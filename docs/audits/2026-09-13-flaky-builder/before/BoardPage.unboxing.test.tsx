@@ -184,9 +184,7 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
-// These workflows mount the full note runtime repeatedly. Keep file workers at
-// their defaults, but budget for the shared CPU load of the complete suite.
-describe('13.4 unboxing through production board and note runtime', { timeout: 20_000 }, () => {
+describe('13.4 unboxing through production board and note runtime', () => {
   it('registers media blob reads through real modal and full-page note mounts without relaxing the strict ledger', async () => {
     const first = openBoard();
     await createNote();

@@ -115,23 +115,18 @@ describe('V13.4 walk-through fix 4 selection workflows', () => {
     pointer(boardObject(objects[0]), 'pointerDown', 85, 85);
     pointer(surface(), 'pointerMove', 145, 125); pointer(surface(), 'pointerUp', 145, 125);
     await saved();
-    // Each next history action depends on the previous operation's fixture
-    // state, in addition to the Saved status. Wait for that exact state.
-    await waitFor(() => objects.forEach((object, index) => expect(object).toMatchObject({ x: original[index].x + 60, y: original[index].y + 40 })));
+    objects.forEach((object, index) => expect(object).toMatchObject({ x: original[index].x + 60, y: original[index].y + 40 }));
     expect(outside).toMatchObject({ x: 380, y: 330 });
-    await history();
-    await waitFor(() => objects.forEach((object, index) => expect(object).toMatchObject(original[index])));
+    await history(); objects.forEach((object, index) => expect(object).toMatchObject(original[index]));
     await history(true);
-    await waitFor(() => objects.forEach((object, index) => expect(object).toMatchObject({ x: original[index].x + 60, y: original[index].y + 40 })));
+    objects.forEach((object, index) => expect(object).toMatchObject({ x: original[index].x + 60, y: original[index].y + 40 }));
     selected(4);
     fireEvent.change(screen.getByRole('combobox', { name: 'Move to layer' }), { target: { value: destination.id } });
     await saved();
-    await waitFor(() => objects.forEach((object) => expect(object.layer_id).toBe(destination.id)));
+    objects.forEach((object) => expect(object.layer_id).toBe(destination.id));
     expect(outside.layer_id).toBeUndefined();
-    await history();
-    await waitFor(() => objects.forEach((object) => expect(object.layer_id ?? null).toBeNull()));
-    await history(true);
-    await waitFor(() => objects.forEach((object) => expect(object.layer_id).toBe(destination.id)));
+    await history(); objects.forEach((object) => expect(object.layer_id ?? null).toBeNull());
+    await history(true); objects.forEach((object) => expect(object.layer_id).toBe(destination.id));
   });
 
   it('② subtracts an Alt marquee from its starting set, restores hits as it shrinks, and preserves additive and replacement semantics', async () => {

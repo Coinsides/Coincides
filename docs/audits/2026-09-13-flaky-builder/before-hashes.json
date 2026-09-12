@@ -1,0 +1,26 @@
+﻿[
+    {
+        "Path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Boards\\BoardPage.unboxing.test.tsx",
+        "Hash":  "029E146C51ECC515E62B4A7ECAF9416EFAC335F3E65648AA3EAB1CBE239DF239"
+    },
+    {
+        "Path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Boards\\BoardPage.selection.test.tsx",
+        "Hash":  "9BC8E974CE51ABACBA44B4E47A53DD468FCB041D49566F5F1AA3B90775003957"
+    },
+    {
+        "Path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\GroupGallery\\groupGalleryPurposeRetirement.test.tsx",
+        "Hash":  "4E1C02B7E740CADD14FE2A61712155E77B07892FBBE6276EF23E0AD17B99ADBA"
+    },
+    {
+        "Path":  "D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2DevQuickLogin.test.ts",
+        "Hash":  "70E9BE5413D2B7ABAFE299A58310C937261C134E8006ED0F436D1956FA2A6000"
+    },
+    {
+        "Path":  "D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2ImprintEmbedding.test.ts",
+        "Hash":  "F729ECEB048560B726E06304401E4D9E880E0EB27E6EB7D63125D09F78753E71"
+    },
+    {
+        "Path":  "D:\\Coinsides\\v2.x\\Coincides\\server\\src\\agent\\providers\\index.test.ts",
+        "Hash":  "776BC90AD6DEA69693613E5F2664812998FD3A21B512DD7C86BF43338CEE3E3F"
+    }
+]

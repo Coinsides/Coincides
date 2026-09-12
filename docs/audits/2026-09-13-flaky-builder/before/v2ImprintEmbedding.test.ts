@@ -1,8 +1,5 @@
-import test, { afterEach, beforeEach } from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 import embeddingMigration from '../db/migrations/052_v2_imprint_fragment_vectors.js';
@@ -23,21 +20,6 @@ import {
 
 const MODEL_A = 'fixture:model-a-v1:1024';
 const MODEL_B = 'fixture:model-b-v1:1024';
-
-// Local credentials precede environment fallback. Keep both inputs owned by
-// this fixture; inherited app-data must never change a synthetic request.
-let previousAppData: string | undefined;
-let credentialDirectory: string;
-beforeEach(() => {
-  previousAppData = process.env.COINCIDES_APP_DATA_DIR;
-  credentialDirectory = mkdtempSync(join(tmpdir(), 'coincides-embedding-fixture-'));
-  process.env.COINCIDES_APP_DATA_DIR = credentialDirectory;
-});
-afterEach(() => {
-  if (previousAppData === undefined) delete process.env.COINCIDES_APP_DATA_DIR;
-  else process.env.COINCIDES_APP_DATA_DIR = previousAppData;
-  rmSync(credentialDirectory, { recursive: true, force: true });
-});
 
 function unitVector(index: number): number[] {
   const vector = new Array<number>(DASHSCOPE_EMBEDDING_DIMENSIONS).fill(0);

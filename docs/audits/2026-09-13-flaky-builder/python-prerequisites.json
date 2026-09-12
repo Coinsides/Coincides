@@ -1,0 +1,13 @@
+[
+  {
+    "command": "python.exe",
+    "status": null,
+    "errorCode": "ENOENT"
+  },
+  {
+    "command": "D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe",
+    "status": 101,
+    "stdout": "",
+    "stderr": "Unable to create process using '\"C:\\Users\\70208\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none\\python.exe\" -B -c \"import sys; print(sys.version)\"'\r\n"
+  }
+]

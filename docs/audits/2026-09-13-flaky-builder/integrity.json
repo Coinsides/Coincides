@@ -1,0 +1,62 @@
+[
+  {
+    "file": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+    "beforeHash": "029e146c51ecc515e62b4a7ecaf9416efac335f3e65648aa3eab1cbe239df239",
+    "afterHash": "6e5d73c0086de9b279d1fac8bb0e1aa39b97ad1d6f5c3b4bba39f1b3300697d6",
+    "unchanged": false,
+    "originalAssertions": 47,
+    "originalAssertionsPreserved": true,
+    "extraAssertions": 0,
+    "directTestDeclarations": 3
+  },
+  {
+    "file": "client/src/pages/Boards/BoardPage.selection.test.tsx",
+    "beforeHash": "9bc8e974ce51abacba44b4e47a53dd468fcb041d49566f5f1aa3b90775003957",
+    "afterHash": "f70354e05aa0b9f428f391fca81a492081e8297143e057be7d02d8b0d74c35b7",
+    "unchanged": false,
+    "originalAssertions": 66,
+    "originalAssertionsPreserved": true,
+    "extraAssertions": 0,
+    "directTestDeclarations": 8
+  },
+  {
+    "file": "client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx",
+    "beforeHash": "4e1c02b7e740cadd14fe2a61712155e77b07892fbbe6276ef23e0ad17b99adba",
+    "afterHash": "011c86d4b315bf6429e339fd84a4ae35bc9eae3a571687998994fad31d70f8e1",
+    "unchanged": false,
+    "originalAssertions": 14,
+    "originalAssertionsPreserved": true,
+    "extraAssertions": 2,
+    "directTestDeclarations": 3
+  },
+  {
+    "file": "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "beforeHash": "70e9be5413d2b7abafe299a58310c937261c134e8006ed0f436d1956fa2a6000",
+    "afterHash": "70e9be5413d2b7abafe299a58310c937261c134e8006ed0f436d1956fa2a6000",
+    "unchanged": true,
+    "originalAssertions": 14,
+    "originalAssertionsPreserved": true,
+    "extraAssertions": 0,
+    "directTestDeclarations": 3
+  },
+  {
+    "file": "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "beforeHash": "f729eceb048560b726e06304401e4d9e880e0eb27e6eb7d63125d09f78753e71",
+    "afterHash": "f729eceb048560b726e06304401e4d9e880e0eb27e6eb7d63125d09f78753e71",
+    "unchanged": true,
+    "originalAssertions": 40,
+    "originalAssertionsPreserved": true,
+    "extraAssertions": 0,
+    "directTestDeclarations": 7
+  },
+  {
+    "file": "server/src/agent/providers/index.test.ts",
+    "beforeHash": "776bc90ad6dea69693613e5f2664812998fd3a21b512dd7c86bf43338cee3e3f",
+    "afterHash": "776bc90ad6dea69693613e5f2664812998fd3a21b512dd7c86bf43338cee3e3f",
+    "unchanged": true,
+    "originalAssertions": 17,
+    "originalAssertionsPreserved": true,
+    "extraAssertions": 0,
+    "directTestDeclarations": 7
+  }
+]
