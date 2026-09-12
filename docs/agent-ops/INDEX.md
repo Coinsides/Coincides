@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 354 份文档。
+共 355 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -136,6 +136,7 @@
 | [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-08-22 | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
+| [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
 | [handoffs/2026-06-27-retire-stale-pi.md](handoffs/2026-06-27-retire-stale-pi.md) | Spec：给 7 条过时 PI 标 superseded / 重锚到 TextFlow-first | `(缺状态头)` | — | — |
 | [handoffs/2026-06-28-canvas-object-kind-general-pipeline.md](handoffs/2026-06-28-canvas-object-kind-general-pipeline.md) | 8.11.2 — Kind-General CanvasObject Pipeline | `(缺状态头)` | — | — |
