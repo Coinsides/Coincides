@@ -12,18 +12,19 @@ describe('SkinEditor save failure recovery', () => {
     fireEvent.change(screen.getByRole('combobox', { name: '把手样式' }), { target: { value: 'capsule' } });
     expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { edge: '#123456' }, components: { handleStyle: 'capsule' } });
   });
-  it('edits all four board components without discarding colors, then resets to preset defaults', async () => {
+  it('edits all five board components without discarding colors, then resets to preset defaults', async () => {
     const save = vi.fn().mockResolvedValue(undefined);
     render(<SkinEditor value={{ preset: 'warm-paper', overrides: { card: '#334455' } }} save={save} surface="board" advanced />);
     fireEvent.click(screen.getByText('部件样式'));
-    for (const [name, value] of [['标题字', 'sans'], ['标签与刻度字', 'mono'], ['菜单密度', 'compact'], ['把手样式', 'rivet']]) {
+    for (const [name, value] of [['标题字', 'sans'], ['标签与刻度字', 'mono'], ['菜单密度', 'compact'], ['把手样式', 'rivet'], ['表头分隔线', 'hidden']]) {
       fireEvent.change(screen.getByRole('combobox', { name }), { target: { value } });
     }
     await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'warm-paper', overrides: { card: '#334455' },
-      components: { titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' } }));
+      components: { titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet', headerRule: 'hidden' } }));
     fireEvent.change(screen.getByRole('combobox', { name: '板面预设' }), { target: { value: 'workbench' } });
     expect(save).toHaveBeenLastCalledWith({ preset: 'workbench' });
     expect((screen.getByRole('combobox', { name: '把手样式' }) as HTMLSelectElement).value).toBe('rivet');
+    expect((screen.getByRole('combobox', { name: '表头分隔线' }) as HTMLSelectElement).value).toBe('visible');
   });
   it('shows an owner failure after reopening and retries the retained selection', async () => {
     const value: SkinSelection = { preset: 'warm-paper' };

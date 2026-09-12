@@ -4,19 +4,20 @@ import { SKIN_LABELS, resolveSkin } from '@/styles/skinPresets';
 import styles from './SkinControls.module.css';
 
 const labels: Record<SkinTokenName, string> = { desk: '桌面', paper: '纸面', ink: '正文', 'ink-muted': '弱字', accent: '强调', annotation: '批注', hairline: '分隔线', danger: '危险操作', wall: '页边距墙', 'board-desk': '板台面', card: '板卡面', edge: '连线', chalk: '粉笔' };
-const componentLabels: Record<keyof SkinComponents, string> = { titleFont: '标题字', labelFont: '标签与刻度字', menuDensity: '菜单密度', handleStyle: '把手样式' };
-const optionLabels: Record<string, string> = { sans: '无衬线', serif: '衬线', system: '系统', mono: '等宽', comfortable: '舒适', compact: '紧凑', capsule: '胶囊', rivet: '铆钉' };
+const componentLabels: Record<keyof SkinComponents, string> = { titleFont: '标题字', labelFont: '标签与刻度字', menuDensity: '菜单密度', handleStyle: '把手样式', headerRule: '表头分隔线' };
+const optionLabels: Record<string, string> = { sans: '无衬线', serif: '衬线', system: '系统', mono: '等宽', comfortable: '舒适', compact: '紧凑', capsule: '胶囊', rivet: '铆钉', visible: '显示', hidden: '隐藏' };
 
-export function SkinControls({ value, onChange, inheritLabel, inheritedValue, advanced = false, disabled = false, surface = 'paper' }: {
+export function SkinControls({ value, onChange, inheritLabel, inheritedValue, advanced = false, disabled = false, surface = 'paper', showComponents = true, presetLabel: customPresetLabel }: {
   value: SkinSelection | null; onChange: (value: SkinSelection | null) => void;
   inheritLabel?: string; advanced?: boolean; disabled?: boolean;
   surface?: 'paper' | 'board' | 'all';
   inheritedValue?: SkinSelection | null;
+  showComponents?: boolean; presetLabel?: string;
 }) {
   const id = useId();
   const base = value ?? inheritedValue ?? { preset: 'default' as const };
   const { tokens, components } = resolveSkin(base);
-  const presetLabel = surface === 'board' ? '板面预设' : '纸面预设';
+  const presetLabel = customPresetLabel ?? (surface === 'board' ? '板面预设' : '纸面预设');
   const tokenNames = SKIN_TOKEN_NAMES.filter((key) => surface === 'all' || (surface === 'board'
     ? !['desk', 'paper', 'wall'].includes(key) : !['board-desk', 'card', 'edge', 'chalk'].includes(key)));
   return <div className={styles.controls} data-skin-controls>
@@ -38,7 +39,7 @@ export function SkinControls({ value, onChange, inheritLabel, inheritedValue, ad
           onChange({ ...base, overrides });
         }} />)}
     </details>}
-    <details className={styles.advanced}>
+    {showComponents && <details className={styles.advanced}>
       <summary>部件样式</summary>
       {(Object.keys(SKIN_COMPONENT_OPTIONS) as Array<keyof SkinComponents>).map((key) => <div className={styles.row} key={key}>
         <label htmlFor={`${id}-${key}`}>{componentLabels[key]}</label>
@@ -52,7 +53,7 @@ export function SkinControls({ value, onChange, inheritLabel, inheritedValue, ad
           onChange({ ...base, components: next });
         }}>重置</button>
       </div>)}
-    </details>
+    </details>}
   </div>;
 }
 

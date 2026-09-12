@@ -6,6 +6,16 @@
   animation: fadeIn var(--transition-normal) ease forwards;
 }
 
+/* Page reading does not acquire the canvas body lock. Fill the app's inset
+   from this note host only; embedded BoardNoteModal keeps its own bounds. */
+.page[data-note-host-mode='page']:not(.pageCanvas) {
+  margin: -28px;
+  min-height: 100vh;
+  /* Paint the desk behind horizontally overflowing zoomed paper. The app
+     scrollport clips this solid spread; measured layout widths stay intact. */
+  box-shadow: 0 0 0 100vmax var(--sk-desk, transparent);
+}
+
 .page[data-note-skin-preset='workbench'],
 .page[data-note-skin-preset='workbench'] .writingSurfaceCanvas,
 .page[data-note-skin-preset='workbench'] :global(.noteOverview) {
@@ -1148,11 +1158,13 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   transition-property: color, background-color, border-color, box-shadow, opacity;
 }
 
+/* A visible header rule uses a guaranteed-invalid custom-property initial value,
+   so these fallbacks resolve against each sheet's own template variables. */
 .pageReadingPaper {
   position: absolute;
   box-sizing: border-box;
   background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
-  outline: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
+  outline: var(--sk-header-rule, 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle))));
 }
 
 .pageReadingHeaderBand {
@@ -1160,7 +1172,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   top: 0;
   box-sizing: border-box;
   background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
-  outline: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
+  outline: var(--sk-header-rule, 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle))));
 }
 
 /* A note with a cover paints one continuous sheet on the header band. Its

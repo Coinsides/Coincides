@@ -15,7 +15,7 @@ const frame: PageFrameModel = {
 describe('paper margin walls', () => {
   it('places pointer targets on current projected content bounds without adding a second inset', () => {
     const onPointerDown = vi.fn();
-    const props = { frame: projectPageFrameToReadingSurface(frame, 'v2', 0), onPointerDown };
+    const props = { frame: projectPageFrameToReadingSurface(frame, 'v2', 0), interactive: true, onPointerDown };
     const view = render(<PageFrameWallLayer {...props} />);
     const left = view.getByRole('separator', { name: 'Left page margin' });
     const right = view.getByRole('separator', { name: 'Right page margin' });
@@ -30,7 +30,7 @@ describe('paper margin walls', () => {
 
     const preview = { ...frame, contentInset: { ...frame.contentInset, left: 24, right: 240 } };
     view.rerender(<PageFrameWallLayer frame={projectPageFrameToReadingSurface(preview, 'v2', 0)}
-      activeWall={{ frameId: frame.id, side: 'right' }} onPointerDown={onPointerDown} />);
+      interactive activeWall={{ frameId: frame.id, side: 'right' }} onPointerDown={onPointerDown} />);
     expect(left.style.left).toBe('0px');
     expect(right.style.left).toBe('640px');
     expect(right.dataset.pageFrameWallActive).toBe('true');
@@ -42,7 +42,7 @@ describe('paper margin walls', () => {
     const blankDoubleClick = vi.fn();
     const blankContextMenu = vi.fn();
     const view = render(<div onMouseDown={blankMouseDown} onDoubleClick={blankDoubleClick} onContextMenu={blankContextMenu}>
-      <PageFrameWallLayer frame={frame} onPointerDown={vi.fn()} />
+      <PageFrameWallLayer frame={frame} interactive onPointerDown={vi.fn()} />
     </div>);
     const wall = view.getByRole('separator', { name: 'Left page margin' });
     fireEvent.mouseDown(wall);
@@ -55,7 +55,7 @@ describe('paper margin walls', () => {
 
   it('extends idle material across the cover without moving or resizing either live margin target', () => {
     const onPointerDown = vi.fn();
-    const view = render(<PageFrameWallLayer frame={frame} idleHeaderHeight={192} onPointerDown={onPointerDown} />);
+    const view = render(<PageFrameWallLayer frame={frame} interactive idleHeaderHeight={192} onPointerDown={onPointerDown} />);
     const walls = view.getAllByRole('separator');
     expect(walls.map((wall) => [wall.style.left, wall.style.top, wall.style.height]))
       .toEqual([['492px', '120px', '1086px'], ['1252px', '120px', '1086px']]);
@@ -64,7 +64,7 @@ describe('paper margin walls', () => {
     expect(onPointerDown).toHaveBeenCalledWith(expect.anything(), frame.id, 'left');
   });
 
-  it('keeps read-only and ink-mode material inert without exposing margin controls or callbacks', () => {
+  it('keeps material inert outside Layout without exposing margin controls or callbacks', () => {
     const onPointerDown = vi.fn();
     const view = render(<PageFrameWallLayer frame={frame} interactive={false}
       activeWall={{ frameId: frame.id, side: 'left' }} onPointerDown={onPointerDown} />);
@@ -78,5 +78,30 @@ describe('paper margin walls', () => {
       fireEvent.pointerDown(wall, { pointerId: 1, button: 0 });
     }
     expect(onPointerDown).not.toHaveBeenCalled();
+  });
+
+  it('releases margin event interception when Layout is turned off', () => {
+    const onPointerDown = vi.fn();
+    const writingMouseDown = vi.fn();
+    const writingDoubleClick = vi.fn();
+    const writingContextMenu = vi.fn();
+    const renderSurface = (layoutMode: boolean) => (
+      <div onMouseDown={writingMouseDown} onDoubleClick={writingDoubleClick} onContextMenu={writingContextMenu}>
+        <PageFrameWallLayer frame={frame} interactive={layoutMode} onPointerDown={onPointerDown} />
+      </div>
+    );
+    const view = render(renderSurface(true));
+    expect(view.getAllByRole('separator')).toHaveLength(2);
+    view.rerender(renderSurface(false));
+    const wall = view.container.querySelector<HTMLElement>('[data-page-frame-wall="left"]')!;
+    fireEvent.pointerDown(wall, { pointerId: 1, button: 0 });
+    fireEvent.mouseDown(wall);
+    fireEvent.doubleClick(wall);
+    fireEvent.contextMenu(wall);
+    expect(onPointerDown).not.toHaveBeenCalled();
+    expect(writingMouseDown).toHaveBeenCalledTimes(1);
+    expect(writingDoubleClick).toHaveBeenCalledTimes(1);
+    expect(writingContextMenu).toHaveBeenCalledTimes(1);
+    expect(view.queryAllByRole('separator')).toHaveLength(0);
   });
 });

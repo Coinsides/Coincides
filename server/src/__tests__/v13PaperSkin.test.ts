@@ -62,7 +62,7 @@ async function fixture() {
   };
 }
 
-test('B1b board tokens and all four component overrides persist at every mount and leave geometry/content intact', async (t) => {
+test('B1e board tokens and all five component overrides persist at every mount and leave geometry/content intact', async (t) => {
   const f = await fixture(); t.after(() => f.close());
   const project = await f.request('POST', 'courses', { name: 'Board skins' }, 201);
   const note = await f.request('POST', 'notes', { course_id: project.id, title: 'Paper title', metadata: { typography: { font: 'system', size: 16 } } }, 201);
@@ -71,7 +71,7 @@ test('B1b board tokens and all four component overrides persist at every mount a
   assert.equal(board.skin, null);
   for (const preset of presets) {
     const skin = { preset, overrides: { 'board-desk': '#112233', card: '#eeeeee', edge: '#8899aa', chalk: '#ddeeff' },
-      components: { titleFont: 'serif', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' } };
+      components: { titleFont: 'serif', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet', headerRule: preset === 'quiet-ink' ? 'visible' : 'hidden' } };
     await f.request('PUT', 'settings', { settings: { skin } });
     await f.request('PUT', `courses/${project.id}`, { skin });
     await f.request('PUT', `notes/${note.id}`, { skin });
@@ -184,7 +184,7 @@ test('B1b board migration preserves existing rows and repeated runs preserve a s
     db.exec("CREATE TABLE boards (id TEXT PRIMARY KEY, title TEXT, viewport TEXT); INSERT INTO boards VALUES ('old', 'Existing board', '{\"x\":40}')");
     boardMigration.up(db); boardMigration.up(db);
     assert.deepEqual(db.prepare('SELECT * FROM boards').get(), { id: 'old', title: 'Existing board', viewport: '{"x":40}', skin: null });
-    const skin = { preset: 'workbench', components: { handleStyle: 'capsule' } };
+    const skin = { preset: 'workbench', components: { handleStyle: 'capsule', headerRule: 'hidden' } };
     db.prepare('UPDATE boards SET skin = ?').run(JSON.stringify(skin));
     boardMigration.up(db);
     assert.deepEqual(parseStoredSkin((db.prepare('SELECT skin FROM boards').get() as { skin: string }).skin), skin);

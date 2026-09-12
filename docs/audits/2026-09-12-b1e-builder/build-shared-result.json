@@ -1,0 +1,4 @@
+﻿{
+    "check":  "shared tsc -b shared/tsconfig.json",
+    "exitCode":  0
+}

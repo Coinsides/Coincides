@@ -8,12 +8,12 @@ export const SKIN_PRESETS: Record<SkinPresetId, SkinTokens> = {
   workbench: { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A', 'board-desk': '#12151A', card: '#1A1E25', edge: '#E5A33C', chalk: '#DEE3EA' },
 };
 
-const defaultComponents: SkinComponents = { titleFont: 'sans', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule' };
+const defaultComponents: SkinComponents = { titleFont: 'sans', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule', headerRule: 'visible' };
 export const SKIN_PRESET_COMPONENTS: Record<SkinPresetId, SkinComponents> = {
   default: { ...defaultComponents },
   'quiet-ink': { ...defaultComponents },
   'warm-paper': { ...defaultComponents, titleFont: 'serif' },
-  workbench: { titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' },
+  workbench: { ...defaultComponents, labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' },
 };
 
 export const SKIN_LABELS: Record<SkinPresetId, string> = {

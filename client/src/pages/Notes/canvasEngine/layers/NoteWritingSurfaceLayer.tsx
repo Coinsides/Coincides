@@ -3622,7 +3622,7 @@ export function NoteWritingSurfaceLayer({
             <PageFrameWallLayer key={`${frame.id}:walls`}
               frame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
               idleHeaderHeight={frame.id === primaryPageFrameId ? displayHeaderHeight : 0}
-              interactive={!contentReadOnly && paperInkTool === 'selection' && Boolean(onPageFrameWallPointerDown)}
+              interactive={layoutMode && !contentReadOnly && Boolean(onPageFrameWallPointerDown)}
               activeWall={activePageFrameWall} onPointerDown={onPageFrameWallPointerDown} />
           ))}
         {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (

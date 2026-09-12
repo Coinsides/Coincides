@@ -35,6 +35,8 @@ beforeEach(() => {
 });
 
 async function providerRow(label: string) {
+  const summary = screen.getByText(/^AI Provider 凭据/);
+  if (!(summary.parentElement as HTMLDetailsElement).open) fireEvent.click(summary);
   const heading = await screen.findByRole('heading', { name: label });
   return within(heading.closest('li')!);
 }
@@ -43,19 +45,21 @@ describe('Settings provider credential controls', () => {
   it('lists the provider roster and saves then replaces a synthetic key with synchronized masked status', async () => {
     const onCredentialsChange = vi.fn();
     render(<ProvidersSection onCredentialsChange={onCredentialsChange} />);
-    expect(screen.getByRole('status').textContent).toBe('Loading providers...');
+    expect((screen.getByText(/^AI Provider 凭据/).parentElement as HTMLDetailsElement).open).toBe(false);
+    expect(screen.getByText('Loading providers...')).toBeTruthy();
     const row = await providerRow('Anthropic');
     expect(screen.getAllByRole('listitem')).toHaveLength(6);
     expect(row.getByText('No key configured')).toBeTruthy();
     const input = row.getByLabelText('Anthropic API key') as HTMLInputElement;
 
-    fireEvent.change(input, { target: { value: 'synthetic-key-not-real-first-1111' } });
+    fireEvent.change(input, { target: { value: 'syn-fake-first-1111' } });
     fireEvent.click(row.getByRole('button', { name: 'Save key' }));
     await row.findByText('****1111 · Saved on this machine');
-    expect(requests.put).toHaveBeenLastCalledWith(`${path}/anthropic`, { api_key: 'synthetic-key-not-real-first-1111' });
+    expect(screen.getByText('AI Provider 凭据(1 已配置)')).toBeTruthy();
+    expect(requests.put).toHaveBeenLastCalledWith(`${path}/anthropic`, { api_key: 'syn-fake-first-1111' });
     expect(input.value).toBe('');
 
-    fireEvent.change(input, { target: { value: 'synthetic-key-not-real-replacement-2222' } });
+    fireEvent.change(input, { target: { value: 'syn-fake-replace-2222' } });
     fireEvent.click(row.getByRole('button', { name: 'Save key' }));
     await row.findByText('****2222 · Saved on this machine');
     expect(input.value).toBe('');
@@ -87,7 +91,7 @@ describe('Settings provider credential controls', () => {
     render(<ProvidersSection connectionSettings={connectionSettings} />);
     const row = await providerRow('OpenAI Compatible');
     const input = row.getByLabelText('OpenAI Compatible API key');
-    fireEvent.change(input, { target: { value: 'synthetic-key-not-real-draft-2222' } });
+    fireEvent.change(input, { target: { value: 'syn-fake-draft-2222' } });
     expect(row.getByText(/Save the new key before testing/)).toBeTruthy();
     expect((row.getByRole('button', { name: 'Test connection' }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(row.getByRole('button', { name: 'Save key' }));
@@ -105,14 +109,15 @@ describe('Settings provider credential controls', () => {
     requests.get.mockRejectedValueOnce(new Error('Synthetic request failure'));
     requests.put.mockRejectedValueOnce(new Error('Synthetic request failure'));
     render(<ProvidersSection />);
+    fireEvent.click(screen.getByText(/^AI Provider 凭据/));
     expect((await screen.findByRole('alert')).textContent).toBe('Could not load provider settings.');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     const row = await providerRow('Voyage AI');
     const input = row.getByLabelText('Voyage AI API key') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'synthetic-key-not-real-voyage-3333' } });
+    fireEvent.change(input, { target: { value: 'syn-fake-voyage-3333' } });
     fireEvent.click(row.getByRole('button', { name: 'Save key' }));
     expect((await row.findByRole('alert')).textContent).toBe('Could not save the key. Try saving again.');
-    expect(input.value).toBe('synthetic-key-not-real-voyage-3333');
+    expect(input.value).toBe('syn-fake-voyage-3333');
     fireEvent.click(row.getByRole('button', { name: 'Save key' }));
     await row.findByText('****3333 · Saved on this machine');
     await waitFor(() => expect(row.queryByRole('alert')).toBeNull());

@@ -1,6 +1,7 @@
 .page {
   animation: fadeIn var(--transition-normal) ease forwards;
   max-width: 600px;
+  margin-inline: auto;
 }
 
 .title {
@@ -361,6 +362,17 @@
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.5;
+}
+
+.providerDetails > summary {
+  cursor: pointer;
+  padding: 8px 0;
+  color: var(--text-primary);
+}
+
+.providerDetails > summary:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .providerCredential {

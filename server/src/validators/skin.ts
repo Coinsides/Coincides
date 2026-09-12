@@ -25,5 +25,6 @@ export const skinSelectionSchema: z.ZodType<SkinSelection> = z.object({
     labelFont: z.enum(['system', 'mono']).optional(),
     menuDensity: z.enum(['comfortable', 'compact']).optional(),
     handleStyle: z.enum(['capsule', 'rivet']).optional(),
+    headerRule: z.enum(['visible', 'hidden']).optional(),
   }).strict().optional(),
 }).strict();

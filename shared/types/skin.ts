@@ -14,6 +14,7 @@ export const SKIN_COMPONENT_OPTIONS = {
   labelFont: ['system', 'mono'],
   menuDensity: ['comfortable', 'compact'],
   handleStyle: ['capsule', 'rivet'],
+  headerRule: ['visible', 'hidden'],
 } as const;
 export type SkinComponents = { -readonly [K in keyof typeof SKIN_COMPONENT_OPTIONS]: typeof SKIN_COMPONENT_OPTIONS[K][number] };
 

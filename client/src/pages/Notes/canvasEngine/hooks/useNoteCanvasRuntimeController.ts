@@ -69,6 +69,7 @@ export function useNoteCanvasRuntimeController() {
     showExportPreview,
     showLayoutPanel,
     showMoreActions,
+    showAppearancePanel,
     showViewOptions,
     showPreviewAIVisibility,
     showPreviewBlockTypes,
@@ -80,6 +81,7 @@ export function useNoteCanvasRuntimeController() {
     toggleExportPreview,
     toggleLayoutMode,
     toggleMoreActions,
+    toggleAppearancePanel,
     toggleViewOptions,
     togglePreviewAIVisibility,
     togglePreviewBlockTypes,
@@ -189,7 +191,7 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const walls = usePageFrameWalls({
-    noteId, generation: textHistoryGeneration, enabled: surfaceMode === 'page' && !loading && !sourceProjectionPolicy.contentReadOnly,
+    noteId, generation: textHistoryGeneration, enabled: layoutMode && surfaceMode === 'page' && !loading && !sourceProjectionPolicy.contentReadOnly,
     coordinateContract, collection: storedPageFrameCollection, blocks, layoutDrafts,
     getCollection: () => {
       const rendered = runtimePageFrameCollectionRef.current;
@@ -301,7 +303,7 @@ export function useNoteCanvasRuntimeController() {
     createDraftBlock, saveDraftBlockPlacement, discardDraftBlock, trashBlock, restoreBlock, transferTextUnit,
   });
   const { applyEdit: applyBlockTextFlowEdit, saveBlock } = textHistory;
-  wallBoundaryRef.current = textHistory.boundary;
+  wallBoundaryRef.current = () => layoutMode && textHistory.boundary();
   const rollbackBlockSlashSession = useSlashBlockRollbackController({
     applyBlockTextFlowEdit,
     blocks,
@@ -505,6 +507,7 @@ export function useNoteCanvasRuntimeController() {
     showExportPreview,
     showLayoutPanel,
     showMoreActions,
+    showAppearancePanel,
     showViewOptions,
     showPreviewAIVisibility,
     showPreviewBlockTypes,
@@ -601,6 +604,7 @@ export function useNoteCanvasRuntimeController() {
     onToggleExportRole: toggleBlockExportRole,
     onToggleLayoutMode: toggleLayoutMode,
     onToggleMoreActions: toggleMoreActions,
+    onToggleAppearancePanel: toggleAppearancePanel,
     onToggleViewOptions: toggleViewOptions,
     onOpenBlockTrash: handleOpenBlockTrash,
     onOpenLayoutPanel: openLayoutPanel,

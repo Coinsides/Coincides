@@ -5,6 +5,7 @@ import {
   renderHook,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import { useState } from 'react';
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -15,6 +16,10 @@ import { createPrimaryPageFrame } from '../engineModel';
 import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
 import { useNoteBlockTrashController } from '../hooks/useNoteBlockTrashController';
 import { useNoteTrashAction } from '../hooks/useNoteTrashAction';
+import { useFloatingOverlayController } from '../hooks/useFloatingOverlayController';
+import { PaperSkinContext } from '../PaperSkinContext';
+import { SKIN_PRESET_IDS, type SkinSelection } from '@shared/types';
+import { SKIN_LABELS, SKIN_PRESETS } from '@/styles/skinPresets';
 import { ProjectNotesSection } from '../../../Courses/CourseDetail';
 import {
   NoteChromeLayer,
@@ -73,6 +78,7 @@ function noteChromeProps(
     showBlockTrash: false,
     showExportPreview: false,
     showLayoutPanel: false,
+    showAppearancePanel: false,
     showMoreActions: true,
     showPreviewAIVisibility: false,
     showPreviewBlockTypes: false,
@@ -93,6 +99,7 @@ function noteChromeProps(
     onDetachPageFromStack: noop,
     onSaveDocumentTypographyProfile: noop,
     onToggleExportPreview: noop,
+    onToggleAppearancePanel: noop,
     onToggleLayoutMode: noop,
     onToggleMoreActions: noop,
     onOpenBlockTrash: noop,
@@ -118,7 +125,7 @@ function noteChromeProps(
 describe('NoteChromeLayer block restore door', () => {
   it('D2 keeps only the direct pills and More visible before opening the bottom menu', () => {
     const props = noteChromeProps({ showMoreActions: false,
-      onToggleExportPreview: vi.fn(), onToggleLayoutMode: vi.fn(), onToggleMoreActions: vi.fn() });
+      onToggleExportPreview: vi.fn(), onToggleLayoutMode: vi.fn(), onToggleAppearancePanel: vi.fn(), onToggleMoreActions: vi.fn() });
     const { container } = render(<div data-page-reading-control="true"><NoteChromeLayer {...props} /></div>);
     for (const name of ['New PageStack', 'Add to favorites', 'View info', 'Deleted blocks', 'Delete note']) {
       expect(screen.queryByRole('button', { name })).toBeNull();
@@ -127,9 +134,11 @@ describe('NoteChromeLayer block restore door', () => {
     expect(screen.queryByRole('button', { name: /Back to project|Collapse toolbar|Expand toolbar/i })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
     fireEvent.click(screen.getByRole('button', { name: 'Layout' }));
+    fireEvent.click(screen.getByRole('button', { name: '笔记外观' }));
     fireEvent.click(screen.getByRole('button', { name: 'More note actions' }));
     expect(props.onToggleExportPreview).toHaveBeenCalledOnce();
     expect(props.onToggleLayoutMode).toHaveBeenCalledOnce();
+    expect(props.onToggleAppearancePanel).toHaveBeenCalledOnce();
     expect(props.onToggleMoreActions).toHaveBeenCalledOnce();
     expect(container.querySelector('[data-page-reading-control] [data-note-toolbar-actions]')).not.toBeNull();
   });
@@ -240,6 +249,90 @@ describe('NoteChromeLayer block restore door', () => {
     expect((restoreButton as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(restoreButton);
     expect(onRestoreTrashedBlock).not.toHaveBeenCalled();
+  });
+});
+
+describe('NoteChromeLayer appearance', () => {
+  it('opens the shared portal, selects complete presets, edits colors, and removes the old More entry', async () => {
+    const save = vi.fn();
+    const setInteractionState = vi.fn();
+    function AppearanceFixture() {
+      const overlay = useFloatingOverlayController({ setInteractionState });
+      const [selection, setSelection] = useState<SkinSelection | null>({ preset: 'warm-paper', overrides: { paper: '#abcdef' } });
+      return <PaperSkinContext.Provider value={{
+        style: {}, preset: selection?.preset ?? 'default', selection,
+        save: async (next) => { save(next); setSelection(next); },
+        error: null, retry: vi.fn(),
+      }}>
+        <NoteChromeLayer {...noteChromeProps({
+          showAppearancePanel: overlay.showAppearancePanel,
+          showMoreActions: overlay.showMoreActions,
+          onToggleAppearancePanel: overlay.toggleAppearancePanel,
+          onToggleMoreActions: overlay.toggleMoreActions,
+          onCloseOverlay: overlay.closeOverlay,
+        })} />
+      </PaperSkinContext.Provider>;
+    }
+    const { container } = render(<AppearanceFixture />);
+    fireEvent.click(screen.getByRole('button', { name: '笔记外观' }));
+    const panel = document.querySelector<HTMLElement>('[data-note-overlay="appearance"]')!;
+    expect(container.contains(panel)).toBe(false);
+    expect(panel.closest('[data-canvas-layer="floating-overlay"]')?.parentElement).toBe(document.body);
+    const presets = screen.getByRole('group', { name: '外观预设快选' });
+    expect(within(presets).getAllByRole('button')).toHaveLength(4);
+    expect(within(presets).getByRole('button', { name: '暖纸' }).getAttribute('aria-pressed')).toBe('true');
+    for (const preset of SKIN_PRESET_IDS) {
+      const button = within(presets).getByRole('button', { name: SKIN_LABELS[preset] });
+      const expected = document.createElement('button');
+      expected.style.background = SKIN_PRESETS[preset].paper;
+      expected.style.borderColor = SKIN_PRESETS[preset].desk;
+      expect(button.style.background).toBe(expected.style.background);
+      expect(button.style.borderColor).toBe(expected.style.borderColor);
+      fireEvent.click(button);
+      await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset }));
+      expect(button.getAttribute('aria-pressed')).toBe('true');
+      expect(within(presets).getAllByRole('button', { pressed: true })).toHaveLength(1);
+    }
+    fireEvent.click(screen.getByText('纸面外观'));
+    fireEvent.click(screen.getByText('高级颜色'));
+    fireEvent.change(screen.getByRole('textbox', { name: '纸面' }), { target: { value: '#123456' } });
+    await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { paper: '#123456' } }));
+    fireEvent.click(screen.getByRole('button', { name: '关闭外观' }));
+    expect(document.querySelector('[data-note-overlay="appearance"]')).toBeNull();
+    expect(screen.getByRole('button', { name: '笔记外观' }).getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(screen.getByRole('button', { name: 'More note actions' }));
+    expect(document.querySelector('[data-note-overlay="more"]')).not.toBeNull();
+    expect(document.querySelector('[data-paper-appearance]')).toBeNull();
+  });
+
+  it('shares mutual exclusion and close semantics with every existing overlay', () => {
+    const setInteractionState = vi.fn();
+    const { result } = renderHook(() => useFloatingOverlayController({ setInteractionState }));
+    const panels = [
+      ['openLayoutPanel', 'showLayoutPanel'],
+      ['toggleMoreActions', 'showMoreActions'],
+      ['openBlockTrash', 'showBlockTrash'],
+      ['toggleExportPreview', 'showExportPreview'],
+      ['toggleViewOptions', 'showViewOptions'],
+    ] as const;
+    for (const [open, shown] of panels) {
+      act(() => result.current[open]());
+      act(() => result.current.toggleAppearancePanel());
+      expect(result.current.showAppearancePanel).toBe(true);
+      expect(result.current[shown]).toBe(false);
+      expect(setInteractionState).toHaveBeenLastCalledWith(expect.objectContaining({ mode: 'openingMenu', panel: 'appearance' }));
+      act(() => result.current[open]());
+      expect(result.current[shown]).toBe(true);
+      expect(result.current.showAppearancePanel).toBe(false);
+      act(() => result.current.closeOverlay());
+    }
+    act(() => result.current.toggleAppearancePanel());
+    act(() => result.current.toggleAppearancePanel());
+    expect(result.current.showAppearancePanel).toBe(false);
+    act(() => result.current.toggleAppearancePanel());
+    act(() => result.current.closeOverlay());
+    expect(result.current.showAppearancePanel).toBe(false);
+    expect(setInteractionState).toHaveBeenLastCalledWith({ mode: 'idle', target: 'surface' });
   });
 });
 

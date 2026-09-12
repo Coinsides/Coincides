@@ -1,0 +1,5 @@
+﻿{
+    "check":  "client build (tsc -b + vite build)",
+    "exitCode":  1,
+    "envDir":  "D:\\Coinsides\\v2.x\\Coincides\\.tmp\\b1e\\empty-env"
+}

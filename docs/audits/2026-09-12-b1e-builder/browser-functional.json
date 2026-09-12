@@ -1,0 +1,120 @@
+{
+  "presets": [
+    {
+      "preset": "quiet-ink",
+      "selected": "静墨"
+    },
+    {
+      "preset": "warm-paper",
+      "selected": "暖纸"
+    },
+    {
+      "preset": "workbench",
+      "selected": "工作台"
+    }
+  ],
+  "headers": [
+    {
+      "requested": "hidden",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "preset": "default",
+      "templateBorder": "#2a2f38"
+    },
+    {
+      "requested": "visible",
+      "outline": "rgb(42, 47, 56) solid 1px",
+      "preset": "default",
+      "templateBorder": "#2a2f38"
+    },
+    {
+      "requested": "hidden",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "preset": "quiet-ink",
+      "templateBorder": "#2a2f38"
+    },
+    {
+      "requested": "visible",
+      "outline": "rgba(255, 255, 255, 0.07) solid 1px",
+      "preset": "quiet-ink",
+      "templateBorder": "#2a2f38"
+    },
+    {
+      "requested": "hidden",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "preset": "warm-paper",
+      "templateBorder": "#2a2f38"
+    },
+    {
+      "requested": "visible",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "preset": "warm-paper",
+      "templateBorder": "#2a2f38"
+    }
+  ],
+  "settings": {
+    "appearanceDetails": 0,
+    "appearanceSelects": 1,
+    "marginLeft": "492px",
+    "marginRight": "492px",
+    "page": {
+      "bottom": 1129.9375,
+      "height": 1838.9375,
+      "left": 790,
+      "right": 1390,
+      "top": -709,
+      "width": 600,
+      "x": 790,
+      "y": -709
+    },
+    "providersOpen": false,
+    "shell": {
+      "bottom": 1185.9375,
+      "height": 1922.9375,
+      "left": 270,
+      "right": 1910,
+      "top": -737,
+      "width": 1640,
+      "x": 270,
+      "y": -737
+    }
+  },
+  "wall": {
+    "before": {
+      "inset": "72",
+      "walls": [
+        {
+          "interactive": "false",
+          "line": "0",
+          "pointerEvents": "none",
+          "side": "left"
+        },
+        {
+          "interactive": "false",
+          "line": "0",
+          "pointerEvents": "none",
+          "side": "right"
+        }
+      ]
+    },
+    "dragged": {
+      "inset": "121.81224489795918",
+      "right": {
+        "bottom": 1016.9185791015624,
+        "height": 1281.3717041015625,
+        "left": 1441.442138671875,
+        "right": 1454.4510498046875,
+        "top": -264.453125,
+        "width": 13.0089111328125,
+        "x": 1441.442138671875,
+        "y": -264.453125
+      }
+    },
+    "undoneInset": "72"
+  },
+  "providers": {
+    "defaultOpen": false,
+    "expandedRows": 6
+  },
+  "detailInk": "#302A24",
+  "moreAppearanceRemoved": true
+}

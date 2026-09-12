@@ -36,6 +36,9 @@ export function usePageFrameWalls(options: Options) {
   const activeWall = activeState?.scope === scope ? activeState.wall : null;
   const saving = savingScope === scope;
   useEffect(() => () => { scope.cleanup?.(); }, [scope]);
+  useEffect(() => {
+    if (!options.enabled) scope.cleanup?.();
+  }, [options.enabled, scope]);
 
   const begin = useCallback((event: ReactPointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => {
     const start = latest.current;

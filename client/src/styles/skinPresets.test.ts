@@ -72,12 +72,24 @@ describe('B1b board snapshots and component defaults', () => {
     const project = { preset: 'workbench' as const };
     const board = { preset: 'quiet-ink' as const, overrides: { card: '#334455' }, components: { titleFont: 'serif' as const } };
     expect(resolveSkin(global).components.titleFont).toBe('serif');
-    expect(resolveSkin(global, project).components).toEqual({ titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' });
-    expect(resolveSkin(global, project, board)).toMatchObject({ tokens: { card: '#334455' }, components: { titleFont: 'serif', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule' } });
+    expect(resolveSkin(global, project).components).toEqual({ titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet', headerRule: 'visible' });
+    expect(resolveSkin(global, project, board)).toMatchObject({ tokens: { card: '#334455' }, components: { titleFont: 'serif', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule', headerRule: 'visible' } });
     expect(resolveSkin(global, project, null)).toEqual(resolveSkin(project));
     expect(resolveSkin(global, null, null)).toEqual(resolveSkin(global));
     const parsed = readSkin(board)!;
     parsed.components!.titleFont = 'sans';
     expect(board.components.titleFont).toBe('serif');
+  });
+});
+
+describe('B1e header rule selection', () => {
+  it.each(['default', 'quiet-ink', 'warm-paper', 'workbench'] as const)('%s supplies all five defaults, while header rule overrides inherit and clear', (preset) => {
+    const selected = { preset, components: { headerRule: 'hidden' as const } };
+    expect(Object.keys(resolveSkin({ preset }).components).sort()).toEqual(['handleStyle', 'headerRule', 'labelFont', 'menuDensity', 'titleFont']);
+    expect(resolveSkin({ preset }).components.headerRule).toBe('visible');
+    expect(readSkin(selected)).toEqual(selected);
+    expect(resolveSkin(selected, null, null).components.headerRule).toBe('hidden');
+    expect(resolveSkin(selected, null, { preset }).components.headerRule).toBe('visible');
+    expect(resolveSkin(selected, null, { preset, components: {} }).components.headerRule).toBe('visible');
   });
 });

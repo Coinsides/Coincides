@@ -53,14 +53,14 @@
   margin-left: -4px;
 }
 
-.wall:hover::before,
-.wall:hover::after,
+.wall[data-page-frame-wall-interactive='true']:hover::before,
+.wall[data-page-frame-wall-interactive='true']:hover::after,
 .wall[data-page-frame-wall-active='true']::before,
 .wall[data-page-frame-wall-active='true']::after {
   opacity: 0;
 }
 
-.wall:hover .line,
+.wall[data-page-frame-wall-interactive='true']:hover .line,
 .wall[data-page-frame-wall-active='true'] .line {
   opacity: 1;
 }

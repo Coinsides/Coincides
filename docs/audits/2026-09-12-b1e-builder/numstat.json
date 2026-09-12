@@ -1,0 +1,215 @@
+{
+  "basis": "Pre-edit working-tree snapshot, not HEAD; CRLF normalized for line comparison; LCS line additions/deletions. No Git accessed.",
+  "files": [
+    {
+      "path": "client/src/components/Skin/SkinControls.test.tsx",
+      "added": 29,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "72d50f842d683d437c2fc2476bb6198c6cacfc6fdf4bba76880ac75d65b5d102"
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.tsx",
+      "added": 7,
+      "deleted": 6,
+      "beforeSha256": "4414c354315592fee3cf220bfe380ca8d2527ac912d3bd1ccfe3adffb1ec8a12",
+      "afterSha256": "ce7702aa18209576082cb0705eeee17510313fe1489dfbe7d6f7122767236efe"
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.test.tsx",
+      "added": 4,
+      "deleted": 3,
+      "beforeSha256": "fa4b0bded028bd7fda7c940e0b3a01a11ebea246a4d3eb5a65767a5aff611e68",
+      "afterSha256": "7c95eb2526a41913bf6c4b18f4a67b1f2ef20e72a34563ffcf040ef4f97d7a03"
+    },
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "added": 14,
+      "deleted": 2,
+      "beforeSha256": "b586fff861a1bb445c52d8f2c88be1f0ee551700d5c7ad946d2c82f8a01a87d7",
+      "afterSha256": "b289bcbb651e390005576bbce28e3c73d973ce50aee2dc222e12d848023e5f51"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts",
+      "added": 3,
+      "deleted": 1,
+      "beforeSha256": "ca6b201f272a83c7481838b563b13e72d2277b90c15557a4c9d6f88a00153de6",
+      "afterSha256": "f7eee4c57a41d6c0ed5c39d2fe15e8639087279314205db4a187e5de1a7532e5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+      "added": 2,
+      "deleted": 0,
+      "beforeSha256": "97aedbf66bbf66d7c5e82177d82d8138393adeadb7ead96625994c6d61354bd2",
+      "afterSha256": "51cd57e85af393af415af137523982ce62a2511a08aa23b0acff4923395787f0"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+      "added": 45,
+      "deleted": 1,
+      "beforeSha256": "47c867ebc0eab2d267465f1689b10934606254e34e2a5d5bc72751234ec8aaf7",
+      "afterSha256": "6578e0d0084b310882bf83c549a5e3721862ae25607933200b740a29a64ddb5d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "added": 6,
+      "deleted": 2,
+      "beforeSha256": "3ffbab3169a6e07cd137d38f02d52d9cb0fe129cb3006659feaebeec45c772a3",
+      "afterSha256": "77015fe1f69c2bbad379c9cc075658db00919f3a2777daa67c681bbf5e12545f"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+      "added": 37,
+      "deleted": 4,
+      "beforeSha256": "728e80bf27af32c642ec5a87248694c270006ac48afd51badd5db07f93479433",
+      "afterSha256": "3b0b6c845348387222c4a8e464499efabff558fa7d9fb0268b0d80545c021b28"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "74335fcebae3d63c97abc63cc3a23580456cc01b3ed52a6ded83d667bd4170aa",
+      "afterSha256": "530bd30687294d0f6d4ea4f36295c1fcdf3e69af984458ba0ddc07985f5392f0"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts",
+      "added": 4,
+      "deleted": 0,
+      "beforeSha256": "7760f3049e992b9506a09701bdc08c841c6d4312d2a0400c7d32eb77a98732bf",
+      "afterSha256": "ed891aa6f343b80a984eaeb8f7ef52c05589b375be621ea2fcc4e4d9a24c1a37"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/interactionController.ts",
+      "added": 1,
+      "deleted": 1,
+      "beforeSha256": "81420315ff0686d7b129e2250038aa6151e64698ee83b0cac87fafd69d8717c4",
+      "afterSha256": "87608220f536a003d9498d2f6fa21e56becbecc9159d887206f8b4cc84bcb715"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteAppearance.module.css",
+      "added": 27,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "1972c74270829de8c601931f6eef58a29e11281c64e87b10e446bb7acccc31af"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "added": 94,
+      "deleted": 1,
+      "beforeSha256": "575d2d8a532d0ad4b43b6c4e568803d0342bef575bd163569ec178ade6c44535",
+      "afterSha256": "15d2a9d3e0822487dc1a6812f37950f8e9e9b512d4894cb358b694927a9fee8b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+      "added": 52,
+      "deleted": 5,
+      "beforeSha256": "d5be6269a64357df1838f38c6fab24d651653f721c46c2973646a4b41dc80948",
+      "afterSha256": "e22e275e66cae4dd6d02b3e9801e37eee9891ba3fba93789397450b29968145b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "added": 1,
+      "deleted": 1,
+      "beforeSha256": "7db626ba703f64ff62ac09102a06ebee8073cbba72a630eb47e2e0db908a7e2b",
+      "afterSha256": "19daae89d25ecce34b8d7d24880db7e92085ef02cb9eed52c49f075071c06803"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "added": 3,
+      "deleted": 3,
+      "beforeSha256": "ca9c1136f1fc4edfb0a605c6848caceb249837e4e1b68c0d220c3ad2b35b7ffa",
+      "afterSha256": "e430d2d831d806d91424c5ac0bad92060b96ec397f4cc97132c68a16933a8ffb"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "added": 30,
+      "deleted": 5,
+      "beforeSha256": "5ea73659c2dca2022067c06fba0905a6950a467f25afd03156de30df60661309",
+      "afterSha256": "7242297aa02a369ee5472ebcc8aa4b42790ad48f6a6fb87178471443c757a9fb"
+    },
+    {
+      "path": "client/src/pages/Settings/AppearanceSection.tsx",
+      "added": 12,
+      "deleted": 8,
+      "beforeSha256": "153989a5247c38c8caffcb7bf42fb2977f7f561aa3659a801c167b06cbb9c1d4",
+      "afterSha256": "5199cfd1e839fd98169c1a62ef190e02ea975512e1b3d65cb112b1014ad65f65"
+    },
+    {
+      "path": "client/src/pages/Settings/ProvidersSection.test.tsx",
+      "added": 6,
+      "deleted": 1,
+      "beforeSha256": "00211b0f7276e3ca453c6970b49221809bb245bc39d3d1deaa22901e4df5800e",
+      "afterSha256": "55f676888260aa54ff6e834dc772883b46e9afc46b23f0f9109bfceeeb8e135f"
+    },
+    {
+      "path": "client/src/pages/Settings/ProvidersSection.tsx",
+      "added": 3,
+      "deleted": 1,
+      "beforeSha256": "c44b4822eda6692e7e01dc34e54f3d95ac503daa119b8d5360db983cc92444be",
+      "afterSha256": "342d32e46b1f112a03294da144c6719483b31d6298edd1136a2cb5a6395870a4"
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.module.css",
+      "added": 12,
+      "deleted": 0,
+      "beforeSha256": "6f74183c563cb48d732c437fb19e6d0d2b2edb87a63fc6195b92adb3b36bc4c3",
+      "afterSha256": "d959e0f34daa2d2a0ba54094d28dc7f32c06ab31b1f03c8e181694e3527bdfde"
+    },
+    {
+      "path": "client/src/styles/skinComponentStyles.test.ts",
+      "added": 12,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "4f0f6309298214c8633bfffcc60cf255d0f5558d944455dd446ba4c8cd837414"
+    },
+    {
+      "path": "client/src/styles/skinComponentStyles.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "d77953c7847f45bd605a91227027906f95969da85bda480ba9b575dd61286fda",
+      "afterSha256": "f8f6b708f6a23201c0db9bf5d481353c96f0ad549bfa4ab780068d498f4b5aa6"
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "added": 14,
+      "deleted": 2,
+      "beforeSha256": "6db2c06eac8e49fd9bda8c571ef79a4569651d351176fea36b7f3a0616e93402",
+      "afterSha256": "478bb8780a876bc47c4ec8b660a417bdc0312d56054d09ba10bb0c7905d765b1"
+    },
+    {
+      "path": "client/src/styles/skinPresets.ts",
+      "added": 2,
+      "deleted": 2,
+      "beforeSha256": "9128bc5bee3287d5fd4a63ed5b205ee727b7f416c92e11c34b0394feffebe589",
+      "afterSha256": "f8c299b71b973dbd43d9089cdc04a0f399feaec97dc142ca6f0a134e398e2760"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md",
+      "added": 79,
+      "deleted": 1,
+      "beforeSha256": "fe484b8eac5251000e01d2f686c95cc5ae4bae10fd0df43185d243f99f9f5a3d",
+      "afterSha256": "1a32471e3dbb285b3dba2a37fb10f1ee472957575d4af8d9f0d02057cc338c01"
+    },
+    {
+      "path": "server/src/__tests__/v13PaperSkin.test.ts",
+      "added": 3,
+      "deleted": 3,
+      "beforeSha256": "63c77c1c894de459ceb880282a5a8c503b6f2c735f7b2d96a58f057a74e8105c",
+      "afterSha256": "ed165ccad41d123cd74b451bb75e4924213422b10a95aa5f6300e3f3ef52d981"
+    },
+    {
+      "path": "server/src/validators/skin.ts",
+      "added": 1,
+      "deleted": 0,
+      "beforeSha256": "e1797f550cf4eb8a64388cda27d53a0aaa89f559f5dd315137880956f1764ccf",
+      "afterSha256": "e4b02604cfd6eb7457d7f25d1b3b72185a9e4a5a20c93880108d0fecd2651c84"
+    },
+    {
+      "path": "shared/types/skin.ts",
+      "added": 1,
+      "deleted": 0,
+      "beforeSha256": "d6740307ff86e26f98db6f9f66f693f8293dfb40317b1a6d7f5851cba898c3c0",
+      "afterSha256": "f5d7777ac649f03916a7071ef8e2dbb72a925970e5580182de8d22fc9e94772a"
+    }
+  ]
+}

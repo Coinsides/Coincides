@@ -1,0 +1,31 @@
+{
+  "reports": [
+    {
+      "name": "warm-fit-page.json",
+      "count": 32,
+      "uncovered": 0,
+      "wrongPosition": 0,
+      "steps": 16
+    },
+    {
+      "name": "warm-fit-width.json",
+      "count": 32,
+      "uncovered": 0,
+      "wrongPosition": 0,
+      "steps": 16
+    },
+    {
+      "name": "warm-physical.json",
+      "count": 32,
+      "uncovered": 0,
+      "wrongPosition": 0,
+      "steps": 16
+    }
+  ],
+  "evidenceFiles": 54,
+  "ports": {
+    "3109": "closed",
+    "5279": "closed"
+  },
+  "handoffStatus": "> **状态 (Status)**: done(2026-09-12 Codex builder 六件施工与功能验收完成；待 HQ 复核/放行；原施工授权与裁定不变)"
+}

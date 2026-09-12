@@ -175,7 +175,8 @@ export default function ProvidersSection({ connectionSettings, onCredentialsChan
 
   return (
     <section className={styles.section} aria-labelledby="providers-title">
-      <h2 id="providers-title" className={styles.sectionTitle}>Providers</h2>
+      <details className={styles.providerDetails}>
+      <summary id="providers-title">AI Provider 凭据({providers.filter((provider) => provider.has_key).length} 已配置)</summary>
       <div className={styles.card} aria-busy={loading}>
         <p className={styles.providerDisclosure}>Keys stay on this machine in a plaintext file in the application data directory, separate from your notebook database.</p>
         <p className={styles.providerHelp}>Clear removes the local key; an environment key is used if available.</p>
@@ -200,6 +201,7 @@ export default function ProvidersSection({ connectionSettings, onCredentialsChan
           </ul>
         )}
       </div>
+      </details>
     </section>
   );
 }

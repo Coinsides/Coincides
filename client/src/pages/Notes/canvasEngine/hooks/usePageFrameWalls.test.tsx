@@ -62,12 +62,12 @@ interface HarnessApi {
   resolved: ReturnType<typeof useNoteCanvasResolvedLayoutModel>;
   state: State;
 }
-function mountWalls({ zoom = 1, outcome = async (_snapshot: PageFrameWallSnapshot) => true,
-  boundary = () => true }: { zoom?: number; outcome?: (snapshot: PageFrameWallSnapshot) => Promise<boolean>; boundary?: () => boolean } = {}) {
+function mountWalls({ zoom = 1, enabled = true, outcome = async (_snapshot: PageFrameWallSnapshot) => true,
+  boundary = () => true }: { zoom?: number; enabled?: boolean; outcome?: (snapshot: PageFrameWallSnapshot) => Promise<boolean>; boundary?: () => boolean } = {}) {
   let api: HarnessApi;
   const save = vi.fn(outcome);
   const layoutReplay = vi.fn();
-  function Harness({ noteId = 'wall-note', generation = 0 }: { noteId?: string; generation?: number }) {
+  function Harness({ noteId = 'wall-note', generation = 0, layoutMode = enabled }: { noteId?: string; generation?: number; layoutMode?: boolean }) {
     const [state, setState] = useState<State>(() => {
       const seeded = createPageFrameCollectionSeed(frame);
       return { collection: appendPageFrameToStack(seeded, seeded.primaryStackId!, frame.id, { id: 'second-frame' }),
@@ -79,7 +79,7 @@ function mountWalls({ zoom = 1, outcome = async (_snapshot: PageFrameWallSnapsho
       applyLayoutDrafts: layoutReplay, persistLayoutSnapshot: async () => true, target: null });
     const host = useRef<TextFlowHistoryHost | null>(history);
     host.current = history;
-    const walls = usePageFrameWalls({ noteId, generation, enabled: true, coordinateContract: 'v2',
+    const walls = usePageFrameWalls({ noteId, generation, enabled: layoutMode, coordinateContract: 'v2',
       collection: state.collection, blocks: state.blocks, layoutDrafts: {}, objects, placements: state.placements,
       zoom, history: host, boundary, save: async (snapshot) => {
         const succeeded = await save(snapshot);
@@ -105,6 +105,7 @@ function mountWalls({ zoom = 1, outcome = async (_snapshot: PageFrameWallSnapsho
   }
   const view = render(<Harness />);
   return { get current() { return api!; }, view, save, layoutReplay,
+    setLayoutMode: (layoutMode: boolean) => view.rerender(<Harness layoutMode={layoutMode} />),
     switchScope: (noteId: string, generation = 0) => view.rerender(<Harness noteId={noteId} generation={generation} />) };
 }
 function begin(subject: ReturnType<typeof mountWalls>, side: 'left' | 'right', x = 400) {
@@ -128,6 +129,38 @@ afterAll(() => {
 });
 
 describe('D1 wall pointer, projection and shared placement history', () => {
+  it('requires Layout before touching the editing boundary or starting a wall gesture', async () => {
+    const boundary = vi.fn(() => true);
+    const subject = mountWalls({ enabled: false, boundary });
+    begin(subject, 'right');
+    await finish(subject, 240);
+    expect(boundary).not.toHaveBeenCalled();
+    expect(subject.save).not.toHaveBeenCalled();
+    expect(subject.current.walls.activeWall).toBe(null);
+    subject.setLayoutMode(true);
+    begin(subject, 'right');
+    await finish(subject, 240);
+    expect(boundary).toHaveBeenCalledTimes(1);
+    expect(subject.save).toHaveBeenCalledTimes(1);
+    await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(subject.current.state.collection.pageFrames[0].contentInset.right).toBe(72);
+  });
+
+  it('cancels an active wall drag when Layout is turned off without saving or adding history', async () => {
+    const subject = mountWalls();
+    const before = JSON.stringify(subject.current.state);
+    begin(subject, 'right');
+    act(() => pointer('pointermove', 240));
+    expect(subject.current.walls.activeWall).toEqual({ frameId: frame.id, side: 'right' });
+    subject.setLayoutMode(false);
+    expect(subject.current.walls.activeWall).toBe(null);
+    expect(subject.current.walls.collection).toBe(subject.current.state.collection);
+    await finish(subject, 200);
+    expect(subject.save).not.toHaveBeenCalled();
+    expect(JSON.stringify(subject.current.state)).toBe(before);
+    await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(false); });
+  });
+
   it('previews right-wall contraction, commits one combined snapshot, and replays one symmetric undo/redo', async () => {
     const subject = mountWalls({ zoom: 0.5 });
     const before = JSON.stringify(subject.current.state);

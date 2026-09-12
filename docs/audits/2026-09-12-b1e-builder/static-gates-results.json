@@ -1,0 +1,47 @@
+﻿[
+    {
+        "check":  "check:canvas-runtime-boundary",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-canvas-runtime-boundary.log"
+    },
+    {
+        "check":  "check:group-gallery-shell",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-group-gallery-shell.log"
+    },
+    {
+        "check":  "check:single-editor-shell",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-single-editor-shell.log"
+    },
+    {
+        "check":  "check:groups-rail-shell",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-groups-rail-shell.log"
+    },
+    {
+        "check":  "check:v2-bn11-legacy-shutdown",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-v2-bn11-legacy-shutdown.log"
+    },
+    {
+        "check":  "check:v2-bn11-relation-freshness",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-v2-bn11-relation-freshness.log"
+    },
+    {
+        "check":  "check:source-experience",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/check-source-experience.log"
+    },
+    {
+        "check":  "smoke:canvas-engine-model-contract",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/smoke-canvas-engine-model-contract.log"
+    },
+    {
+        "check":  "smoke:canvas-engine-performance",
+        "exitCode":  0,
+        "log":  "docs/audits/2026-09-12-b1e-builder/smoke-canvas-engine-performance.log"
+    }
+]

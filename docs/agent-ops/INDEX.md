@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 350 份文档。
+共 354 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -81,7 +81,7 @@
 | [analysis/2026-09-07-wilderness-migration-mapping.md](analysis/2026-09-07-wilderness-migration-mapping.md) | 13.0 图三 · 野地退役迁移映射表 | `active` | 2026-09-07 | — |
 | [analysis/2026-09-08-v13-2-canvas-deadcode-inventory.md](analysis/2026-09-08-v13-2-canvas-deadcode-inventory.md) | V13.2 单 5 · canvas 模式死代码清册 | `frozen` | 2026-09-08 | — |
 | [analysis/2026-09-08-v13-3-s0-recon.md](analysis/2026-09-08-v13-3-s0-recon.md) | V13.3 单 0 · 板 / 魂 / 书记官只读侦察 | `frozen` | 2026-09-08 | — |
-| [analysis/2026-09-09-block-endgame-direction.md](analysis/2026-09-09-block-endgame-direction.md) | 块的终局 —— 方向档 v0 | `active` | 2026-09-09 | — |
+| [analysis/2026-09-09-block-endgame-direction.md](analysis/2026-09-09-block-endgame-direction.md) | 块的终局 —— 方向档 v0 | `active` | 2026-09-12(转正翻牌+修宪记录一;正文冻结,修订只走文末 append-only 修宪记录) | — |
 | [analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md](analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md) | 编辑成熟度与 Agent 对称 —— 对谈分析档 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s0-recon.md](analysis/2026-09-09-v13-4-s0-recon.md) | V13.4 单 0 · 投影全谱与 item 化侦察 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s1-item-depth.md](analysis/2026-09-09-v13-4-s1-item-depth.md) | 13.4 单 1 · Item 三道深水题 | `active` | 2026-09-09 | — |
@@ -132,6 +132,7 @@
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
+| [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
 | [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-08-22 | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
@@ -285,7 +286,7 @@
 | [handoffs/2026-09-09-v13-3-s4-polish-order.md](handoffs/2026-09-09-v13-3-s4-polish-order.md) | 13.3 · 单 4 · 走查③打磨(板名独立/入口淡化/两件收起) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md](handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md) | 13.4 段收口 · 全链冒烟 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s0-recon-order.md](handoffs/2026-09-09-v13-4-s0-recon-order.md) | 13.4 · 单 0 · 投影全谱与 item 化侦察 | `(缺状态头)` | — | — |
-| [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready)` | — | — |
 | [handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md](handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md) | 13.4 单 10 · 开箱仪式 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s2-text-range-order.md](handoffs/2026-09-09-v13-4-s2-text-range-order.md) | 13.4 单 2 · text_range 上板 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s3-tray-polish-order.md](handoffs/2026-09-09-v13-4-s3-tray-polish-order.md) | 13.4 单 3 · 准备区二件 + 正名(笔记侧) | `done(HQ 收口:S3-V1 裁不违例,交付收货)` | — | — |
@@ -301,7 +302,7 @@
 | [handoffs/2026-09-09-v13-4-w4-fix4-order.md](handoffs/2026-09-09-v13-4-w4-fix4-order.md) | 走查修四 · 选区精修批 | `done（施工回执；完整 runtime gate 停线待 HQ）` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix5-order.md](handoffs/2026-09-09-v13-4-w4-fix5-order.md) | 走查修五 · F11 | `done（builder施工回执；HQ复核/完整总门待接）` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix6-order.md](handoffs/2026-09-09-v13-4-w4-fix6-order.md) | 走查修六 · F11-B + F12 | `done(HQ 收口:双修+两补遗收货;T-1 红判环境候查入 13.6 基线)` | — | — |
-| [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready)` | — | — |
 | [handoffs/2026-09-09-v13-5-a1-agent-memories-crud-order.md](handoffs/2026-09-09-v13-5-a1-agent-memories-crud-order.md) | 13.5 A1 · agent_memories 人类 CRUD | `done（builder 施工回执；docs 检查 / 完整总门停线待 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-4-w4-fix7-order.md](handoffs/2026-09-10-v13-4-w4-fix7-order.md) | 走查修七 · F13 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-a2-os-credential-store-order.md](handoffs/2026-09-10-v13-5-a2-os-credential-store-order.md) | 13.5 A2 · OS 凭据库 | `done` | — | — |
@@ -311,7 +312,7 @@
 | [handoffs/2026-09-10-v13-5-b2-textflow-debt-survey-order.md](handoffs/2026-09-10-v13-5-b2-textflow-debt-survey-order.md) | 13.5 B2 · TextFlow 欠条清算立项调查 | `done（纯调查回执；候裁方案未施工）` | — | — |
 | [handoffs/2026-09-10-v13-5-b4-typing-undo-order.md](handoffs/2026-09-10-v13-5-b4-typing-undo-order.md) | 13.5 B4 · 打字撤销(方案 A) | `done(HQ 收口:主体+补遗一收货,863全库,扫描绿)` | — | — |
 | [handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md](handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md) | 13.5 B5 · 光标穿行 | `done(builder 施工回执;完整 runtime 总门/凭据扫描留 HQ)` | — | — |
-| [handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md](handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md) | 13.5 B6 · 跨界选择与导航 | `ready` | — | — |
+| [handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md](handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md) | 13.5 B6 · 跨界选择与导航 | `done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready)` | — | — |
 | [handoffs/2026-09-10-v13-5-b6-fix1-order.md](handoffs/2026-09-10-v13-5-b6-fix1-order.md) | B6 走查修一 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b6b-cross-block-selection-order.md](handoffs/2026-09-10-v13-5-b6b-cross-block-selection-order.md) | 13.5 B6b · 跨块选择 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md](handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md) | 13.5 B7 · 原子文本保存 | `done` | — | — |
@@ -332,7 +333,7 @@
 | [handoffs/2026-09-11-v13-5-b4v-fix1-order.md](handoffs/2026-09-11-v13-5-b4v-fix1-order.md) | B4v-fix1 · 台账补记 | `done（builder 工作树交付；待 HQ 复核放行）` | — | — |
 | [handoffs/2026-09-11-v13-5-b4v-viewport-bookmarks-order.md](handoffs/2026-09-11-v13-5-b4v-viewport-bookmarks-order.md) | B4v · 板视口书签 | `done(builder 交付，待独立复核与放行)` | — | — |
 | [handoffs/2026-09-11-v13-5-d1-walls-order.md](handoffs/2026-09-11-v13-5-d1-walls-order.md) | D1 · 可调的墙 + 把手安家 | `done` | — | — |
-| [handoffs/2026-09-11-v13-5-d2-fix1-order.md](handoffs/2026-09-11-v13-5-d2-fix1-order.md) | D2-fix1 · F18 表头编辑键放行 | `ready` | — | — |
+| [handoffs/2026-09-11-v13-5-d2-fix1-order.md](handoffs/2026-09-11-v13-5-d2-fix1-order.md) | D2-fix1 · F18 表头编辑键放行 | `done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready)` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-header-chrome-order.md](handoffs/2026-09-11-v13-5-d2-header-chrome-order.md) | D2 · 纸上表头 + 顶栏拆解 | `done(builder 工作树交付；待 HQ 复核放行)` | — | — |
 | [handoffs/2026-09-11-v13-5-e1-menu-debox-order.md](handoffs/2026-09-11-v13-5-e1-menu-debox-order.md) | E1 · 菜单去盒 + 视图收纳 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-e2-annotation-stamp-order.md](handoffs/2026-09-11-v13-5-e2-annotation-stamp-order.md) | E2 · 标注章邻近自适应 | `done(builder 工作树交付；待 HQ 复核放行)` | — | — |
@@ -341,6 +342,9 @@
 | [handoffs/2026-09-11-v13-5-e5-cover-metadata-order.md](handoffs/2026-09-11-v13-5-e5-cover-metadata-order.md) | E5 · 封面元数据行 + 标签真相 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-e5-fix1-order.md](handoffs/2026-09-11-v13-5-e5-fix1-order.md) | E5-fix1 · 台账补记 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-f19-recovery-conflict-order.md](handoffs/2026-09-11-v13-5-f19-recovery-conflict-order.md) | F19 · 恢复冲突的显式出口 | `done(builder 已交付；最终总门与放行留 HQ)` | — | — |
+| [handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md](handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md) | B1e · 外观清扫小单 | `done(2026-09-12 Codex builder 六件施工与功能验收完成；待 HQ 复核/放行；原施工授权与裁定不变)` | — | — |
+| [handoffs/2026-09-12-v13-6-media-block-paste-order.md](handoffs/2026-09-12-v13-6-media-block-paste-order.md) | 媒体块先遣 · 粘贴图片进纸 | `ready(施工夜第三单;13.6 媒体块复活的先遣件,Henry 睡前令提前开工)` | — | — |
+| [handoffs/2026-09-12-v13-6-source-projection-repair-order.md](handoffs/2026-09-12-v13-6-source-projection-repair-order.md) | 源投影修单 · 页码契约与重投影 v1 | `ready(施工夜第二单;Henry 09-12 认分诊全表+重投影裁定,睡前令"施工类全清"提前开工)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

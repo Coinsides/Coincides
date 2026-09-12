@@ -20,6 +20,9 @@ const rootBridgeContract = vi.hoisted(() => ({
   blocks: [] as NoteBlock[],
   contentWidth: 0,
   loading: true,
+  layoutMode: false,
+  contentReadOnly: false,
+  wallOptions: null as { enabled: boolean; boundary: () => boolean } | null,
   note: undefined as { id: string; metadata?: Record<string, unknown> } | undefined,
   noteId: undefined as string | undefined,
   pageFrameCollection: null as PageFrameCollectionModel | null,
@@ -64,6 +67,7 @@ vi.mock('./useRuntimeSurfaceStateController', async () => {
 
       return new Proxy({
         ...surface,
+        layoutMode: rootBridgeContract.layoutMode,
         blockListRef,
         movingBlockIdRef,
         resolveInitialSurfaceMode,
@@ -86,7 +90,7 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
     note: rootBridgeContract.note,
     pageFrameCollection: rootBridgeContract.pageFrameCollection,
     documentTypographyProfile: rootBridgeContract.hydratedProfile,
-    sourceProjectionPolicy: { contentReadOnly: false },
+    sourceProjectionPolicy: { contentReadOnly: rootBridgeContract.contentReadOnly },
     sourceReferenceCount: 0,
     sortedBlocks: rootBridgeContract.blocks,
     persistedCanvasObjects: [],
@@ -100,6 +104,16 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
     },
   }),
 }));
+
+vi.mock('./usePageFrameWalls', async () => {
+  const actual = await vi.importActual<typeof import('./usePageFrameWalls')>('./usePageFrameWalls');
+  return {
+    usePageFrameWalls: (options: Parameters<typeof actual.usePageFrameWalls>[0]) => {
+      rootBridgeContract.wallOptions = options;
+      return actual.usePageFrameWalls(options);
+    },
+  };
+});
 
 vi.mock('./useRuntimeLayoutModelController', async () => {
   const { useNoteCanvasResolvedLayoutModel } = await vi.importActual<typeof import('./useNoteCanvasLayoutModel')>(
@@ -234,6 +248,9 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     rootBridgeContract.blocks = [];
     rootBridgeContract.contentWidth = DEFAULT_PAGE_CONTENT_WIDTH;
     rootBridgeContract.loading = false;
+    rootBridgeContract.layoutMode = false;
+    rootBridgeContract.contentReadOnly = false;
+    rootBridgeContract.wallOptions = null;
     rootBridgeContract.note = { id: NOTE_ID };
     rootBridgeContract.noteId = NOTE_ID;
     rootBridgeContract.pageFrameCollection = null;
@@ -242,6 +259,33 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     rootBridgeContract.blockLayouts = {};
     rootBridgeContract.resolverCalls = [];
     rootBridgeContract.layoutPhaseReceipts = [];
+  });
+
+  it('gates both wall hook and runtime boundary with the current Layout state', () => {
+    const view = render(<RootBridgeHarness />);
+    expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+    expect(rootBridgeContract.wallOptions?.boundary()).toBe(false);
+    const previousBoundary = rootBridgeContract.wallOptions!.boundary;
+
+    rootBridgeContract.layoutMode = true;
+    view.rerender(<RootBridgeHarness />);
+    expect(rootBridgeContract.wallOptions?.enabled).toBe(true);
+    expect(rootBridgeContract.wallOptions?.boundary()).toBe(true);
+
+    rootBridgeContract.loading = true;
+    view.rerender(<RootBridgeHarness />);
+    expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+    rootBridgeContract.loading = false;
+    rootBridgeContract.contentReadOnly = true;
+    view.rerender(<RootBridgeHarness />);
+    expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+
+    rootBridgeContract.contentReadOnly = false;
+    rootBridgeContract.layoutMode = false;
+    view.rerender(<RootBridgeHarness />);
+    expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+    expect(rootBridgeContract.wallOptions?.boundary()).toBe(false);
+    expect(previousBoundary()).toBe(false);
   });
 
   it.each([

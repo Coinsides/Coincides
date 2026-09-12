@@ -1,0 +1,4 @@
+﻿{
+    "check":  "server build (manifest + tsc + copy manifest)",
+    "exitCode":  0
+}

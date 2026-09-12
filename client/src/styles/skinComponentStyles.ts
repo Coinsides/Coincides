@@ -4,6 +4,9 @@ import type { SkinComponents } from '@shared/types/skin';
 /** Fixed enum-to-CSS translation, scoped to each surface and its portals. */
 export function buildSkinComponentStyles(components: SkinComponents): CSSProperties {
   return {
+    // The guaranteed-invalid initial value resolves the outline fallback on each
+    // sheet, where its template variables live, instead of on this skin root.
+    '--sk-header-rule': components.headerRule === 'hidden' ? 'none' : 'initial',
     '--sk-title-font': components.titleFont === 'serif' ? 'Georgia, "Noto Serif SC", "Songti SC", SimSun, serif' : 'initial',
     '--sk-paper-title-size': components.titleFont === 'serif' ? '36px' : '34px',
     '--sk-paper-title-weight': components.titleFont === 'serif' ? '600' : '650',
