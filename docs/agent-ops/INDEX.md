@@ -350,7 +350,7 @@
 | [handoffs/2026-09-12-v13-6-media-block-paste-order.md](handoffs/2026-09-12-v13-6-media-block-paste-order.md) | 媒体块先遣 · 粘贴图片进纸 | `done（builder 工程施工与申报完成；待 HQ/reviewer 复核，非主观放行）` | — | — |
 | [handoffs/2026-09-12-v13-6-source-projection-repair-order.md](handoffs/2026-09-12-v13-6-source-projection-repair-order.md) | 源投影修单 · 页码契约与重投影 v1 | `done(2026-09-12 补遗三四轮六步工程验收通过;历史三轮 Result 原样保留)` | — | — |
 | [handoffs/2026-09-13-v13-6-deadcode-purge-order.md](handoffs/2026-09-13-v13-6-deadcode-purge-order.md) | 单1 · Canvas 死代码清除大单 | `done(四批全清;HQ 收口:无过滤 client 全库 1576/1576 零 skip、server test:v2 476/477+DashScope 单红隔离复验 13/13 绿判 flaky 入总测名录、2 条环境红既档;git diff --check+secrets 扫描 HQ 补跑双绿)` | — | — |
-| [handoffs/2026-09-13-v13-6-flaky-roster-order.md](handoffs/2026-09-13-v13-6-flaky-roster-order.md) | 尾单 · flaky 名录五笔清基线 | `ready(13.6 收官尾单;Henry 裁"集中总测取消"后保留的机器面基线清理,HQ 职权报备派发)` | — | — |
+| [handoffs/2026-09-13-v13-6-flaky-roster-order.md](handoffs/2026-09-13-v13-6-flaky-roster-order.md) | 尾单 · flaky 名录五笔清基线 | `done(builder 三笔修复+诊断;HQ 收口:DashScope 根因确诊=配真实 key 机器必红的夹具缺陷(本地凭据文件优先 env mock),应用 builder 隔离 patch 后 7/7 绿;三轮全库=server 477×3 全绿、client 轮1/2 各 1 无名间歇红后 4 连绿(身份未获挂观察位候现身);T-1 定向 1/1 绿历史红未复现;环境红 2 条诊断申报在档)` | — | — |
 | [handoffs/2026-09-13-v13-6-test-gate-repair-order.md](handoffs/2026-09-13-v13-6-test-gate-repair-order.md) | 单2 · 测试门修复:漏挂发现机关+24 文件接门 | `done(补遗二三轮终态达成;保留25条已裁归单1 Canvas红+2条已知环境红;HQ收口补跑git/secrets)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
