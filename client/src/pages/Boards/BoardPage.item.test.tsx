@@ -7,7 +7,10 @@ import type { BoardDetail, BoardMember, BoardMemberReference } from './boardType
 
 // Only transport is replaced. BoardPage, repositories, the summary adapter and useBoard are real.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: http,
+}));
 
 interface FixtureItem {
   id: string;

@@ -17,7 +17,10 @@ import { useTrayController } from './useTrayController';
 // Only the HTTP transport is replaced. The tray UI/hook, board repository,
 // route navigation, board hook and board rendering are production components.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: http,
+}));
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 const response = <T,>(data: T) => ({ data: clone(data) });
 const date = '2026-09-08T12:00:00.000Z';

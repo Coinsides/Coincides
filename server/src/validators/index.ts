@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { skinSelectionSchema } from './skin.js';
 import { paperFreehandDataSchema } from './paperInk.js';
 
 // --- Auth ---
@@ -17,6 +18,7 @@ export const loginSchema = z.object({
 // --- Course ---
 
 export const createCourseSchema = z.object({
+  skin: skinSelectionSchema.nullable().optional(),
   name: z.string().min(1, 'Course name is required').max(200),
   code: z.string().max(20).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
@@ -26,6 +28,7 @@ export const createCourseSchema = z.object({
 });
 
 export const updateCourseSchema = z.object({
+  skin: skinSelectionSchema.nullable().optional(),
   name: z.string().min(1).max(200).optional(),
   code: z.string().max(20).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
@@ -136,6 +139,7 @@ export const setDailyStatusSchema = z.object({
 
 export const updateSettingsSchema = z.object({
   settings: z.object({
+    skin: skinSelectionSchema.nullable().optional(),
     theme: z.enum(['dark', 'light']).optional(),
     language: z.enum(['en', 'zh']).optional(),
     agent_name: z.string().max(50).optional(),
@@ -347,6 +351,7 @@ export const uploadDocumentSchema = z.object({
 // --- v2 Notes / NoteBlocks ---
 
 export const createNoteSchema = z.object({
+  skin: skinSelectionSchema.nullable().optional(),
   course_id: z.string().uuid('Invalid course ID'),
   title: z.string().min(1, 'Note title is required').max(300),
   description: z.string().max(2000).optional(),
@@ -355,6 +360,7 @@ export const createNoteSchema = z.object({
 });
 
 export const updateNoteSchema = z.object({
+  skin: skinSelectionSchema.nullable().optional(),
   title: z.string().min(1).max(300).optional(),
   description: z.string().max(2000).nullable().optional(),
   page_format: z.string().max(50).optional(),

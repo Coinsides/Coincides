@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3';
+import { hydrateCourseSkin } from './skin.js';
 
 export interface RecentCourseNote {
   id: string;
@@ -62,7 +63,7 @@ export function listCourseCards(db: Database.Database, userId: string): CourseCa
     } = row;
 
     return {
-      ...course,
+      ...hydrateCourseSkin(course),
       recent_note: recentNoteId === null
         ? null
         : {

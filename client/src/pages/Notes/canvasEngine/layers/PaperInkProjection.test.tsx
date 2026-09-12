@@ -93,7 +93,7 @@ describe('C4 paper ink print and overview projection', () => {
     const overview = container.querySelector(`[data-note-overview] ${INK}`)!;
     const printed = document.querySelector(`[data-note-print-root] ${INK}`)!;
     expect(geometry(writing)).toEqual([
-      PATH, 'translate(40 50) rotate(0 60 40)', 'var(--board-ink, var(--text-primary, #374151))', '2.5', 'round', 'round', 'none',
+      PATH, 'translate(40 50) rotate(0 60 40)', 'var(--sk-ink, var(--board-ink, var(--text-primary, #374151)))', '2.5', 'round', 'round', 'none',
     ]);
     expect(geometry(overview)).toEqual(geometry(writing));
     expect(geometry(printed)).toEqual(geometry(writing));

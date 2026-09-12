@@ -1,0 +1,160 @@
+{
+  "status": "failed",
+  "syntheticOnly": true,
+  "persistenceCoverage": false,
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/152.0.7977.83",
+    "revision": "@79460ebecaa5625e57a5fb679a735659e73dc687",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+    "jsVersion": "15.2.124.21"
+  },
+  "assertions": [
+    {
+      "name": "Initial overlays closed",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "More (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Dead placeholder absent",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "More preserved callbacks",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography fontSizePx",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography lineHeightPx",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography paragraphSpacingPx",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography font family callback",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography reset dispatched",
+      "pass": true,
+      "detail": true
+    }
+  ],
+  "borders": [
+    {
+      "overlay": "More",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 61,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_1xc4x_372",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More",
+      "state": "hover",
+      "forcedHoverTargets": 10,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 61,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_1xc4x_372",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "00-closed.png",
+    "01-more.png",
+    "02-typography.png",
+    "failure.png"
+  ],
+  "errors": [],
+  "callbacks": [],
+  "failure": "Error: {\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":281,\"scriptId\":\"73\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"73\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":287},{\"functionName\":\"\",\"scriptId\":\"73\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":502}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"Error\",\"description\":\"Error: Missing target View info\\n    at <anonymous>:1:288\\n    at <anonymous>:1:503\",\"objectId\":\"8502966100873677820.2.2\"}}\n    at evaluate (file:///D:/Coinsides/v2.x/Coincides/docs/audits/2026-09-11-b1a-builder/baseline-e1.mjs:30:33)\n    at async click (file:///D:/Coinsides/v2.x/Coincides/docs/audits/2026-09-11-b1a-builder/baseline-e1.mjs:45:17)\n    at async file:///D:/Coinsides/v2.x/Coincides/docs/audits/2026-09-11-b1a-builder/baseline-e1.mjs:125:3",
+  "counts": {
+    "passed": 10,
+    "failed": 0,
+    "overlays": 1,
+    "inspectionSamples": 2,
+    "nestedBorders": 0,
+    "hairlineSeparators": 1,
+    "forcedHoverTargets": 10
+  }
+}

@@ -104,7 +104,7 @@ export function NoteReadOnlyPageContent({
       [data-note-readonly-fragment] .${styles.blockStatusBadges} { display: none !important; }
       [data-note-readonly-fragment] .${styles.blockBox} { border-color: transparent; }
       [data-note-print-fragment] .${styles.codeBlockBox},
-      [data-note-print-fragment] .${styles.codeBlockProjection} { background: white; }
+      [data-note-print-fragment] .${styles.codeBlockProjection} { background: var(--sk-paper, white); }
     `}</style>
   </>;
 }

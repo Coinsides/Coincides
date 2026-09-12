@@ -1,0 +1,703 @@
+{
+  "status": "passed",
+  "syntheticOnly": true,
+  "persistenceCoverage": false,
+  "browser": null,
+  "assertions": [],
+  "borders": [],
+  "screenshots": [
+    "baseline-paper.png"
+  ],
+  "errors": [],
+  "callbacks": [],
+  "styles": [
+    {
+      "tag": "DIV",
+      "class": "_trayViewport_1xc4x_283",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_contentGroupLauncher_1xc4x_284 _trayToggle_1xc4x_284",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.94)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "polyline",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_trayDocumentRow_1xc4x_285",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_documentShell_1xc4x_66 ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_templateWarning_1xc4x_894",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(245, 158, 11, 0.12)",
+      "border": "rgb(245, 158, 11)"
+    },
+    {
+      "tag": "SECTION",
+      "class": "_writingSurface_1xc4x_958 _pageReadingSurface_1xc4x_1078   ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageReadingSpace_1xc4x_1088",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageReadingHeaderBand_1xc4x_1133",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgb(16, 17, 20)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "HEADER",
+      "class": "_header_7zpje_1",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "TEXTAREA",
+      "class": "_title_7zpje_9",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "TEXTAREA",
+      "class": "_description_7zpje_10",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_row_1o4tv_1",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_add_1o4tv_6",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_disclosure_1o4tv_6",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageReadingPaper_1xc4x_1126",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_blockList_1xc4x_1068 _blockListPage_1xc4x_1073 ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_wall_hhanc_1",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "_line_hhanc_11",
+      "color": "rgb(245, 245, 245)",
+      "bg": "color(srgb 0.466667 0.478431 0.509804 / 0.44)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_wall_hhanc_1",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "_line_hhanc_11",
+      "color": "rgb(245, 245, 245)",
+      "bg": "color(srgb 0.466667 0.478431 0.509804 / 0.44)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_paperInkLayer_1xc4x_1172",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageFrameSlot_1xc4x_3995 _pageFrameHeaderSlot_1xc4x_4009",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.466667 0.478431 0.509804 / 0.82) color(srgb 0.466667 0.478431 0.509804 / 0.82) color(srgb 0.172549 0.176471 0.192157 / 0.42)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageFrameSlot_1xc4x_3995 _pageFrameFooterSlot_1xc4x_4013",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.34) color(srgb 0.466667 0.478431 0.509804 / 0.82) color(srgb 0.466667 0.478431 0.509804 / 0.82)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageFrameSlot_1xc4x_3995 _pageFramePageNumberSlot_1xc4x_4017",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.466667 0.478431 0.509804 / 0.82)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.466667 0.478431 0.509804 / 0.82)"
+    },
+    {
+      "tag": "DIV",
+      "class": "",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "ARTICLE",
+      "class": "_block_1xc4x_152 _blockBox_1xc4x_1626     ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "DIV",
+      "class": "",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitEditor_1xc4x_1919",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitRow_1xc4x_1924",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitGutter_1xc4x_1942",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_textUnitGutterButton_1xc4x_1953",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.466667 0.478431 0.509804 / 0.16)",
+      "border": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitLine_1xc4x_2012",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitTextAreaWrap_1xc4x_2156",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "TEXTAREA",
+      "class": "_pageTextArea_1xc4x_1902 _textUnitTextArea_1xc4x_2156",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_resizeHandleRight_1xc4x_3921",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_canvasZoomControl_1xc4x_1011 _pageReadingControl_1xc4x_1109",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.78)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_noteToolbarActions_1xc4x_1141",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_modePill_1xc4x_25 ",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgb(15, 15, 16)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_modePill_1xc4x_25 ",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgb(15, 15, 16)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_iconBtn_1xc4x_24",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgb(15, 15, 16)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1xc4x_1028",
+      "color": "rgb(245, 245, 245)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "rgb(37, 99, 235)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1xc4x_1028",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1xc4x_1028",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomReset_1xc4x_1029 _trigger_12g13_1",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomReset_1xc4x_1029",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1xc4x_1028",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "OUTPUT",
+      "class": "_pageReadingPercent_1xc4x_1198",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1xc4x_1028",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_contentGroupLauncher_1xc4x_284",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.94)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    }
+  ],
+  "counts": {
+    "passed": 0,
+    "failed": 0,
+    "overlays": 0,
+    "inspectionSamples": 0,
+    "nestedBorders": 0,
+    "hairlineSeparators": 0,
+    "forcedHoverTargets": 0
+  }
+}

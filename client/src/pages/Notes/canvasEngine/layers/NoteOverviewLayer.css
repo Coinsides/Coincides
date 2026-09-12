@@ -5,7 +5,7 @@
   min-width: 0;
   min-height: 240px;
   height: calc(100dvh - 80px);
-  background: var(--bg-secondary);
+  background: var(--sk-desk, var(--bg-secondary));
   color: var(--text-primary);
 }
 .noteOverview:focus, .noteOverview:focus-visible { outline: none; }
@@ -54,7 +54,7 @@
   position: relative;
   overflow: hidden;
   outline: 1px solid var(--border-default);
-  background: var(--page-frame-background, var(--bg-primary));
+  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
   pointer-events: none;
   user-select: none;
 }

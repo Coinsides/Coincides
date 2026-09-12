@@ -414,7 +414,7 @@ test('PUT /api/notes/:id keeps status plus title in one mixed patch response', a
   });
 });
 
-test('PUT /api/notes/:id handler remains byte-for-byte unchanged apart from line endings', () => {
+test('PUT /api/notes/:id handler matches the B1a skin-aware baseline apart from line endings', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
   const start = routeSource.indexOf("router.put('/:id'");
@@ -425,6 +425,6 @@ test('PUT /api/notes/:id handler remains byte-for-byte unchanged apart from line
 
   assert.equal(
     createHash('sha256').update(putRoute).digest('hex'),
-    '6140c7351e061a18a6db23753c98ec3c7bbf146e1c97ddacf88b658387b23c61',
+    '69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e',
   );
 });

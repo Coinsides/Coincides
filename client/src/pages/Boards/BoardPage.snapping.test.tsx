@@ -6,7 +6,10 @@ import api, { BOARD_PATH, detail, resetSample, seedLayer, seedMember, seedVisual
 import type { BoardMember, BoardVisual } from './boardTypes';
 
 // Real board, geometry writers and command history; only transport is in memory.
-vi.mock('@/services/api', async () => ({ default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default,
+}));
 function openBoard() {
   return render(<MemoryRouter initialEntries={[BOARD_PATH]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>

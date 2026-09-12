@@ -1,0 +1,546 @@
+{
+  "status": "passed",
+  "syntheticOnly": true,
+  "persistenceCoverage": false,
+  "browser": null,
+  "assertions": [
+    {
+      "name": "Router reaches /notes/d2-existing",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /notes/d2-existing",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves default",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Nine CSS tokens injected into current runtime",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves quiet-ink",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Sidebar stays unchanged in quiet-ink",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Title stays system font in quiet-ink",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves warm-paper",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Sidebar stays unchanged in warm-paper",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Title stays system font in warm-paper",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves workbench",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Sidebar stays unchanged in workbench",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Title stays system font in workbench",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves default",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Sidebar stays unchanged in default",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Title stays system font in default",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves default",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /settings",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /notes/d2-existing",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves warm-paper",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /projects",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /notes/d2-existing",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves workbench",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves quiet-ink",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves quiet-ink",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves workbench",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /projects",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /notes/d2-existing",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves warm-paper",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /settings",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Router reaches /notes/d2-existing",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Paper resolves warm-paper",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Advanced single token persisted and applied",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Print uses composed paper and ink",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "No failed requests or save-error toasts",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "failures": [],
+        "errorToasts": []
+      }
+    },
+    {
+      "name": "Skin never changes content, placements or typography",
+      "pass": true,
+      "detail": {
+        "blocks": 3
+      }
+    },
+    {
+      "name": "No browser runtime exceptions",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "borders": [],
+  "screenshots": [
+    "01-default-full.png",
+    "02-quiet-ink-full.png",
+    "02-warm-paper-full.png",
+    "02-workbench-full.png",
+    "02-default-full.png",
+    "03-global-warm.png",
+    "04-project-workbench.png",
+    "05-paper-refresh.png",
+    "06-clear-inherits.png",
+    "07-advanced.png",
+    "08-overridden-paper.png",
+    "09-print-preview.png"
+  ],
+  "errors": [],
+  "callbacks": [],
+  "requestDiagnostics": {
+    "requests": [
+      {
+        "method": "get",
+        "url": "/notes/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/blocks",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/templates?status=active",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/courses",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/tags",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/content-groups?course_id=d2-project&note_id=d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/group-folders?course_id=d2-project&note_id=d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/canvas-objects/coordinate-contract",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/annotation-truths/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/purposes",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/boards/text-ranges/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/canvas-objects/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/tags",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/metadata",
+        "payload": null
+      },
+      {
+        "method": "post",
+        "url": "/source-anchors/generate",
+        "payload": {
+          "course_id": "d2-project",
+          "target_type": "note_block"
+        }
+      },
+      {
+        "method": "get",
+        "url": "/courses/d2-project/summary",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/source-anchors?course_id=d2-project",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/tags",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/metadata",
+        "payload": null
+      },
+      {
+        "method": "put",
+        "url": "/notes/d2-existing",
+        "payload": {
+          "skin": null
+        }
+      },
+      {
+        "method": "get",
+        "url": "/notes?course_id=d2-project&status=active",
+        "payload": null
+      },
+      {
+        "method": "put",
+        "url": "/courses/d2-project",
+        "payload": {
+          "name": "D2 synthetic project",
+          "color": "#756a5c",
+          "description": "Synthetic browser evidence only",
+          "skin": null
+        }
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/blocks",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/templates?status=active",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/content-groups?course_id=d2-project&note_id=d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/group-folders?course_id=d2-project&note_id=d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/canvas-objects/coordinate-contract",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/annotation-truths/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/purposes",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/boards/text-ranges/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/canvas-objects/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/tags",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/metadata",
+        "payload": null
+      },
+      {
+        "method": "post",
+        "url": "/source-anchors/generate",
+        "payload": {
+          "course_id": "d2-project",
+          "target_type": "note_block"
+        }
+      },
+      {
+        "method": "get",
+        "url": "/courses/d2-project/summary",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/source-anchors?course_id=d2-project",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/settings/providers",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/settings/agent-memories",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/embedding/status",
+        "payload": null
+      },
+      {
+        "method": "put",
+        "url": "/settings",
+        "payload": {
+          "settings": {
+            "skin": {
+              "preset": "warm-paper",
+              "overrides": {
+                "paper": "#EEE8DA"
+              }
+            }
+          }
+        }
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/blocks",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/templates?status=active",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/content-groups?course_id=d2-project&note_id=d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/group-folders?course_id=d2-project&note_id=d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/canvas-objects/coordinate-contract",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/annotation-truths/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/purposes",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/boards/text-ranges/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/canvas-objects/by-note/d2-existing",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/tags",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/notes/d2-existing/metadata",
+        "payload": null
+      },
+      {
+        "method": "post",
+        "url": "/source-anchors/generate",
+        "payload": {
+          "course_id": "d2-project",
+          "target_type": "note_block"
+        }
+      },
+      {
+        "method": "get",
+        "url": "/courses/d2-project/summary",
+        "payload": null
+      },
+      {
+        "method": "get",
+        "url": "/source-anchors?course_id=d2-project",
+        "payload": null
+      }
+    ],
+    "failures": [],
+    "errorToasts": []
+  },
+  "persistence": {
+    "global": {
+      "preset": "warm-paper",
+      "overrides": {
+        "paper": "#EEE8DA"
+      }
+    },
+    "project": null,
+    "paper": null
+  },
+  "counts": {
+    "passed": 37,
+    "failed": 0,
+    "overlays": 0,
+    "inspectionSamples": 0,
+    "nestedBorders": 0,
+    "hairlineSeparators": 0,
+    "forcedHoverTargets": 0
+  }
+}

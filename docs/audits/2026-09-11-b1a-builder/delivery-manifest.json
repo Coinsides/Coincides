@@ -1,0 +1,552 @@
+{
+  "basis": "Explicit B1a ownership inventory and source snapshots, not git diff. Reconstructed bases are individually declared. Evidence files and handoff Result are indexed separately.",
+  "files": [
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "88e30e93e9d9ea1c8a3e0dc9dcf76de0c52363c48c26a435285a9772633571e8",
+      "afterSha256": "b12aba9930890a88a4bcc882be5af64dc946775c074fcf6aff4beb9462b606de",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "a264cfc00ee0a04d7a087733997e919d975b889269bf35058e1616982ab75593",
+      "afterSha256": "6e48f78a0d690942840ff47202cdc7c706a2be3ba03483cb4dd3ebaeac2ff62d",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/scripts/cFix1Smoke/mockApi.ts",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "006c6ed5c9a73541ea8b027b6f7c8c21b96699b1e774db7ed5d623c6b8ac2b15",
+      "afterSha256": "c12b4137940afaaaf26c4e00a219108f726e8dab6b00a85d7c9fa345a9220b2b",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "f98da5aacdf9fd70f98ea757b46010b73f328eb48ba923cec454ca9f39772479",
+      "afterSha256": "9421ea41df273b5adb8b4182adda1a20fbc22abf5d153beca15c549f179004b8",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/scripts/pageReadingSmoke/mockApi.ts",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "6fa2b53c22563a4d9a0d5295b7f81bc4d4ff774070f418fbd64da08f3f006f7e",
+      "afterSha256": "b46c2ed41ba9c0fd5de582508e8cfdad9e96f98303c5827fd783311f49af6a1b",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/scripts/paperInkSmoke/inkMockApi.ts",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "bf94496eee6029fff6cda211d5f38bea9bdb3864cc6c8b07adcdcffa73f5fe31",
+      "afterSha256": "438b55ba202cd87ec190a6c5279009a7b081031d2630d371a262da27b17cb67c",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.test.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/review/client/src/components/CourseModal/CourseModal.test.tsx",
+      "basis": "captured before review fix",
+      "change": "modified",
+      "beforeSha256": "ac54a425dce37132a3fb3c524b85fb4b174e3e15983c89e3e03e93baa0ed5c8f",
+      "afterSha256": "cb50e354bc776628fd5b343e95c47927b91cf00c5fd20725e2d8f763375256f4",
+      "addedLines": 37,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/components/CourseModal/CourseModal.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "73f205ae3e23450f9c64b8bc83263864da1edb6d9a105e3c8f686aa067dc23ac",
+      "afterSha256": "56eb668c090e6d7d3f2b03986a492d12a7a94ba0a42484dd36d24635f0d4dcc8",
+      "addedLines": 17,
+      "removedLines": 7
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.module.css",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "c883383b077da8b812d350960eb30e4855c54a9e2821ebacf55b51884bbaaad0",
+      "addedLines": 15,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.tsx",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "e38db0e46c5a9041a4018aad5225f9408cf513fae7565b78f2ef17ef37c918c8",
+      "addedLines": 50,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.test.tsx",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "455d44628e030db3e4bbdb33e2f6f99cc1c14f5044cd9e9d6d7040236423539a",
+      "addedLines": 38,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.tsx",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "e6068198322140c180bca31503cf489fff7c315529ab9d36dc0b4b6fab1a1e8b",
+      "addedLines": 34,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "88ac5109ab573974183628a08819fc6b9c6635f751c2b072bd5ea0d2c8c97c3c",
+      "afterSha256": "796b849d05c98d26c6b995c63d16b395937f381f1d967d3baafbbef67455cdad",
+      "addedLines": 5,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Courses/CourseDetail.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Courses/CourseDetail.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "ceafd4b880b537bf559d919a209c3fbd36eab23480c480a6d582c2ab5a9d68ba",
+      "afterSha256": "eb2efb3dd22024d7b003cf9dc7fb95c1d02d3e5c28016961e14272064e379b7c",
+      "addedLines": 1,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/annotationColorService.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/annotationColorService.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "468b4163e952cc23695b0bf076d58e2b53376e5ef5ab837b1cb78eeb5306decf",
+      "afterSha256": "dc68085df6697582700a3c0077e6a1040f647edf1a112cb7912674e65086e345",
+      "addedLines": 24,
+      "removedLines": 24
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/freehandService.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/freehandService.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "6d94a646985fce2242074b6bd00f3e895934ffb04fc7bcebb43a28b3d2ab4fe7",
+      "afterSha256": "c20bb975bc49d8064419770edf09bbff106d79308980dded0dec75abef162d0b",
+      "addedLines": 1,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "bdbb24c135adf2f970e5424bd2f8c96bd08e07ce0f04d106eaec41f7a953410d",
+      "addedLines": 221,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "a631e7312b8f02b1038500c072754bd85e858b9b86312f752732ac1ac03176b7",
+      "afterSha256": "bc6105001f77c5a69e6dfe59bd3974d301d6fa964c05f9c6efca68f16f5ad734",
+      "addedLines": 89,
+      "removedLines": 21
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "62a803a871c42f998bf04f3f89d3a95b68e1c4b517b41a84f4e6d4f6e009b1ff",
+      "afterSha256": "bdfad0906f20327c26e2f0e33ed19422e3538a15d45afe58228d6ba4b4c32b6f",
+      "addedLines": 5,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "4d19ef7fe4d5dcec880ae0dbb001fb531eba9a3059aa2052df1bbcb746b2b410",
+      "addedLines": 130,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "e6050f7b593eb05adccd0c2925c147ae8fb3ea82536e7115a03dc42400ecbcaa",
+      "addedLines": 29,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "a235818b0cacf68a8fb2667f876fbc5f1ecaea03ef23b3eb7846eff7ae05dbee",
+      "afterSha256": "779f7d1f83e0fca3d885befe93e5c99cf33f12cbb1f2bfbfe8c2417a5a159e64",
+      "addedLines": 4,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "a5e820951f02cc01fbb09b3bd74f3e0009371373656a732cfd3f7c983715621d",
+      "afterSha256": "74ce9e1aaf2bd0d5602ef04462d6f8e5fba26b90b0bbea44bb03e447408af880",
+      "addedLines": 8,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "b3de6f24470955ad2aaa60bb2f6a0b698edf8513721016e6f7f9c3f31124d64d",
+      "afterSha256": "b47a2be578abee40508ad0550c7391de73a56b46d4c1b70d99458c826d11c8d5",
+      "addedLines": 2,
+      "removedLines": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "4fc8cff62d0f176e21ab53ad3bb8e98623d72cb679d2238984f109a937c9a3e0",
+      "afterSha256": "1edca43a5491bd868ff604d7577cdcfba9d1a0a69136649160645132317cfdfd",
+      "addedLines": 2,
+      "removedLines": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.css",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.css",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "76f3f727adc8ba93f4de1a2f22145edfaa91fcf5dc2d38faf5995b27b7917331",
+      "afterSha256": "e276f4471c86697ce08bd28bfa5b0d0248320d099d23b39ff9799299a299ea26",
+      "addedLines": 4,
+      "removedLines": 10
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx",
+      "basis": "reconstructed by reversing the five exact B1a print integration edits in this script",
+      "change": "modified",
+      "beforeSha256": "1fb539780a4363cf2949726413cde63fb2db7a73f93e28d2d46a559bc598e97c",
+      "afterSha256": "1926facf44160ed93a7e130bfb435275a51af2d0e91900b553707d4a78443ad6",
+      "addedLines": 5,
+      "removedLines": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "3d217881a04e1bfaafa052cde58bbc510b2e37894aab4e290fba362001220635",
+      "afterSha256": "581e9f3eb42a730a3041b9640adda0e32d2ef2c0be47c86873fc426d1d9ef1db",
+      "addedLines": 1,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "fd879234f66e3b15eead10b51ece880a2da6cb8d7c07fdba8f54522052c70cb5",
+      "afterSha256": "125fdbe55e2bbe5ce87b55201c93416f6d291429dae37c678ccbe9fc2f3355d9",
+      "addedLines": 1,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "b2923159b5211371aa25478ffa5d917570f6ee4d05a8a8dd7f62bd5222f10acb",
+      "afterSha256": "f5bd57aa88a2ad72a776137c79d7960193841d17a3dea61aa61cce138261ecdf",
+      "addedLines": 1,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "4aeb80a4d8037e0c354cb7a434fb986df02a5de98d9a14b49a8e5e577cc331c8",
+      "afterSha256": "65a239a886b2ad4c73744bd813d852ad41a07e8043c341e2d6cdd68ff246a2a2",
+      "addedLines": 7,
+      "removedLines": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/panels/contentGroupRailShellModel.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/canvasEngine/panels/contentGroupRailShellModel.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "9d21fbfd06d2fe60246db76b3de9fd46a20bd6744f0071f783516fbc39f25c24",
+      "afterSha256": "51325bcd201fc5aa9c7acc3576ac88be37eb8724ea6b4b99cc52c556d0fe296b",
+      "addedLines": 7,
+      "removedLines": 7
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "c97a83ce709f9fa7cf114033d527fd3e61427c71f2ad55a28bba7fc4b948118a",
+      "addedLines": 14,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinDefaults.css",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "7d9da280e063507b9bf81bc6fee0edce183d1e889d2dfe7f88273927e0a24ac6",
+      "addedLines": 78,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "57ef39e0359e6d43e1ec9f4baf71301ac4169deab75f9beabd88099fe78aed98",
+      "addedLines": 57,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "fdebc1f58eedb8be235afaa6002af7c35cd7714531d980cb911d30b675e0b91f",
+      "addedLines": 128,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/client/src/pages/Notes/NoteDetail.module.css",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "ac3890a8c8c0077816a2b6a04f5fb2a6e52a85f0576342d9a4487173d49b8d84",
+      "afterSha256": "34d1b96289f3f93689f742b2c4ff50f343678a7577f3fb5d72a8de3e1a7d5b0f",
+      "addedLines": 97,
+      "removedLines": 87
+    },
+    {
+      "path": "client/src/pages/Settings/AppearanceSection.tsx",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "30a241275c439a82c7446970a64d49e72c5377f98ab35a0a70ab0a8b77675c9d",
+      "addedLines": 21,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/root/client/src/pages/Settings/Settings.tsx",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "5c79d4964c7e4e82d1b753df6c47d179588719e3b08db1ffad75790ca20b868b",
+      "afterSha256": "513f49a3ac873e1f4b247270ede83e2c10ebd4e47e8f19f0c4563e8c5c4bbad4",
+      "addedLines": 4,
+      "removedLines": 1
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "d4039237ba38387fad6179ec383b06d02d6b262a0d8ea69369ce3a45e4335e2c",
+      "addedLines": 57,
+      "removedLines": 0
+    },
+    {
+      "path": "client/src/styles/skinPresets.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "4abb37aee636d6b4c3a87dcfe5bcf36fe4c82ca4ab32ac243bcbb46c14b993c6",
+      "addedLines": 37,
+      "removedLines": 0
+    },
+    {
+      "path": "docs/audits/2026-09-11-d2-builder/browser-fixture.tsx",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline/reconstructed/docs/audits/2026-09-11-d2-builder/browser-fixture.tsx",
+      "basis": "reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json",
+      "change": "modified",
+      "beforeSha256": "45f977dc60e88c8edf0c46e125338662fca871a90a5411a4145ed5f48828e7f2",
+      "afterSha256": "106a6e9caf118d513311959ab1588e211705b646ac03a34bb926b3cc18284a17",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "server/src/__tests__/v13PaperSkin.test.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "92ee1904e90790d630c1b525d78cf142db4196c03e9435ec26bb4de0c8ea5d0d",
+      "addedLines": 143,
+      "removedLines": 0
+    },
+    {
+      "path": "server/src/__tests__/v2NotesLifecycle.test.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/server/src/__tests__/v2NotesLifecycle.test.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "0dfbacca45e0d0cc1748125cb7afdbdbc2cee6a727e168a0e13e7255326ad1d5",
+      "afterSha256": "c712a065e26a3b06a0d1f0da29c994069a83820108795e337c2b957d84dba8c6",
+      "addedLines": 2,
+      "removedLines": 2
+    },
+    {
+      "path": "server/src/db/migrations/067_v13_paper_skin.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "80d1f4bed67efcf1dbd8594bea23258db051eb73a7758202d30b543ad2911613",
+      "addedLines": 12,
+      "removedLines": 0
+    },
+    {
+      "path": "server/src/db/schema.sql",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/server/src/db/schema.sql",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "cb6fffe2c5a84ef271c2cf110bbcfcb039adc46e1b7c181853e7d6a27d7695a6",
+      "afterSha256": "60f0e1ea673b9cec5090084a0246f89fbf69cfee4c59faf2125bde8de9e45d2c",
+      "addedLines": 2,
+      "removedLines": 1
+    },
+    {
+      "path": "server/src/routes/courses.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/server/src/routes/courses.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "794d58ca07d5ead44f581da811cedd9cba319c8187fc0a4eed6bad4c76f05c66",
+      "afterSha256": "21217be0cfbf24506e632a06c0191caad14e252db40787610afbd6fea7857c02",
+      "addedLines": 11,
+      "removedLines": 8
+    },
+    {
+      "path": "server/src/routes/notes.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/server/src/routes/notes.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "7f2a4d1fe201f9c8c3d8aef2ab5aaa264e0f08643cd3efe8a1399c509e3f7784",
+      "afterSha256": "fc8d8b8c44e61f15df932d3cd208d6e1c2410ff00ccbb656dcbfc1d796ede53e",
+      "addedLines": 9,
+      "removedLines": 2
+    },
+    {
+      "path": "server/src/services/courseCards.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/server/src/services/courseCards.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "d15f480f93d30703cd5801d4186d5472aff7927422393acc51ad903414f61124",
+      "afterSha256": "81a9e6c3cd68b5b97042deea45e69d447b1e95e7972f3dc2d61d72869dd3fd30",
+      "addedLines": 2,
+      "removedLines": 1
+    },
+    {
+      "path": "server/src/services/skin.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "c770b45b2df7adccd6655a0e2063ac645bdced6880c76b0d2ebde9dcd797261a",
+      "addedLines": 36,
+      "removedLines": 0
+    },
+    {
+      "path": "server/src/validators/index.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/server/src/validators/index.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "91780a11969ecd9a297341071cd49982727f312ea6242c93a690674959fcd210",
+      "afterSha256": "96ee1da9d8544f9ab1a09433fedea4be1478302968d5628ca1557f52b44d78dd",
+      "addedLines": 11,
+      "removedLines": 5
+    },
+    {
+      "path": "server/src/validators/skin.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "b57dbbe4b9b0d1e56ff508d488b694539f35d3d8db03e7a8a7067a036ce6bf08",
+      "addedLines": 19,
+      "removedLines": 0
+    },
+    {
+      "path": "shared/types/index.ts",
+      "before": "docs/audits/2026-09-11-b1a-builder/baseline-code/shared/types/index.ts",
+      "basis": "captured before implementation",
+      "change": "modified",
+      "beforeSha256": "55ce66095f51e434f5768490f877c45507db56268875c74a8a4c0add0cf61d5d",
+      "afterSha256": "1f3c69d6bab346a138cf860b291b9c4124e5accc0ffd435afb1a5fc3b6a94c4d",
+      "addedLines": 9,
+      "removedLines": 4
+    },
+    {
+      "path": "shared/types/skin.ts",
+      "before": null,
+      "basis": "new B1a file",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "8061bfbaff6b6775a335fc3a8699d9dd15aaafdaa015f9842d8818fa79ee386c",
+      "addedLines": 15,
+      "removedLines": 0
+    }
+  ],
+  "totals": {
+    "files": 54,
+    "added": 19,
+    "modified": 35,
+    "addedLines": 1509,
+    "removedLines": 196
+  }
+}

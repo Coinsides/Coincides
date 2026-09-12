@@ -14,7 +14,10 @@ import type { BoardDetail, BoardMember, MountBoardTextRangeInput } from './board
 // Only HTTP and the native clipboard are simulated. The copy hook, toolbar,
 // board component, write queue and repository all execute production code.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: http,
+}));
 
 const selected = {
   blockId: 'source-block', textFlowId: 'textflow-source-block', textUnitId: 'source-unit',

@@ -7,7 +7,10 @@ import type { BoardDetail, BoardMember, BoardVisual } from './boardTypes';
 // Production page, useBoard and repository, with synthetic memory-only transport.
 // Unknown requests throw: this test never starts or contacts an application server.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: http,
+}));
 
 const date = '2026-09-09T12:00:00.000Z';
 const path = '/boards/chalk-board';

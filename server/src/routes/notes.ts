@@ -34,6 +34,7 @@ import {
 import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
 import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
 import { createNoteMetadataRouter } from './noteMetadata.js';
+import { mergeNoteSkin } from '../services/skin.js';
 
 export { hydrateNote };
 
@@ -117,7 +118,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.title,
       data.description || null,
       data.page_format,
-      stringifyJson(data.metadata, {}),
+      stringifyJson(mergeNoteSkin({}, data.metadata, data.skin), {}),
       operationBatchId,
       now,
       now
@@ -153,7 +154,13 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
     if (data.page_format !== undefined) { fields.push('page_format = ?'); values.push(data.page_format); }
-    if (data.metadata !== undefined) { fields.push('metadata = ?'); values.push(stringifyJson(data.metadata, {})); }
+    if (data.metadata !== undefined || data.skin !== undefined) {
+      const current = getDb().prepare('SELECT metadata FROM notes WHERE id = ? AND user_id = ?')
+        .get(noteId, req.userId!) as { metadata: string };
+      const metadata = mergeNoteSkin(JSON.parse(current.metadata || '{}'), data.metadata, data.skin);
+      fields.push('metadata = ?');
+      values.push(stringifyJson(metadata, {}));
+    }
     if (data.status !== undefined) {
       fields.push('status = ?');
       values.push(data.status);

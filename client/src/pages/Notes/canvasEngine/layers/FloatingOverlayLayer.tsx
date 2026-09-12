@@ -1,6 +1,7 @@
 import { type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import styles from '../../NoteDetail.module.css';
+import { usePaperSkin } from '../PaperSkinContext';
 
 interface FloatingOverlayLayerProps {
   children: ReactNode;
@@ -17,13 +18,15 @@ export function FloatingOverlayLayer({
   portalClassName,
   portalStyle,
 }: FloatingOverlayLayerProps) {
+  const skin = usePaperSkin();
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
     <div
       className={[styles.floatingOverlayPortal, portalClassName].filter(Boolean).join(' ')}
       data-canvas-layer="floating-overlay"
-      style={portalStyle}
+      data-note-skin-preset={skin?.preset}
+      style={{ ...skin?.style, ...portalStyle }}
     >
       {placement === 'free' ? (
         children

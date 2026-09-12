@@ -196,6 +196,7 @@ const api = axios.create({ adapter: async (config) => {
     else if (method === 'PUT' && note) { Object.assign(note, input); data = note; }
     else if (method === 'GET' && url === '/notes') data = state.notes;
     else if (method === 'GET' && url === '/courses') data = [{ id: 'open-smoke-project', name: 'Synthetic project' }];
+    else if (method === 'GET' && url === '/courses/open-smoke-project/summary') data = { course: { id: 'open-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };
     else if (method === 'GET' && url === '/items') data = state.items;
     else if (method === 'GET' && url === '/purposes') data = { purposes: [{ id: state.board.board.soul_id,
       title: 'Open note verification board', project_id: null, course_id: null, note_id: null, status: 'active',

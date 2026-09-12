@@ -1,0 +1,166 @@
+{
+  "author": "codex builder",
+  "workOrder": "2026-09-11-v13-5-b1a-fix1-order.md",
+  "recordedAt": "2026-09-12T02:22:55.411Z",
+  "before": {
+    "command": "npm run test:unit -- --maxWorkers=4 --minWorkers=1 --reporter=default --reporter=json --outputFile=../.codex-tmp/b1a-fix1/client-before.json",
+    "exitCode": 1,
+    "totalFiles": 138,
+    "passedFiles": 129,
+    "failedSuites": 9,
+    "passedTests": 1410,
+    "durationSeconds": 43.89,
+    "failedFiles": [
+      {
+        "file": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/BoardPage.item.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/BoardPage.layers.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/BoardPage.selection.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/BoardPage.snapping.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/BoardPage.tools.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      },
+      {
+        "file": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+        "error": "[vitest] No \"getToken\" export is defined on the \"@/services/api\" mock. Did you forget to return it from \"vi.mock\"?",
+        "collectedTests": 0
+      }
+    ]
+  },
+  "firstAfter": {
+    "command": "npm run verify:v2-bn8-runtime",
+    "environment": {
+      "VITEST_MAX_THREADS": "4",
+      "VITEST_MIN_THREADS": "1"
+    },
+    "exitCode": 1,
+    "passedFiles": 136,
+    "failedFiles": 2,
+    "passedTests": 1483,
+    "failedTests": 2,
+    "namedExportSuiteFailures": 0,
+    "failures": [
+      {
+        "file": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+        "kind": "5000ms timeout"
+      },
+      {
+        "file": "client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx",
+        "kind": "title assertion"
+      }
+    ]
+  },
+  "final": {
+    "command": "npm run verify:v2-bn8-runtime",
+    "environment": {
+      "VITEST_MAX_THREADS": "4",
+      "VITEST_MIN_THREADS": "1",
+      "VITEST_MAX_FORKS": "4",
+      "VITEST_MIN_FORKS": "1"
+    },
+    "exitCode": 0,
+    "passedFiles": 138,
+    "totalFiles": 138,
+    "passedTests": 1485,
+    "totalTests": 1485,
+    "skippedTests": 0,
+    "clientDurationSeconds": 43.49,
+    "restoredTests": 75,
+    "toolFaceTests": {
+      "registry": 5,
+      "manifest": 10,
+      "parity": 10
+    },
+    "modelContractGroups": 60,
+    "clientBuild": "passed",
+    "serverBuild": "passed",
+    "staticGates": "passed",
+    "performanceSmoke": "passed",
+    "docsCheck": "passed",
+    "diffCheck": "passed",
+    "changedFileSecretScan": "passed"
+  },
+  "scopeCheck": {
+    "sourceRoots": [
+      "client/src",
+      "client/scripts",
+      "client/test",
+      "server/src",
+      "shared"
+    ],
+    "baselineFiles": 970,
+    "baselineSha256": "2dba5c823fb33f542c3960406063070b922e8ece249a7e09bcb378c113547f01",
+    "changedFiles": [
+      "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "client/src/pages/Boards/BoardPage.layers.test.tsx",
+      "client/src/pages/Boards/BoardPage.selection.test.tsx",
+      "client/src/pages/Boards/BoardPage.snapping.test.tsx",
+      "client/src/pages/Boards/BoardPage.tools.test.tsx",
+      "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+      "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx"
+    ],
+    "unchangedFiles": 961,
+    "addedSourceFiles": 0,
+    "removedSourceFiles": 0,
+    "nonTestChanges": 0
+  },
+  "logs": [
+    {
+      "file": "client-before.txt",
+      "exitCode": 1,
+      "sha256": "43d18dceaaa0ff4a301109a80630fadbc4b39b606e581d09f1930d7735d2b94e"
+    },
+    {
+      "file": "runtime-thread-limit-only.txt",
+      "exitCode": 1,
+      "sha256": "ec4274117be2fcae782c9255ada7a6e2f52f4664c3a7c14bdb9da48a4ad417f9"
+    },
+    {
+      "file": "runtime-4-workers.txt",
+      "exitCode": 0,
+      "sha256": "2f6ca6a8c1c4216c1e4c0c8b8033a4a5d6d2f68fb673b7b5038604254e515851"
+    }
+  ],
+  "documentationFinalization": {
+    "docsIndexGeneratorChanged": [
+      "docs/agent-ops/INDEX.md"
+    ],
+    "docsCheckExitCode": 0,
+    "diffCheckExitCode": 0,
+    "changedFileSecretScanExitCode": 0,
+    "sourceFingerprintRechecked": true
+  }
+}

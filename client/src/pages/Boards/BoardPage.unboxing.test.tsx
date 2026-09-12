@@ -9,7 +9,7 @@ import type { Note, NoteBlock } from '../Notes/canvasEngine/runtimeDataTypes';
 import type { PageFrameCollectionModel } from '../Notes/canvasEngine/types';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', () => ({ default: http, getToken: () => null, setToken: vi.fn() }));
 // Only HTTP is replaced. BoardPage, modal, full-page host, runtime, adapter and
 // ItemSummary reader run together against the same disposable in-memory state.
 const at = '2026-09-09T12:00:00.000Z';
@@ -112,6 +112,10 @@ beforeEach(() => {
     if (url === '/boards/board') return response(board);
     if (url === '/boards/board/viewport-bookmarks') return response({ bookmarks: [] });
     if (url === '/courses') return response(projects);
+    if (url.startsWith('/courses/')) {
+      const project = projects.find(({ id }) => url === `/courses/${id}/summary`);
+      if (project) return response({ course: { ...project, skin: null }, goals: [], decks: [], documents: [] });
+    }
     if (url === '/notes') return response(notes.filter((note) => !config?.params?.course_id || note.course_id === config.params.course_id));
     if (url === '/items') return response([item]);
     if (url === '/purposes') return response({ purposes: [] });

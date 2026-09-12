@@ -1,0 +1,1635 @@
+{
+  "status": "after-fix census with separately labelled original pre-edit export observations",
+  "scope": "All client .ts/.tsx/.js/.jsx/.mts/.cts/.mjs/.cjs source files; exclude node_modules, dist, .vite and coverage",
+  "method": "TypeScript AST mock inventory; transpiled value-import graph; respect full test-local mocks; include literal dynamic imports conservatively",
+  "caveat": "Static reachability identifies imported consumers; full Vitest run determines actual execution. Runtime dynamic imports in uncalled branches may overapproximate.",
+  "sourceFileCount": 525,
+  "testFileCount": 138,
+  "mockCallCount": 110,
+  "mockedFileCount": 64,
+  "apiMockCount": 45,
+  "doMockCount": 0,
+  "nonliteralMockCount": 0,
+  "relativeApiMockCount": 0,
+  "manualMockFiles": [],
+  "classificationCounts": {
+    "no-real-named-api-consumer": 34,
+    "reachable-named-exports-present": 11
+  },
+  "beforeClassificationCounts": {
+    "no-real-named-api-consumer": 34,
+    "reachable-missing-named-exports": 9,
+    "reachable-named-exports-present": 2
+  },
+  "beforeEvidence": "Independent pre-edit TypeScript AST inventory observed all 45 factory export shapes (43 default-only, 2 default/getToken/setToken). The before graph reuses current value-import reachability; builder changed only the 9 api factories. Baseline execution independently reported these same 9 getToken suite failures.",
+  "browserHelpers": [
+    {
+      "file": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    },
+    {
+      "file": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    },
+    {
+      "file": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    },
+    {
+      "file": "client/scripts/cFix1Smoke/mockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    },
+    {
+      "file": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    },
+    {
+      "file": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    },
+    {
+      "file": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "exports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingApiExports": []
+    }
+  ],
+  "apiNamedConsumers": [
+    {
+      "file": "client/src/stores/agentStore.ts",
+      "imports": [
+        "default",
+        "getToken",
+        "API_BASE"
+      ]
+    },
+    {
+      "file": "client/src/stores/authStore.ts",
+      "imports": [
+        "default",
+        "getToken",
+        "setToken"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "file": "client/src/components/ReferenceTag/ReferenceTag.test.tsx",
+      "line": 6,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/AgentMemories/AgentMemories.test.tsx",
+      "line": 8,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/BoardNewNoteDialog.test.tsx",
+      "line": 6,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx",
+      "line": 18,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "line": 11,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "line": 10,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "line": 10,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.item.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.layers.test.tsx",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.layers.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+      "line": 10,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.selection.test.tsx",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.selection.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+      "line": 23,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.snapping.test.tsx",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.snapping.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+      "line": 10,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.tools.test.tsx",
+      "line": 8,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.tools.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "line": 12,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default",
+        "getToken",
+        "setToken"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default",
+          "getToken",
+          "setToken"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "reachable-named-exports-present"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+            "client/src/pages/Notes/NoteDetail.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardRelocatedVisual.test.tsx",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/boardRepository.test.ts",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+      "line": 17,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardViewportBookmarks.test.tsx",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Boards/useBoard.test.tsx",
+      "line": 12,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Courses/CourseDetail.test.tsx",
+      "line": 11,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/DailyBrief/DailyBrief.test.tsx",
+      "line": 10,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/GroupGallery/groupGalleryItemSummary.test.tsx",
+      "line": 12,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx",
+      "line": 13,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx",
+      "line": 11,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts",
+      "line": 11,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/genericPlacementContract.test.ts",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+      "line": 17,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "line": 13,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "line": 11,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "line": 45,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "line": 9,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default",
+        "getToken",
+        "setToken"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default",
+          "getToken",
+          "setToken"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "reachable-named-exports-present"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "line": 13,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx",
+      "line": 12,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+      "line": 20,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": true,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": true,
+      "reachesAuth": true,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [
+          "getToken",
+          "setToken"
+        ],
+        "classification": "reachable-missing-named-exports"
+      },
+      "afterEffectiveExports": [
+        "default",
+        "getToken",
+        "setToken",
+        "API_BASE"
+      ],
+      "missingConsumedExports": [],
+      "classification": "reachable-named-exports-present",
+      "consumers": [
+        {
+          "file": "client/src/stores/authStore.ts",
+          "imports": [
+            "default",
+            "getToken",
+            "setToken"
+          ],
+          "path": [
+            "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+            "client/src/pages/Boards/BoardPage.tsx",
+            "client/src/pages/Boards/BoardNoteModal.tsx",
+            "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+            "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+            "client/src/stores/authStore.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "line": 28,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx",
+      "line": 20,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "line": 24,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx",
+      "line": 12,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx",
+      "line": 19,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/purposeRetirement.test.ts",
+      "line": 7,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Settings/AgentMemoriesSection.test.tsx",
+      "line": 8,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Settings/ProvidersSection.test.tsx",
+      "line": 6,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/pages/Settings/Settings.test.tsx",
+      "line": 10,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    },
+    {
+      "file": "client/src/services/itemSummaryReader.test.ts",
+      "line": 6,
+      "call": "vi.mock",
+      "specifier": "@/services/api",
+      "target": "client/src/services/api.ts",
+      "importsOriginal": false,
+      "exports": [
+        "default"
+      ],
+      "reachesSkin": false,
+      "reachesAuth": false,
+      "reachesAgent": false,
+      "before": {
+        "exports": [
+          "default"
+        ],
+        "importsOriginal": false,
+        "missingConsumedExports": [],
+        "classification": "no-real-named-api-consumer"
+      },
+      "afterEffectiveExports": [
+        "default"
+      ],
+      "missingConsumedExports": [],
+      "classification": "no-real-named-api-consumer",
+      "consumers": []
+    }
+  ]
+}

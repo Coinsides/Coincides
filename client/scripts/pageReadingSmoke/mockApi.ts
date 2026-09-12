@@ -118,6 +118,7 @@ const api = axios.create({
     }
     if ((isPrintFixture || isOverviewFixture) && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
     else if (url === `/notes/${NOTE_ID}`) data = isOverviewFixture ? overviewSpecimen.note : isPrintFixture ? printSpecimen.note : fixtureNote;
+    else if (['/courses/page-reading-smoke-project/summary', '/courses/page-print-smoke-project/summary', '/courses/overview-smoke-project/summary', '/courses/tray-smoke-course/summary'].includes(url)) data = { course: { id: url.split('/')[2], name: 'Synthetic reading project', skin: null }, goals: [], decks: [], documents: [] };
     else if (url === `/notes/${NOTE_ID}/blocks`) data = isOverviewFixture ? overviewSpecimen.blocks : isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
     else if (url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
     else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isOverviewFixture ? overviewSpecimen.canvas : isPrintFixture ? printSpecimen.canvas : fixtureCanvas;

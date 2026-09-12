@@ -114,6 +114,7 @@ api.defaults.adapter = async (config) => {
   const blockMatch = path.match(/^\/note-blocks\/([^/]+)$/);
   if (path === '/canvas-objects/coordinate-contract' && method === 'get') data = { coordinate_contract: 'v2' };
   else if (path === '/courses' && method === 'get') data = [project];
+  else if (path === `/courses/${project.id}/summary` && method === 'get') data = { course: { ...project, skin: null }, goals: [], decks: [], documents: [] };
   else if (path === '/notes' && method === 'get') {
     const courseId = url.searchParams.get('course_id');
     const status = url.searchParams.get('status') || 'active';

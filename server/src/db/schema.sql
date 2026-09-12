@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS courses (
   weight INTEGER NOT NULL DEFAULT 2,
   description TEXT,
   semester TEXT,
+  skin TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

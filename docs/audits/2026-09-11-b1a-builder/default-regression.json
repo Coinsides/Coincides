@@ -1,0 +1,744 @@
+{
+  "status": "passed",
+  "syntheticOnly": true,
+  "persistenceCoverage": false,
+  "browser": null,
+  "assertions": [
+    {
+      "name": "Current runtime actually injects default skin variables",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "preset": "default",
+        "inline": "#101114",
+        "resolved": "#101114"
+      }
+    },
+    {
+      "name": "Default screenshot matches the pre-change fixture pixel for pixel",
+      "pass": true,
+      "detail": {
+        "baseline": "baseline-paper.png",
+        "current": "default-regression.png",
+        "width": 1440,
+        "height": 1100,
+        "pixels": 1584000,
+        "changedPixels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null,
+        "baselineSha256": "50c64c0298dac821ac3335747191134cc9f0df5a22ae65064b2df2ed2ecb611d",
+        "currentSha256": "50c64c0298dac821ac3335747191134cc9f0df5a22ae65064b2df2ed2ecb611d",
+        "pass": true
+      }
+    }
+  ],
+  "borders": [],
+  "screenshots": [
+    "default-regression.png"
+  ],
+  "errors": [],
+  "callbacks": [],
+  "pixelComparison": {
+    "baseline": "baseline-paper.png",
+    "current": "default-regression.png",
+    "width": 1440,
+    "height": 1100,
+    "pixels": 1584000,
+    "changedPixels": 0,
+    "maxChannelDelta": 0,
+    "bounds": null,
+    "baselineSha256": "50c64c0298dac821ac3335747191134cc9f0df5a22ae65064b2df2ed2ecb611d",
+    "currentSha256": "50c64c0298dac821ac3335747191134cc9f0df5a22ae65064b2df2ed2ecb611d",
+    "pass": true
+  },
+  "styles": [
+    {
+      "tag": "DIV",
+      "class": "_trayViewport_1thm9_293",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_contentGroupLauncher_1thm9_294 _trayToggle_1thm9_294",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.94)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "polyline",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_trayDocumentRow_1thm9_295",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_documentShell_1thm9_76 ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_templateWarning_1thm9_904",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(245, 158, 11, 0.12)",
+      "border": "rgb(245, 158, 11)"
+    },
+    {
+      "tag": "SECTION",
+      "class": "_writingSurface_1thm9_968 _pageReadingSurface_1thm9_1088   ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageReadingSpace_1thm9_1098",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageReadingHeaderBand_1thm9_1143",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgb(16, 17, 20)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "HEADER",
+      "class": "_header_7zpje_1",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "TEXTAREA",
+      "class": "_title_7zpje_9",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "TEXTAREA",
+      "class": "_description_7zpje_10",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_row_1avg1_1",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_add_1avg1_6",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_disclosure_1avg1_6",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageReadingPaper_1thm9_1136",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_blockList_1thm9_1078 _blockListPage_1thm9_1083 ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_wall_19q10_1",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "_line_19q10_11",
+      "color": "rgb(245, 245, 245)",
+      "bg": "color(srgb 0.466667 0.478431 0.509804 / 0.44)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_wall_19q10_1",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "_line_19q10_11",
+      "color": "rgb(245, 245, 245)",
+      "bg": "color(srgb 0.466667 0.478431 0.509804 / 0.44)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_paperInkLayer_1thm9_1182",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageFrameSlot_1thm9_4005 _pageFrameHeaderSlot_1thm9_4019",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.466667 0.478431 0.509804 / 0.82) color(srgb 0.466667 0.478431 0.509804 / 0.82) color(srgb 0.172549 0.176471 0.192157 / 0.42)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageFrameSlot_1thm9_4005 _pageFrameFooterSlot_1thm9_4023",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.34) color(srgb 0.466667 0.478431 0.509804 / 0.82) color(srgb 0.466667 0.478431 0.509804 / 0.82)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_pageFrameSlot_1thm9_4005 _pageFramePageNumberSlot_1thm9_4027",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.466667 0.478431 0.509804 / 0.82)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "color(srgb 0.466667 0.478431 0.509804 / 0.82)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.466667 0.478431 0.509804 / 0.82)"
+    },
+    {
+      "tag": "DIV",
+      "class": "",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "ARTICLE",
+      "class": "_block_1thm9_162 _blockBox_1thm9_1636     ",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "DIV",
+      "class": "",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitEditor_1thm9_1929",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitRow_1thm9_1934",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitGutter_1thm9_1952",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_textUnitGutterButton_1thm9_1963",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.466667 0.478431 0.509804 / 0.16)",
+      "border": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitLine_1thm9_2022",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_textUnitTextAreaWrap_1thm9_2166",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "TEXTAREA",
+      "class": "_pageTextArea_1thm9_1912 _textUnitTextArea_1thm9_2166",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_resizeHandleRight_1thm9_3931",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_canvasZoomControl_1thm9_1021 _pageReadingControl_1thm9_1119",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.78)"
+    },
+    {
+      "tag": "DIV",
+      "class": "_noteToolbarActions_1thm9_1151",
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_modePill_1thm9_35 ",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgb(15, 15, 16)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_modePill_1thm9_35 ",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgb(15, 15, 16)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "rect",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_iconBtn_1thm9_34",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgb(15, 15, 16)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "circle",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1thm9_1038",
+      "color": "rgb(245, 245, 245)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "rgb(37, 99, 235)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(245, 245, 245)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(245, 245, 245)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1thm9_1038",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1thm9_1038",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomReset_1thm9_1039 _trigger_12g13_1",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomReset_1thm9_1039",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1thm9_1038",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "OUTPUT",
+      "class": "_pageReadingPercent_1thm9_1208",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_canvasZoomButton_1thm9_1038",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.88)",
+      "border": "color(srgb 0.172549 0.176471 0.192157 / 0.76)"
+    },
+    {
+      "tag": "BUTTON",
+      "class": "_contentGroupLauncher_1thm9_294",
+      "color": "rgb(183, 184, 189)",
+      "bg": "color(srgb 0.0588235 0.0588235 0.0627451 / 0.94)",
+      "border": "rgb(44, 45, 49)"
+    },
+    {
+      "tag": "svg",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "path",
+      "class": {},
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    },
+    {
+      "tag": "SPAN",
+      "class": "",
+      "color": "rgb(183, 184, 189)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(183, 184, 189)"
+    }
+  ],
+  "counts": {
+    "passed": 2,
+    "failed": 0,
+    "overlays": 0,
+    "inspectionSamples": 0,
+    "nestedBorders": 0,
+    "hairlineSeparators": 0,
+    "forcedHoverTargets": 0
+  }
+}

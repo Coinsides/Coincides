@@ -8,7 +8,10 @@ import { BOARD_ID, BOARD_PATH, detail, resetSample, seedLayer, seedMember, seedV
 
 // Production BoardPage, rail, viewport animator, hook and repository; transport only is mocked.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: http,
+}));
 const date = '2026-09-11T12:00:00.000Z';
 const target = { x: -1357.25, y: 682.5, zoom: 0.375 };
 const initial = { x: 40, y: -20, zoom: 1.25 };

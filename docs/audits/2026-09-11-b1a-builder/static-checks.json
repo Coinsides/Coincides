@@ -1,0 +1,56 @@
+[
+  {
+    "name": "canvas-runtime-boundary",
+    "command": "node scripts/canvasRuntimeBoundaryCheck.mjs",
+    "cwd": "client",
+    "exitCode": 0
+  },
+  {
+    "name": "group-gallery-shell",
+    "command": "node scripts/groupGalleryShellContractCheck.mjs",
+    "cwd": "client",
+    "exitCode": 0
+  },
+  {
+    "name": "groups-rail-shell",
+    "command": "node scripts/groupsRailShellContractCheck.mjs",
+    "cwd": "client",
+    "exitCode": 0
+  },
+  {
+    "name": "single-editor-shell",
+    "command": "node scripts/singleEditorShellContractCheck.mjs",
+    "cwd": "client",
+    "exitCode": 0
+  },
+  {
+    "name": "source-experience-static",
+    "command": "node scripts/sourceExperienceContractCheck.mjs",
+    "cwd": "client",
+    "exitCode": 0
+  },
+  {
+    "name": "server-shared-runtime-import",
+    "command": "node scripts/check-server-shared-runtime-import.mjs",
+    "cwd": ".",
+    "exitCode": 0
+  },
+  {
+    "name": "docs-index",
+    "command": "node scripts/docs-index.mjs --check",
+    "cwd": ".",
+    "exitCode": 0
+  },
+  {
+    "name": "docs-inventory",
+    "command": "node scripts/docs-inventory.mjs --check",
+    "cwd": ".",
+    "exitCode": 0
+  },
+  {
+    "name": "glossary-shape-vs-capability",
+    "command": "node docs/agent-ops/current-state/glossary-shape-vs-capability.test.mjs",
+    "cwd": ".",
+    "exitCode": 0
+  }
+]

@@ -6,6 +6,7 @@ import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import AgentMemoriesSection from './AgentMemoriesSection';
 import ProvidersSection from './ProvidersSection';
+import AppearanceSection from './AppearanceSection';
 import styles from './Settings.module.css';
 
 const providerOptions = [
@@ -247,6 +248,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <AppearanceSection />
 
       {/* Agent */}
       <div className={styles.section}>

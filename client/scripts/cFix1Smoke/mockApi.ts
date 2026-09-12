@@ -38,6 +38,7 @@ const api = axios.create({
     }
     let data: unknown;
     if (method === 'GET' && url === '/templates') data = templates;
+    else if (method === 'GET' && url === '/courses/c-fix1-course/summary') data = { course: { id: 'c-fix1-course', name: 'Synthetic interaction course', skin: null }, goals: [], decks: [], documents: [] };
     else if (method === 'POST' && url === '/source-anchors/generate') data = {};
     else if (method === 'GET' && (emptyCatalogs.has(url) || url === `/purposes/by-note/${NOTE_ID}`)) data = [];
     else throw new Error(`Unmapped C fix 1 fixture request: ${method} ${url}`);

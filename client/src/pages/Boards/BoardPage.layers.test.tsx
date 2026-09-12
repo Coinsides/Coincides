@@ -6,7 +6,10 @@ import { BOARD_PATH, detail, resetSample, seedEdge, seedLayer, seedMember, seedV
 import type { BoardMember, BoardVisual } from './boardTypes';
 
 // Production page, repository and history; transport state is synthetic memory only.
-vi.mock('@/services/api', async () => ({ default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default,
+}));
 const noop = () => undefined;
 function openBoard() {
   return render(<MemoryRouter initialEntries={[BOARD_PATH]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

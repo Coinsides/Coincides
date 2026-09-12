@@ -12,6 +12,7 @@ import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
 import { usePageFrameWalls } from './usePageFrameWalls';
+import { useNoteSkin } from './useNoteSkin';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
@@ -93,6 +94,8 @@ export function useNoteCanvasRuntimeController() {
     whenIdle,
     trackPendingWrite,
     note,
+    saveSkin,
+    skinSaveError,
     sourceProjectionPolicy,
     coordinateContract,
     blocks,
@@ -196,6 +199,7 @@ export function useNoteCanvasRuntimeController() {
     zoom: pageReadingViewport?.zoom || 1, history: textHistoryHostRef,
     boundary: () => wallBoundaryRef.current(), save: savePageFrameWalls,
   });
+  const skin = useNoteSkin(note, saveSkin, skinSaveError);
   const pageFrameCollection = walls.collection;
   const persistedCanvasPlacements = walls.placements;
 
@@ -639,6 +643,7 @@ export function useNoteCanvasRuntimeController() {
   }, [saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
 
   return {
+    skin,
     dismissTransientUI,
     flushPendingSaves,
     refreshBoardTextRanges,

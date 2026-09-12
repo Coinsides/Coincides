@@ -5,7 +5,10 @@ import BoardPage from './BoardPage';
 import api, { BOARD_PATH, detail, events, resetSample, seedEdge, seedMember, seedVisual, writes } from '../../../scripts/boardToolsSmoke/mockApi';
 import type { BoardVisual } from './boardTypes';
 
-vi.mock('@/services/api', async () => ({ default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default,
+}));
 const noop = () => undefined;
 function openBoard() {
   return render(<MemoryRouter initialEntries={[BOARD_PATH]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

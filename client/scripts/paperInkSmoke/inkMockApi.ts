@@ -37,6 +37,7 @@ const api = axios.create({
     }
     let data: unknown;
     if (method === 'GET' && url === '/templates') data = templates;
+    else if (method === 'GET' && url === '/courses/paper-ink-smoke-course/summary') data = { course: { id: 'paper-ink-smoke-course', name: 'Synthetic paper ink', skin: null }, goals: [], decks: [], documents: [] };
     else if (method === 'GET' && url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
     else if (method === 'POST' && url === '/source-anchors/generate') data = {};
     else if (method === 'GET' && (emptyCatalogs.has(url)

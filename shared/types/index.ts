@@ -2,6 +2,9 @@
 // Coincides — Shared Type Definitions
 // ============================================================
 
+import type { SkinSelection } from './skin.js';
+export * from './skin.js';
+
 // --- Enums ---
 
 export enum TaskPriority {
@@ -136,6 +139,7 @@ export interface User {
 }
 
 export interface UserSettings {
+  skin?: SkinSelection | null;
   theme?: 'dark' | 'light';
   language?: 'en' | 'zh';
   agent_name?: string;
@@ -153,6 +157,7 @@ export interface AIProviderConfig {
 }
 
 export interface Course {
+  skin?: SkinSelection | null;
   id: string;
   user_id: string;
   name: string;

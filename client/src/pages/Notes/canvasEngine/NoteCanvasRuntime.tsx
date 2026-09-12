@@ -4,6 +4,7 @@ import { useNoteCanvasRuntimeController } from './hooks/useNoteCanvasRuntimeCont
 import { NoteChromeLayer } from './layers/NoteChromeLayer';
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './layers/NoteRuntimeDocumentLayer';
 import styles from '../NoteDetail.module.css';
+import { PaperSkinContext } from './PaperSkinContext';
 
 export interface NoteCanvasRuntimeHandle {
   dismissTransientUI: () => void;
@@ -13,7 +14,7 @@ export interface NoteCanvasRuntimeHandle {
 
 const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntime({ onRequestClose }, ref) {
   const { hostMode = 'page' } = useNoteCanvasRuntime();
-  const { layerProps, loading, loadError, note, dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
+  const { layerProps, loading, loadError, note, skin, dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
   const dismissTransientUI = useCallback(() => {
     documentRef.current?.resumeEditingForExit();
@@ -53,11 +54,15 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
   }
 
   return (
-    <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`} data-note-host-mode={hostMode}>
+    <PaperSkinContext.Provider value={skin}>
+    <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`} data-note-host-mode={hostMode}
+      data-note-skin-preset={skin.preset} style={skin.style}>
+      {skin.error && <div role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></div>}
       <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps}
         writingSurfaceProps={{ ...layerProps.documentLayerProps.writingSurfaceProps,
           noteTools: <NoteChromeLayer {...layerProps.chromeProps} /> }} />
     </div>
+    </PaperSkinContext.Provider>
   );
 });
 

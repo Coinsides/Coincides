@@ -5,15 +5,16 @@ import { documentTypographyToCssVars } from '../typographyProfileService';
 import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import './NotePrintLayer.css';
+import { usePaperSkin } from '../PaperSkinContext';
 
 export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
   | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts'
-  | 'documentTypographyProfile' | 'anchorsBySourceRef'>;
+  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & { skinStyle?: CSSProperties; skinPreset?: string };
 
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
-  return <div data-note-print-root="true" data-note-id={input.noteId}>
+  return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
     {input.noteCanvasRuntime.pageFrames.map((frame) => {
       const print = getPagePrintGeometry(frame);
       return <section
@@ -52,8 +53,9 @@ function PrintPages({ input }: { input: NotePrintInput }) {
 }
 
 export function NotePrintLayer(input: NotePrintInput) {
+  const skin = usePaperSkin();
   const latest = useRef(input);
-  latest.current = input;
+  latest.current = { ...input, skinStyle: skin?.style, skinPreset: skin?.preset };
   const snapshot = useRef<NotePrintInput | null>(null);
   const [printing, setPrinting] = useState<NotePrintInput | null>(null);
 

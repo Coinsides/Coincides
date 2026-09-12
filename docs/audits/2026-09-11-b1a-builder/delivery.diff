@@ -1,0 +1,2868 @@
+===================================================================
+--- a/client/scripts/boardOpenNoteSmoke/mockApi.ts	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/scripts/boardOpenNoteSmoke/mockApi.ts	B1a final working copy
+@@ -196,6 +196,7 @@
+     else if (method === 'PUT' && note) { Object.assign(note, input); data = note; }
+     else if (method === 'GET' && url === '/notes') data = state.notes;
+     else if (method === 'GET' && url === '/courses') data = [{ id: 'open-smoke-project', name: 'Synthetic project' }];
++    else if (method === 'GET' && url === '/courses/open-smoke-project/summary') data = { course: { id: 'open-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };
+     else if (method === 'GET' && url === '/items') data = state.items;
+     else if (method === 'GET' && url === '/purposes') data = { purposes: [{ id: state.board.board.soul_id,
+       title: 'Open note verification board', project_id: null, course_id: null, note_id: null, status: 'active',
+===================================================================
+--- a/client/scripts/boardTextRangeSmoke/mockApi.ts	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/scripts/boardTextRangeSmoke/mockApi.ts	B1a final working copy
+@@ -81,6 +81,7 @@
+   if (method === 'GET' && url === `/notes/${NOTE_ID}`) data = state.note;
+   else if (method === 'GET' && url === '/notes') data = [state.note];
+   else if (method === 'GET' && url === '/courses') data = [{ id: 'range-smoke-project', name: 'Synthetic project' }];
++  else if (method === 'GET' && url === '/courses/range-smoke-project/summary') data = { course: { id: 'range-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };
+   else if (method === 'GET' && url === '/items') data = [];
+   else if (method === 'GET' && url === '/purposes') data = { purposes: state.boards.map(({ board }) => ({
+     id: board.soul_id, title: `Question for ${board.title}`, project_id: null, course_id: null, note_id: null,
+===================================================================
+--- a/client/scripts/cFix1Smoke/mockApi.ts	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/scripts/cFix1Smoke/mockApi.ts	B1a final working copy
+@@ -38,6 +38,7 @@
+     }
+     let data: unknown;
+     if (method === 'GET' && url === '/templates') data = templates;
++    else if (method === 'GET' && url === '/courses/c-fix1-course/summary') data = { course: { id: 'c-fix1-course', name: 'Synthetic interaction course', skin: null }, goals: [], decks: [], documents: [] };
+     else if (method === 'POST' && url === '/source-anchors/generate') data = {};
+     else if (method === 'GET' && (emptyCatalogs.has(url) || url === `/purposes/by-note/${NOTE_ID}`)) data = [];
+     else throw new Error(`Unmapped C fix 1 fixture request: ${method} ${url}`);
+===================================================================
+--- a/client/scripts/pageFrameHealingSmoke/mockApi.ts	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/scripts/pageFrameHealingSmoke/mockApi.ts	B1a final working copy
+@@ -93,6 +93,7 @@
+   if (method === 'GET') {
+     if (url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
+     else if (url === `/notes/${NOTE_ID}`) data = fixtureNote;
++    else if (url === `/courses/${fixtureNote.course_id}/summary`) data = { course: { id: fixtureNote.course_id, name: 'Synthetic healing project', skin: null }, goals: [], decks: [], documents: [] };
+     else if (url === `/notes/${NOTE_ID}/blocks`) data = fixtureBlocks;
+     else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = canvasPayload();
+     else if (url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
+===================================================================
+--- a/client/scripts/pageReadingSmoke/mockApi.ts	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/scripts/pageReadingSmoke/mockApi.ts	B1a final working copy
+@@ -118,6 +118,7 @@
+     }
+     if ((isPrintFixture || isOverviewFixture) && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
+     else if (url === `/notes/${NOTE_ID}`) data = isOverviewFixture ? overviewSpecimen.note : isPrintFixture ? printSpecimen.note : fixtureNote;
++    else if (['/courses/page-reading-smoke-project/summary', '/courses/page-print-smoke-project/summary', '/courses/overview-smoke-project/summary', '/courses/tray-smoke-course/summary'].includes(url)) data = { course: { id: url.split('/')[2], name: 'Synthetic reading project', skin: null }, goals: [], decks: [], documents: [] };
+     else if (url === `/notes/${NOTE_ID}/blocks`) data = isOverviewFixture ? overviewSpecimen.blocks : isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
+     else if (url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
+     else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isOverviewFixture ? overviewSpecimen.canvas : isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
+===================================================================
+--- a/client/scripts/paperInkSmoke/inkMockApi.ts	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/scripts/paperInkSmoke/inkMockApi.ts	B1a final working copy
+@@ -37,6 +37,7 @@
+     }
+     let data: unknown;
+     if (method === 'GET' && url === '/templates') data = templates;
++    else if (method === 'GET' && url === '/courses/paper-ink-smoke-course/summary') data = { course: { id: 'paper-ink-smoke-course', name: 'Synthetic paper ink', skin: null }, goals: [], decks: [], documents: [] };
+     else if (method === 'GET' && url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
+     else if (method === 'POST' && url === '/source-anchors/generate') data = {};
+     else if (method === 'GET' && (emptyCatalogs.has(url)
+===================================================================
+--- a/client/src/components/CourseModal/CourseModal.test.tsx	captured before review fix
++++ b/client/src/components/CourseModal/CourseModal.test.tsx	B1a final working copy
+@@ -1,5 +1,6 @@
+ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
++import type { Course } from '@shared/types';
+ import CourseModal from './CourseModal';
+ 
+ const mocks = vi.hoisted(() => ({
+@@ -84,4 +85,40 @@
+ 
+     expect({ ...existingCourse, ...submittedPatch }.weight).toBe(existingCourse.weight);
+   });
++
++  it('publishes the saved project so reopening an edit preserves its persisted skin', async () => {
++    let detailCourse: Course = { ...existingCourse, skin: null };
++    const onUpdated = vi.fn((updated: Course) => { detailCourse = updated; });
++    mocks.uiState.modal = { type: 'course-edit', data: { course: detailCourse, onUpdated } };
++    const savedCourse: Course = {
++      ...detailCourse,
++      skin: { preset: 'warm-paper' },
++      updated_at: '2026-09-11T12:00:00.000Z',
++    };
++    mocks.updateCourse.mockResolvedValueOnce(savedCourse);
++
++    const firstEdit = render(<CourseModal />);
++    fireEvent.change(screen.getByRole('combobox', { name: '纸面预设' }), { target: { value: 'warm-paper' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Update' }));
++
++    await waitFor(() => expect(onUpdated).toHaveBeenCalledWith(savedCourse));
++    expect(detailCourse).toBe(savedCourse);
++    expect(onUpdated.mock.invocationCallOrder[0]).toBeLessThan(mocks.closeModal.mock.invocationCallOrder[0]);
++    firstEdit.unmount();
++
++    mocks.uiState.modal = { type: 'course-edit', data: { course: detailCourse, onUpdated } };
++    mocks.updateCourse.mockResolvedValueOnce({ ...savedCourse, name: 'Linear Algebra II' });
++    render(<CourseModal />);
++    expect((screen.getByRole('combobox', { name: '纸面预设' }) as HTMLSelectElement).value).toBe('warm-paper');
++    fireEvent.change(screen.getByPlaceholderText('e.g. Linear Algebra, PI-046 Research, Case Notes'), {
++      target: { value: 'Linear Algebra II' },
++    });
++    fireEvent.click(screen.getByRole('button', { name: 'Update' }));
++
++    await waitFor(() => expect(onUpdated).toHaveBeenCalledTimes(2));
++    expect(mocks.updateCourse.mock.calls[1][1]).toMatchObject({
++      name: 'Linear Algebra II', skin: { preset: 'warm-paper' },
++    });
++    expect(detailCourse.skin).toEqual({ preset: 'warm-paper' });
++  });
+ });
+===================================================================
+--- a/client/src/components/CourseModal/CourseModal.tsx	captured before implementation
++++ b/client/src/components/CourseModal/CourseModal.tsx	B1a final working copy
+@@ -1,7 +1,10 @@
+ import { useState, useEffect, FormEvent } from 'react';
+ import { useCourseStore } from '@/stores/courseStore';
+ import { useUIStore } from '@/stores/uiStore';
+-import type { Course } from '@shared/types';
++import type { Course } from '@shared/types';
++import type { SkinSelection } from '@shared/types/skin';
++import { readSkin } from '@/styles/skinPresets';
++import { SkinControls } from '@/components/Skin/SkinControls';
+ import styles from './CourseModal.module.css';
+ 
+ const PRESET_COLORS = [
+@@ -24,7 +27,8 @@
+   const [color, setColor] = useState(PRESET_COLORS[0]);
+   const [description, setDescription] = useState('');
+   const [semester, setSemester] = useState('');
+-  const [saving, setSaving] = useState(false);
++  const [saving, setSaving] = useState(false);
++  const [skin, setSkin] = useState<SkinSelection | null>(null);
+ 
+   useEffect(() => {
+     if (isEdit && existing) {
+@@ -32,7 +36,8 @@
+       setCode(existing.code || '');
+       setColor(existing.color);
+       setDescription(existing.description || '');
+-      setSemester(existing.semester || '');
++      setSemester(existing.semester || '');
++      setSkin(readSkin(existing.skin));
+     }
+   }, [modal]);
+ 
+@@ -47,11 +52,14 @@
+         code: code.trim() || undefined,
+         color,
+         description: description.trim() || undefined,
+-        semester: semester.trim() || undefined,
++        semester: semester.trim() || undefined,
++        ...(isEdit ? { skin } : {}),
+       };
+ 
+-      if (isEdit && existing) {
+-        await updateCourse(existing.id, payload);
++      if (isEdit && existing) {
++        const updated = await updateCourse(existing.id, payload);
++        const onUpdated = modal?.data?.onUpdated;
++        if (typeof onUpdated === 'function') onUpdated(updated);
+         addToast('success', 'Project updated');
+       } else {
+         await createCourse(payload);
+@@ -129,7 +137,9 @@
+             />
+           </div>
+ 
+-          <div className={styles.actions}>
++          {isEdit && <SkinControls value={skin} onChange={setSkin} inheritLabel="继承全局外观" disabled={saving} />}
++
++          <div className={styles.actions}>
+             <button type="button" className={styles.cancelBtn} onClick={closeModal}>
+               Cancel
+             </button>
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/components/Skin/SkinControls.module.css	B1a final working copy
+@@ -0,0 +1,15 @@
++.controls { display: grid; gap: 8px; width: 100%; color: var(--text-primary); font: inherit; }
++.appearance { color: var(--text-primary); }
++.appearance > summary { cursor: pointer; padding: 10px 0; }
++.preview { margin-top: 16px; padding: 24px; }
++.preview p { margin: 10px 0; }
++.error { color: var(--danger); }
++.error button { color: var(--accent-primary); background: transparent; border: 0; border-radius: 0; cursor: pointer; font: inherit; padding: 4px; }
++.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
++.row select, .row input { font: inherit; color: inherit; background: transparent; border: 0; border-radius: 0; padding: 6px 0; max-width: 180px; min-width: 0; }
++.row input { width: 94px; }
++.row button, .clear { font: inherit; color: inherit; background: transparent; border: 0; border-radius: 0; padding: 5px 0; text-align: left; cursor: pointer; }
++.row button:disabled { opacity: .4; cursor: default; }
++.advanced summary { cursor: pointer; padding: 8px 0; }
++.advanced .row { border-top: 1px solid var(--border-primary); }
++.controls :is(button, input, select, summary):focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/components/Skin/SkinControls.tsx	B1a final working copy
+@@ -0,0 +1,50 @@
++import { useEffect, useId, useState } from 'react';
++import { SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinSelection, type SkinTokenName } from '@shared/types';
++import { SKIN_LABELS, resolveSkin } from '@/styles/skinPresets';
++import styles from './SkinControls.module.css';
++
++const labels: Record<SkinTokenName, string> = { desk: '桌面', paper: '纸面', ink: '正文', 'ink-muted': '弱字', accent: '强调', annotation: '批注', hairline: '分隔线', danger: '危险操作', wall: '页边距墙' };
++
++export function SkinControls({ value, onChange, inheritLabel, advanced = false, disabled = false }: {
++  value: SkinSelection | null; onChange: (value: SkinSelection | null) => void;
++  inheritLabel?: string; advanced?: boolean; disabled?: boolean;
++}) {
++  const id = useId();
++  const { tokens } = resolveSkin(value);
++  return <div className={styles.controls} data-skin-controls>
++    <label className={styles.row} htmlFor={id}>
++      <span>纸面预设</span>
++      <select id={id} aria-label="纸面预设" value={value?.preset || (inheritLabel ? '' : 'default')} disabled={disabled}
++        onChange={(event) => onChange(event.target.value ? { preset: event.target.value as SkinSelection['preset'] } : null)}>
++        {inheritLabel && <option value="">{inheritLabel}</option>}
++        {SKIN_PRESET_IDS.map((preset) => <option key={preset} value={preset}>{SKIN_LABELS[preset]}</option>)}
++      </select>
++    </label>
++    {inheritLabel && value && <button type="button" className={styles.clear} disabled={disabled} onClick={() => onChange(null)}>清除覆写</button>}
++    {advanced && <details className={styles.advanced}>
++      <summary>高级颜色</summary>
++      {SKIN_TOKEN_NAMES.map((key) => <ColorField key={`${value?.preset}:${key}`} name={key} value={tokens[key]} disabled={disabled}
++        overridden={!!value?.overrides?.[key]} onChange={(color) => {
++          const overrides = { ...value?.overrides };
++          if (color === null) delete overrides[key]; else overrides[key] = color;
++          onChange({ preset: value?.preset || 'default', ...(Object.keys(overrides).length ? { overrides } : {}) });
++        }} />)}
++    </details>}
++  </div>;
++}
++
++function ColorField({ name, value, disabled, overridden, onChange }: { name: SkinTokenName; value: string; disabled: boolean; overridden: boolean; onChange: (color: string | null) => void }) {
++  const id = useId();
++  const [draft, setDraft] = useState(value);
++  useEffect(() => { setDraft(value); }, [value]);
++  const valid = /^#[\da-f]{6}([\da-f]{2})?$/i.test(draft);
++  return <div className={styles.row}>
++    <label htmlFor={id}>{labels[name]}</label>
++    <input id={id} type="text" aria-label={labels[name]} spellCheck={false} value={draft}
++      aria-invalid={!valid} maxLength={9} disabled={disabled} onChange={(event) => {
++        const next = event.target.value; setDraft(next);
++        if (/^#[\da-f]{6}([\da-f]{2})?$/i.test(next)) onChange(next);
++      }} onBlur={() => { if (!valid) setDraft(value); }} />
++    <button type="button" disabled={disabled || !overridden} onClick={() => onChange(null)}>重置</button>
++  </div>;
++}
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/components/Skin/SkinEditor.test.tsx	B1a final working copy
+@@ -0,0 +1,38 @@
++import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
++import { describe, expect, it, vi } from 'vitest';
++import type { SkinSelection } from '@shared/types/skin';
++import { SkinEditor } from './SkinEditor';
++
++describe('SkinEditor save failure recovery', () => {
++  it('shows an owner failure after reopening and retries the retained selection', async () => {
++    const value: SkinSelection = { preset: 'warm-paper' };
++    let rejectFirst!: (error: Error) => void;
++    const firstSave = new Promise<void>((_resolve, reject) => { rejectFirst = reject; });
++    const save = vi.fn().mockReturnValueOnce(firstSave).mockResolvedValue(undefined);
++    const firstEditor = render(<SkinEditor value={null} save={save} inheritLabel="继承项目外观" />);
++    fireEvent.change(screen.getByRole('combobox', { name: '纸面预设' }), { target: { value: 'warm-paper' } });
++    firstEditor.unmount();
++    await act(async () => { rejectFirst(new Error('Synthetic write failure')); });
++
++    const reopened = render(<SkinEditor value={value} save={save} failed inheritLabel="继承项目外观" />);
++    expect(screen.getByRole('alert').textContent).toContain('外观未保存');
++    fireEvent.click(screen.getByRole('button', { name: '重试保存' }));
++    await waitFor(() => expect(save).toHaveBeenLastCalledWith(value));
++    expect(save).toHaveBeenCalledTimes(2);
++    // An individual promise settling cannot clear a failure still owned by the note runtime.
++    expect(screen.getByRole('alert').textContent).toContain('外观未保存');
++    reopened.rerender(<SkinEditor value={value} save={save} failed={false} inheritLabel="继承项目外观" />);
++    expect(screen.queryByRole('alert')).toBeNull();
++  });
++
++  it('keeps local failure feedback until retry succeeds without an external failure', async () => {
++    const save = vi.fn().mockRejectedValueOnce(new Error('Synthetic write failure')).mockResolvedValue(undefined);
++    render(<SkinEditor value={null} save={save} />);
++    fireEvent.change(screen.getByRole('combobox', { name: '纸面预设' }), { target: { value: 'workbench' } });
++    await screen.findByRole('alert');
++    fireEvent.click(screen.getByRole('button', { name: '重试保存' }));
++    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
++    expect(save).toHaveBeenLastCalledWith({ preset: 'workbench' });
++    expect(save).toHaveBeenCalledTimes(2);
++  });
++});
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/components/Skin/SkinEditor.tsx	B1a final working copy
+@@ -0,0 +1,34 @@
++import { useEffect, useRef, useState } from 'react';
++import type { SkinSelection } from '@shared/types/skin';
++import { SkinControls } from './SkinControls';
++import { resolveSkin } from '@/styles/skinPresets';
++import styles from './SkinControls.module.css';
++
++/** Dispatch immediately so the owner can bind and track each intent before navigation. */
++export function SkinEditor({ value, save, inheritLabel, advanced, preview = false, failed = false }: {
++  value: SkinSelection | null; save: (skin: SkinSelection | null) => Promise<void>;
++  inheritLabel?: string; advanced?: boolean; preview?: boolean; failed?: boolean;
++}) {
++  const [draft, setDraft] = useState(value);
++  const [error, setError] = useState(false);
++  const pending = useRef(0);
++  const mounted = useRef(true);
++  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
++  useEffect(() => { if (!pending.current && !error && !failed) setDraft(value); }, [value, error, failed]);
++  const change = (next: SkinSelection | null) => {
++    setDraft(next); setError(false); pending.current += 1;
++    void save(next).then(() => {
++      if (mounted.current) setError(false);
++    }, () => { if (mounted.current) setError(true); }).finally(() => { pending.current -= 1; });
++  };
++  const { tokens } = resolveSkin(draft);
++  return <>
++    <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} advanced={advanced} />
++    {preview && <div className={styles.preview} aria-label="纸面颜色预览" style={{ background: tokens.paper, color: tokens.ink }}>
++      <strong>纸面预览</strong>
++      <p style={{ color: tokens['ink-muted'] }}>正文、弱字与强调色随选择更新。</p>
++      <span style={{ color: tokens.accent }}>强调文字</span>
++    </div>}
++    {(error || failed) && <p role="alert" className={styles.error}>外观未保存。<button type="button" onClick={() => change(draft)}>重试保存</button></p>}
++  </>;
++}
+===================================================================
+--- a/client/src/pages/Boards/BoardPage.unboxing.test.tsx	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/client/src/pages/Boards/BoardPage.unboxing.test.tsx	B1a final working copy
+@@ -9,7 +9,7 @@
+ import type { PageFrameCollectionModel } from '../Notes/canvasEngine/types';
+ 
+ const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
+-vi.mock('@/services/api', () => ({ default: http }));
++vi.mock('@/services/api', () => ({ default: http, getToken: () => null, setToken: vi.fn() }));
+ // Only HTTP is replaced. BoardPage, modal, full-page host, runtime, adapter and
+ // ItemSummary reader run together against the same disposable in-memory state.
+ const at = '2026-09-09T12:00:00.000Z';
+@@ -112,6 +112,10 @@
+     if (url === '/boards/board') return response(board);
+     if (url === '/boards/board/viewport-bookmarks') return response({ bookmarks: [] });
+     if (url === '/courses') return response(projects);
++    if (url.startsWith('/courses/')) {
++      const project = projects.find(({ id }) => url === `/courses/${id}/summary`);
++      if (project) return response({ course: { ...project, skin: null }, goals: [], decks: [], documents: [] });
++    }
+     if (url === '/notes') return response(notes.filter((note) => !config?.params?.course_id || note.course_id === config.params.course_id));
+     if (url === '/items') return response([item]);
+     if (url === '/purposes') return response({ purposes: [] });
+===================================================================
+--- a/client/src/pages/Courses/CourseDetail.tsx	captured before implementation
++++ b/client/src/pages/Courses/CourseDetail.tsx	B1a final working copy
+@@ -978,7 +978,7 @@
+         <div className={styles.headerRight}>
+           <button
+             className={styles.headerAction}
+-            onClick={() => openModal('course-edit', { course })}
++            onClick={() => openModal('course-edit', { course, onUpdated: (updated: Course) => setData((current) => current ? { ...current, course: updated } : current) })}
+           >
+             <Edit2 size={15} />
+             Edit
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/annotationColorService.ts	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/annotationColorService.ts	B1a final working copy
+@@ -11,50 +11,50 @@
+   {
+     token: 'annotation-yellow',
+     label: 'Yellow',
+-    accent: '#facc15',
+-    background: 'rgba(250, 204, 21, 0.22)',
+-    badgeBackground: 'rgba(113, 63, 18, 0.72)',
+-    text: '#fef9c3',
++    accent: 'var(--paper-annotation-yellow-accent, #facc15)',
++    background: 'var(--paper-annotation-yellow-background, rgba(250, 204, 21, 0.22))',
++    badgeBackground: 'var(--paper-annotation-yellow-badge, rgba(113, 63, 18, 0.72))',
++    text: 'var(--paper-annotation-yellow-text, #fef9c3)',
+   },
+   {
+     token: 'annotation-blue',
+     label: 'Blue',
+-    accent: '#60a5fa',
+-    background: 'rgba(37, 99, 235, 0.24)',
+-    badgeBackground: 'rgba(30, 58, 138, 0.74)',
+-    text: '#dbeafe',
++    accent: 'var(--paper-annotation-blue-accent, #60a5fa)',
++    background: 'var(--paper-annotation-blue-background, rgba(37, 99, 235, 0.24))',
++    badgeBackground: 'var(--paper-annotation-blue-badge, rgba(30, 58, 138, 0.74))',
++    text: 'var(--paper-annotation-blue-text, #dbeafe)',
+   },
+   {
+     token: 'annotation-teal',
+     label: 'Teal',
+-    accent: '#2dd4bf',
+-    background: 'rgba(20, 184, 166, 0.24)',
+-    badgeBackground: 'rgba(17, 94, 89, 0.74)',
+-    text: '#ccfbf1',
++    accent: 'var(--paper-annotation-teal-accent, #2dd4bf)',
++    background: 'var(--paper-annotation-teal-background, rgba(20, 184, 166, 0.24))',
++    badgeBackground: 'var(--paper-annotation-teal-badge, rgba(17, 94, 89, 0.74))',
++    text: 'var(--paper-annotation-teal-text, #ccfbf1)',
+   },
+   {
+     token: 'annotation-violet',
+     label: 'Violet',
+-    accent: '#a78bfa',
+-    background: 'rgba(124, 58, 237, 0.23)',
+-    badgeBackground: 'rgba(76, 29, 149, 0.74)',
+-    text: '#ede9fe',
++    accent: 'var(--paper-annotation-violet-accent, #a78bfa)',
++    background: 'var(--paper-annotation-violet-background, rgba(124, 58, 237, 0.23))',
++    badgeBackground: 'var(--paper-annotation-violet-badge, rgba(76, 29, 149, 0.74))',
++    text: 'var(--paper-annotation-violet-text, #ede9fe)',
+   },
+   {
+     token: 'annotation-rose',
+     label: 'Rose',
+-    accent: '#fb7185',
+-    background: 'rgba(225, 29, 72, 0.22)',
+-    badgeBackground: 'rgba(136, 19, 55, 0.74)',
+-    text: '#ffe4e6',
++    accent: 'var(--paper-annotation-rose-accent, #fb7185)',
++    background: 'var(--paper-annotation-rose-background, rgba(225, 29, 72, 0.22))',
++    badgeBackground: 'var(--paper-annotation-rose-badge, rgba(136, 19, 55, 0.74))',
++    text: 'var(--paper-annotation-rose-text, #ffe4e6)',
+   },
+   {
+     token: 'annotation-slate',
+     label: 'Slate',
+-    accent: '#94a3b8',
+-    background: 'rgba(100, 116, 139, 0.24)',
+-    badgeBackground: 'rgba(51, 65, 85, 0.78)',
+-    text: '#e2e8f0',
++    accent: 'var(--paper-annotation-slate-accent, #94a3b8)',
++    background: 'var(--paper-annotation-slate-background, rgba(100, 116, 139, 0.24))',
++    badgeBackground: 'var(--paper-annotation-slate-badge, rgba(51, 65, 85, 0.78))',
++    text: 'var(--paper-annotation-slate-text, #e2e8f0)',
+   },
+ ];
+ 
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/freehandService.ts	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/freehandService.ts	B1a final working copy
+@@ -57,7 +57,7 @@
+ export function paperFreehandStyle(data: PaperFreehandData): { color: string; width: number } {
+   const width = data.style?.width;
+   return {
+-    color: 'var(--board-ink, var(--text-primary, #374151))',
++    color: 'var(--sk-ink, var(--board-ink, var(--text-primary, #374151)))',
+     width: typeof width === 'number' && Number.isFinite(width) && width > 0 ? width : PAPER_INK_STYLE.width,
+   };
+ }
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx	B1a final working copy
+@@ -0,0 +1,221 @@
++import { act, renderHook, waitFor } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { MemoryRouter } from 'react-router-dom';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++import type { SkinSelection } from '@shared/types';
++import type { Note } from '../runtimeDataTypes';
++import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
++import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, writeTypographyProfileMetadata } from '../typographyProfileService';
++
++const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn(), addToast: vi.fn() }));
++vi.mock('@/services/api', () => ({ default: { get: mocks.get, put: mocks.put, post: mocks.post, delete: mocks.delete } }));
++vi.mock('@/stores/uiStore', () => ({ useUIStore: (select: (state: { addToast: typeof mocks.addToast }) => unknown) => select({ addToast: mocks.addToast }) }));
++
++const callbacks = { onNoteLoaded: vi.fn(), clearLayoutDraftForBlock: vi.fn(), setLayoutDraftForBlock: vi.fn() };
++const warm: SkinSelection = { preset: 'warm-paper' };
++const workbench: SkinSelection = { preset: 'workbench', overrides: { accent: '#EEAA44' } };
++let storedNotes: Record<string, Note>;
++
++function deferred<T>() {
++  let resolve!: (value: T) => void;
++  let reject!: (reason?: unknown) => void;
++  const promise = new Promise<T>((complete, fail) => { resolve = complete; reject = fail; });
++  return { promise, resolve, reject };
++}
++function wrapper({ children }: { children: ReactNode }) { return <MemoryRouter>{children}</MemoryRouter>; }
++function renderAdapter() {
++  return renderHook(({ noteId }) => useNoteCanvasDataAdapter({ noteId, ...callbacks }), {
++    initialProps: { noteId: 'paper-a' }, wrapper,
++  });
++}
++async function loaded(subject: ReturnType<typeof renderAdapter>, id = 'paper-a') {
++  await waitFor(() => {
++    expect(subject.result.current.loading).toBe(false);
++    expect(subject.result.current.loadError).toBeNull();
++    expect(subject.result.current.note?.id).toBe(id);
++  });
++}
++
++describe('B1a adapter paper skin write intent', () => {
++  beforeEach(() => {
++    vi.clearAllMocks();
++    mocks.put.mockReset();
++    sessionStorage.clear();
++    storedNotes = Object.fromEntries(['paper-a', 'paper-b'].map((id) => [id, {
++      id, course_id: '', title: id, description: null, status: 'active',
++      metadata: { document_property: id, skin: { preset: 'default' } },
++    }]));
++    mocks.get.mockImplementation(async (url: string) => {
++      if (url === '/canvas-objects/coordinate-contract') return { data: { coordinate_contract: 'v1' } };
++      const noteId = /^\/notes\/([^/]+)$/.exec(url)?.[1];
++      if (noteId && storedNotes[noteId]) return { data: structuredClone(storedNotes[noteId]) };
++      if (/^\/notes\/[^/]+\/blocks$/.test(url)) return { data: [] };
++      if (url.startsWith('/canvas-objects/by-note/')) return { data: {} };
++      if (url.startsWith('/annotation-truths/by-note/')) return { data: [] };
++      if (url.startsWith('/boards/text-ranges/by-note/')) return { data: { text_ranges: [] } };
++      if (['/content-groups', '/group-folders', '/purposes', '/templates'].includes(url)) return { data: [] };
++      throw new Error(`Unexpected skin fixture GET ${url}`);
++    });
++    mocks.put.mockImplementation(async (url: string, payload: { skin: SkinSelection | null }) => {
++      const id = url.split('/').pop()!;
++      storedNotes[id] = { ...storedNotes[id], metadata: { ...storedNotes[id].metadata, skin: payload.skin } };
++      return { data: structuredClone(storedNotes[id]) };
++    });
++  });
++
++  it('publishes successive choices immediately, sends them serially and drains the entire queued intent', async () => {
++    const first = deferred<{ data: Note }>();
++    const second = deferred<{ data: Note }>();
++    mocks.put.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
++    const subject = renderAdapter(); await loaded(subject);
++    let firstSave!: Promise<void>; let secondSave!: Promise<void>;
++    act(() => {
++      firstSave = subject.result.current.saveSkin(warm);
++      secondSave = subject.result.current.saveSkin(workbench);
++    });
++    expect(subject.result.current.note?.metadata?.skin).toEqual(workbench);
++    expect(subject.result.current.note?.metadata?.document_property).toBe('paper-a');
++    let drained = false;
++    const idle = subject.result.current.whenIdle().then(() => { drained = true; });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
++    expect(mocks.put).toHaveBeenNthCalledWith(1, '/notes/paper-a', { skin: warm });
++    expect(drained).toBe(false);
++    await act(async () => { first.resolve({ data: storedNotes['paper-a'] }); await firstSave; });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(2));
++    expect(mocks.put).toHaveBeenNthCalledWith(2, '/notes/paper-a', { skin: workbench });
++    expect(drained).toBe(false);
++    expect(subject.result.current.note?.metadata?.skin).toEqual(workbench);
++    await act(async () => { second.resolve({ data: storedNotes['paper-a'] }); await secondSave; await idle; });
++    expect(drained).toBe(true);
++  });
++
++  it('queued choices keep their original note ID after a route switch and late writes leave the new paper alone', async () => {
++    const first = deferred<{ data: Note }>();
++    const second = deferred<{ data: Note }>();
++    mocks.put.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
++    const subject = renderAdapter(); await loaded(subject);
++    let firstSave!: Promise<void>; let secondSave!: Promise<void>;
++    const oldWhenIdle = subject.result.current.whenIdle;
++    act(() => {
++      firstSave = subject.result.current.saveSkin(warm);
++      secondSave = subject.result.current.saveSkin(workbench);
++    });
++    let oldDrained = false;
++    const oldIdle = oldWhenIdle().then(() => { oldDrained = true; });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
++    subject.rerender({ noteId: 'paper-b' }); await loaded(subject, 'paper-b');
++    expect(subject.result.current.note?.metadata?.skin).toEqual({ preset: 'default' });
++    await act(async () => { first.resolve({ data: storedNotes['paper-a'] }); await firstSave; });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(2));
++    expect(mocks.put.mock.calls).toEqual([
++      ['/notes/paper-a', { skin: warm }], ['/notes/paper-a', { skin: workbench }],
++    ]);
++    expect(oldDrained).toBe(false);
++    await act(async () => { second.resolve({ data: storedNotes['paper-a'] }); await secondSave; await oldIdle; });
++    expect(oldDrained).toBe(true);
++    expect(subject.result.current.note?.metadata).toEqual(storedNotes['paper-b'].metadata);
++  });
++
++  it('failed persistence keeps the latest local skin and the route drain rejects until a successful retry', async () => {
++    const failed = deferred<{ data: Note }>();
++    const retried = deferred<{ data: Note }>();
++    mocks.put.mockReturnValueOnce(failed.promise).mockReturnValueOnce(retried.promise);
++    const subject = renderAdapter(); await loaded(subject);
++    let save!: Promise<void>;
++    act(() => { save = subject.result.current.saveSkin(workbench); void save.catch(() => {}); });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
++    const failure = new Error('Synthetic skin save interrupted');
++    await act(async () => { failed.reject(failure); await expect(save).rejects.toBe(failure); });
++    expect(subject.result.current.note?.metadata?.skin).toEqual(workbench);
++    await expect(subject.result.current.whenIdle()).rejects.toBe(failure);
++    let retry!: Promise<void>;
++    act(() => { retry = subject.result.current.saveSkin(workbench); });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(2));
++    expect(mocks.put).toHaveBeenLastCalledWith('/notes/paper-a', { skin: workbench });
++    await act(async () => { retried.resolve({ data: storedNotes['paper-a'] }); await retry; });
++    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
++  });
++
++  it('a source paper can save or clear its presentation without touching content properties', async () => {
++    storedNotes['paper-a'] = { ...storedNotes['paper-a'], note_class: 'source_projection', source_kind: 'source_projection' };
++    const subject = renderAdapter(); await loaded(subject);
++    expect(subject.result.current.sourceProjectionPolicy.contentReadOnly).toBe(true);
++    await act(async () => { await subject.result.current.saveSkin(warm); });
++    expect(subject.result.current.note?.metadata?.skin).toEqual(warm);
++    await act(async () => { await subject.result.current.saveSkin(null); });
++    expect(mocks.put.mock.calls).toEqual([
++      ['/notes/paper-a', { skin: warm }], ['/notes/paper-a', { skin: null }],
++    ]);
++    expect(subject.result.current.note?.metadata?.document_property).toBe('paper-a');
++    expect(subject.result.current.note?.metadata?.skin).toBeNull();
++    expect(mocks.addToast).not.toHaveBeenCalled();
++  });
++
++  it.each(['success', 'failure'] as const)('late typography %s preserves a newer saved skin', async (outcome) => {
++    const typographyResponse = deferred<{ data: Note }>();
++    mocks.put.mockReturnValueOnce(typographyResponse.promise);
++    const subject = renderAdapter(); await loaded(subject);
++    const profile = { ...DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, fontSizePx: 20 };
++    const staleNote = {
++      ...storedNotes['paper-a'],
++      metadata: writeTypographyProfileMetadata(storedNotes['paper-a'].metadata, profile),
++    };
++    let typographySave!: Promise<void>;
++    act(() => { typographySave = subject.result.current.saveDocumentTypographyProfile(profile); });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
++    await act(async () => { await subject.result.current.saveSkin(warm); });
++    expect(subject.result.current.note?.metadata?.skin).toEqual(warm);
++    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
++    try {
++      await act(async () => {
++        if (outcome === 'success') typographyResponse.resolve({ data: staleNote });
++        else typographyResponse.reject(new Error('Synthetic delayed typography failure'));
++        await typographySave;
++      });
++      expect(subject.result.current.note?.metadata?.skin).toEqual(warm);
++      expect(storedNotes['paper-a'].metadata?.skin).toEqual(warm);
++      expect(subject.result.current.documentTypographyProfile.fontSizePx).toBe(
++        outcome === 'success' ? 20 : DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontSizePx,
++      );
++    } finally { consoleError.mockRestore(); }
++  });
++
++  it.each(['reading', 'annotation'] as const)('late %s metadata response cannot replace a newer skin', async (kind) => {
++    const metadataResponse = deferred<{ data: Note }>();
++    mocks.put.mockReturnValueOnce(metadataResponse.promise);
++    const subject = renderAdapter(); await loaded(subject);
++    const staleNote = structuredClone(storedNotes['paper-a']);
++    let metadataSave!: Promise<void>;
++    act(() => {
++      metadataSave = kind === 'reading'
++        ? subject.result.current.saveReadingInterpretations([])
++        : subject.result.current.saveAnnotationProposals([]);
++    });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
++    await act(async () => { await subject.result.current.saveSkin(workbench); });
++    await act(async () => { metadataResponse.resolve({ data: staleNote }); await metadataSave; });
++    expect(subject.result.current.note?.metadata?.skin).toEqual(workbench);
++  });
++
++  it.each(['success', 'failure'] as const)('late typography %s after switching notes leaves the new paper alone', async (outcome) => {
++    const typographyResponse = deferred<{ data: Note }>();
++    mocks.put.mockReturnValueOnce(typographyResponse.promise);
++    const subject = renderAdapter(); await loaded(subject);
++    let typographySave!: Promise<void>;
++    act(() => { typographySave = subject.result.current.saveDocumentTypographyProfile({ ...DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, fontSizePx: 20 }); });
++    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
++    subject.rerender({ noteId: 'paper-b' }); await loaded(subject, 'paper-b');
++    await act(async () => { await subject.result.current.saveSkin(workbench); });
++    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
++    try {
++      await act(async () => {
++        if (outcome === 'success') typographyResponse.resolve({ data: storedNotes['paper-a'] });
++        else typographyResponse.reject(new Error('Synthetic old-route typography failure'));
++        await typographySave;
++      });
++      expect(subject.result.current.note?.id).toBe('paper-b');
++      expect(subject.result.current.note?.metadata?.skin).toEqual(workbench);
++      expect(mocks.addToast).not.toHaveBeenCalled();
++    } finally { consoleError.mockRestore(); }
++  });
++});
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts	B1a final working copy
+@@ -861,6 +861,40 @@
+     await Promise.all([saveTitle(), saveDescription()]);
+   }, [saveTitle, saveDescription]);
+ 
++  const skinSaveTails = useRef(new Map<string, Promise<unknown>>());
++  const [skinWriteFailure, setSkinWriteFailure] = useState<string | null>(null);
++  const saveSkin = useCallback(writeRegistry.hold('saveSkin', async (skin: SkinSelection | null) => {
++    const current = noteRef.current;
++    if (!current || current.id !== routeNoteIdRef.current) throw new Error('Note is not loaded');
++    const generation = routeRequestGenerationRef.current;
++    const hydrationEpoch = successfulHydrationEpochRef.current;
++    const responseIsCurrent = () => adapterMountActiveRef.current
++      && routeNoteIdRef.current === current.id && routeRequestGenerationRef.current === generation
++      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === current.id;
++    const publish = (value: SkinSelection | null) => {
++      if (!responseIsCurrent()) return;
++      const latest = noteRef.current!;
++      noteRef.current = { ...latest, metadata: { ...latest.metadata, skin: value } };
++      setNote((latest) => latest?.id === current.id ? { ...latest, metadata: { ...latest.metadata, skin: value } } : latest);
++    };
++    publish(skin);
++    const previous = skinSaveTails.current.get(current.id) || Promise.resolve();
++    const write = previous.then(() => writeRegistry.track(`note-skin:${current.id}`, () => api.put(`/notes/${current.id}`, { skin })));
++    const settled = write.catch(() => undefined);
++    skinSaveTails.current.set(current.id, settled);
++    try {
++      await write;
++      if (responseIsCurrent()) setSkinWriteFailure(null);
++    } catch (error) {
++      if (responseIsCurrent()) {
++        setSkinWriteFailure(current.id);
++        addToast('error', '外观未保存，请在纸面外观中重试。');
++      }
++      throw error;
++    }
++    finally { if (skinSaveTails.current.get(current.id) === settled) skinSaveTails.current.delete(current.id); }
++  }), [writeRegistry, addToast]);
++
+   const saveAnnotationTruthsOutcome = useCallback(writeRegistry.hold('saveAnnotationTruths', async (
+     nextAnnotations: AnnotationTruthV1[], options: { preserveDrafts?: boolean } = {},
+   ): Promise<boolean> => {
+@@ -1136,9 +1170,26 @@
+     }
+   }), [writeRegistry, note, noteId, allowSourceContentMutation, frameHealing, coordinateContract, clearLayoutDraftForBlock, addToast]);
+ 
++  // Other metadata responses own their existing fields, but cannot roll back a newer skin intent.
++  const publishNonSkinNote = useCallback((updated: Note) => {
++    const latest = noteRef.current;
++    if (!latest || latest.id !== updated.id) return;
++    const metadata = { ...updated.metadata };
++    if (Object.prototype.hasOwnProperty.call(latest.metadata || {}, 'skin')) metadata.skin = latest.metadata!.skin;
++    else delete metadata.skin;
++    const next = { ...updated, metadata };
++    noteRef.current = next;
++    setNote(next);
++  }, []);
++
+   const saveDocumentTypographyProfile = useCallback(writeRegistry.hold('saveDocumentTypographyProfile', async (nextProfile: DocumentTypographyProfile) => {
+-    const currentNote = noteRef.current || note;
+-    if (!currentNote) return;
++    const currentNote = noteRef.current;
++    if (!currentNote || currentNote.id !== noteId || currentNote.id !== routeNoteIdRef.current) return;
++    const routeGeneration = routeRequestGenerationRef.current;
++    const hydrationEpoch = successfulHydrationEpochRef.current;
++    const responseIsCurrent = () => adapterMountActiveRef.current && routeNoteIdRef.current === currentNote.id
++      && routeRequestGenerationRef.current === routeGeneration
++      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === currentNote.id;
+     const previousProfile = documentTypographyProfile;
+     const nextMetadata = writeTypographyProfileMetadata(currentNote.metadata, nextProfile);
+     const normalizedProfile = typographyProfileFromMetadata(nextMetadata);
+@@ -1154,58 +1205,72 @@
+     try {
+       const res = await writeRegistry.track('saveDocumentTypographyProfile:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
+       const updated = res.data as Note;
+-      if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
++      if (!responseIsCurrent() || typographyProfileSaveGenerationRef.current !== saveGeneration) return;
+       const savedProfile = typographyProfileFromMetadata(updated.metadata);
+-      noteRef.current = updated;
+-      setNote(updated);
++      publishNonSkinNote(updated);
+       setDocumentTypographyProfile(savedProfile);
+     } catch (err) {
+       console.error('Failed to save document typography:', err);
++      if (!responseIsCurrent() || typographyProfileSaveGenerationRef.current !== saveGeneration) return;
+       addToast('error', 'Failed to save typography');
+-      if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
+-      noteRef.current = currentNote;
+-      setNote(currentNote);
++      publishNonSkinNote(currentNote);
+       setDocumentTypographyProfile(previousProfile);
+     }
+-  }), [writeRegistry, addToast, documentTypographyProfile, note]);
++  }), [writeRegistry, addToast, documentTypographyProfile, noteId, publishNonSkinNote]);
+ 
+   const saveReadingInterpretations = useCallback(writeRegistry.hold('saveReadingInterpretations', async (nextInterpretations: ReadingInterpretationV1[]) => {
+-    if (!note) return;
++    const currentNote = noteRef.current;
++    if (!currentNote || currentNote.id !== noteId || currentNote.id !== routeNoteIdRef.current) return;
++    const routeGeneration = routeRequestGenerationRef.current;
++    const hydrationEpoch = successfulHydrationEpochRef.current;
++    const responseIsCurrent = () => adapterMountActiveRef.current && routeNoteIdRef.current === currentNote.id
++      && routeRequestGenerationRef.current === routeGeneration
++      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === currentNote.id;
+     const nextMetadata = {
+-      ...(note.metadata || {}),
++      ...(currentNote.metadata || {}),
+       [NOTE_READING_INTERPRETATIONS_METADATA_KEY]: nextInterpretations,
+     };
+     setReadingInterpretations(nextInterpretations);
+     try {
+-      const res = await writeRegistry.track('saveReadingInterpretations:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { metadata: nextMetadata }));
++      const res = await writeRegistry.track('saveReadingInterpretations:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
+       const updated = res.data as Note;
+-      setNote(updated);
++      if (!responseIsCurrent()) return;
++      publishNonSkinNote(updated);
+       setReadingInterpretations(readingInterpretationsFromMetadata(updated.metadata));
+     } catch (err) {
+       console.error('Failed to save reading interpretations:', err);
++      if (!responseIsCurrent()) return;
+       addToast('error', 'Failed to save reading interpretation');
+-      setReadingInterpretations(readingInterpretationsFromMetadata(note.metadata));
++      setReadingInterpretations(readingInterpretationsFromMetadata(currentNote.metadata));
+     }
+-  }), [writeRegistry, addToast, note]);
++  }), [writeRegistry, addToast, noteId, publishNonSkinNote]);
+ 
+   const saveAnnotationProposals = useCallback(writeRegistry.hold('saveAnnotationProposals', async (nextProposals: AnnotationProposalV1[]) => {
+-    if (!note) return;
++    const currentNote = noteRef.current;
++    if (!currentNote || currentNote.id !== noteId || currentNote.id !== routeNoteIdRef.current) return;
++    const routeGeneration = routeRequestGenerationRef.current;
++    const hydrationEpoch = successfulHydrationEpochRef.current;
++    const responseIsCurrent = () => adapterMountActiveRef.current && routeNoteIdRef.current === currentNote.id
++      && routeRequestGenerationRef.current === routeGeneration
++      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === currentNote.id;
+     const nextMetadata = {
+-      ...(note.metadata || {}),
++      ...(currentNote.metadata || {}),
+       [NOTE_ANNOTATION_PROPOSALS_METADATA_KEY]: nextProposals,
+     };
+     setAnnotationProposals(nextProposals);
+     try {
+-      const res = await writeRegistry.track('saveAnnotationProposals:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { metadata: nextMetadata }));
++      const res = await writeRegistry.track('saveAnnotationProposals:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
+       const updated = res.data as Note;
+-      setNote(updated);
++      if (!responseIsCurrent()) return;
++      publishNonSkinNote(updated);
+       setAnnotationProposals(annotationProposalsFromMetadata(updated.metadata));
+     } catch (err) {
+       console.error('Failed to save annotation proposals:', err);
++      if (!responseIsCurrent()) return;
+       addToast('error', 'Failed to save annotation proposal');
+-      setAnnotationProposals(annotationProposalsFromMetadata(note.metadata));
++      setAnnotationProposals(annotationProposalsFromMetadata(currentNote.metadata));
+     }
+-  }), [writeRegistry, addToast, note]);
++  }), [writeRegistry, addToast, noteId, publishNonSkinNote]);
+ 
+   const createBlock = useCallback(writeRegistry.hold('createBlock', async (
+     template: TemplateOption,
+@@ -2779,6 +2844,8 @@
+     saveTitle,
+     saveDescription,
+     saveHeaderMetadata,
++    saveSkin,
++    skinSaveError: skinWriteFailure === note?.id,
+     saveAnnotationTruths,
+     saveContentGroups,
+     saveGroupFolders,
+@@ -2812,3 +2879,4 @@
+     handleViewSource,
+   };
+ }
++import type { SkinSelection } from '@shared/types/skin';
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts	B1a final working copy
+@@ -12,6 +12,7 @@
+ import { useTrayController } from './useTrayController';
+ import { usePaperInkCommands } from './usePaperInkCommands';
+ import { usePageFrameWalls } from './usePageFrameWalls';
++import { useNoteSkin } from './useNoteSkin';
+ import { tableObjectSavePayload } from '../tableObjectService';
+ import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
+ import type {
+@@ -93,6 +94,8 @@
+     whenIdle,
+     trackPendingWrite,
+     note,
++    saveSkin,
++    skinSaveError,
+     sourceProjectionPolicy,
+     coordinateContract,
+     blocks,
+@@ -196,6 +199,7 @@
+     zoom: pageReadingViewport?.zoom || 1, history: textHistoryHostRef,
+     boundary: () => wallBoundaryRef.current(), save: savePageFrameWalls,
+   });
++  const skin = useNoteSkin(note, saveSkin, skinSaveError);
+   const pageFrameCollection = walls.collection;
+   const persistedCanvasPlacements = walls.placements;
+ 
+@@ -639,6 +643,7 @@
+   }, [saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
+ 
+   return {
++    skin,
+     dismissTransientUI,
+     flushPendingSaves,
+     refreshBoardTextRanges,
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts	B1a final working copy
+@@ -0,0 +1,130 @@
++import { act, renderHook, waitFor } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { useAuthStore } from '@/stores/authStore';
++import type { SkinSelection } from '@shared/types';
++import type { Note } from '../runtimeDataTypes';
++import { useNoteSkin } from './useNoteSkin';
++
++const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), save: vi.fn() }));
++vi.mock('@/services/api', () => ({
++  default: { get: mocks.get, put: mocks.put }, getToken: () => null, setToken: vi.fn(),
++}));
++
++function note(courseId = 'project-a', skin?: SkinSelection | null): Note {
++  return { id: `paper-${courseId}`, course_id: courseId, title: 'Synthetic skin paper',
++    description: null, status: 'active', metadata: skin === undefined ? {} : { skin } };
++}
++
++function setGlobal(skin: SkinSelection | null) {
++  useAuthStore.setState({ user: {
++    id: 'synthetic-user', email: 'b1a@example.invalid', name: 'Skin fixture', settings: { skin },
++    onboarding_completed: true, created_at: '2026-09-11', updated_at: '2026-09-11',
++  } });
++}
++
++function deferred<T>() {
++  let resolve!: (value: T) => void;
++  let reject!: (reason?: unknown) => void;
++  const promise = new Promise<T>((complete, fail) => { resolve = complete; reject = fail; });
++  return { promise, resolve, reject };
++}
++
++function summary(skin: SkinSelection | null) { return { data: { course: { skin } } }; }
++
++describe('B1a note skin mounting', () => {
++  beforeEach(() => {
++    vi.clearAllMocks();
++    mocks.get.mockReset();
++    mocks.put.mockReset();
++    mocks.save.mockResolvedValue(undefined);
++    setGlobal({ preset: 'quiet-ink', overrides: { accent: '#334455' } });
++  });
++  afterEach(() => useAuthStore.setState({ user: null }));
++
++  it('reads the existing project summary once and uses it above global settings', async () => {
++    mocks.get.mockResolvedValue(summary({ preset: 'warm-paper', overrides: { ink: '#123456' } }));
++    const { result, rerender } = renderHook(({ current }) => useNoteSkin(current, mocks.save), { initialProps: { current: note() } });
++    await waitFor(() => expect(result.current.preset).toBe('warm-paper'));
++    expect(mocks.get).toHaveBeenCalledExactlyOnceWith('/courses/project-a/summary');
++    expect(result.current.tokens.ink).toBe('#123456');
++    expect(result.current.tokens.accent).toBe('#33604F');
++    expect(result.current.error).toBeNull();
++    rerender({ current: { ...note(), title: 'A different title' } });
++    expect(mocks.get).toHaveBeenCalledTimes(1);
++  });
++
++  it('route changes discard both the old project palette and its late response', async () => {
++    const oldRead = deferred<ReturnType<typeof summary>>();
++    const newRead = deferred<ReturnType<typeof summary>>();
++    mocks.get.mockImplementation((url: string) => url === '/courses/project-a/summary' ? oldRead.promise : newRead.promise);
++    const { result, rerender } = renderHook(({ current }) => useNoteSkin(current, mocks.save), { initialProps: { current: note() } });
++    rerender({ current: note('project-b') });
++    expect(result.current.preset).toBe('quiet-ink');
++    await act(async () => { newRead.resolve(summary({ preset: 'workbench' })); });
++    expect(result.current.preset).toBe('workbench');
++    await act(async () => { oldRead.resolve(summary({ preset: 'warm-paper' })); });
++    expect(result.current.preset).toBe('workbench');
++    expect(mocks.get.mock.calls.map(([url]) => url)).toEqual(['/courses/project-a/summary', '/courses/project-b/summary']);
++  });
++
++  it('an already loaded project is not applied to the next route while its summary is pending', async () => {
++    const nextRead = deferred<ReturnType<typeof summary>>();
++    mocks.get.mockResolvedValueOnce(summary({ preset: 'warm-paper' })).mockReturnValueOnce(nextRead.promise);
++    const { result, rerender } = renderHook(({ current }) => useNoteSkin(current, mocks.save), { initialProps: { current: note() } });
++    await waitFor(() => expect(result.current.preset).toBe('warm-paper'));
++    rerender({ current: note('project-b') });
++    expect(result.current.preset).toBe('quiet-ink');
++    await act(async () => { nextRead.resolve(summary(null)); });
++    expect(result.current.preset).toBe('quiet-ink');
++  });
++
++  it('a summary failure leaves global colors usable and retry loads the project skin', async () => {
++    mocks.get.mockRejectedValueOnce(new Error('Synthetic summary unavailable'))
++      .mockResolvedValueOnce(summary({ preset: 'warm-paper' }));
++    const { result } = renderHook(() => useNoteSkin(note(), mocks.save));
++    await waitFor(() => expect(result.current.error).toBe('项目外观未加载，暂用全局外观。'));
++    expect(result.current.preset).toBe('quiet-ink');
++    expect(result.current.tokens.accent).toBe('#334455');
++    act(() => result.current.retry());
++    await waitFor(() => expect(result.current.preset).toBe('warm-paper'));
++    expect(result.current.error).toBeNull();
++    expect(mocks.get).toHaveBeenCalledTimes(2);
++  });
++
++  it('global settings changes recompute inheriting paper immediately without refetching its project', async () => {
++    mocks.get.mockResolvedValue(summary(null));
++    const { result } = renderHook(() => useNoteSkin(note(), mocks.save));
++    await act(async () => {});
++    expect(result.current.preset).toBe('quiet-ink');
++    act(() => setGlobal({ preset: 'warm-paper', overrides: { paper: '#EFEAD0' } }));
++    expect(result.current.preset).toBe('warm-paper');
++    expect(result.current.tokens.paper).toBe('#EFEAD0');
++    expect(mocks.get).toHaveBeenCalledTimes(1);
++    act(() => setGlobal(null));
++    expect(result.current.preset).toBe('default');
++  });
++
++  it('note metadata overrides project and global; clearing the paper restores project and delegates saves', async () => {
++    mocks.get.mockResolvedValue(summary({ preset: 'workbench' }));
++    const paper = { preset: 'warm-paper' as const, overrides: { ink: '#332211' } };
++    const { result, rerender } = renderHook(({ current }) => useNoteSkin(current, mocks.save), { initialProps: { current: note('project-a', paper) } });
++    await act(async () => {});
++    expect(result.current.selection).toEqual(paper);
++    expect(result.current.tokens.ink).toBe('#332211');
++    act(() => setGlobal({ preset: 'default' }));
++    expect(result.current.preset).toBe('warm-paper');
++    await act(async () => { await result.current.save(null); });
++    expect(mocks.save).toHaveBeenCalledExactlyOnceWith(null);
++    rerender({ current: note('project-a', null) });
++    expect(result.current.selection).toBeNull();
++    expect(result.current.preset).toBe('workbench');
++    expect(result.current.tokens.ink).toBe('#DEE3EA');
++    expect(mocks.put).not.toHaveBeenCalled();
++  });
++
++  it('an absent note has no summary request and uses only global settings', () => {
++    const { result } = renderHook(() => useNoteSkin(null, mocks.save));
++    expect(result.current.preset).toBe('quiet-ink');
++    expect(mocks.get).not.toHaveBeenCalled();
++  });
++});
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts	B1a final working copy
+@@ -0,0 +1,29 @@
++import { useEffect, useMemo, useState } from 'react';
++import api from '@/services/api';
++import { useAuthStore } from '@/stores/authStore';
++import { readSkin, resolveSkin } from '@/styles/skinPresets';
++import { buildPaperSkinStyles } from '../paperSkinStyles';
++import type { Course } from '@shared/types';
++import type { SkinSelection } from '@shared/types/skin';
++import type { Note } from '../runtimeDataTypes';
++
++export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null) => Promise<void>, saveError = false) {
++  const global = useAuthStore((s) => s.user?.settings.skin);
++  const [project, setProject] = useState<{ id: string; skin: SkinSelection | null } | null>(null);
++  const [error, setError] = useState<string | null>(null);
++  const [attempt, setAttempt] = useState(0);
++  const courseId = note?.course_id;
++  useEffect(() => {
++    if (!courseId) return;
++    let active = true;
++    setError(null);
++    void api.get<{ course: Course }>(`/courses/${courseId}/summary`).then(({ data }) => {
++      if (active) setProject({ id: courseId, skin: readSkin(data.course.skin) });
++    }, () => { if (active) setError('项目外观未加载，暂用全局外观。'); });
++    return () => { active = false; };
++  }, [courseId, attempt]);
++  const selection = useMemo(() => readSkin(note?.metadata?.skin), [note?.metadata?.skin]);
++  const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === courseId ? project.skin : null, selection), [global, project, courseId, selection]);
++  const style = useMemo(() => buildPaperSkinStyles(resolved.tokens), [resolved.tokens]);
++  return { ...resolved, style, selection, save, saveError, error, retry: () => setAttempt((n) => n + 1) };
++}
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx	B1a final working copy
+@@ -1,6 +1,7 @@
+ import { type CSSProperties, type ReactNode } from 'react';
+ import { createPortal } from 'react-dom';
+ import styles from '../../NoteDetail.module.css';
++import { usePaperSkin } from '../PaperSkinContext';
+ 
+ interface FloatingOverlayLayerProps {
+   children: ReactNode;
+@@ -17,13 +18,15 @@
+   portalClassName,
+   portalStyle,
+ }: FloatingOverlayLayerProps) {
++  const skin = usePaperSkin();
+   if (!open || typeof document === 'undefined') return null;
+ 
+   return createPortal(
+     <div
+       className={[styles.floatingOverlayPortal, portalClassName].filter(Boolean).join(' ')}
+       data-canvas-layer="floating-overlay"
+-      style={portalStyle}
++      data-note-skin-preset={skin?.preset}
++      style={{ ...skin?.style, ...portalStyle }}
+     >
+       {placement === 'free' ? (
+         children
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx	B1a final working copy
+@@ -34,6 +34,9 @@
+ import { ExportPreviewLayer } from './ExportPreviewLayer';
+ import { FloatingOverlayLayer } from './FloatingOverlayLayer';
+ import styles from '../../NoteDetail.module.css';
++import { usePaperSkin } from '../PaperSkinContext';
++import { SkinEditor } from '@/components/Skin/SkinEditor';
++import skinStyles from '@/components/Skin/SkinControls.module.css';
+ 
+ export interface SurfacePolicyView {
+   label: string;
+@@ -147,6 +150,7 @@
+   onTogglePreviewLabelOverlay,
+   onToggleSurfaceMode,
+ }: NoteChromeLayerProps) {
++  const skin = usePaperSkin();
+   const toolbarRef = useRef<HTMLDivElement>(null);
+   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
+   const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
+@@ -582,6 +586,10 @@
+                   <span>Deleted blocks</span>
+                   <small>Review and restore blocks removed from this note.</small>
+                 </button>
++                {skin && <details data-paper-appearance className={skinStyles.appearance}>
++                  <summary>纸面外观</summary>
++                  <SkinEditor key={note.id} value={skin.selection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" />
++                </details>}
+                 <div
+                   className={styles.typographyControls}
+                   data-typography-controls="document"
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css	B1a final working copy
+@@ -22,9 +22,9 @@
+ .popup form { margin-top: 12px; }
+ .popup label { display: block; margin-bottom: 4px; }
+ .entry { display: flex; gap: 8px; }
+-.entry input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); }
++.entry input { flex: 1; min-width: 0; padding: 6px 8px; border: 0; border-radius: 0; background: transparent; color: var(--text-primary); }
+ .entry input::placeholder { color: var(--text-secondary); }
+-.entry button { padding: 4px 8px; border-radius: 4px; background: var(--bg-hover); }
++.entry button { padding: 4px 8px; border-radius: 0; background: transparent; }
+ .popup section { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+ .popup h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+ .popup h4 { margin: 10px 0 4px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css	B1a final working copy
+@@ -5,7 +5,7 @@
+   min-width: 0;
+   min-height: 240px;
+   height: calc(100dvh - 80px);
+-  background: var(--bg-secondary);
++  background: var(--sk-desk, var(--bg-secondary));
+   color: var(--text-primary);
+ }
+ .noteOverview:focus, .noteOverview:focus-visible { outline: none; }
+@@ -54,7 +54,7 @@
+   position: relative;
+   overflow: hidden;
+   outline: 1px solid var(--border-default);
+-  background: var(--page-frame-background, var(--bg-primary));
++  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
+   pointer-events: none;
+   user-select: none;
+ }
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.css	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.css	B1a final working copy
+@@ -7,13 +7,7 @@
+   pointer-events: none;
+   margin: 0;
+   padding: 0;
+-  color: #17181a;
+-  --text-primary: #17181a;
+-  --text-secondary: #424750;
+-  --text-muted: #606873;
+-  --bg-primary: white;
+-  --bg-secondary: #f5f5f5;
+-  --bg-tertiary: #eeeeee;
++  color: var(--sk-ink, var(--text-primary));
+ }
+ 
+ [data-note-print-page] {
+@@ -25,7 +19,7 @@
+   overflow: hidden;
+   break-inside: avoid;
+   break-after: page;
+-  background: white;
++  background: var(--sk-paper, var(--page-frame-background, var(--bg-primary)));
+ }
+ 
+ [data-note-print-page]:last-of-type { break-after: auto; }
+@@ -37,7 +31,7 @@
+   left: 0;
+   top: 0;
+   transform-origin: 0 0;
+-  background: white;
++  background: var(--sk-paper, var(--page-frame-background, var(--bg-primary)));
+ }
+ 
+ [data-note-print-fragment] {
+@@ -57,7 +51,7 @@
+     margin: 0 !important;
+     padding: 0 !important;
+     overflow: visible !important;
+-    background: white !important;
++    background: none !important;
+   }
+ 
+   body:has(> [data-note-print-root]) > :not([data-note-print-root]) {
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx	reconstructed by reversing the five exact B1a print integration edits in this script
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx	B1a final working copy
+@@ -5,15 +5,16 @@
+ import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
+ import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+ import './NotePrintLayer.css';
++import { usePaperSkin } from '../PaperSkinContext';
+ 
+ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
+   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
+   | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts'
+-  | 'documentTypographyProfile' | 'anchorsBySourceRef'>;
++  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & { skinStyle?: CSSProperties; skinPreset?: string };
+ 
+ /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
+ function PrintPages({ input }: { input: NotePrintInput }) {
+-  return <div data-note-print-root="true" data-note-id={input.noteId}>
++  return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
+     {input.noteCanvasRuntime.pageFrames.map((frame) => {
+       const print = getPagePrintGeometry(frame);
+       return <section
+@@ -52,8 +53,9 @@
+ }
+ 
+ export function NotePrintLayer(input: NotePrintInput) {
++  const skin = usePaperSkin();
+   const latest = useRef(input);
+-  latest.current = input;
++  latest.current = { ...input, skinStyle: skin?.style, skinPreset: skin?.preset };
+   const snapshot = useRef<NotePrintInput | null>(null);
+   const [printing, setPrinting] = useState<NotePrintInput | null>(null);
+ 
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx	B1a final working copy
+@@ -104,7 +104,7 @@
+       [data-note-readonly-fragment] .${styles.blockStatusBadges} { display: none !important; }
+       [data-note-readonly-fragment] .${styles.blockBox} { border-color: transparent; }
+       [data-note-print-fragment] .${styles.codeBlockBox},
+-      [data-note-print-fragment] .${styles.codeBlockProjection} { background: white; }
++      [data-note-print-fragment] .${styles.codeBlockProjection} { background: var(--sk-paper, white); }
+     `}</style>
+   </>;
+ }
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css	B1a final working copy
+@@ -12,7 +12,7 @@
+   position: absolute;
+   inset: 0 auto 0 50%;
+   width: 1px;
+-  background: color-mix(in srgb, var(--text-muted) 44%, transparent);
++  background: var(--paper-wall);
+   opacity: 0;
+   pointer-events: none;
+   transition: opacity 140ms ease-out;
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx	B1a final working copy
+@@ -93,7 +93,7 @@
+     const overview = container.querySelector(`[data-note-overview] ${INK}`)!;
+     const printed = document.querySelector(`[data-note-print-root] ${INK}`)!;
+     expect(geometry(writing)).toEqual([
+-      PATH, 'translate(40 50) rotate(0 60 40)', 'var(--board-ink, var(--text-primary, #374151))', '2.5', 'round', 'round', 'none',
++      PATH, 'translate(40 50) rotate(0 60 40)', 'var(--sk-ink, var(--board-ink, var(--text-primary, #374151)))', '2.5', 'round', 'round', 'none',
+     ]);
+     expect(geometry(overview)).toEqual(geometry(writing));
+     expect(geometry(printed)).toEqual(geometry(writing));
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx	B1a final working copy
+@@ -4,6 +4,7 @@
+ import { NoteChromeLayer } from './layers/NoteChromeLayer';
+ import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './layers/NoteRuntimeDocumentLayer';
+ import styles from '../NoteDetail.module.css';
++import { PaperSkinContext } from './PaperSkinContext';
+ 
+ export interface NoteCanvasRuntimeHandle {
+   dismissTransientUI: () => void;
+@@ -13,7 +14,7 @@
+ 
+ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntime({ onRequestClose }, ref) {
+   const { hostMode = 'page' } = useNoteCanvasRuntime();
+-  const { layerProps, loading, loadError, note, dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
++  const { layerProps, loading, loadError, note, skin, dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
+   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
+   const dismissTransientUI = useCallback(() => {
+     documentRef.current?.resumeEditingForExit();
+@@ -53,11 +54,15 @@
+   }
+ 
+   return (
+-    <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`} data-note-host-mode={hostMode}>
++    <PaperSkinContext.Provider value={skin}>
++    <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`} data-note-host-mode={hostMode}
++      data-note-skin-preset={skin.preset} style={skin.style}>
++      {skin.error && <div role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></div>}
+       <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps}
+         writingSurfaceProps={{ ...layerProps.documentLayerProps.writingSurfaceProps,
+           noteTools: <NoteChromeLayer {...layerProps.chromeProps} /> }} />
+     </div>
++    </PaperSkinContext.Provider>
+   );
+ });
+ 
+===================================================================
+--- a/client/src/pages/Notes/canvasEngine/panels/contentGroupRailShellModel.ts	captured before implementation
++++ b/client/src/pages/Notes/canvasEngine/panels/contentGroupRailShellModel.ts	B1a final working copy
+@@ -10,13 +10,13 @@
+ } from '../runtimeDataTypes';
+ 
+ const RAIL_TOPIC_COLORS = [
+-  '#22d3ee',
+-  '#34d399',
+-  '#facc15',
+-  '#fb7185',
+-  '#a78bfa',
+-  '#38bdf8',
+-  '#f59e0b',
++  'var(--paper-rail-cyan)',
++  'var(--paper-rail-success)',
++  'var(--paper-rail-warning)',
++  'var(--paper-rail-error)',
++  'var(--paper-rail-topic-violet)',
++  'var(--paper-rail-topic-sky)',
++  'var(--paper-warning)',
+ ];
+ 
+ export interface RailGroupRowView {
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx	B1a final working copy
+@@ -0,0 +1,14 @@
++import { createContext, useContext, type CSSProperties } from 'react';
++import type { SkinPresetId, SkinSelection } from '@shared/types/skin';
++
++export interface PaperSkinContextValue {
++  style: CSSProperties;
++  preset: SkinPresetId;
++  selection: SkinSelection | null;
++  save: (skin: SkinSelection | null) => Promise<void>;
++  saveError?: boolean;
++  error: string | null;
++  retry: () => void;
++}
++export const PaperSkinContext = createContext<PaperSkinContextValue | null>(null);
++export const usePaperSkin = () => useContext(PaperSkinContext);
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/paperSkinDefaults.css	B1a final working copy
+@@ -0,0 +1,78 @@
++/* Fixed incumbent rendering aliases, not user-configurable skin tokens.
++ * Paper roots override these through buildPaperSkinStyles; other consumers
++ * retain the original colors. No app-shell or board theme is applied here. */
++:root {
++  --paper-source-lock-border: #55bd8a;
++  --paper-source-lock-ink: #65cf99;
++  --paper-sticky-ink: #f8edc4;
++  --paper-image-label-ink: #fff;
++  --paper-annotation-teal: #2dd4bf;
++  --paper-annotation-teal-dark: #0f766e;
++  --paper-black: #000;
++  --paper-white: white;
++  --paper-danger: #ef4444;
++  --paper-warning-border: rgba(245, 158, 11, 0.42);
++  --paper-warning-background: rgba(245, 158, 11, 0.08);
++  --paper-warning-ink: rgba(253, 230, 138, 0.95);
++  --paper-warning: #f59e0b;
++  --paper-code-accent: #a8c7ff;
++  --paper-rail-bg: #090d12;
++  --paper-rail-bg-soft: #0d1319;
++  --paper-rail-bg-raised: #111820;
++  --paper-rail-border: #27313c;
++  --paper-rail-border-soft: #1b252f;
++  --paper-rail-text: #edf7ff;
++  --paper-rail-muted: #7f8c9a;
++  --paper-rail-dim: #536170;
++  --paper-rail-cyan: #22d3ee;
++  --paper-rail-strip: #080c11;
++  --paper-rail-popup: #0b1117;
++  --paper-rail-input: #070b10;
++  --paper-rail-warning: #facc15;
++  --paper-rail-success: #34d399;
++  --paper-rail-error: #fb7185;
++  --paper-rail-stale-border: #d6b65e;
++  --paper-rail-stale-ink: #c9b676;
++  --paper-rail-topic-violet: #a78bfa;
++  --paper-rail-topic-sky: #38bdf8;
++  --paper-annotation-yellow-accent: #facc15;
++  --paper-annotation-yellow-background: rgba(250, 204, 21, 0.22);
++  --paper-annotation-yellow-badge: rgba(113, 63, 18, 0.72);
++  --paper-annotation-yellow-text: #fef9c3;
++  --paper-button-ink: white;
++  --paper-image-label-bg: rgba(0, 0, 0, 0.58);
++  --paper-highlight-edge: rgba(255, 255, 255, 0.12);
++  --paper-wall: color-mix(in srgb, #777a82 44%, transparent);
++  --paper-shadow-14: rgba(0, 0, 0, 0.14);
++  --paper-shadow-16: rgba(0, 0, 0, 0.16);
++  --paper-shadow-17: rgba(0, 0, 0, 0.17);
++  --paper-shadow-18: rgba(0, 0, 0, 0.18);
++  --paper-shadow-20: rgba(0, 0, 0, 0.2);
++  --paper-shadow-22: rgba(0, 0, 0, 0.22);
++  --paper-shadow-24: rgba(0, 0, 0, 0.24);
++  --paper-shadow-28: rgba(0, 0, 0, 0.28);
++  --paper-shadow-32: rgba(0, 0, 0, 0.32);
++  --paper-shadow-34: rgba(0, 0, 0, 0.34);
++  --paper-shadow-35: rgba(0, 0, 0, 0.35);
++  --paper-shadow-38: rgba(0, 0, 0, 0.38);
++  --paper-annotation-blue-accent: #60a5fa;
++  --paper-annotation-blue-background: rgba(37, 99, 235, 0.24);
++  --paper-annotation-blue-badge: rgba(30, 58, 138, 0.74);
++  --paper-annotation-blue-text: #dbeafe;
++  --paper-annotation-teal-accent: #2dd4bf;
++  --paper-annotation-teal-background: rgba(20, 184, 166, 0.24);
++  --paper-annotation-teal-badge: rgba(17, 94, 89, 0.74);
++  --paper-annotation-teal-text: #ccfbf1;
++  --paper-annotation-violet-accent: #a78bfa;
++  --paper-annotation-violet-background: rgba(124, 58, 237, 0.23);
++  --paper-annotation-violet-badge: rgba(76, 29, 149, 0.74);
++  --paper-annotation-violet-text: #ede9fe;
++  --paper-annotation-rose-accent: #fb7185;
++  --paper-annotation-rose-background: rgba(225, 29, 72, 0.22);
++  --paper-annotation-rose-badge: rgba(136, 19, 55, 0.74);
++  --paper-annotation-rose-text: #ffe4e6;
++  --paper-annotation-slate-accent: #94a3b8;
++  --paper-annotation-slate-background: rgba(100, 116, 139, 0.24);
++  --paper-annotation-slate-badge: rgba(51, 65, 85, 0.78);
++  --paper-annotation-slate-text: #e2e8f0;
++}
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts	B1a final working copy
+@@ -0,0 +1,57 @@
++import { describe, expect, it } from 'vitest';
++import type { SkinTokens } from '@shared/types/skin';
++import { SKIN_PRESETS } from '@/styles/skinPresets';
++import { buildPaperSkinStyles, PAPER_DERIVED_COLORS } from './paperSkinStyles';
++
++const stylesFor = (tokens: SkinTokens) => buildPaperSkinStyles(tokens) as Record<string, string>;
++
++describe('paper skin painting', () => {
++  it('retains every incumbent shade and the undefined legacy transparent aliases in the default', () => {
++    const styles = stylesFor(SKIN_PRESETS.default);
++    for (const [name, color] of Object.entries(PAPER_DERIVED_COLORS)) {
++      expect(styles[`--paper-${name}`]).toBe(color.baseline);
++    }
++    expect(styles['--text-muted']).toBe('#777a82');
++    expect(styles['--bg-primary']).toBe('#0f0f10');
++    expect(styles['--bg-hover']).toBe('#252528');
++    expect(styles['--warning-bg']).toBe('rgba(245, 158, 11, 0.12)');
++    expect(styles['--paper-wall']).toBe('color-mix(in srgb, #777a82 44%, transparent)');
++    for (const name of ['--bg-secondary', '--bg-tertiary', '--border-color', '--border-muted', '--paper-template-fill']) {
++      expect(styles).not.toHaveProperty(name);
++    }
++  });
++
++  it('recolors all automatic chrome roles and yellow annotation on warm paper without changing authored annotation palettes', () => {
++    const styles = stylesFor(SKIN_PRESETS['warm-paper']);
++    expect(styles['--paper-template-fill']).toBe('var(--sk-paper)');
++    expect(styles['--paper-rail-bg']).toBe('var(--paper-overlay)');
++    expect(styles['--paper-rail-text']).toBe('var(--sk-ink)');
++    expect(styles['--paper-annotation-yellow-accent']).toBe('var(--sk-annotation)');
++    expect(styles['--paper-annotation-yellow-background']).toContain('20%');
++    expect(styles).not.toHaveProperty('--paper-annotation-blue-accent');
++    expect(styles['--bg-hover']).toContain('var(--sk-ink) 6%');
++    expect(styles['--warning-bg']).toBe('color-mix(in srgb, var(--sk-annotation) 12%, var(--sk-paper))');
++    expect(Object.keys(styles).some((name) => /font|typography/.test(name))).toBe(false);
++  });
++
++  it('a single token override changes its derived faces and clearing it restores their baseline', () => {
++    const baseline = stylesFor(SKIN_PRESETS.default);
++    const changed = stylesFor({ ...SKIN_PRESETS.default, annotation: '#123456' });
++    expect(changed['--paper-annotation-yellow-accent']).toBe('var(--sk-annotation)');
++    expect(changed['--warning']).toBe('var(--sk-annotation)');
++    expect(changed['--paper-rail-bg']).toBe(baseline['--paper-rail-bg']);
++    expect(changed['--bg-primary']).toBe(baseline['--bg-primary']);
++    expect(stylesFor(SKIN_PRESETS.default)).toEqual(baseline);
++    expect(stylesFor({ ...SKIN_PRESETS.default, paper: '#ffffff' })['--warning-bg']).toContain('var(--sk-paper)');
++  });
++
++  it('uses the specified workbench grid and outline, then derives them from their token overrides', () => {
++    const styles = stylesFor(SKIN_PRESETS.workbench);
++    expect(styles['--paper-workbench-grid']).toBe('#1B2028');
++    expect(styles['--paper-template-border']).toBe('#2A313C');
++    const changed = stylesFor({ ...SKIN_PRESETS.workbench, desk: '#778899', hairline: '#556677' });
++    expect(changed['--paper-workbench-grid']).toContain('var(--sk-desk)');
++    expect(changed['--paper-template-border']).toBe('var(--sk-hairline)');
++    expect(changed['--paper-shadow-24']).not.toBe(styles['--paper-shadow-24']);
++  });
++});
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Notes/canvasEngine/paperSkinStyles.ts	B1a final working copy
+@@ -0,0 +1,128 @@
++import type { CSSProperties } from 'react';
++import type { SkinTokenName, SkinTokens } from '@shared/types/skin';
++import { SKIN_PRESETS } from '@/styles/skinPresets';
++
++type DerivedColor = { token: SkinTokenName; baseline: string; themed: string };
++
++/** Fixed rendering aliases, not configurable/persisted skin tokens. Baselines are
++ * the pre-B1a per-face census; only the corresponding color role can replace one. */
++export const PAPER_DERIVED_COLORS: Record<string, DerivedColor> = {
++  'source-lock-border': { token: 'accent', baseline: '#55bd8a', themed: 'var(--sk-accent)' },
++  'source-lock-ink': { token: 'accent', baseline: '#65cf99', themed: 'var(--sk-accent)' },
++  'sticky-ink': { token: 'ink', baseline: '#f8edc4', themed: 'var(--sk-ink)' },
++  'image-label-ink': { token: 'ink', baseline: '#fff', themed: 'var(--sk-ink)' },
++  'annotation-teal': { token: 'annotation', baseline: '#2dd4bf', themed: 'var(--sk-annotation)' },
++  'annotation-teal-dark': { token: 'annotation', baseline: '#0f766e', themed: 'var(--sk-annotation)' },
++  'black': { token: 'paper', baseline: '#000', themed: 'var(--sk-paper)' },
++  'white': { token: 'ink', baseline: 'white', themed: 'var(--sk-ink)' },
++  'danger': { token: 'danger', baseline: '#ef4444', themed: 'var(--sk-danger)' },
++  'warning-border': { token: 'annotation', baseline: 'rgba(245, 158, 11, 0.42)', themed: 'color-mix(in srgb, var(--sk-annotation) 42%, transparent)' },
++  'warning-background': { token: 'annotation', baseline: 'rgba(245, 158, 11, 0.08)', themed: 'color-mix(in srgb, var(--sk-annotation) 8%, transparent)' },
++  'warning-ink': { token: 'annotation', baseline: 'rgba(253, 230, 138, 0.95)', themed: 'var(--sk-annotation)' },
++  'warning': { token: 'annotation', baseline: '#f59e0b', themed: 'var(--sk-annotation)' },
++  'code-accent': { token: 'accent', baseline: '#a8c7ff', themed: 'var(--sk-accent)' },
++  'rail-bg': { token: 'paper', baseline: '#090d12', themed: 'var(--paper-overlay)' },
++  'rail-bg-soft': { token: 'paper', baseline: '#0d1319', themed: 'var(--paper-overlay)' },
++  'rail-bg-raised': { token: 'paper', baseline: '#111820', themed: 'var(--paper-overlay)' },
++  'rail-border': { token: 'hairline', baseline: '#27313c', themed: 'var(--sk-hairline)' },
++  'rail-border-soft': { token: 'hairline', baseline: '#1b252f', themed: 'var(--sk-hairline)' },
++  'rail-text': { token: 'ink', baseline: '#edf7ff', themed: 'var(--sk-ink)' },
++  'rail-muted': { token: 'ink-muted', baseline: '#7f8c9a', themed: 'var(--sk-ink-muted)' },
++  'rail-dim': { token: 'ink-muted', baseline: '#536170', themed: 'var(--sk-ink-muted)' },
++  'rail-cyan': { token: 'accent', baseline: '#22d3ee', themed: 'var(--sk-accent)' },
++  'rail-strip': { token: 'paper', baseline: '#080c11', themed: 'var(--paper-overlay)' },
++  'rail-popup': { token: 'paper', baseline: '#0b1117', themed: 'var(--paper-overlay)' },
++  'rail-input': { token: 'paper', baseline: '#070b10', themed: 'var(--sk-paper)' },
++  'rail-warning': { token: 'annotation', baseline: '#facc15', themed: 'var(--sk-annotation)' },
++  'rail-success': { token: 'accent', baseline: '#34d399', themed: 'var(--sk-accent)' },
++  'rail-error': { token: 'danger', baseline: '#fb7185', themed: 'var(--sk-danger)' },
++  'rail-stale-border': { token: 'annotation', baseline: '#d6b65e', themed: 'var(--sk-annotation)' },
++  'rail-stale-ink': { token: 'annotation', baseline: '#c9b676', themed: 'var(--sk-annotation)' },
++  'rail-topic-violet': { token: 'accent', baseline: '#a78bfa', themed: 'var(--sk-accent)' },
++  'rail-topic-sky': { token: 'accent', baseline: '#38bdf8', themed: 'var(--sk-accent)' },
++  'annotation-yellow-accent': { token: 'annotation', baseline: '#facc15', themed: 'var(--sk-annotation)' },
++  'annotation-yellow-background': { token: 'annotation', baseline: 'rgba(250, 204, 21, 0.22)', themed: 'color-mix(in srgb, var(--sk-annotation) 20%, transparent)' },
++  'annotation-yellow-badge': { token: 'annotation', baseline: 'rgba(113, 63, 18, 0.72)', themed: 'color-mix(in srgb, var(--sk-annotation) 20%, var(--sk-paper))' },
++  'annotation-yellow-text': { token: 'annotation', baseline: '#fef9c3', themed: 'var(--sk-ink)' },
++};
++
++function luminance(color: string): number {
++  const channels = color.slice(1, 7).match(/.{2}/g)?.map((part) => parseInt(part, 16) / 255) || [0, 0, 0];
++  const linear = channels.map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
++  return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
++}
++
++/** Scope this result to a paper runtime or one of its portal/print roots. Never body. */
++export function buildPaperSkinStyles(tokens: SkinTokens): CSSProperties {
++  const defaults = SKIN_PRESETS.default;
++  const changed = (name: SkinTokenName) => tokens[name].toLowerCase() !== defaults[name].toLowerCase();
++  const value = (name: SkinTokenName, baseline: string, themed = `var(--sk-${name})`) => changed(name) ? themed : baseline;
++  const styles: Record<string, string> = {};
++  for (const [name, color] of Object.entries(tokens)) styles[`--sk-${name}`] = color;
++
++  Object.assign(styles, {
++    '--text-primary': 'var(--sk-ink)',
++    '--text-secondary': 'var(--sk-ink-muted)',
++    '--text-muted': value('ink-muted', '#777a82'),
++    '--text-inverse': value('ink', '#0a0a0f', 'var(--sk-paper)'),
++    '--paper-overlay': 'color-mix(in srgb, var(--sk-paper) 96%, var(--sk-ink))',
++    '--bg-primary': value('paper', '#0f0f10', 'var(--paper-overlay)'),
++    '--bg-deepest': value('paper', '#0b0b0c', 'var(--sk-paper)'),
++    '--bg-surface': value('paper', '#151516', 'var(--paper-overlay)'),
++    '--bg-elevated': value('paper', '#1d1d1f', 'var(--paper-overlay)'),
++    '--bg-hover': changed('ink') || changed('paper') ? 'color-mix(in srgb, var(--sk-ink) 6%, transparent)' : '#252528',
++    '--bg-active': value('paper', '#2f3034', 'color-mix(in srgb, var(--sk-ink) 7%, transparent)'),
++    '--border-default': 'var(--sk-hairline)',
++    '--border-subtle': value('hairline', '#232427'),
++    '--border-focus': 'var(--sk-accent)',
++    '--accent-primary': 'var(--sk-accent)',
++    '--accent-primary-hover': value('accent', '#3b82f6'),
++    '--accent-primary-bg': value('accent', 'rgba(37, 99, 235, 0.16)', 'color-mix(in srgb, var(--sk-accent) 16%, transparent)'),
++    '--accent-primary-bg-hover': value('accent', 'rgba(37, 99, 235, 0.24)', 'color-mix(in srgb, var(--sk-accent) 24%, transparent)'),
++    '--warning': value('annotation', '#f59e0b'),
++    // Recovery and template notices can sit on the dark desk, outside a sheet.
++    '--warning-bg': changed('annotation') || changed('paper')
++      ? 'color-mix(in srgb, var(--sk-annotation) 12%, var(--sk-paper))' : 'rgba(245, 158, 11, 0.12)',
++    '--danger': 'var(--sk-danger)',
++    '--error': 'var(--sk-danger)',
++    '--error-bg': value('danger', 'rgba(239, 68, 68, 0.12)', 'color-mix(in srgb, var(--sk-danger) 12%, transparent)'),
++    '--paper-wall': value('wall', 'color-mix(in srgb, #777a82 44%, transparent)'),
++    '--canvas-sticky-note-fill': value('annotation', '#2f2817', 'color-mix(in srgb, var(--sk-annotation) 20%, var(--sk-paper))'),
++    '--canvas-sticky-note-stroke': value('annotation', '#d8a429'),
++    '--paper-button-ink': changed('accent') ? (luminance(tokens.accent) > 0.179 ? 'var(--sk-desk)' : 'var(--sk-paper)') : 'white',
++    '--paper-image-label-bg': changed('paper') ? 'var(--paper-overlay)' : 'rgba(0, 0, 0, 0.58)',
++    '--paper-highlight-edge': value('ink', 'rgba(255, 255, 255, 0.12)', 'color-mix(in srgb, var(--sk-ink) 12%, transparent)'),
++    '--paper-workbench-grid': tokens.desk.toLowerCase() === SKIN_PRESETS.workbench.desk.toLowerCase()
++      ? '#1B2028' : 'color-mix(in srgb, var(--sk-desk) 94%, var(--sk-ink))',
++  });
++
++  for (const [name, color] of Object.entries(PAPER_DERIVED_COLORS)) {
++    styles[`--paper-${name}`] = value(color.token, color.baseline, color.themed);
++  }
++
++  // Undefined legacy aliases must stay undefined for the untouched default:
++  // several existing declarations intentionally resolve to transparent there.
++  if (changed('paper')) {
++    styles['--bg-secondary'] = 'var(--paper-overlay)';
++    styles['--bg-tertiary'] = 'var(--paper-overlay)';
++    styles['--paper-template-fill'] = 'var(--sk-paper)';
++  }
++  if (changed('hairline')) {
++    styles['--border-color'] = 'var(--sk-hairline)';
++    styles['--border-muted'] = 'var(--sk-hairline)';
++    styles['--paper-template-border'] = tokens.paper.toLowerCase() === SKIN_PRESETS.workbench.paper.toLowerCase()
++      && tokens.hairline.toLowerCase() === SKIN_PRESETS.workbench.hairline.toLowerCase()
++      ? '#2A313C' : 'var(--sk-hairline)';
++  }
++
++  // Shadow color is a fixed physical black; its opacity follows desk luminance.
++  const shadowFactor = changed('desk') ? 0.65 + (1 - luminance(tokens.desk)) * 0.35 : 1;
++  for (const opacity of [0.14, 0.16, 0.17, 0.18, 0.2, 0.22, 0.24, 0.28, 0.32, 0.34, 0.35, 0.38]) {
++    styles[`--paper-shadow-${Math.round(opacity * 100)}`] = `rgba(0, 0, 0, ${Number((opacity * shadowFactor).toFixed(4))})`;
++  }
++  styles['--glass-shadow-sm'] = '0 1px 2px var(--paper-shadow-28)';
++  styles['--glass-shadow-md'] = '0 8px 18px var(--paper-shadow-22)';
++  styles['--glass-shadow-lg'] = '0 18px 48px var(--paper-shadow-34)';
++  if (changed('desk')) styles['--paper-template-shadow'] = '0 18px 46px var(--paper-shadow-24)';
++  return styles as CSSProperties;
++}
+===================================================================
+--- a/client/src/pages/Notes/NoteDetail.module.css	captured before implementation
++++ b/client/src/pages/Notes/NoteDetail.module.css	B1a final working copy
+@@ -1,8 +1,18 @@
++@import './canvasEngine/paperSkinDefaults.css';
++
+ .page {
+   min-height: 100%;
++  background-color: var(--sk-desk, transparent);
+   animation: fadeIn var(--transition-normal) ease forwards;
+ }
+ 
++.page[data-note-skin-preset='workbench'] {
++  background-image:
++    linear-gradient(var(--paper-workbench-grid) 1px, transparent 1px),
++    linear-gradient(90deg, var(--paper-workbench-grid) 1px, transparent 1px);
++  background-size: 24px 24px;
++}
++
+ .pageCanvas {
+   display: flex;
+   flex-direction: column;
+@@ -98,9 +108,9 @@
+   gap: 5px;
+   min-height: 26px;
+   padding: 0 8px;
+-  border: 1px solid color-mix(in srgb, #55bd8a 45%, var(--border-subtle));
++  border: 1px solid color-mix(in srgb, var(--paper-source-lock-border) 45%, var(--border-subtle));
+   border-radius: 5px;
+-  color: #65cf99;
++  color: var(--paper-source-lock-ink);
+   font-size: 11px;
+   font-weight: 650;
+   white-space: nowrap;
+@@ -883,12 +893,12 @@
+ .primaryBtn {
+   background: var(--accent-primary);
+   border-color: var(--accent-primary);
+-  color: white;
++  color: var(--paper-button-ink);
+ }
+ 
+ .primaryBtn:hover {
+   background: var(--accent-primary-hover);
+-  color: white;
++  color: var(--paper-button-ink);
+ }
+ 
+ .templateWarning {
+@@ -962,9 +972,9 @@
+   justify-content: center;
+   min-height: 580px;
+   padding: 54px 72px 72px;
+-  border: 1px solid var(--page-frame-border-color, var(--border-subtle));
+-  background: var(--page-frame-background, var(--bg-primary));
+-  box-shadow: var(--page-frame-shadow, 0 1px 2px rgba(0, 0, 0, 0.18));
++  border: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
++  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
++  box-shadow: var(--paper-template-shadow, var(--page-frame-shadow, 0 1px 2px var(--paper-shadow-18)));
+ }
+ 
+ .writingSurfaceCanvas {
+@@ -1021,7 +1031,7 @@
+   border: 1px solid color-mix(in srgb, var(--border-default) 78%, transparent);
+   border-radius: 6px;
+   background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
++  box-shadow: 0 10px 24px var(--paper-shadow-20);
+   pointer-events: auto;
+ }
+ 
+@@ -1126,16 +1136,16 @@
+ .pageReadingPaper {
+   position: absolute;
+   box-sizing: border-box;
+-  background: var(--page-frame-background, var(--bg-primary));
+-  outline: 1px solid var(--page-frame-border-color, var(--border-subtle));
++  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
++  outline: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
+ }
+ 
+ .pageReadingHeaderBand {
+   position: absolute;
+   top: 0;
+   box-sizing: border-box;
+-  background: var(--page-frame-background, var(--bg-primary));
+-  outline: 1px solid var(--page-frame-border-color, var(--border-subtle));
++  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
++  outline: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
+ }
+ 
+ .noteToolbarActions {
+@@ -1216,22 +1226,22 @@
+   left: var(--formal-page-offset-x, 0px);
+   z-index: 1;
+   width: var(--formal-page-width, 760px);
+-  border: 1px solid var(--page-frame-border-color, var(--border-default));
++  border: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-default)));
+   border-radius: 2px;
+-  background: var(--page-frame-background, var(--bg-primary));
+-  box-shadow: var(--page-frame-shadow, 0 16px 42px rgba(0, 0, 0, 0.22));
++  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
++  box-shadow: var(--paper-template-shadow, var(--page-frame-shadow, 0 16px 42px var(--paper-shadow-22)));
+   pointer-events: none;
+ }
+ 
+ .formalPageBoundaryPrimary {
+   border-color: color-mix(in srgb, var(--accent-primary) 42%, var(--border-default));
+-  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24);
++  box-shadow: 0 18px 46px var(--paper-shadow-24);
+ }
+ 
+ .formalPageBoundarySecondary {
+   border-style: dashed;
+   opacity: 0.72;
+-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
++  box-shadow: 0 10px 28px var(--paper-shadow-16);
+ }
+ 
+ .formalPageBoundaryOperable {
+@@ -1243,7 +1253,7 @@
+   border-color: var(--accent-primary);
+   box-shadow:
+     0 0 0 2px color-mix(in srgb, var(--accent-primary) 38%, transparent),
+-    var(--page-frame-shadow, 0 16px 42px rgba(0, 0, 0, 0.22));
++    var(--paper-template-shadow, var(--page-frame-shadow, 0 16px 42px var(--paper-shadow-22)));
+ }
+ 
+ .pageStackNumberBadge {
+@@ -1290,7 +1300,7 @@
+   border: 1px solid color-mix(in srgb, var(--accent-primary) 68%, var(--border-default));
+   border-radius: 4px;
+   background: var(--bg-primary);
+-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
++  box-shadow: 0 6px 14px var(--paper-shadow-22);
+   cursor: nwse-resize;
+   pointer-events: auto;
+ }
+@@ -1312,7 +1322,7 @@
+   border: var(--canvas-object-stroke-width, 2px) solid var(--canvas-object-stroke, color-mix(in srgb, var(--accent-primary) 70%, var(--border-default)));
+   background: var(--canvas-object-fill, color-mix(in srgb, var(--accent-primary) 14%, transparent));
+   opacity: var(--canvas-object-opacity, 1);
+-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
++  box-shadow: 0 10px 24px var(--paper-shadow-14);
+   overflow: hidden;
+   pointer-events: auto;
+ }
+@@ -1330,10 +1340,10 @@
+ }
+ 
+ .canvasObjectStyleStickyNote {
+-  color: #f8edc4;
++  color: var(--paper-sticky-ink);
+   box-shadow:
+-    0 16px 30px rgba(0, 0, 0, 0.22),
+-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
++    0 16px 30px var(--paper-shadow-22),
++    inset 0 1px 0 var(--paper-highlight-edge);
+ }
+ 
+ .canvasShapeOperable {
+@@ -1344,7 +1354,7 @@
+   border-color: var(--accent-primary);
+   box-shadow:
+     0 0 0 2px color-mix(in srgb, var(--accent-primary) 36%, transparent),
+-    0 14px 30px rgba(0, 0, 0, 0.18);
++    0 14px 30px var(--paper-shadow-18);
+ }
+ 
+ .canvasShapeTextArea {
+@@ -1381,7 +1391,7 @@
+   border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
+   border-radius: 4px;
+   background: var(--bg-primary);
+-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
++  box-shadow: 0 6px 14px var(--paper-shadow-22);
+   cursor: nwse-resize;
+ }
+ 
+@@ -1391,7 +1401,7 @@
+   border: 1px solid color-mix(in srgb, var(--border-default) 78%, transparent);
+   border-radius: 8px;
+   background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
++  box-shadow: 0 12px 28px var(--paper-shadow-18);
+   overflow: hidden;
+   pointer-events: auto;
+ }
+@@ -1404,7 +1414,7 @@
+   border-color: var(--accent-primary);
+   box-shadow:
+     0 0 0 2px color-mix(in srgb, var(--accent-primary) 34%, transparent),
+-    0 14px 30px rgba(0, 0, 0, 0.2);
++    0 14px 30px var(--paper-shadow-20);
+ }
+ 
+ .canvasImageMedia {
+@@ -1422,8 +1432,8 @@
+   bottom: 8px;
+   padding: 4px 6px;
+   border-radius: 6px;
+-  background: rgba(0, 0, 0, 0.58);
+-  color: #fff;
++  background: var(--paper-image-label-bg);
++  color: var(--paper-image-label-ink);
+   font-size: 11px;
+   line-height: 1.3;
+   pointer-events: none;
+@@ -1438,7 +1448,7 @@
+   border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
+   border-radius: 4px;
+   background: var(--bg-primary);
+-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
++  box-shadow: 0 6px 14px var(--paper-shadow-22);
+   cursor: nwse-resize;
+ }
+ 
+@@ -1450,7 +1460,7 @@
+   border: 1px solid color-mix(in srgb, var(--border-default) 82%, transparent);
+   border-radius: 8px;
+   background: color-mix(in srgb, var(--bg-primary) 94%, var(--bg-secondary));
+-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.17);
++  box-shadow: 0 12px 28px var(--paper-shadow-17);
+   overflow: hidden;
+   pointer-events: auto;
+ }
+@@ -1463,7 +1473,7 @@
+   border-color: var(--accent-primary);
+   box-shadow:
+     0 0 0 2px color-mix(in srgb, var(--accent-primary) 32%, transparent),
+-    0 14px 30px rgba(0, 0, 0, 0.2);
++    0 14px 30px var(--paper-shadow-20);
+ }
+ 
+ .canvasTableHeader {
+@@ -1564,7 +1574,7 @@
+   border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
+   border-radius: 4px;
+   background: var(--bg-primary);
+-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
++  box-shadow: 0 6px 14px var(--paper-shadow-22);
+   cursor: nwse-resize;
+ }
+ 
+@@ -1578,7 +1588,7 @@
+   fill: none;
+   pointer-events: stroke;
+   cursor: context-menu;
+-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22));
++  filter: drop-shadow(0 1px 3px var(--paper-shadow-22));
+ }
+ 
+ .canvasVisualConnectorSelected .canvasVisualConnectorLine {
+@@ -1861,7 +1871,7 @@
+ }
+ 
+ .noteDeleteDialog::backdrop {
+-  background: rgb(0 0 0 / 35%);
++  background: var(--paper-shadow-35);
+ }
+ 
+ .noteDeleteDialog h2 {
+@@ -2080,9 +2090,9 @@
+   width: max-content;
+   max-width: 170px;
+   padding: 1px 5px;
+-  border: 1px solid color-mix(in srgb, var(--annotation-badge-accent, #2dd4bf) 74%, var(--border-default));
++  border: 1px solid color-mix(in srgb, var(--annotation-badge-accent, var(--paper-annotation-teal)) 74%, var(--border-default));
+   border-radius: 999px;
+-  background: var(--annotation-badge-bg, color-mix(in srgb, var(--bg-primary) 78%, #0f766e));
++  background: var(--annotation-badge-bg, color-mix(in srgb, var(--bg-primary) 78%, var(--paper-annotation-teal-dark)));
+   color: var(--annotation-badge-text, var(--text-primary));
+   font-size: 8px;
+   font-weight: 850;
+@@ -2196,7 +2206,7 @@
+ }
+ 
+ .textUnitAnnotationSpanDraft {
+-  outline: 1px dashed color-mix(in srgb, var(--accent-primary) 78%, white 12%);
++  outline: 1px dashed color-mix(in srgb, var(--accent-primary) 78%, var(--paper-white) 12%);
+   outline-offset: 1px;
+   background: color-mix(in srgb, var(--accent-primary) 44%, var(--accent-primary-bg));
+   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+@@ -2219,8 +2229,8 @@
+       180deg,
+       var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 70%, transparent)) 0%,
+       var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 70%, transparent)) 74%,
+-      color-mix(in srgb, var(--annotation-child-accent, #2dd4bf) 68%, transparent) 74%,
+-      color-mix(in srgb, var(--annotation-child-accent, #2dd4bf) 68%, transparent) 100%
++      color-mix(in srgb, var(--annotation-child-accent, var(--paper-annotation-teal)) 68%, transparent) 74%,
++      color-mix(in srgb, var(--annotation-child-accent, var(--paper-annotation-teal)) 68%, transparent) 100%
+     );
+ }
+ 
+@@ -2278,7 +2288,7 @@
+   border: 1px solid color-mix(in srgb, var(--accent-primary) 74%, var(--border-default));
+   border-radius: 50%;
+   background: color-mix(in srgb, var(--bg-primary) 82%, var(--accent-primary-bg));
+-  box-shadow: 0 6px 18px color-mix(in srgb, #000 18%, transparent);
++  box-shadow: 0 6px 18px var(--paper-shadow-18);
+   transform: translateX(-50%);
+   pointer-events: none;
+ }
+@@ -2553,7 +2563,7 @@
+   padding: 10px;
+   border: 1px solid var(--border-default);
+   border-radius: var(--radius-md);
+-  background: color-mix(in srgb, var(--bg-primary) 96%, black);
++  background: color-mix(in srgb, var(--bg-primary) 96%, var(--paper-black));
+   box-shadow: var(--glass-shadow-lg);
+ }
+ 
+@@ -2600,7 +2610,7 @@
+   padding: 6px;
+   border: 1px solid var(--border-default);
+   border-radius: var(--radius-md);
+-  background: color-mix(in srgb, var(--bg-primary) 96%, black);
++  background: color-mix(in srgb, var(--bg-primary) 96%, var(--paper-black));
+   box-shadow: var(--glass-shadow-lg);
+ }
+ 
+@@ -2685,7 +2695,7 @@
+   padding: 6px;
+   border: 1px solid var(--border-default);
+   border-radius: var(--radius-md);
+-  background: color-mix(in srgb, var(--bg-primary) 96%, black);
++  background: color-mix(in srgb, var(--bg-primary) 96%, var(--paper-black));
+   box-shadow: var(--glass-shadow-lg);
+ }
+ 
+@@ -2702,7 +2712,7 @@
+   padding: 12px;
+   border: 1px solid var(--border-default);
+   border-radius: var(--radius-md);
+-  background: color-mix(in srgb, var(--bg-primary) 97%, black);
++  background: color-mix(in srgb, var(--bg-primary) 97%, var(--paper-black));
+   box-shadow: var(--glass-shadow-lg);
+ }
+ 
+@@ -2849,8 +2859,8 @@
+ 
+ .canvasObjectInspectorActionDanger:hover:not(:disabled),
+ .canvasObjectInspectorActionDanger:focus-visible {
+-  border-color: color-mix(in srgb, var(--danger, #ef4444) 62%, var(--border-default));
+-  color: color-mix(in srgb, var(--danger, #ef4444) 82%, var(--text-primary));
++  border-color: color-mix(in srgb, var(--danger, var(--paper-danger)) 62%, var(--border-default));
++  color: color-mix(in srgb, var(--danger, var(--paper-danger)) 82%, var(--text-primary));
+ }
+ 
+ .canvasObjectInspectorAction:disabled {
+@@ -3406,8 +3416,8 @@
+ }
+ 
+ .contentGroupMemberRowWarning {
+-  border-color: rgba(245, 158, 11, 0.42);
+-  background: rgba(245, 158, 11, 0.08);
++  border-color: var(--paper-warning-border);
++  background: var(--paper-warning-background);
+ }
+ 
+ .contentGroupMemberRow span,
+@@ -3425,8 +3435,8 @@
+   margin-left: 6px;
+   padding: 1px 6px;
+   border-radius: 999px;
+-  border: 1px solid rgba(245, 158, 11, 0.42);
+-  color: rgba(253, 230, 138, 0.95);
++  border: 1px solid var(--paper-warning-border);
++  color: var(--paper-warning-ink);
+   font-size: 9px;
+   font-weight: 820;
+   text-transform: uppercase;
+@@ -3777,10 +3787,10 @@
+ .annotationRangeNeedsReview {
+   justify-self: start;
+   padding: 2px 6px;
+-  border: 1px solid color-mix(in srgb, var(--accent-warning, #f59e0b) 46%, transparent);
++  border: 1px solid color-mix(in srgb, var(--accent-warning, var(--paper-warning)) 46%, transparent);
+   border-radius: var(--radius-sm);
+   color: var(--text-muted);
+-  background: color-mix(in srgb, var(--accent-warning, #f59e0b) 12%, transparent);
++  background: color-mix(in srgb, var(--accent-warning, var(--paper-warning)) 12%, transparent);
+   font-size: 10px;
+   font-weight: 800;
+   text-transform: uppercase;
+@@ -4129,7 +4139,7 @@
+   background: var(--bg-primary);
+   border: 1px solid var(--border-default);
+   border-radius: 8px;
+-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38);
++  box-shadow: 0 18px 44px var(--paper-shadow-38);
+   color: var(--text-secondary);
+   display: block;
+   font-size: 12px;
+@@ -4176,7 +4186,7 @@
+ 
+ .codeBlockBox {
+   border-color: color-mix(in srgb, var(--border-subtle) 72%, var(--text-muted));
+-  background: color-mix(in srgb, var(--bg-elevated) 70%, #000 30%);
++  background: color-mix(in srgb, var(--bg-elevated) 70%, var(--paper-black) 30%);
+ }
+ 
+ .codeBlockProjection {
+@@ -4188,7 +4198,7 @@
+   padding: 10px 12px;
+   border: 1px solid color-mix(in srgb, var(--border-subtle) 76%, var(--text-muted));
+   border-radius: var(--radius-sm);
+-  background: color-mix(in srgb, var(--bg-primary) 56%, #000 44%);
++  background: color-mix(in srgb, var(--bg-primary) 56%, var(--paper-black) 44%);
+ }
+ 
+ .codeLineGutter {
+@@ -4213,7 +4223,7 @@
+   font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+   font-size: 14px;
+   line-height: 1.55;
+-  color: color-mix(in srgb, var(--text-primary) 94%, #a8c7ff);
++  color: color-mix(in srgb, var(--text-primary) 94%, var(--paper-code-accent));
+ }
+ 
+ .quoteTextArea {
+@@ -4521,16 +4531,16 @@
+ 
+ /* V2.BN.8.7.6 Groups Rail OpenDesign shell */
+ .contentGroupPanel {
+-  --rail-bg: #090d12;
+-  --rail-bg-soft: #0d1319;
+-  --rail-bg-raised: #111820;
+-  --rail-border: #27313c;
+-  --rail-border-soft: #1b252f;
+-  --rail-text: #edf7ff;
+-  --rail-muted: #7f8c9a;
+-  --rail-dim: #536170;
+-  --rail-cyan: #22d3ee;
+-  --rail-topic-color: #22d3ee;
++  --rail-bg: var(--paper-rail-bg);
++  --rail-bg-soft: var(--paper-rail-bg-soft);
++  --rail-bg-raised: var(--paper-rail-bg-raised);
++  --rail-border: var(--paper-rail-border);
++  --rail-border-soft: var(--paper-rail-border-soft);
++  --rail-text: var(--paper-rail-text);
++  --rail-muted: var(--paper-rail-muted);
++  --rail-dim: var(--paper-rail-dim);
++  --rail-cyan: var(--paper-rail-cyan);
++  --rail-topic-color: var(--paper-rail-cyan);
+   position: fixed;
+   top: 0;
+   right: 0;
+@@ -4548,7 +4558,7 @@
+   border-left: 1px solid var(--rail-border);
+   border-radius: 0;
+   background: var(--rail-bg);
+-  box-shadow: -16px 0 38px rgba(0, 0, 0, 0.32);
++  box-shadow: -16px 0 38px var(--paper-shadow-32);
+   color: var(--rail-text);
+ }
+ 
+@@ -4583,7 +4593,7 @@
+   min-height: 44px;
+   padding: 0 11px 0 14px;
+   border-bottom: 1px solid var(--rail-border-soft);
+-  background: #080c11;
++  background: var(--paper-rail-strip);
+ }
+ 
+ .contentGroupHeaderTitle {
+@@ -4684,8 +4694,8 @@
+   padding: 7px;
+   border: 1px solid var(--rail-border);
+   border-radius: 5px;
+-  background: #0b1117;
+-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
++  background: var(--paper-rail-popup);
++  box-shadow: 0 16px 40px var(--paper-shadow-32);
+ }
+ 
+ .contentGroupFolderRow {
+@@ -4758,7 +4768,7 @@
+   padding: 0 9px;
+   border: 1px solid var(--rail-border);
+   border-radius: 4px;
+-  background: #070b10;
++  background: var(--paper-rail-input);
+   color: var(--rail-text);
+   font-size: 12px;
+   font-weight: 680;
+@@ -4776,7 +4786,7 @@
+   border: 1px solid var(--rail-border);
+   border-radius: 4px;
+   overflow: hidden;
+-  background: #0b1117;
++  background: var(--paper-rail-popup);
+ }
+ 
+ .contentGroupViewTabs button {
+@@ -4829,7 +4839,7 @@
+   padding: 0 9px;
+   border: 1px solid var(--rail-border);
+   border-radius: 4px;
+-  background: #070b10;
++  background: var(--paper-rail-input);
+   color: var(--rail-text);
+   font-size: 12px;
+   font-weight: 720;
+@@ -4964,17 +4974,17 @@
+ }
+ 
+ .contentGroupStatusChip {
+-  color: #facc15;
++  color: var(--paper-rail-warning);
+ }
+ 
+ .contentGroupStatusChip[data-status-kind='accepted'] {
+-  border-color: color-mix(in srgb, #34d399 48%, var(--rail-border));
+-  color: #34d399;
++  border-color: color-mix(in srgb, var(--paper-rail-success) 48%, var(--rail-border));
++  color: var(--paper-rail-success);
+ }
+ 
+ .contentGroupStatusChip[data-status-kind='rejected'] {
+-  border-color: color-mix(in srgb, #fb7185 48%, var(--rail-border));
+-  color: #fb7185;
++  border-color: color-mix(in srgb, var(--paper-rail-error) 48%, var(--rail-border));
++  color: var(--paper-rail-error);
+ }
+ 
+ .contentGroupStatusChip[data-status-kind='archived'] {
+@@ -5199,7 +5209,7 @@
+   min-width: 0;
+   border: 1px solid var(--rail-border);
+   border-radius: 4px;
+-  background: #070b10;
++  background: var(--paper-rail-input);
+   color: var(--rail-text);
+   font: inherit;
+   font-size: 11px;
+@@ -5327,7 +5337,7 @@
+   padding: 0 7px;
+   border: 1px solid var(--rail-border);
+   border-radius: 4px;
+-  background: #070b10;
++  background: var(--paper-rail-input);
+   color: var(--rail-text);
+   font: inherit;
+   font-size: 10px;
+@@ -5468,8 +5478,8 @@
+ }
+ 
+ .itemRelationRow:not([data-freshness='fresh']) .itemRelationFreshness {
+-  border-color: color-mix(in srgb, #d6b65e 38%, var(--rail-border));
+-  color: #c9b676;
++  border-color: color-mix(in srgb, var(--paper-rail-stale-border) 38%, var(--rail-border));
++  color: var(--paper-rail-stale-ink);
+ }
+ 
+ .itemRelationEndpoint {
+@@ -5581,8 +5591,8 @@
+   display: grid;
+   gap: 6px;
+   padding: 6px 0;
+-  border-top: 1px solid color-mix(in srgb, #facc15 42%, var(--rail-border));
+-  color: #facc15;
++  border-top: 1px solid color-mix(in srgb, var(--paper-rail-warning) 42%, var(--rail-border));
++  color: var(--paper-rail-warning);
+   font-size: 10px;
+   line-height: 1.35;
+ }
+@@ -5599,7 +5609,7 @@
+ }
+ 
+ .itemErrorText {
+-  color: #fb7185;
++  color: var(--paper-rail-error);
+ }
+ 
+ .contentGroupStatusBar {
+@@ -5610,7 +5620,7 @@
+   min-height: 32px;
+   padding: 0 13px;
+   border-top: 1px solid var(--rail-border-soft);
+-  background: #080c11;
++  background: var(--paper-rail-strip);
+   color: var(--rail-dim);
+   font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+   font-size: 10px;
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/pages/Settings/AppearanceSection.tsx	B1a final working copy
+@@ -0,0 +1,21 @@
++import { SkinEditor } from '@/components/Skin/SkinEditor';
++import { useAuthStore } from '@/stores/authStore';
++import { readSkin } from '@/styles/skinPresets';
++import styles from './Settings.module.css';
++
++export default function AppearanceSection() {
++  const skin = useAuthStore((s) => s.user?.settings.skin);
++  const updateSettings = useAuthStore((s) => s.updateSettings);
++  const pending = useRef(Promise.resolve());
++  const save = (next: SkinSelection | null) => {
++    const write = pending.current.then(() => updateSettings({ skin: next }));
++    pending.current = write.catch(() => undefined);
++    return write;
++  };
++  return <section className={styles.section} aria-label="纸面外观">
++    <h2 className={styles.sectionTitle}>纸面外观</h2>
++    <SkinEditor value={readSkin(skin)} save={save} advanced preview />
++  </section>;
++}
++import { useRef } from 'react';
++import type { SkinSelection } from '@shared/types';
+===================================================================
+--- a/client/src/pages/Settings/Settings.tsx	captured before implementation
++++ b/client/src/pages/Settings/Settings.tsx	B1a final working copy
+@@ -6,6 +6,7 @@
+ import api from '@/services/api';
+ import AgentMemoriesSection from './AgentMemoriesSection';
+ import ProvidersSection from './ProvidersSection';
++import AppearanceSection from './AppearanceSection';
+ import styles from './Settings.module.css';
+ 
+ const providerOptions = [
+@@ -248,7 +249,9 @@
+         </div>
+       </div>
+ 
+-      {/* Agent */}
++      <AppearanceSection />
++
++      {/* Agent */}
+       <div className={styles.section}>
+         <div className={styles.sectionTitle}>AI Agent</div>
+         <div className={styles.card}>
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/styles/skinPresets.test.ts	B1a final working copy
+@@ -0,0 +1,57 @@
++import { describe, expect, it } from 'vitest';
++import { readSkin, resolveSkin, SKIN_PRESETS } from './skinPresets';
++
++describe('B1a factory paper snapshots', () => {
++  it.each([
++    ['default', { desk: '#0f0f10', paper: '#101114', ink: '#f5f5f5', 'ink-muted': '#b7b8bd', accent: '#2563eb', annotation: '#facc15', hairline: '#2c2d31', danger: '#ef4444', wall: '#777a8270' }],
++    ['quiet-ink', { desk: '#101114', paper: '#17181C', ink: '#E7E8EB', 'ink-muted': '#8B909A', accent: '#7FA3D7', annotation: '#B89B4C', hairline: '#FFFFFF12', danger: '#C4766B', wall: '#FFFFFF14' }],
++    ['warm-paper', { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC' }],
++    ['workbench', { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A' }],
++  ] as const)('%s keeps its nine agreed literal colors', (preset, expected) => {
++    expect(resolveSkin({ preset })).toEqual({ preset, tokens: expected });
++    expect(SKIN_PRESETS[preset]).toEqual(expected);
++  });
++
++  it('rollout absence and cleared global selection both use the incumbent default snapshot', () => {
++    expect(resolveSkin()).toEqual({ preset: 'default', tokens: SKIN_PRESETS.default });
++    expect(resolveSkin(null, null, null)).toEqual(resolveSkin());
++  });
++
++  it('paper wins over project and global; clearing each mounting point returns to its parent', () => {
++    const global = { preset: 'quiet-ink' as const, overrides: { accent: '#123456' } };
++    const project = { preset: 'workbench' as const, overrides: { paper: '#263340' } };
++    const paper = { preset: 'warm-paper' as const, overrides: { 'ink-muted': '#876543' } };
++    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', tokens: {
++      ...SKIN_PRESETS['warm-paper'], 'ink-muted': '#876543',
++    } });
++    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', tokens: {
++      ...SKIN_PRESETS.workbench, paper: '#263340',
++    } });
++    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', tokens: {
++      ...SKIN_PRESETS['quiet-ink'], accent: '#123456',
++    } });
++  });
++
++  it('a named snapshot resets inherited custom colors even when its overrides are sparse or empty', () => {
++    const global = { preset: 'warm-paper' as const, overrides: { accent: '#112233', desk: '#445566' } };
++    expect(resolveSkin(global, { preset: 'warm-paper', overrides: { ink: '#776655' } }).tokens).toEqual({
++      ...SKIN_PRESETS['warm-paper'], ink: '#776655',
++    });
++    expect(resolveSkin(global, null, { preset: 'quiet-ink', overrides: {} }).tokens).toEqual(SKIN_PRESETS['quiet-ink']);
++  });
++
++  it('reading persisted overrides and editing resolved colors do not mutate a saved selection or factory', () => {
++    const saved = { preset: 'quiet-ink' as const, overrides: { wall: '#FFFFFF14', accent: '#334455' } };
++    const original = structuredClone(saved);
++    const parsed = readSkin(saved)!;
++    parsed.overrides!.accent = '#667788';
++    const first = resolveSkin(saved);
++    first.tokens.paper = '#FFFFFF';
++    first.tokens.accent = '#000000';
++    expect(saved).toEqual(original);
++    expect(resolveSkin(saved).tokens.paper).toBe('#17181C');
++    expect(resolveSkin(saved).tokens.accent).toBe('#334455');
++    expect(SKIN_PRESETS['quiet-ink'].paper).toBe('#17181C');
++    expect(SKIN_PRESETS['quiet-ink'].accent).toBe('#7FA3D7');
++  });
++});
+===================================================================
+--- /dev/null	new B1a file
++++ b/client/src/styles/skinPresets.ts	B1a final working copy
+@@ -0,0 +1,37 @@
++import { SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinPresetId, type SkinSelection, type SkinTokens } from '@shared/types';
++
++/** Factory snapshots. The default column is the incumbent paper palette, not a redesign. */
++export const SKIN_PRESETS: Record<SkinPresetId, SkinTokens> = {
++  default: { desk: '#0f0f10', paper: '#101114', ink: '#f5f5f5', 'ink-muted': '#b7b8bd', accent: '#2563eb', annotation: '#facc15', hairline: '#2c2d31', danger: '#ef4444', wall: '#777a8270' },
++  'quiet-ink': { desk: '#101114', paper: '#17181C', ink: '#E7E8EB', 'ink-muted': '#8B909A', accent: '#7FA3D7', annotation: '#B89B4C', hairline: '#FFFFFF12', danger: '#C4766B', wall: '#FFFFFF14' },
++  'warm-paper': { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC' },
++  workbench: { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A' },
++};
++
++export const SKIN_LABELS: Record<SkinPresetId, string> = {
++  default: '默认', 'quiet-ink': '静墨', 'warm-paper': '暖纸', workbench: '工作台',
++};
++
++export function readSkin(value: unknown): SkinSelection | null {
++  if (!value || typeof value !== 'object') return null;
++  const raw = value as Partial<SkinSelection>;
++  if (!SKIN_PRESET_IDS.includes(raw.preset as SkinPresetId)) return null;
++  const overrides = Object.fromEntries(SKIN_TOKEN_NAMES.flatMap((key) => {
++    const color = raw.overrides?.[key];
++    return typeof color === 'string' && /^#[\da-f]{6}([\da-f]{2})?$/i.test(color) ? [[key, color]] : [];
++  }));
++  return { preset: raw.preset!, ...(Object.keys(overrides).length ? { overrides } : {}) };
++}
++
++/** An absent mounting point inherits. A named snapshot replaces its parent's palette. */
++export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, paper?: SkinSelection | null) {
++  let preset: SkinPresetId = 'default';
++  let tokens = { ...SKIN_PRESETS.default };
++  for (const candidate of [global, project, paper]) {
++    const skin = readSkin(candidate);
++    if (!skin) continue;
++    preset = skin.preset;
++    tokens = { ...SKIN_PRESETS[preset], ...skin.overrides };
++  }
++  return { preset, tokens };
++}
+===================================================================
+--- a/docs/audits/2026-09-11-d2-builder/browser-fixture.tsx	reconstructed by reversing exact B1a additions; see fixture-edit-provenance.json
++++ b/docs/audits/2026-09-11-d2-builder/browser-fixture.tsx	B1a final working copy
+@@ -114,6 +114,7 @@
+   const blockMatch = path.match(/^\/note-blocks\/([^/]+)$/);
+   if (path === '/canvas-objects/coordinate-contract' && method === 'get') data = { coordinate_contract: 'v2' };
+   else if (path === '/courses' && method === 'get') data = [project];
++  else if (path === `/courses/${project.id}/summary` && method === 'get') data = { course: { ...project, skin: null }, goals: [], decks: [], documents: [] };
+   else if (path === '/notes' && method === 'get') {
+     const courseId = url.searchParams.get('course_id');
+     const status = url.searchParams.get('status') || 'active';
+===================================================================
+--- /dev/null	new B1a file
++++ b/server/src/__tests__/v13PaperSkin.test.ts	B1a final working copy
+@@ -0,0 +1,143 @@
++import assert from 'node:assert/strict';
++import { mkdtempSync, rmSync } from 'node:fs';
++import type { Server } from 'node:http';
++import { tmpdir } from 'node:os';
++import { join, resolve, sep } from 'node:path';
++import test from 'node:test';
++import express from 'express';
++import Database from 'better-sqlite3';
++import { closeDb, initDb } from '../db/init.js';
++import migration from '../db/migrations/067_v13_paper_skin.js';
++import type { AuthRequest } from '../middleware/auth.js';
++import { errorHandler } from '../middleware/errorHandler.js';
++import coursesRoutes from '../routes/courses.js';
++import notesRoutes from '../routes/notes.js';
++import settingsRoutes from '../routes/settings.js';
++import { parseStoredSkin } from '../services/skin.js';
++
++const userId = 'b1000000-0000-4000-8000-000000000001';
++const presets = ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const;
++
++async function fixture() {
++  const temporaryRoot = resolve(tmpdir());
++  const directory = mkdtempSync(join(temporaryRoot, 'coincides-b1a-skin-'));
++  const dbPath = join(directory, 'skin.sqlite');
++  let db = await initDb(dbPath);
++  db.prepare("INSERT INTO users (id,email,password_hash,name,settings) VALUES (?,?,'synthetic','B1a',?)")
++    .run(userId, 'b1a@example.invalid', JSON.stringify({ language: 'zh', daily_status_enabled: false }));
++  const app = express();
++  app.use(express.json());
++  // Exercise the existing human routes after authentication, using synthetic data only.
++  app.use((req: AuthRequest, _res, next) => { req.userId = userId; next(); });
++  app.use('/api/settings', settingsRoutes);
++  app.use('/api/courses', coursesRoutes);
++  app.use('/api/notes', notesRoutes);
++  app.use(errorHandler);
++  const server = await new Promise<Server>((resolveServer) => {
++    const listener = app.listen(0, '127.0.0.1', () => resolveServer(listener));
++  });
++  const address = server.address();
++  assert.ok(address && typeof address === 'object');
++  return {
++    get db() { return db; },
++    async reopen() { closeDb(); db = await initDb(dbPath); },
++    async request(method: string, path: string, body?: unknown, status = 200) {
++      const response = await fetch(`http://127.0.0.1:${address.port}/api/${path}`, {
++        method,
++        ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
++      });
++      const result = await response.json() as any;
++      assert.equal(response.status, status, JSON.stringify(result));
++      return result;
++    },
++    async close() {
++      await new Promise<void>((resolveClose, reject) => server.close((error) => error ? reject(error) : resolveClose()));
++      closeDb();
++      assert.ok(resolve(directory).startsWith(`${temporaryRoot}${sep}coincides-b1a-skin-`));
++      rmSync(directory, { recursive: true, force: true });
++    },
++  };
++}
++
++test('B1a existing settings, project and note routes persist four preset selections across a database reopen', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  const project = await f.request('POST', 'courses', { name: 'Paper skins' }, 201);
++  const note = await f.request('POST', 'notes', {
++    course_id: project.id, title: 'Synthetic paper', metadata: { typography: { font: 'system', size: 16 } },
++  }, 201);
++  assert.equal(project.skin, null);
++  assert.equal(note.metadata.skin, undefined);
++  for (const preset of presets) {
++    const skin = { preset };
++    assert.deepEqual((await f.request('PUT', 'settings', { settings: { skin } })).skin, skin);
++    assert.deepEqual((await f.request('PUT', `courses/${project.id}`, { skin })).skin, skin);
++    assert.deepEqual((await f.request('PUT', `notes/${note.id}`, { skin })).metadata.skin, skin);
++    await f.reopen();
++    assert.deepEqual((await f.request('GET', 'settings')).skin, skin);
++    assert.deepEqual((await f.request('GET', 'courses'))[0].skin, skin);
++    assert.deepEqual((await f.request('GET', `courses/${project.id}/summary`)).course.skin, skin);
++    const readNote = await f.request('GET', `notes/${note.id}`);
++    assert.deepEqual(readNote.metadata.skin, skin);
++    assert.deepEqual(readNote.metadata.typography, { font: 'system', size: 16 });
++    assert.equal(Object.prototype.hasOwnProperty.call(readNote, 'skin'), false);
++    assert.deepEqual((await f.request('GET', `notes?course_id=${project.id}`))[0].metadata.skin, skin);
++  }
++  const settings = await f.request('GET', 'settings');
++  assert.equal(settings.language, 'zh');
++  assert.equal(settings.daily_status_enabled, false);
++});
++
++test('B1a each mount persists nine token overrides, and a preset switch replaces the old overrides', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  const skin = { preset: 'warm-paper', overrides: {
++    desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F',
++    annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#FFFFFF14',
++  } };
++  const project = await f.request('POST', 'courses', { name: 'With overrides', skin }, 201);
++  const note = await f.request('POST', 'notes', { course_id: project.id, title: 'With overrides', skin }, 201);
++  await f.request('PUT', 'settings', { settings: { skin } });
++  await f.reopen();
++  assert.deepEqual((await f.request('GET', 'settings')).skin, skin);
++  assert.deepEqual((await f.request('GET', 'courses'))[0].skin, skin);
++  assert.deepEqual((await f.request('GET', `notes/${note.id}`)).metadata.skin, skin);
++  const replacement = { preset: 'quiet-ink' };
++  assert.deepEqual((await f.request('PUT', 'settings', { settings: { skin: replacement } })).skin, replacement);
++  assert.deepEqual((await f.request('PUT', `courses/${project.id}`, { skin: replacement })).skin, replacement);
++  assert.deepEqual((await f.request('PUT', `notes/${note.id}`, { skin: replacement })).metadata.skin, replacement);
++});
++
++test('B1a null clears each mount while unrelated writes retain its chosen skin and document metadata', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  const skin = { preset: 'workbench', overrides: { accent: '#E5A33C' } };
++  const project = await f.request('POST', 'courses', { name: 'Inherit', skin }, 201);
++  const note = await f.request('POST', 'notes', { course_id: project.id, title: 'Inherit', skin }, 201);
++  await f.request('PUT', 'settings', { settings: { skin } });
++  assert.deepEqual((await f.request('PUT', 'settings', { settings: { language: 'en' } })).skin, skin);
++  assert.deepEqual((await f.request('PUT', `courses/${project.id}`, { name: 'Renamed' })).skin, skin);
++  const typography = { fontFamily: 'system', fontSize: 18, lineHeight: 1.6 };
++  const updated = await f.request('PUT', `notes/${note.id}`, { metadata: { typography }, title: 'Renamed' });
++  assert.deepEqual(updated.metadata, { typography, skin });
++  const staleSave = await f.request('PUT', `notes/${note.id}`, {
++    metadata: { typography, skin: { preset: 'default' } },
++  });
++  assert.deepEqual(staleSave.metadata, { typography, skin });
++  assert.equal((await f.request('PUT', 'settings', { settings: { skin: null } })).skin, null);
++  assert.equal((await f.request('PUT', `courses/${project.id}`, { skin: null })).skin, null);
++  assert.deepEqual((await f.request('PUT', `notes/${note.id}`, { skin: null })).metadata, { typography, skin: null });
++  await f.reopen();
++  assert.equal((await f.request('GET', 'settings')).skin, null);
++  assert.equal((await f.request('GET', 'courses'))[0].skin, null);
++  assert.equal((await f.request('GET', `notes/${note.id}`)).metadata.skin, null);
++});
++
++test('B1a project migration is additive and repeatable for an existing project', () => {
++  const db = new Database(':memory:');
++  try {
++    db.exec("CREATE TABLE courses (id TEXT PRIMARY KEY, name TEXT); INSERT INTO courses VALUES ('old', 'Existing project')");
++    migration.up(db); migration.up(db);
++    assert.deepEqual(db.prepare('SELECT * FROM courses').get(), { id: 'old', name: 'Existing project', skin: null });
++    db.prepare('UPDATE courses SET skin = ?').run(JSON.stringify({ preset: 'warm-paper' }));
++    migration.up(db);
++    assert.deepEqual(parseStoredSkin((db.prepare('SELECT skin FROM courses').get() as { skin: string }).skin), { preset: 'warm-paper' });
++  } finally { db.close(); }
++});
+===================================================================
+--- a/server/src/__tests__/v2NotesLifecycle.test.ts	captured before implementation
++++ b/server/src/__tests__/v2NotesLifecycle.test.ts	B1a final working copy
+@@ -414,7 +414,7 @@
+   });
+ });
+ 
+-test('PUT /api/notes/:id handler remains byte-for-byte unchanged apart from line endings', () => {
++test('PUT /api/notes/:id handler matches the B1a skin-aware baseline apart from line endings', () => {
+   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
+     .replace(/\r\n?/g, '\n');
+   const start = routeSource.indexOf("router.put('/:id'");
+@@ -425,6 +425,6 @@
+ 
+   assert.equal(
+     createHash('sha256').update(putRoute).digest('hex'),
+-    '6140c7351e061a18a6db23753c98ec3c7bbf146e1c97ddacf88b658387b23c61',
++    '69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e',
+   );
+ });
+===================================================================
+--- /dev/null	new B1a file
++++ b/server/src/db/migrations/067_v13_paper_skin.ts	B1a final working copy
+@@ -0,0 +1,12 @@
++import type Database from 'better-sqlite3';
++
++export default {
++  id: '067_v13_paper_skin',
++  description: 'Add an inheritable project paper skin; global and note skins use existing JSON storage',
++  up(db: Database.Database): void {
++    const columns = db.pragma('table_info(courses)') as Array<{ name: string }>;
++    if (!columns.some((column) => column.name === 'skin')) {
++      db.exec('ALTER TABLE courses ADD COLUMN skin TEXT');
++    }
++  },
++};
+===================================================================
+--- a/server/src/db/schema.sql	captured before implementation
++++ b/server/src/db/schema.sql	B1a final working copy
+@@ -29,7 +29,8 @@
+   color TEXT NOT NULL DEFAULT '#6366f1',
+   weight INTEGER NOT NULL DEFAULT 2,
+   description TEXT,
+-  semester TEXT,
++  semester TEXT,
++  skin TEXT,
+   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+ );
+===================================================================
+--- a/server/src/routes/courses.ts	captured before implementation
++++ b/server/src/routes/courses.ts	B1a final working copy
+@@ -9,6 +9,7 @@
+ } from '../services/courseLifecycle.js';
+ import { listCourseCards } from '../services/courseCards.js';
+ import { assertCourseCanRename } from '../services/systemCourses.js';
++import { hydrateCourseSkin, serializeSkin } from '../services/skin.js';
+ import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
+ import { z, ZodError } from 'zod';
+ 
+@@ -32,7 +33,7 @@
+     const now = new Date().toISOString();
+ 
+     db.prepare(
+-      'INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
++      'INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, skin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+     ).run(
+       id,
+       req.userId!,
+@@ -41,13 +42,14 @@
+       data.color || '#6366f1',
+       data.weight ?? 2,
+       data.description || null,
+-      data.semester || null,
++      data.semester || null,
++      serializeSkin(data.skin),
+       now,
+       now
+     );
+ 
+-    const course = db.prepare('SELECT * FROM courses WHERE id = ?').get(id);
+-    res.status(201).json(course);
++    const course = db.prepare('SELECT * FROM courses WHERE id = ?').get(id) as Record<string, unknown>;
++    res.status(201).json(hydrateCourseSkin(course));
+   } catch (err) {
+     if (err instanceof ZodError) {
+       res.status(400).json({ error: 'Validation error', details: err.errors });
+@@ -80,7 +82,8 @@
+     if (data.color !== undefined) { fields.push('color = ?'); values.push(data.color); }
+     if (data.weight !== undefined) { fields.push('weight = ?'); values.push(data.weight); }
+     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+-    if (data.semester !== undefined) { fields.push('semester = ?'); values.push(data.semester); }
++    if (data.semester !== undefined) { fields.push('semester = ?'); values.push(data.semester); }
++    if (data.skin !== undefined) { fields.push('skin = ?'); values.push(serializeSkin(data.skin)); }
+ 
+     if (fields.length === 0) {
+       throw new AppError(400, 'No fields to update');
+@@ -92,8 +95,8 @@
+ 
+     db.prepare(`UPDATE courses SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+ 
+-    const updated = db.prepare('SELECT * FROM courses WHERE id = ?').get(req.params.id);
+-    res.json(updated);
++    const updated = db.prepare('SELECT * FROM courses WHERE id = ?').get(req.params.id) as Record<string, unknown>;
++    res.json(hydrateCourseSkin(updated));
+   } catch (err) {
+     if (err instanceof ZodError) {
+       res.status(400).json({ error: 'Validation error', details: err.errors });
+@@ -156,7 +159,7 @@
+   `).all(courseId, userId);
+ 
+   res.json({
+-    course,
++    course: hydrateCourseSkin(course),
+     goals,
+     decks,
+     documents,
+===================================================================
+--- a/server/src/routes/notes.ts	captured before implementation
++++ b/server/src/routes/notes.ts	B1a final working copy
+@@ -34,6 +34,7 @@
+ import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
+ import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
+ import { createNoteMetadataRouter } from './noteMetadata.js';
++import { mergeNoteSkin } from '../services/skin.js';
+ 
+ export { hydrateNote };
+ 
+@@ -117,7 +118,7 @@
+       data.title,
+       data.description || null,
+       data.page_format,
+-      stringifyJson(data.metadata, {}),
++      stringifyJson(mergeNoteSkin({}, data.metadata, data.skin), {}),
+       operationBatchId,
+       now,
+       now
+@@ -153,7 +154,13 @@
+     if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
+     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+     if (data.page_format !== undefined) { fields.push('page_format = ?'); values.push(data.page_format); }
+-    if (data.metadata !== undefined) { fields.push('metadata = ?'); values.push(stringifyJson(data.metadata, {})); }
++    if (data.metadata !== undefined || data.skin !== undefined) {
++      const current = getDb().prepare('SELECT metadata FROM notes WHERE id = ? AND user_id = ?')
++        .get(noteId, req.userId!) as { metadata: string };
++      const metadata = mergeNoteSkin(JSON.parse(current.metadata || '{}'), data.metadata, data.skin);
++      fields.push('metadata = ?');
++      values.push(stringifyJson(metadata, {}));
++    }
+     if (data.status !== undefined) {
+       fields.push('status = ?');
+       values.push(data.status);
+===================================================================
+--- a/server/src/services/courseCards.ts	captured before implementation
++++ b/server/src/services/courseCards.ts	B1a final working copy
+@@ -1,4 +1,5 @@
+ import type Database from 'better-sqlite3';
++import { hydrateCourseSkin } from './skin.js';
+ 
+ export interface RecentCourseNote {
+   id: string;
+@@ -62,7 +63,7 @@
+     } = row;
+ 
+     return {
+-      ...course,
++      ...hydrateCourseSkin(course),
+       recent_note: recentNoteId === null
+         ? null
+         : {
+===================================================================
+--- /dev/null	new B1a file
++++ b/server/src/services/skin.ts	B1a final working copy
+@@ -0,0 +1,36 @@
++import type { SkinSelection } from '../../../shared/types/skin.js';
++import { skinSelectionSchema } from '../validators/skin.js';
++
++export function parseStoredSkin(value: unknown): SkinSelection | null {
++  let decoded = value;
++  if (typeof value === 'string') {
++    try { decoded = JSON.parse(value); } catch { return null; }
++  }
++  const result = skinSelectionSchema.safeParse(decoded);
++  return result.success ? result.data : null;
++}
++
++export function serializeSkin(value: SkinSelection | null | undefined): string | null {
++  return value == null ? null : JSON.stringify(value);
++}
++
++export function hydrateCourseSkin<T extends Record<string, unknown>>(course: T) {
++  return { ...course, skin: parseStoredSkin(course.skin) };
++}
++
++/** Paper presentation shares metadata storage, but a skin-only write never replaces document properties. */
++export function mergeNoteSkin(
++  currentMetadata: Record<string, unknown>,
++  incomingMetadata: Record<string, unknown> | undefined,
++  skin: SkinSelection | null | undefined,
++): Record<string, unknown> {
++  const next = { ...(incomingMetadata ?? currentMetadata) };
++  // Existing typography/layout callers can carry a stale metadata snapshot. Only the explicit
++  // human-route skin field changes the paper property, so such saves cannot rewind a newer skin.
++  if (incomingMetadata) {
++    if (Object.prototype.hasOwnProperty.call(currentMetadata, 'skin')) next.skin = currentMetadata.skin;
++    else delete next.skin;
++  }
++  if (skin !== undefined) next.skin = skin;
++  return next;
++}
+===================================================================
+--- a/server/src/validators/index.ts	captured before implementation
++++ b/server/src/validators/index.ts	B1a final working copy
+@@ -1,4 +1,5 @@
+ import { z } from 'zod';
++import { skinSelectionSchema } from './skin.js';
+ import { paperFreehandDataSchema } from './paperInk.js';
+ 
+ // --- Auth ---
+@@ -16,7 +17,8 @@
+ 
+ // --- Course ---
+ 
+-export const createCourseSchema = z.object({
++export const createCourseSchema = z.object({
++  skin: skinSelectionSchema.nullable().optional(),
+   name: z.string().min(1, 'Course name is required').max(200),
+   code: z.string().max(20).optional(),
+   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+@@ -25,7 +27,8 @@
+   semester: z.string().max(50).optional(),
+ });
+ 
+-export const updateCourseSchema = z.object({
++export const updateCourseSchema = z.object({
++  skin: skinSelectionSchema.nullable().optional(),
+   name: z.string().min(1).max(200).optional(),
+   code: z.string().max(20).optional(),
+   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+@@ -135,7 +138,8 @@
+ // --- Settings ---
+ 
+ export const updateSettingsSchema = z.object({
+-  settings: z.object({
++  settings: z.object({
++    skin: skinSelectionSchema.nullable().optional(),
+     theme: z.enum(['dark', 'light']).optional(),
+     language: z.enum(['en', 'zh']).optional(),
+     agent_name: z.string().max(50).optional(),
+@@ -346,7 +350,8 @@
+ 
+ // --- v2 Notes / NoteBlocks ---
+ 
+-export const createNoteSchema = z.object({
++export const createNoteSchema = z.object({
++  skin: skinSelectionSchema.nullable().optional(),
+   course_id: z.string().uuid('Invalid course ID'),
+   title: z.string().min(1, 'Note title is required').max(300),
+   description: z.string().max(2000).optional(),
+@@ -354,7 +359,8 @@
+   metadata: jsonObjectSchema.optional(),
+ });
+ 
+-export const updateNoteSchema = z.object({
++export const updateNoteSchema = z.object({
++  skin: skinSelectionSchema.nullable().optional(),
+   title: z.string().min(1).max(300).optional(),
+   description: z.string().max(2000).nullable().optional(),
+   page_format: z.string().max(50).optional(),
+===================================================================
+--- /dev/null	new B1a file
++++ b/server/src/validators/skin.ts	B1a final working copy
+@@ -0,0 +1,19 @@
++import { z } from 'zod';
++import type { SkinSelection } from '../../../shared/types/skin.js';
++
++// Runtime enum stays local to the server build; shared/types/skin.ts is the public type contract.
++const colorSchema = z.string().regex(/^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/, 'Use a six- or eight-digit hex color');
++export const skinSelectionSchema: z.ZodType<SkinSelection> = z.object({
++  preset: z.enum(['default', 'quiet-ink', 'warm-paper', 'workbench']),
++  overrides: z.object({
++    desk: colorSchema.optional(),
++    paper: colorSchema.optional(),
++    ink: colorSchema.optional(),
++    'ink-muted': colorSchema.optional(),
++    accent: colorSchema.optional(),
++    annotation: colorSchema.optional(),
++    hairline: colorSchema.optional(),
++    danger: colorSchema.optional(),
++    wall: colorSchema.optional(),
++  }).strict().optional(),
++}).strict();
+===================================================================
+--- a/shared/types/index.ts	captured before implementation
++++ b/shared/types/index.ts	B1a final working copy
+@@ -1,6 +1,9 @@
+ // ============================================================
+-// Coincides — Shared Type Definitions
+-// ============================================================
++// Coincides — Shared Type Definitions
++// ============================================================
++
++import type { SkinSelection } from './skin.js';
++export * from './skin.js';
+ 
+ // --- Enums ---
+ 
+@@ -135,7 +138,8 @@
+   updated_at: string;
+ }
+ 
+-export interface UserSettings {
++export interface UserSettings {
++  skin?: SkinSelection | null;
+   theme?: 'dark' | 'light';
+   language?: 'en' | 'zh';
+   agent_name?: string;
+@@ -152,7 +156,8 @@
+   base_url?: string;
+ }
+ 
+-export interface Course {
++export interface Course {
++  skin?: SkinSelection | null;
+   id: string;
+   user_id: string;
+   name: string;
+===================================================================
+--- /dev/null	new B1a file
++++ b/shared/types/skin.ts	B1a final working copy
+@@ -0,0 +1,15 @@
++/** B1a paper colors only; typography and board presentation stay independent. */
++export const SKIN_PRESET_IDS = ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const;
++export type SkinPresetId = typeof SKIN_PRESET_IDS[number];
++
++export const SKIN_TOKEN_NAMES = [
++  'desk', 'paper', 'ink', 'ink-muted', 'accent', 'annotation', 'hairline', 'danger', 'wall',
++] as const;
++export type SkinTokenName = typeof SKIN_TOKEN_NAMES[number];
++export type SkinTokens = Record<SkinTokenName, string>;
++
++/** Null/absence at a mounting point inherits its parent; a selection replaces the preset snapshot. */
++export interface SkinSelection {
++  preset: SkinPresetId;
++  overrides?: Partial<SkinTokens>;
++}

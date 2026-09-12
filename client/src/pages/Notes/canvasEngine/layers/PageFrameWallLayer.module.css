@@ -12,7 +12,7 @@
   position: absolute;
   inset: 0 auto 0 50%;
   width: 1px;
-  background: color-mix(in srgb, var(--text-muted) 44%, transparent);
+  background: var(--paper-wall);
   opacity: 0;
   pointer-events: none;
   transition: opacity 140ms ease-out;

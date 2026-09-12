@@ -9,6 +9,7 @@ import {
 } from '../services/courseLifecycle.js';
 import { listCourseCards } from '../services/courseCards.js';
 import { assertCourseCanRename } from '../services/systemCourses.js';
+import { hydrateCourseSkin, serializeSkin } from '../services/skin.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
 import { z, ZodError } from 'zod';
 
@@ -32,7 +33,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     db.prepare(
-      'INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, skin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ).run(
       id,
       req.userId!,
@@ -42,12 +43,13 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.weight ?? 2,
       data.description || null,
       data.semester || null,
+      serializeSkin(data.skin),
       now,
       now
     );
 
-    const course = db.prepare('SELECT * FROM courses WHERE id = ?').get(id);
-    res.status(201).json(course);
+    const course = db.prepare('SELECT * FROM courses WHERE id = ?').get(id) as Record<string, unknown>;
+    res.status(201).json(hydrateCourseSkin(course));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });
@@ -81,6 +83,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.weight !== undefined) { fields.push('weight = ?'); values.push(data.weight); }
     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
     if (data.semester !== undefined) { fields.push('semester = ?'); values.push(data.semester); }
+    if (data.skin !== undefined) { fields.push('skin = ?'); values.push(serializeSkin(data.skin)); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');
@@ -92,8 +95,8 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 
     db.prepare(`UPDATE courses SET ${fields.join(', ')} WHERE id = ?`).run(...values);
 
-    const updated = db.prepare('SELECT * FROM courses WHERE id = ?').get(req.params.id);
-    res.json(updated);
+    const updated = db.prepare('SELECT * FROM courses WHERE id = ?').get(req.params.id) as Record<string, unknown>;
+    res.json(hydrateCourseSkin(updated));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });
@@ -156,7 +159,7 @@ router.get('/:id/summary', (req: AuthRequest, res: Response) => {
   `).all(courseId, userId);
 
   res.json({
-    course,
+    course: hydrateCourseSkin(course),
     goals,
     decks,
     documents,

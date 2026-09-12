@@ -6,7 +6,10 @@ import { BOARD_PATH, detail, resetSample, seedEdge, seedLayer, seedMember, seedV
 import type { BoardMember, BoardVisual } from './boardTypes';
 
 // Real BoardPage/useBoard/history, with the shared synthetic in-memory transport.
-vi.mock('@/services/api', async () => ({ default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(),
+  default: (await import('../../../scripts/boardToolsSmoke/mockApi')).default,
+}));
 const noop = () => undefined;
 type Modifiers = Pick<PointerEventInit, 'ctrlKey' | 'shiftKey' | 'altKey'>;
 function openBoard() {

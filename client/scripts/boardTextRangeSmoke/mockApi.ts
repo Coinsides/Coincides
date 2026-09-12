@@ -81,6 +81,7 @@ const api = axios.create({ adapter: async (config) => {
   if (method === 'GET' && url === `/notes/${NOTE_ID}`) data = state.note;
   else if (method === 'GET' && url === '/notes') data = [state.note];
   else if (method === 'GET' && url === '/courses') data = [{ id: 'range-smoke-project', name: 'Synthetic project' }];
+  else if (method === 'GET' && url === '/courses/range-smoke-project/summary') data = { course: { id: 'range-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };
   else if (method === 'GET' && url === '/items') data = [];
   else if (method === 'GET' && url === '/purposes') data = { purposes: state.boards.map(({ board }) => ({
     id: board.soul_id, title: `Question for ${board.title}`, project_id: null, course_id: null, note_id: null,

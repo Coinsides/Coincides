@@ -2,6 +2,9 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import type { Course } from '@shared/types';
+import type { SkinSelection } from '@shared/types/skin';
+import { readSkin } from '@/styles/skinPresets';
+import { SkinControls } from '@/components/Skin/SkinControls';
 import styles from './CourseModal.module.css';
 
 const PRESET_COLORS = [
@@ -25,6 +28,7 @@ export default function CourseModal() {
   const [description, setDescription] = useState('');
   const [semester, setSemester] = useState('');
   const [saving, setSaving] = useState(false);
+  const [skin, setSkin] = useState<SkinSelection | null>(null);
 
   useEffect(() => {
     if (isEdit && existing) {
@@ -33,6 +37,7 @@ export default function CourseModal() {
       setColor(existing.color);
       setDescription(existing.description || '');
       setSemester(existing.semester || '');
+      setSkin(readSkin(existing.skin));
     }
   }, [modal]);
 
@@ -48,10 +53,13 @@ export default function CourseModal() {
         color,
         description: description.trim() || undefined,
         semester: semester.trim() || undefined,
+        ...(isEdit ? { skin } : {}),
       };
 
       if (isEdit && existing) {
-        await updateCourse(existing.id, payload);
+        const updated = await updateCourse(existing.id, payload);
+        const onUpdated = modal?.data?.onUpdated;
+        if (typeof onUpdated === 'function') onUpdated(updated);
         addToast('success', 'Project updated');
       } else {
         await createCourse(payload);
@@ -128,6 +136,8 @@ export default function CourseModal() {
               onChange={(e) => setSemester(e.target.value)}
             />
           </div>
+
+          {isEdit && <SkinControls value={skin} onChange={setSkin} inheritLabel="继承全局外观" disabled={saving} />}
 
           <div className={styles.actions}>
             <button type="button" className={styles.cancelBtn} onClick={closeModal}>

@@ -1,0 +1,549 @@
+
+> coincides@1.8.0 verify:v2-bn8-runtime
+> npm run test:unit && npm run test:tool-face-registry && npm run test:tool-face-manifest && npm run check:tool-face-manifest && npm run test:tool-face-parity && npm run check:tool-face-parity && npm run check:server-shared-runtime-import && npm run check:canvas-runtime-boundary && npm run check:group-gallery-shell && npm run check:groups-rail-shell && npm run check:single-editor-shell && npm run check:source-experience && npm run check:v2-bn11-legacy-shutdown && npm run check:v2-bn11-relation-freshness && npm run smoke:canvas-engine-model-contract && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && npm run docs:check && git diff --check && npm run check:changed-file-secrets
+
+
+> coincides@1.8.0 test:unit
+> cd client && npm run test:unit
+
+
+> coincides-client@1.8.0 test:unit
+> vitest run
+
+
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+
+npm.cmd : stderr | src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx > note cover metadata behavior > hydr
+ates stored tags, trims additions and reflects successful deletion across remounts
+所在位置 行:2 字符: 109
++ ...  $env:Path; & 'C:/Program Files/nodejs/npm.cmd' run verify:v2-bn8-run ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (stderr | src/pa...across remounts:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Boards/useBoard.history.test.tsx (11 tests) 1227ms
+ ✓ src/pages/Boards/useBoard.test.tsx (8 tests) 1039ms
+stderr | src/pages/Notes/canvasEngine/panels/ContentGroupPanel.test.tsx > ContentGroupPanel library Purpose alignment >
+ retires historical membership controls and keeps library soul receipts on new Relations
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+stderr | src/pages/AgentMemories/AgentMemories.test.tsx > Agent memories page human controls > makes all 205 synthetic 
+memories reachable while rendering at most 25 rows
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+stderr | src/pages/GroupGallery/GroupGallery.test.tsx > Group Gallery destination navigation > K-1a renders the fixed d
+estinations and the project group count
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+stderr | src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx > B1a adapter paper skin write inten
+t > publishes successive choices immediately, sends them serially and drains the entire queued intent
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+stderr | src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx > C4 paper ink through the existing canvas com
+mand stack and persistence adapter > moves and deletes a reloaded stroke with symmetric placement undo/redo on the pape
+r stack
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx (23 tests) 3148ms
+   ✓ note cover metadata behavior > hydrates stored tags, trims additions and reflects successful deletion across remounts  658ms
+ ✓ src/pages/AgentMemories/AgentMemories.test.tsx (9 tests) 524ms
+stderr | src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx > useRuntimeNaturalWritingContr
+oller Page draft authority > keeps reconciled missing block rollback on the durable TextFlow and annotation inverse
+Slash block rollback was not durably saved: {
+  blockId: 'block-1',
+  exitReason: 'missing_block',
+  reason: 'block_unavailable',
+  durableOutcome: 'not_attempted'
+}
+
+ ✓ src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx (13 tests) 1208ms
+   ✓ useRuntimeNaturalWritingController Page draft authority > keeps Escape rollback reachable after draft owner reconciles to a durable block  373ms
+ ✓ src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx (7 tests) 1179ms
+   ✓ C4 paper ink through the existing canvas command stack and persistence adapter > moves and deletes a reloaded stroke with symmetric placement undo/redo on the paper stack  377ms
+ ✓ src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx (8 tests) 1253ms
+ ✓ src/pages/Boards/BoardViewportBookmarks.test.tsx (12 tests) 4254ms
+   ✓ B4v personal viewport bookmark rail > waits for loading, retains creation order and jumps with the exact saved camera  348ms
+   ✓ B4v personal viewport bookmark rail > captures when Save current viewport is clicked, then creates, renames and deletes without changing order  525ms
+   ✓ B4v personal viewport bookmark rail > shows a readable 24-bookmark limit and can create after deleting one  2195ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx (10 tests) 1713ms
+   ✓ B1a adapter paper skin write intent > publishes successive choices immediately, sends them serially and drains the entire queued intent  327ms
+ ✓ src/pages/Notes/canvasEngine/blocks/TextBlockProjection.unitHandle.test.tsx (27 tests) 524ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx (14 tests) 4602ms
+   ✓ E4 Overview continuous page grid > fills a 360 px viewport with 1 proportional page columns  316ms
+   ✓ E4 Overview continuous page grid > mounts only nearby content among 240 page shells and unloads distant content after scrolling  788ms
+   ✓ E4 Overview continuous page grid > opens at the current reading page row and highlights it independently of the selected frame  1619ms
+   ✓ E4 Overview continuous page grid > keeps the same page and page-local reading offset when a scrolled grid changes from four columns to one  525ms
+   ✓ E4 Overview continuous page grid > discards the scroll window when changing notes and renders the new note first page  624ms
+ ✓ src/pages/Notes/canvasEngine/textFlowBlockNavigation.test.tsx (34 tests) 571ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useSlashBlockRollbackController.test.tsx (16 tests) 351ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts (7 tests) 318ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.document.test.tsx (13 tests) 281ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx (20 tests) 525ms
+ ✓ src/pages/Boards/BoardNewNoteDialog.test.tsx (7 tests) 336ms
+ ✓ src/pages/GroupGallery/GroupGallery.test.tsx (17 tests) 4668ms
+   ✓ Group Gallery destination navigation > K-1a renders the fixed destinations and the project group count  911ms
+   ✓ Group Gallery origin badges > K-2a renders the project badge for a project-level group  346ms
+   ✓ Group Gallery creation destinations > K-4 gives an explicitly selected middle folder precedence over the destination root  332ms
+   ✓ Group Gallery regressions > K-5 keeps the group visible while switching all three views  313ms
+ ✓ src/pages/Boards/BoardNoteModal.test.tsx (18 tests) 425ms
+stderr | src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx > note route save boundary > keeps naviga
+tor departure on the note until dismiss, focus restoration, blur and pending writes finish
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+
+ ✓ src/pages/Notes/canvasEngine/blocks/TextBlockProjection.input.test.tsx (63 tests) 3222ms
+   ✓ B4 TextFlow input boundaries with synthetic content > fix1 smoke 2: reverses across the original middle-unit anchor without moving it  616ms
+stderr | src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx > note route save boundary > can render i
+solated legacy MemoryRouter fixtures without changing production router requirements
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Settings/ProvidersSection.test.tsx (4 tests) 329ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx (9 tests) 302ms
+stderr | src/components/Layout/AppLayout.test.tsx > AppLayout board navigator session > collapses on board entry and re
+stores the expanded navigator on leaving
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+
+ ✓ src/pages/Notes/canvasEngine/panels/ContentGroupPanel.test.tsx (9 tests) 6538ms
+   ✓ ContentGroupPanel library Purpose alignment > retires historical membership controls and keeps library soul receipts on new Relations  1885ms
+   ✓ ContentGroupPanel library Purpose alignment > allows Item save with no note-default soul or Purpose writer callback  466ms
+   ✓ ContentGroupPanel library Purpose alignment > shows board birthplace board-1 without affecting the editable body  425ms
+   ✓ ContentGroupPanel library Purpose alignment > shows board birthplace null without affecting the editable body  461ms
+   ✓ ContentGroupPanel library Purpose alignment > keeps all Gallery/editor navigation disabled in a modal while local Item tools remain usable  583ms
+   ✓ ContentGroupPanel library Purpose alignment > preserves page navigation and does not register page Item writes  532ms
+   ✓ ContentGroupPanel library Purpose alignment > holds modal exit for a direct Item write and preserves failure until a successful retry  567ms
+   ✓ ContentGroupPanel library Purpose alignment > keeps the complete cast and subsequent Group write pending, and recovers a failed edge through Retry link  790ms
+   ✓ ContentGroupPanel library Purpose alignment > holds modal exit for a direct Relation write  826ms
+ ✓ src/components/Layout/AppLayout.test.tsx (6 tests) 302ms
+ ✓ src/pages/Boards/BoardPage.modal.test.tsx (9 tests) 5175ms
+   ✓ BoardPage note modal host > closes the selection list when opening a note and keeps the same selected cards after closing it  1470ms
+   ✓ BoardPage note modal host > leaves nonempty board undo and redo stacks untouched while the note modal owns keyboard input  1245ms
+   ✓ BoardPage note modal host > keeps the selected board unchanged while the New note dialog owns input and an older paste finishes  388ms
+   ✓ BoardPage note modal host > opens a note in place, refreshes its saved body after close and keeps Enter as navigation  491ms
+   ✓ BoardPage note modal host > yields all board keys, paste, controls and non-note gestures while keeping the note-switch target  591ms
+   ✓ BoardPage note modal host > holds a single instance until the old note accepts closing and retains it when saving fails  590ms
+stderr | src/pages/ToolReceipts/ToolReceipts.test.tsx > ToolReceipts human review and executed views > K-7 keeps the pr
+oposed Apply, Dismiss, and Jump to scene controls
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+stderr | src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx > view options writing-surface integration > f
+orwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+stderr | src/pages/Settings/Settings.test.tsx > Settings provider management integration > preserves the A1 memory sect
+ion and other provider metadata while connecting model drafts to provider tests
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Boards/BoardPage.staging.test.tsx (9 tests) 5426ms
+   ✓ board staging dock > Stages Claim once, leaves it off canvas and reads it back on reopening  1279ms
+   ✓ board staging dock > Stages Source note once, leaves it off canvas and reads it back on reopening  687ms
+   ✓ board staging dock > Stages Study group once, leaves it off canvas and reads it back on reopening  633ms
+   ✓ board staging dock > Places at the default grid with one geometry PATCH and retains that placement on reopening  562ms
+   ✓ board staging dock > drags a staging row to world coordinates without moving the board viewport  413ms
+   ✓ board staging dock > sends a modal selection to a source-labelled staging row and keeps dock controls live while canvas keys yield  580ms
+   ✓ board staging dock > removes through unmount and preserves the library source  564ms
+   ✓ board staging dock > retains a staged row when Place or Remove fails  499ms
+ ✓ src/pages/ToolReceipts/ToolReceipts.test.tsx (2 tests) 286ms
+ ✓ src/pages/Boards/BoardRelocatedVisual.test.tsx (2 tests) 214ms
+ ✓ src/pages/Settings/Settings.test.tsx (1 test) 369ms
+   ✓ Settings provider management integration > preserves the A1 memory section and other provider metadata while connecting model drafts to provider tests  368ms
+stderr | src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx > V13 S3 tray relocation > gates all three tray 
+navigation destinations only in modal host mode
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx (12 tests) 2164ms
+   ✓ NoteChromeLayer note trash smoke > requires confirmation, cancels without deleting, and keeps a failed delete visible for retry  489ms
+   ✓ NoteChromeLayer note trash smoke > moves the note through the real delete action, navigates to its Project, and restores through the existing Trash entry  424ms
+   ✓ NoteChromeLayer note trash smoke > closes the prior note confirmation when the mounted chrome receives another note  306ms
+ ✓ src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx (2 tests) 276ms
+stderr | src/pages/Settings/AgentMemoriesSection.test.tsx > Settings agent memories summary > shows the total and three
+ latest previews, then opens the full page
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/components/ReferenceTag/ReferenceTag.test.tsx (11 tests) 221ms
+ ✓ src/pages/Settings/AgentMemoriesSection.test.tsx (3 tests) 181ms
+ ✓ src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx (8 tests) 241ms
+ ✓ src/pages/Boards/BoardList.test.tsx (3 tests) 171ms
+ ✓ src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx (15 tests) 224ms
+stdout | src/pages/Boards/BoardPage.smoke.test.tsx > V13.5 B3 board identity details > reads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes
+V13_5_B3_CLIENT_IDENTITY {"title":"Renamed board","identity_item_id":"identity-identity","description":"A place to compare field observations.\nQuestions remain open.","rename_request":["/boards/identity",{"title":"Renamed board"}],"reopened":true}
+
+ ✓ src/components/CourseModal/CourseModal.test.tsx (4 tests) 194ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.rangeRecovery.test.tsx (5 tests) 137ms
+ ✓ src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.test.tsx (5 tests) 195ms
+ ✓ src/pages/Notes/canvasEngine/textFlowDocumentHistory.integration.test.tsx (4 tests) 171ms
+stderr | src/pages/Boards/BoardNoteModal.rangeSession.test.tsx > registers a range minted in the open modal and keeps i
+t Live after same-session prefix edits and save
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx (5 tests) 565ms
+ ✓ src/pages/Courses/Courses.test.tsx (18 tests) 1621ms
+   ✓ Project life-trace cards > K-1 opens the newest note from the Continue row  338ms
+   ✓ Project life-trace cards > K-4 opens the shared Project menu from the ellipsis entry  322ms
+ ✓ src/pages/Boards/BoardDeleteDialog.test.tsx (4 tests) 168ms
+stderr | src/pages/Notes/canvasEngine/layers/NoteTraySidebar.test.tsx > Note staging row reorder > drags each entry cat
+egory through one complete order request: 2
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/layers/NoteTraySidebar.test.tsx (9 tests) 145ms
+ ✓ src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx (12 tests) 138ms
+ ✓ src/pages/Boards/BoardNoteModal.rangeSession.test.tsx (1 test) 1474ms
+   ✓ registers a range minted in the open modal and keeps it Live after same-session prefix edits and save  1452ms
+ ✓ src/pages/Boards/boardTextRangeClipboard.test.tsx (12 tests) 4573ms
+   ✓ text range copy and board paste user loop > copies a native selected passage, posts its anchor on board paste, and retains the mounted card after reopening  1268ms
+   ✓ text range copy and board paste user loop > mounts a custom web MIME ClipboardItem delivered as a typed Blob on paste  415ms
+   ✓ text range copy and board paste user loop > Control+C copies a retained mouse-selection draft after the editor collapses its native range  448ms
+   ✓ text range copy and board paste user loop > Meta+C copies a retained mouse-selection draft after the editor collapses its native range  421ms
+   ✓ text range copy and board paste user loop > drifted displays its last snapshot and opens the source note  524ms
+   ✓ text range copy and board paste user loop > lost displays its last snapshot and opens the source note  440ms
+   ✓ text range copy and board paste user loop > leaves plain-text board paste and structured paste into the board name input to native editing  376ms
+ ✓ src/pages/Notes/canvasEngine/layers/DraftBlockEditorLayer.test.tsx (5 tests) 146ms
+ ✓ src/components/Skin/SkinEditor.test.tsx (2 tests) 131ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx (8 tests) 4860ms
+   ✓ V13 S3 tray relocation > gates all three tray navigation destinations only in modal host mode  1513ms
+   ✓ V13 S3 tray relocation > gates all three tray navigation destinations only in page host mode  489ms
+   ✓ V13 S3 tray relocation > keeps block selection in split and distinguishes a failed board list from an empty library  521ms
+   ✓ V13 S3 tray relocation > moves a mixed selection, opens the real board route, returns through its CG and undoes back into the tray  2209ms
+stderr | src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx > Staging gesture and sidebar int
+egration with isolated HTTP memory > restores drag collisions, flushes the draft before the placement, renders the move
+d row, and undoes to the pre-drag position
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx (15 tests) 5908ms
+   ✓ NoteRuntimeDocumentLayer block edit recovery queue > renders the effective page typography without a frame extension and preserves the canvas fallback  363ms
+   ✓ NoteRuntimeDocumentLayer block edit recovery queue > shows the current-note receipt and exposes explicit Apply and Dismiss actions  549ms
+   ✓ NoteRuntimeDocumentLayer block edit recovery queue > passes recovery conflict choices and comparison through the document layer  529ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > D2 renders one header across multiple pages, follows live side walls, and declares projection differences  370ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > D2 title and description edits move only the outer paper origin within the bounded display band  445ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > opens 1 pages in a continuous grid and closes without invoking writers  307ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > opens 4 pages in a continuous grid and closes without invoking writers  368ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > opens 9 pages in a continuous grid and closes without invoking writers  325ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > restores the dirty editor after local page navigation and resumes its ordinary blur save  435ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > highlights the currently read page after scrolling without changing the selected frame collection  398ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > does not resurrect overview across note or surface-mode changes  708ms
+   ✓ NoteRuntimeDocumentLayer overview navigation > resumes an overview editor synchronously for host exit without writing before the host blur  362ms
+ ✓ src/pages/Boards/BoardPage.bookmarks.test.tsx (4 tests) 4865ms
+   ✓ B4v BoardPage camera wiring > saves the current page camera, smoothly jumps to exact x/y/zoom, and persists only viewport  2668ms
+   ✓ B4v BoardPage camera wiring > honors reduced motion and immediately saves the exact bookmark through the board PATCH  611ms
+   ✓ B4v BoardPage camera wiring > lets wheel panning interrupt the animation and saves the user-adjusted camera  835ms
+   ✓ B4v BoardPage camera wiring > keeps an old board bookmark list response out of the new board after route navigation  747ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx (5 tests) 150ms
+stderr | src/pages/DailyBrief/DailyBrief.test.tsx > Home Agent entry > opens the existing panel state from the loaded H
+ome and keeps it open on repeated clicks
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/DailyBrief/DailyBrief.test.tsx (2 tests) 155ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx (2 tests) 743ms
+   ✓ Staging gesture and sidebar integration with isolated HTTP memory > restores drag collisions, flushes the draft before the placement, renders the moved row, and undoes to the pre-drag position  574ms
+stderr | src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx > Gallery Purpose writer retirement > saves the 
+editor draft once and reopens the saved group without a default-purpose role
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/layers/BlockEditorLayer.test.tsx (16 tests) 1963ms
+   ✓ BlockEditorLayer K-4 affiliation controls > offers a quiet border only for an idle editable block on paper  445ms
+   ✓ BlockEditorLayer K-4 affiliation controls > keeps only recovery saving available while text editing remains paused  423ms
+   ✓ BlockEditorLayer K-4 affiliation controls > K-4.3 keeps Move Export AI Save Label and Trash controls wired  312ms
+stderr | src/pages/GroupGallery/groupGalleryItemSummary.test.tsx > Gallery Item summary projection > renders Item body 
+in the Gallery and reloads changed current text when reopened
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ❯ src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx (3 tests | 1 failed) 195ms
+   ✓ Gallery Purpose writer retirement > loads groups and folders without deriving purposes from project notes 5ms
+   ✓ Gallery Purpose writer retirement > persists group and folder changes with no retired purpose write or second save 1ms
+   × Gallery Purpose writer retirement > saves the editor draft once and reopens the saved group without a default-purpose role 187ms
+     → expected 'Original group' to be 'Saved through editor' // Object.is equality
+ ✓ src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx (16 tests) 144ms
+ ✓ src/pages/GroupGallery/groupGalleryItemSummary.test.tsx (4 tests) 166ms
+ ✓ src/pages/Courses/CourseDetail.test.tsx (3 tests) 151ms
+ ✓ src/pages/Notes/canvasEngine/pageTextCoordinates.test.tsx (8 tests) 175ms
+ ✓ src/pages/Boards/BoardPage.tools.test.tsx (6 tests) 6517ms
+   ✓ V13.4 S4 six board tool workflows > ① draws three strokes, erases two in one gesture, undoes both and redoes the erasure  2401ms
+   ✓ V13.4 S4 six board tool workflows > ② drags a card, undoes/redoes its position and preserves the saved terminal state on reopening  1018ms
+   ✓ V13.4 S4 six board tool workflows > ③ deletes an independent labeled directed edge, restores its label/direction with a new ID, and redoes  929ms
+   ✓ V13.4 S4 six board tool workflows > ④ follows live visual IDs across delete/undo/redo/undo and a subsequent move and history replay  688ms
+   ✓ V13.4 S4 six board tool workflows > ⑤ marquee-selects three objects, skips pinned movement with a hint, undoes the whole drag, and Shift-toggles  726ms
+   ✓ V13.4 S4 six board tool workflows > ⑥ shows actual N/K/M including an unselected cascade; undo restores only the drawing and leaves A/E unmounted  751ms
+ ✓ src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx (13 tests) 108ms
+ ✓ src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx (3 tests) 107ms
+ ✓ src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx (25 tests) 8205ms
+   ✓ C4 paper tools are available in writing and disabled in layout and read-only modes  774ms
+   ✓ view options writing-surface integration > forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action  479ms
+   ✓ page frame decoration alignment on synthetic collections > keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for fit_width  1656ms
+   ✓ page frame decoration alignment on synthetic collections > keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for fit_page  1186ms
+   ✓ page frame decoration alignment on synthetic collections > keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for physical  850ms
+   ✓ E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection  325ms
+ ✓ src/deadCodeRetirement.test.ts (2 tests) 105ms
+ ✓ src/pages/Boards/BoardPage.snapping.test.tsx (11 tests) 7187ms
+   ✓ V13.5 C1 board drag alignment smoke > shows a screen-space guide at zoom 0.5, saves its exact position, undoes once and rereads geometry  1869ms
+   ✓ V13.5 C1 board drag alignment smoke > shows a screen-space guide at zoom 1, saves its exact position, undoes once and rereads geometry  1039ms
+   ✓ V13.5 C1 board drag alignment smoke > shows a screen-space guide at zoom 2, saves its exact position, undoes once and rereads geometry  1093ms
+   ✓ V13.5 C1 board drag alignment smoke > aligns both centers independently and includes the final pointerup coordinate  422ms
+   ✓ V13.5 C1 board drag alignment smoke > uses Shift only during an established drag, updates without pointer motion, and keeps Ctrl/Alt/Shift selection gestures  686ms
+   ✓ V13.5 C1 board drag alignment smoke > snaps a group by the grabbed object rather than the first scene member and moves every object by the same delta  553ms
+   ✓ V13.5 C1 board drag alignment smoke > aligns a scaled sticky visual using its visible bounds and restores its geometry  379ms
+   ✓ V13.5 C1 board drag alignment smoke > does not clear a new drag or its guides when the preceding save completes  326ms
+ ✓ src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx (2 tests) 91ms
+ ✓ src/pages/Boards/BoardPage.chalk.test.tsx (13 tests) 7126ms
+   ✓ V13.4 S9 chalk interaction smoke > discards a blank ghost without a write and deletes saved chalk cleared back to a ghost  1402ms
+   ✓ V13.4 S9 chalk interaction smoke > double-clicks blank space, saves with Enter at board coordinates and rereads chalk on reopening  522ms
+   ✓ V13.4 S9 chalk interaction smoke > saves a draft on blur and discards a new draft with Escape without writing  332ms
+   ✓ V13.4 S9 chalk interaction smoke > drags, edits, pins, blocks pinned movement, unpins and deletes through the visual channel  1533ms
+   ✓ V13.4 S9 chalk interaction smoke > casts through one endpoint and replaces chalk with an item at the returned geometry  801ms
+   ✓ V13.4 S9 chalk interaction smoke > rejects 281 characters visibly while preserving the draft and accepts 280 characters  305ms
+   ✓ V13.4 S9 chalk interaction smoke > does not open an editor or delete chalk while casting is pending  406ms
+   ✓ V13.4 S9 chalk interaction smoke > shows an unavailable birthplace on a surviving item projection after an origin is removed  448ms
+   ✓ V13.4 S9 chalk interaction smoke > does not draft over other visuals or with Pan, Connect or Pen selected  374ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx (21 tests) 93ms
+ ✓ src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx (14 tests) 125ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.move.test.tsx (13 tests) 133ms
+ ✓ src/pages/Boards/BoardPage.layers.test.tsx (6 tests) 7305ms
+   ✓ V13.4 S8 six board layer workflows > ① adds two layers, moves overlapping cards, drags layer order and rereads the saved order  2814ms
+   ✓ V13.4 S8 six board layer workflows > ② hides objects and cross-layer edges from rendering and selection, preserves staging, then restores them  2098ms
+   ✓ V13.4 S8 six board layer workflows > ③ confirms the object count, deletes a layer and moves all objects to Base without changing geometry  513ms
+   ✓ V13.4 S8 six board layer workflows > ④ assigns new pen, chalk and staging placement to the active custom layer and replays created visual layers  1111ms
+   ✓ V13.4 S8 six board layer workflows > ⑤ moves three selected objects in one command and Ctrl+Z restores their distinct original layers  340ms
+   ✓ V13.4 S8 six board layer workflows > ⑥ keeps legacy all-NULL geometry, class order and edge-before-ink rendering in Base  422ms
+ ✓ src/pages/Boards/BoardPage.selection.test.tsx (7 tests) 7174ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ① accumulates two Ctrl marquees, drags all four objects in one history step and moves the same selection to a layer  2270ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ② subtracts an Alt marquee from its starting set, restores hits as it shrinks, and preserves additive and replacement semantics  858ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ③ groups all card kinds, chalk, mount-ordered strokes and labeled connections, following Ctrl/Shift toggles immediately  1702ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ④ emphasizes only the hovered stroke in either direction, scrolls its row into view and locates without changing selection  989ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ⑤ removes one row or a complete group from the live selection and clears the corresponding board styles  547ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ⑥ clears selection with Escape from a sidebar button and cancels an active marquee without restoring it on pointerup  391ms
+   ✓ V13.4 walk-through fix 4 selection workflows > keeps accumulated selection in the existing mixed-delete confirmation and reversible drawing history  412ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useDraftBlockController.test.tsx (11 tests) 69ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.extraction.test.tsx (7 tests) 69ms
+ ✓ src/pages/Boards/BoardPage.item.test.tsx (8 tests) 7495ms
+   ✓ V13.4 item projection smoke > resizes an item projection at board zoom, retains its minimum size and rereads saved geometry  2116ms
+   ✓ V13.4 item projection smoke > mounts through the item picker, shows current body and rereads it on reopening without copying membership content  703ms
+   ✓ V13.4 item projection smoke > retirement and missing identity keep the same projection as a visibly degraded card on the next GET  1033ms
+   ✓ V13.4 item projection smoke > disables standalone double-click with a title hint and opens the origin note for a linked item  1447ms
+   ✓ V13.5 item resize command smoke > resizes at zoom 0.5 and projection scale 2 as one undoable command and refreshes its final geometry  701ms
+   ✓ V13.5 item resize command smoke > resizes at zoom 2 and projection scale 1.5 as one undoable command and refreshes its final geometry  744ms
+   ✓ V13.5 item resize command smoke > discards a cancelled item resize without persisting geometry or adding a command  347ms
+   ✓ V13.5 item resize command smoke > keeps a pinned item fixed with no resize handle or enabled projection scale controls  397ms
+ ✓ src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx (2 tests) 102ms
+ ✓ src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx (4 tests) 90ms
+ ❯ src/pages/Boards/BoardPage.unboxing.test.tsx (4 tests | 1 failed) 8141ms
+   × 13.4 unboxing through production board and note runtime > creates in place, inserts a reference, rereads current ItemSummary and survives board/modal/full-page reopening 5573ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ 13.4 unboxing through production board and note runtime > uses ordinary block trash without changing its source item or staging row  1529ms
+   ✓ 13.4 unboxing through production board and note runtime > leaves a staged content_group outside the item-only unboxing flow  562ms
+   ✓ 13.4 unboxing through production board and note runtime > leaves a staged text_range outside the item-only unboxing flow  473ms
+ ✓ src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx (8 tests) 55ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.pageReading.test.tsx (3 tests) 37ms
+ ✓ src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx (5 tests) 40ms
+ ✓ src/pages/Notes/canvasEngine/freehandService.test.tsx (3 tests) 31ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx (13 tests) 49ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx (105 tests) 13950ms
+   ✓ useNoteCanvasDataAdapter draft create receipt seam > keeps an old A callback bound to its creation receipt across A to B to A  305ms
+   ✓ useNoteCanvasDataAdapter draft create receipt seam > keeps a remounted save recoverable when the old mount settles before the new save rejects  304ms
+   ✓ useNoteCanvasDataAdapter draft create receipt seam > keeps recovery after a held reconciliation read is superseded by newer hydration  425ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx (4 tests) 62ms
+ ✓ src/pages/Notes/canvasEngine/inlineLifecycle.test.ts (56 tests) 34ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useSurfaceModeController.test.tsx (8 tests) 30ms
+ ✓ src/pages/Notes/canvasEngine/draftBlockPersistence.test.ts (37 tests) 25ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useBlockTextFlowEditController.test.tsx (3 tests) 25ms
+ ✓ src/pages/Notes/canvasEngine/boundaryAccount.test.tsx (18 tests) 25ms
+stdout | src/pages/Boards/BoardPage.smoke.test.tsx > V13 S4 board polish smoke > opens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker
+V13_S4_BOARD_POLISH_SMOKE {"boardName":"Exam revision","soulTitle":"Exam revision","navigator":"collapsed on entry, manual expansion retained, restored on exit","picker":"open, mount, close, reopen with search retained, Escape, focus returned","members":1}
+
+ ✓ src/pages/Notes/canvasEngine/hooks/usePageReadingViewportController.test.tsx (3 tests) 29ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useCanvasSurfacePointerController.test.tsx (4 tests) 27ms
+stderr | src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx > S5 retired canvas doors > opens legacy canvas r
+oute/state as Page and keeps it Page after hydration and stale toggle calls
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. Y
+ou can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/u
+pgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `
+v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/futur
+e#v7_relativesplatpath.
+
+ ✓ src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx (3 tests) 24ms
+ ✓ src/pages/Notes/canvasEngine/purposeRetirement.test.ts (3 tests) 18ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useBlockSelectionController.test.tsx (2 tests) 22ms
+ ✓ src/pages/Notes/canvasEngine/textFlowSelection.test.ts (18 tests) 25ms
+ ✓ src/pages/Notes/canvasEngine/pageReadingDomService.test.ts (4 tests) 46ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.affiliationVisibility.test.tsx (2 tests) 74ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useLayoutInteractionController.test.tsx (1 test) 18ms
+ ✓ src/pages/Boards/boardRepository.test.ts (11 tests) 18ms
+ ✓ src/pages/Notes/canvasEngine/coordinateContractSession.test.ts (12 tests) 50ms
+ ✓ src/pages/Notes/canvasEngine/graphemeExcerpts.test.ts (23 tests) 19ms
+ ✓ src/pages/Notes/canvasEngine/documentTextFlowSelection.test.ts (12 tests) 57ms
+ ✓ src/pages/Notes/canvasEngine/boardTextRangeEditSession.test.ts (13 tests) 20ms
+ ✓ src/pages/Notes/canvasEngine/pageReadingViewportService.test.ts (71 tests) 14ms
+ ✓ src/pages/Notes/canvasEngine/textFlowEditSession.test.ts (9 tests) 12ms
+ ✓ src/pages/Notes/canvasEngine/graphemes.test.ts (9 tests) 70ms
+ ✓ src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts (18 tests) 10ms
+ ✓ src/pages/Notes/canvasEngine/pageFrameWallService.test.ts (7 tests) 11ms
+ ✓ src/pages/Notes/canvasEngine/placementAutoWidth.test.ts (16 tests) 10ms
+ ✓ src/pages/Notes/canvasEngine/selectionReceiptProjection.test.ts (12 tests) 13ms
+ ✓ src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts (21 tests) 9ms
+ ✓ src/pages/Notes/canvasEngine/draftBlockLifecycleReducer.test.ts (10 tests) 8ms
+ ✓ src/pages/Notes/canvasEngine/slashCommandReducer.test.ts (30 tests) 12ms
+ ✓ src/pages/Notes/canvasEngine/genericPlacementContract.test.ts (3 tests) 33ms
+ ✓ src/pages/Notes/canvasEngine/inFlightWriteRegistry.test.ts (5 tests) 10ms
+ ✓ src/services/itemSummaryReader.test.ts (4 tests) 8ms
+ ✓ src/pages/Notes/canvasEngine/paperSkinStyles.test.ts (4 tests) 9ms
+ ✓ src/pages/Notes/canvasEngine/textUnitMoveService.test.ts (4 tests) 5ms
+ ✓ src/pages/Boards/boardSnapping.test.ts (9 tests) 5ms
+ ✓ src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts (3 tests) 3ms
+ ✓ src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts (3 tests) 4ms
+ ✓ src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts (4 tests) 5ms
+ ✓ src/pages/Notes/canvasEngine/writingSurfaceClassName.test.ts (1 test) 2ms
+ ✓ src/pages/Notes/canvasEngine/trayService.test.ts (3 tests) 27ms
+ ✓ src/styles/skinPresets.test.ts (8 tests) 4ms
+stdout | src/pages/Boards/BoardPage.smoke.test.tsx > V13 S2 board and paper smoke > opens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper
+V13_S2_BOARD_PAPER_SMOKE {"boardZoom":1.2,"members":3,"edges":2,"freehand":1,"paper":{"stored":[{"id":"block-a","canvas_layout":{"x":0,"y":40,"width":760,"height":88,"surface":"formal_page","coordinate_space":"page_frame_local","frame_id":"frame-a","boundary_role":"inside","surface_authority":{"coordinateSpace":"page_frame_local","pageBoundary":{"left":0,"right":760,"frameId":"frame-a"}}}}],"resolved":{"block-a":{"x":0,"y":40,"width":760,"height":88,"surface":"formal_page","coordinate_space":"page_frame_local","frame_id":"frame-a","boundary_role":"inside","surface_authority":{"coordinateSpace":"page_frame_local","pageBoundary":{"left":0,"right":760,"frameId":"frame-a"}}}},"typography":{"fontSizePx":16.7,"lineHeightPx":24.5},"reading":[{"gear":"fit_width","baseScale":1.25,"displayScale":1.25,"stepFactor":1,"paperWidth":904,"paperHeight":1278,"layoutWidth":760},{"gear":"fit_page","baseScale":0.704225352112676,"displayScale":0.704225352112676,"stepFactor":1,"paperWidth":904,"paperHeight":1278,"layoutWidth":760},{"gear":"physical","baseScale":0.8779875966831581,"displayScale":0.8779875966831581,"stepFactor":1,"paperWidth":904,"paperHeight":1278,"layoutWidth":760}]}}
+
+ ✓ src/pages/Notes/canvasEngine/routeRequestGeneration.test.ts (1 test) 2ms
+ ✓ src/pages/Notes/canvasEngine/pageStackContentFlowService.test.ts (2 tests) 5ms
+ ✓ src/pages/Notes/canvasEngine/textFocusReceipt.test.ts (2 tests) 4ms
+ ✓ src/pages/Notes/canvasEngine/pageCenteringContract.test.ts (3 tests) 3ms
+ ✓ src/pages/Notes/canvasEngine/blockAffiliationOutlineService.test.ts (3 tests) 3ms
+ ✓ src/pages/Notes/canvasEngine/surfaceAuthorityContract.test.ts (16 tests) 7ms
+ ✓ src/pages/Notes/canvasEngine/placementContractService.test.ts (24 tests) 12ms
+ ✓ src/pages/Notes/canvasEngine/meaningfulRenderableContent.test.ts (5 tests) 3ms
+ ✓ src/pages/Notes/canvasEngine/surfacePersistenceContract.test.ts (2 tests) 4ms
+ ✓ src/pages/Boards/BoardPage.smoke.test.tsx (13 tests) 14425ms
+   ✓ V13.5 B3 board identity details > reads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes  2183ms
+   ✓ V13.4 wave 1 wiring smoke > A1 renames in the board, rejects a blank name and reopens the saved title  1050ms
+   ✓ V13.4 wave 1 wiring smoke > A2 moves every visual kind, resizes a scaled shape, respects Pin and reopens geometry  3349ms
+   ✓ V13.4 wave 1 wiring smoke > A3 saves and clears a label, persists three arrow states and renders arrowheads outside cards  1313ms
+   ✓ V13.4 wave 1 wiring smoke > A4 shows fresh counts from both menus, cancels safely, deletes and reuses the retained purpose  484ms
+   ✓ V13.4 wave 1 wiring smoke > A5 keeps an unavailable note card visible and revives it on the next board read  300ms
+   ✓ V13 S4 board polish smoke > opens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker  1108ms
+   ✓ V13 S2 board and paper smoke > opens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper  2509ms
+   ✓ V13 S2 board and paper smoke > deletes drawn ink and resizes a hosted group through a zoomed viewport before reopening its paper  1331ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Boards/BoardPage.unboxing.test.tsx > 13.4 unboxing through production board and note runtime > creates
+ in place, inserts a reference, rereads current ItemSummary and survives board/modal/full-page reopening
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/pages/Boards/BoardPage.unboxing.test.tsx:176:3
+    174| 
+    175| describe('13.4 unboxing through production board and note runtime', ()…
+    176|   it('creates in place, inserts a reference, rereads current ItemSumma…
+       |   ^
+    177|     const first = openBoard();
+    178|     await createNote();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx > Gallery Purpose writer retirement > saves the ed
+itor draft once and reopens the saved group without a default-purpose role
+AssertionError: expected 'Original group' to be 'Saved through editor' // Object.is equality
+
+Expected: "Saved through editor"
+Received: "Original group"
+
+ ❯ src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx:111:38
+    109| 
+    110|     const [reopened] = await loadGroupGalleryRecords();
+    111|     expect(reopened.groups[0].title).toBe('Saved through editor');
+       |                                      ^
+    112|     expect(reopened.groups[0].identity.summary).toBe('Original summary…
+    113|     expect(http.put.mock.calls.map(([url]) => url)).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 136 passed (138)
+      Tests  2 failed | 1483 passed (1485)
+   Start at  22:17:13
+   Duration  29.93s (transform 61.65s, setup 54.74s, collect 280.77s, tests 172.72s, environment 177.01s, prepare 17.13s)
+

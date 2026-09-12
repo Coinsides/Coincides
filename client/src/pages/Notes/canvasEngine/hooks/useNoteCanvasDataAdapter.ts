@@ -861,6 +861,40 @@ export function useNoteCanvasDataAdapter({
     await Promise.all([saveTitle(), saveDescription()]);
   }, [saveTitle, saveDescription]);
 
+  const skinSaveTails = useRef(new Map<string, Promise<unknown>>());
+  const [skinWriteFailure, setSkinWriteFailure] = useState<string | null>(null);
+  const saveSkin = useCallback(writeRegistry.hold('saveSkin', async (skin: SkinSelection | null) => {
+    const current = noteRef.current;
+    if (!current || current.id !== routeNoteIdRef.current) throw new Error('Note is not loaded');
+    const generation = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const responseIsCurrent = () => adapterMountActiveRef.current
+      && routeNoteIdRef.current === current.id && routeRequestGenerationRef.current === generation
+      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === current.id;
+    const publish = (value: SkinSelection | null) => {
+      if (!responseIsCurrent()) return;
+      const latest = noteRef.current!;
+      noteRef.current = { ...latest, metadata: { ...latest.metadata, skin: value } };
+      setNote((latest) => latest?.id === current.id ? { ...latest, metadata: { ...latest.metadata, skin: value } } : latest);
+    };
+    publish(skin);
+    const previous = skinSaveTails.current.get(current.id) || Promise.resolve();
+    const write = previous.then(() => writeRegistry.track(`note-skin:${current.id}`, () => api.put(`/notes/${current.id}`, { skin })));
+    const settled = write.catch(() => undefined);
+    skinSaveTails.current.set(current.id, settled);
+    try {
+      await write;
+      if (responseIsCurrent()) setSkinWriteFailure(null);
+    } catch (error) {
+      if (responseIsCurrent()) {
+        setSkinWriteFailure(current.id);
+        addToast('error', '外观未保存，请在纸面外观中重试。');
+      }
+      throw error;
+    }
+    finally { if (skinSaveTails.current.get(current.id) === settled) skinSaveTails.current.delete(current.id); }
+  }), [writeRegistry, addToast]);
+
   const saveAnnotationTruthsOutcome = useCallback(writeRegistry.hold('saveAnnotationTruths', async (
     nextAnnotations: AnnotationTruthV1[], options: { preserveDrafts?: boolean } = {},
   ): Promise<boolean> => {
@@ -1136,9 +1170,26 @@ export function useNoteCanvasDataAdapter({
     }
   }), [writeRegistry, note, noteId, allowSourceContentMutation, frameHealing, coordinateContract, clearLayoutDraftForBlock, addToast]);
 
+  // Other metadata responses own their existing fields, but cannot roll back a newer skin intent.
+  const publishNonSkinNote = useCallback((updated: Note) => {
+    const latest = noteRef.current;
+    if (!latest || latest.id !== updated.id) return;
+    const metadata = { ...updated.metadata };
+    if (Object.prototype.hasOwnProperty.call(latest.metadata || {}, 'skin')) metadata.skin = latest.metadata!.skin;
+    else delete metadata.skin;
+    const next = { ...updated, metadata };
+    noteRef.current = next;
+    setNote(next);
+  }, []);
+
   const saveDocumentTypographyProfile = useCallback(writeRegistry.hold('saveDocumentTypographyProfile', async (nextProfile: DocumentTypographyProfile) => {
-    const currentNote = noteRef.current || note;
-    if (!currentNote) return;
+    const currentNote = noteRef.current;
+    if (!currentNote || currentNote.id !== noteId || currentNote.id !== routeNoteIdRef.current) return;
+    const routeGeneration = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const responseIsCurrent = () => adapterMountActiveRef.current && routeNoteIdRef.current === currentNote.id
+      && routeRequestGenerationRef.current === routeGeneration
+      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === currentNote.id;
     const previousProfile = documentTypographyProfile;
     const nextMetadata = writeTypographyProfileMetadata(currentNote.metadata, nextProfile);
     const normalizedProfile = typographyProfileFromMetadata(nextMetadata);
@@ -1154,58 +1205,72 @@ export function useNoteCanvasDataAdapter({
     try {
       const res = await writeRegistry.track('saveDocumentTypographyProfile:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
       const updated = res.data as Note;
-      if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
+      if (!responseIsCurrent() || typographyProfileSaveGenerationRef.current !== saveGeneration) return;
       const savedProfile = typographyProfileFromMetadata(updated.metadata);
-      noteRef.current = updated;
-      setNote(updated);
+      publishNonSkinNote(updated);
       setDocumentTypographyProfile(savedProfile);
     } catch (err) {
       console.error('Failed to save document typography:', err);
+      if (!responseIsCurrent() || typographyProfileSaveGenerationRef.current !== saveGeneration) return;
       addToast('error', 'Failed to save typography');
-      if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
-      noteRef.current = currentNote;
-      setNote(currentNote);
+      publishNonSkinNote(currentNote);
       setDocumentTypographyProfile(previousProfile);
     }
-  }), [writeRegistry, addToast, documentTypographyProfile, note]);
+  }), [writeRegistry, addToast, documentTypographyProfile, noteId, publishNonSkinNote]);
 
   const saveReadingInterpretations = useCallback(writeRegistry.hold('saveReadingInterpretations', async (nextInterpretations: ReadingInterpretationV1[]) => {
-    if (!note) return;
+    const currentNote = noteRef.current;
+    if (!currentNote || currentNote.id !== noteId || currentNote.id !== routeNoteIdRef.current) return;
+    const routeGeneration = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const responseIsCurrent = () => adapterMountActiveRef.current && routeNoteIdRef.current === currentNote.id
+      && routeRequestGenerationRef.current === routeGeneration
+      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === currentNote.id;
     const nextMetadata = {
-      ...(note.metadata || {}),
+      ...(currentNote.metadata || {}),
       [NOTE_READING_INTERPRETATIONS_METADATA_KEY]: nextInterpretations,
     };
     setReadingInterpretations(nextInterpretations);
     try {
-      const res = await writeRegistry.track('saveReadingInterpretations:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { metadata: nextMetadata }));
+      const res = await writeRegistry.track('saveReadingInterpretations:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
       const updated = res.data as Note;
-      setNote(updated);
+      if (!responseIsCurrent()) return;
+      publishNonSkinNote(updated);
       setReadingInterpretations(readingInterpretationsFromMetadata(updated.metadata));
     } catch (err) {
       console.error('Failed to save reading interpretations:', err);
+      if (!responseIsCurrent()) return;
       addToast('error', 'Failed to save reading interpretation');
-      setReadingInterpretations(readingInterpretationsFromMetadata(note.metadata));
+      setReadingInterpretations(readingInterpretationsFromMetadata(currentNote.metadata));
     }
-  }), [writeRegistry, addToast, note]);
+  }), [writeRegistry, addToast, noteId, publishNonSkinNote]);
 
   const saveAnnotationProposals = useCallback(writeRegistry.hold('saveAnnotationProposals', async (nextProposals: AnnotationProposalV1[]) => {
-    if (!note) return;
+    const currentNote = noteRef.current;
+    if (!currentNote || currentNote.id !== noteId || currentNote.id !== routeNoteIdRef.current) return;
+    const routeGeneration = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const responseIsCurrent = () => adapterMountActiveRef.current && routeNoteIdRef.current === currentNote.id
+      && routeRequestGenerationRef.current === routeGeneration
+      && successfulHydrationEpochRef.current === hydrationEpoch && noteRef.current?.id === currentNote.id;
     const nextMetadata = {
-      ...(note.metadata || {}),
+      ...(currentNote.metadata || {}),
       [NOTE_ANNOTATION_PROPOSALS_METADATA_KEY]: nextProposals,
     };
     setAnnotationProposals(nextProposals);
     try {
-      const res = await writeRegistry.track('saveAnnotationProposals:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { metadata: nextMetadata }));
+      const res = await writeRegistry.track('saveAnnotationProposals:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
       const updated = res.data as Note;
-      setNote(updated);
+      if (!responseIsCurrent()) return;
+      publishNonSkinNote(updated);
       setAnnotationProposals(annotationProposalsFromMetadata(updated.metadata));
     } catch (err) {
       console.error('Failed to save annotation proposals:', err);
+      if (!responseIsCurrent()) return;
       addToast('error', 'Failed to save annotation proposal');
-      setAnnotationProposals(annotationProposalsFromMetadata(note.metadata));
+      setAnnotationProposals(annotationProposalsFromMetadata(currentNote.metadata));
     }
-  }), [writeRegistry, addToast, note]);
+  }), [writeRegistry, addToast, noteId, publishNonSkinNote]);
 
   const createBlock = useCallback(writeRegistry.hold('createBlock', async (
     template: TemplateOption,
@@ -2779,6 +2844,8 @@ export function useNoteCanvasDataAdapter({
     saveTitle,
     saveDescription,
     saveHeaderMetadata,
+    saveSkin,
+    skinSaveError: skinWriteFailure === note?.id,
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,
@@ -2812,3 +2879,4 @@ export function useNoteCanvasDataAdapter({
     handleViewSource,
   };
 }
+import type { SkinSelection } from '@shared/types/skin';

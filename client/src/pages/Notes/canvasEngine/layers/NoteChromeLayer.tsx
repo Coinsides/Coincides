@@ -34,6 +34,9 @@ import {
 import { ExportPreviewLayer } from './ExportPreviewLayer';
 import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
+import { usePaperSkin } from '../PaperSkinContext';
+import { SkinEditor } from '@/components/Skin/SkinEditor';
+import skinStyles from '@/components/Skin/SkinControls.module.css';
 
 export interface SurfacePolicyView {
   label: string;
@@ -147,6 +150,7 @@ export function NoteChromeLayer({
   onTogglePreviewLabelOverlay,
   onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
+  const skin = usePaperSkin();
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
   const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
@@ -582,6 +586,10 @@ export function NoteChromeLayer({
                   <span>Deleted blocks</span>
                   <small>Review and restore blocks removed from this note.</small>
                 </button>
+                {skin && <details data-paper-appearance className={skinStyles.appearance}>
+                  <summary>纸面外观</summary>
+                  <SkinEditor key={note.id} value={skin.selection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" />
+                </details>}
                 <div
                   className={styles.typographyControls}
                   data-typography-controls="document"

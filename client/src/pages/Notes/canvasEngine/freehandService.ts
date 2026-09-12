@@ -57,7 +57,7 @@ export function paperFreehandPath(data: PaperFreehandData): string {
 export function paperFreehandStyle(data: PaperFreehandData): { color: string; width: number } {
   const width = data.style?.width;
   return {
-    color: 'var(--board-ink, var(--text-primary, #374151))',
+    color: 'var(--sk-ink, var(--board-ink, var(--text-primary, #374151)))',
     width: typeof width === 'number' && Number.isFinite(width) && width > 0 ? width : PAPER_INK_STYLE.width,
   };
 }

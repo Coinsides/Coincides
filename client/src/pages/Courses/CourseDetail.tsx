@@ -978,7 +978,7 @@ export default function CourseDetailPage() {
         <div className={styles.headerRight}>
           <button
             className={styles.headerAction}
-            onClick={() => openModal('course-edit', { course })}
+            onClick={() => openModal('course-edit', { course, onUpdated: (updated: Course) => setData((current) => current ? { ...current, course: updated } : current) })}
           >
             <Edit2 size={15} />
             Edit

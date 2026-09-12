@@ -1,0 +1,9 @@
+{
+  "extends": "../../../server/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../../..",
+    "outDir": "./server-skin-build",
+    "noEmit": true
+  },
+  "references": []
+}

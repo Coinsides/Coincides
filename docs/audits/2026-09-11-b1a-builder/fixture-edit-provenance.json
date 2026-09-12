@@ -1,0 +1,130 @@
+{
+  "scope": "8 existing fixture code ledgers only; no historical reports changed",
+  "entries": [
+    {
+      "file": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "sha256": {
+        "reconstructedBefore": "88e30e93e9d9ea1c8a3e0dc9dcf76de0c52363c48c26a435285a9772633571e8",
+        "after": "b12aba9930890a88a4bcc882be5af64dc946775c074fcf6aff4beb9462b606de"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "    else if (method === 'GET' && url === '/courses/open-smoke-project/summary') data = { course: { id: 'open-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "sha256": {
+        "reconstructedBefore": "a264cfc00ee0a04d7a087733997e919d975b889269bf35058e1616982ab75593",
+        "after": "6e48f78a0d690942840ff47202cdc7c706a2be3ba03483cb4dd3ebaeac2ff62d"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "  else if (method === 'GET' && url === '/courses/range-smoke-project/summary') data = { course: { id: 'range-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "client/scripts/cFix1Smoke/mockApi.ts",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/scripts/cFix1Smoke/mockApi.ts",
+      "sha256": {
+        "reconstructedBefore": "006c6ed5c9a73541ea8b027b6f7c8c21b96699b1e774db7ed5d623c6b8ac2b15",
+        "after": "c12b4137940afaaaf26c4e00a219108f726e8dab6b00a85d7c9fa345a9220b2b"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "    else if (method === 'GET' && url === '/courses/c-fix1-course/summary') data = { course: { id: 'c-fix1-course', name: 'Synthetic interaction course', skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "sha256": {
+        "reconstructedBefore": "f98da5aacdf9fd70f98ea757b46010b73f328eb48ba923cec454ca9f39772479",
+        "after": "9421ea41df273b5adb8b4182adda1a20fbc22abf5d153beca15c549f179004b8"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "    else if (url === `/courses/${fixtureNote.course_id}/summary`) data = { course: { id: fixtureNote.course_id, name: 'Synthetic healing project', skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/scripts/pageReadingSmoke/mockApi.ts",
+      "sha256": {
+        "reconstructedBefore": "6fa2b53c22563a4d9a0d5295b7f81bc4d4ff774070f418fbd64da08f3f006f7e",
+        "after": "b46c2ed41ba9c0fd5de582508e8cfdad9e96f98303c5827fd783311f49af6a1b"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "    else if (['/courses/page-reading-smoke-project/summary', '/courses/page-print-smoke-project/summary', '/courses/overview-smoke-project/summary', '/courses/tray-smoke-course/summary'].includes(url)) data = { course: { id: url.split('/')[2], name: 'Synthetic reading project', skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/scripts/paperInkSmoke/inkMockApi.ts",
+      "sha256": {
+        "reconstructedBefore": "bf94496eee6029fff6cda211d5f38bea9bdb3864cc6c8b07adcdcffa73f5fe31",
+        "after": "438b55ba202cd87ec190a6c5279009a7b081031d2630d371a262da27b17cb67c"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "    else if (method === 'GET' && url === '/courses/paper-ink-smoke-course/summary') data = { course: { id: 'paper-ink-smoke-course', name: 'Synthetic paper ink', skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "docs/audits/2026-09-11-d2-builder/browser-fixture.tsx",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/docs/audits/2026-09-11-d2-builder/browser-fixture.tsx",
+      "sha256": {
+        "reconstructedBefore": "45f977dc60e88c8edf0c46e125338662fca871a90a5411a4145ed5f48828e7f2",
+        "after": "106a6e9caf118d513311959ab1588e211705b646ac03a34bb926b3cc18284a17"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "  else if (path === `/courses/${project.id}/summary` && method === 'get') data = { course: { ...project, skin: null }, goals: [], decks: [], documents: [] };\n"
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "basis": "Reconstructed before by reversing only this agent's exact B1a fixture additions; not a contemporaneous original snapshot.",
+      "snapshot": ".codex-tmp/b1a-fixture-reconstructed-before/client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "sha256": {
+        "reconstructedBefore": "88ac5109ab573974183628a08819fc6b9c6635f751c2b072bd5ea0d2c8c97c3c",
+        "after": "796b849d05c98d26c6b995c63d16b395937f381f1d967d3baafbbef67455cdad"
+      },
+      "edits": [
+        {
+          "kind": "addition",
+          "added": "    if (url.startsWith('/courses/')) {\n      const project = projects.find(({ id }) => url === `/courses/${id}/summary`);\n      if (project) return response({ course: { ...project, skin: null }, goals: [], decks: [], documents: [] });\n    }\n"
+        },
+        {
+          "kind": "replacement",
+          "before": "vi.mock('@/services/api', () => ({ default: http }));",
+          "after": "vi.mock('@/services/api', () => ({ default: http, getToken: () => null, setToken: vi.fn() }));"
+        }
+      ]
+    }
+  ]
+}

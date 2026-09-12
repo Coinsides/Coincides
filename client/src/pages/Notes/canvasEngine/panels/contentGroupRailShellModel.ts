@@ -10,13 +10,13 @@ import type {
 } from '../runtimeDataTypes';
 
 const RAIL_TOPIC_COLORS = [
-  '#22d3ee',
-  '#34d399',
-  '#facc15',
-  '#fb7185',
-  '#a78bfa',
-  '#38bdf8',
-  '#f59e0b',
+  'var(--paper-rail-cyan)',
+  'var(--paper-rail-success)',
+  'var(--paper-rail-warning)',
+  'var(--paper-rail-error)',
+  'var(--paper-rail-topic-violet)',
+  'var(--paper-rail-topic-sky)',
+  'var(--paper-warning)',
 ];
 
 export interface RailGroupRowView {
