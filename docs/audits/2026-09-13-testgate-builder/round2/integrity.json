@@ -1,0 +1,30 @@
+{
+  "baseline": "Round-two pre-edit byte snapshots; not Git HEAD",
+  "files": 1003,
+  "unchanged": 999,
+  "modified": [
+    "server/scripts/check-test-wiring.mjs",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts"
+  ],
+  "deleted": [],
+  "added": [],
+  "packages": {
+    "package.json": {
+      "changedScripts": [
+        "verify:v2-bn8-runtime",
+        "check:test-wiring"
+      ],
+      "beforeSha256": "3bb2e91729c38ce42bb3975981fae090e01532cc5ecb51608c51f63f09df0dce",
+      "afterSha256": "217cdf6a356e57d1fdc35ef157faef8adc80c462ba01bbe1f623c8b1666cfc3c"
+    },
+    "server/package.json": {
+      "changedScripts": [
+        "test:v2"
+      ],
+      "beforeSha256": "2b0c18b4c24eff0ac38eb8dc16b8fb191aa6fb56c6b6bb41d0c4c21d92a9f494",
+      "afterSha256": "c095be8e3b3c79a8caf8de32b280f81ddccb89f3d9cad18e808fa8c756b50988"
+    }
+  }
+}

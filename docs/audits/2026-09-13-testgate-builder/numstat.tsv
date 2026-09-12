@@ -1,0 +1,17 @@
+added	deleted	file
+0	0	package.json
+0	0	server/package.json
+72	0	docs/agent-ops/handoffs/2026-09-13-v13-6-test-gate-repair-order.md
+83	0	server/scripts/check-test-wiring.mjs
+45	0	docs/audits/2026-09-13-testgate-builder/README.md
+75	0	docs/audits/2026-09-13-testgate-builder/failures.log
+19	0	docs/audits/2026-09-13-testgate-builder/integrity.json
+27	0	docs/audits/2026-09-13-testgate-builder/missing-files.json
+5845	0	docs/audits/2026-09-13-testgate-builder/missing-suites.log
+42	0	docs/audits/2026-09-13-testgate-builder/order.before.md
+47	0	docs/audits/2026-09-13-testgate-builder/root-package.before.json
+75	0	docs/audits/2026-09-13-testgate-builder/server-package.before.json
+1051	0	docs/audits/2026-09-13-testgate-builder/source-hashes.before.json
+69	0	docs/audits/2026-09-13-testgate-builder/validation-summary.json
+30	0	docs/audits/2026-09-13-testgate-builder/wiring-before.log
+17	0	docs/audits/2026-09-13-testgate-builder/numstat.tsv

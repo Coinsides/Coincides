@@ -1,0 +1,34 @@
+{
+  "scope": [
+    "server/src",
+    "server/scripts",
+    "client/src",
+    "client/scripts",
+    "shared",
+    "scripts"
+  ],
+  "baselineFiles": 1003,
+  "unchanged": 998,
+  "changed": [
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/toolFace/registry.ts"
+  ],
+  "added": [],
+  "deleted": [],
+  "preserved": [
+    "package.json",
+    "server/package.json",
+    "server/scripts/check-test-wiring.mjs",
+    "scripts/check-tech-debt-table.mjs",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "docs/generated/object-inventory.md"
+  ],
+  "inventoryUnchangedFromRound2": true,
+  "wiringPositiveControls": "../round2/wiring-controls.json",
+  "productionManifestByteIdentical": true
+}

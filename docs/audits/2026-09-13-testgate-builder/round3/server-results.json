@@ -1,0 +1,12 @@
+[
+  {
+    "name": "server-test-v2",
+    "exitCode": 1,
+    "elapsedSeconds": 37.701
+  },
+  {
+    "name": "server-supplemental",
+    "exitCode": 0,
+    "elapsedSeconds": 138.289
+  }
+]

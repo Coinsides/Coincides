@@ -1,0 +1,20 @@
+[
+  "scripts/v13WildernessExecute.test.ts",
+  "scripts/v13WildernessShadowRun.test.ts",
+  "scripts/v2Bn12LifecycleMigration.test.ts",
+  "src/__tests__/v13BoardCeremonyNote.test.ts",
+  "src/__tests__/v13BoardIdentity.test.ts",
+  "src/__tests__/v13BoardRoutes.test.ts",
+  "src/__tests__/v13BoardSchema.test.ts",
+  "src/__tests__/v13BoardServices.test.ts",
+  "src/__tests__/v13BoardWave1.test.ts",
+  "src/__tests__/v13CoordinateContract.test.ts",
+  "src/__tests__/v13ItemFloor.test.ts",
+  "src/__tests__/v13RecordedAction.test.ts",
+  "src/__tests__/v2McpArtifact.test.ts",
+  "src/__tests__/v2McpTransport.test.ts",
+  "src/__tests__/v2NotesLifecycle.test.ts",
+  "src/__tests__/v2NotesListService.test.ts",
+  "src/__tests__/v2TrashNotesTool.test.ts",
+  "src/toolFace/registry.test.ts"
+]

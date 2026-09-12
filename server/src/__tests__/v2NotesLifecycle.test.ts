@@ -414,7 +414,7 @@ test('PUT /api/notes/:id keeps status plus title in one mixed patch response', a
   });
 });
 
-test('PUT /api/notes/:id handler matches the B1a skin-aware baseline apart from line endings', () => {
+test('PUT /api/notes/:id handler matches the B1c immutable-page-preset baseline apart from line endings', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
   const start = routeSource.indexOf("router.put('/:id'");
@@ -423,8 +423,14 @@ test('PUT /api/notes/:id handler matches the B1a skin-aware baseline apart from 
   assert.notEqual(end, -1, 'DELETE /:id boundary must exist after PUT');
   const putRoute = routeSource.slice(start, end).trimEnd();
 
+  // Authorized B1c commit: docs/agent-ops/claude-log/2026-09-09.md §115 records
+  // "B1c 已 commit" (the receipt does not publish its commit ID).
+  // Delivery: docs/agent-ops/handoffs/2026-09-11-v13-5-b1c-page-presets-order.md, Result;
+  // exact handler delta: docs/audits/2026-09-11-b1c-builder/product-changes.patch.
+  // Reversing only its owned-note binding + note_page_preset_immutable guard restores
+  // the previous B1a SHA-256 69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e.
   assert.equal(
     createHash('sha256').update(putRoute).digest('hex'),
-    '69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e',
+    '0dfd76eb9fa0f7c0f8002596663a4ff2fa052f0aa8c7e7d01318d1436f559b57',
   );
 });

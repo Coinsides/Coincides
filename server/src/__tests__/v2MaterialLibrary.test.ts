@@ -811,9 +811,14 @@ test('v2.5 template runtime seeds system templates idempotently', async () => {
     const secondSeed = seedSystemTemplateDefinitions(db, userId);
     const templates = listTemplateDefinitions(db, userId, {});
 
-    assert.equal(firstSeed.length, 3);
+    // The media advance delivery added media.image to the active system set.
+    const expectedTemplateKeys = ['code.snippet', 'formula.math', 'media.image', 'text.paragraph'];
+    assert.equal(firstSeed.length, expectedTemplateKeys.length);
     assert.equal(secondSeed.length, firstSeed.length);
     assert.equal(templates.length, firstSeed.length);
+    for (const seeded of [firstSeed, secondSeed, templates]) {
+      assert.deepEqual(seeded.map((template) => template.template_key).sort(), expectedTemplateKeys);
+    }
     assert.equal(templates.some((template) => template.template_key === 'text.paragraph'), true);
     assert.equal(templates.every((template) => template.version === '1.0.0'), true);
     assert.equal(templates.every((template) => template.origin === 'system_seed'), true);

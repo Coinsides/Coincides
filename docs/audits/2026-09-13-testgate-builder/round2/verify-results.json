@@ -1,0 +1,107 @@
+[
+  {
+    "name": "verify-check-test-wiring",
+    "exitCode": 0,
+    "elapsedSeconds": 0.204
+  },
+  {
+    "name": "verify-check-tech-debt-table",
+    "exitCode": 0,
+    "elapsedSeconds": 0.186
+  },
+  {
+    "name": "verify-test-unit",
+    "exitCode": 0,
+    "elapsedSeconds": 23.53
+  },
+  {
+    "name": "verify-test-tool-face-registry",
+    "exitCode": 0,
+    "elapsedSeconds": 0.607
+  },
+  {
+    "name": "verify-test-tool-face-manifest",
+    "exitCode": 0,
+    "elapsedSeconds": 3.491
+  },
+  {
+    "name": "verify-check-tool-face-manifest",
+    "exitCode": 0,
+    "elapsedSeconds": 0.571
+  },
+  {
+    "name": "verify-test-tool-face-parity",
+    "exitCode": 0,
+    "elapsedSeconds": 5.189
+  },
+  {
+    "name": "verify-check-tool-face-parity",
+    "exitCode": 0,
+    "elapsedSeconds": 0.509
+  },
+  {
+    "name": "verify-check-server-shared-runtime-import",
+    "exitCode": 0,
+    "elapsedSeconds": 0.513
+  },
+  {
+    "name": "verify-check-canvas-runtime-boundary",
+    "exitCode": 0,
+    "elapsedSeconds": 0.439
+  },
+  {
+    "name": "verify-check-group-gallery-shell",
+    "exitCode": 0,
+    "elapsedSeconds": 0.425
+  },
+  {
+    "name": "verify-check-groups-rail-shell",
+    "exitCode": 0,
+    "elapsedSeconds": 0.449
+  },
+  {
+    "name": "verify-check-single-editor-shell",
+    "exitCode": 0,
+    "elapsedSeconds": 0.425
+  },
+  {
+    "name": "verify-check-source-experience",
+    "exitCode": 0,
+    "elapsedSeconds": 0.903
+  },
+  {
+    "name": "verify-check-v2-bn11-legacy-shutdown",
+    "exitCode": 0,
+    "elapsedSeconds": 0.413
+  },
+  {
+    "name": "verify-check-v2-bn11-relation-freshness",
+    "exitCode": 0,
+    "elapsedSeconds": 0.44
+  },
+  {
+    "name": "verify-smoke-canvas-engine-model-contract",
+    "exitCode": 0,
+    "elapsedSeconds": 1.893
+  },
+  {
+    "name": "verify-build-client",
+    "exitCode": 0,
+    "elapsedSeconds": 11.967
+  },
+  {
+    "name": "verify-build",
+    "exitCode": 0,
+    "elapsedSeconds": 6.505
+  },
+  {
+    "name": "verify-smoke-canvas-engine-performance",
+    "exitCode": 0,
+    "elapsedSeconds": 1.171
+  },
+  {
+    "name": "verify-docs-check",
+    "exitCode": 0,
+    "elapsedSeconds": 0.593
+  }
+]

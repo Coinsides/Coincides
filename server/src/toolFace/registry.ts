@@ -127,6 +127,7 @@ const noteBlockOutputSchema = z.object({
   operation_batch_id: z.string().nullable(),
   created_at: z.string(),
   updated_at: z.string(),
+  text_save_revision: z.number().int().nonnegative(),
   trashed_at: z.string().nullable(),
   source_references: z.array(noteBlockSourceReferenceOutputSchema),
 }).strict();

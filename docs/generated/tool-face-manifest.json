@@ -437,6 +437,10 @@
           "updated_at": {
             "type": "string"
           },
+          "text_save_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
           "trashed_at": {
             "type": [
               "string",
@@ -542,6 +546,7 @@
           "operation_batch_id",
           "created_at",
           "updated_at",
+          "text_save_revision",
           "trashed_at",
           "source_references"
         ],

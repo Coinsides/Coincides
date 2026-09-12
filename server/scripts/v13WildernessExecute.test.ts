@@ -251,18 +251,22 @@ test('complete frame replay rejects single-frame false positives and refuses inc
   } finally { db.close(); }
 });
 
-test('live print baseline is applied when page_size is absent, while explicit A4 preserves Source origin', () => {
+test('missing page_size applies live A4 geometry while preserving D1 persisted walls and Source origin', () => {
   const db = fixture();
   try {
     const row = get(db, 'production-source-x152');
-    assert.equal(readFrame(db, row)!.contentInset.top, 96);
+    const explicitFrame = readFrame(db, row)!;
+    assert.equal(explicitFrame.contentInset.top, 96);
     db.prepare('UPDATE page_frame_extensions SET page_size=NULL WHERE frame_id=?').run(row.frame_id);
     const frame = readFrame(db, row)!;
     assert.equal(frame.width, 904);
-    assert.equal(frame.contentInset.top, 0);
+    // D1 preserves each persisted wall even when a historical page_size is absent.
+    // Authority: docs/agent-ops/current-state/page-frame-and-layout-contract.md §一.2–3.
+    assert.equal(frame.contentInset.top, 96);
+    assert.deepEqual(frame.contentInset, explicitFrame.contentInset);
     const result = solveCoordinates(row, frame, readFrames(db, row));
     assert.equal(result.status, 'normalized');
-    if (result.status === 'normalized') assert.equal(result.candidate.y, 96);
+    if (result.status === 'normalized') assert.equal(result.candidate.y, 0);
   } finally { db.close(); }
 });
 

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "typecheck-server",
+    "exitCode": 0,
+    "elapsedSeconds": 10.358
+  },
+  {
+    "name": "typecheck-client",
+    "exitCode": 0,
+    "elapsedSeconds": 8.747
+  }
+]

@@ -1,0 +1,69 @@
+{
+  "status": "stopped",
+  "inventory": {
+    "allServerTests": 75,
+    "wiredBefore": 50,
+    "unwiredBefore": 25,
+    "mainTestDirectory": {
+      "files": 69,
+      "unwired": 24
+    },
+    "extraUnwired": "server/src/agent/providers/index.test.ts"
+  },
+  "missingSuites": {
+    "name": "missing-suites",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "../scripts/run-server-test-suite.mjs",
+      "--test-concurrency=1",
+      "--test-reporter=tap",
+      "src/__tests__/providerCredentials.test.ts",
+      "src/__tests__/v13AgentMemories.test.ts",
+      "src/__tests__/v13AtomicTextSave.test.ts",
+      "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "src/__tests__/v13BoardChalk.test.ts",
+      "src/__tests__/v13BoardStaging.test.ts",
+      "src/__tests__/v13BoardTextRanges.test.ts",
+      "src/__tests__/v13BoardTrayRelocation.test.ts",
+      "src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "src/__tests__/v13CanvasRetirement.test.ts",
+      "src/__tests__/v13EventsLedger.test.ts",
+      "src/__tests__/v13GraphemeTextRanges.test.ts",
+      "src/__tests__/v13ItemRefBlocks.test.ts",
+      "src/__tests__/v13MediaBlocks.test.ts",
+      "src/__tests__/v13NoteMetadata.test.ts",
+      "src/__tests__/v13PagePresets.test.ts",
+      "src/__tests__/v13PaperInk.test.ts",
+      "src/__tests__/v13PaperSkin.test.ts",
+      "src/__tests__/v13ProjectDeletionReferences.test.ts",
+      "src/__tests__/v13SourceProjectionRepair.test.ts",
+      "src/__tests__/v13SourceReprojection.test.ts",
+      "src/__tests__/v13Tray.test.ts",
+      "src/__tests__/v13TrayOrder.test.ts",
+      "src/__tests__/v13WallCollectionBatch.test.ts",
+      "src/agent/providers/index.test.ts"
+    ],
+    "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+    "exitCode": 1,
+    "signal": null,
+    "durationMs": 23627,
+    "tests": 148,
+    "pass": 144,
+    "fail": 4,
+    "skipped": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "failingFiles": [
+      "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "src/__tests__/v13EventsLedger.test.ts",
+      "src/__tests__/v13ProjectDeletionReferences.test.ts"
+    ]
+  },
+  "scriptsChanged": false,
+  "exemptionsAdded": false,
+  "fullServerRun": false,
+  "verifyRun": false,
+  "typecheckRun": false,
+  "buildRun": false,
+  "positiveControlRun": false
+}

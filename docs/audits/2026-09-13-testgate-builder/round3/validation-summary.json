@@ -1,0 +1,193 @@
+{
+  "serverFiles": 75,
+  "batches": {
+    "testV2": {
+      "tests": 466,
+      "pass": 439,
+      "fail": 27,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "supplemental": {
+      "tests": 179,
+      "pass": 179,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "totals": {
+    "tests": 645,
+    "pass": 618,
+    "fail": 27,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "groupedFailures": {
+    "v2CanvasPersistenceCutover.test.ts": 25,
+    "v2SourceMineruWiring.test.ts": 1,
+    "v2SourceRegionCells.test.ts": 1
+  },
+  "caveat": "TAP count includes MineruWiring module-load failure; its internal tests never registered.",
+  "server": [
+    {
+      "name": "server-test-v2",
+      "exitCode": 1,
+      "elapsedSeconds": 37.701
+    },
+    {
+      "name": "server-supplemental",
+      "exitCode": 0,
+      "elapsedSeconds": 138.289
+    }
+  ],
+  "typecheck": [
+    {
+      "name": "typecheck-server",
+      "exitCode": 0,
+      "elapsedSeconds": 4.512
+    },
+    {
+      "name": "typecheck-client",
+      "exitCode": 0,
+      "elapsedSeconds": 7.946
+    }
+  ],
+  "verify": [
+    {
+      "name": "verify-check-test-wiring",
+      "exitCode": 0,
+      "elapsedSeconds": 0.195
+    },
+    {
+      "name": "verify-check-tech-debt-table",
+      "exitCode": 0,
+      "elapsedSeconds": 0.187
+    },
+    {
+      "name": "verify-test-unit",
+      "exitCode": 0,
+      "elapsedSeconds": 23.9
+    },
+    {
+      "name": "verify-test-tool-face-registry",
+      "exitCode": 0,
+      "elapsedSeconds": 0.595
+    },
+    {
+      "name": "verify-test-tool-face-manifest",
+      "exitCode": 0,
+      "elapsedSeconds": 3.425
+    },
+    {
+      "name": "verify-check-tool-face-manifest",
+      "exitCode": 0,
+      "elapsedSeconds": 0.573
+    },
+    {
+      "name": "verify-test-tool-face-parity",
+      "exitCode": 0,
+      "elapsedSeconds": 5.24
+    },
+    {
+      "name": "verify-check-tool-face-parity",
+      "exitCode": 0,
+      "elapsedSeconds": 0.517
+    },
+    {
+      "name": "verify-check-server-shared-runtime-import",
+      "exitCode": 0,
+      "elapsedSeconds": 0.535
+    },
+    {
+      "name": "verify-check-canvas-runtime-boundary",
+      "exitCode": 0,
+      "elapsedSeconds": 0.434
+    },
+    {
+      "name": "verify-check-group-gallery-shell",
+      "exitCode": 0,
+      "elapsedSeconds": 0.433
+    },
+    {
+      "name": "verify-check-groups-rail-shell",
+      "exitCode": 0,
+      "elapsedSeconds": 0.435
+    },
+    {
+      "name": "verify-check-single-editor-shell",
+      "exitCode": 0,
+      "elapsedSeconds": 0.431
+    },
+    {
+      "name": "verify-check-source-experience",
+      "exitCode": 0,
+      "elapsedSeconds": 0.916
+    },
+    {
+      "name": "verify-check-v2-bn11-legacy-shutdown",
+      "exitCode": 0,
+      "elapsedSeconds": 0.455
+    },
+    {
+      "name": "verify-check-v2-bn11-relation-freshness",
+      "exitCode": 0,
+      "elapsedSeconds": 0.436
+    },
+    {
+      "name": "verify-smoke-canvas-engine-model-contract",
+      "exitCode": 0,
+      "elapsedSeconds": 1.922
+    },
+    {
+      "name": "verify-build-client",
+      "exitCode": 0,
+      "elapsedSeconds": 12.365
+    },
+    {
+      "name": "verify-build",
+      "exitCode": 0,
+      "elapsedSeconds": 6.625
+    },
+    {
+      "name": "verify-smoke-canvas-engine-performance",
+      "exitCode": 0,
+      "elapsedSeconds": 1.163
+    },
+    {
+      "name": "verify-docs-check",
+      "exitCode": 0,
+      "elapsedSeconds": 0.6
+    }
+  ],
+  "finalDocs": [
+    {
+      "name": "final-docs-check-after-index",
+      "exitCode": 0,
+      "elapsedSeconds": 0.583
+    }
+  ],
+  "clientUnit": {
+    "files": 151,
+    "tests": 1590,
+    "failed": 0
+  },
+  "excludedHqTail": [
+    "git diff --check",
+    "npm run check:changed-file-secrets"
+  ],
+  "manifest": {
+    "changedTools": [
+      "list_note_blocks"
+    ],
+    "unchangedTools": 13,
+    "soleChange": "Required output item property text_save_revision: integer, minimum 0",
+    "schemaOtherFieldsIdentical": true,
+    "manifestSha256": "0b28b47e8c60fa508da4bdc66e31abb83a4228e0c44c25f15716e29aa3798d09",
+    "registrySha256": "6aa5fa247481478835493623d8f44b82ac60540bbbf44d126a948fefc726dc18"
+  },
+  "terminalCriterionMet": true
+}

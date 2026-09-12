@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(13.6 裁决半场执行单2,先行;Henry 2026-09-13 拍板"单2先行单1在后")
+> **状态 (Status)**: done(补遗二三轮终态达成;保留25条已裁归单1 Canvas红+2条已知环境红;HQ收口补跑git/secrets)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-13
 > **单号**: 13.6 · 单2 · 测试门修复(TD-22 置顶还款)
@@ -235,3 +235,65 @@ server 两批显式文件集合互不重复，使用 `--test-concurrency=1 --tes
 4. **MCP 严格输出 schema 漏声明=真产品缺陷,授权本单修**(B7 的收尾遗漏):`toolFace/registry.ts` 的 `list_note_blocks` 输出 schema 补声明 `text_save_revision`(如实声明真实返回,零语义变更);manifest 按既有生成器重生成;parity/manifest 门须绿;`v2McpTransport` 转绿;⛔顺手动其他工具 schema。
 
 **终态判据**:server 全量红仅剩 25(canvas,候单1)+2(环境,候总测),其余全绿;三份+四份修复测试、25 接门、机关、两新门全在;Result 更新;status 翻 done。
+
+## Result（补遗二 · 三轮执行）
+
+**Codex builder：补遗二终态判据已达成，status 翻 done。** Server 全量75文件尝试执行，**645 tests / 618 pass / 27 fail**；失败集合严格为 **25条 Canvas 陈旧红（已裁归单1）+2条 Python 已知环境红（候13.6总测）**，其他全绿。done 是本单工程终态，不代替 HQ 放行；未申报 server 全绿。
+
+本节为最新回执；前两轮停线 Result 原样保留为历史。详细证据：[round3/README.md](../../audits/2026-09-13-testgate-builder/round3/README.md)。
+
+### 交付与活语义保全
+
+| 文件 | 本轮修复 | numstat |
+|---|---|---|
+| `server/src/__tests__/v2MaterialLibrary.test.ts` | 对齐包含媒体先遣 `media.image` 的现役四模板集；保留原数量、幂等、版本、来源及作用域断言，补三路精确键集校验 | +6/-1 |
+| `server/src/__tests__/v13BoardIdentity.test.ts` | 从真实 startup ledger 取得动态终点，补录已手工运行的 pre-065 历史后跑完整 runner；base-schema 重放、原 PRAGMA、唯一性、FK、NULL 及其他065定点测试全保留 | +18/-1 |
+| `server/scripts/v13WildernessExecute.test.ts` | 按 D1 后墙契约，缺 page_size 保留持久墙 top=96，Source candidate.y=0；增加完整 contentInset 等值断言 | +8/-4 |
+| `server/src/__tests__/v2NotesLifecycle.test.ts` | handler hash 对齐合法 B1c 不可改纸型交付，附 commit 收据、工单和精确patch出处；原断言保留 | +8/-2 |
+| `server/src/toolFace/registry.ts` | 仅给 `list_note_blocks` 输出补必填非负整数 `text_save_revision` | +1/-0 |
+| `docs/generated/tool-face-manifest.json` | 按既有生成器重生成，仅投影该字段及 required 项 | +5/-0 |
+
+上述六文件合计 **+46/-8**。连同本工单状态/追加回执及证据的完整增删行数见 [round3/numstat.tsv](../../audits/2026-09-13-testgate-builder/round3/numstat.tsv)；基线为施工前字节快照，**不是 Git HEAD**。
+
+工单翻done后文档末检提示自动索引状态过期，已运行既有 `docs:index` 生成器，仅同步 `docs/agent-ops/INDEX.md` 的本工单状态条目；其他八份索引未变。原始失败、生成输出和随后绿色复验分别存于 round3 的 `final-docs-check.log` / `generate-docs-index.log` / `final-docs-check-after-index.log`，索引变更计入完整numstat。
+
+**B1c hash 署名**：新 SHA 为 `0dfd76eb9fa0f7c0f8002596663a4ff2fa052f0aa8c7e7d01318d1436f559b57`；代码注释指出 B1c 工单 Result、09-09 日志 §115“B1c 已 commit”及 B1c `product-changes.patch`。将该合法交付的 owned-note binding 与 immutable guard 在内存精确逆向，即恢复旧 B1a SHA `69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e`，没有借更新hash吞掉其他handler漂移。**Docs 收据未刊 commit ID**，未访问 `.git` 求值或伪造ID；出处行号与核对证据见 [handler-hash-provenance.json](../../audits/2026-09-13-testgate-builder/round3/handler-hash-provenance.json)。
+
+**MCP 限界**：manifest完整结构对照证明仅 `list_note_blocks` 增加该声明，其他13工具完整对象不变；registry删除新增一行即与before字节等同。`v2McpTransport` 整套及真实 `list_note_blocks` 调用转绿，未改该测试；manifest/registry/parity各门均绿，生产manifest与生成源字节等同。证据：[mcp-manifest-delta.json](../../audits/2026-09-13-testgate-builder/round3/mcp-manifest-delta.json)。
+
+### 接门台账、机关与 scripts 保全
+
+**已接门25 / 陈旧候单1（漏挂集合内）0 / 未接停线0**，前节25文件逐项台账全部继续成立；TD-6 killer、TD-21字素守护、TD-7退役闸及补遗一三份修复测试本轮均整套通过。补遗一三测试、两package、机关和tech-debt门均与本轮before字节相同；无测试删除、语义放宽或豁免。
+
+Server `test:v2` 仍为原32逐字前缀追加25后的57显式文件；其余18唯一文件完整补跑，合计75，清单与二轮全等。verify仍为两新门+完整旧链+HQ两尾门。前后全文继续见 [test-v2-scripts.json](../../audits/2026-09-13-testgate-builder/round2/test-v2-scripts.json) / [verify-scripts.json](../../audits/2026-09-13-testgate-builder/round2/verify-scripts.json)。
+
+机关本轮亲跑 **75/75 wired/0 exempted/0 unwired，exit0**；豁免表保持空。二轮已完成的 [12项阳性对照](../../audits/2026-09-13-testgate-builder/round2/wiring-controls.json) 继续有效：基线绿→临时漏挂红→六类假引用仍红→三类真实runner引用绿→删除临时文件、恢复package后绿；本轮机关与scripts不变，未重复制造临时文件。`check:test-wiring`、`check:tech-debt-table` 均仍在verify且本轮跑绿，tech-debt三条历史豁免零动。
+
+### 全量验证数字与四类裁定
+
+| 项目 | 本轮实跑 |
+|---|---|
+| Server test:v2，57文件，保留真实npm pretest钩子 | 466 tests / 439 pass / 27 fail，exit1 |
+| Server其余18唯一文件，完整套件 | 179 tests / 179 pass / 0 fail，exit0 |
+| Server合计75文件尝试执行 | **645 tests / 618 pass / 27 fail / 0 skipped / 0 cancelled / 0 todo** |
+| Client unit | 151文件、1590 tests，全通过 |
+| Server / client typecheck | 两端exit0 |
+| Server / client build | 两端exit0 |
+| verify允许的完整子门集合 | **21/21 exit0**，含两新门、registry/manifest/parity、docs:check |
+
+全部完整套件使用 `--test-concurrency=1 --test-reporter=tap`，无name-pattern或其他子例过滤；七份修复测试和25接门都在全量集合内，不重复累加。645为真实TAP计数，**含MineruWiring模块加载失败，其内部五用例未注册**，不以0 skipped冒充内部全跑。完整命令、用时和退出码：[validation-summary.json](../../audits/2026-09-13-testgate-builder/round3/validation-summary.json)。
+
+1. **25 Canvas红：已裁归单1**。全部位于 `v2CanvasPersistenceCutover.test.ts`，文件未改。
+2. **2环境红：已知基线红，候13.6总测**。`v2SourceMineruWiring.test.ts` Python ENOENT；`v2SourceRegionCells.test.ts` 的c-1b-2 pinned Python无法启动（exit101）；测试和环境均未改。
+3. **4份活测试腐烂：获准修复并转绿**，活语义零放宽。
+4. **MCP真产品缺陷：仅补真实字段声明并转绿**，其他工具schema零动。
+
+逐条失败名称、文件、原始诊断和日志行号：[failures.json](../../audits/2026-09-13-testgate-builder/round3/failures.json)。机器摘要强制核对仅25/1/1，没有把额外失败塞进裁定类别。
+
+### 完整性与未做项
+
+限定源码射程1003文件中998字节不变，仅4测试+registry改变，新增0/删除0；两package、补遗一三测试、机关、tech-debt门与object inventory均字节不变。证据：[integrity.json](../../audits/2026-09-13-testgate-builder/round3/integrity.json)。
+
+DB全部为内存/临时合成夹具；空dotenv/Vite env、临时app-data/assets/blobs/uploads、清空provider key的设置与命令留档。未读真实.env key值、凭证或用户库；未改Canvas/环境红、其他产品实现或工具schema、current-state、权限文件；未删测试、增豁免、glob化、做安全专项或子例过滤；未执行Git、访问.git、commit/push/PR/merge。临时合成目录留在临时区，构建产物未进audits。
+
+**git diff --check与secrets扫描按HQ补遗由HQ收口补跑，不计builder漏验。** 本单终态已达成，故按补遗二翻done；保留的27红、HQ尾门及最终放行权均如实留给既定承接方。

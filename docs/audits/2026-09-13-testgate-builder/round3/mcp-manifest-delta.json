@@ -1,0 +1,10 @@
+{
+  "changedTools": [
+    "list_note_blocks"
+  ],
+  "unchangedTools": 13,
+  "soleChange": "Required output item property text_save_revision: integer, minimum 0",
+  "schemaOtherFieldsIdentical": true,
+  "manifestSha256": "0b28b47e8c60fa508da4bdc66e31abb83a4228e0c44c25f15716e29aa3798d09",
+  "registrySha256": "6aa5fa247481478835493623d8f44b82ac60540bbbf44d126a948fefc726dc18"
+}

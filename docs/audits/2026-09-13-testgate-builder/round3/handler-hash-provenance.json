@@ -1,0 +1,98 @@
+{
+  "status": "verified",
+  "recordedAt": "2026-09-12T17:50:48.608Z",
+  "scope": "B1c PUT /api/notes/:id handler hash attribution; source files are read-only in this check",
+  "references": [
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-13-v13-6-test-gate-repair-order.md",
+      "line": 233,
+      "supports": "Addendum 2 authorizes hash update with B1c legal-delivery attribution"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-11-v13-5-b1c-page-presets-order.md",
+      "line": 41,
+      "supports": "B1c Result delivers 409 note_page_preset_immutable guard while retaining ordinary edits and same-value resubmission"
+    },
+    {
+      "path": "docs/agent-ops/claude-log/2026-09-09.md",
+      "line": 807,
+      "section": "115",
+      "supports": "B1c closeout section"
+    },
+    {
+      "path": "docs/agent-ops/claude-log/2026-09-09.md",
+      "line": 810,
+      "quote": "B1c ? commit",
+      "supports": "HQ records the B1c delivery as committed"
+    },
+    {
+      "path": "docs/audits/2026-09-11-b1c-builder/product-changes.patch",
+      "line": 974,
+      "hunkLine": 1004,
+      "supports": "Exact retained B1c handler patch"
+    },
+    {
+      "path": "server/src/__tests__/v2NotesLifecycle.test.ts",
+      "line": 426,
+      "hashLine": 434,
+      "supports": "Updated hash guard includes commit-receipt and delivery attribution"
+    }
+  ],
+  "handler": {
+    "path": "server/src/routes/notes.ts",
+    "startMarker": "router.put('/:id'",
+    "endMarker": "// DELETE /api/notes/:id",
+    "normalization": "CRLF or CR becomes LF; extracted handler trimEnd(); same boundaries and normalization as existing test",
+    "priorB1aSha256": "69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e",
+    "currentB1cSha256": "0dfd76eb9fa0f7c0f8002596663a4ff2fa052f0aa8c7e7d01318d1436f559b57",
+    "currentObservedSha256": "0dfd76eb9fa0f7c0f8002596663a4ff2fa052f0aa8c7e7d01318d1436f559b57",
+    "reversedB1cObservedSha256": "69f60628e10e2930a2c8ab540a85b25a1b569957f9e1e48da33f9af87b2c916e"
+  },
+  "verification": {
+    "method": "Parse the exact retained unified-diff hunk, require its new-side text to occur exactly once in the current handler, replace only that hunk with its old-side text in memory, and hash the result",
+    "exactHunkOccurrenceCount": 1,
+    "reversedChanges": [
+      {
+        "kind": "owned-note binding",
+        "beforeB1c": "    getOwnedNote(noteId, req.userId!);",
+        "afterB1c": "    const note = getOwnedNote(noteId, req.userId!);"
+      },
+      {
+        "kind": "immutable-page-preset guard",
+        "afterB1cLines": [
+          "    if (",
+          "      data.page_format !== undefined",
+          "      && data.page_format !== note.page_format",
+          "      && (notePagePresetSchema.safeParse(note.page_format).success",
+          "        || notePagePresetSchema.safeParse(data.page_format).success)",
+          "    ) {",
+          "      throw new AppError(409, 'Page preset cannot be changed after note creation', {",
+          "        code: 'note_page_preset_immutable',",
+          "      });",
+          "    }"
+        ]
+      }
+    ],
+    "unchangedContextRetained": true,
+    "handlerHunkAddedLines": 11,
+    "handlerHunkRemovedLines": 1,
+    "oldHashRestoredExactly": true,
+    "extraHandlerDriftObserved": false,
+    "productSourceMutationPerformed": false
+  },
+  "commitIdentityBoundary": {
+    "commitReceiptFound": true,
+    "commitId": null,
+    "reason": "HQ receipt records B1c as committed but does not publish a commit ID. No ID is inferred from blob hashes or neighboring snapshots.",
+    "searchScope": [
+      "docs/agent-ops/handoffs files: B1c and related page-preset references",
+      "docs/agent-ops/claude-log files: B1c references; the latest dated file available was 2026-09-09.md",
+      "docs/agent-ops recursively: .md and .json references matching B1c with commit/hash language",
+      "docs recursively: .md, .json, .log and .tsv, token-delimited B1c or b1c-page-presets references, then commit/hash language",
+      "docs/audits/2026-09-11-b1c-builder: retained delivery patch, inventory and evidence filenames"
+    ],
+    "searchConclusion": "No B1c commit ID found in the searched documentary references; legal delivery is attributed by HQ commit receipt plus exact preserved delivery patch.",
+    "gitCommandsExecuted": false,
+    "gitDirectoryAccessed": false
+  }
+}

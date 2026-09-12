@@ -1,0 +1,86 @@
+[
+  {
+    "name": "baseline",
+    "command": null,
+    "exitCode": 0,
+    "expectedCode": 0,
+    "expectedSummary": "75 test files; 75 wired; 0 exempted; 0 unwired."
+  },
+  {
+    "name": "unwired",
+    "command": null,
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "echo",
+    "command": "echo \"server/src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "echo-runner",
+    "command": "echo node --test \"server/src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "ordinary-node-program",
+    "command": "node scripts/not-a-test-runner.mjs --test \"server/src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "import-option-value",
+    "command": "node --import \"server/src/__tests__/__test wiring positive control__.test.ts\" --test server/src/__tests__/v13EventsLedger.test.ts",
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "reporter-option-value",
+    "command": "node --test --test-reporter-destination \"server/src/__tests__/__test wiring positive control__.test.ts\" server/src/__tests__/v13EventsLedger.test.ts",
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "echo-cd",
+    "command": "echo cd server && node --test \"src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 1,
+    "expectedCode": 1,
+    "expectedSummary": "76 test files; 75 wired; 0 exempted; 1 unwired."
+  },
+  {
+    "name": "node-test",
+    "command": "node --import tsx --test \"server/src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 0,
+    "expectedCode": 0,
+    "expectedSummary": "76 test files; 76 wired; 0 exempted; 0 unwired."
+  },
+  {
+    "name": "curated-wrapper",
+    "command": "node scripts/run-server-test-suite.mjs \"server/src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 0,
+    "expectedCode": 0,
+    "expectedSummary": "76 test files; 76 wired; 0 exempted; 0 unwired."
+  },
+  {
+    "name": "cd-wrapper",
+    "command": "cd server && node ../scripts/run-server-test-suite.mjs \"src/__tests__/__test wiring positive control__.test.ts\"",
+    "exitCode": 0,
+    "expectedCode": 0,
+    "expectedSummary": "76 test files; 76 wired; 0 exempted; 0 unwired."
+  },
+  {
+    "name": "restored",
+    "command": null,
+    "exitCode": 0,
+    "expectedCode": 0,
+    "expectedSummary": "75 test files; 75 wired; 0 exempted; 0 unwired."
+  }
+]

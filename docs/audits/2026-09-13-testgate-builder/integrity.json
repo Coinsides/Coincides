@@ -1,0 +1,19 @@
+{
+  "basis": "This-run source/script byte snapshots; no Git reads",
+  "existingFilesChecked": 1049,
+  "existingTestFilesChecked": 227,
+  "changed": [],
+  "missing": [],
+  "packages": [
+    {
+      "file": "package.json",
+      "unchanged": true
+    },
+    {
+      "file": "server/package.json",
+      "unchanged": true
+    }
+  ],
+  "newScript": "server/scripts/check-test-wiring.mjs",
+  "exemptions": 0
+}

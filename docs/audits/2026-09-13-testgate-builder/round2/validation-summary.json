@@ -1,0 +1,222 @@
+{
+  "scope": "75 unique server files attempted (57 in test:v2 + 18 supplemental); one module-load failure counts as a TAP test, its cases did not register.",
+  "server": {
+    "tests": 645,
+    "pass": 613,
+    "fail": 32,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "tap": {
+    "repaired-suites-attempt1.log": {
+      "tests": 12,
+      "suites": 0,
+      "pass": 9,
+      "fail": 3,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "repaired-suites-attempt2.log": {
+      "tests": 12,
+      "suites": 0,
+      "pass": 11,
+      "fail": 1,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "repaired-suites-pre-review.log": {
+      "tests": 12,
+      "suites": 0,
+      "pass": 12,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "repaired-suites.log": {
+      "tests": 12,
+      "suites": 0,
+      "pass": 12,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "server-supplemental.log": {
+      "tests": 179,
+      "suites": 0,
+      "pass": 175,
+      "fail": 4,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "server-test-v2.log": {
+      "tests": 466,
+      "suites": 0,
+      "pass": 438,
+      "fail": 28,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "verify-test-tool-face-manifest.log": {
+      "tests": 10,
+      "suites": 0,
+      "pass": 10,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "verify-test-tool-face-parity.log": {
+      "tests": 10,
+      "suites": 0,
+      "pass": 10,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "verify-test-tool-face-registry.log": {
+      "tests": 5,
+      "suites": 0,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "typecheck": [
+    {
+      "name": "typecheck-server",
+      "exitCode": 0,
+      "elapsedSeconds": 10.358
+    },
+    {
+      "name": "typecheck-client",
+      "exitCode": 0,
+      "elapsedSeconds": 8.747
+    }
+  ],
+  "verify": [
+    {
+      "name": "verify-check-test-wiring",
+      "exitCode": 0,
+      "elapsedSeconds": 0.204
+    },
+    {
+      "name": "verify-check-tech-debt-table",
+      "exitCode": 0,
+      "elapsedSeconds": 0.186
+    },
+    {
+      "name": "verify-test-unit",
+      "exitCode": 0,
+      "elapsedSeconds": 23.53
+    },
+    {
+      "name": "verify-test-tool-face-registry",
+      "exitCode": 0,
+      "elapsedSeconds": 0.607
+    },
+    {
+      "name": "verify-test-tool-face-manifest",
+      "exitCode": 0,
+      "elapsedSeconds": 3.491
+    },
+    {
+      "name": "verify-check-tool-face-manifest",
+      "exitCode": 0,
+      "elapsedSeconds": 0.571
+    },
+    {
+      "name": "verify-test-tool-face-parity",
+      "exitCode": 0,
+      "elapsedSeconds": 5.189
+    },
+    {
+      "name": "verify-check-tool-face-parity",
+      "exitCode": 0,
+      "elapsedSeconds": 0.509
+    },
+    {
+      "name": "verify-check-server-shared-runtime-import",
+      "exitCode": 0,
+      "elapsedSeconds": 0.513
+    },
+    {
+      "name": "verify-check-canvas-runtime-boundary",
+      "exitCode": 0,
+      "elapsedSeconds": 0.439
+    },
+    {
+      "name": "verify-check-group-gallery-shell",
+      "exitCode": 0,
+      "elapsedSeconds": 0.425
+    },
+    {
+      "name": "verify-check-groups-rail-shell",
+      "exitCode": 0,
+      "elapsedSeconds": 0.449
+    },
+    {
+      "name": "verify-check-single-editor-shell",
+      "exitCode": 0,
+      "elapsedSeconds": 0.425
+    },
+    {
+      "name": "verify-check-source-experience",
+      "exitCode": 0,
+      "elapsedSeconds": 0.903
+    },
+    {
+      "name": "verify-check-v2-bn11-legacy-shutdown",
+      "exitCode": 0,
+      "elapsedSeconds": 0.413
+    },
+    {
+      "name": "verify-check-v2-bn11-relation-freshness",
+      "exitCode": 0,
+      "elapsedSeconds": 0.44
+    },
+    {
+      "name": "verify-smoke-canvas-engine-model-contract",
+      "exitCode": 0,
+      "elapsedSeconds": 1.893
+    },
+    {
+      "name": "verify-build-client",
+      "exitCode": 0,
+      "elapsedSeconds": 11.967
+    },
+    {
+      "name": "verify-build",
+      "exitCode": 0,
+      "elapsedSeconds": 6.505
+    },
+    {
+      "name": "verify-smoke-canvas-engine-performance",
+      "exitCode": 0,
+      "elapsedSeconds": 1.171
+    },
+    {
+      "name": "verify-docs-check",
+      "exitCode": 0,
+      "elapsedSeconds": 0.593
+    }
+  ],
+  "client": {
+    "files": 151,
+    "tests": 1590,
+    "passed": 1590
+  },
+  "hqOnly": [
+    "git diff --check",
+    "check:changed-file-secrets"
+  ]
+}

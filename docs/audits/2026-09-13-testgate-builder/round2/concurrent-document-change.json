@@ -1,0 +1,7 @@
+{
+  "path": "docs/agent-ops/INDEX.md",
+  "observedChange": "ownership-signature-ruling-draft entry: draft -> active",
+  "builderWroteThisFile": false,
+  "action": "Preserved concurrent document update; excluded from builder numstat.",
+  "baseline": "before/docs/agent-ops/INDEX.md"
+}

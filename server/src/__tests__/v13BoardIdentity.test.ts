@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test, { type TestContext } from 'node:test';
 import type Database from 'better-sqlite3';
+import { initDb } from '../db/init.js';
+import { runMigrations } from '../db/migrate.js';
 import migration065 from '../db/migrations/065_v13_board_item_identity.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createBoard, deleteBoard, getBoard, listBoards, mountBoardMember, updateBoard } from '../services/boards.js';
@@ -56,13 +58,28 @@ function legacyBoard(db: Database.Database, id: string, projectId: string | null
 test('065 nullable unique Item bridge and FK converge for fresh and actual pre-065 schemas', async (t) => {
   const fresh = await fixture(t);
   const upgrade = await fixture(t, true);
+  const startup = await initDb(':memory:');
+  t.after(() => startup.close());
+  const currentLedger = startup.prepare('SELECT id, description FROM db_migrations ORDER BY rowid')
+    .all() as Array<{ id: string; description: string }>;
+  assert.ok(currentLedger.some((migration) => migration.id === migration065.id));
   // Production startup re-applies base schema BEFORE migrations on existing DBs.
   // This catches accidentally moving the new bridge index into schema.sql.
   const baseSchema = readFileSync(new URL('../db/schema.sql', import.meta.url), 'utf8');
   for (const statement of baseSchema.split(';').map((sql) => sql.trim())) {
     if (statement && !statement.startsWith('PRAGMA')) upgrade.exec(`${statement};`);
   }
-  migration065.up(upgrade);
+  // The fixture already ran every pre-065 body without a ledger. Record those
+  // entries, then let the real runner reach its current endpoint (including skin
+  // and future migrations) without replaying historical non-idempotent bodies.
+  upgrade.exec(`CREATE TABLE db_migrations (id TEXT PRIMARY KEY, description TEXT NOT NULL,
+    applied_at TEXT NOT NULL DEFAULT (datetime('now')))`);
+  for (const migration of currentLedger.filter((entry) => entry.id < migration065.id)) {
+    upgrade.prepare('INSERT INTO db_migrations (id, description) VALUES (?, ?)')
+      .run(migration.id, migration.description);
+  }
+  assert.equal(await runMigrations(upgrade), currentLedger.filter((entry) => entry.id >= migration065.id).length);
+  assert.deepEqual(upgrade.prepare('SELECT id, description FROM db_migrations ORDER BY rowid').all(), currentLedger);
   for (const pragma of ['table_info(boards)', 'foreign_key_list(boards)', 'index_list(boards)']) {
     // ALTER appends the column; SQLite's ordinal IDs are not schema semantics.
     const shape = (db: Database.Database) => (db.pragma(pragma) as Array<Record<string, unknown>>)
