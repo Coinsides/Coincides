@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 356 份文档。
+共 358 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -85,6 +85,7 @@
 | [analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md](analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md) | 编辑成熟度与 Agent 对称 —— 对谈分析档 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s0-recon.md](analysis/2026-09-09-v13-4-s0-recon.md) | V13.4 单 0 · 投影全谱与 item 化侦察 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s1-item-depth.md](analysis/2026-09-09-v13-4-s1-item-depth.md) | 13.4 单 1 · Item 三道深水题 | `active` | 2026-09-09 | — |
+| [analysis/2026-09-13-ownership-signature-ruling-draft.md](analysis/2026-09-13-ownership-signature-ruling-draft.md) | 权威 ownership 签名裁定稿(TD-15 设计步) | `draft` | 2026-09-13 | — |
 | [analysis/2026-09-13-v13-6-adjudication.md](analysis/2026-09-13-v13-6-adjudication.md) | 13.6 裁决半场记录 | `active` | 2026-09-13 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
@@ -347,6 +348,7 @@
 | [handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md](handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md) | B1e · 外观清扫小单 | `done(2026-09-12 Codex builder 六件施工与功能验收完成；待 HQ 复核/放行；原施工授权与裁定不变)` | — | — |
 | [handoffs/2026-09-12-v13-6-media-block-paste-order.md](handoffs/2026-09-12-v13-6-media-block-paste-order.md) | 媒体块先遣 · 粘贴图片进纸 | `done（builder 工程施工与申报完成；待 HQ/reviewer 复核，非主观放行）` | — | — |
 | [handoffs/2026-09-12-v13-6-source-projection-repair-order.md](handoffs/2026-09-12-v13-6-source-projection-repair-order.md) | 源投影修单 · 页码契约与重投影 v1 | `done(2026-09-12 补遗三四轮六步工程验收通过;历史三轮 Result 原样保留)` | — | — |
+| [handoffs/2026-09-13-v13-6-test-gate-repair-order.md](handoffs/2026-09-13-v13-6-test-gate-repair-order.md) | 单2 · 测试门修复:漏挂发现机关+24 文件接门 | `ready(13.6 裁决半场执行单2,先行;Henry 2026-09-13 拍板"单2先行单1在后")` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
