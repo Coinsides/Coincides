@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 355 份文档。
+共 356 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -85,6 +85,7 @@
 | [analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md](analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md) | 编辑成熟度与 Agent 对称 —— 对谈分析档 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s0-recon.md](analysis/2026-09-09-v13-4-s0-recon.md) | V13.4 单 0 · 投影全谱与 item 化侦察 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s1-item-depth.md](analysis/2026-09-09-v13-4-s1-item-depth.md) | 13.4 单 1 · Item 三道深水题 | `active` | 2026-09-09 | — |
+| [analysis/2026-09-13-v13-6-adjudication.md](analysis/2026-09-13-v13-6-adjudication.md) | 13.6 裁决半场记录 | `active` | 2026-09-13 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -133,7 +134,7 @@
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-08-22 | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-09-13(13.6 裁决半场批量补账:12 天欠账一次清——TD-25/28 关行、TD-6 部分清偿、TD-21 触发、TD-22 加重、TD-15 增长、TD-41 新增;裁决档=analysis/2026-09-13-v13-6-adjudication.md) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
