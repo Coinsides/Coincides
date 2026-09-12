@@ -41,3 +41,37 @@ canvasRuntimeBoundaryCheck 5 组 assertContainsAll 唯一供货方在死枝—�
 ## 申报义务
 
 Result 必含:交付清单+numstat(预期净删除为主)、四批逐批完成态、门改红演示清单、25 条转绿证据、退役锁测试改写清单、测试数字、未做项。冲突停线举证⛔自作主张。
+
+## Result
+
+### 2026-09-12 builder · STOP-1 · needs: HQ
+
+**按“疑难与图纸不符→停线举证”停于首刀前；状态保留 ready，未达 done。** 工单、现物复查图纸、裁决档已完整读取。停线报告：[STOP-1](../../audits/2026-09-13-purge-builder/STOP-1.md)；亲跑原始输出：[基线日志](../../audits/2026-09-13-purge-builder/stop-1-targeted-baseline.log)。日期取本机 America/Toronto，证据目录沿用本单指定日期。
+
+**图纸漏项**：一·20 被列纯死直删，但 `pageFrameTypographyService.test.ts:117–130` 明确断言 Canvas 原 typography 对象不变，直接删旁路会违反 125–127 行身份断言；一·10 要求确认无 Canvas 用例，现物 `useCanvasSurfacePointerController.test.tsx:11–12,39` 实有两条 Canvas 场景及模式相关宽度断言，另与一·6 workspace 宽度分支耦合。未据此判 Canvas 复活，未擅自改测试期待；请 HQ 补足这两项测试处置及批次归属后续工。
+
+| 申报项 | 本次结果 |
+|---|---|
+| 交付清单 / numstat | 本轮逐文件文本行计数：STOP-1 报告 **+42/-0**、基线日志 **+15/-0**、当前工单 Result **+23/-0**（43→66 行），合计 **+80/-0**；生产代码与测试源码 **+0/-0**。未运行 Git numstat，未读取或修改 `.git`；此为本轮写入量，不申报仓库整体 diff |
+| 批一：纯死直删 10 项 | 未启动，首刀前发现图纸测试耦合漏项 |
+| 批二：拆分 9 项 | 未启动 |
+| 批三：删除与静态门 7 项 | 未启动 |
+| 批四：替身测试 3 项与 TD-7/TD-9 桥 | 未启动 |
+| 门改红演示清单 | 空；尚无删枝或门改，不伪称红绿验证 |
+| 25 条陈旧红转绿 | 未执行 server baseline、未改 fixture、未取得转绿证据；5 条图片资产生命周期用例未删 |
+| 退役锁测试改写清单 | 空；4 个 toggle 相关文件、pageCenteringContract、v13CanvasRetirement 均未改 |
+| 测试数字 | 仅定向基线：**2 文件、22/22 PASS**（typography 18 + pointer 4），exit 0；安全标题排除 0 |
+| 未做项 | 四批代码施工、三端 typecheck/build、server 57 文件、client 全库、各静态门与 check:test-wiring、隔离库真浏览器冒烟、+56px 删除验证、桥拆除均未做；Git/secrets 扫描仍由 HQ 补跑 |
+
+定向测试走现成 runner 的 `--client-tests` 分支，环境白名单、`envFile:false`、内存 DB 设置已核查。没有运行安全类测试、读取 `.env` key 值、接触用户库、启动应用服务、执行 Git 或 commit。现成总门及另一个隔离 runner 含 Git 子步骤，未原样执行；精确位点见 STOP-1 附记。
+
+---
+
+## 补遗一(HQ 裁定,2026-09-13 二轮)
+
+STOP-1 举证成立收货,图纸两漏项补裁:
+
+1. **图纸一·20**(typography canvas 旁路):`pageFrameTypographyService.test.ts:117-130` 的 Canvas 身份断言=**死语义断言**,随删枝同批退役(删该 canvas 用例/断言);Page 活语义(物理字号/首帧选择/显式 override/双缩放坐标)断言**逐字保留**;仍归批一;
+2. **图纸一·10**(pointer 短路臂):`useCanvasSurfacePointerController.test.tsx` 两条 Canvas 场景=死场景用例,随短路臂退役;因宽度断言与一·6 workspace 分支耦合,**一·10 改归批二与一·6 同刀**,宽度断言改写为 Page 单模语义;
+3. **通例(授权,防逐处停线)**:施工中再遇"测试断言死语义"——**明确断言 canvas 死行为**的用例/断言随枝退役,活语义断言零动;两可/拿不准仍停线举证。退役的用例逐条入 Result 清单;
+4. 其余四批与验收判据零变。续工。
