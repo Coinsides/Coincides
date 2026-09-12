@@ -85,7 +85,7 @@
 | [analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md](analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md) | 编辑成熟度与 Agent 对称 —— 对谈分析档 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s0-recon.md](analysis/2026-09-09-v13-4-s0-recon.md) | V13.4 单 0 · 投影全谱与 item 化侦察 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s1-item-depth.md](analysis/2026-09-09-v13-4-s1-item-depth.md) | 13.4 单 1 · Item 三道深水题 | `active` | 2026-09-09 | — |
-| [analysis/2026-09-13-ownership-signature-ruling-draft.md](analysis/2026-09-13-ownership-signature-ruling-draft.md) | 权威 ownership 签名裁定稿(TD-15 设计步) | `draft` | 2026-09-13 | — |
+| [analysis/2026-09-13-ownership-signature-ruling-draft.md](analysis/2026-09-13-ownership-signature-ruling-draft.md) | 权威 ownership 签名裁定稿(TD-15 设计步) | `active` | 2026-09-13 | — |
 | [analysis/2026-09-13-v13-6-adjudication.md](analysis/2026-09-13-v13-6-adjudication.md) | 13.6 裁决半场记录 | `active` | 2026-09-13 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
