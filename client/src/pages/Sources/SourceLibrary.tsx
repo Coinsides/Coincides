@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SourceDetailDialog } from './SourceDetailDialog';
 import { SourceDeleteDialog } from './SourceDeleteDialog';
+import { SourceReprojectionDialog } from './SourceReprojectionDialog';
 import { SourceList } from './SourceList';
 import { SourceUploader } from './SourceUploader';
 import {
@@ -13,7 +15,7 @@ import {
 } from './sourceExperienceModel';
 import { useSourceActions } from './useSourceActions';
 import { useSourceCollection } from './useSourceCollection';
-import { deleteSource } from './sourceApi';
+import { deleteSource, rematerializeSource } from './sourceApi';
 import { useUIStore } from '@/stores/uiStore';
 import styles from './SourceLibrary.module.css';
 
@@ -21,6 +23,7 @@ type StateFilter = 'all' | SourceExperienceState;
 type TypeFilter = 'all' | SourceFormat;
 
 export default function SourceLibraryPage() {
+  const { t } = useTranslation();
   const collection = useSourceCollection({ originEntryKind: 'library_upload' });
   const addToast = useUIStore((state) => state.addToast);
   const [query, setQuery] = useState('');
@@ -28,6 +31,7 @@ export default function SourceLibraryPage() {
   const [stateFilter, setStateFilter] = useState<StateFilter>('all');
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [deleteSourceId, setDeleteSourceId] = useState<string | null>(null);
+  const [reprojectionTarget, setReprojectionTarget] = useState<SourceRecordDetail | null>(null);
   const selectedSource = collection.sources.find((source) => source.id === selectedSourceId) || null;
   const deleteTarget = collection.sources.find((source) => source.id === deleteSourceId) || null;
   const showDetails = (source: SourceRecordDetail) => setSelectedSourceId(source.id);
@@ -49,6 +53,18 @@ export default function SourceLibraryPage() {
     setSelectedSourceId(null);
     await collection.refresh(true);
     addToast('success', 'Source permanently deleted; historical receipts were retained');
+  };
+
+  const showReprojection = (source: SourceRecordDetail) => {
+    setSelectedSourceId(null);
+    setReprojectionTarget(source);
+  };
+
+  const confirmReprojection = async (source: SourceRecordDetail) => {
+    await rematerializeSource(source.id);
+    setReprojectionTarget(null);
+    await collection.refresh(true);
+    addToast('success', t('sources.reprojection.success'));
   };
 
   return (
@@ -114,6 +130,7 @@ export default function SourceLibraryPage() {
         onOriginal={(source) => void actions.original(source)}
         onDownload={(source) => void actions.download(source)}
         onRetry={(source) => void retry(source)}
+        onReproject={showReprojection}
       />
       <SourceDetailDialog
         source={selectedSource}
@@ -123,12 +140,21 @@ export default function SourceLibraryPage() {
         onDownload={(source) => void actions.download(source)}
         onRetry={(source) => void retry(source)}
         onDelete={(source) => setDeleteSourceId(source.id)}
+        onReproject={showReprojection}
       />
       {deleteTarget && (
         <SourceDeleteDialog
           source={deleteTarget}
           onCancel={() => setDeleteSourceId(null)}
           onConfirm={confirmDelete}
+        />
+      )}
+      {reprojectionTarget && (
+        <SourceReprojectionDialog
+          key={reprojectionTarget.id}
+          source={reprojectionTarget}
+          onCancel={() => setReprojectionTarget(null)}
+          onConfirm={confirmReprojection}
         />
       )}
     </main>

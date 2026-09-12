@@ -1,0 +1,22 @@
+{
+  "stopped": [
+    {
+      "key": "serverPid",
+      "pid": 38816,
+      "result": "terminated"
+    },
+    {
+      "key": "clientPid",
+      "pid": 39552,
+      "result": "terminated"
+    },
+    {
+      "key": "launcherPid",
+      "pid": 17492,
+      "result": "terminated"
+    }
+  ],
+  "serverListening": false,
+  "clientListening": false,
+  "stoppedAt": "2026-09-12T06:40:42.497Z"
+}

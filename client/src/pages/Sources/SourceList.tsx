@@ -8,7 +8,9 @@ import {
   Info,
   Presentation,
   RotateCcw,
+  RefreshCw,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   deriveSourceExperienceState,
   formatSourceBytes,
@@ -27,6 +29,7 @@ interface SourceListProps {
   onOriginal: (source: SourceRecordDetail) => void;
   onDownload: (source: SourceRecordDetail) => void;
   onRetry: (source: SourceRecordDetail) => void;
+  onReproject?: (source: SourceRecordDetail) => void;
 }
 
 function iconForSource(source: SourceRecordDetail) {
@@ -52,7 +55,9 @@ export function SourceList({
   onOriginal,
   onDownload,
   onRetry,
+  onReproject,
 }: SourceListProps) {
+  const { t } = useTranslation();
   if (loading) return <div className={styles.emptyState}>Loading sources...</div>;
   if (sources.length === 0) return <div className={styles.emptyState}>{emptyMessage}</div>;
 
@@ -109,6 +114,16 @@ export function SourceList({
               {behavior.canRetry && (
                 <button type="button" onClick={() => onRetry(source)} title="Retry extraction" aria-label="Retry extraction">
                   <RotateCcw size={15} />
+                </button>
+              )}
+              {state === 'materialized' && onReproject && (
+                <button
+                  type="button"
+                  onClick={() => onReproject(source)}
+                  title={t('sources.reprojection.action')}
+                  aria-label={t('sources.reprojection.action')}
+                >
+                  <RefreshCw size={15} />
                 </button>
               )}
               <button type="button" onClick={() => onDetails(source)} title="Source details" aria-label="Source details">

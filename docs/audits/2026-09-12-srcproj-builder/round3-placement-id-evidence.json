@@ -1,0 +1,397 @@
+{
+  "date": "2026-09-12",
+  "branch": "B",
+  "repair_performed": false,
+  "head": "73eb8627abf083f77d60c77ca56cab5ea599382b\n2026-09-12T02:42:59-04:00\ndocs: 源投影单补遗二(placement id 同形修:取证现役形状,确定性派生保持两表对应,⛔碰 client hydration)",
+  "last_materializer_change": "9d512bfda14bb4ff878398b9dd7a928cf97b4b67\n2026-09-08T01:41:00-04:00\nfeat(coords): dual coordinate contract v1/v2 (13.2 s4a)",
+  "git_commands": [
+    [
+      "git",
+      "log",
+      "-1",
+      "--format=%H%n%cd%n%s",
+      "--date=iso-strict"
+    ],
+    [
+      "git",
+      "log",
+      "-1",
+      "--format=%H%n%cd%n%s",
+      "--date=iso-strict",
+      "--",
+      "server/src/services/sourceProjectionMaterializer.ts"
+    ],
+    [
+      "git",
+      "show",
+      "HEAD:server/src/services/sourceProjectionMaterializer.ts"
+    ],
+    [
+      "git",
+      "show",
+      "HEAD:server/src/services/notes.ts"
+    ],
+    [
+      "git",
+      "show",
+      "HEAD:server/src/services/canvasObjects.ts"
+    ],
+    [
+      "git",
+      "show",
+      "HEAD:client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts"
+    ],
+    [
+      "git",
+      "show",
+      "HEAD:server/src/services/sourceProjectionMaterializer.ts"
+    ]
+  ],
+  "conclusion": "HEAD and working-tree materializers both write bare UUIDv4 note placement IDs and canvas-placement:<same UUID> canvas IDs; unchanged DTO/client paths compare unequal exact keys.",
+  "sources": [
+    {
+      "path": "server/src/services/sourceProjectionMaterializer.ts",
+      "head_sha256": "dd941d3abfed91452b02812169498cc07508c29c1606184ba6ee01b5f0cd6bb1",
+      "current_sha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+      "head": [
+        {
+          "first": 188,
+          "last": 205,
+          "text": "188:     ) {\n189:       addFrame(block.page_index);\n190:     }\n191:     const frame = currentFrame!;\n192:     const notePlacementId = uuidv4();\n193:     const blockId = uuidv4();\n194:     const canvasObjectId = `canvas-object:${frame.frameId}:${notePlacementId}`;\n195:     plannedBlocks.push({\n196:       blockId,\n197:       notePlacementId,\n198:       canvasObjectId,\n199:       canvasPlacementId: `canvas-placement:${notePlacementId}`,\n200:       mountId: `content-mount:${notePlacementId}`,\n201:       artifact: block,\n202:       orderIndex: index,\n203:       frame,\n204:       x: frame.x + CONTENT_LEFT,\n205:       y: frame.y + localY,"
+        },
+        {
+          "first": 480,
+          "last": 488,
+          "text": "480:           source_record_id, source_materialization_id, created_at\n481:         ) VALUES (?, ?, NULL, NULL, ?, ?, ?, ?, 1, ?, ?, ?, ?)\n482:       `);\n483:       const insertMount = db.prepare(`\n484:         INSERT INTO content_mounts (\n485:           id, user_id, course_id, note_id, object_id, target_kind, target_id,\n486:           projection_mode, sync_policy, metadata, created_at, updated_at\n487:         ) VALUES (?, ?, ?, ?, ?, 'note_block', ?, 'owned', 'manual', ?, ?, ?)\n488:       `);"
+        },
+        {
+          "first": 514,
+          "last": 522,
+          "text": "514:         insertNotePlacement.run(\n515:           block.notePlacementId,\n516:           noteId,\n517:           block.blockId,\n518:           block.orderIndex,\n519:           now,\n520:           now,\n521:         );\n522:         insertReceipt.run("
+        },
+        {
+          "first": 557,
+          "last": 565,
+          "text": "557:         insertCanvasPlacement.run(\n558:           block.canvasPlacementId,\n559:           source.user_id,\n560:           source.course_id,\n561:           noteId,\n562:           block.canvasObjectId,\n563:           canvasId,\n564:           coordinates.x,\n565:           coordinates.y,"
+        },
+        {
+          "first": 394,
+          "last": 402,
+          "text": "394:       const insertCanvasPlacement = db.prepare(`\n395:         INSERT INTO canvas_placements (\n396:           id, user_id, course_id, note_id, object_id, canvas_id,\n397:           x, y, width, height, rotation, frame_id, surface, boundary_role,\n398:           z_index, snap_state_json, visibility_state, render_visibility, metadata,\n399:           created_at, updated_at\n400:         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'formal_page', 'inside',\n401:           ?, '{}', 'normal', 'visible', ?, ?, ?)\n402:       `);"
+        },
+        {
+          "first": 470,
+          "last": 475,
+          "text": "470:       const insertNotePlacement = db.prepare(`\n471:         INSERT INTO note_block_placements (\n472:           id, note_id, block_id, order_index, display_mode, display_overrides_json,\n473:           created_at, updated_at\n474:         ) VALUES (?, ?, ?, ?, 'default', '{}', ?, ?)\n475:       `);"
+        }
+      ],
+      "current": [
+        {
+          "first": 207,
+          "last": 224,
+          "text": "207:     const index = plannedBlocks.length;\n208:     const height = estimateBlockHeight(block);\n209:     const frame = currentFrame;\n210:     const localY = nextYByFrame.get(frame) ?? CONTENT_TOP;\n211:     const notePlacementId = uuidv4();\n212:     const blockId = projectionIdentity(sourceFileId, 'block', block.artifact_block_id);\n213:     const canvasObjectId = `canvas-object:${frame.frameId}:${notePlacementId}`;\n214:     plannedBlocks.push({\n215:       blockId,\n216:       notePlacementId,\n217:       canvasObjectId,\n218:       canvasPlacementId: `canvas-placement:${notePlacementId}`,\n219:       mountId: `content-mount:${notePlacementId}`,\n220:       artifact: block,\n221:       orderIndex: index,\n222:       frame,\n223:       x: frame.x + CONTENT_LEFT,\n224:       y: frame.y + localY,"
+        },
+        {
+          "first": 515,
+          "last": 523,
+          "text": "515:       `);\n516:       const insertMount = db.prepare(`\n517:         INSERT INTO content_mounts (\n518:           id, user_id, course_id, note_id, object_id, target_kind, target_id,\n519:           projection_mode, sync_policy, metadata, created_at, updated_at\n520:         ) VALUES (?, ?, ?, ?, ?, 'note_block', ?, 'owned', 'manual', ?, ?, ?)\n521:       `);\n522: \n523:       for (const block of layout.blocks) {"
+        },
+        {
+          "first": 549,
+          "last": 557,
+          "text": "549:         insertNotePlacement.run(\n550:           block.notePlacementId,\n551:           noteId,\n552:           block.blockId,\n553:           block.orderIndex,\n554:           now,\n555:           now,\n556:         );\n557:         insertReceipt.run("
+        },
+        {
+          "first": 592,
+          "last": 600,
+          "text": "592:         insertCanvasPlacement.run(\n593:           block.canvasPlacementId,\n594:           source.user_id,\n595:           source.course_id,\n596:           noteId,\n597:           block.canvasObjectId,\n598:           canvasId,\n599:           coordinates.x,\n600:           coordinates.y,"
+        },
+        {
+          "first": 426,
+          "last": 434,
+          "text": "426:       const insertCanvasPlacement = db.prepare(`\n427:         INSERT INTO canvas_placements (\n428:           id, user_id, course_id, note_id, object_id, canvas_id,\n429:           x, y, width, height, rotation, frame_id, surface, boundary_role,\n430:           z_index, snap_state_json, visibility_state, render_visibility, metadata,\n431:           created_at, updated_at\n432:         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'formal_page', 'inside',\n433:           ?, '{}', 'normal', 'visible', ?, ?, ?)\n434:       `);"
+        },
+        {
+          "first": 503,
+          "last": 508,
+          "text": "503:       const insertNotePlacement = db.prepare(`\n504:         INSERT INTO note_block_placements (\n505:           id, note_id, block_id, order_index, display_mode, display_overrides_json,\n506:           created_at, updated_at\n507:         ) VALUES (?, ?, ?, ?, 'default', '{}', ?, ?)\n508:       `);"
+        }
+      ]
+    },
+    {
+      "path": "server/src/services/notes.ts",
+      "head_sha256": "b6616f24a741c1f3345ad4f465e78a1fa805e8310b99854c6a9833bd4c8c78d8",
+      "current_sha256": "b6616f24a741c1f3345ad4f465e78a1fa805e8310b99854c6a9833bd4c8c78d8",
+      "head": [
+        {
+          "first": 148,
+          "last": 163,
+          "text": "148: }: NoteBlockReadTarget) {\n149:   getOwnedNote(noteId, userId);\n150: \n151:   const blocks = getDb().prepare(`\n152:     SELECT\n153:       nbp.id AS placement_id,\n154:       nbp.note_id,\n155:       nbp.block_id,\n156:       nbp.parent_placement_id,\n157:       nbp.order_index,\n158:       nbp.display_mode,\n159:       nbp.display_overrides_json,\n160:       nb.id,\n161:       nb.user_id,\n162:       nb.course_id,\n163:       nb.block_type,"
+        }
+      ],
+      "current": [
+        {
+          "first": 148,
+          "last": 163,
+          "text": "148: }: NoteBlockReadTarget) {\n149:   getOwnedNote(noteId, userId);\n150: \n151:   const blocks = getDb().prepare(`\n152:     SELECT\n153:       nbp.id AS placement_id,\n154:       nbp.note_id,\n155:       nbp.block_id,\n156:       nbp.parent_placement_id,\n157:       nbp.order_index,\n158:       nbp.display_mode,\n159:       nbp.display_overrides_json,\n160:       nb.id,\n161:       nb.user_id,\n162:       nb.course_id,\n163:       nb.block_type,"
+        }
+      ]
+    },
+    {
+      "path": "server/src/services/canvasObjects.ts",
+      "head_sha256": "ff25249d8af0dea90d3401455cea328fc13882314e99ff741ef35bec86c1e715",
+      "current_sha256": "bf1f1055e99a6ede85496412843301250425ecc514b0900604cf1ad7780fd5fc",
+      "head": [
+        {
+          "first": 1747,
+          "last": 1766,
+          "text": "1747:   const blockRows = db.prepare(`\n1748:     SELECT\n1749:       cp.*,\n1750:       cm.target_id AS block_id\n1751:     FROM canvas_placements cp\n1752:     JOIN canvas_objects co ON co.id = cp.object_id\n1753:     JOIN content_mounts cm\n1754:       ON cm.object_id = co.id\n1755:       AND cm.target_kind = 'note_block'\n1756:       AND cm.note_id = cp.note_id\n1757:     JOIN note_blocks nb\n1758:       ON nb.id = cm.target_id\n1759:       AND nb.user_id = cp.user_id\n1760:       AND nb.status = 'active'\n1761:     WHERE cp.user_id = ?\n1762:       AND cp.note_id = ?\n1763:       AND co.kind = 'paragraph_block_projection'\n1764:       AND co.status = 'active'\n1765:     ORDER BY cp.z_index ASC, cp.id ASC\n1766:   `).all(userId, noteId) as BlockPlacementRow[];"
+        },
+        {
+          "first": 1776,
+          "last": 1781,
+          "text": "1776:     blockLayouts: blockRows.map((row) => ({\n1777:       placement_id: row.id,\n1778:       block_id: row.block_id,\n1779:       layout: layoutFromPlacement(row),\n1780:     })),\n1781:   };"
+        }
+      ],
+      "current": [
+        {
+          "first": 1747,
+          "last": 1766,
+          "text": "1747:   const blockRows = db.prepare(`\n1748:     SELECT\n1749:       cp.*,\n1750:       cm.target_id AS block_id\n1751:     FROM canvas_placements cp\n1752:     JOIN canvas_objects co ON co.id = cp.object_id\n1753:     JOIN content_mounts cm\n1754:       ON cm.object_id = co.id\n1755:       AND cm.target_kind = 'note_block'\n1756:       AND cm.note_id = cp.note_id\n1757:     JOIN note_blocks nb\n1758:       ON nb.id = cm.target_id\n1759:       AND nb.user_id = cp.user_id\n1760:       AND nb.status = 'active'\n1761:     WHERE cp.user_id = ?\n1762:       AND cp.note_id = ?\n1763:       AND co.kind = 'paragraph_block_projection'\n1764:       AND co.status = 'active'\n1765:     ORDER BY cp.z_index ASC, cp.id ASC\n1766:   `).all(userId, noteId) as BlockPlacementRow[];"
+        },
+        {
+          "first": 1776,
+          "last": 1781,
+          "text": "1776:     blockLayouts: blockRows.map((row) => ({\n1777:       placement_id: row.id,\n1778:       block_id: row.block_id,\n1779:       layout: layoutFromPlacement(row),\n1780:     })),\n1781:   };"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+      "head_sha256": "d2128cfd4fc5281339f6f2a31c36f790e3df65b45fe20758d3dc19060ff12f51",
+      "current_sha256": "d2128cfd4fc5281339f6f2a31c36f790e3df65b45fe20758d3dc19060ff12f51",
+      "head": [
+        {
+          "first": 66,
+          "last": 84,
+          "text": "66:   } = {},\n67: ): NoteBlock[] {\n68:   if (blockLayouts.length === 0) return blocks;\n69:   const pageFrames = options.pageFrameCollection?.pageFrames || [];\n70:   const layoutsByBlockId = new Map(blockLayouts.map((item) => [\n71:     item.block_id,\n72:     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),\n73:   ]));\n74:   const layoutsByPlacementId = new Map(blockLayouts.map((item) => [\n75:     item.placement_id,\n76:     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),\n77:   ]));\n78:   return blocks.map((block) => {\n79:     const layout = block.placement_id\n80:       ? layoutsByPlacementId.get(block.placement_id)\n81:       : layoutsByBlockId.get(block.id);\n82:     return layout ? { ...block, canvas_layout: layout } : block;\n83:   });\n84: }"
+        }
+      ],
+      "current": [
+        {
+          "first": 66,
+          "last": 84,
+          "text": "66:   } = {},\n67: ): NoteBlock[] {\n68:   if (blockLayouts.length === 0) return blocks;\n69:   const pageFrames = options.pageFrameCollection?.pageFrames || [];\n70:   const layoutsByBlockId = new Map(blockLayouts.map((item) => [\n71:     item.block_id,\n72:     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),\n73:   ]));\n74:   const layoutsByPlacementId = new Map(blockLayouts.map((item) => [\n75:     item.placement_id,\n76:     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),\n77:   ]));\n78:   return blocks.map((block) => {\n79:     const layout = block.placement_id\n80:       ? layoutsByPlacementId.get(block.placement_id)\n81:       : layoutsByBlockId.get(block.id);\n82:     return layout ? { ...block, canvas_layout: layout } : block;\n83:   });\n84: }"
+        }
+      ]
+    }
+  ],
+  "sql": {
+    "db_path": ".codex-tmp/srcproj-13-6/smoke-run-wkxsqo/synthetic-smoke.db",
+    "readonly": true,
+    "provenance": "round2-smoke.md: fresh synthetic fixture, not a copy of a user database",
+    "source": {
+      "source_record_id": "d2ef33a3-8964-44b8-8c7c-a26b62197e23",
+      "display_name": "Projection Alignment (2).pdf",
+      "source_file_id": "64eb9603-3e77-445e-afd6-21c60f98d8d1",
+      "projection_note_id": "f1da6fbd-c389-453f-9c91-c2adf926e054",
+      "status": "materialized"
+    },
+    "database_meta": [
+      {
+        "key": "coordinate_contract",
+        "value": "v2"
+      }
+    ],
+    "frame_count": 5,
+    "queries": {
+      "database_meta": "SELECT key, value FROM database_meta ORDER BY key",
+      "source": "SELECT sr.id AS source_record_id, sr.display_name, sm.source_file_id, sm.projection_note_id,\n    sm.status FROM source_records sr JOIN source_materializations sm ON sm.source_record_id=sr.id\n    WHERE sr.id=?",
+      "placements": "SELECT nbp.block_id, nbp.id AS note_placement_id, cp.id AS canvas_placement_id,\n    cp.frame_id, json_extract(nb.metadata, '$.source_page_index') AS source_page_index,\n    nbp.id=cp.id AS exact_match,\n    cp.id=('canvas-placement:' || nbp.id) AS prefixed_match\n    FROM note_block_placements nbp JOIN note_blocks nb ON nb.id=nbp.block_id\n    JOIN content_mounts cm ON cm.target_kind='note_block' AND cm.target_id=nbp.block_id AND cm.note_id=nbp.note_id\n    JOIN canvas_placements cp ON cp.object_id=cm.object_id AND cp.note_id=nbp.note_id\n    WHERE nbp.note_id=? ORDER BY nbp.order_index",
+      "frame_count": "SELECT count(*) AS n FROM page_frame_extensions WHERE note_id=?"
+    },
+    "rows": [
+      {
+        "block_id": "ae29362f-344e-5615-baba-cb0431e9aac3",
+        "note_placement_id": "96aea1d0-b2ae-4917-b59e-b2f24354dc8b",
+        "canvas_placement_id": "canvas-placement:96aea1d0-b2ae-4917-b59e-b2f24354dc8b",
+        "frame_id": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1",
+        "source_page_index": 1,
+        "exact_match": 0,
+        "prefixed_match": 1
+      },
+      {
+        "block_id": "fa27a11a-befc-570d-bca0-923507a55848",
+        "note_placement_id": "6b2ab1a1-0f72-454b-ad0d-f5a14426130f",
+        "canvas_placement_id": "canvas-placement:6b2ab1a1-0f72-454b-ad0d-f5a14426130f",
+        "frame_id": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-2",
+        "source_page_index": 2,
+        "exact_match": 0,
+        "prefixed_match": 1
+      },
+      {
+        "block_id": "b0019bd0-fe09-51dd-b037-30eab849b791",
+        "note_placement_id": "0badaef0-7d06-44cf-a90f-09291abdaae9",
+        "canvas_placement_id": "canvas-placement:0badaef0-7d06-44cf-a90f-09291abdaae9",
+        "frame_id": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-3",
+        "source_page_index": 3,
+        "exact_match": 0,
+        "prefixed_match": 1
+      },
+      {
+        "block_id": "f04b8fd0-e9cb-58ba-84fc-fe00cc362d31",
+        "note_placement_id": "9ef74d01-d04b-44a7-8985-c49185068300",
+        "canvas_placement_id": "canvas-placement:9ef74d01-d04b-44a7-8985-c49185068300",
+        "frame_id": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-4",
+        "source_page_index": 4,
+        "exact_match": 0,
+        "prefixed_match": 1
+      },
+      {
+        "block_id": "a53f3531-3a62-587c-94b2-adf93645fbf8",
+        "note_placement_id": "d58aa06a-7ec1-4e8e-bcf3-706a93d7a73b",
+        "canvas_placement_id": "canvas-placement:d58aa06a-7ec1-4e8e-bcf3-706a93d7a73b",
+        "frame_id": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-5",
+        "source_page_index": 5,
+        "exact_match": 0,
+        "prefixed_match": 1
+      }
+    ],
+    "exact_matches": 0,
+    "prefixed_matches": 5,
+    "matches_round2_evidence_note_and_placement_ids": true,
+    "database_sha256_before": "706af9f08db19b01767bf01c44ea08cbd4041422aaf56d32178901dcfba4bb74",
+    "database_sha256_after": "706af9f08db19b01767bf01c44ea08cbd4041422aaf56d32178901dcfba4bb74"
+  },
+  "round2_named_file_boundary": {
+    "count": 23,
+    "unchanged": 23,
+    "files": [
+      {
+        "path": "client/src/locales/en/translation.json",
+        "round2_final": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41",
+        "current": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41"
+      },
+      {
+        "path": "client/src/locales/zh/translation.json",
+        "round2_final": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b",
+        "current": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b"
+      },
+      {
+        "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+        "round2_final": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270",
+        "current": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270"
+      },
+      {
+        "path": "client/src/pages/Sources/SourceDetailDialog.tsx",
+        "round2_final": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1",
+        "current": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1"
+      },
+      {
+        "path": "client/src/pages/Sources/SourceLibrary.module.css",
+        "round2_final": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215",
+        "current": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215"
+      },
+      {
+        "path": "client/src/pages/Sources/SourceLibrary.tsx",
+        "round2_final": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e",
+        "current": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e"
+      },
+      {
+        "path": "client/src/pages/Sources/SourceList.tsx",
+        "round2_final": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9",
+        "current": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9"
+      },
+      {
+        "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+        "round2_final": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+        "current": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b"
+      },
+      {
+        "path": "client/src/pages/Sources/SourceReprojectionDialog.tsx",
+        "round2_final": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+        "current": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e"
+      },
+      {
+        "path": "client/src/pages/Sources/sourceApi.ts",
+        "round2_final": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3",
+        "current": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3"
+      },
+      {
+        "path": "docs/generated/object-inventory.md",
+        "round2_final": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+        "current": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448"
+      },
+      {
+        "path": "server/src/__tests__/v13CoordinateContract.test.ts",
+        "round2_final": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18",
+        "current": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18"
+      },
+      {
+        "path": "server/src/__tests__/v13SourceReprojection.test.ts",
+        "round2_final": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+        "current": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2"
+      },
+      {
+        "path": "server/src/db/migrations/069_v13_source_reprojection_receipts.ts",
+        "round2_final": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+        "current": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d"
+      },
+      {
+        "path": "server/src/routes/sources.ts",
+        "round2_final": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b",
+        "current": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b"
+      },
+      {
+        "path": "server/src/services/courseLifecycle.ts",
+        "round2_final": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f",
+        "current": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f"
+      },
+      {
+        "path": "server/src/services/sourceMaterialization.ts",
+        "round2_final": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+        "current": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af"
+      },
+      {
+        "path": "server/src/services/sourcePageFurniture.ts",
+        "round2_final": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27",
+        "current": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27"
+      },
+      {
+        "path": "server/src/services/sourceReprojection.ts",
+        "round2_final": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+        "current": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7"
+      },
+      {
+        "path": "shared/types/pageGeometry.ts",
+        "round2_final": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a",
+        "current": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a"
+      },
+      {
+        "path": "scripts/check-server-shared-runtime-import.mjs",
+        "round2_final": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b",
+        "current": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b"
+      },
+      {
+        "path": "server/src/services/sourceProjectionMaterializer.ts",
+        "round2_final": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+        "current": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405"
+      },
+      {
+        "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+        "round2_final": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+        "current": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd"
+      }
+    ]
+  },
+  "limits": [
+    "No user database accessed; no claim about historical write path of the reported 33-page IELTS note.",
+    "SQL re-read is from the existing isolated round-two synthetic database, not a new publication by HEAD.",
+    "No product changes or post-repair tests/browser/reprojection runs in round three."
+  ],
+  "independent_review": {
+    "agent": "/root/placement_contract_audit",
+    "result": "PASS",
+    "scope": "HEAD/current excerpts checked against source; 23 named hashes rechecked; five JSON rows recomputed as 0 exact/5 prefixed; no database or browser execution by reviewer."
+  }
+}

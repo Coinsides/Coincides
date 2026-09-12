@@ -1,0 +1,324 @@
+{
+  "basis": "Round 4 opening worktree text snapshots, line LCS, not Git HEAD diff. Evidence files separately inventoried.",
+  "files": [
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+      "baseline": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\round4\\canvasObjectRepository.before.ts",
+      "added": 8,
+      "removed": 2,
+      "before_sha256": "d2128cfd4fc5281339f6f2a31c36f790e3df65b45fe20758d3dc19060ff12f51",
+      "after_sha256": "21e3f061a432512d4607cfcb52790329737e3712ce4c256a5f76d32ee7756291"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.test.ts",
+      "baseline": "new file",
+      "added": 112,
+      "removed": 0,
+      "before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "after_sha256": "82eba1e2b45b53f6aef5675011e6778bb0519c437622b098f7aa7f98307439ca"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-12-v13-6-source-projection-repair-order.md",
+      "baseline": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\round4\\handoff-before.md",
+      "added": 67,
+      "removed": 1,
+      "before_sha256": "5f909d25c6c06950d7e3f92744fb7635c6de332a6fb9b064fed912ff7ac45372",
+      "after_sha256": "4530b7abf56e867ae768c1759b91ecc66ae3d6e9d4a8ae564982fdd42ae558f6"
+    },
+    {
+      "path": "docs/agent-ops/INDEX.md",
+      "baseline": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\round4\\agent-ops-index-before.md",
+      "added": 1,
+      "removed": 1,
+      "before_sha256": "3acbfe48f72157bcc22c754d9e264c5c87fa2d5a7ca2481f0b65b84f4e9d1028",
+      "after_sha256": "afc6e5034aedb5c8652fcce7dea65c863962d4aca66897fcfce78a1889167633"
+    }
+  ],
+  "product_and_tests": {
+    "files": 2,
+    "added": 120,
+    "removed": 2
+  },
+  "evidence": [
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-boundary-baseline.json",
+      "bytes": 8229
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-boundary-final.json",
+      "bytes": 13724
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-browser-comparison.json",
+      "bytes": 4195
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-browser-verification.md",
+      "bytes": 5725
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-dom-geometry.json",
+      "bytes": 6530
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-overview-dom.json",
+      "bytes": 5647
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-overview.png",
+      "bytes": 82615
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-read-page3-dom.json",
+      "bytes": 6525
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-read-page3.png",
+      "bytes": 74758
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-reading.png",
+      "bytes": 86813
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-first-spa-stale-note-ax.txt",
+      "bytes": 10235
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-matching-chain.md",
+      "bytes": 9414
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-dom-geometry.json",
+      "bytes": 6530
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-overview-ax.txt",
+      "bytes": 1467
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-overview-dom.json",
+      "bytes": 7842
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-overview.png",
+      "bytes": 82615
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-preview-ax.txt",
+      "bytes": 10179
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-projection-after-browser.json",
+      "bytes": 33963
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-projection-before.json",
+      "bytes": 65168
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-read-page3-dom.json",
+      "bytes": 3587
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-read-page3.png",
+      "bytes": 73098
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-old-reading.png",
+      "bytes": 87182
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-reproject-1.json",
+      "bytes": 34996
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-reproject-2.json",
+      "bytes": 35007
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-smoke-shutdown.json",
+      "bytes": 3551
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-dom-geometry.json",
+      "bytes": 6530
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-overview-ax.txt",
+      "bytes": 1467
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-overview-dom.json",
+      "bytes": 5647
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-overview.png",
+      "bytes": 82615
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-preview-ax.txt",
+      "bytes": 10179
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-preview.png",
+      "bytes": 83140
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-read-page3-ax.txt",
+      "bytes": 6963
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-read-page3-dom.json",
+      "bytes": 6525
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-read-page3.png",
+      "bytes": 74758
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-twice-reading.png",
+      "bytes": 86813
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_canvas-runtime-boundary.log",
+      "bytes": 23319
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_group-gallery-shell.log",
+      "bytes": 245
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_groups-rail-shell.log",
+      "bytes": 224
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_server-shared-runtime-import.log",
+      "bytes": 270
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_single-editor-shell.log",
+      "bytes": 234
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_source-experience.log",
+      "bytes": 422
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_tool-face-manifest.log",
+      "bytes": 9370
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_tool-face-parity.log",
+      "bytes": 204
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_v2-bn11-legacy-shutdown.log",
+      "bytes": 256
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/check_v2-bn11-relation-freshness.log",
+      "bytes": 271
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/client-before-fix-client-full-functional.log",
+      "bytes": 8423
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/client-full-client-full-functional.log",
+      "bytes": 41725
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/client-results.json",
+      "bytes": 6442
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/client-targeted-client-full-functional.log",
+      "bytes": 3134
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/client-targeted-final-client-full-functional.log",
+      "bytes": 635
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/docs-after-result-final-docs_check.log",
+      "bytes": 396
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/docs-after-result-initial-docs_check.log",
+      "bytes": 251
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/docs_check.log",
+      "bytes": 396
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/server-static-results.json",
+      "bytes": 7017
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/server-three-families.log",
+      "bytes": 122349
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/smoke_canvas-engine-model-contract.log",
+      "bytes": 6809
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/smoke_canvas-engine-performance.log",
+      "bytes": 1668
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-final-client-build-types.log",
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-final-client-build-vite.log",
+      "bytes": 7925
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-final-client-typecheck.log",
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-final-server-build.log",
+      "bytes": 9584
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-final-server-typecheck.log",
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-final-shared-build.log",
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-initial-client-build-types.log",
+      "bytes": 136
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-initial-client-build-vite.log",
+      "bytes": 7925
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-initial-client-typecheck.log",
+      "bytes": 136
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-initial-server-build.log",
+      "bytes": 9584
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-initial-server-typecheck.log",
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification/types-build-initial-shared-build.log",
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round4-verification-server-static.md",
+      "bytes": 5917
+    }
+  ]
+}

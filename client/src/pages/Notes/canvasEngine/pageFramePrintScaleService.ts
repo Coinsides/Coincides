@@ -5,6 +5,7 @@ import type {
   PageFramePrintProfile,
   PageFrameTemplateId,
 } from './types';
+import { A4_PAGE_GEOMETRY } from '../../../../../shared/types/pageGeometry';
 import {
   createDefaultDocumentTypographyProfile,
   normalizeDocumentTypographyProfile,
@@ -25,17 +26,11 @@ const DEFAULT_BOTTOM_MARGIN = 96;
 export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom'>, Omit<PageFramePrintProfile, 'documentTypography' | 'physicalWidthMm' | 'physicalScale'>> = {
   A4: {
     pageSize: 'A4',
-    width: DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2,
-    height: Math.round((DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2) * Math.SQRT2),
-    contentInset: {
-      top: 0,
-      right: DEFAULT_HORIZONTAL_MARGIN,
-      bottom: DEFAULT_BOTTOM_MARGIN,
-      left: DEFAULT_HORIZONTAL_MARGIN,
-    },
-    contentWidth: DEFAULT_CONTENT_WIDTH,
-    contentHeight: Math.round((DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2) * Math.SQRT2)
-      - DEFAULT_BOTTOM_MARGIN,
+    width: A4_PAGE_GEOMETRY.width,
+    height: A4_PAGE_GEOMETRY.height,
+    contentInset: { ...A4_PAGE_GEOMETRY.contentInset },
+    contentWidth: A4_PAGE_GEOMETRY.contentWidth,
+    contentHeight: A4_PAGE_GEOMETRY.height - A4_PAGE_GEOMETRY.contentInset.bottom,
   },
   Letter: {
     pageSize: 'Letter',

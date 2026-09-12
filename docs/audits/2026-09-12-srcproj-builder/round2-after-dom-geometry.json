@@ -1,0 +1,421 @@
+{
+  "blocks": [
+    {
+      "id": "ae29362f-344e-5615-baba-cb0431e9aac3",
+      "rect": {
+        "bottom": 535.7036743164062,
+        "height": 299.40679931640625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 236.296875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 236.296875
+      },
+      "style": "left: 0px; top: 0px; width: 760px; min-height: 276px;",
+      "text": "Original page 1 starts here\nPAGE 1 BODY 1: The original evidence stays on its own source page.\nPAGE 1 BODY 2: The original evidence stays on its own source page.\nPAGE 1 BODY 3: The original evidence stays on its own source page.\nPAGE 1 BODY 4: The original evidence stays on its own source page.\nPAGE 1 BODY 5: The original evidence stays on its own source page.\nPAGE 1 BODY 6: The original evidence stays on its own source page.\nPAGE 1 BODY 7: The original evidence stays on its own source page.\nPAGE 1 BODY 8: The original evidence stays on its own source page."
+    },
+    {
+      "id": "fa27a11a-befc-570d-bca0-923507a55848",
+      "rect": {
+        "bottom": 834.9072265625,
+        "height": 299.40679931640625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 535.5004272460938,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 535.5004272460938
+      },
+      "style": "left: 0px; top: 276px; width: 760px; min-height: 276px;",
+      "text": "Original page 2 starts here\nPAGE 2 BODY 1: The original evidence stays on its own source page.\nPAGE 2 BODY 2: The original evidence stays on its own source page.\nPAGE 2 BODY 3: The original evidence stays on its own source page.\nPAGE 2 BODY 4: The original evidence stays on its own source page.\nPAGE 2 BODY 5: The original evidence stays on its own source page.\nPAGE 2 BODY 6: The original evidence stays on its own source page.\nPAGE 2 BODY 7: The original evidence stays on its own source page.\nPAGE 2 BODY 8: The original evidence stays on its own source page."
+    },
+    {
+      "id": "b0019bd0-fe09-51dd-b037-30eab849b791",
+      "rect": {
+        "bottom": 1134.11083984375,
+        "height": 299.4068603515625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 834.7039794921875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 834.7039794921875
+      },
+      "style": "left: 0px; top: 552px; width: 760px; min-height: 276px;",
+      "text": "Original page 3 starts here\nPAGE 3 BODY 1: The original evidence stays on its own source page.\nPAGE 3 BODY 2: The original evidence stays on its own source page.\nPAGE 3 BODY 3: The original evidence stays on its own source page.\nPAGE 3 BODY 4: The original evidence stays on its own source page.\nPAGE 3 BODY 5: The original evidence stays on its own source page.\nPAGE 3 BODY 6: The original evidence stays on its own source page.\nPAGE 3 BODY 7: The original evidence stays on its own source page.\nPAGE 3 BODY 8: The original evidence stays on its own source page."
+    },
+    {
+      "id": "f04b8fd0-e9cb-58ba-84fc-fe00cc362d31",
+      "rect": {
+        "bottom": 1433.3143310546875,
+        "height": 299.4068603515625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 1133.907470703125,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 1133.907470703125
+      },
+      "style": "left: 0px; top: 828px; width: 760px; min-height: 276px;",
+      "text": "Original page 4 starts here\nPAGE 4 BODY 1: The original evidence stays on its own source page.\nPAGE 4 BODY 2: The original evidence stays on its own source page.\nPAGE 4 BODY 3: The original evidence stays on its own source page.\nPAGE 4 BODY 4: The original evidence stays on its own source page.\nPAGE 4 BODY 5: The original evidence stays on its own source page.\nPAGE 4 BODY 6: The original evidence stays on its own source page.\nPAGE 4 BODY 7: The original evidence stays on its own source page.\nPAGE 4 BODY 8: The original evidence stays on its own source page."
+    },
+    {
+      "id": "a53f3531-3a62-587c-94b2-adf93645fbf8",
+      "rect": {
+        "bottom": 1732.517822265625,
+        "height": 299.40673828125,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 1433.111083984375,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 1433.111083984375
+      },
+      "style": "left: 0px; top: 1104px; width: 760px; min-height: 276px;",
+      "text": "Original page 5 starts here\nPAGE 5 BODY 1: The original evidence stays on its own source page.\nPAGE 5 BODY 2: The original evidence stays on its own source page.\nPAGE 5 BODY 3: The original evidence stays on its own source page.\nPAGE 5 BODY 4: The original evidence stays on its own source page.\nPAGE 5 BODY 5: The original evidence stays on its own source page.\nPAGE 5 BODY 6: The original evidence stays on its own source page.\nPAGE 5 BODY 7: The original evidence stays on its own source page.\nPAGE 5 BODY 8: The original evidence stays on its own source page."
+    }
+  ],
+  "frames": [
+    {
+      "attrs": [
+        [
+          "data-text-unit-move-scope",
+          "f1da6fbd-c389-453f-9c91-c2adf926e054"
+        ],
+        [
+          "data-page-frame-template",
+          "a4_portrait"
+        ],
+        [
+          "data-page-frame-background",
+          "none"
+        ],
+        [
+          "style",
+          "--page-frame-grid-visible: 0;"
+        ]
+      ],
+      "cls": "_writingSurface_othl9_20 _pageReadingSurface_othl9_1113   ",
+      "rect": {
+        "bottom": 7526.34375,
+        "height": 7500.34375,
+        "left": 600,
+        "right": 1580,
+        "top": 26,
+        "width": 980,
+        "x": 600,
+        "y": 26
+      },
+      "tag": "SECTION"
+    },
+    {
+      "attrs": [
+        [
+          "data-source-content-read-only",
+          "true"
+        ],
+        [
+          "data-canvas-engine-version",
+          "V2.BN.8-self-owned-minimal-hybrid-0"
+        ],
+        [
+          "data-canvas-engine-route",
+          "self_owned_minimal_hybrid"
+        ],
+        [
+          "data-canvas-visible-blocks",
+          "4"
+        ],
+        [
+          "data-canvas-world-width",
+          "760"
+        ],
+        [
+          "data-canvas-world-height",
+          "1476"
+        ],
+        [
+          "data-canvas-page-frame",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-canvas-object-id",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-canvas-surface-mode",
+          "page"
+        ],
+        [
+          "data-canvas-interaction-mode",
+          "idle"
+        ],
+        [
+          "data-canvas-interaction-target",
+          "surface"
+        ],
+        [
+          "data-canvas-interaction-block",
+          ""
+        ],
+        [
+          "data-canvas-viewport-x",
+          "-376"
+        ],
+        [
+          "data-canvas-viewport-y",
+          "-218"
+        ],
+        [
+          "data-canvas-viewport-zoom",
+          "1.084"
+        ],
+        [
+          "data-page-frame-id",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-page-frame-role",
+          "primary_page_frame"
+        ],
+        [
+          "data-page-frame-primary",
+          "true"
+        ],
+        [
+          "data-page-frame-exportable",
+          "true"
+        ],
+        [
+          "data-page-frame-template",
+          "a4_portrait"
+        ],
+        [
+          "data-page-frame-background",
+          "none"
+        ],
+        [
+          "data-page-frame-page-size",
+          "A4"
+        ],
+        [
+          "data-page-frame-inset-left",
+          "72"
+        ],
+        [
+          "data-page-frame-inset-right",
+          "72"
+        ],
+        [
+          "data-document-typography-profile",
+          "paper-document"
+        ],
+        [
+          "data-document-font-size",
+          "16.7"
+        ],
+        [
+          "data-document-line-height",
+          "24.5"
+        ],
+        [
+          "style",
+          "min-height: 6518px; width: 760px; --document-font-family: Aptos, Calibri, \"Segoe UI\", Arial, sans-serif; --document-font-size: 16.7px; --document-line-height: 24.5px; --document-paragraph-spacing: 0px; --page-frame-grid-visible: 0; --formal-page-offset-x: 80px; --formal-page-width: 904px; --canvas-world-width: 760px; --canvas-world-height: 1476px;"
+        ]
+      ],
+      "cls": "_blockList_othl9_1103 _blockListPage_othl9_1108 ",
+      "rect": {
+        "bottom": 7302.2705078125,
+        "height": 7065.9736328125,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 236.296875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 236.296875
+      },
+      "tag": "DIV"
+    },
+    {
+      "attrs": [
+        [
+          "data-page-frame-wall-interactive",
+          "false"
+        ],
+        [
+          "data-page-frame-wall",
+          "left"
+        ],
+        [
+          "data-page-frame-wall-frame",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-page-frame-wall-active",
+          "false"
+        ],
+        [
+          "style",
+          "left: 0px; top: 80px; height: 1182px; --paper-wall-idle-top: -194px;"
+        ]
+      ],
+      "cls": "_wall_kve6t_1",
+      "rect": {
+        "bottom": 1604.3943481445312,
+        "height": 1281.371826171875,
+        "left": 671.5487060546875,
+        "right": 684.5574951171875,
+        "top": 323.02252197265625,
+        "width": 13.0087890625,
+        "x": 671.5487060546875,
+        "y": 323.02252197265625
+      },
+      "tag": "DIV"
+    },
+    {
+      "attrs": [
+        [
+          "data-page-frame-wall-interactive",
+          "false"
+        ],
+        [
+          "data-page-frame-wall",
+          "right"
+        ],
+        [
+          "data-page-frame-wall-frame",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-page-frame-wall-active",
+          "false"
+        ],
+        [
+          "style",
+          "left: 760px; top: 80px; height: 1182px; --paper-wall-idle-top: -194px;"
+        ]
+      ],
+      "cls": "_wall_kve6t_1",
+      "rect": {
+        "bottom": 1604.3943481445312,
+        "height": 1281.371826171875,
+        "left": 1495.4425048828125,
+        "right": 1508.451416015625,
+        "top": 323.02252197265625,
+        "width": 13.0089111328125,
+        "x": 1495.4425048828125,
+        "y": 323.02252197265625
+      },
+      "tag": "DIV"
+    },
+    {
+      "attrs": [
+        [
+          "data-page-frame-slot",
+          "header"
+        ],
+        [
+          "data-page-frame-slot-frame",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-page-frame-slot-source",
+          "empty"
+        ],
+        [
+          "data-page-frame-slot-enabled",
+          "true"
+        ],
+        [
+          "style",
+          "left: 0px; top: 98px; width: 760px; height: 30px;"
+        ]
+      ],
+      "cls": "_pageFrameSlot_othl9_4060 _pageFrameHeaderSlot_othl9_4074",
+      "rect": {
+        "bottom": 375.0579223632813,
+        "height": 32.5220947265625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 342.53582763671875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 342.53582763671875
+      },
+      "tag": "DIV"
+    },
+    {
+      "attrs": [
+        [
+          "data-page-frame-slot",
+          "footer"
+        ],
+        [
+          "data-page-frame-slot-frame",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-page-frame-slot-source",
+          "empty"
+        ],
+        [
+          "data-page-frame-slot-enabled",
+          "true"
+        ],
+        [
+          "style",
+          "left: 0px; top: 1286px; width: 760px; height: 28px;"
+        ]
+      ],
+      "cls": "_pageFrameSlot_othl9_4060 _pageFrameFooterSlot_othl9_4078",
+      "rect": {
+        "bottom": 1660.765869140625,
+        "height": 30.35400390625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 1630.411865234375,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 1630.411865234375
+      },
+      "tag": "DIV"
+    },
+    {
+      "attrs": [
+        [
+          "data-page-frame-slot",
+          "page-number"
+        ],
+        [
+          "data-page-frame-slot-frame",
+          "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1"
+        ],
+        [
+          "data-page-frame-slot-source",
+          "generated"
+        ],
+        [
+          "data-page-frame-slot-enabled",
+          "true"
+        ],
+        [
+          "style",
+          "left: 0px; top: 1320px; width: 760px; height: 22px;"
+        ]
+      ],
+      "cls": "_pageFrameSlot_othl9_4060 _pageFramePageNumberSlot_othl9_4082",
+      "rect": {
+        "bottom": 1691.119873046875,
+        "height": 23.8494873046875,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 1667.2703857421875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 1667.2703857421875
+      },
+      "tag": "DIV"
+    }
+  ]
+}

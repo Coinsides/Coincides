@@ -18,6 +18,28 @@ export interface SourceUploadResult {
   source: SourceRecordDetail;
 }
 
+export interface SourceProjectionUserWork {
+  annotation_count: number;
+  note_tag_count: number;
+  content_group_count: number;
+  purpose_count: number;
+  display_override_count: number;
+  external_block_placement_count: number;
+  has_user_work: boolean;
+}
+
+export interface SourceReprojectionPreview {
+  user_work: SourceProjectionUserWork;
+}
+
+export interface SourceReprojectionResult extends SourceReprojectionPreview {
+  projection_note_id: string;
+  operation_batch_id: string;
+  block_count: number;
+  canvas_object_count: number;
+  receipt_id: string;
+}
+
 export interface SourceDeletionImpact {
   source: { id: string; display_name: string };
   placement_count: number;
@@ -25,15 +47,7 @@ export interface SourceDeletionImpact {
   projection_receipt_count: number;
   retained_receipt_count: number;
   projection_note_id: string | null;
-  projection_user_work: {
-    annotation_count: number;
-    note_tag_count: number;
-    content_group_count: number;
-    purpose_count: number;
-    display_override_count: number;
-    external_block_placement_count: number;
-    has_user_work: boolean;
-  } | null;
+  projection_user_work: SourceProjectionUserWork | null;
   materialization_status: string;
   deletion_blocked: boolean;
   blocked_reason: string | null;
@@ -95,6 +109,16 @@ export async function materializeSource(sourceId: string): Promise<void> {
 
 export async function retrySourceMaterialization(sourceId: string): Promise<void> {
   await api.post(`/sources/${sourceId}/retry`);
+}
+
+export async function previewSourceReprojection(sourceId: string): Promise<SourceReprojectionPreview> {
+  const response = await api.post<SourceReprojectionPreview>(`/sources/${sourceId}/rematerialize`, {});
+  return response.data;
+}
+
+export async function rematerializeSource(sourceId: string): Promise<SourceReprojectionResult> {
+  const response = await api.post<SourceReprojectionResult>(`/sources/${sourceId}/rematerialize`, { confirm: true });
+  return response.data;
 }
 
 export async function getSourceDeletionImpact(sourceId: string): Promise<SourceDeletionImpact> {

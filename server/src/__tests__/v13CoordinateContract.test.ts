@@ -14,6 +14,7 @@ import canvasObjectRoutes from '../routes/canvasObjects.js';
 import { intakeSourceTempFile } from '../services/sourceFileIntake.js';
 import { materializeSourceNow } from '../services/sourceMaterialization.js';
 import type { SourceArtifact } from '../services/sourceArtifact.js';
+import { A4_PAGE_GEOMETRY } from '../../../shared/types/pageGeometry.js';
 
 test('coordinate metadata migration only adds an empty table and preserves placements', () => {
   const db = new Database(':memory:');
@@ -173,7 +174,13 @@ test('Source v2 publication writes full-axis content-local placements aligned wi
     };
 
     const v1 = await publish('v1');
-    assert.deepEqual(v1.map(({ x, y }) => [x, y]), [[152, 176], [152, 266], [152, 1335], [152, 1425]]);
+    const firstPageY = 80 + A4_PAGE_GEOMETRY.contentInset.top;
+    const secondPageY = firstPageY + A4_PAGE_GEOMETRY.height + 36;
+    const worldX = 80 + A4_PAGE_GEOMETRY.contentInset.left;
+    assert.deepEqual(v1.map(({ x, y }) => [x, y]), [
+      [worldX, firstPageY], [worldX, firstPageY + 90],
+      [worldX, secondPageY], [worldX, secondPageY + 90],
+    ]);
     assert.ok(v1.every((row) => JSON.parse(row.metadata).layout_policy.coordinate_space === 'canvas_world'));
     db.prepare('INSERT INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v2');
     const v2 = await publish('v2');
@@ -181,8 +188,8 @@ test('Source v2 publication writes full-axis content-local placements aligned wi
     assert.ok(v2.every((row) => JSON.parse(row.metadata).layout_policy.coordinate_space === 'page_frame_local'));
     assert.deepEqual(v2.map((row) => {
       const inset = JSON.parse(row.content_inset_json);
-      return [row.frame_id, row.x + row.frame_x + inset.left, row.y + row.frame_y + inset.top, row.width, row.height];
-    }), v1.map((row) => [row.frame_id, row.x, row.y, row.width, row.height]));
+      return [row.frame_id.split(':').pop(), row.x + row.frame_x + inset.left, row.y + row.frame_y + inset.top, row.width, row.height];
+    }), v1.map((row) => [row.frame_id.split(':').pop(), row.x, row.y, row.width, row.height]));
   });
 });
 
@@ -229,7 +236,7 @@ test('Source image publication preserves v1 metadata and writes aligned local co
         frame_x: number; frame_y: number; content_inset_json: string;
       };
       if (version === 'v1') {
-        assert.deepEqual([row.x, row.y], [152, 176]);
+        assert.deepEqual([row.x, row.y], [80 + A4_PAGE_GEOMETRY.contentInset.left, 80 + A4_PAGE_GEOMETRY.contentInset.top]);
         assert.equal(row.metadata, '{"placement_kind":"source_image"}');
         worldRects.push([row.x, row.y, row.width, row.height]);
       } else {

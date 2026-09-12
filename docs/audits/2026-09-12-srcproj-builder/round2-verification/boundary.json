@@ -1,0 +1,204 @@
+{
+  "method": "SHA-256 comparison of explicitly named file bytes; no Git access",
+  "preserved_count": 21,
+  "preserved_unchanged": 21,
+  "preserved_in_round1_manifest": 20,
+  "preserved_match_round1": 20,
+  "modified_count": 2,
+  "modified_baselines_match_round1": true,
+  "modified_finals_match_record": true,
+  "files": [
+    {
+      "path": "client/src/locales/en/translation.json",
+      "round2_baseline": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41",
+      "current": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41",
+      "unchanged": true,
+      "round1_final": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/locales/zh/translation.json",
+      "round2_baseline": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b",
+      "current": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b",
+      "unchanged": true,
+      "round1_final": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+      "round2_baseline": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270",
+      "current": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270",
+      "unchanged": true,
+      "round1_final": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/SourceDetailDialog.tsx",
+      "round2_baseline": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1",
+      "current": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1",
+      "unchanged": true,
+      "round1_final": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/SourceLibrary.module.css",
+      "round2_baseline": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215",
+      "current": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215",
+      "unchanged": true,
+      "round1_final": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/SourceLibrary.tsx",
+      "round2_baseline": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e",
+      "current": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e",
+      "unchanged": true,
+      "round1_final": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/SourceList.tsx",
+      "round2_baseline": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9",
+      "current": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9",
+      "unchanged": true,
+      "round1_final": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+      "round2_baseline": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+      "current": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+      "unchanged": true,
+      "round1_final": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.tsx",
+      "round2_baseline": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+      "current": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+      "unchanged": true,
+      "round1_final": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+      "matches_round1": true
+    },
+    {
+      "path": "client/src/pages/Sources/sourceApi.ts",
+      "round2_baseline": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3",
+      "current": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3",
+      "unchanged": true,
+      "round1_final": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3",
+      "matches_round1": true
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "round2_baseline": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+      "current": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+      "unchanged": true,
+      "round1_final": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/__tests__/v13CoordinateContract.test.ts",
+      "round2_baseline": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18",
+      "current": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18",
+      "unchanged": true,
+      "round1_final": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "round2_baseline": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+      "current": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+      "unchanged": true,
+      "round1_final": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/db/migrations/069_v13_source_reprojection_receipts.ts",
+      "round2_baseline": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+      "current": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+      "unchanged": true,
+      "round1_final": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/routes/sources.ts",
+      "round2_baseline": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b",
+      "current": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b",
+      "unchanged": true,
+      "round1_final": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/services/courseLifecycle.ts",
+      "round2_baseline": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f",
+      "current": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f",
+      "unchanged": true,
+      "round1_final": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/services/sourceMaterialization.ts",
+      "round2_baseline": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+      "current": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+      "unchanged": true,
+      "round1_final": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/services/sourcePageFurniture.ts",
+      "round2_baseline": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27",
+      "current": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27",
+      "unchanged": true,
+      "round1_final": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27",
+      "matches_round1": true
+    },
+    {
+      "path": "server/src/services/sourceReprojection.ts",
+      "round2_baseline": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+      "current": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+      "unchanged": true,
+      "round1_final": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+      "matches_round1": true
+    },
+    {
+      "path": "shared/types/pageGeometry.ts",
+      "round2_baseline": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a",
+      "current": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a",
+      "unchanged": true,
+      "round1_final": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a",
+      "matches_round1": true
+    },
+    {
+      "path": "scripts/check-server-shared-runtime-import.mjs",
+      "round2_baseline": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b",
+      "current": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b",
+      "unchanged": true,
+      "round1_final": null,
+      "matches_round1": null
+    }
+  ],
+  "modified": [
+    {
+      "path": "server/src/services/sourceProjectionMaterializer.ts",
+      "round1_final": "cd24c1acfbddeaa705dc152264e9ebad00bc3bb8600819f3ea51319015d607c5",
+      "round2_baseline": "cd24c1acfbddeaa705dc152264e9ebad00bc3bb8600819f3ea51319015d607c5",
+      "round2_final": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+      "current": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+      "baseline_matches_round1": true,
+      "final_matches": true,
+      "added": 8,
+      "deleted": 5
+    },
+    {
+      "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "round1_final": "db7533fcdf09253cc01accd59c7494e21503de758159d7283b2637f5dd641a13",
+      "round2_baseline": "db7533fcdf09253cc01accd59c7494e21503de758159d7283b2637f5dd641a13",
+      "round2_final": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+      "current": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+      "baseline_matches_round1": true,
+      "final_matches": true,
+      "added": 6,
+      "deleted": 1
+    }
+  ]
+}

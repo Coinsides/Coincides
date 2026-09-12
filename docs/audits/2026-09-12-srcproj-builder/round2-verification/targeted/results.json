@@ -1,0 +1,16 @@
+{
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "--test",
+    "--test-reporter=tap",
+    "src/__tests__/v13SourceProjectionRepair.test.ts",
+    "src/__tests__/v13SourceReprojection.test.ts",
+    "src/__tests__/v13CoordinateContract.test.ts"
+  ],
+  "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+  "exit": 0,
+  "duration_ms": 2426,
+  "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\round2-targeted-2BDMsk\\server-targeted.log"
+}

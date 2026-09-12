@@ -57,6 +57,12 @@ export async function resolveCanvasPlacementWriteContext(input: {
   };
 }
 
+// Note and canvas DTOs can use bare / prefixed IDs for the same placement.
+// Normalize only the read key; preserve both DTOs' IDs for their write paths.
+function placementHydrationKey(id: string): string {
+  return id.replace(/^canvas-placement:/, '');
+}
+
 export function applyCanvasLayoutsToBlocks(
   blocks: NoteBlock[],
   blockLayouts: CanvasBlockLayoutRecord[],
@@ -72,12 +78,12 @@ export function applyCanvasLayoutsToBlocks(
     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),
   ]));
   const layoutsByPlacementId = new Map(blockLayouts.map((item) => [
-    item.placement_id,
+    placementHydrationKey(item.placement_id),
     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),
   ]));
   return blocks.map((block) => {
     const layout = block.placement_id
-      ? layoutsByPlacementId.get(block.placement_id)
+      ? layoutsByPlacementId.get(placementHydrationKey(block.placement_id))
       : layoutsByBlockId.get(block.id);
     return layout ? { ...block, canvas_layout: layout } : block;
   });

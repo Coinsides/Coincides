@@ -1,0 +1,130 @@
+{
+  "round": 2,
+  "method": "Line LCS against two-file pre-edit byte snapshots; no Git or .git access.",
+  "baselineRoot": "C:/Users/70208/AppData/Local/Temp/coincides-srcproj-round2-geometry-5d99948171d94badb5fcb49c46922722",
+  "files": [
+    {
+      "file": "server/src/services/sourceProjectionMaterializer.ts",
+      "added": 8,
+      "deleted": 5,
+      "baseline_sha256": "cd24c1acfbddeaa705dc152264e9ebad00bc3bb8600819f3ea51319015d607c5",
+      "final_sha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+      "edits": [
+        {
+          "kind": "add",
+          "line": 22,
+          "text": "// A4 geometry mirrors shared/types/pageGeometry.ts. Do not hand-edit;"
+        },
+        {
+          "kind": "add",
+          "line": 23,
+          "text": "// server projection tests import the shared source and enforce field-by-field alignment."
+        },
+        {
+          "kind": "add",
+          "line": 24,
+          "text": "const PAGE_WIDTH = 904;"
+        },
+        {
+          "kind": "add",
+          "line": 25,
+          "text": "const PAGE_HEIGHT = 1278;"
+        },
+        {
+          "kind": "delete",
+          "line": 22,
+          "text": "const PAGE_WIDTH = 794;"
+        },
+        {
+          "kind": "delete",
+          "line": 23,
+          "text": "const PAGE_HEIGHT = 1123;"
+        },
+        {
+          "kind": "add",
+          "line": 30,
+          "text": "const CONTENT_RIGHT = 72;"
+        },
+        {
+          "kind": "add",
+          "line": 31,
+          "text": "const CONTENT_TOP = 0;"
+        },
+        {
+          "kind": "delete",
+          "line": 28,
+          "text": "const CONTENT_TOP = 96;"
+        },
+        {
+          "kind": "add",
+          "line": 33,
+          "text": "const CONTENT_WIDTH = 760;"
+        },
+        {
+          "kind": "delete",
+          "line": 30,
+          "text": "const CONTENT_WIDTH = 650;"
+        },
+        {
+          "kind": "add",
+          "line": 486,
+          "text": "          JSON.stringify({ top: CONTENT_TOP, right: CONTENT_RIGHT, bottom: CONTENT_BOTTOM, left: CONTENT_LEFT }),"
+        },
+        {
+          "kind": "delete",
+          "line": 483,
+          "text": "          JSON.stringify({ top: CONTENT_TOP, right: 72, bottom: CONTENT_BOTTOM, left: CONTENT_LEFT }),"
+        }
+      ]
+    },
+    {
+      "file": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "added": 6,
+      "deleted": 1,
+      "baseline_sha256": "db7533fcdf09253cc01accd59c7494e21503de758159d7283b2637f5dd641a13",
+      "final_sha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+      "edits": [
+        {
+          "kind": "add",
+          "line": 119,
+          "text": "      const inset = JSON.parse(page.content_inset_json);"
+        },
+        {
+          "kind": "add",
+          "line": 120,
+          "text": "      assert.equal(inset.top, A4_PAGE_GEOMETRY.contentInset.top);"
+        },
+        {
+          "kind": "add",
+          "line": 121,
+          "text": "      assert.equal(inset.right, A4_PAGE_GEOMETRY.contentInset.right);"
+        },
+        {
+          "kind": "add",
+          "line": 122,
+          "text": "      assert.equal(inset.bottom, A4_PAGE_GEOMETRY.contentInset.bottom);"
+        },
+        {
+          "kind": "add",
+          "line": 123,
+          "text": "      assert.equal(inset.left, A4_PAGE_GEOMETRY.contentInset.left);"
+        },
+        {
+          "kind": "add",
+          "line": 124,
+          "text": "      assert.equal(page.width - inset.left - inset.right, A4_PAGE_GEOMETRY.contentWidth);"
+        },
+        {
+          "kind": "delete",
+          "line": 119,
+          "text": "      assert.deepEqual(JSON.parse(page.content_inset_json), A4_PAGE_GEOMETRY.contentInset);"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "files": 2,
+    "added": 14,
+    "deleted": 6
+  }
+}

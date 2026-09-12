@@ -1,4 +1,30 @@
 {
+  "sources": {
+    "reprojection": {
+      "action": "重新投影",
+      "title": "重新投影：{{name}}",
+      "description": "从原文件重新生成阅读内容并替换当前投影，原文件继续保留。",
+      "loading": "正在检查此投影上的工作…",
+      "annotationWarning": "批注将被移除(已留快照收据)。执行时会先保存快照再替换投影，批注不会迁入新投影。",
+      "otherWorkWarning": "此投影上的标签、关联与外观调整不会迁入新投影。内容组保留快照，但失去对此投影的实时来源关联。",
+      "blockedExternalRefs": "其他笔记或看板正在引用此投影的内容。请先移除这些引用，再重新投影。",
+      "inProgress": "此源正在解析或发布。请等待完成后再试。",
+      "notReady": "此源当前无法重新投影。请刷新源库查看最新状态。",
+      "failed": "无法重新投影，请重试；若仍失败，请刷新源库。",
+      "retryPreview": "重新读取工作计数",
+      "confirm": "替换投影",
+      "submitting": "正在替换投影…",
+      "success": "已重新投影，旧批注已保存为快照收据。",
+      "counts": {
+        "annotation_count": "批注",
+        "note_tag_count": "笔记标签",
+        "content_group_count": "内容组",
+        "purpose_count": "关联目的",
+        "display_override_count": "外观调整",
+        "external_block_placement_count": "其他笔记或看板中的引用"
+      }
+    }
+  },
   "nav": {
     "home": "首页",
     "dailyBrief": "每日简报",

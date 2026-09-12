@@ -1,0 +1,187 @@
+{
+  "capturedAt": "2026-09-12T07:05:28.858Z",
+  "status": "PASS",
+  "phases": [
+    {
+      "phase": "old",
+      "boxes": [
+        {
+          "sourcePage": 1,
+          "left": 0,
+          "top": 80,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 2,
+          "left": 0,
+          "top": 1394,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 3,
+          "left": 0,
+          "top": 2708,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 4,
+          "left": 0,
+          "top": 4022,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 5,
+          "left": 0,
+          "top": 5336,
+          "width": 760,
+          "height": 276
+        }
+      ],
+      "overviewPages": [
+        "Read page 1",
+        "Read page 2",
+        "Read page 3",
+        "Read page 4",
+        "Read page 5"
+      ],
+      "page3": {
+        "top": 23.960693359375,
+        "bottom": 323.367431640625
+      },
+      "leftCut": false
+    },
+    {
+      "phase": "first",
+      "boxes": [
+        {
+          "sourcePage": 1,
+          "left": 0,
+          "top": 80,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 2,
+          "left": 0,
+          "top": 1394,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 3,
+          "left": 0,
+          "top": 2708,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 4,
+          "left": 0,
+          "top": 4022,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 5,
+          "left": 0,
+          "top": 5336,
+          "width": 760,
+          "height": 276
+        }
+      ],
+      "overviewPages": [
+        "Read page 1",
+        "Read page 2",
+        "Read page 3",
+        "Read page 4",
+        "Read page 5"
+      ],
+      "page3": {
+        "top": 23.960693359375,
+        "bottom": 323.367431640625
+      },
+      "leftCut": false
+    },
+    {
+      "phase": "twice",
+      "boxes": [
+        {
+          "sourcePage": 1,
+          "left": 0,
+          "top": 80,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 2,
+          "left": 0,
+          "top": 1394,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 3,
+          "left": 0,
+          "top": 2708,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 4,
+          "left": 0,
+          "top": 4022,
+          "width": 760,
+          "height": 276
+        },
+        {
+          "sourcePage": 5,
+          "left": 0,
+          "top": 5336,
+          "width": 760,
+          "height": 276
+        }
+      ],
+      "overviewPages": [
+        "Read page 1",
+        "Read page 2",
+        "Read page 3",
+        "Read page 4",
+        "Read page 5"
+      ],
+      "page3": {
+        "top": 23.960693359375,
+        "bottom": 323.367431640625
+      },
+      "leftCut": false
+    }
+  ],
+  "sameRenderedGeometry": true,
+  "finalProjectionTruthUnchangedByBrowser": true,
+  "originalHashChecks": [
+    {
+      "name": "synthetic-smoke.db",
+      "before": "706af9f08db19b01767bf01c44ea08cbd4041422aaf56d32178901dcfba4bb74",
+      "after": "706af9f08db19b01767bf01c44ea08cbd4041422aaf56d32178901dcfba4bb74",
+      "equal": true
+    },
+    {
+      "name": "synthetic-smoke.db-wal",
+      "before": "264ce45fd027ab01aeeb84a5edc5ab3d1e8a1f578868f96202ddcadf858eedfd",
+      "after": "264ce45fd027ab01aeeb84a5edc5ab3d1e8a1f578868f96202ddcadf858eedfd",
+      "equal": true
+    },
+    {
+      "name": "synthetic-smoke.db-shm",
+      "before": "18259c7bf33345c32632bd790466b08b7ec42c89f119674d1d1e4838f94f21ae",
+      "after": "18259c7bf33345c32632bd790466b08b7ec42c89f119674d1d1e4838f94f21ae",
+      "equal": true
+    }
+  ],
+  "finalNoteId": "c6746866-4f3d-4e2d-98c7-688e4e56ed17",
+  "receiptCount": 4,
+  "boundary": "Synthetic clone only. Browser DOM geometry + overview content + actual screenshots; no IELTS/user database inspected."
+}

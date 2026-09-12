@@ -1,0 +1,204 @@
+{
+  "started_from": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\round4-server-static-fQsrgw",
+  "isolation": {
+    "DB_PATH": ":memory:",
+    "dotenv": "new empty synthetic .env only",
+    "provider": "new isolated scratch directory",
+    "parent_environment": "allowlist of OS/tool paths only"
+  },
+  "results": [
+    {
+      "label": "server-three-families",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "--test-reporter=tap",
+        "src/__tests__/v13SourceProjectionRepair.test.ts",
+        "src/__tests__/v13SourceReprojection.test.ts",
+        "src/__tests__/v13CoordinateContract.test.ts"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+      "exit": 0,
+      "duration_ms": 2160,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\server-three-families.log",
+      "tests": 23,
+      "suites": 0,
+      "pass": 23,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "label": "check_tool-face-manifest",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 667,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_tool-face-manifest.log"
+    },
+    {
+      "label": "check_tool-face-parity",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:tool-face-parity"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 590,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_tool-face-parity.log"
+    },
+    {
+      "label": "check_server-shared-runtime-import",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:server-shared-runtime-import"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 585,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_server-shared-runtime-import.log"
+    },
+    {
+      "label": "check_canvas-runtime-boundary",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:canvas-runtime-boundary"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 501,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_canvas-runtime-boundary.log"
+    },
+    {
+      "label": "check_group-gallery-shell",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:group-gallery-shell"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 502,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_group-gallery-shell.log"
+    },
+    {
+      "label": "check_groups-rail-shell",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:groups-rail-shell"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 486,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_groups-rail-shell.log"
+    },
+    {
+      "label": "check_single-editor-shell",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:single-editor-shell"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 499,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_single-editor-shell.log"
+    },
+    {
+      "label": "check_source-experience",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:source-experience"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 1039,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_source-experience.log"
+    },
+    {
+      "label": "check_v2-bn11-legacy-shutdown",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:v2-bn11-legacy-shutdown"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 514,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_v2-bn11-legacy-shutdown.log"
+    },
+    {
+      "label": "check_v2-bn11-relation-freshness",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:v2-bn11-relation-freshness"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 523,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\check_v2-bn11-relation-freshness.log"
+    },
+    {
+      "label": "smoke_canvas-engine-model-contract",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "smoke:canvas-engine-model-contract"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 2317,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\smoke_canvas-engine-model-contract.log"
+    },
+    {
+      "label": "smoke_canvas-engine-performance",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "smoke:canvas-engine-performance"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 1362,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\smoke_canvas-engine-performance.log"
+    },
+    {
+      "label": "docs_check",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+      "exit": 0,
+      "duration_ms": 654,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\docs_check.log"
+    }
+  ]
+}

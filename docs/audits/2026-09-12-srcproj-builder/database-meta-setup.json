@@ -1,0 +1,14 @@
+{
+  "dbPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\smoke-run-hWVJh9\\synthetic-smoke.db",
+  "before": [],
+  "defaultContract": "v1",
+  "after": [
+    {
+      "key": "coordinate_contract",
+      "value": "v2"
+    }
+  ],
+  "contract": "v2",
+  "userId": "13e60000-0000-4000-8000-000000000001",
+  "courseId": "6a9864b7-215a-402c-8550-a5fe859e1538"
+}

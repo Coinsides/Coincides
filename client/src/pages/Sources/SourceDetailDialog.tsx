@@ -1,4 +1,5 @@
-import { Download, ExternalLink, Eye, RotateCcw, Trash2, X } from 'lucide-react';
+import { Download, ExternalLink, Eye, RefreshCw, RotateCcw, Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   deriveSourceExperienceState,
   formatSourceBytes,
@@ -16,6 +17,7 @@ interface SourceDetailDialogProps {
   onDownload: (source: SourceRecordDetail) => void;
   onRetry: (source: SourceRecordDetail) => void;
   onDelete?: (source: SourceRecordDetail) => void;
+  onReproject?: (source: SourceRecordDetail) => void;
 }
 
 function formatTimestamp(value: string | null): string {
@@ -32,7 +34,9 @@ export function SourceDetailDialog({
   onDownload,
   onRetry,
   onDelete,
+  onReproject,
 }: SourceDetailDialogProps) {
+  const { t } = useTranslation();
   if (!source) return null;
   const state = deriveSourceExperienceState(source);
   const behavior = sourceOpenBehavior(source);
@@ -89,6 +93,12 @@ export function SourceDetailDialog({
             <button type="button" onClick={() => onRetry(source)}>
               <RotateCcw size={15} />
               Retry extraction
+            </button>
+          )}
+          {state === 'materialized' && onReproject && (
+            <button type="button" onClick={() => onReproject(source)}>
+              <RefreshCw size={15} />
+              {t('sources.reprojection.action')}
             </button>
           )}
         </div>

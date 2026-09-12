@@ -1,0 +1,205 @@
+{
+  "date": "2026-09-12",
+  "branch": "B",
+  "status": "ready",
+  "method": "Working-tree text baseline; append-only normalized line comparison, no Git diff.",
+  "product_and_tests": {
+    "changed_files": 0,
+    "added": 0,
+    "deleted": 0
+  },
+  "files": [
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-12-v13-6-source-projection-repair-order.md",
+      "added": 46,
+      "deleted": 0,
+      "baseline_sha256": "5707e9a30a1b5f14ce4a99485c4c1b7281e0494581c7c9a7ad5c1d9e89369b15",
+      "final_sha256": "92db54b22192d801f3981b46649aaa9c6bcfbf420f9470c2485ef0f9861bf5bd"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round3-placement-id-evidence.json",
+      "added": 397,
+      "deleted": 0,
+      "baseline": "new this round",
+      "final_sha256": "6acf549bd3b2223631f407003f33d930ef450eaaaf70a327a606a99296022a87"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round3-source-excerpts.md",
+      "added": 334,
+      "deleted": 0,
+      "baseline": "new this round",
+      "final_sha256": "75ef1cc30ab377484b285dbbdd9e9ced0ff18474ffd64dd0f08f990afdc7172d"
+    }
+  ],
+  "count_manifest_self": "round3-numstat.json is new evidence, excluded from its own line/hash totals to avoid self-reference.",
+  "scratch_only": ".codex-tmp/srcproj-13-6/round3/ contains the evidence collectors and local baselines; no product changes.",
+  "source_boundary": {
+    "named_count": 26,
+    "unchanged": 26,
+    "files": [
+      {
+        "path": "client/src/locales/en/translation.json",
+        "sha256": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41",
+        "final_sha256": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/locales/zh/translation.json",
+        "sha256": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b",
+        "final_sha256": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+        "sha256": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270",
+        "final_sha256": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/SourceDetailDialog.tsx",
+        "sha256": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1",
+        "final_sha256": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/SourceLibrary.module.css",
+        "sha256": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215",
+        "final_sha256": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/SourceLibrary.tsx",
+        "sha256": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e",
+        "final_sha256": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/SourceList.tsx",
+        "sha256": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9",
+        "final_sha256": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+        "sha256": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+        "final_sha256": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/SourceReprojectionDialog.tsx",
+        "sha256": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+        "final_sha256": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Sources/sourceApi.ts",
+        "sha256": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3",
+        "final_sha256": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3",
+        "unchanged": true
+      },
+      {
+        "path": "docs/generated/object-inventory.md",
+        "sha256": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+        "final_sha256": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/__tests__/v13CoordinateContract.test.ts",
+        "sha256": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18",
+        "final_sha256": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/__tests__/v13SourceReprojection.test.ts",
+        "sha256": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+        "final_sha256": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/db/migrations/069_v13_source_reprojection_receipts.ts",
+        "sha256": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+        "final_sha256": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/routes/sources.ts",
+        "sha256": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b",
+        "final_sha256": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/courseLifecycle.ts",
+        "sha256": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f",
+        "final_sha256": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/sourceMaterialization.ts",
+        "sha256": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+        "final_sha256": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/sourcePageFurniture.ts",
+        "sha256": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27",
+        "final_sha256": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/sourceReprojection.ts",
+        "sha256": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+        "final_sha256": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+        "unchanged": true
+      },
+      {
+        "path": "shared/types/pageGeometry.ts",
+        "sha256": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a",
+        "final_sha256": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/check-server-shared-runtime-import.mjs",
+        "sha256": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b",
+        "final_sha256": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/sourceProjectionMaterializer.ts",
+        "sha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+        "final_sha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+        "sha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+        "final_sha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/notes.ts",
+        "sha256": "b6616f24a741c1f3345ad4f465e78a1fa805e8310b99854c6a9833bd4c8c78d8",
+        "final_sha256": "b6616f24a741c1f3345ad4f465e78a1fa805e8310b99854c6a9833bd4c8c78d8",
+        "unchanged": true
+      },
+      {
+        "path": "server/src/services/canvasObjects.ts",
+        "sha256": "bf1f1055e99a6ede85496412843301250425ecc514b0900604cf1ad7780fd5fc",
+        "final_sha256": "bf1f1055e99a6ede85496412843301250425ecc514b0900604cf1ad7780fd5fc",
+        "unchanged": true
+      },
+      {
+        "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+        "sha256": "d2128cfd4fc5281339f6f2a31c36f790e3df65b45fe20758d3dc19060ff12f51",
+        "final_sha256": "d2128cfd4fc5281339f6f2a31c36f790e3df65b45fe20758d3dc19060ff12f51",
+        "unchanged": true
+      }
+    ]
+  },
+  "verification": {
+    "new_test_executions": 0,
+    "new_browser_executions": 0,
+    "reason": "Branch B stop; no repair to verify.",
+    "handoff_previous_content_unchanged": true,
+    "handoff_header_unchanged": true
+  }
+}

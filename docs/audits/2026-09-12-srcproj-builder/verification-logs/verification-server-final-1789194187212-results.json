@@ -1,0 +1,14 @@
+[
+  {
+    "label": "server-typecheck-final",
+    "exit": 0,
+    "duration_ms": 4709,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-server-final-1789194187212\\server-typecheck-final.log"
+  },
+  {
+    "label": "server-build-final",
+    "exit": 0,
+    "duration_ms": 6755,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-server-final-1789194187212\\server-build-final.log"
+  }
+]

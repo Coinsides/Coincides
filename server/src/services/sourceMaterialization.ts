@@ -159,6 +159,15 @@ function operationBatchId(
   userId: string,
   materializationId: string,
 ): string | null {
+  // Replacement can create several batches in the same timestamp second.
+  // The current projection owns the authoritative batch; UUID sort order does
+  // not indicate which publication is newest.
+  const current = db.prepare(`
+    SELECT n.operation_batch_id AS id FROM source_materializations sm
+    JOIN notes n ON n.id = sm.projection_note_id AND n.user_id = sm.user_id
+    WHERE sm.id = ? AND sm.user_id = ?
+  `).get(materializationId, userId) as { id: string | null } | undefined;
+  if (current?.id) return current.id;
   const row = db.prepare(`
     SELECT id FROM operation_batches
     WHERE user_id = ? AND source_type = 'source_materialization' AND source_id = ?

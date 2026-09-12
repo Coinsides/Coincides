@@ -1,0 +1,181 @@
+[
+  {
+    "group": "client-before-fix",
+    "label": "client-full-functional",
+    "exit": 1,
+    "duration_ms": 1368,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\client-before-fix-client-full-functional.log",
+    "counts": {
+      "files": 1,
+      "cases": 11,
+      "passed": 6,
+      "failed": 5,
+      "excluded": [],
+      "otherSkipped": [],
+      "unhandledErrors": 0
+    }
+  },
+  {
+    "group": "client-targeted",
+    "label": "client-full-functional",
+    "exit": 0,
+    "duration_ms": 8527,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\client-targeted-client-full-functional.log",
+    "counts": {
+      "files": 19,
+      "cases": 212,
+      "passed": 212,
+      "failed": 0,
+      "excluded": [],
+      "otherSkipped": [],
+      "unhandledErrors": 0
+    }
+  },
+  {
+    "group": "client-full",
+    "label": "client-full-functional",
+    "exit": 0,
+    "duration_ms": 85314,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\client-full-client-full-functional.log",
+    "counts": {
+      "files": 146,
+      "cases": 1558,
+      "passed": 1554,
+      "failed": 0,
+      "excluded": [
+        {
+          "name": "src/pages/Settings/ProvidersSection.test.tsx Settings provider credential controls lists the provider roster and saves then replaces a synthetic key with synchronized masked status",
+          "state": "skip"
+        },
+        {
+          "name": "src/pages/Settings/ProvidersSection.test.tsx Settings provider credential controls updates Clear to environment fallback or no key using the returned effective status",
+          "state": "skip"
+        },
+        {
+          "name": "src/pages/Settings/ProvidersSection.test.tsx Settings provider credential controls tests a saved key with the current model settings and presents success or a recognizable failure",
+          "state": "skip"
+        },
+        {
+          "name": "src/pages/Settings/ProvidersSection.test.tsx Settings provider credential controls retries a failed status request and retains a draft when a save fails",
+          "state": "skip"
+        }
+      ],
+      "otherSkipped": [],
+      "unhandledErrors": 0
+    }
+  },
+  {
+    "group": "types-build-initial",
+    "label": "shared-build",
+    "exit": 0,
+    "duration_ms": 82,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-initial-shared-build.log"
+  },
+  {
+    "group": "types-build-initial",
+    "label": "client-typecheck",
+    "exit": 1,
+    "duration_ms": 8582,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-initial-client-typecheck.log"
+  },
+  {
+    "group": "types-build-initial",
+    "label": "server-typecheck",
+    "exit": 0,
+    "duration_ms": 4912,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-initial-server-typecheck.log"
+  },
+  {
+    "group": "types-build-initial",
+    "label": "client-build-types",
+    "exit": 1,
+    "duration_ms": 9018,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-initial-client-build-types.log"
+  },
+  {
+    "group": "types-build-initial",
+    "label": "client-build-vite",
+    "exit": 0,
+    "duration_ms": 4509,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-initial-client-build-vite.log"
+  },
+  {
+    "group": "types-build-initial",
+    "label": "server-build",
+    "exit": 0,
+    "duration_ms": 7439,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-initial-server-build.log"
+  },
+  {
+    "group": "types-build-final",
+    "label": "shared-build",
+    "exit": 0,
+    "duration_ms": 78,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-final-shared-build.log"
+  },
+  {
+    "group": "types-build-final",
+    "label": "client-typecheck",
+    "exit": 0,
+    "duration_ms": 8286,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-final-client-typecheck.log"
+  },
+  {
+    "group": "types-build-final",
+    "label": "server-typecheck",
+    "exit": 0,
+    "duration_ms": 4822,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-final-server-typecheck.log"
+  },
+  {
+    "group": "types-build-final",
+    "label": "client-build-types",
+    "exit": 0,
+    "duration_ms": 8258,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-final-client-build-types.log"
+  },
+  {
+    "group": "types-build-final",
+    "label": "client-build-vite",
+    "exit": 0,
+    "duration_ms": 4084,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-final-client-build-vite.log"
+  },
+  {
+    "group": "types-build-final",
+    "label": "server-build",
+    "exit": 0,
+    "duration_ms": 6671,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\types-build-final-server-build.log"
+  },
+  {
+    "group": "client-targeted-final",
+    "label": "client-full-functional",
+    "exit": 0,
+    "duration_ms": 1306,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\client-targeted-final-client-full-functional.log",
+    "counts": {
+      "files": 1,
+      "cases": 11,
+      "passed": 11,
+      "failed": 0,
+      "excluded": [],
+      "otherSkipped": [],
+      "unhandledErrors": 0
+    }
+  },
+  {
+    "group": "docs-after-result-initial",
+    "label": "docs:check",
+    "exit": 1,
+    "duration_ms": 284,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\docs-after-result-initial-docs_check.log"
+  },
+  {
+    "group": "docs-after-result-final",
+    "label": "docs:check",
+    "exit": 0,
+    "duration_ms": 596,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-12-srcproj-builder\\round4-verification\\docs-after-result-final-docs_check.log"
+  }
+]

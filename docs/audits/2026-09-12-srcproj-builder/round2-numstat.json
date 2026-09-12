@@ -1,0 +1,363 @@
+{
+  "basis": "Second-round opening working-tree snapshots; normalized line LCS; no Git or .git. Prior Result/addendum retained verbatim; latest Result appended. Evidence listed as additions, excludes this inventory itself.",
+  "product_and_test": {
+    "files": 2,
+    "added": 14,
+    "deleted": 6
+  },
+  "product_test_and_result": {
+    "files": 3,
+    "added": 61,
+    "deleted": 6
+  },
+  "preserved_named_files": 21,
+  "files": [
+    {
+      "path": "server/src/services/sourceProjectionMaterializer.ts",
+      "added": 8,
+      "deleted": 5,
+      "baseline_sha256": "cd24c1acfbddeaa705dc152264e9ebad00bc3bb8600819f3ea51319015d607c5",
+      "final_sha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "added": 6,
+      "deleted": 1,
+      "baseline_sha256": "db7533fcdf09253cc01accd59c7494e21503de758159d7283b2637f5dd641a13",
+      "final_sha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-12-v13-6-source-projection-repair-order.md",
+      "added": 47,
+      "deleted": 0,
+      "baseline_sha256": "48f6487646989ac825bb710c4db6c3e67fe1b1f8a863596182100e034602683e",
+      "final_sha256": "26be66995df15e0871f197113a1070fffa0333a16bc1d992bc2c8e7451a06244"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-after-dom-geometry.json",
+      "kind": "text evidence",
+      "added": 421,
+      "deleted": 0,
+      "bytes": 13462,
+      "sha256": "9b539cbd164565246d541bcdaae2acf31d15b1cfbf66220ca159fa3b5a389bcc"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-after-overview.json",
+      "kind": "text evidence",
+      "added": 72,
+      "deleted": 0,
+      "bytes": 1524,
+      "sha256": "4668df75c9d22375563a65b017dc3a94290c4c6d9a0db29d76f5cdf298c4c802"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-after-overview.png",
+      "kind": "binary screenshot",
+      "bytes": 62835,
+      "sha256": "5ee6756565d6ae1fb27ed1a06e5979b215d5a6bd470744427cea2d2909322e89"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-after-page1.png",
+      "kind": "binary screenshot",
+      "bytes": 128171,
+      "sha256": "cbb73a60532f230c19e2290b9790b746987bf00690b940a7dd68e60adf8703da"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-after-read-page3.png",
+      "kind": "binary screenshot",
+      "bytes": 33831,
+      "sha256": "d10163653e478834a5b12f41d81ed35aadf26e28ea8d8fba87a4c92a0a78a82a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-before-dom-geometry.json",
+      "kind": "text evidence",
+      "added": 421,
+      "deleted": 0,
+      "bytes": 13462,
+      "sha256": "f24918cb1cdc5c30277946479c4abb9f0ae273cf8f1a0006f1f40a934ce5f67e"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-before-overview.png",
+      "kind": "binary screenshot",
+      "bytes": 62835,
+      "sha256": "5ee6756565d6ae1fb27ed1a06e5979b215d5a6bd470744427cea2d2909322e89"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-before-page1.png",
+      "kind": "binary screenshot",
+      "bytes": 128171,
+      "sha256": "cbb73a60532f230c19e2290b9790b746987bf00690b940a7dd68e60adf8703da"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-before-preview-ax.txt",
+      "kind": "text evidence",
+      "added": 226,
+      "deleted": 0,
+      "bytes": 10559,
+      "sha256": "8719bcb09117b1f3b987974efb40f74dfe0f07231042b29fcacf3c862a626ca0"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-before-read-page3.png",
+      "kind": "binary screenshot",
+      "bytes": 33831,
+      "sha256": "d10163653e478834a5b12f41d81ed35aadf26e28ea8d8fba87a4c92a0a78a82a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-browser-comparison.json",
+      "kind": "text evidence",
+      "added": 45,
+      "deleted": 0,
+      "bytes": 1444,
+      "sha256": "45d9bb23cea7be22701d4adce453b4c2a9a368cd98fe2cd8b1860aa89e6b20a4"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-browser-finding.md",
+      "kind": "text evidence",
+      "added": 54,
+      "deleted": 0,
+      "bytes": 6242,
+      "sha256": "164160f015379e725e53a8fb1a37c843341efc08d043dc7757d0dea66757d709"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-browser-hydration-api.json",
+      "kind": "text evidence",
+      "added": 99,
+      "deleted": 0,
+      "bytes": 3340,
+      "sha256": "eabc28de80915ec9538a7ee90f117d54782a0f2c71715b73db338bb63c1e3925"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-database-meta-setup.json",
+      "kind": "text evidence",
+      "added": 14,
+      "deleted": 0,
+      "bytes": 367,
+      "sha256": "65c7c92aefeda8f039e98f93e7a828fdde7d84efe0456a76df50ea9b830c826e"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-geometry-change.json",
+      "kind": "text evidence",
+      "added": 130,
+      "deleted": 0,
+      "bytes": 3878,
+      "sha256": "89f94ac4e646159814b60385e317581d1911eaa411fe44bc4c50b9a08be50007"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-smoke-after.json",
+      "kind": "text evidence",
+      "added": 320,
+      "deleted": 0,
+      "bytes": 18605,
+      "sha256": "709a2ade7b0655855c641b2388d7c157533681a1147a59ec887426a325f6cea1"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-smoke-before.json",
+      "kind": "text evidence",
+      "added": 178,
+      "deleted": 0,
+      "bytes": 9812,
+      "sha256": "cda270e80b6e004c77350ccf72f233f6b19744446ef025faeb73ffe70a8248ee"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-smoke-shutdown.json",
+      "kind": "text evidence",
+      "added": 22,
+      "deleted": 0,
+      "bytes": 386,
+      "sha256": "6bed0458d2fb430b3ef49e7e0ea6e6e5057d7d7b954a31036ce9009c798727a7"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-smoke.md",
+      "kind": "text evidence",
+      "added": 49,
+      "deleted": 0,
+      "bytes": 6447,
+      "sha256": "ff3ddbb6cf12d74efe8132656767995fff04418fb01ad92ebe063ef99eb7e63b"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/boundary.json",
+      "kind": "text evidence",
+      "added": 204,
+      "deleted": 0,
+      "bytes": 9724,
+      "sha256": "e419975b84a4857f864eef12c3c10fc8ad8f58e76ac9cc77fdb40f8f13c05e69"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/compilation/results.json",
+      "kind": "text evidence",
+      "added": 14,
+      "deleted": 0,
+      "bytes": 448,
+      "sha256": "9470d7bbb493fe78259cb6163cc71ee06fe7af24c3a65520d54b15399e0446e3"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/compilation/server-build-final.log",
+      "kind": "text evidence",
+      "added": 80,
+      "deleted": 0,
+      "bytes": 9584,
+      "sha256": "52d5ec0b3ae70aa7b2b78fe2dbc828d379b2357f9070536a530a8b65c467233a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/compilation/server-typecheck-final.log",
+      "kind": "text evidence",
+      "added": 1,
+      "deleted": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/final-docs/docs_check.log",
+      "kind": "text evidence",
+      "added": 10,
+      "deleted": 0,
+      "bytes": 396,
+      "sha256": "f2d620656c8d5c67a006ee053dad5c464f7277df1f2ceca40a65aabe1e19ef55"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/final-docs/results.json",
+      "kind": "text evidence",
+      "added": 8,
+      "deleted": 0,
+      "bytes": 201,
+      "sha256": "6d499adcd5a0f4c64022c1b76211097bddb8d1d129738c98627b4f5447d88532"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_canvas-runtime-boundary.log",
+      "kind": "text evidence",
+      "added": 181,
+      "deleted": 0,
+      "bytes": 23319,
+      "sha256": "ca2c191c725b7f36a371327bd2ba8a836ad0ae9b1b2e7ec1c08d01ee45da9135"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_group-gallery-shell.log",
+      "kind": "text evidence",
+      "added": 9,
+      "deleted": 0,
+      "bytes": 245,
+      "sha256": "a6d4d4c4a4e7c3d476f15e94cb531bb09618b54d68d50859fc4040bec85e6120"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_groups-rail-shell.log",
+      "kind": "text evidence",
+      "added": 9,
+      "deleted": 0,
+      "bytes": 224,
+      "sha256": "05f44df5eb579ca376c7c1813c81c131f5185eb8c5aabc5c714de2aece4cf5bf"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_server-shared-runtime-import.log",
+      "kind": "text evidence",
+      "added": 5,
+      "deleted": 0,
+      "bytes": 270,
+      "sha256": "d3cf2461dc5b2c9e7da19b39e0abe5a61a20d32dc27a17188581f191433979d7"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_single-editor-shell.log",
+      "kind": "text evidence",
+      "added": 9,
+      "deleted": 0,
+      "bytes": 234,
+      "sha256": "d13e63eced2c3e5251bf85f6212091a9c186ca132eb4bf01595dd1034da7ffb5"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_source-experience.log",
+      "kind": "text evidence",
+      "added": 10,
+      "deleted": 0,
+      "bytes": 422,
+      "sha256": "a372cce7133327a838c4d6a68fb350bc6002cfa9d2b05b376f6baf145a77ae03"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_tool-face-manifest.log",
+      "kind": "text evidence",
+      "added": 75,
+      "deleted": 0,
+      "bytes": 9370,
+      "sha256": "669f591834a4e7bd4e23976c717407dce29c301926fcbf45521fc1b9ea2b0283"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_tool-face-parity.log",
+      "kind": "text evidence",
+      "added": 5,
+      "deleted": 0,
+      "bytes": 204,
+      "sha256": "fc9039607a82dd7b6e20aa9cfde57ee207b2eae24fb8085d26d2e825b9d1b30f"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_v2-bn11-legacy-shutdown.log",
+      "kind": "text evidence",
+      "added": 9,
+      "deleted": 0,
+      "bytes": 256,
+      "sha256": "6110947274ac2096bf1f4c771b9f199896004e34241d32c77951ee1efcc2441b"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/check_v2-bn11-relation-freshness.log",
+      "kind": "text evidence",
+      "added": 9,
+      "deleted": 0,
+      "bytes": 271,
+      "sha256": "741a34652313e8224b1f46715ffdd6858fbebca4adba41b9786ead65745f5cca"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/docs_check.log",
+      "kind": "text evidence",
+      "added": 10,
+      "deleted": 0,
+      "bytes": 396,
+      "sha256": "f2d620656c8d5c67a006ee053dad5c464f7277df1f2ceca40a65aabe1e19ef55"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/results.json",
+      "kind": "text evidence",
+      "added": 80,
+      "deleted": 0,
+      "bytes": 2975,
+      "sha256": "d647a986fca95f0399312b636b508b7a0bfc8e8673c7ace2d9cc2e1079b3a8d0"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/smoke_canvas-engine-model-contract.log",
+      "kind": "text evidence",
+      "added": 73,
+      "deleted": 0,
+      "bytes": 6809,
+      "sha256": "15f6b405087b821009b2b1fe0d685a2b39735bfb11473bae174f67e25b296b8a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/static/smoke_canvas-engine-performance.log",
+      "kind": "text evidence",
+      "added": 18,
+      "deleted": 0,
+      "bytes": 1668,
+      "sha256": "d93f23c3442f2eed60c7f8d5981ac962927bab9ff5d80c2aaa0349f404583c58"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/targeted/results.json",
+      "kind": "text evidence",
+      "added": 16,
+      "deleted": 0,
+      "bytes": 459,
+      "sha256": "3243e776437a8ace863c87fa2f2259f848552f87e5df2e0a0708153caeef9167"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/targeted/server-targeted.log",
+      "kind": "text evidence",
+      "added": 1373,
+      "deleted": 0,
+      "bytes": 122354,
+      "sha256": "ec6a9df51436471e38c91e240b4c161239c63a3e39d8140c5af49d0c162a0158"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/round2-verification/verification.md",
+      "kind": "text evidence",
+      "added": 55,
+      "deleted": 0,
+      "bytes": 4319,
+      "sha256": "ef66720a9b8ff428e7051a841d3eeb93dc0d492f4234b822b7398003e54fdfa3"
+    }
+  ]
+}

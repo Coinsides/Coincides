@@ -1,4 +1,30 @@
 {
+  "sources": {
+    "reprojection": {
+      "action": "Rebuild projection",
+      "title": "Rebuild projection: {{name}}",
+      "description": "Rebuild the reading view from the original file and replace the current projection. The original file stays available.",
+      "loading": "Checking work attached to this projection...",
+      "annotationWarning": "Annotations will be removed, with a snapshot receipt retained. The snapshot is saved before replacement; annotations are not moved to the new projection.",
+      "otherWorkWarning": "Tags, links, and appearance changes on this projection will not carry over. Content groups retain their snapshots but lose their live link to this projection.",
+      "blockedExternalRefs": "This projection is referenced by another note or board. Remove those references before rebuilding it.",
+      "inProgress": "This source is currently being parsed or published. Wait for it to finish, then try again.",
+      "notReady": "This source is no longer ready to rebuild. Refresh the Source Library to see its current state.",
+      "failed": "Could not rebuild this projection. Try again; if the problem continues, refresh the Source Library.",
+      "retryPreview": "Reload work counts",
+      "confirm": "Replace projection",
+      "submitting": "Replacing projection...",
+      "success": "Projection rebuilt. The previous annotations were saved in a snapshot receipt.",
+      "counts": {
+        "annotation_count": "Annotations",
+        "note_tag_count": "Note tags",
+        "content_group_count": "Content groups",
+        "purpose_count": "Linked purposes",
+        "display_override_count": "Appearance changes",
+        "external_block_placement_count": "References in other notes or boards"
+      }
+    }
+  },
   "nav": {
     "home": "Home",
     "dailyBrief": "Daily Brief",

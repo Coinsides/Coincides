@@ -1,0 +1,43 @@
+Browser tab: 566869278, Title: "Coincides", URL: "http://127.0.0.1:61935/#/notes/c6746866-4f3d-4e2d-98c7-688e4e56ed17".
+0 AXWebArea Coincides, URL: 127.0.0.1:61935/#/notes/c6746866-4f3d-4e2d-98c7-688e4e56ed17
+	1 container root
+		2 container
+			3 image
+			4 text Coincides
+			5 button (expanded) Description: Collapse navigator, Secondary Actions: Collapse
+				6 image
+			7 link Description: 首页, Value: 127.0.0.1:61935/#/
+			8 link Description: 项目, Value: 127.0.0.1:61935/#/projects
+			9 link Description: 来源库, Value: 127.0.0.1:61935/#/sources
+			10 link Description: Boards, Value: 127.0.0.1:61935/#/boards
+			11 link Description: Group Gallery, Value: 127.0.0.1:61935/#/group-gallery
+			12 link Description: 设置, Value: 127.0.0.1:61935/#/settings
+			13 text UTILITIES
+			14 link Description: Tool Receipts, Value: 127.0.0.1:61935/#/tool-receipts
+			15 text 项目
+			16 button
+				17 image
+			18 button Home
+			19 text 收藏
+			20 image
+			21 button Home
+				22 image
+				23 text Home
+			24 text 最近
+			25 image
+			26 button Home
+				27 image
+				28 text Home
+		29 container Page overview
+			30 container
+				31 heading Overview 5, Value: 2
+					32 text Overview  5
+				33 button Description: Close page overview, Help: Close page overview (Esc)
+			34 container
+				35 button Read page 1
+				36 button Read page 2
+				37 button Read page 3
+				38 button Read page 4
+				39 button Read page 5
+
+The focused UI element is 29 container Page overview

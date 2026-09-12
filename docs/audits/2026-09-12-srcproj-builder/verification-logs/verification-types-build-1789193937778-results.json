@@ -1,0 +1,38 @@
+[
+  {
+    "label": "shared-build",
+    "exit": 0,
+    "duration_ms": 486,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-types-build-1789193937778\\shared-build.log"
+  },
+  {
+    "label": "client-typecheck",
+    "exit": 0,
+    "duration_ms": 9565,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-types-build-1789193937778\\client-typecheck.log"
+  },
+  {
+    "label": "server-typecheck",
+    "exit": 0,
+    "duration_ms": 5071,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-types-build-1789193937778\\server-typecheck.log"
+  },
+  {
+    "label": "client-build-types",
+    "exit": 0,
+    "duration_ms": 9117,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-types-build-1789193937778\\client-build-types.log"
+  },
+  {
+    "label": "client-build-vite",
+    "exit": 0,
+    "duration_ms": 4799,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-types-build-1789193937778\\client-build-vite.log"
+  },
+  {
+    "label": "server-build",
+    "exit": 0,
+    "duration_ms": 8275,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-types-build-1789193937778\\server-build.log"
+  }
+]

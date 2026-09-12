@@ -15,6 +15,7 @@ import {
   type SourceOriginEntryKind,
 } from '../services/sourceFileIntake.js';
 import { scheduleSourceMaterialization } from '../services/sourceMaterialization.js';
+import { previewSourceReprojection, rematerializeSource } from '../services/sourceReprojection.js';
 import {
   deleteSourceWithCompensation,
   getSourceDeletionImpact,
@@ -132,6 +133,17 @@ function scheduleMaterialization(req: AuthRequest, res: Response, next: NextFunc
 
 router.post('/:sourceId/materialize', scheduleMaterialization);
 router.post('/:sourceId/retry', scheduleMaterialization);
+
+router.post('/:sourceId/rematerialize', async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const sourceId = String(req.params.sourceId);
+    res.json(req.body?.confirm === true
+      ? await rematerializeSource(getDb(), req.userId!, sourceId)
+      : previewSourceReprojection(getDb(), req.userId!, sourceId));
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/:sourceId/delete-impact', (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

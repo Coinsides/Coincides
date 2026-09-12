@@ -1,0 +1,66 @@
+{
+    "stoppedAt":  "2026-09-12T07:06:44.133Z",
+    "run":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\round4\\old-projection-clone-CnUkS8",
+    "processScope":  "Only the exact server/client/launcher PIDs captured by this round-four launcher; no other PID targeted",
+    "launcherExecSession":  88123,
+    "processes":  [
+                      {
+                          "role":  "serverPid",
+                          "pid":  33112,
+                          "action":  "SIGTERM sent"
+                      },
+                      {
+                          "role":  "clientPid",
+                          "pid":  41060,
+                          "action":  "SIGTERM sent"
+                      },
+                      {
+                          "role":  "launcherPid",
+                          "pid":  16292,
+                          "action":  "SIGTERM sent"
+                      }
+                  ],
+    "loopbackPortChecks":  [
+                               {
+                                   "host":  "127.0.0.1",
+                                   "port":  61934,
+                                   "listening":  false
+                               },
+                               {
+                                   "host":  "127.0.0.1",
+                                   "port":  61935,
+                                   "listening":  false
+                               }
+                           ],
+    "originalSourceRun":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\smoke-run-wkxsqo",
+    "originalFileHashes":  [
+                               {
+                                   "name":  "synthetic-smoke.db",
+                                   "beforeClone":  "706af9f08db19b01767bf01c44ea08cbd4041422aaf56d32178901dcfba4bb74",
+                                   "final":  "706af9f08db19b01767bf01c44ea08cbd4041422aaf56d32178901dcfba4bb74",
+                                   "unchanged":  true
+                               },
+                               {
+                                   "name":  "synthetic-smoke.db-wal",
+                                   "beforeClone":  "264ce45fd027ab01aeeb84a5edc5ab3d1e8a1f578868f96202ddcadf858eedfd",
+                                   "final":  "264ce45fd027ab01aeeb84a5edc5ab3d1e8a1f578868f96202ddcadf858eedfd",
+                                   "unchanged":  true
+                               },
+                               {
+                                   "name":  "synthetic-smoke.db-shm",
+                                   "beforeClone":  "18259c7bf33345c32632bd790466b08b7ec42c89f119674d1d1e4838f94f21ae",
+                                   "final":  "18259c7bf33345c32632bd790466b08b7ec42c89f119674d1d1e4838f94f21ae",
+                                   "unchanged":  true
+                               }
+                           ],
+    "originalDatabaseAndWalAndShmUnchanged":  true,
+    "browserComparisonStatus":  "PASS",
+    "browserComparisonReference":  "round4-browser-comparison.json",
+    "browserTabsClosed":  "Root confirmed all task tabs closed before shutdown request",
+    "databaseOpenedDuringShutdown":  false,
+    "appRestarted":  false,
+    "rematerializationCalledDuringShutdown":  false,
+    "launcherSessionClosed":  true,
+    "launcherSessionExitCode":  1,
+    "launcherSessionExitExplanation":  "Launcher exited after requested task-process termination on Windows; this is shutdown status, not a validation failure."
+}

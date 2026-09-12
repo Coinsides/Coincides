@@ -9,20 +9,28 @@ import {
   statSync,
 } from 'node:fs';
 import { dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type { SourceArtifact, SourceArtifactBlock } from './sourceArtifact.js';
 import type { SourceMaterializationFile } from './sourceFileIntake.js';
 import { readCoordinateContract, type CoordinateContract } from './coordinateContract.js';
+import {
+  sourceArtifactPageCount,
+  stripSourcePageFurniture,
+  type SourcePageFurnitureReceipt,
+} from './sourcePageFurniture.js';
 
-const PAGE_WIDTH = 794;
-const PAGE_HEIGHT = 1123;
+// A4 geometry mirrors shared/types/pageGeometry.ts. Do not hand-edit;
+// server projection tests import the shared source and enforce field-by-field alignment.
+const PAGE_WIDTH = 904;
+const PAGE_HEIGHT = 1278;
 const PAGE_GAP = 36;
 const PAGE_X = 80;
 const PAGE_Y = 80;
 const CONTENT_LEFT = 72;
-const CONTENT_TOP = 96;
+const CONTENT_RIGHT = 72;
+const CONTENT_TOP = 0;
 const CONTENT_BOTTOM = 96;
-const CONTENT_WIDTH = 650;
+const CONTENT_WIDTH = 760;
 const BLOCK_GAP = 18;
 const SOURCE_ASSET_FOLDER = 'source-materializations';
 
@@ -32,6 +40,8 @@ interface ProjectionFramePlan {
   sourcePageIndex: number | null;
   x: number;
   y: number;
+  height: number;
+  furniture: SourcePageFurnitureReceipt[];
 }
 
 interface ProjectionBlockPlan {
@@ -145,52 +155,61 @@ function cleanupPreparedImageAsset(
 }
 
 function estimateBlockHeight(block: SourceArtifactBlock): number {
-  const explicitLines = Math.max(1, block.text.split('\n').length);
-  const wrappedLines = Math.max(explicitLines, Math.ceil(block.text.length / 78));
-  return Math.min(900, Math.max(72, wrappedLines * 23 + 34));
+  const wrappedLines = block.text.split('\n')
+    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / 78)), 0);
+  return Math.max(72, wrappedLines * 23 + 34);
 }
 
-function buildProjectionLayout(blocks: SourceArtifactBlock[]): {
+function projectionIdentity(sourceFileId: string, kind: string, artifactId: string): string {
+  return uuidv5(JSON.stringify(['coincides:source-projection:v1', sourceFileId, kind, artifactId]), uuidv5.URL);
+}
+
+function buildProjectionLayout(sourceFileId: string, artifact: SourceArtifact): {
   frames: ProjectionFramePlan[];
   blocks: ProjectionBlockPlan[];
 } {
+  const { blocks, furnitureByPage } = stripSourcePageFurniture(artifact);
   const frames: ProjectionFramePlan[] = [];
   const plannedBlocks: ProjectionBlockPlan[] = [];
-  let currentFrame: ProjectionFramePlan | null = null;
-  let currentPageIndex: number | null = null;
-  let localY = CONTENT_TOP;
-
-  const addFrame = (sourcePageIndex: number | null) => {
+  const pageIndices = new Set(artifact.blocks.flatMap((block) => block.page_index === null ? [] : [block.page_index]));
+  const declaredPageCount = sourceArtifactPageCount(artifact);
+  // Empty pages (including pages containing only stripped furniture) still
+  // have exactly one frame. Native and MinerU artifact page indices are 1-based.
+  if (declaredPageCount !== null) {
+    for (let pageIndex = 1; pageIndex <= declaredPageCount; pageIndex += 1) pageIndices.add(pageIndex);
+  }
+  const sourcePages: Array<number | null> = pageIndices.size > 0
+    ? [...pageIndices].sort((left, right) => left - right)
+    : [null];
+  for (const sourcePageIndex of sourcePages) {
     const index = frames.length;
-    const frame: ProjectionFramePlan = {
-      frameId: `source-page-${index + 1}`,
+    frames.push({
+      // The namespace prevents collisions between Sources; the suffix retains
+      // original-page identity rather than a pagination-dependent ordinal.
+      frameId: `source-${projectionIdentity(sourceFileId, 'frame', '')}:source-page-${sourcePageIndex ?? 'flow'}`,
       index,
       sourcePageIndex,
       x: PAGE_X,
-      y: PAGE_Y + index * (PAGE_HEIGHT + PAGE_GAP),
-    };
-    frames.push(frame);
-    currentFrame = frame;
-    currentPageIndex = sourcePageIndex;
-    localY = CONTENT_TOP;
-    return frame;
-  };
+      y: PAGE_Y,
+      height: PAGE_HEIGHT,
+      furniture: sourcePageIndex === null ? [] : furnitureByPage.get(sourcePageIndex) || [],
+    });
+  }
+  const frameByPage = new Map(frames.map((frame) => [frame.sourcePageIndex, frame]));
+  const bodyByArtifactId = new Map(blocks.map((block) => [block.artifact_block_id, block]));
+  const nextYByFrame = new Map<ProjectionFramePlan, number>();
+  let currentFrame = frames[0];
 
-  for (const [index, block] of blocks.entries()) {
+  for (const originalBlock of artifact.blocks) {
+    if (originalBlock.page_index !== null) currentFrame = frameByPage.get(originalBlock.page_index)!;
+    const block = bodyByArtifactId.get(originalBlock.artifact_block_id);
+    if (!block) continue;
+    const index = plannedBlocks.length;
     const height = estimateBlockHeight(block);
-    const sourcePageChanged = block.page_index !== null
-      && currentFrame !== null
-      && currentPageIndex !== block.page_index;
-    if (
-      !currentFrame
-      || sourcePageChanged
-      || localY + height > PAGE_HEIGHT - CONTENT_BOTTOM
-    ) {
-      addFrame(block.page_index);
-    }
-    const frame = currentFrame!;
+    const frame = currentFrame;
+    const localY = nextYByFrame.get(frame) ?? CONTENT_TOP;
     const notePlacementId = uuidv4();
-    const blockId = uuidv4();
+    const blockId = projectionIdentity(sourceFileId, 'block', block.artifact_block_id);
     const canvasObjectId = `canvas-object:${frame.frameId}:${notePlacementId}`;
     plannedBlocks.push({
       blockId,
@@ -208,10 +227,18 @@ function buildProjectionLayout(blocks: SourceArtifactBlock[]): {
       width: CONTENT_WIDTH,
       height,
     });
-    localY += height + BLOCK_GAP;
+    nextYByFrame.set(frame, localY + height + BLOCK_GAP);
+    frame.height = Math.max(PAGE_HEIGHT, localY + height + CONTENT_BOTTOM);
   }
 
-  if (frames.length === 0) addFrame(null);
+  let frameY = PAGE_Y;
+  for (const frame of frames) {
+    frame.y = frameY;
+    frameY += frame.height + PAGE_GAP;
+  }
+  for (const block of plannedBlocks) {
+    block.y = block.frame.y + CONTENT_TOP + block.localY;
+  }
   return { frames, blocks: plannedBlocks };
 }
 
@@ -290,7 +317,7 @@ export function publishSourceProjection(
   const noteId = uuidv4();
   const operationBatchId = uuidv4();
   const canvasId = noteId;
-  const layout = buildProjectionLayout(artifact.blocks);
+  const layout = buildProjectionLayout(source.source_file_id, artifact);
   const rootDir = canvasAssetRoot(options.canvasAssetRootDir);
   const preparedImage = artifact.artifact_kind === 'image'
     ? prepareImageAssetCopy(db, source, rootDir)
@@ -311,6 +338,10 @@ export function publishSourceProjection(
       }
       // One database snapshot governs every block in this publication.
       const coordinateContract = readCoordinateContract(db);
+      const imported = db.prepare('SELECT created_at FROM source_records WHERE id = ? AND user_id = ?')
+        .get(source.source_record_id, source.user_id) as { created_at: string };
+      const coverTitle = source.display_name.replace(/\.(?:pdf|md|markdown|txt|docx|png|jpe?g|webp)$/i, '');
+      const description = `源文档 · ${sourceArtifactPageCount(artifact) ?? layout.frames.length} 页 · 导入于 ${imported.created_at.slice(0, 10)}`;
 
       db.prepare(`
         INSERT INTO operation_batches (
@@ -339,13 +370,14 @@ export function publishSourceProjection(
           id, user_id, course_id, title, description, status, source_kind,
           page_format, note_class, metadata, operation_batch_id, created_at, updated_at
         )
-        VALUES (?, ?, ?, ?, NULL, 'active', 'source_projection', 'flow',
+        VALUES (?, ?, ?, ?, ?, 'active', 'source_projection', 'flow',
           'source_projection', ?, ?, ?, ?)
       `).run(
         noteId,
         source.user_id,
         source.course_id,
-        source.display_name,
+        coverTitle,
+        description,
         JSON.stringify({
           source_projection_version: 'v1',
           source_record_id: source.source_record_id,
@@ -427,7 +459,7 @@ export function publishSourceProjection(
           frame.x,
           frame.y,
           PAGE_WIDTH,
-          PAGE_HEIGHT,
+          frame.height,
           frame.frameId,
           frame.index,
           JSON.stringify({ placement_kind: 'page_frame' }),
@@ -440,7 +472,7 @@ export function publishSourceProjection(
             page_stack_id, page_index, page_size, content_inset_json,
             typography_json, background_json, template_id, template_json,
             slots_json, exportable, metadata, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'A4', ?, '{}', '{}',
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'A4', ?, ?, '{}',
             'a4_portrait', '{}', '{}', 1, ?, ?, ?)
         `).run(
           frame.frameId,
@@ -451,7 +483,8 @@ export function publishSourceProjection(
           canvasId,
           stackId,
           frame.index,
-          JSON.stringify({ top: CONTENT_TOP, right: 72, bottom: CONTENT_BOTTOM, left: CONTENT_LEFT }),
+          JSON.stringify({ top: CONTENT_TOP, right: CONTENT_RIGHT, bottom: CONTENT_BOTTOM, left: CONTENT_LEFT }),
+          JSON.stringify({ source_page_furniture: frame.furniture }),
           JSON.stringify({
             role: frame.index === 0 ? 'primary_page_frame' : 'page_frame',
             source_page_index: frame.sourcePageIndex,
@@ -465,7 +498,7 @@ export function publishSourceProjection(
         INSERT INTO note_blocks (
           id, user_id, course_id, block_type, title, content_json, plain_text,
           status, source_kind, metadata, operation_batch_id, created_at, updated_at
-        ) VALUES (?, ?, ?, 'paragraph', NULL, ?, ?, 'active', 'source_projection', ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', 'source_projection', ?, ?, ?, ?)
       `);
       const insertNotePlacement = db.prepare(`
         INSERT INTO note_block_placements (
@@ -504,6 +537,8 @@ export function publishSourceProjection(
           block.blockId,
           source.user_id,
           source.course_id,
+          block.artifact.writing_role === 'heading' ? 'heading' : 'paragraph',
+          block.artifact.writing_role === 'heading' ? block.artifact.text : null,
           JSON.stringify(textFlowContent(block.artifact)),
           block.artifact.text,
           JSON.stringify(metadata),
@@ -597,6 +632,10 @@ export function publishSourceProjection(
             filename, mime_type, byte_size, width, height, sha256, metadata,
             created_at, updated_at
           ) VALUES (?, ?, ?, ?, 'image', 'local_file', ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            origin_note_id = excluded.origin_note_id,
+            course_id = excluded.course_id,
+            updated_at = excluded.updated_at
         `).run(
           preparedImage.assetId,
           source.user_id,

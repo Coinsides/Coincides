@@ -1,0 +1,80 @@
+[
+  {
+    "label": "check:tool-face-manifest",
+    "exit": 0,
+    "duration_ms": 796,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_tool-face-manifest.log"
+  },
+  {
+    "label": "check:tool-face-parity",
+    "exit": 0,
+    "duration_ms": 656,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_tool-face-parity.log"
+  },
+  {
+    "label": "check:server-shared-runtime-import",
+    "exit": 0,
+    "duration_ms": 664,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_server-shared-runtime-import.log"
+  },
+  {
+    "label": "check:canvas-runtime-boundary",
+    "exit": 0,
+    "duration_ms": 502,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_canvas-runtime-boundary.log"
+  },
+  {
+    "label": "check:group-gallery-shell",
+    "exit": 0,
+    "duration_ms": 478,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_group-gallery-shell.log"
+  },
+  {
+    "label": "check:groups-rail-shell",
+    "exit": 0,
+    "duration_ms": 460,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_groups-rail-shell.log"
+  },
+  {
+    "label": "check:single-editor-shell",
+    "exit": 0,
+    "duration_ms": 461,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_single-editor-shell.log"
+  },
+  {
+    "label": "check:source-experience",
+    "exit": 0,
+    "duration_ms": 1000,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_source-experience.log"
+  },
+  {
+    "label": "check:v2-bn11-legacy-shutdown",
+    "exit": 0,
+    "duration_ms": 453,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_v2-bn11-legacy-shutdown.log"
+  },
+  {
+    "label": "check:v2-bn11-relation-freshness",
+    "exit": 0,
+    "duration_ms": 456,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\check_v2-bn11-relation-freshness.log"
+  },
+  {
+    "label": "smoke:canvas-engine-model-contract",
+    "exit": 0,
+    "duration_ms": 2215,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\smoke_canvas-engine-model-contract.log"
+  },
+  {
+    "label": "smoke:canvas-engine-performance",
+    "exit": 0,
+    "duration_ms": 1318,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\smoke_canvas-engine-performance.log"
+  },
+  {
+    "label": "docs:check",
+    "exit": 0,
+    "duration_ms": 617,
+    "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\srcproj-13-6\\verification-static-1789194719283\\docs_check.log"
+  }
+]

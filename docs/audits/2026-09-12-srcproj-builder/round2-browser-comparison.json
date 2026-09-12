@@ -1,0 +1,45 @@
+{
+  "domBlockCount": 5,
+  "domBlocksEqual": true,
+  "cssFrameWidth": 904,
+  "cssBlockWidth": 760,
+  "renderScale": 1.084070796460177,
+  "allBlocksInside760Column": true,
+  "browserPageCount": 5,
+  "page3Navigation": "FAIL: blank before and after",
+  "pageDistribution": "FAIL: all five bodies appear in frame 1",
+  "screenshots": [
+    {
+      "view": "page1",
+      "before_sha256": "cbb73a60532f230c19e2290b9790b746987bf00690b940a7dd68e60adf8703da",
+      "after_sha256": "cbb73a60532f230c19e2290b9790b746987bf00690b940a7dd68e60adf8703da",
+      "byteIdentical": true
+    },
+    {
+      "view": "overview",
+      "before_sha256": "5ee6756565d6ae1fb27ed1a06e5979b215d5a6bd470744427cea2d2909322e89",
+      "after_sha256": "5ee6756565d6ae1fb27ed1a06e5979b215d5a6bd470744427cea2d2909322e89",
+      "byteIdentical": true
+    },
+    {
+      "view": "read-page3",
+      "before_sha256": "d10163653e478834a5b12f41d81ed35aadf26e28ea8d8fba87a4c92a0a78a82a",
+      "after_sha256": "d10163653e478834a5b12f41d81ed35aadf26e28ea8d8fba87a4c92a0a78a82a",
+      "byteIdentical": true
+    }
+  ],
+  "reprojectionConfirmCalls": 2,
+  "receiptCount": 2,
+  "firstReprojectionMs": 16.955799999999996,
+  "preview": {
+    "user_work": {
+      "note_tag_count": 0,
+      "annotation_count": 0,
+      "content_group_count": 0,
+      "purpose_count": 0,
+      "display_override_count": 0,
+      "external_block_placement_count": 0,
+      "has_user_work": false
+    }
+  }
+}

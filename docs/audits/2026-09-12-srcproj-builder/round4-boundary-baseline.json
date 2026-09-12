@@ -1,0 +1,211 @@
+{
+  "captured_at": "2026-09-12T06:55:39.535Z",
+  "scope": "Named files only; full repository hash is allowed to change at the read matcher, remaining writer region must not change. No Git use.",
+  "files": [
+    {
+      "path": "client/src/locales/en/translation.json",
+      "expected": "unchanged",
+      "sha256": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41"
+    },
+    {
+      "path": "client/src/locales/zh/translation.json",
+      "expected": "unchanged",
+      "sha256": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+      "expected": "unchanged",
+      "sha256": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceDetailDialog.tsx",
+      "expected": "unchanged",
+      "sha256": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceLibrary.module.css",
+      "expected": "unchanged",
+      "sha256": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceLibrary.tsx",
+      "expected": "unchanged",
+      "sha256": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceList.tsx",
+      "expected": "unchanged",
+      "sha256": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+      "expected": "unchanged",
+      "sha256": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.tsx",
+      "expected": "unchanged",
+      "sha256": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e"
+    },
+    {
+      "path": "client/src/pages/Sources/sourceApi.ts",
+      "expected": "unchanged",
+      "sha256": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3"
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "expected": "unchanged",
+      "sha256": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448"
+    },
+    {
+      "path": "server/src/__tests__/v13CoordinateContract.test.ts",
+      "expected": "unchanged",
+      "sha256": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "expected": "unchanged",
+      "sha256": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2"
+    },
+    {
+      "path": "server/src/db/migrations/069_v13_source_reprojection_receipts.ts",
+      "expected": "unchanged",
+      "sha256": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d"
+    },
+    {
+      "path": "server/src/routes/sources.ts",
+      "expected": "unchanged",
+      "sha256": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b"
+    },
+    {
+      "path": "server/src/services/courseLifecycle.ts",
+      "expected": "unchanged",
+      "sha256": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f"
+    },
+    {
+      "path": "server/src/services/sourceMaterialization.ts",
+      "expected": "unchanged",
+      "sha256": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af"
+    },
+    {
+      "path": "server/src/services/sourcePageFurniture.ts",
+      "expected": "unchanged",
+      "sha256": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27"
+    },
+    {
+      "path": "server/src/services/sourceReprojection.ts",
+      "expected": "unchanged",
+      "sha256": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7"
+    },
+    {
+      "path": "shared/types/pageGeometry.ts",
+      "expected": "unchanged",
+      "sha256": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a"
+    },
+    {
+      "path": "scripts/check-server-shared-runtime-import.mjs",
+      "expected": "unchanged",
+      "sha256": "c85018f558c7d9c7e11849ffca14e89e93b5fa465e01c2ed3685a2106abd062b"
+    },
+    {
+      "path": "server/src/services/sourceProjectionMaterializer.ts",
+      "expected": "unchanged",
+      "sha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "expected": "unchanged",
+      "sha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd"
+    },
+    {
+      "path": "server/src/services/notes.ts",
+      "expected": "unchanged",
+      "sha256": "b6616f24a741c1f3345ad4f465e78a1fa805e8310b99854c6a9833bd4c8c78d8"
+    },
+    {
+      "path": "server/src/services/canvasObjects.ts",
+      "expected": "unchanged",
+      "sha256": "bf1f1055e99a6ede85496412843301250425ecc514b0900604cf1ad7780fd5fc"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+      "expected": "read-matcher-only",
+      "sha256": "21e3f061a432512d4607cfcb52790329737e3712ce4c256a5f76d32ee7756291"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFrameWallService.ts",
+      "expected": "unchanged",
+      "sha256": "9ab8d33a72acbd7626e57fb30bddbb3a360184ca8d08840da8bedec6ff347605"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.ts",
+      "expected": "unchanged",
+      "sha256": "530bd30687294d0f6d4ea4f36295c1fcdf3e69af984458ba0ddc07985f5392f0"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePlacementHistory.ts",
+      "expected": "unchanged",
+      "sha256": "dc44e39b6b8304f0b83bf22ab2e29bb558a5ce46d6a3148471a2bf37e8dbe5cd"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.ts",
+      "expected": "unchanged",
+      "sha256": "990523d73e82bb3b3a5c3b182b9ab42fe77a6eeb9964ad7051b8f7487f969291"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementContractService.ts",
+      "expected": "unchanged",
+      "sha256": "d6623a7a2ab58fe73ba23c5f7a2f889b5dee44c69dcd9449366cb12011d2a7a8"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementService.ts",
+      "expected": "unchanged",
+      "sha256": "7e76a304c2f1d10cb55729e7eaacd0898cf77fd5cc2128171eff95164b92a844"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasPersistenceNormalizer.ts",
+      "expected": "unchanged",
+      "sha256": "7ed187396d1a1934a6c9535aa9187be32990a86c0b64d4445be8e252d4bc661e"
+    },
+    {
+      "path": "server/src/routes/canvasObjects.ts",
+      "expected": "unchanged",
+      "sha256": "a1dff7a1afe917ad38c0a15be8db7bbcc491018edb26c81cbfb6d3a833402696"
+    },
+    {
+      "path": "server/src/routes/notes.ts",
+      "expected": "unchanged",
+      "sha256": "c8160527eb37fb0199e950cecd793072b51bf75a53dc543b39b28e4713a5d834"
+    },
+    {
+      "path": "server/src/db/migrations/015_v2_note_foundation.ts",
+      "expected": "unchanged",
+      "sha256": "ac32d6b1234c9dcbe43f419d0fd370abbe2791210cd8c5e5a045cc2cec2c906e"
+    },
+    {
+      "path": "server/src/db/migrations/035_v2_canvas_objects.ts",
+      "expected": "unchanged",
+      "sha256": "8bc77ee026590bfe9877d06c95cd97ffe383c07e276b37e1577b20da3955fbb2"
+    },
+    {
+      "path": "server/src/db/migrations/037_v2_canvas_object_block_identity_hardening.ts",
+      "expected": "unchanged",
+      "sha256": "6c11a33b1b7e9edc14cb40fd85d893c1bed2e996527d3d4f874af03302304b17"
+    },
+    {
+      "path": "server/src/db/migrations/038_v2_canvas_note_block_mount_uniqueness.ts",
+      "expected": "unchanged",
+      "sha256": "3da8a2abdc8f7afb5c75f4d29e24ec8468b166c08987eadac2899724edeedcb6"
+    },
+    {
+      "path": "server/src/db/migrations/056_v13_coordinate_contract.ts",
+      "expected": "unchanged",
+      "sha256": "ddbc7313aa05183250d0019819f61bab77228beab34198629f00c05599bab339"
+    }
+  ],
+  "writer_region": {
+    "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+    "starts_at": "export interface PageFrameBlockLayoutUpdate",
+    "sha256": "8871bd6679dfc4d75893c09ced7ef27b758f4400c46cc1c64ec3f3b44484aba0"
+  }
+}

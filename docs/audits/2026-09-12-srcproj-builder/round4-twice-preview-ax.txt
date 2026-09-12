@@ -1,0 +1,226 @@
+Browser tab: 566869278, Title: "Coincides", URL: "http://127.0.0.1:61935/#/notes/c6746866-4f3d-4e2d-98c7-688e4e56ed17".
+0 AXWebArea Coincides, URL: 127.0.0.1:61935/#/notes/c6746866-4f3d-4e2d-98c7-688e4e56ed17
+	1 container
+		2 container root
+			3 container
+				4 image
+				5 text Coincides
+				6 button (expanded) Description: Collapse navigator, Secondary Actions: Collapse
+					7 image
+				8 link Description: 首页, Value: 127.0.0.1:61935/#/
+				9 link Description: 项目, Value: 127.0.0.1:61935/#/projects
+				10 link Description: 来源库, Value: 127.0.0.1:61935/#/sources
+				11 link Description: Boards, Value: 127.0.0.1:61935/#/boards
+				12 link Description: Group Gallery, Value: 127.0.0.1:61935/#/group-gallery
+				13 link Description: 设置, Value: 127.0.0.1:61935/#/settings
+				14 text UTILITIES
+				15 link Description: Tool Receipts, Value: 127.0.0.1:61935/#/tool-receipts
+				16 text 项目
+				17 button
+					18 image
+				19 button Home
+				20 text 收藏
+				21 image
+				22 button Home
+					23 image
+					24 text Home
+				25 text 最近
+				26 image
+				27 button Home
+					28 image
+					29 text Home
+			30 container
+				31 button (collapsed) Staging (0), Secondary Actions: Expand
+					32 text Staging (
+					33 text 0
+					34 text )
+				35 container
+					36 container
+						37 text entry area Description: Note title, Value: Projection Alignment (2)
+						38 text entry area Description: Note description, Value: 源文档 · 5 页 · 导入于 2026-09-12
+						39 pop up button (collapsed) Description: Note metadata, Secondary Actions: Expand
+						40 pop up button (collapsed) Upstream 1 · Downstream 0, Secondary Actions: Expand
+					41 container
+						42 container Paper ink
+						43 container Paper ink
+						44 container Paper ink
+						45 container Paper ink
+						46 container Paper ink
+						47 text 1 / 5
+						48 container
+							49 container Text unit tools
+								50 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+							51 text entry area Original page 1 starts here
+PAGE 1 BODY 1: The original evidence stays on its own source page.
+PAGE 1 BODY 2: The original evidence stays on its own source page.
+PAGE 1 BODY 3: The original evidence stays on its own source page.
+PAGE 1 BODY 4: The original evidence stays on its own source page.
+PAGE 1 BODY 5: The original evidence stays on its own source page.
+PAGE 1 BODY 6: The original evidence stays on its own source page.
+PAGE 1 BODY 7: The original evidence stays on its own source page.
+PAGE 1 BODY 8: The original evidence stays on its own source page.
+						52 text Source
+						53 text  p.1
+						54 container
+							55 container Text unit tools
+								56 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+							57 text entry area Original page 2 starts here
+PAGE 2 BODY 1: The original evidence stays on its own source page.
+PAGE 2 BODY 2: The original evidence stays on its own source page.
+PAGE 2 BODY 3: The original evidence stays on its own source page.
+PAGE 2 BODY 4: The original evidence stays on its own source page.
+PAGE 2 BODY 5: The original evidence stays on its own source page.
+PAGE 2 BODY 6: The original evidence stays on its own source page.
+PAGE 2 BODY 7: The original evidence stays on its own source page.
+PAGE 2 BODY 8: The original evidence stays on its own source page.
+						58 text Source
+						59 text  p.2
+						60 container
+							61 container Text unit tools
+								62 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+							63 text entry area Original page 3 starts here
+PAGE 3 BODY 1: The original evidence stays on its own source page.
+PAGE 3 BODY 2: The original evidence stays on its own source page.
+PAGE 3 BODY 3: The original evidence stays on its own source page.
+PAGE 3 BODY 4: The original evidence stays on its own source page.
+PAGE 3 BODY 5: The original evidence stays on its own source page.
+PAGE 3 BODY 6: The original evidence stays on its own source page.
+PAGE 3 BODY 7: The original evidence stays on its own source page.
+PAGE 3 BODY 8: The original evidence stays on its own source page.
+						64 text Source
+						65 text  p.3
+						66 container
+							67 container Text unit tools
+								68 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+							69 text entry area Original page 4 starts here
+PAGE 4 BODY 1: The original evidence stays on its own source page.
+PAGE 4 BODY 2: The original evidence stays on its own source page.
+PAGE 4 BODY 3: The original evidence stays on its own source page.
+PAGE 4 BODY 4: The original evidence stays on its own source page.
+PAGE 4 BODY 5: The original evidence stays on its own source page.
+PAGE 4 BODY 6: The original evidence stays on its own source page.
+PAGE 4 BODY 7: The original evidence stays on its own source page.
+PAGE 4 BODY 8: The original evidence stays on its own source page.
+						70 text Source
+						71 text  p.4
+						72 container
+							73 container Text unit tools
+								74 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+							75 text entry area Original page 5 starts here
+PAGE 5 BODY 1: The original evidence stays on its own source page.
+PAGE 5 BODY 2: The original evidence stays on its own source page.
+PAGE 5 BODY 3: The original evidence stays on its own source page.
+PAGE 5 BODY 4: The original evidence stays on its own source page.
+PAGE 5 BODY 5: The original evidence stays on its own source page.
+PAGE 5 BODY 6: The original evidence stays on its own source page.
+PAGE 5 BODY 7: The original evidence stays on its own source page.
+PAGE 5 BODY 8: The original evidence stays on its own source page.
+						76 text Source
+						77 text  p.5
+					78 container Page reading controls
+						79 container Source content locked; interpretation and organization remain editable
+							80 image
+							81 text Source locked
+						82 checkbox Preview, Help: Preview export boundary, Value: 1
+							83 image
+							84 text Preview
+						85 checkbox (disabled) Layout, Help: Toggle layout mode, Value: 0
+							86 image
+							87 text Layout
+						88 checkbox (collapsed) Description: 笔记外观, Value: 0, Secondary Actions: Expand
+							89 image
+							90 text 外观
+						91 button More note actions
+							92 image
+						93 checkbox (disabled) Description: Selection, Value: 1
+						94 checkbox (disabled) Description: Pen, Value: 0
+						95 checkbox (disabled) Description: Eraser, Value: 0
+						96 pop up button (collapsed) Description: View options, Secondary Actions: Expand
+						97 checkbox Description: Page overview, Value: 0
+						98 button Decrease page reading step
+						99 container Page display scale
+							100 text 108 %
+						101 button Increase page reading step
+					102 button Open content groups
+						103 image
+						104 text Groups
+		105 container
+			106 text EXPORT PREVIEW Boundary seed
+			107 button Close
+				108 image
+			109 text 5 Included 0 Excluded 5 AI visible 0 AI hidden
+			110 container Preview overlay controls
+				111 checkbox Description: Toggle block type overlay, Help: Show block type overlay, Value: 0
+					112 image
+					113 text Block types
+				114 container Block type overlay help
+					115 image
+					116 text Show or hide block type badges across the page.
+				117 checkbox Description: Toggle AI visibility overlay, Help: Show AI visibility overlay, Value: 0
+					118 image
+					119 text AI visibility
+				120 container AI visibility overlay help
+					121 image
+					122 text Show which blocks are visible or hidden from AI context.
+				123 checkbox Description: Toggle export status overlay, Help: Show export status overlay, Value: 0
+					124 image
+					125 text Export status
+				126 container Export status overlay help
+					127 image
+					128 text Show which blocks are included, excluded, or scratch-only.
+				129 checkbox Description: Toggle label overlay, Help: Hide label overlay, Value: 1
+					130 image
+					131 text Labels
+				132 container Label overlay help
+					133 image
+					134 text Show or hide annotation labels and highlights while writing.
+			135 button (expanded) > Primary PageFrame 1 / A4 1, Secondary Actions: Collapse
+				136 text >
+				137 text Primary PageFrame 1 / A4
+				138 text 1
+			139 text 1  export 0  excluded 0  AI hidden exportable 16.7 px 24.5 px line 0 px gap 48  lines Original page 1 starts here PAGE 1 BODY 1: The original evidence stays o
+			140 container
+				141 text Export  /  AI visible
+			142 button (collapsed) > Secondary PageFrame 2 / A4 1, Secondary Actions: Expand
+				143 text >
+				144 text Secondary PageFrame 2 / A4
+				145 text 1
+			146 button (collapsed) > Secondary PageFrame 3 / A4 1, Secondary Actions: Expand
+				147 text >
+				148 text Secondary PageFrame 3 / A4
+				149 text 1
+			150 button (collapsed) > Secondary PageFrame 4 / A4 1, Secondary Actions: Expand
+				151 text >
+				152 text Secondary PageFrame 4 / A4
+				153 text 1
+			154 button (collapsed) > Secondary PageFrame 5 / A4 1, Secondary Actions: Expand
+				155 text >
+				156 text Secondary PageFrame 5 / A4
+				157 text 1
+			158 button (collapsed) > Crossing PageFrame boundary 0, Secondary Actions: Expand
+				159 text >
+				160 text Crossing PageFrame boundary
+				161 text 0
+			162 button (collapsed) > Workspace only 0, Secondary Actions: Expand
+				163 text >
+				164 text Workspace only
+				165 text 0
+			166 button (collapsed) > Included in export 5, Secondary Actions: Expand
+				167 text >
+				168 text Included in export
+				169 text 5
+			170 button (collapsed) > Excluded / scratch 0, Secondary Actions: Expand
+				171 text >
+				172 text Excluded / scratch
+				173 text 0
+			174 button (collapsed) > AI visible 5, Secondary Actions: Expand
+				175 text >
+				176 text AI visible
+				177 text 5
+			178 button (collapsed) > AI hidden 0, Secondary Actions: Expand
+				179 text >
+				180 text AI hidden
+				181 text 0
+			182 text Preview owns export boundary, AI visibility, export status, block type, and label overlays. It is not the final PDF export engine.
+
+The focused UI element is 82 checkbox Preview, Help: Preview export boundary, Value: 1

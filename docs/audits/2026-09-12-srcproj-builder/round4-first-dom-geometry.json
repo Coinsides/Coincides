@@ -1,0 +1,97 @@
+{
+  "blocks": [
+    {
+      "id": "true",
+      "rect": {
+        "bottom": 622.4293212890625,
+        "height": 299.40679931640625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 323.02252197265625,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 323.02252197265625
+      },
+      "style": "left: 0px; top: 80px; width: 760px; min-height: 276px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;",
+      "text": "Original page 1 starts here\nPAGE 1 BODY 1: The original evidence stays on its own source page.\nPAGE 1 BODY 2: The original evidence stays on its own source page.\nPAGE 1 BODY 3: The original evidence stays on its own source page.\nPAGE 1 BODY 4: The original evidence stays on its own source page.\nPAGE 1 BODY 5: The original evidence stays on its own source page.\nPAGE 1 BODY 6: The original evidence stays on its own source page.\nPAGE 1 BODY 7: The original evidence stays on its own source page.\nPAGE 1 BODY 8: The original evidence stays on its own source page.Source p.1"
+    },
+    {
+      "id": "true",
+      "rect": {
+        "bottom": 2046.8984375,
+        "height": 299.4068603515625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 1747.4915771484375,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 1747.4915771484375
+      },
+      "style": "left: 0px; top: 1394px; width: 760px; min-height: 276px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;",
+      "text": "Original page 2 starts here\nPAGE 2 BODY 1: The original evidence stays on its own source page.\nPAGE 2 BODY 2: The original evidence stays on its own source page.\nPAGE 2 BODY 3: The original evidence stays on its own source page.\nPAGE 2 BODY 4: The original evidence stays on its own source page.\nPAGE 2 BODY 5: The original evidence stays on its own source page.\nPAGE 2 BODY 6: The original evidence stays on its own source page.\nPAGE 2 BODY 7: The original evidence stays on its own source page.\nPAGE 2 BODY 8: The original evidence stays on its own source page.Source p.2"
+    },
+    {
+      "id": "true",
+      "rect": {
+        "bottom": 3471.367431640625,
+        "height": 299.40673828125,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 3171.960693359375,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 3171.960693359375
+      },
+      "style": "left: 0px; top: 2708px; width: 760px; min-height: 276px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;",
+      "text": "Original page 3 starts here\nPAGE 3 BODY 1: The original evidence stays on its own source page.\nPAGE 3 BODY 2: The original evidence stays on its own source page.\nPAGE 3 BODY 3: The original evidence stays on its own source page.\nPAGE 3 BODY 4: The original evidence stays on its own source page.\nPAGE 3 BODY 5: The original evidence stays on its own source page.\nPAGE 3 BODY 6: The original evidence stays on its own source page.\nPAGE 3 BODY 7: The original evidence stays on its own source page.\nPAGE 3 BODY 8: The original evidence stays on its own source page.Source p.3"
+    },
+    {
+      "id": "true",
+      "rect": {
+        "bottom": 4895.83642578125,
+        "height": 299.40673828125,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 4596.4296875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 4596.4296875
+      },
+      "style": "left: 0px; top: 4022px; width: 760px; min-height: 276px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;",
+      "text": "Original page 4 starts here\nPAGE 4 BODY 1: The original evidence stays on its own source page.\nPAGE 4 BODY 2: The original evidence stays on its own source page.\nPAGE 4 BODY 3: The original evidence stays on its own source page.\nPAGE 4 BODY 4: The original evidence stays on its own source page.\nPAGE 4 BODY 5: The original evidence stays on its own source page.\nPAGE 4 BODY 6: The original evidence stays on its own source page.\nPAGE 4 BODY 7: The original evidence stays on its own source page.\nPAGE 4 BODY 8: The original evidence stays on its own source page.Source p.4"
+    },
+    {
+      "id": "true",
+      "rect": {
+        "bottom": 6320.3056640625,
+        "height": 299.4072265625,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 6020.8984375,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 6020.8984375
+      },
+      "style": "left: 0px; top: 5336px; width: 760px; min-height: 276px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;",
+      "text": "Original page 5 starts here\nPAGE 5 BODY 1: The original evidence stays on its own source page.\nPAGE 5 BODY 2: The original evidence stays on its own source page.\nPAGE 5 BODY 3: The original evidence stays on its own source page.\nPAGE 5 BODY 4: The original evidence stays on its own source page.\nPAGE 5 BODY 5: The original evidence stays on its own source page.\nPAGE 5 BODY 6: The original evidence stays on its own source page.\nPAGE 5 BODY 7: The original evidence stays on its own source page.\nPAGE 5 BODY 8: The original evidence stays on its own source page.Source p.5"
+    }
+  ],
+  "frames": [
+    {
+      "id": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1",
+      "rect": {
+        "bottom": 7302.2705078125,
+        "height": 7065.9736328125,
+        "left": 678.0531005859375,
+        "right": 1501.9468994140625,
+        "top": 236.296875,
+        "width": 823.893798828125,
+        "x": 678.0531005859375,
+        "y": 236.296875
+      },
+      "style": "min-height: 6518px; width: 760px; --document-font-family: Aptos, Calibri, \"Segoe UI\", Arial, sans-serif; --document-font-size: 16.7px; --document-line-height: 24.5px; --document-paragraph-spacing: 0px; --page-frame-grid-visible: 0; --formal-page-offset-x: 80px; --formal-page-width: 904px; --canvas-world-width: 760px; --canvas-world-height: 5708px;",
+      "tag": "DIV"
+    }
+  ],
+  "text": "Coincides\n首页\n项目\n来源库\nBoards\nGroup Gallery\n设置\nUTILITIES\nTool Receipts\n项目\nHome\n收藏\nHome\n最近\nHome\nStaging (0)\nNote metadata\nUpstream 1 · Downstream 0\n1 / 5\nSource p.1\nSource p.2\nSource p.3\nSource p.4\nSource p.5\nSource locked\nPreview\nLayout\n外观\nOverview\n−\n108%\n+\nGroups"
+}

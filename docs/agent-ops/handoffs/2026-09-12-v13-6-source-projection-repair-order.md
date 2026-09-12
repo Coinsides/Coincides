@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(施工夜第二单;Henry 09-12 认分诊全表+重投影裁定,睡前令"施工类全清"提前开工)
+> **状态 (Status)**: done(2026-09-12 补遗三四轮六步工程验收通过;历史三轮 Result 原样保留)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-12
 > **单号**: 13.6 · 源投影修单(页对齐+常量统一+页渣剥离+封面+重投影 v1)
@@ -284,3 +284,69 @@ Result 必含:交付清单+numstat、database_meta 契约值实测、六节逐�
 6. Result 更新;全过翻 done。
 
 射程=client 读匹配单点+测试;禁区照旧。
+
+## Result · 补遗三四轮执行（2026-09-12，codex builder）
+
+**六步完成，工程验收通过，header 翻 `done`。** 最后一处 hydration 断链已由 client 读键归一最小修消除；旧隔离投影无需重投影即可恢复五页归属，两次重投影后也全部复验通过。本结论不代替 Henry 的主观体验验收，不声称已经验过真机 IELTS。
+
+### 1. 先勘匹配链：读与写的完整消费清单
+
+先由独立只读子代理勘链，核心清单返回后才修改产品。CodeGraph 目录存在，但 CLI 不在 PATH、无可用 MCP；`rg` 也不可调用，因此以 PowerShell 对列明源码目录定向搜索。未调用 Git。完整逐点表及**修前行号**见 `docs/audits/2026-09-12-srcproj-builder/round4-matching-chain.md`；下表归拢全部路径（client 文件均相对 `client/src/pages/Notes/canvasEngine/`）：
+
+| 消费方向 | 点位与身份语义 | 本轮处理 |
+| --- | --- | --- |
+| 产生/两侧 API | materializer `notePlacementId=UUIDv4`、`canvasPlacementId=canvas-placement:<UUID>`；server `notes.ts` 返回 nbp.id，`canvasObjects.ts` 返回 cp.id | **零动**，继续两种形状 |
+| DTO 读取 | `canvasPersistenceNormalizer.ts` 的 blockLayouts、通用 placement normalizer 保留原 ID | **零动** |
+| 唯一 hydration 匹配 | `canvasObjectRepository.ts` 的 `applyCanvasLayoutsToBlocks`：placement Map 建键与 lookup；无 placement ID 才按 block ID fallback | **只在这两处归一读键**；fallback 规则不改 |
+| 全部产品直接调用 | `hooks/useNoteCanvasDataAdapter.ts` 首次/切 note 装载（修前 673）及 refresh（2257） | 原样调用同一 hydration，结果只增加 canvas_layout，不改 NoteBlock 身份 |
+| 单块写回 | repository `saveBlockCanvasPlacementForNote` 的 URL 用原 `block.placement_id`；adapter 初创/恢复/续写及手势保存（1325/1413/1462/1507/2273）、`useTrayController`（92/154）调用它 | **零动**；响应只取 layout，不用 canvas ID 覆盖 NoteBlock ID |
+| 页墙/撤销写回 | repository collection 的 `layout_updates` 用原 block ID；`object_layout_updates` 用原 CanvasPlacement ID；`pageFrameWallService` clamp 快照；adapter 1132–1164 保存与 snapshot 精确匹配、history 撤销重做 | **零动**；两边仍在各自身份域内 |
+| 其他关联消费 | adapter reorder 2622–2638；`placementService` runtime placement；freehand/image/table/connector/NoteWritingSurfaceLayer 通用对象投影；blockProjection/shapeProjection 临时身份；collection 无布局保存调用 | **全部零动**；归一 key 不暴露给运行时、reorder 或 DTO |
+| 相邻 tray 匹配 | `trayService.ts:19–27` 是 tray-only 的 NoteBlock↔CanvasPlacement 精确匹配，源投影 formal_page 不走它 | **射程外零动**；既有 tray 回归通过 |
+| server 写消费 | `canvasObjects.ts` collection batch→单块 writer 使用原 update.placement_id；按同 ID 查 note placement；通用 batch 精确查 cp.id；通用单写保留 payload ID | **API、写口及 schema 全零动** |
+
+### 2. 最小修、交付清单与边界
+
+- **唯一产品文件**：`client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts`。新增私有 `placementHydrationKey`，仅去掉开头一个精确 `canvas-placement:` 前缀；在 Map 建键和 block 查询时使用。无 trim、大小写变换或任意前缀剥离，不按同 block ID 误配无关 placement。
+- **唯一测试文件**：同目录新增 `canvasObjectRepository.test.ts`，11 项：裸/前缀四组合、三个无关 ID、同块不同 placement、旧 block-ID fallback，以及两种形状读后单块 URL/墙 layout_updates/通用 object_layout_updates 的身份保持。入参、输出 block ID 与 API 响应 ID 保持原值。
+- **产品/测试 numstat：2 文件，+120 / −2**（产品 +8/−2；新测试 +112/−0）。依据本轮开工工作树文本快照逐行 LCS，**非 Git HEAD diff**。本 Result/header 增量及证据文件单列于 `round4-numstat.json`。
+- 文档交付还包括生成的 `docs/agent-ops/INDEX.md`：header 翻 done 后索引检查报告这一处过期，按 `node scripts/docs-index.mjs` 只同步这一份索引；未手改索引或任何 agent 操作指令。
+- 真正修前快照与当前文件独立比较，只包含 helper+两键变化；repository 从 `PageFrameBlockLayoutUpdate` 至文件尾的**整个写回区文本/哈希全等**。另有 **39 个点名非目标文件** baseline/final 全等，覆盖 materializer、两侧 API、相关迁移、shared/client 几何、墙/placement 写消费者和静态门。射程及 SHA 见 `round4-boundary-{baseline,final}.json`，不冒称全库扫描。
+- 原单六节现物：一几何、三页渣、四 heading、五封面、六重投影实现均零改且本轮 server 三族复绿；**二页对齐的浏览器阻塞已解除**，六的浏览器联验亦补齐。没有改 parser、source policy、两表 schema 或 materializer ID 派生。
+
+### 3. 定向、全库与验证数字
+
+| 验证 | 本轮亲跑结果 |
+| --- | --- |
+| 新 11 项修前基线 | **6 PASS / 5 FAIL**；跨形状读取、同块多 placement 和读后保存序列实际咬中失配 |
+| 修后受影响族 | **19 文件 / 212 PASS**，0 fail/skip；覆盖 repository、placement、墙、history、坐标、tray、surface、print/boundary |
+| Client 全库 | **146 文件 / 1558 项收集：1554 PASS / 4 skip**，0 fail、0 unhandled；4 项均为 ProvidersSection 凭据族，已按禁令过滤并核验结果树，不冒称无过滤全绿 |
+| 新 11 项最终复跑 | **11/11 PASS**；已含于上两行，不重复累加 |
+| Server 三族 | **23/23 PASS**，0 fail/skip：投影 10、重投影 8、坐标 5 |
+| Shared/client/server typecheck + build | 最终 **全部 PASS**；首轮新测试夹具 delete 必填属性引发 TS2790，改为合法的空 placement ID 后补绿，初始失败日志保留 |
+| 秒级静态/模型门 | **13 阶段 PASS**；runtime-import 233/0违规、canvas 168、model 60、performance 5 场景、docs:check 等 |
+| Result 收尾 docs:check | status 变更后首次提示 agent-ops INDEX 过期；生成同步后 **PASS**，失败/成功日志均保留 |
+| 浏览器 | 旧投影、一次重投影、二次重投影三阶段 **五页各住其帧 + Read page 3 到位 + 760列无左切 + 封面一致**；真实截图/DOM/SQL 联验通过 |
+
+完整命令、耗时和日志在 `round4-verification/`；server/static 说明见 `round4-verification-server-static.md`。client 全库期间夹具仅作上述类型写法修正，产品代码全程相同；最终 11 项与 typecheck/build 再验确认最终文本。没有改测试预期来遮红。
+
+### 4. 浏览器页对齐、重投影及确定性 ID
+
+- 唯一操作目标为二轮已记录**合成隔离库的原字节克隆** `.codex-tmp/srcproj-13-6/round4/old-projection-clone-CnUkS8/synthetic-smoke.db`。DB/WAL/SHM 一起复制，原三文件至收尾 SHA 全等。`database_meta.coordinate_contract` 实测 **v2**；本轮未 seed、未新上传、未预先重投影。
+- 三阶段 DOM 块 top 均为 **80 / 1394 / 2708 / 4022 / 5336**，分别等于各自 frame y；left=0、width=760、height=276，正文不越本帧。纸宽 904。Overview 每页只出现本页 `Original page N`；旧页和二次重投影 Preview 均为 **每帧 1 块，Crossing 0、Workspace 0**。不同于二轮 0/276/552/828/1104 的跨页连排。
+- 三阶段均亲点 `Read page 3`：第三页正文及 `Source p.3` 到位，块视口 top **23.9607px**、bottom **323.3674px**。跳转判据是实际内容/矩形；AX 底层仍出现 `1 / 5`，不据此声称页码指示器同步已验好。
+- 两次 API 无 confirm 预览都零改投影 SQL；随后各 `confirm:true`，旧 note `f1da6fbd-…` → `d7255d50-…` → `c6746866-…`，收据 **2→3→4**，旧 note 清除。全部 **5 个 block ID、5 个 frame ID、选定几何/正文**三次深相等。**placement ID 仍随机裸值/前缀配对，不宣称其确定性**。本轮两次 HTTP 实测 **80.01ms / 16.51ms**，只代表该合成样本。
+- 首次外部 API 替换时旧 note 仍挂载，SPA 切换出现保存提示，完整 reload 新 note 后正常；第二次先关旧页再重投影、开新页。该旧页面保存/导航行为留证，未扩大范围修复，**不申报无刷新替换通过**。不影响重新读取投影后的页对齐判据。
+- 浏览器记录见 `round4-browser-verification.md`、`round4-browser-comparison.json`、`round4-{old,first,twice}-*.png/json/txt` 与 `round4-reproject-{1,2}.json`。任务标签页已关闭，隔离进程收尾见 `round4-smoke-shutdown.json`。
+
+### 5. 存量受惠实证与适用条件
+
+**已实证“不重投影即惠存量”**：旧 note `f1da6fbd-c389-453f-9c91-c2adf926e054` 首次用修后 client 打开时就五页正确；此时本轮 materialize/rematerialize 调用数均 **0**。浏览器前后列明投影 SQL 深相等，包括 note、frame/块、两表 placement ID、几何/正文、时间戳及原有 **2 份收据**。裸 UUID 与前缀 ID 的持久形状完全保留。证据 `round4-old-projection-before.json` / `round4-old-projection-after-browser.json`。
+
+**机制申报**：存量 v2 投影若 frame/geometry 有效、失配仅来自这两种 ID 形状，运行修后 client 后再次打开或刷新 hydration 即受惠，无需迁移或重投影。**真机 IELTS 未访问、未实测**；若满足上述同形条件，应由同一读取链直接受惠，这是有条件的代码推论。读匹配不会追改旧库自身错误几何、缺失布局或错误原页映射；这些不在“直接受惠”的证据射程内。
+
+### 6. Result/status 与未做项
+
+本轮按 **勘链→只修读键→定向/全库→旧页与重投影浏览器→存量实证申报→Result** 顺序完成，满足补遗三工程完成条件，status 翻 `done`。前三轮 Result 原样冻结。
+
+未做：真机 IELTS/任何用户库与用户主观验收；所有安全类测试（含 4 项凭据测试）；原样 `npm run verify:v2-bn8-runtime` 聚合（含 Git/secret scan/安全语义套件，依本单禁令拆可执行子项）；Git diff/secret scan；射程外 tray 匹配、旧页外部替换保存提示及页码指示器改造。**零 commit、零 Git 操作及 `.git` 写入、零 `.env` key 值读取、零用户库接触**。audit 仅日志/JSON/Markdown/真实截图，不含数据库、PDF、构建产物或登录秘密。

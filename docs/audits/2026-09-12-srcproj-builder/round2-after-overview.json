@@ -1,0 +1,72 @@
+[
+  {
+    "frameId": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-1",
+    "label": "Read page 1",
+    "rect": {
+      "bottom": 625.671875,
+      "height": 557.671875,
+      "left": 304,
+      "right": 681.5,
+      "top": 68,
+      "width": 377.5,
+      "x": 304,
+      "y": 68
+    }
+  },
+  {
+    "frameId": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-2",
+    "label": "Read page 2",
+    "rect": {
+      "bottom": 625.671875,
+      "height": 557.671875,
+      "left": 705.5,
+      "right": 1083,
+      "top": 68,
+      "width": 377.5,
+      "x": 705.5,
+      "y": 68
+    }
+  },
+  {
+    "frameId": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-3",
+    "label": "Read page 3",
+    "rect": {
+      "bottom": 625.671875,
+      "height": 557.671875,
+      "left": 1107,
+      "right": 1484.5,
+      "top": 68,
+      "width": 377.5,
+      "x": 1107,
+      "y": 68
+    }
+  },
+  {
+    "frameId": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-4",
+    "label": "Read page 4",
+    "rect": {
+      "bottom": 625.671875,
+      "height": 557.671875,
+      "left": 1508.5,
+      "right": 1886,
+      "top": 68,
+      "width": 377.5,
+      "x": 1508.5,
+      "y": 68
+    }
+  },
+  {
+    "frameId": "source-6c7049e4-27c2-5feb-96f4-feb9df5f9401:source-page-5",
+    "label": "Read page 5",
+    "rect": {
+      "bottom": 1207.34375,
+      "height": 557.671875,
+      "left": 304,
+      "right": 681.5,
+      "top": 649.671875,
+      "width": 377.5,
+      "x": 304,
+      "y": 649.671875
+    }
+  }
+]

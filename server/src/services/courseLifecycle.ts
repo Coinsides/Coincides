@@ -91,13 +91,41 @@ export function getProjectionUserWork(
     ) AS count
   `, noteId, userId, noteId, userId, noteId);
   const externalBlockPlacementCount = count(db, `
-    SELECT COUNT(*) AS count
-    FROM note_block_placements external
-    WHERE external.note_id != ?
-      AND external.block_id IN (
-        SELECT block_id FROM note_block_placements WHERE note_id = ?
+    WITH projection_blocks AS (
+      SELECT block_id FROM note_block_placements WHERE note_id = @noteId
+    ), external_references AS (
+      SELECT 'placement:' || external.id AS ref
+      FROM note_block_placements external
+      WHERE external.note_id != @noteId
+        AND external.block_id IN (SELECT block_id FROM projection_blocks)
+      UNION ALL
+      SELECT 'mount:' || mount.id
+      FROM content_mounts mount
+      WHERE mount.user_id = @userId AND mount.note_id != @noteId
+        AND mount.target_kind = 'note_block'
+        AND mount.target_id IN (SELECT block_id FROM projection_blocks)
+        AND NOT EXISTS (SELECT 1 FROM note_block_placements p
+          WHERE p.note_id = mount.note_id AND p.block_id = mount.target_id)
+      UNION ALL
+      SELECT 'board-range:' || r.id FROM board_text_ranges r
+      WHERE r.user_id = @userId
+        AND (r.note_id = @noteId OR r.block_id IN (SELECT block_id FROM projection_blocks))
+      UNION ALL
+      SELECT 'board-member:' || m.id FROM board_members m
+      JOIN boards b ON b.id = m.board_id
+      WHERE b.user_id = @userId AND (
+        (m.member_kind = 'note' AND m.member_id = @noteId)
+        OR (m.member_kind = 'content_group' AND m.member_id IN (
+          SELECT id FROM content_groups WHERE user_id = @userId AND note_id = @noteId
+        ))
       )
-  `, noteId, noteId);
+      UNION ALL
+      SELECT 'board-soul:' || b.id FROM boards b
+      JOIN purposes p ON p.id = b.soul_id
+      WHERE b.user_id = @userId AND p.user_id = @userId AND p.note_id = @noteId
+    )
+    SELECT COUNT(*) AS count FROM external_references
+  `, { noteId, userId });
   return {
     note_tag_count: noteTagCount,
     annotation_count: annotationCount,

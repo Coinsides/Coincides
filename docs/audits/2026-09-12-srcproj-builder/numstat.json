@@ -1,0 +1,407 @@
+{
+  "basis": "Per-turn initial working-tree UTF-8 snapshot; CRLF-normalized line LCS; no Git or .git access. numstat files exclude themselves to avoid recursive bookkeeping.",
+  "product_and_handoff": {
+    "files": 23,
+    "added": 1589,
+    "deleted": 91
+  },
+  "evidence": {
+    "files": 33,
+    "added": 4626,
+    "deleted": 0
+  },
+  "files": [
+    {
+      "path": "client/src/locales/en/translation.json",
+      "added": 26,
+      "deleted": 0,
+      "baseline_sha256": "44ae1d72d97ef810d5e97b4660a3cef9126837b93276df137609f86fb56eac88",
+      "current_sha256": "6de34979fe31d3f303d6cf35f3b77bc3b096f628456f7a2c309a4847e1acbb41"
+    },
+    {
+      "path": "client/src/locales/zh/translation.json",
+      "added": 26,
+      "deleted": 0,
+      "baseline_sha256": "912e017698d6c516d5edbc601f54ff90a9ba5dc593165665f0f0d4acd6d3f98a",
+      "current_sha256": "b96df06f12d4f6b814aa878483633e78f257157a5c77ac43e98adc5455fdcf7b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+      "added": 6,
+      "deleted": 11,
+      "baseline_sha256": "dca51541e079293836f111df70ac9d3c187872331a378bb02c8de1741834d88f",
+      "current_sha256": "6b145ee134363b900e5f4b0a6da5b65e6239edd1f1a53a955a65d4d9b7ed0270"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceDetailDialog.tsx",
+      "added": 11,
+      "deleted": 1,
+      "baseline_sha256": "c93e71dda40bea411f191210ad1b59e173c41b498d4d5539d760f1c98c58345d",
+      "current_sha256": "d0e31b8ba388b67e408a06566c1df75bfcbfa3230f2bd1aee2b53ac95a94eba1"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceLibrary.module.css",
+      "added": 37,
+      "deleted": 0,
+      "baseline_sha256": "7dda2e0456d3cc67b2c3ecccfff6a4a354f293dd96832fe01fe828aa676141cd",
+      "current_sha256": "d18c8df23f9942d39a0596a2b3ecb98a7fc8c178a993b3222fad375548c8f215"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceLibrary.tsx",
+      "added": 27,
+      "deleted": 1,
+      "baseline_sha256": "bf83b570ac821839e2794ce31a6a53ed6d60df14485a2bf753239e82d06fc482",
+      "current_sha256": "9e2b86e956bef5130033872bbe48198b977b8c11016ec914de2870278e5e762e"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceList.tsx",
+      "added": 15,
+      "deleted": 0,
+      "baseline_sha256": "76ee878728ee24aff7d80eedfab4e2565645e980702f92e63d2ba000cc970a06",
+      "current_sha256": "ffcbcf8fa89bb4e82f2eadafa03d9ffba7d694309786ca690688947e8b5532e9"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+      "added": 195,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.tsx",
+      "added": 180,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e"
+    },
+    {
+      "path": "client/src/pages/Sources/sourceApi.ts",
+      "added": 33,
+      "deleted": 9,
+      "baseline_sha256": "8f51c30df9682b52b27e7fbe9ccc1444dd02cab68e296de945dfcb5fe7cc7882",
+      "current_sha256": "891fcd69ba9125605d0ad06f856300ce364c0c97ab0c643d89157efcb0ea7bc3"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-12-v13-6-source-projection-repair-order.md",
+      "added": 55,
+      "deleted": 0,
+      "baseline_sha256": "3d1c3b88947db4f901d7ade6d2ea7b6aee18a176f0c253a4f7ba1a2527fb97bd",
+      "current_sha256": "9263afda4a982ecdd58e21379ce0295237af39475ff9ffaf6bec9efe50f36915"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/database-meta-setup.json",
+      "added": 14,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "95b4b740252f12dee2fb7c806a12d480fd9d4be4ba6b6f61409028b5a9d66d51"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/materialization-regression.log",
+      "added": 640,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "2c0a93263f25362894eef8530407e403a9280ec2ed56f3cf9a97d52df857a147"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/pipeline-tests-pending-geometry.log",
+      "added": 522,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "a9721f6b4d6aea3dc43997ae645eae42ba9a46c19095420ad810f74a37232d73"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/reprojection-tests.log",
+      "added": 636,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "a20e1420036106451d9d79442470049f79a66609232769705869b449a0f44cf4"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/smoke-setup.md",
+      "added": 69,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "0831a45574462b22f22c992e0cae166c32d227b1a2e2604eac90d9ecfe048843"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/smoke-shutdown.json",
+      "added": 22,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "5817f7a1cbc63216ac1756d3ac7763cdd2ef2de7ec75e3fce6dd7187832635af"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/source-targeted-final.log",
+      "added": 1484,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "ad53549b597b8747cf334a496c51036d82a13253ae22e24f7101f219d10fb283"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-client-tests-1789193938013-client-full-functional.log",
+      "added": 271,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "581d6b9d2dce1dea6e77007057358527fe76963c89159b80f5e80eb93c81d945"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-client-tests-1789193938013-results.json",
+      "added": 8,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "8b6a82d5d6711ad716365ba15f30812a1e59512a8ee3b8492bd5015598f84f43"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-docs-only-1789194103039-docs_check.log",
+      "added": 10,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "f2d620656c8d5c67a006ee053dad5c464f7277df1f2ceca40a65aabe1e19ef55"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-docs-only-1789194103039-results.json",
+      "added": 8,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "2c6b13f8909c2c0a61e3be08bd06284988434523cafdc0609d8d16e972067777"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-manifest-tests-1789193996370-results.json",
+      "added": 8,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "722fc18437bea7c22701be2921d59687f7ee410cb59a4604082015bd849fc1d6"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-manifest-tests-1789193996370-test_tool-face-manifest.log",
+      "added": 79,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "8ddbaf533b6670a5eb036314841ff5846bd250f3a5fef1261c3e956002fa302a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-server-final-1789194187212-results.json",
+      "added": 14,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "de6399245717e920f92f35033b56565508acf159050e71f459cb5417bff1c76f"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-server-final-1789194187212-server-build-final.log",
+      "added": 80,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "52d5ec0b3ae70aa7b2b78fe2dbc828d379b2357f9070536a530a8b65c467233a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_canvas-runtime-boundary.log",
+      "added": 181,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "ca2c191c725b7f36a371327bd2ba8a836ad0ae9b1b2e7ec1c08d01ee45da9135"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_group-gallery-shell.log",
+      "added": 9,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "a6d4d4c4a4e7c3d476f15e94cb531bb09618b54d68d50859fc4040bec85e6120"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_groups-rail-shell.log",
+      "added": 9,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "05f44df5eb579ca376c7c1813c81c131f5185eb8c5aabc5c714de2aece4cf5bf"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_server-shared-runtime-import.log",
+      "added": 5,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "d3cf2461dc5b2c9e7da19b39e0abe5a61a20d32dc27a17188581f191433979d7"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_single-editor-shell.log",
+      "added": 9,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "d13e63eced2c3e5251bf85f6212091a9c186ca132eb4bf01595dd1034da7ffb5"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_source-experience.log",
+      "added": 10,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "a372cce7133327a838c4d6a68fb350bc6002cfa9d2b05b376f6baf145a77ae03"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_tool-face-manifest.log",
+      "added": 75,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "669f591834a4e7bd4e23976c717407dce29c301926fcbf45521fc1b9ea2b0283"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_tool-face-parity.log",
+      "added": 5,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "fc9039607a82dd7b6e20aa9cfde57ee207b2eae24fb8085d26d2e825b9d1b30f"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_v2-bn11-legacy-shutdown.log",
+      "added": 9,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "6110947274ac2096bf1f4c771b9f199896004e34241d32c77951ee1efcc2441b"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-check_v2-bn11-relation-freshness.log",
+      "added": 9,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "741a34652313e8224b1f46715ffdd6858fbebca4adba41b9786ead65745f5cca"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-docs_check.log",
+      "added": 6,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "3aae21c62705f8557393a0ee3b1779dfa9b3701c9da6c90b8f8354502c498f0b"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-results.json",
+      "added": 80,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "795281045ecf3d06d64067eb43682e08d07f4905d9441568b36301849e8cd42c"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-smoke_canvas-engine-model-contract.log",
+      "added": 73,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "15f6b405087b821009b2b1fe0d685a2b39735bfb11473bae174f67e25b296b8a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-static-1789193937878-smoke_canvas-engine-performance.log",
+      "added": 18,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "50b36f980765fb7d0bd720a683df2eb4de1276b896a494ca261b745008dd8bb6"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-types-build-1789193937778-client-build-vite.log",
+      "added": 76,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "528928346cd2f4901d82b283cadefc6e12cf46164272b98e31112795733237b8"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-types-build-1789193937778-results.json",
+      "added": 38,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "9524fdfafe6dcff28a713cada2761b987deab7b3c51cb9ac7caad7b7c2577566"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification-logs/verification-types-build-1789193937778-server-build.log",
+      "added": 80,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "52d5ec0b3ae70aa7b2b78fe2dbc828d379b2357f9070536a530a8b65c467233a"
+    },
+    {
+      "path": "docs/audits/2026-09-12-srcproj-builder/verification.md",
+      "added": 69,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "6760dd77e41321a221fd80500a4bc6692f3c185989bf1efe889db3ad3be492c6"
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "added": 19,
+      "deleted": 18,
+      "baseline_sha256": "9b80e177b305967356ec56321f59ee27fc9a32f6f8ab5f91832b75922d3f29d0",
+      "current_sha256": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448"
+    },
+    {
+      "path": "server/src/__tests__/v13CoordinateContract.test.ts",
+      "added": 11,
+      "deleted": 4,
+      "baseline_sha256": "6380eaceebfe6fbf3c9dc307c40aaa5ec225e42f8944ad5c6b12a9da16e67a10",
+      "current_sha256": "9ce4b54cc1739e67e4d638b2668000f95750c09b3a22fe83e8302defef5b6e18"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "added": 283,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "db7533fcdf09253cc01accd59c7494e21503de758159d7283b2637f5dd641a13"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "added": 253,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2"
+    },
+    {
+      "path": "server/src/db/migrations/069_v13_source_reprojection_receipts.ts",
+      "added": 30,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d"
+    },
+    {
+      "path": "server/src/routes/sources.ts",
+      "added": 12,
+      "deleted": 0,
+      "baseline_sha256": "c1c935bc9f83685490a7c9dde35367006c57260296c57c347d27357c2361cf34",
+      "current_sha256": "41abb2927216281fa54ab36453b8359bd1b89a51f102847a07de76cd44759f0b"
+    },
+    {
+      "path": "server/src/services/courseLifecycle.ts",
+      "added": 34,
+      "deleted": 6,
+      "baseline_sha256": "5c1a6976e381f21182bd374a204398fe8561c24ef9068e7f3abab7df21068124",
+      "current_sha256": "63edf267fe96048bf6c4b50b420bf485db61131e059239363203ed0f8b6a7c5f"
+    },
+    {
+      "path": "server/src/services/sourceMaterialization.ts",
+      "added": 9,
+      "deleted": 0,
+      "baseline_sha256": "751342e7a735629fd353a8913e5b9a188cfa0a887daa77e7f07a79a0be751806",
+      "current_sha256": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af"
+    },
+    {
+      "path": "server/src/services/sourcePageFurniture.ts",
+      "added": 103,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "b20c92455801c3d4dc0db8eb182b60f37e5066356fe1a4c0f653b00fb0000d27"
+    },
+    {
+      "path": "server/src/services/sourceProjectionMaterializer.ts",
+      "added": 77,
+      "deleted": 41,
+      "baseline_sha256": "a08b5d3e3f74a09768cf7fafd0505170f0987751afc453cc10149065073eb8b9",
+      "current_sha256": "cd24c1acfbddeaa705dc152264e9ebad00bc3bb8600819f3ea51319015d607c5"
+    },
+    {
+      "path": "server/src/services/sourceReprojection.ts",
+      "added": 140,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7"
+    },
+    {
+      "path": "shared/types/pageGeometry.ts",
+      "added": 7,
+      "deleted": 0,
+      "baseline_sha256": null,
+      "current_sha256": "33c81c208179f468998166df7f5de3383c9012a439739807295916b8f2a5fc6a"
+    }
+  ]
+}

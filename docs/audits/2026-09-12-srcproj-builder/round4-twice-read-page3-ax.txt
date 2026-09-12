@@ -1,0 +1,148 @@
+Browser tab: 566869278, Title: "Coincides", URL: "http://127.0.0.1:61935/#/notes/c6746866-4f3d-4e2d-98c7-688e4e56ed17".
+0 AXWebArea Coincides, URL: 127.0.0.1:61935/#/notes/c6746866-4f3d-4e2d-98c7-688e4e56ed17
+	1 container root
+		2 container
+			3 image
+			4 text Coincides
+			5 button (expanded) Description: Collapse navigator, Secondary Actions: Collapse
+				6 image
+			7 link Description: 首页, Value: 127.0.0.1:61935/#/
+			8 link Description: 项目, Value: 127.0.0.1:61935/#/projects
+			9 link Description: 来源库, Value: 127.0.0.1:61935/#/sources
+			10 link Description: Boards, Value: 127.0.0.1:61935/#/boards
+			11 link Description: Group Gallery, Value: 127.0.0.1:61935/#/group-gallery
+			12 link Description: 设置, Value: 127.0.0.1:61935/#/settings
+			13 text UTILITIES
+			14 link Description: Tool Receipts, Value: 127.0.0.1:61935/#/tool-receipts
+			15 text 项目
+			16 button
+				17 image
+			18 button Home
+			19 text 收藏
+			20 image
+			21 button Home
+				22 image
+				23 text Home
+			24 text 最近
+			25 image
+			26 button Home
+				27 image
+				28 text Home
+		29 container
+			30 button (collapsed) Staging (0), Secondary Actions: Expand
+				31 text Staging (
+				32 text 0
+				33 text )
+			34 container
+				35 container
+					36 text entry area Description: Note title, Value: Projection Alignment (2)
+					37 text entry area Description: Note description, Value: 源文档 · 5 页 · 导入于 2026-09-12
+					38 pop up button (collapsed) Description: Note metadata, Secondary Actions: Expand
+					39 pop up button (collapsed) Upstream 1 · Downstream 0, Secondary Actions: Expand
+				40 container Paper ink Paper ink Paper ink Paper ink Paper ink 1 / 5
+					41 container Paper ink
+					42 container Paper ink
+					43 container Paper ink
+					44 container Paper ink
+					45 container Paper ink
+					46 container
+						47 text 1 / 5
+					48 container
+						49 container Text unit tools
+							50 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+						51 text entry area Original page 1 starts here
+PAGE 1 BODY 1: The original evidence stays on its own source page.
+PAGE 1 BODY 2: The original evidence stays on its own source page.
+PAGE 1 BODY 3: The original evidence stays on its own source page.
+PAGE 1 BODY 4: The original evidence stays on its own source page.
+PAGE 1 BODY 5: The original evidence stays on its own source page.
+PAGE 1 BODY 6: The original evidence stays on its own source page.
+PAGE 1 BODY 7: The original evidence stays on its own source page.
+PAGE 1 BODY 8: The original evidence stays on its own source page.
+						52 text Source
+						53 text  p.1
+					54 container
+						55 container Text unit tools
+							56 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+						57 text entry area Original page 2 starts here
+PAGE 2 BODY 1: The original evidence stays on its own source page.
+PAGE 2 BODY 2: The original evidence stays on its own source page.
+PAGE 2 BODY 3: The original evidence stays on its own source page.
+PAGE 2 BODY 4: The original evidence stays on its own source page.
+PAGE 2 BODY 5: The original evidence stays on its own source page.
+PAGE 2 BODY 6: The original evidence stays on its own source page.
+PAGE 2 BODY 7: The original evidence stays on its own source page.
+PAGE 2 BODY 8: The original evidence stays on its own source page.
+						58 text Source
+						59 text  p.2
+					60 container
+						61 container Text unit tools
+							62 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+						63 text entry area Original page 3 starts here
+PAGE 3 BODY 1: The original evidence stays on its own source page.
+PAGE 3 BODY 2: The original evidence stays on its own source page.
+PAGE 3 BODY 3: The original evidence stays on its own source page.
+PAGE 3 BODY 4: The original evidence stays on its own source page.
+PAGE 3 BODY 5: The original evidence stays on its own source page.
+PAGE 3 BODY 6: The original evidence stays on its own source page.
+PAGE 3 BODY 7: The original evidence stays on its own source page.
+PAGE 3 BODY 8: The original evidence stays on its own source page.
+						64 text Source
+						65 text  p.3
+					66 container
+						67 container Text unit tools
+							68 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+						69 text entry area Original page 4 starts here
+PAGE 4 BODY 1: The original evidence stays on its own source page.
+PAGE 4 BODY 2: The original evidence stays on its own source page.
+PAGE 4 BODY 3: The original evidence stays on its own source page.
+PAGE 4 BODY 4: The original evidence stays on its own source page.
+PAGE 4 BODY 5: The original evidence stays on its own source page.
+PAGE 4 BODY 6: The original evidence stays on its own source page.
+PAGE 4 BODY 7: The original evidence stays on its own source page.
+PAGE 4 BODY 8: The original evidence stays on its own source page.
+						70 text Source
+						71 text  p.4
+					72 container
+						73 container Text unit tools
+							74 pop up button (disabled, collapsed) Description: Text unit handle, Secondary Actions: Expand
+						75 text entry area Original page 5 starts here
+PAGE 5 BODY 1: The original evidence stays on its own source page.
+PAGE 5 BODY 2: The original evidence stays on its own source page.
+PAGE 5 BODY 3: The original evidence stays on its own source page.
+PAGE 5 BODY 4: The original evidence stays on its own source page.
+PAGE 5 BODY 5: The original evidence stays on its own source page.
+PAGE 5 BODY 6: The original evidence stays on its own source page.
+PAGE 5 BODY 7: The original evidence stays on its own source page.
+PAGE 5 BODY 8: The original evidence stays on its own source page.
+						76 text Source
+						77 text  p.5
+				78 container Page reading controls
+					79 container Source content locked; interpretation and organization remain editable
+						80 image
+						81 text Source locked
+					82 checkbox Preview, Help: Preview export boundary, Value: 0
+						83 image
+						84 text Preview
+					85 checkbox (disabled) Layout, Help: Toggle layout mode, Value: 0
+						86 image
+						87 text Layout
+					88 checkbox (collapsed) Description: 笔记外观, Value: 0, Secondary Actions: Expand
+						89 image
+						90 text 外观
+					91 button More note actions
+						92 image
+					93 checkbox (disabled) Description: Selection, Value: 1
+					94 checkbox (disabled) Description: Pen, Value: 0
+					95 checkbox (disabled) Description: Eraser, Value: 0
+					96 pop up button (collapsed) Description: View options, Secondary Actions: Expand
+					97 checkbox Description: Page overview, Value: 0
+					98 button Decrease page reading step
+					99 container Page display scale
+						100 text 108 %
+					101 button Increase page reading step
+				102 button Open content groups
+					103 image
+					104 text Groups
+
+The focused UI element is 40 container Paper ink Paper ink Paper ink Paper ink Paper ink 1 / 5
