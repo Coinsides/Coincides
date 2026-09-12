@@ -57,11 +57,11 @@ const newProviders = [
 
 for (const { name, env, baseUrl, model } of newProviders) {
   test(`${name}: createProvider uses the OpenAI-compatible adapter`, () => {
-    assert.ok(createProvider(name, { apiKey: 'synthetic-key-not-real-adapter', model }) instanceof OpenAIProvider);
+    assert.ok(createProvider(name, { apiKey: 'syn-fake-adapter', model }) instanceof OpenAIProvider);
   });
 
   test(`${name}: env fallback supplies defaults for absent or empty settings`, async (t) => {
-    const envKey = 'synthetic-key-not-real-environment';
+    const envKey = 'syn-fake-environment';
     process.env[env] = envKey;
     for (const config of [undefined, { api_key: '', default_model: '', base_url: '' }]) {
       const { provider, providerName } = getProviderFromSettings({
@@ -76,8 +76,8 @@ for (const { name, env, baseUrl, model } of newProviders) {
   });
 
   test(`${name}: local credentials win and only the terminal v1 suffix is removed`, async (t) => {
-    process.env[env] = 'synthetic-key-not-real-environment';
-    const settingsKey = 'synthetic-key-not-real-local';
+    process.env[env] = 'syn-fake-environment';
+    const settingsKey = 'syn-fake-local';
     saveProviderCredential(name, settingsKey);
     for (const suffix of ['', '/', '/v1', '/v1/']) {
       const explicitBase = 'https://provider.example/v1/proxy';
@@ -94,7 +94,7 @@ for (const { name, env, baseUrl, model } of newProviders) {
   });
 
   test(`${name}: local credentials work without env fallback`, async (t) => {
-    const settingsKey = 'synthetic-key-not-real-local';
+    const settingsKey = 'syn-fake-local';
     saveProviderCredential(name, settingsKey);
     const { provider } = getProviderFromSettings({
       active_provider: name,
@@ -104,8 +104,8 @@ for (const { name, env, baseUrl, model } of newProviders) {
 
   test(`${name}: missing credentials produce only the existing configuration error`, () => {
     // Credentials for other providers must not be used as a fallback.
-    process.env.ANTHROPIC_API_KEY = 'synthetic-key-not-real-other';
-    process.env[name === 'deepseek' ? 'DASHSCOPE_API_KEY' : 'DEEPSEEK_API_KEY'] = 'synthetic-key-not-real-other';
+    process.env.ANTHROPIC_API_KEY = 'syn-fake-other';
+    process.env[name === 'deepseek' ? 'DASHSCOPE_API_KEY' : 'DEEPSEEK_API_KEY'] = 'syn-fake-other';
     assert.throws(() => getProviderFromSettings({ active_provider: name }), {
       message: 'No API key configured. Go to Settings to add one.',
     });
@@ -114,9 +114,9 @@ for (const { name, env, baseUrl, model } of newProviders) {
 
 for (const name of ['openai', 'generic']) {
   test(`${name}: existing defaults and explicit URL handling work with local credentials`, async (t) => {
-    const settingsKey = 'synthetic-key-not-real-local';
-    process.env.DEEPSEEK_API_KEY = 'synthetic-key-not-real-other';
-    process.env.DASHSCOPE_API_KEY = 'synthetic-key-not-real-other';
+    const settingsKey = 'syn-fake-local';
+    process.env.DEEPSEEK_API_KEY = 'syn-fake-other';
+    process.env.DASHSCOPE_API_KEY = 'syn-fake-other';
     assert.throws(() => getProviderFromSettings({ active_provider: name }), {
       message: 'No API key configured. Go to Settings to add one.',
     });
@@ -137,7 +137,7 @@ for (const name of ['openai', 'generic']) {
 }
 
 test('anthropic remains the default provider with env fallback', () => {
-  process.env.ANTHROPIC_API_KEY = 'synthetic-key-not-real-anthropic';
+  process.env.ANTHROPIC_API_KEY = 'syn-fake-anthropic';
   const { provider, providerName } = getProviderFromSettings({});
   assert.equal(providerName, 'anthropic');
   assert.ok(provider instanceof AnthropicProvider);
