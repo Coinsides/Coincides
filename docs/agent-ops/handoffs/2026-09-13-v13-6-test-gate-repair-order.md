@@ -130,3 +130,108 @@ Result 必含:交付清单+numstat、机关阳性对照证据、24 文件三分�
 4. `check:tech-debt-table` 同批接 verify 链;
 5. **验收冲突裁定**:verify 链末端 git diff --check 与 secrets 扫描按 B1e 先例——builder 拆开执行允许子门,该两项由 HQ 收口补跑,⛔算你未验;
 6. 完成后:server 全量+typecheck/build 数字,Result 更新,status 翻 done。
+
+## Result（补遗一 · 二轮执行）
+
+**Codex builder：补遗前四步完成，全量数字已取得；发现额外 MCP 活接口契约真红，按原单停线举证，status 保持 ready，未翻 done。** 三份获准修复的套件已全绿、25 份全部接入 test:v2、新机关阳性对照与两门接 verify 已完成。停止扩大修改的直接依据是原单「真红→停线举证」与「⛔改被测产品代码」；本次真实 MCP 失败不能靠测试 fixture 或放宽断言修复。
+
+本节为当前回执；上方首次停线 Result 原样保留为历史。详细证据：[round2/README.md](../../audits/2026-09-13-testgate-builder/round2/README.md)。
+
+### 交付与语义保全
+
+- `v13AtomicTextSaveMigration.test.ts`：真实 initDb / migration runner 账本计算动态终点；保留 063 默认 revision、历史完整 rows、重跑不改 revision、FK 与原精确 PRAGMA 断言；加入空历史夹具、带历史数据升级夹具、真实 startup 的三路径 schema 对照。逻辑对照仅规范化物理编号，完整列约束、FK 分组和索引语义不放宽。
+- `v13EventsLedger.test.ts`：以真实 runner 的 pending 账本替代 054–062 数量硬编码；事件账本断言逐字不动。
+- `v13ProjectDeletionReferences.test.ts`：补录手工夹具已执行的历史迁移，再跑完整 runner 的全部 pending；legacy soul 两分支、409、整组 rows 不变和 soul_id 断言逐字不动。
+- `server/package.json`：保留原 test:v2 runner + 32 文件的逐字前缀，追加全部 25 文件，成为 57；无删除、重复、glob、子例过滤。
+- `server/scripts/check-test-wiring.mjs`：收紧至真实 Node --test / 精确解析的既有隔离 wrapper 命令段；普通文本与选项值不计挂，未知复杂 shell 不猜测，空豁免表保持不变。
+- 根 `package.json`：verify 前置 `check:test-wiring` 与 `check:tech-debt-table`；旧链和 HQ 末尾两项完整保留，tech-debt-table 脚本及三条历史豁免零动。
+- `docs/generated/object-inventory.md`：运行既有生成器，同步验证门清单；无手改权威现状或权限文件。
+
+完整增删行数：[round2/numstat.tsv](../../audits/2026-09-13-testgate-builder/round2/numstat.tsv)，基线为本轮施工前字节快照，**不是 Git HEAD**。限定 1003 个源码文件的完整性核对：999 字节不变，仅上述三份测试与机关改变，零删除、零新增源码。见 [integrity.json](../../audits/2026-09-13-testgate-builder/round2/integrity.json)。
+
+### 25 文件处置台账
+
+**已接门 25 / 陈旧候单1 0 / 未接停线 0**，以下均整套通过并接入 `server/package.json#test:v2`。全单停线由后述额外全量失败触发，不是这 25 份仍未接门。
+
+| 文件（默认位于 server/src/__tests__/） | 分类 / 接门 |
+|---|---|
+| `providerCredentials.test.ts` | 已接 test:v2，整套通过 |
+| `v13AgentMemories.test.ts` | 已接 test:v2，整套通过 |
+| `v13AtomicTextSave.test.ts` | 已接 test:v2，TD-6 killer 通过 |
+| `v13AtomicTextSaveMigration.test.ts` | 授权修复；已接 test:v2，整套通过 |
+| `v13BoardChalk.test.ts` | 已接 test:v2，整套通过 |
+| `v13BoardStaging.test.ts` | 已接 test:v2，整套通过 |
+| `v13BoardTextRanges.test.ts` | 已接 test:v2，整套通过 |
+| `v13BoardTrayRelocation.test.ts` | 已接 test:v2，整套通过 |
+| `v13BoardViewportBookmarks.test.ts` | 已接 test:v2，整套通过 |
+| `v13CanvasRetirement.test.ts` | 已接 test:v2，TD-7 退役闸通过 |
+| `v13EventsLedger.test.ts` | 授权修复；已接 test:v2，整套通过 |
+| `v13GraphemeTextRanges.test.ts` | 已接 test:v2，TD-21 守护通过 |
+| `v13ItemRefBlocks.test.ts` | 已接 test:v2，整套通过 |
+| `v13MediaBlocks.test.ts` | 已接 test:v2，整套通过 |
+| `v13NoteMetadata.test.ts` | 已接 test:v2，整套通过 |
+| `v13PagePresets.test.ts` | 已接 test:v2，整套通过 |
+| `v13PaperInk.test.ts` | 已接 test:v2，整套通过 |
+| `v13PaperSkin.test.ts` | 已接 test:v2，整套通过 |
+| `v13ProjectDeletionReferences.test.ts` | 授权修复；已接 test:v2，整套通过 |
+| `v13SourceProjectionRepair.test.ts` | 已接 test:v2，整套通过 |
+| `v13SourceReprojection.test.ts` | 已接 test:v2，整套通过 |
+| `v13Tray.test.ts` | 已接 test:v2，整套通过 |
+| `v13TrayOrder.test.ts` | 已接 test:v2，整套通过 |
+| `v13WallCollectionBatch.test.ts` | 已接 test:v2，整套通过 |
+| `server/src/agent/providers/index.test.ts` | 额外第25份；已接 test:v2，整套通过 |
+
+### 机关阳性对照与 scripts 对照
+
+阳性对照 **12 项通过**：基线 75/75/0/0 → 新增临时未挂文件 76/75/0/1（exit 1）→ 六种普通文本/选项值假引用仍红 → 三种真实 runner 显式接门绿 → 删除临时文件、字节恢复 package 后 75/75/0/0（exit 0）。未执行临时测试本身。逐项原始日志及汇总：[wiring-controls.json](../../audits/2026-09-13-testgate-builder/round2/wiring-controls.json)。
+
+| Script | 施工前 | 本轮后 |
+|---|---|---|
+| server `test:v2` | curated runner + 32 显式文件 | 原命令逐字前缀 + 25，合计57 |
+| 根 `verify:v2-bn8-runtime` | 旧链，缺两门 | test-wiring + tech-debt-table + 完整旧链 |
+| `check:tech-debt-table` | 独立脚本、三项历史豁免 | 定义及豁免不变，已进入 verify 并跑绿 |
+
+完整命令前后：[test-v2-scripts.json](../../audits/2026-09-13-testgate-builder/round2/test-v2-scripts.json)、[verify-scripts.json](../../audits/2026-09-13-testgate-builder/round2/verify-scripts.json)。
+
+### 全量验证数字
+
+| 项目 | 本次实跑 |
+|---|---|
+| 三份授权套件最终复验 | 12 tests / 12 pass / 0 fail |
+| server test:v2，57 文件 | 466 tests / 438 pass / 28 fail，exit 1 |
+| server 其余18唯一文件 | 179 tests / 175 pass / 4 fail，exit 1 |
+| server 合计75文件尝试执行 | **645 tests / 613 pass / 32 fail / 0 skipped / 0 cancelled / 0 todo** |
+| client unit | 151 文件、1590 tests，全通过 |
+| server / client typecheck | 两端 exit 0 |
+| server / client build | 两端 exit 0 |
+| verify 允许的完整子门集合 | **21/21 exit 0**；含新两门与 docs:check |
+
+server 两批显式文件集合互不重复，使用 `--test-concurrency=1 --test-reporter=tap`；保留 test:v2 真实 npm pretest 钩子。645 为 TAP 实际数字，含一个模块加载失败（MineruWiring 内部用例未注册），不能称全部内部用例已跑。原始日志、各门退出码和用时：[validation-summary.json](../../audits/2026-09-13-testgate-builder/round2/validation-summary.json)。
+
+### 新停线证据与未做项
+
+32 条失败分为：**25 条上游已交单1的 Canvas 陈旧红 + 4 条额外活测试过期 + 2 项 Python 环境前置失败 + 1 条 MCP 活产品契约真红**。逐文件、行号与定位详见 [二轮证据表](../../audits/2026-09-13-testgate-builder/round2/README.md)。四份额外活测试为 `v2MaterialLibrary`（模板3→4）、`v13BoardIdentity`（升级停065缺068 skin）、`v13WildernessExecute`（旧缺省墙期待）、`v2NotesLifecycle`（B1a旧handler hash未跟B1c改型保护）；均超出补遗列出的三份修复授权，没有擅自改断言或归退役。
+
+**直接停线项：`v2McpTransport.test.ts` 的 `list_note_blocks` 真实调用失败。** `services/notes.ts:173` 返回 `text_save_revision`，hydration 保留该字段；`toolFace/registry.ts:109–132` 的严格输出 schema 未声明该字段，生产 manifest 也拒绝额外字段。fixture 已跑当前全部迁移，直接 service 的两块/来源断言通过，MCP 响应却无 structuredContent（[server-supplemental.log](../../audits/2026-09-13-testgate-builder/round2/server-supplemental.log) 1295 附近）。接口契约冲突由运行失败结合现物确证；日志未打印原始 MCP error content，具体 SDK 错误正文不冒充亲见。
+
+未修上述产品契约、四份额外测试或仓外 Python 工具链；未改任何其他既有测试或产品源码；未做安全专项测试、name-pattern 过滤、测试豁免、用户库操作、真实凭证读取、Git/.git、commit/push/PR/merge。构建产物未进入 audits。
+
+**git diff --check 和 secrets 扫描按补遗第5条由 HQ 收口补跑，不计 builder 漏验。** 这与本轮另发现的活契约真红是两件事。原单禁止产品修改且要求真红停线，所以不以 21 道允许子门全绿代替 server 全量通过，亦不将本单翻 done；待 HQ 裁定新的修复归属与收口条件。
+
+---
+
+## 补遗二(HQ 裁定,2026-09-13 三轮)
+
+二轮停线举证成立收货。32 红四类裁定:
+
+1. **25 条 Canvas 陈旧红=单1 既裁域**(裁决档 A3:fixture surface→formal_page),⛔本单碰;全量数字中标注"已裁归单1"即可;
+2. **2 条 Python 环境红(MineruWiring/c-1b-2)=13.6 总测基线既档**(w4-fix6 判环境候查),⛔本单碰;申报为已知基线红;
+3. **4 条额外活测试过期:授权本单修**(与补遗一同族=测试腐烂,发现即修):
+   - `v2MaterialLibrary`(模板 3→4:媒体先遣加 media 模板的合法涟漪)——断言对齐现役模板集;
+   - `v13BoardIdentity`(升级夹具停 065 缺 068 skin)——迁移终点按补遗一"动态终点优先"原则修;
+   - `v13WildernessExecute`(旧缺省墙期待)——对齐 D1 后现役墙缺省;
+   - `v2NotesLifecycle`(handler hash 未跟 B1c 改型保护)——更新 hash 并注明对应合法交付(B1c commit),⛔无注更新;
+   - 一律活语义零放宽⛔删断言;
+4. **MCP 严格输出 schema 漏声明=真产品缺陷,授权本单修**(B7 的收尾遗漏):`toolFace/registry.ts` 的 `list_note_blocks` 输出 schema 补声明 `text_save_revision`(如实声明真实返回,零语义变更);manifest 按既有生成器重生成;parity/manifest 门须绿;`v2McpTransport` 转绿;⛔顺手动其他工具 schema。
+
+**终态判据**:server 全量红仅剩 25(canvas,候单1)+2(环境,候总测),其余全绿;三份+四份修复测试、25 接门、机关、两新门全在;Result 更新;status 翻 done。
