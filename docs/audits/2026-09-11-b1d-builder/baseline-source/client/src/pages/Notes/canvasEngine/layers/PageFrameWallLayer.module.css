@@ -1,0 +1,36 @@
+.wall {
+  position: absolute;
+  z-index: 36;
+  width: 12px;
+  transform: translateX(-50%);
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.line {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 1px;
+  background: var(--paper-wall);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease-out;
+}
+
+.wall:hover .line,
+.wall[data-page-frame-wall-active='true'] .line {
+  opacity: 1;
+}
+
+.wall[data-page-frame-wall-active='true'] .line {
+  background: var(--accent-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line { transition: none; }
+}
+
+@media print {
+  .wall { display: none; }
+}

@@ -1,0 +1,173 @@
+{
+  "status": "passed",
+  "syntheticOnly": true,
+  "persistenceCoverage": false,
+  "presets": 4,
+  "uniqueOverlayTypes": 8,
+  "runs": [
+    {
+      "preset": "default",
+      "status": "passed",
+      "report": "default/smoke-report.json",
+      "counts": {
+        "passed": 65,
+        "failed": 0,
+        "overlays": 8,
+        "namedOverlayStates": 11,
+        "inspectionSamples": 22,
+        "nestedBorders": 0,
+        "hairlineSeparators": 17,
+        "forcedHoverTargets": 114
+      },
+      "browserErrors": 0,
+      "consoleErrors": 0,
+      "appearanceInk": {
+        "name": "Paper appearance text uses the effective skin ink",
+        "pass": true,
+        "detail": {
+          "pass": true,
+          "expected": "rgb(245, 245, 245)",
+          "colors": [
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)",
+            "rgb(245, 245, 245)"
+          ]
+        }
+      }
+    },
+    {
+      "preset": "quiet-ink",
+      "status": "passed",
+      "report": "quiet-ink/smoke-report.json",
+      "counts": {
+        "passed": 65,
+        "failed": 0,
+        "overlays": 8,
+        "namedOverlayStates": 11,
+        "inspectionSamples": 22,
+        "nestedBorders": 0,
+        "hairlineSeparators": 17,
+        "forcedHoverTargets": 114
+      },
+      "browserErrors": 0,
+      "consoleErrors": 0,
+      "appearanceInk": {
+        "name": "Paper appearance text uses the effective skin ink",
+        "pass": true,
+        "detail": {
+          "pass": true,
+          "expected": "rgb(231, 232, 235)",
+          "colors": [
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)",
+            "rgb(231, 232, 235)"
+          ]
+        }
+      }
+    },
+    {
+      "preset": "warm-paper",
+      "status": "passed",
+      "report": "warm-paper/smoke-report.json",
+      "counts": {
+        "passed": 65,
+        "failed": 0,
+        "overlays": 8,
+        "namedOverlayStates": 11,
+        "inspectionSamples": 22,
+        "nestedBorders": 0,
+        "hairlineSeparators": 17,
+        "forcedHoverTargets": 114
+      },
+      "browserErrors": 0,
+      "consoleErrors": 0,
+      "appearanceInk": {
+        "name": "Paper appearance text uses the effective skin ink",
+        "pass": true,
+        "detail": {
+          "pass": true,
+          "expected": "rgb(43, 38, 32)",
+          "colors": [
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)",
+            "rgb(43, 38, 32)"
+          ]
+        }
+      }
+    },
+    {
+      "preset": "workbench",
+      "status": "passed",
+      "report": "workbench/smoke-report.json",
+      "counts": {
+        "passed": 65,
+        "failed": 0,
+        "overlays": 8,
+        "namedOverlayStates": 11,
+        "inspectionSamples": 22,
+        "nestedBorders": 0,
+        "hairlineSeparators": 17,
+        "forcedHoverTargets": 114
+      },
+      "browserErrors": 0,
+      "consoleErrors": 0,
+      "appearanceInk": {
+        "name": "Paper appearance text uses the effective skin ink",
+        "pass": true,
+        "detail": {
+          "pass": true,
+          "expected": "rgb(222, 227, 234)",
+          "colors": [
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)",
+            "rgb(222, 227, 234)"
+          ]
+        }
+      }
+    }
+  ],
+  "totals": {
+    "passed": 260,
+    "failed": 0,
+    "inspectionSamples": 88,
+    "nestedBorders": 0,
+    "hairlineSeparators": 68,
+    "forcedHoverTargets": 456
+  }
+}

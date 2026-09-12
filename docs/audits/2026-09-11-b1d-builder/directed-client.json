@@ -1,0 +1,15 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx",
+    "src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+    "src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+    "src/pages/Notes/canvasEngine/paperSkinStyles.test.ts"
+  ],
+  "cwd": "client",
+  "started": "2026-09-12T04:04:08.884Z",
+  "durationMs": 2929,
+  "exitCode": 0
+}

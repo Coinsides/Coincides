@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import { readSkin, resolveSkin } from '@/styles/skinPresets';
-import { buildPaperSkinStyles } from '../paperSkinStyles';
+import { buildPaperMaterialStyles, buildPaperSkinStyles } from '../paperSkinStyles';
 import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
 import type { Course } from '@shared/types';
 import type { SkinSelection } from '@shared/types/skin';
@@ -26,8 +26,8 @@ export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null
   const selection = useMemo(() => readSkin(note?.metadata?.skin), [note?.metadata?.skin]);
   const inheritedSelection = (project && project.id === courseId ? project.skin : null) ?? readSkin(global);
   const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === courseId ? project.skin : null, selection), [global, project, courseId, selection]);
-  const style = useMemo(() => ({ ...buildPaperSkinStyles(resolved.tokens), ...buildSkinComponentStyles(resolved.components),
-    '--sk-paper-title-weight': resolved.preset === 'quiet-ink' ? '400' : '700',
+  const style = useMemo(() => ({ ...buildPaperSkinStyles(resolved.tokens),
+    ...buildPaperMaterialStyles(resolved.tokens, resolved.preset), ...buildSkinComponentStyles(resolved.components),
   }), [resolved.tokens, resolved.components, resolved.preset]);
   return { ...resolved, style, selection, inheritedSelection, save, saveError, error, retry: () => setAttempt((n) => n + 1) };
 }

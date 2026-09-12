@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit"
+  ],
+  "cwd": "server",
+  "started": "2026-09-12T04:06:10.233Z",
+  "durationMs": 4456,
+  "exitCode": 0
+}

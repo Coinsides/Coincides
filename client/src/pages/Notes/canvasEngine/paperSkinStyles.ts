@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { SkinTokenName, SkinTokens } from '@shared/types/skin';
+import type { SkinPresetId, SkinTokenName, SkinTokens } from '@shared/types/skin';
 import { SKIN_PRESETS } from '@/styles/skinPresets';
 
 type DerivedColor = { token: SkinTokenName; baseline: string; themed: string };
@@ -124,5 +124,43 @@ export function buildPaperSkinStyles(tokens: SkinTokens): CSSProperties {
   styles['--glass-shadow-md'] = '0 8px 18px var(--paper-shadow-22)';
   styles['--glass-shadow-lg'] = '0 18px 48px var(--paper-shadow-34)';
   if (changed('desk')) styles['--paper-template-shadow'] = '0 18px 46px var(--paper-shadow-24)';
+  return styles as CSSProperties;
+}
+
+/** Preset-owned materials; these aliases never enter the persisted token schema.
+ * Keep default/quiet-ink paint untouched and let authored color overrides win. */
+export function buildPaperMaterialStyles(tokens: SkinTokens, preset: SkinPresetId): CSSProperties {
+  const styles: Record<string, string> = {
+    '--sk-wall-idle': preset === 'warm-paper' ? '0.55' : preset === 'workbench' ? '1' : '0',
+    // Even fully transparent generated paint can change Chromium text AA.
+    // The two unadorned presets must generate no idle pseudo-elements at all.
+    '--paper-wall-idle-content': preset === 'warm-paper' || preset === 'workbench' ? '""' : 'none',
+  };
+  // Nested note/portal roots must not inherit a different preset's material.
+  // Custom-property initial restores each consumer's incumbent fallback.
+  for (const name of ['desk', 'fill', 'shadow', 'binding']) {
+    styles[`--paper-material-${name}`] = 'initial';
+  }
+  for (const name of ['left', 'mask', 'ticks']) styles[`--paper-wall-idle-${name}`] = 'initial';
+  if (preset === 'warm-paper') {
+    const stock = SKIN_PRESETS['warm-paper'];
+    const unchanged = (name: SkinTokenName) => tokens[name].toLowerCase() === stock[name].toLowerCase();
+    Object.assign(styles, {
+      '--paper-material-desk': unchanged('desk')
+        ? 'radial-gradient(90% 72% at 50% 10%, #2B2520 0%, #211D19 46%, #1D1A17 78%)'
+        : 'var(--sk-desk)',
+      '--paper-material-fill': unchanged('paper')
+        ? 'linear-gradient(#F9F5ED 0%, #F7F3EA 34%, #F5F0E5 100%)'
+        : 'var(--sk-paper)',
+      '--paper-material-shadow': '0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)',
+      '--paper-material-binding': 'linear-gradient(to right, rgba(8,6,4,.10), rgba(8,6,4,0))',
+      // The red rule is 45% of the wall's shared 0.55 idle presence.
+      '--paper-wall-idle-left': unchanged('wall') ? 'rgba(194,109,90,.45)' : 'color-mix(in srgb, var(--sk-wall) 45%, transparent)',
+      '--paper-wall-idle-mask': 'linear-gradient(transparent 0, #000 72px)',
+    });
+  }
+  if (preset === 'workbench') {
+    styles['--paper-wall-idle-ticks'] = 'linear-gradient(var(--sk-wall) 1px, transparent 1px)';
+  }
   return styles as CSSProperties;
 }

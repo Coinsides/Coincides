@@ -1,0 +1,77 @@
+{
+  "capturedAt": "2026-09-12T04:23:20.665Z",
+  "files": [
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "bytes": 121011,
+      "sha256": "b586fff861a1bb445c52d8f2c88be1f0ee551700d5c7ad946d2c82f8a01a87d7"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "bytes": 2108,
+      "sha256": "4608a1b8b0d54132dc1d08fd9dd6785ac69f76927286d019d791a0550e3a150c"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css",
+      "bytes": 3460,
+      "sha256": "964fca3941013d51df4165becce0bc7e92af1f7dbb8eb61097555d6a81688519"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+      "bytes": 1208,
+      "sha256": "1cbb5a3cca578bbd6eb409ecaa5588e489a96aa407823a9b9814d52d78f4d41b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx",
+      "bytes": 3772,
+      "sha256": "dbddcb1c09c0a710c0da314dc617d86ede159b77db75243643814f8a6f452d4f"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx",
+      "bytes": 4785,
+      "sha256": "21378141ad3c4684684893f4a631b03f009a01f1a46ebdd3c15bdeeb5e303fb5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "bytes": 30571,
+      "sha256": "a4bd1c114074ab973c8154d989d8db4e4ea3fdb575ce2a4de6aec479575d7b4a"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "bytes": 175760,
+      "sha256": "7db626ba703f64ff62ac09102a06ebee8073cbba72a630eb47e2e0db908a7e2b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "bytes": 1680,
+      "sha256": "ca9c1136f1fc4edfb0a605c6848caceb249837e4e1b68c0d220c3ad2b35b7ffa"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "bytes": 4342,
+      "sha256": "5ea73659c2dca2022067c06fba0905a6950a467f25afd03156de30df60661309"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx",
+      "bytes": 2466,
+      "sha256": "6128961e017b5aa0303ab0eef1390b212f043483ea9e4e7720c6bf7f5a354958"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+      "bytes": 5626,
+      "sha256": "fd6b20af26fa3cc7bd5539d14d728fadb3f847390f2d58f838c5133ea7a82db5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.ts",
+      "bytes": 11527,
+      "sha256": "6a0c9154c00d36d47e762feff027a4b98f6ea89a01c88b0bd8ff41f60b44d4bd"
+    },
+    {
+      "path": "client/src/styles/skinComponentStyles.ts",
+      "bytes": 1830,
+      "sha256": "d77953c7847f45bd605a91227027906f95969da85bda480ba9b575dd61286fda"
+    }
+  ],
+  "gitIndexWritten": false,
+  "scope": "Tracked client/src changes only; worktree started with no tracked modifications."
+}

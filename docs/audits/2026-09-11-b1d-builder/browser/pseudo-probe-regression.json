@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "method": "Decoded original PNG pixels, no tolerance, no resize; header-baseline keeps all current material code and rolls back only the explicit header files/title-weight.",
+  "rows": [
+    {
+      "preset": "default",
+      "mode": "header-baseline-no-idle-pseudo",
+      "files": [
+        "default-baseline.png",
+        "default-header-baseline-no-idle-pseudo.png"
+      ],
+      "width": 1440,
+      "height": 1800,
+      "totalPixels": 2592000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "bounds": null
+    }
+  ]
+}

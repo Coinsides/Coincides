@@ -478,7 +478,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     expect(header.onTitleDraftChange).toHaveBeenCalledWith('Changed title '.repeat(30));
     expect(header.onDescriptionDraftChange).toHaveBeenCalledWith('Changed description '.repeat(40));
     rerender(documentFor({ ...props, paperHeader: { ...header, titleDraft: 'Changed title '.repeat(30), descriptionDraft: 'Changed description '.repeat(40) } }));
-    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(244 * scale);
+    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(240 * scale);
     expect({ top: shell.style.top, left: shell.style.left }).toEqual(localPosition);
     expect(JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks })).toBe(original);
     fireEvent.blur(title);

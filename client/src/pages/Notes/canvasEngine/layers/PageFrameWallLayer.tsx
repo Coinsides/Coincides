@@ -1,4 +1,4 @@
-import type { PointerEvent } from 'react';
+import type { CSSProperties, PointerEvent } from 'react';
 import type { PageFrameModel } from '../types';
 import { createPageFrameGuides } from '../pageFrameGuideService';
 import styles from './PageFrameWallLayer.module.css';
@@ -12,30 +12,37 @@ export interface ActivePageFrameWall {
 interface PageFrameWallLayerProps {
   /** Already projected into the writing surface's content coordinate space. */
   frame: PageFrameModel;
+  /** Cover height affects idle paint only; the live margin target stays put. */
+  idleHeaderHeight?: number;
   activeWall?: ActivePageFrameWall | null;
-  onPointerDown: (event: PointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
+  interactive?: boolean;
+  onPointerDown?: (event: PointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
 }
 
-export function PageFrameWallLayer({ frame, activeWall, onPointerDown }: PageFrameWallLayerProps) {
+export function PageFrameWallLayer({ frame, idleHeaderHeight = 0, activeWall, interactive = true, onPointerDown }: PageFrameWallLayerProps) {
   const guides = createPageFrameGuides(frame);
   return <>{(['left', 'right'] as const).map((side) => {
     const guide = side === 'left' ? guides.leftMargin : guides.rightMargin;
-    const active = activeWall?.frameId === frame.id && activeWall.side === side;
+    const active = interactive && activeWall?.frameId === frame.id && activeWall.side === side;
     return (
       <div
         key={side}
-        role="separator"
-        aria-label={`${side === 'left' ? 'Left' : 'Right'} page margin`}
-        aria-orientation="vertical"
+        role={interactive ? 'separator' : undefined}
+        aria-label={interactive ? `${side === 'left' ? 'Left' : 'Right'} page margin` : undefined}
+        aria-orientation={interactive ? 'vertical' : undefined}
+        aria-hidden={interactive ? undefined : true}
         className={styles.wall}
+        data-page-frame-wall-interactive={interactive ? 'true' : 'false'}
         data-page-frame-wall={side}
         data-page-frame-wall-frame={frame.id}
         data-page-frame-wall-active={active ? 'true' : 'false'}
-        style={{ left: guide.x, top: guide.y, height: guide.length }}
-        onPointerDown={(event) => onPointerDown(event, frame.id, side)}
-        onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
-        onDoubleClick={(event) => event.stopPropagation()}
-        onContextMenu={(event) => { event.preventDefault(); event.stopPropagation(); }}
+        style={{ left: guide.x, top: guide.y, height: guide.length,
+          '--paper-wall-idle-top': `${-frame.contentInset.top - idleHeaderHeight}px`,
+        } as CSSProperties}
+        onPointerDown={interactive ? (event) => onPointerDown?.(event, frame.id, side) : undefined}
+        onMouseDown={interactive ? (event) => { event.preventDefault(); event.stopPropagation(); } : undefined}
+        onDoubleClick={interactive ? (event) => event.stopPropagation() : undefined}
+        onContextMenu={interactive ? (event) => { event.preventDefault(); event.stopPropagation(); } : undefined}
       >
         <span className={styles.line} aria-hidden="true" />
       </div>

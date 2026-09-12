@@ -1,8 +1,8 @@
 .header {
   box-sizing: border-box;
-  padding-top: 24px;
-  padding-bottom: 24px;
-  max-height: 244px;
+  padding-top: 56px;
+  padding-bottom: 28px;
+  max-height: 240px;
   color: var(--text-primary);
 }
 
@@ -24,8 +24,8 @@
   overflow-wrap: anywhere;
 }
 
-.title { height: 40px; max-height: 80px; font-size: 32px; line-height: 40px; font-weight: var(--sk-paper-title-weight, 700); font-family: var(--sk-title-font, inherit); }
-.description { height: 24px; max-height: 72px; margin-top: 8px; color: var(--text-secondary); font-size: 16px; line-height: 24px; }
+.title { height: 1.2em; max-height: 2.4em; font-size: var(--sk-paper-title-size, 34px); line-height: 1.2; font-weight: var(--sk-paper-title-weight, 650); letter-spacing: var(--sk-paper-title-spacing, normal); font-family: var(--sk-title-font, inherit); }
+.description { height: 19.5px; max-height: 39px; margin-top: 10px; color: var(--text-secondary); font-size: 13px; line-height: 19.5px; }
 .title:focus,
 .description:focus { overflow-y: auto; }
 .title:focus-visible,

@@ -52,4 +52,31 @@ describe('paper margin walls', () => {
     expect(blankDoubleClick).not.toHaveBeenCalled();
     expect(blankContextMenu).not.toHaveBeenCalled();
   });
+
+  it('extends idle material across the cover without moving or resizing either live margin target', () => {
+    const onPointerDown = vi.fn();
+    const view = render(<PageFrameWallLayer frame={frame} idleHeaderHeight={192} onPointerDown={onPointerDown} />);
+    const walls = view.getAllByRole('separator');
+    expect(walls.map((wall) => [wall.style.left, wall.style.top, wall.style.height]))
+      .toEqual([['492px', '120px', '1086px'], ['1252px', '120px', '1086px']]);
+    expect(walls.map((wall) => wall.style.getPropertyValue('--paper-wall-idle-top'))).toEqual(['-288px', '-288px']);
+    fireEvent.pointerDown(walls[0], { pointerId: 1, button: 0 });
+    expect(onPointerDown).toHaveBeenCalledWith(expect.anything(), frame.id, 'left');
+  });
+
+  it('keeps read-only and ink-mode material inert without exposing margin controls or callbacks', () => {
+    const onPointerDown = vi.fn();
+    const view = render(<PageFrameWallLayer frame={frame} interactive={false}
+      activeWall={{ frameId: frame.id, side: 'left' }} onPointerDown={onPointerDown} />);
+    expect(view.queryAllByRole('separator')).toEqual([]);
+    const walls = view.container.querySelectorAll<HTMLElement>('[data-page-frame-wall]');
+    expect(walls).toHaveLength(2);
+    for (const wall of walls) {
+      expect(wall.dataset.pageFrameWallInteractive).toBe('false');
+      expect(wall.dataset.pageFrameWallActive).toBe('false');
+      expect(wall.getAttribute('aria-hidden')).toBe('true');
+      fireEvent.pointerDown(wall, { pointerId: 1, button: 0 });
+    }
+    expect(onPointerDown).not.toHaveBeenCalled();
+  });
 });

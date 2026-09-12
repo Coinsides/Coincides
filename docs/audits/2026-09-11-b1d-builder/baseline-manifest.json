@@ -1,0 +1,57 @@
+{
+  "files": [
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "sha256": "ed80d61635a9b8b85f9b02306815651c421f7dae400936bf1d35eacab9cd9709"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css",
+      "sha256": "b47a2be578abee40508ad0550c7391de73a56b46d4c1b70d99458c826d11c8d5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css",
+      "sha256": "1edca43a5491bd868ff604d7577cdcfba9d1a0a69136649160645132317cfdfd"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+      "sha256": "516af843c5516f1bd9aea31438613633b26269e63b2d263588c4f55076cfe349"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx",
+      "sha256": "ca9c77fdb946964a4b60bff7abacda7b3f3f21ca7d05cb87a870511eebac679e"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "sha256": "b96becf325b293478f58395f221cfc7ac28f7c121acf3068a8313168d704c41f"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "sha256": "125fdbe55e2bbe5ce87b55201c93416f6d291429dae37c678ccbe9fc2f3355d9"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "sha256": "2570f84c955aef1bef0dbe950d5ceccf35d5a22d4d745752e0f6d08c879ed92c"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx",
+      "sha256": "504014e86648734c62bfee6ea0eb10ad1aa540e20913912a7c923be1c4c4329e"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+      "sha256": "57ef39e0359e6d43e1ec9f4baf71301ac4169deab75f9beabd88099fe78aed98"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.ts",
+      "sha256": "fdebc1f58eedb8be235afaa6002af7c35cd7714531d980cb911d30b675e0b91f"
+    },
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "sha256": "726b0fcad9cebb44aef9df9d20f588df1c3f3c0860894a0815b365c4c8bba70a"
+    },
+    {
+      "path": "client/src/styles/skinComponentStyles.ts",
+      "sha256": "1c609e2d9d34232485fd0daf7ebb03e7a208cc98629401a1bf4b2563b26b2809"
+    }
+  ],
+  "source": "Original worktree files copied before edits; Vite baseline loader retains original module IDs."
+}

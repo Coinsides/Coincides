@@ -47,9 +47,20 @@ describe('paper note metadata', () => {
     try {
       const input = props({ titleDraft: 'long '.repeat(80), descriptionDraft: 'details '.repeat(200) });
       render(<NotePaperHeader {...input} />);
-      expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('80px');
-      expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('72px');
-      expect(input.onHeightChange).toHaveBeenCalledWith(244);
+      expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('81.6px');
+      expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('39px');
+      expect(input.onHeightChange).toHaveBeenCalledWith(240);
     } finally { scroll.mockRestore(); offset.mockRestore(); }
+  });
+
+  it('does not add a blank title line for Chromium fractional-line glyph overflow', () => {
+    const scroll = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.getAttribute('aria-label') === 'Note title' ? 42 : 20;
+    });
+    try {
+      render(<NotePaperHeader {...props()} />);
+      expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('40.8px');
+      expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('19.5px');
+    } finally { scroll.mockRestore(); }
   });
 });

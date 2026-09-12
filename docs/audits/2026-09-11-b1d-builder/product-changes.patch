@@ -1,0 +1,547 @@
+diff --git a/client/src/pages/Notes/NoteDetail.module.css b/client/src/pages/Notes/NoteDetail.module.css
+index 7faf6cf..cf204fe 100644
+--- a/client/src/pages/Notes/NoteDetail.module.css
++++ b/client/src/pages/Notes/NoteDetail.module.css
+@@ -6,13 +6,26 @@
+   animation: fadeIn var(--transition-normal) ease forwards;
+ }
+ 
+-.page[data-note-skin-preset='workbench'] {
++.page[data-note-skin-preset='workbench'],
++.page[data-note-skin-preset='workbench'] .writingSurfaceCanvas,
++.page[data-note-skin-preset='workbench'] :global(.noteOverview) {
++  background-color: var(--sk-desk);
+   background-image:
+     linear-gradient(var(--paper-workbench-grid) 1px, transparent 1px),
+     linear-gradient(90deg, var(--paper-workbench-grid) 1px, transparent 1px);
+   background-size: 24px 24px;
+ }
+ 
++.page[data-note-skin-preset='warm-paper'],
++.page[data-note-skin-preset='warm-paper'] .writingSurfaceCanvas,
++.page[data-note-skin-preset='warm-paper'] :global(.noteOverview) {
++  background: var(--paper-material-desk);
++}
++
++.page[data-note-skin-preset='workbench'] :global(.noteOverviewPreview) {
++  outline-color: var(--paper-template-border);
++}
++
+ .pageCanvas {
+   display: flex;
+   flex-direction: column;
+@@ -1150,6 +1163,31 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   outline: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
+ }
+ 
++/* A note with a cover paints one continuous sheet on the header band. Its
++   transparent reading-paper sibling must not add a second gradient or shadow. */
++.page[data-note-skin-preset='warm-paper'] .pageReadingHeaderBand,
++.page[data-note-skin-preset='warm-paper'] .pageReadingSpace:not(:has(.pageReadingHeaderBand)) .pageReadingPaper {
++  background: var(--paper-material-fill);
++  box-shadow: var(--paper-material-shadow);
++  outline: none;
++}
++
++.page[data-note-skin-preset='warm-paper'] .pageReadingHeaderBand::before,
++.page[data-note-skin-preset='warm-paper'] .pageReadingSpace:not(:has(.pageReadingHeaderBand)) .pageReadingPaper::before {
++  content: '';
++  position: absolute;
++  inset: 0 auto 0 0;
++  width: 10px;
++  background: var(--paper-material-binding);
++  pointer-events: none;
++}
++
++.page[data-note-skin-preset='warm-paper'] .formalPageBoundary,
++.page[data-note-skin-preset='warm-paper'] :global(.noteOverviewPreview) {
++  background: var(--paper-material-fill);
++  box-shadow: var(--paper-material-shadow);
++}
++
+ .noteToolbarActions {
+   display: flex;
+   align-items: center;
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts
+index 4d80b48..141621b 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts
+@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
+ import api from '@/services/api';
+ import { useAuthStore } from '@/stores/authStore';
+ import { readSkin, resolveSkin } from '@/styles/skinPresets';
+-import { buildPaperSkinStyles } from '../paperSkinStyles';
++import { buildPaperMaterialStyles, buildPaperSkinStyles } from '../paperSkinStyles';
+ import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
+ import type { Course } from '@shared/types';
+ import type { SkinSelection } from '@shared/types/skin';
+@@ -26,8 +26,8 @@ export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null
+   const selection = useMemo(() => readSkin(note?.metadata?.skin), [note?.metadata?.skin]);
+   const inheritedSelection = (project && project.id === courseId ? project.skin : null) ?? readSkin(global);
+   const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === courseId ? project.skin : null, selection), [global, project, courseId, selection]);
+-  const style = useMemo(() => ({ ...buildPaperSkinStyles(resolved.tokens), ...buildSkinComponentStyles(resolved.components),
+-    '--sk-paper-title-weight': resolved.preset === 'quiet-ink' ? '400' : '700',
++  const style = useMemo(() => ({ ...buildPaperSkinStyles(resolved.tokens),
++    ...buildPaperMaterialStyles(resolved.tokens, resolved.preset), ...buildSkinComponentStyles(resolved.components),
+   }), [resolved.tokens, resolved.components, resolved.preset]);
+   return { ...resolved, style, selection, inheritedSelection, save, saveError, error, retry: () => setAttempt((n) => n + 1) };
+ }
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css
+index ff3e8de..14909d5 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css
+@@ -1,4 +1,4 @@
+-.row { display: flex; align-items: center; gap: 8px; height: 28px; margin-top: 8px; min-width: 0; font-size: 12px; color: var(--text-secondary); }
++.row { display: flex; align-items: center; gap: 8px; height: 28px; margin-top: 12px; min-width: 0; font-size: 12px; color: var(--text-secondary); }
+ .tags { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+ .chip { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; max-width: 180px; height: 24px; padding: 2px 7px; border-radius: 4px; background: var(--bg-hover); color: var(--text-primary); }
+ .chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
+index ab119e4..6f19241 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
+@@ -1,8 +1,8 @@
+ .header {
+   box-sizing: border-box;
+-  padding-top: 24px;
+-  padding-bottom: 24px;
+-  max-height: 244px;
++  padding-top: 56px;
++  padding-bottom: 28px;
++  max-height: 240px;
+   color: var(--text-primary);
+ }
+ 
+@@ -24,8 +24,8 @@
+   overflow-wrap: anywhere;
+ }
+ 
+-.title { height: 40px; max-height: 80px; font-size: 32px; line-height: 40px; font-weight: var(--sk-paper-title-weight, 700); font-family: var(--sk-title-font, inherit); }
+-.description { height: 24px; max-height: 72px; margin-top: 8px; color: var(--text-secondary); font-size: 16px; line-height: 24px; }
++.title { height: 1.2em; max-height: 2.4em; font-size: var(--sk-paper-title-size, 34px); line-height: 1.2; font-weight: var(--sk-paper-title-weight, 650); letter-spacing: var(--sk-paper-title-spacing, normal); font-family: var(--sk-title-font, inherit); }
++.description { height: 19.5px; max-height: 39px; margin-top: 10px; color: var(--text-secondary); font-size: 13px; line-height: 19.5px; }
+ .title:focus,
+ .description:focus { overflow-y: auto; }
+ .title:focus-visible,
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx
+index d5fefcf..0e51c9e 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx
+@@ -47,9 +47,20 @@ describe('paper note metadata', () => {
+     try {
+       const input = props({ titleDraft: 'long '.repeat(80), descriptionDraft: 'details '.repeat(200) });
+       render(<NotePaperHeader {...input} />);
+-      expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('80px');
+-      expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('72px');
+-      expect(input.onHeightChange).toHaveBeenCalledWith(244);
++      expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('81.6px');
++      expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('39px');
++      expect(input.onHeightChange).toHaveBeenCalledWith(240);
+     } finally { scroll.mockRestore(); offset.mockRestore(); }
+   });
++
++  it('does not add a blank title line for Chromium fractional-line glyph overflow', () => {
++    const scroll = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (this: HTMLElement) {
++      return this.getAttribute('aria-label') === 'Note title' ? 42 : 20;
++    });
++    try {
++      render(<NotePaperHeader {...props()} />);
++      expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('40.8px');
++      expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('19.5px');
++    } finally { scroll.mockRestore(); }
++  });
+ });
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx
+index 740188f..330e133 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx
+@@ -1,6 +1,7 @@
+ import { useLayoutEffect, useRef, type CSSProperties } from 'react';
+ import styles from './NotePaperHeader.module.css';
+ import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
++import { usePaperSkin } from '../PaperSkinContext';
+ 
+ export interface NotePaperHeaderProps {
+   titleDraft: string;
+@@ -13,8 +14,8 @@ export interface NotePaperHeaderProps {
+   metadata?: NoteCoverMetadataProps;
+ }
+ 
+-export const NOTE_HEADER_MAX_HEIGHT = 244;
+-export const NOTE_HEADER_INITIAL_HEIGHT = 156;
++export const NOTE_HEADER_MAX_HEIGHT = 240;
++export const NOTE_HEADER_INITIAL_HEIGHT = 197;
+ 
+ /** A display-only band before the existing paper coordinate origin. */
+ export function NotePaperHeader({
+@@ -29,14 +30,27 @@ export function NotePaperHeader({
+   const headerRef = useRef<HTMLElement>(null);
+   const titleRef = useRef<HTMLTextAreaElement>(null);
+   const descriptionRef = useRef<HTMLTextAreaElement>(null);
++  const skin = usePaperSkin();
+   useLayoutEffect(() => {
+     const header = headerRef.current;
+     if (!header) return;
+     const measure = () => {
+-      for (const [field, maxHeight] of [[titleRef.current, 80], [descriptionRef.current, 72]] as const) {
++      let titleHeight = 40.8;
++      for (const [field, fallbackLineHeight] of [[titleRef.current, 40.8], [descriptionRef.current, 19.5]] as const) {
+         if (!field) continue;
++        const lineHeight = parseFloat(getComputedStyle(field).lineHeight) || fallbackLineHeight;
++        // Keep complete lines within the compact display band. A two-line title
++        // leaves one description line; overflow remains scrollable while editing.
++        const available = field === titleRef.current ? lineHeight * 2
++          : NOTE_HEADER_MAX_HEIGHT - 56 - 28 - 10 - (metadata ? 12 + 28 : 0) - titleHeight;
++        const maxLines = Math.max(1, Math.min(2, Math.floor(available / lineHeight)));
+         field.style.height = '0px';
+-        field.style.height = `${Math.min(maxHeight, Math.max(field === titleRef.current ? 40 : 24, field.scrollHeight))}px`;
++        // Chromium rounds scrollHeight and can add a pixel of glyph overflow;
++        // rounding to the nearest line avoids inventing a blank second line.
++        const lines = Math.min(maxLines, Math.max(1, Math.round(field.scrollHeight / lineHeight)));
++        const height = lines * lineHeight;
++        field.style.height = `${height}px`;
++        if (field === titleRef.current) titleHeight = height;
+       }
+       onHeightChange(Math.min(NOTE_HEADER_MAX_HEIGHT, header.offsetHeight || NOTE_HEADER_INITIAL_HEIGHT));
+     };
+@@ -44,7 +58,7 @@ export function NotePaperHeader({
+     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+     observer?.observe(header);
+     return () => observer?.disconnect();
+-  }, [titleDraft, descriptionDraft, onHeightChange]);
++  }, [titleDraft, descriptionDraft, onHeightChange, Boolean(metadata), skin?.style]);
+ 
+   const commit = (save: () => void | Promise<void>) => {
+     // The adapter owns error feedback and the pending-write failure receipt.
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
+index c223dc9..a2392bf 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
+@@ -478,7 +478,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
+     expect(header.onTitleDraftChange).toHaveBeenCalledWith('Changed title '.repeat(30));
+     expect(header.onDescriptionDraftChange).toHaveBeenCalledWith('Changed description '.repeat(40));
+     rerender(documentFor({ ...props, paperHeader: { ...header, titleDraft: 'Changed title '.repeat(30), descriptionDraft: 'Changed description '.repeat(40) } }));
+-    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(244 * scale);
++    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(240 * scale);
+     expect({ top: shell.style.top, left: shell.style.left }).toEqual(localPosition);
+     expect(JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks })).toBe(original);
+     fireEvent.blur(title);
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+index ff5575b..fb590af 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+@@ -10,6 +10,7 @@ import { ViewOptionsMenu } from './ViewOptionsMenu';
+ import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
+ import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
+ import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
++import { usePaperSkin } from '../PaperSkinContext';
+ import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
+ import type { ItemRefBlockData } from '@shared/types/itemRef';
+ import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
+@@ -674,6 +675,7 @@ export function NoteWritingSurfaceLayer({
+   onViewSource,
+   onZoomViewportAt,
+ }: NoteWritingSurfaceLayerProps) {
++  const paperSkin = usePaperSkin();
+   const addToast = useUIStore((state) => state.addToast);
+   const surfaceRef = useRef<HTMLElement | null>(null);
+   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
+@@ -3530,7 +3532,9 @@ export function NoteWritingSurfaceLayer({
+         style={surfaceMode === 'page' ? {
+           width: pageDisplayBounds.width * pageReading.displayScale,
+           height: (pageDisplayBounds.height + displayHeaderHeight) * pageReading.displayScale,
+-          overflowClipMargin: `${32 * pageReading.displayScale}px`,
++          // overflow-clip-margin rejects calc() in the supported browser.
++          // Keep the incumbent literal length, extending only warm paper's shadow.
++          overflowClipMargin: `${(paperSkin?.preset === 'warm-paper' ? 80 : 32) * pageReading.displayScale}px`,
+         } : { display: 'contents' }}
+       >
+       {surfaceMode === 'page' && paperHeader && <div className={styles.pageReadingHeaderBand}
+@@ -3613,11 +3617,12 @@ export function NoteWritingSurfaceLayer({
+         onDragOverCapture={handleStagingDragOver}
+         onDropCapture={handleStagingDrop}
+       >
+-        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'selection'
+-          && noteCanvasRuntime.coordinateContract === 'v2' && onPageFrameWallPointerDown
++        {surfaceMode === 'page' && !overviewOpen && noteCanvasRuntime.coordinateContract === 'v2'
+           && visiblePageFrames.map((frame) => (
+             <PageFrameWallLayer key={`${frame.id}:walls`}
+               frame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
++              idleHeaderHeight={frame.id === primaryPageFrameId ? displayHeaderHeight : 0}
++              interactive={!contentReadOnly && paperInkTool === 'selection' && Boolean(onPageFrameWallPointerDown)}
+               activeWall={activePageFrameWall} onPointerDown={onPageFrameWallPointerDown} />
+           ))}
+         {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (
+diff --git a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css
+index 9fb63f3..e7650e6 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css
++++ b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css
+@@ -8,6 +8,10 @@
+   user-select: none;
+ }
+ 
++.wall[data-page-frame-wall-interactive='false'] {
++  pointer-events: none;
++}
++
+ .line {
+   position: absolute;
+   inset: 0 auto 0 50%;
+@@ -18,6 +22,44 @@
+   transition: opacity 140ms ease-out;
+ }
+ 
++/* Idle material is paint-only. Pointer targets, hover and drag keep their
++   incumbent line, color and timing, including the absence of ruler ticks. */
++.wall::before,
++.wall::after {
++  content: var(--paper-wall-idle-content, none);
++  position: absolute;
++  inset: var(--paper-wall-idle-top, 0px) auto 0 50%;
++  pointer-events: none;
++  opacity: var(--sk-wall-idle, 0);
++  mask-image: var(--paper-wall-idle-mask, none);
++}
++
++.wall::before {
++  width: 1px;
++  background: var(--sk-wall, var(--paper-wall));
++}
++
++.wall[data-page-frame-wall='left']::before {
++  background: var(--paper-wall-idle-left, var(--sk-wall, var(--paper-wall)));
++}
++
++.wall::after {
++  width: 5px;
++  background-image: var(--paper-wall-idle-ticks, none);
++  background-size: 5px 24px;
++}
++
++.wall[data-page-frame-wall='left']::after {
++  margin-left: -4px;
++}
++
++.wall:hover::before,
++.wall:hover::after,
++.wall[data-page-frame-wall-active='true']::before,
++.wall[data-page-frame-wall-active='true']::after {
++  opacity: 0;
++}
++
+ .wall:hover .line,
+ .wall[data-page-frame-wall-active='true'] .line {
+   opacity: 1;
+diff --git a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx
+index a3f3d69..8399971 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx
+@@ -52,4 +52,31 @@ describe('paper margin walls', () => {
+     expect(blankDoubleClick).not.toHaveBeenCalled();
+     expect(blankContextMenu).not.toHaveBeenCalled();
+   });
++
++  it('extends idle material across the cover without moving or resizing either live margin target', () => {
++    const onPointerDown = vi.fn();
++    const view = render(<PageFrameWallLayer frame={frame} idleHeaderHeight={192} onPointerDown={onPointerDown} />);
++    const walls = view.getAllByRole('separator');
++    expect(walls.map((wall) => [wall.style.left, wall.style.top, wall.style.height]))
++      .toEqual([['492px', '120px', '1086px'], ['1252px', '120px', '1086px']]);
++    expect(walls.map((wall) => wall.style.getPropertyValue('--paper-wall-idle-top'))).toEqual(['-288px', '-288px']);
++    fireEvent.pointerDown(walls[0], { pointerId: 1, button: 0 });
++    expect(onPointerDown).toHaveBeenCalledWith(expect.anything(), frame.id, 'left');
++  });
++
++  it('keeps read-only and ink-mode material inert without exposing margin controls or callbacks', () => {
++    const onPointerDown = vi.fn();
++    const view = render(<PageFrameWallLayer frame={frame} interactive={false}
++      activeWall={{ frameId: frame.id, side: 'left' }} onPointerDown={onPointerDown} />);
++    expect(view.queryAllByRole('separator')).toEqual([]);
++    const walls = view.container.querySelectorAll<HTMLElement>('[data-page-frame-wall]');
++    expect(walls).toHaveLength(2);
++    for (const wall of walls) {
++      expect(wall.dataset.pageFrameWallInteractive).toBe('false');
++      expect(wall.dataset.pageFrameWallActive).toBe('false');
++      expect(wall.getAttribute('aria-hidden')).toBe('true');
++      fireEvent.pointerDown(wall, { pointerId: 1, button: 0 });
++    }
++    expect(onPointerDown).not.toHaveBeenCalled();
++  });
+ });
+diff --git a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx
+index 20fd063..1201a76 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx
+@@ -1,4 +1,4 @@
+-import type { PointerEvent } from 'react';
++import type { CSSProperties, PointerEvent } from 'react';
+ import type { PageFrameModel } from '../types';
+ import { createPageFrameGuides } from '../pageFrameGuideService';
+ import styles from './PageFrameWallLayer.module.css';
+@@ -12,30 +12,37 @@ export interface ActivePageFrameWall {
+ interface PageFrameWallLayerProps {
+   /** Already projected into the writing surface's content coordinate space. */
+   frame: PageFrameModel;
++  /** Cover height affects idle paint only; the live margin target stays put. */
++  idleHeaderHeight?: number;
+   activeWall?: ActivePageFrameWall | null;
+-  onPointerDown: (event: PointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
++  interactive?: boolean;
++  onPointerDown?: (event: PointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
+ }
+ 
+-export function PageFrameWallLayer({ frame, activeWall, onPointerDown }: PageFrameWallLayerProps) {
++export function PageFrameWallLayer({ frame, idleHeaderHeight = 0, activeWall, interactive = true, onPointerDown }: PageFrameWallLayerProps) {
+   const guides = createPageFrameGuides(frame);
+   return <>{(['left', 'right'] as const).map((side) => {
+     const guide = side === 'left' ? guides.leftMargin : guides.rightMargin;
+-    const active = activeWall?.frameId === frame.id && activeWall.side === side;
++    const active = interactive && activeWall?.frameId === frame.id && activeWall.side === side;
+     return (
+       <div
+         key={side}
+-        role="separator"
+-        aria-label={`${side === 'left' ? 'Left' : 'Right'} page margin`}
+-        aria-orientation="vertical"
++        role={interactive ? 'separator' : undefined}
++        aria-label={interactive ? `${side === 'left' ? 'Left' : 'Right'} page margin` : undefined}
++        aria-orientation={interactive ? 'vertical' : undefined}
++        aria-hidden={interactive ? undefined : true}
+         className={styles.wall}
++        data-page-frame-wall-interactive={interactive ? 'true' : 'false'}
+         data-page-frame-wall={side}
+         data-page-frame-wall-frame={frame.id}
+         data-page-frame-wall-active={active ? 'true' : 'false'}
+-        style={{ left: guide.x, top: guide.y, height: guide.length }}
+-        onPointerDown={(event) => onPointerDown(event, frame.id, side)}
+-        onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
+-        onDoubleClick={(event) => event.stopPropagation()}
+-        onContextMenu={(event) => { event.preventDefault(); event.stopPropagation(); }}
++        style={{ left: guide.x, top: guide.y, height: guide.length,
++          '--paper-wall-idle-top': `${-frame.contentInset.top - idleHeaderHeight}px`,
++        } as CSSProperties}
++        onPointerDown={interactive ? (event) => onPointerDown?.(event, frame.id, side) : undefined}
++        onMouseDown={interactive ? (event) => { event.preventDefault(); event.stopPropagation(); } : undefined}
++        onDoubleClick={interactive ? (event) => event.stopPropagation() : undefined}
++        onContextMenu={interactive ? (event) => { event.preventDefault(); event.stopPropagation(); } : undefined}
+       >
+         <span className={styles.line} aria-hidden="true" />
+       </div>
+diff --git a/client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts b/client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts
+index 1940588..8fe53b6 100644
+--- a/client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts
++++ b/client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts
+@@ -1,7 +1,7 @@
+ import { describe, expect, it } from 'vitest';
+ import type { SkinTokens } from '@shared/types/skin';
+ import { SKIN_PRESETS } from '@/styles/skinPresets';
+-import { buildPaperSkinStyles, PAPER_DERIVED_COLORS } from './paperSkinStyles';
++import { buildPaperMaterialStyles, buildPaperSkinStyles, PAPER_DERIVED_COLORS } from './paperSkinStyles';
+ 
+ const stylesFor = (tokens: SkinTokens) => buildPaperSkinStyles(tokens) as Record<string, string>;
+ 
+@@ -54,4 +54,37 @@ describe('paper skin painting', () => {
+     expect(changed['--paper-template-border']).toBe('var(--sk-hairline)');
+     expect(changed['--paper-shadow-24']).not.toBe(styles['--paper-shadow-24']);
+   });
++
++  it('keeps idle presence preset-owned and installs no material on default or quiet ink', () => {
++    for (const preset of ['default', 'quiet-ink'] as const) {
++      const material = buildPaperMaterialStyles(SKIN_PRESETS[preset], preset) as Record<string, string>;
++      expect(material['--sk-wall-idle']).toBe('0');
++      expect(material['--paper-wall-idle-content']).toBe('none');
++      expect(Object.entries(material).filter(([name]) => name !== '--sk-wall-idle' && name !== '--paper-wall-idle-content')
++        .every(([, value]) => value === 'initial')).toBe(true);
++    }
++    expect(buildPaperMaterialStyles(SKIN_PRESETS.workbench, 'workbench')).toMatchObject({
++      '--sk-wall-idle': '1',
++      '--paper-wall-idle-content': '""',
++      '--paper-wall-idle-ticks': 'linear-gradient(var(--sk-wall) 1px, transparent 1px)',
++    });
++    const warm = buildPaperMaterialStyles(SKIN_PRESETS['warm-paper'], 'warm-paper') as Record<string, string>;
++    expect(warm['--sk-wall-idle']).toBe('0.55');
++    expect(warm['--paper-wall-idle-content']).toBe('""');
++    expect(warm['--paper-material-desk']).toBe('radial-gradient(90% 72% at 50% 10%, #2B2520 0%, #211D19 46%, #1D1A17 78%)');
++    expect(warm['--paper-material-fill']).toBe('linear-gradient(#F9F5ED 0%, #F7F3EA 34%, #F5F0E5 100%)');
++    expect(warm['--paper-material-shadow']).toBe('0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)');
++    expect(warm['--paper-wall-idle-left']).toBe('rgba(194,109,90,.45)');
++    expect(warm['--paper-wall-idle-mask']).toBe('linear-gradient(transparent 0, #000 72px)');
++  });
++
++  it('keeps authored desk, paper and wall colors effective within the warm material preset', () => {
++    const changed = buildPaperMaterialStyles({ ...SKIN_PRESETS['warm-paper'],
++      desk: '#102030', paper: '#abcdef', wall: '#567890',
++    }, 'warm-paper') as Record<string, string>;
++    expect(changed['--paper-material-desk']).toBe('var(--sk-desk)');
++    expect(changed['--paper-material-fill']).toBe('var(--sk-paper)');
++    expect(changed['--paper-wall-idle-left']).toBe('color-mix(in srgb, var(--sk-wall) 45%, transparent)');
++    expect(changed['--sk-wall-idle']).toBe('0.55');
++  });
+ });
+diff --git a/client/src/pages/Notes/canvasEngine/paperSkinStyles.ts b/client/src/pages/Notes/canvasEngine/paperSkinStyles.ts
+index 0ef3448..17439e4 100644
+--- a/client/src/pages/Notes/canvasEngine/paperSkinStyles.ts
++++ b/client/src/pages/Notes/canvasEngine/paperSkinStyles.ts
+@@ -1,5 +1,5 @@
+ import type { CSSProperties } from 'react';
+-import type { SkinTokenName, SkinTokens } from '@shared/types/skin';
++import type { SkinPresetId, SkinTokenName, SkinTokens } from '@shared/types/skin';
+ import { SKIN_PRESETS } from '@/styles/skinPresets';
+ 
+ type DerivedColor = { token: SkinTokenName; baseline: string; themed: string };
+@@ -126,3 +126,41 @@ export function buildPaperSkinStyles(tokens: SkinTokens): CSSProperties {
+   if (changed('desk')) styles['--paper-template-shadow'] = '0 18px 46px var(--paper-shadow-24)';
+   return styles as CSSProperties;
+ }
++
++/** Preset-owned materials; these aliases never enter the persisted token schema.
++ * Keep default/quiet-ink paint untouched and let authored color overrides win. */
++export function buildPaperMaterialStyles(tokens: SkinTokens, preset: SkinPresetId): CSSProperties {
++  const styles: Record<string, string> = {
++    '--sk-wall-idle': preset === 'warm-paper' ? '0.55' : preset === 'workbench' ? '1' : '0',
++    // Even fully transparent generated paint can change Chromium text AA.
++    // The two unadorned presets must generate no idle pseudo-elements at all.
++    '--paper-wall-idle-content': preset === 'warm-paper' || preset === 'workbench' ? '""' : 'none',
++  };
++  // Nested note/portal roots must not inherit a different preset's material.
++  // Custom-property initial restores each consumer's incumbent fallback.
++  for (const name of ['desk', 'fill', 'shadow', 'binding']) {
++    styles[`--paper-material-${name}`] = 'initial';
++  }
++  for (const name of ['left', 'mask', 'ticks']) styles[`--paper-wall-idle-${name}`] = 'initial';
++  if (preset === 'warm-paper') {
++    const stock = SKIN_PRESETS['warm-paper'];
++    const unchanged = (name: SkinTokenName) => tokens[name].toLowerCase() === stock[name].toLowerCase();
++    Object.assign(styles, {
++      '--paper-material-desk': unchanged('desk')
++        ? 'radial-gradient(90% 72% at 50% 10%, #2B2520 0%, #211D19 46%, #1D1A17 78%)'
++        : 'var(--sk-desk)',
++      '--paper-material-fill': unchanged('paper')
++        ? 'linear-gradient(#F9F5ED 0%, #F7F3EA 34%, #F5F0E5 100%)'
++        : 'var(--sk-paper)',
++      '--paper-material-shadow': '0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)',
++      '--paper-material-binding': 'linear-gradient(to right, rgba(8,6,4,.10), rgba(8,6,4,0))',
++      // The red rule is 45% of the wall's shared 0.55 idle presence.
++      '--paper-wall-idle-left': unchanged('wall') ? 'rgba(194,109,90,.45)' : 'color-mix(in srgb, var(--sk-wall) 45%, transparent)',
++      '--paper-wall-idle-mask': 'linear-gradient(transparent 0, #000 72px)',
++    });
++  }
++  if (preset === 'workbench') {
++    styles['--paper-wall-idle-ticks'] = 'linear-gradient(var(--sk-wall) 1px, transparent 1px)';
++  }
++  return styles as CSSProperties;
++}
+diff --git a/client/src/styles/skinComponentStyles.ts b/client/src/styles/skinComponentStyles.ts
+index 3e41c78..41ba0e8 100644
+--- a/client/src/styles/skinComponentStyles.ts
++++ b/client/src/styles/skinComponentStyles.ts
+@@ -5,6 +5,9 @@ import type { SkinComponents } from '@shared/types/skin';
+ export function buildSkinComponentStyles(components: SkinComponents): CSSProperties {
+   return {
+     '--sk-title-font': components.titleFont === 'serif' ? 'Georgia, "Noto Serif SC", "Songti SC", SimSun, serif' : 'initial',
++    '--sk-paper-title-size': components.titleFont === 'serif' ? '36px' : '34px',
++    '--sk-paper-title-weight': components.titleFont === 'serif' ? '600' : '650',
++    '--sk-paper-title-spacing': components.titleFont === 'serif' ? '.01em' : 'normal',
+     '--sk-label-font': components.labelFont === 'mono' ? 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace' : 'initial',
+     '--sk-menu-row-height': components.menuDensity === 'compact' ? '26px' : '30px',
+     '--sk-menu-gap': components.menuDensity === 'compact' ? '1px' : '3px',

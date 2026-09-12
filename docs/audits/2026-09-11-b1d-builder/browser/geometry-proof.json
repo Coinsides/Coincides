@@ -1,0 +1,127 @@
+{
+  "status": "passed",
+  "source": "browser-report.json: initial/final/initialBlocks/finalBlocks; derived without revisiting or changing the fixture",
+  "blockCount": 4,
+  "blockHashes": [
+    "619fcb261e6ca17d77dc2e0a8e9da9271bb07a26ebdb93d09f14972394e63401",
+    "619fcb261e6ca17d77dc2e0a8e9da9271bb07a26ebdb93d09f14972394e63401"
+  ],
+  "geometryHashes": [
+    "b55f07c333f879debc6313222059ee732853b1ca254d8f68eaf8a3d146368051",
+    "b55f07c333f879debc6313222059ee732853b1ca254d8f68eaf8a3d146368051"
+  ],
+  "before": {
+    "canvasPlacements": [
+      {
+        "placement_id": "canvas-placement:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "x": 84,
+        "y": 0,
+        "width": 904,
+        "height": 1278,
+        "rotation": 0,
+        "frame_id": "b1d-legacy-primary-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "z_index": 0,
+        "order_index": null,
+        "snap_state": {},
+        "visibility_state": "normal",
+        "render_visibility": "visible",
+        "metadata": {
+          "placement_kind": "page_frame"
+        }
+      }
+    ],
+    "pageFrameCollection": {
+      "pageFrames": [
+        {
+          "id": "b1d-legacy-primary-frame",
+          "role": "primary_page_frame",
+          "templateId": "a4_portrait",
+          "pageSize": "A4",
+          "background": {},
+          "exportable": true,
+          "contentInset": {
+            "left": 72,
+            "right": 72,
+            "top": 0,
+            "bottom": 96
+          },
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ],
+      "pageStacks": [],
+      "primaryFrameId": "b1d-legacy-primary-frame",
+      "primaryStackId": null,
+      "selectedFrameId": "b1d-legacy-primary-frame",
+      "selectedStackId": null
+    },
+    "blockLayouts": [],
+    "contentMounts": []
+  },
+  "after": {
+    "canvasPlacements": [
+      {
+        "placement_id": "canvas-placement:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "x": 84,
+        "y": 0,
+        "width": 904,
+        "height": 1278,
+        "rotation": 0,
+        "frame_id": "b1d-legacy-primary-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "z_index": 0,
+        "order_index": null,
+        "snap_state": {},
+        "visibility_state": "normal",
+        "render_visibility": "visible",
+        "metadata": {
+          "placement_kind": "page_frame"
+        }
+      }
+    ],
+    "pageFrameCollection": {
+      "pageFrames": [
+        {
+          "id": "b1d-legacy-primary-frame",
+          "role": "primary_page_frame",
+          "templateId": "a4_portrait",
+          "pageSize": "A4",
+          "background": {},
+          "exportable": true,
+          "contentInset": {
+            "left": 72,
+            "right": 72,
+            "top": 0,
+            "bottom": 96
+          },
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ],
+      "pageStacks": [],
+      "primaryFrameId": "b1d-legacy-primary-frame",
+      "primaryStackId": null,
+      "selectedFrameId": "b1d-legacy-primary-frame",
+      "selectedStackId": null
+    },
+    "blockLayouts": [],
+    "contentMounts": []
+  }
+}

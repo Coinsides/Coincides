@@ -6,11 +6,24 @@
   animation: fadeIn var(--transition-normal) ease forwards;
 }
 
-.page[data-note-skin-preset='workbench'] {
+.page[data-note-skin-preset='workbench'],
+.page[data-note-skin-preset='workbench'] .writingSurfaceCanvas,
+.page[data-note-skin-preset='workbench'] :global(.noteOverview) {
+  background-color: var(--sk-desk);
   background-image:
     linear-gradient(var(--paper-workbench-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--paper-workbench-grid) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+.page[data-note-skin-preset='warm-paper'],
+.page[data-note-skin-preset='warm-paper'] .writingSurfaceCanvas,
+.page[data-note-skin-preset='warm-paper'] :global(.noteOverview) {
+  background: var(--paper-material-desk);
+}
+
+.page[data-note-skin-preset='workbench'] :global(.noteOverviewPreview) {
+  outline-color: var(--paper-template-border);
 }
 
 .pageCanvas {
@@ -1148,6 +1161,31 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   box-sizing: border-box;
   background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
   outline: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-subtle)));
+}
+
+/* A note with a cover paints one continuous sheet on the header band. Its
+   transparent reading-paper sibling must not add a second gradient or shadow. */
+.page[data-note-skin-preset='warm-paper'] .pageReadingHeaderBand,
+.page[data-note-skin-preset='warm-paper'] .pageReadingSpace:not(:has(.pageReadingHeaderBand)) .pageReadingPaper {
+  background: var(--paper-material-fill);
+  box-shadow: var(--paper-material-shadow);
+  outline: none;
+}
+
+.page[data-note-skin-preset='warm-paper'] .pageReadingHeaderBand::before,
+.page[data-note-skin-preset='warm-paper'] .pageReadingSpace:not(:has(.pageReadingHeaderBand)) .pageReadingPaper::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 10px;
+  background: var(--paper-material-binding);
+  pointer-events: none;
+}
+
+.page[data-note-skin-preset='warm-paper'] .formalPageBoundary,
+.page[data-note-skin-preset='warm-paper'] :global(.noteOverviewPreview) {
+  background: var(--paper-material-fill);
+  box-shadow: var(--paper-material-shadow);
 }
 
 .noteToolbarActions {

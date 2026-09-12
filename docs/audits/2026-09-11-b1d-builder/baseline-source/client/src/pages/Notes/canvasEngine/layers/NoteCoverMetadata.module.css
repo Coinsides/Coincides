@@ -1,0 +1,39 @@
+.row { display: flex; align-items: center; gap: 8px; height: 28px; margin-top: 8px; min-width: 0; font-size: 12px; color: var(--text-secondary); }
+.tags { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+.chip { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; max-width: 180px; height: 24px; padding: 2px 7px; border-radius: 4px; background: var(--bg-hover); color: var(--text-primary); }
+.chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip svg { flex-shrink: 0; }
+.add, .disclosure { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; flex: 0 0 auto; white-space: nowrap; }
+.add { padding: 0 4px; }
+.disclosure { margin-left: auto; flex-shrink: 1; min-width: 0; }
+.disclosure span { overflow: hidden; text-overflow: ellipsis; }
+.disclosure svg { flex-shrink: 0; }
+.row[data-empty='true'] .add { opacity: 0; }
+:global([data-note-paper-header]:hover) .add, :global([data-note-paper-header]:focus-within) .add { opacity: 1; }
+.row[data-projection-hidden='true'] { visibility: hidden; }
+.row button:hover, .popup a:hover, .popup button:hover { background: var(--bg-hover); }
+.row button:focus-visible, .popup a:focus-visible, .popup input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.row button:disabled { opacity: 0.5; cursor: default; }
+.rowError { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.popup { position: fixed; inset: auto; box-sizing: border-box; margin: 0; width: min(368px, calc(100vw - 16px)); padding: 16px; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); font-size: 13px; line-height: 1.5; text-align: left; user-select: text; }
+.popup:popover-open { display: block; }
+.popup header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.popup header button { display: inline-flex; padding: 5px; }
+.popup form { margin-top: 12px; }
+.popup label { display: block; margin-bottom: 4px; }
+.entry { display: flex; gap: 8px; }
+.entry input { flex: 1; min-width: 0; padding: 6px 8px; border: 0; border-radius: 0; background: transparent; color: var(--text-primary); }
+.entry input::placeholder { color: var(--text-secondary); }
+.entry button { padding: 4px 8px; border-radius: 0; background: transparent; }
+.popup section { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+.popup h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.popup h4 { margin: 10px 0 4px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+.popup p { display: block; margin: 8px 0; font-size: 13px; color: var(--text-secondary); }
+.popup ul { list-style: none; margin: 0; padding: 0; }
+.popup li a, .popup li button { display: flex; align-items: baseline; justify-content: space-between; width: 100%; gap: 12px; padding: 5px 0; text-align: left; color: var(--text-primary); text-decoration: none; }
+.popup li span { overflow-wrap: anywhere; min-width: 0; }
+.popup small { flex-shrink: 0; font-size: 12px; color: var(--text-secondary); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin: 0; }
+.stats dt { font-size: 12px; color: var(--text-secondary); }
+.stats dd { margin: 0; }
+@media print { .row, .popup { display: none !important; } }

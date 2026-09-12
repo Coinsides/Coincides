@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+    "run",
+    "docs:check"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T04:26:06.978Z",
+  "durationMs": 590,
+  "exitCode": 0
+}

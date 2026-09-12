@@ -1,0 +1,177 @@
+{
+  "status": "passed",
+  "method": "Compare direct HTTP call expressions and HTTP-bearing effect expressions in captured B1d pre-edit sources against current sources; enumerate added import declarations for manual review.",
+  "boundary": "Direct API/fetch scan complements the full-client mock/value-import census. It does not prove arbitrary wrapper calls or unexecuted branches harmless. CSS and test files are hashed but not interpreted as runtime request sources.",
+  "files": 13,
+  "runtimeFiles": 6,
+  "addedDirectRequests": 0,
+  "changedRequestEffects": 0,
+  "rows": [
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "changed": true,
+      "beforeSha256": "ed80d61635a9b8b85f9b02306815651c421f7dae400936bf1d35eacab9cd9709",
+      "afterSha256": "4608a1b8b0d54132dc1d08fd9dd6785ac69f76927286d019d791a0550e3a150c",
+      "inspectedRuntime": true,
+      "beforeRequests": [
+        "api.get<{ course: Course }>(`/courses/${courseId}/summary`)"
+      ],
+      "afterRequests": [
+        "api.get<{ course: Course }>(`/courses/${courseId}/summary`)"
+      ],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": [
+        "import { buildPaperMaterialStyles, buildPaperSkinStyles } from '../paperSkinStyles';"
+      ]
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css",
+      "changed": true,
+      "beforeSha256": "b47a2be578abee40508ad0550c7391de73a56b46d4c1b70d99458c826d11c8d5",
+      "afterSha256": "964fca3941013d51df4165becce0bc7e92af1f7dbb8eb61097555d6a81688519",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css",
+      "changed": false,
+      "beforeSha256": "1edca43a5491bd868ff604d7577cdcfba9d1a0a69136649160645132317cfdfd",
+      "afterSha256": "1edca43a5491bd868ff604d7577cdcfba9d1a0a69136649160645132317cfdfd",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+      "changed": true,
+      "beforeSha256": "516af843c5516f1bd9aea31438613633b26269e63b2d263588c4f55076cfe349",
+      "afterSha256": "1cbb5a3cca578bbd6eb409ecaa5588e489a96aa407823a9b9814d52d78f4d41b",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx",
+      "changed": true,
+      "beforeSha256": "ca9c77fdb946964a4b60bff7abacda7b3f3f21ca7d05cb87a870511eebac679e",
+      "afterSha256": "21378141ad3c4684684893f4a631b03f009a01f1a46ebdd3c15bdeeb5e303fb5",
+      "inspectedRuntime": true,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": [
+        "import { usePaperSkin } from '../PaperSkinContext';"
+      ]
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "changed": true,
+      "beforeSha256": "b96becf325b293478f58395f221cfc7ac28f7c121acf3068a8313168d704c41f",
+      "afterSha256": "7db626ba703f64ff62ac09102a06ebee8073cbba72a630eb47e2e0db908a7e2b",
+      "inspectedRuntime": true,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": [
+        "import { usePaperSkin } from '../PaperSkinContext';"
+      ]
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "changed": true,
+      "beforeSha256": "125fdbe55e2bbe5ce87b55201c93416f6d291429dae37c678ccbe9fc2f3355d9",
+      "afterSha256": "ca9c1136f1fc4edfb0a605c6848caceb249837e4e1b68c0d220c3ad2b35b7ffa",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "changed": true,
+      "beforeSha256": "2570f84c955aef1bef0dbe950d5ceccf35d5a22d4d745752e0f6d08c879ed92c",
+      "afterSha256": "5ea73659c2dca2022067c06fba0905a6950a467f25afd03156de30df60661309",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx",
+      "changed": true,
+      "beforeSha256": "504014e86648734c62bfee6ea0eb10ad1aa540e20913912a7c923be1c4c4329e",
+      "afterSha256": "6128961e017b5aa0303ab0eef1390b212f043483ea9e4e7720c6bf7f5a354958",
+      "inspectedRuntime": true,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+      "changed": true,
+      "beforeSha256": "57ef39e0359e6d43e1ec9f4baf71301ac4169deab75f9beabd88099fe78aed98",
+      "afterSha256": "fd6b20af26fa3cc7bd5539d14d728fadb3f847390f2d58f838c5133ea7a82db5",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/paperSkinStyles.ts",
+      "changed": true,
+      "beforeSha256": "fdebc1f58eedb8be235afaa6002af7c35cd7714531d980cb911d30b675e0b91f",
+      "afterSha256": "6a0c9154c00d36d47e762feff027a4b98f6ea89a01c88b0bd8ff41f60b44d4bd",
+      "inspectedRuntime": true,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/pages/Notes/NoteDetail.module.css",
+      "changed": true,
+      "beforeSha256": "726b0fcad9cebb44aef9df9d20f588df1c3f3c0860894a0815b365c4c8bba70a",
+      "afterSha256": "b586fff861a1bb445c52d8f2c88be1f0ee551700d5c7ad946d2c82f8a01a87d7",
+      "inspectedRuntime": false,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    },
+    {
+      "file": "client/src/styles/skinComponentStyles.ts",
+      "changed": true,
+      "beforeSha256": "1c609e2d9d34232485fd0daf7ebb03e7a208cc98629401a1bf4b2563b26b2809",
+      "afterSha256": "d77953c7847f45bd605a91227027906f95969da85bda480ba9b575dd61286fda",
+      "inspectedRuntime": true,
+      "beforeRequests": [],
+      "afterRequests": [],
+      "requestCallsEqual": true,
+      "requestEffectsEqual": true,
+      "addedImports": []
+    }
+  ]
+}

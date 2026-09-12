@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+    "run",
+    "verify:v2-bn8-runtime"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T04:13:20.233Z",
+  "durationMs": 86001,
+  "exitCode": 0
+}

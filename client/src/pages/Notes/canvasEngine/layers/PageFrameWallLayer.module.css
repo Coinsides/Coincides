@@ -8,6 +8,10 @@
   user-select: none;
 }
 
+.wall[data-page-frame-wall-interactive='false'] {
+  pointer-events: none;
+}
+
 .line {
   position: absolute;
   inset: 0 auto 0 50%;
@@ -16,6 +20,44 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 140ms ease-out;
+}
+
+/* Idle material is paint-only. Pointer targets, hover and drag keep their
+   incumbent line, color and timing, including the absence of ruler ticks. */
+.wall::before,
+.wall::after {
+  content: var(--paper-wall-idle-content, none);
+  position: absolute;
+  inset: var(--paper-wall-idle-top, 0px) auto 0 50%;
+  pointer-events: none;
+  opacity: var(--sk-wall-idle, 0);
+  mask-image: var(--paper-wall-idle-mask, none);
+}
+
+.wall::before {
+  width: 1px;
+  background: var(--sk-wall, var(--paper-wall));
+}
+
+.wall[data-page-frame-wall='left']::before {
+  background: var(--paper-wall-idle-left, var(--sk-wall, var(--paper-wall)));
+}
+
+.wall::after {
+  width: 5px;
+  background-image: var(--paper-wall-idle-ticks, none);
+  background-size: 5px 24px;
+}
+
+.wall[data-page-frame-wall='left']::after {
+  margin-left: -4px;
+}
+
+.wall:hover::before,
+.wall:hover::after,
+.wall[data-page-frame-wall-active='true']::before,
+.wall[data-page-frame-wall-active='true']::after {
+  opacity: 0;
 }
 
 .wall:hover .line,

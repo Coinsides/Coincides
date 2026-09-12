@@ -1,0 +1,72 @@
+{
+  "status": "passed",
+  "method": "Decoded original PNG pixels, no tolerance, no resize; header-baseline keeps all current material code and rolls back only the explicit header files/title-weight.",
+  "rows": [
+    {
+      "preset": "default",
+      "mode": "current",
+      "files": [
+        "default-baseline.png",
+        "default-current.png"
+      ],
+      "width": 1440,
+      "height": 1800,
+      "totalPixels": 2592000,
+      "changedPixels": 155276,
+      "maxChannelDelta": 231,
+      "bounds": {
+        "minX": 218,
+        "minY": 2,
+        "maxX": 1437,
+        "maxY": 1797
+      }
+    },
+    {
+      "preset": "default",
+      "mode": "header-baseline",
+      "files": [
+        "default-baseline.png",
+        "default-header-baseline.png"
+      ],
+      "width": 1440,
+      "height": 1800,
+      "totalPixels": 2592000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "bounds": null
+    },
+    {
+      "preset": "quiet-ink",
+      "mode": "current",
+      "files": [
+        "quiet-ink-baseline.png",
+        "quiet-ink-current.png"
+      ],
+      "width": 1440,
+      "height": 1800,
+      "totalPixels": 2592000,
+      "changedPixels": 193976,
+      "maxChannelDelta": 217,
+      "bounds": {
+        "minX": 218,
+        "minY": 0,
+        "maxX": 1439,
+        "maxY": 1799
+      }
+    },
+    {
+      "preset": "quiet-ink",
+      "mode": "header-baseline",
+      "files": [
+        "quiet-ink-baseline.png",
+        "quiet-ink-header-baseline.png"
+      ],
+      "width": 1440,
+      "height": 1800,
+      "totalPixels": 2592000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "bounds": null
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import { ViewOptionsMenu } from './ViewOptionsMenu';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
+import { usePaperSkin } from '../PaperSkinContext';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
 import type { ItemRefBlockData } from '@shared/types/itemRef';
 import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
@@ -674,6 +675,7 @@ export function NoteWritingSurfaceLayer({
   onViewSource,
   onZoomViewportAt,
 }: NoteWritingSurfaceLayerProps) {
+  const paperSkin = usePaperSkin();
   const addToast = useUIStore((state) => state.addToast);
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
@@ -3530,7 +3532,9 @@ export function NoteWritingSurfaceLayer({
         style={surfaceMode === 'page' ? {
           width: pageDisplayBounds.width * pageReading.displayScale,
           height: (pageDisplayBounds.height + displayHeaderHeight) * pageReading.displayScale,
-          overflowClipMargin: `${32 * pageReading.displayScale}px`,
+          // overflow-clip-margin rejects calc() in the supported browser.
+          // Keep the incumbent literal length, extending only warm paper's shadow.
+          overflowClipMargin: `${(paperSkin?.preset === 'warm-paper' ? 80 : 32) * pageReading.displayScale}px`,
         } : { display: 'contents' }}
       >
       {surfaceMode === 'page' && paperHeader && <div className={styles.pageReadingHeaderBand}
@@ -3613,11 +3617,12 @@ export function NoteWritingSurfaceLayer({
         onDragOverCapture={handleStagingDragOver}
         onDropCapture={handleStagingDrop}
       >
-        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'selection'
-          && noteCanvasRuntime.coordinateContract === 'v2' && onPageFrameWallPointerDown
+        {surfaceMode === 'page' && !overviewOpen && noteCanvasRuntime.coordinateContract === 'v2'
           && visiblePageFrames.map((frame) => (
             <PageFrameWallLayer key={`${frame.id}:walls`}
               frame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
+              idleHeaderHeight={frame.id === primaryPageFrameId ? displayHeaderHeight : 0}
+              interactive={!contentReadOnly && paperInkTool === 'selection' && Boolean(onPageFrameWallPointerDown)}
               activeWall={activePageFrameWall} onPointerDown={onPageFrameWallPointerDown} />
           ))}
         {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (

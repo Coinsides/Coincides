@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T04:23:20.513Z",
+  "durationMs": 40,
+  "exitCode": 0
+}

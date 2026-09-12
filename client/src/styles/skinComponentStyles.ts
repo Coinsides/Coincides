@@ -5,6 +5,9 @@ import type { SkinComponents } from '@shared/types/skin';
 export function buildSkinComponentStyles(components: SkinComponents): CSSProperties {
   return {
     '--sk-title-font': components.titleFont === 'serif' ? 'Georgia, "Noto Serif SC", "Songti SC", SimSun, serif' : 'initial',
+    '--sk-paper-title-size': components.titleFont === 'serif' ? '36px' : '34px',
+    '--sk-paper-title-weight': components.titleFont === 'serif' ? '600' : '650',
+    '--sk-paper-title-spacing': components.titleFont === 'serif' ? '.01em' : 'normal',
     '--sk-label-font': components.labelFont === 'mono' ? 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace' : 'initial',
     '--sk-menu-row-height': components.menuDensity === 'compact' ? '26px' : '30px',
     '--sk-menu-gap': components.menuDensity === 'compact' ? '1px' : '3px',

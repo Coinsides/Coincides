@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 import styles from './NotePaperHeader.module.css';
 import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
+import { usePaperSkin } from '../PaperSkinContext';
 
 export interface NotePaperHeaderProps {
   titleDraft: string;
@@ -13,8 +14,8 @@ export interface NotePaperHeaderProps {
   metadata?: NoteCoverMetadataProps;
 }
 
-export const NOTE_HEADER_MAX_HEIGHT = 244;
-export const NOTE_HEADER_INITIAL_HEIGHT = 156;
+export const NOTE_HEADER_MAX_HEIGHT = 240;
+export const NOTE_HEADER_INITIAL_HEIGHT = 197;
 
 /** A display-only band before the existing paper coordinate origin. */
 export function NotePaperHeader({
@@ -29,14 +30,27 @@ export function NotePaperHeader({
   const headerRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const skin = usePaperSkin();
   useLayoutEffect(() => {
     const header = headerRef.current;
     if (!header) return;
     const measure = () => {
-      for (const [field, maxHeight] of [[titleRef.current, 80], [descriptionRef.current, 72]] as const) {
+      let titleHeight = 40.8;
+      for (const [field, fallbackLineHeight] of [[titleRef.current, 40.8], [descriptionRef.current, 19.5]] as const) {
         if (!field) continue;
+        const lineHeight = parseFloat(getComputedStyle(field).lineHeight) || fallbackLineHeight;
+        // Keep complete lines within the compact display band. A two-line title
+        // leaves one description line; overflow remains scrollable while editing.
+        const available = field === titleRef.current ? lineHeight * 2
+          : NOTE_HEADER_MAX_HEIGHT - 56 - 28 - 10 - (metadata ? 12 + 28 : 0) - titleHeight;
+        const maxLines = Math.max(1, Math.min(2, Math.floor(available / lineHeight)));
         field.style.height = '0px';
-        field.style.height = `${Math.min(maxHeight, Math.max(field === titleRef.current ? 40 : 24, field.scrollHeight))}px`;
+        // Chromium rounds scrollHeight and can add a pixel of glyph overflow;
+        // rounding to the nearest line avoids inventing a blank second line.
+        const lines = Math.min(maxLines, Math.max(1, Math.round(field.scrollHeight / lineHeight)));
+        const height = lines * lineHeight;
+        field.style.height = `${height}px`;
+        if (field === titleRef.current) titleHeight = height;
       }
       onHeightChange(Math.min(NOTE_HEADER_MAX_HEIGHT, header.offsetHeight || NOTE_HEADER_INITIAL_HEIGHT));
     };
@@ -44,7 +58,7 @@ export function NotePaperHeader({
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
     observer?.observe(header);
     return () => observer?.disconnect();
-  }, [titleDraft, descriptionDraft, onHeightChange]);
+  }, [titleDraft, descriptionDraft, onHeightChange, Boolean(metadata), skin?.style]);
 
   const commit = (save: () => void | Promise<void>) => {
     // The adapter owns error feedback and the pending-write failure receipt.

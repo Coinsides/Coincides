@@ -1,0 +1,276 @@
+{
+  "syntheticOnly": true,
+  "database": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\b1d-browser\\run-8lQqHC\\fixture.sqlite",
+  "run": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\b1d-browser\\run-8lQqHC",
+  "boardId": "b7e71610-d929-457f-a05f-84375321a0ae",
+  "projectId": "b1d00000-0000-4000-8000-000000000002",
+  "legacyNoteId": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+  "memberId": "494d59a1-b82c-4938-ab98-c1b00268a453",
+  "legacyBaseline": {
+    "note": {
+      "id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+      "user_id": "b1d00000-0000-4000-8000-000000000001",
+      "course_id": "b1d00000-0000-4000-8000-000000000002",
+      "title": "Power series & the champion",
+      "description": "A quiet place for definitions, useful tests, and the ideas worth keeping.",
+      "status": "active",
+      "source_kind": "manual",
+      "page_format": "flow",
+      "metadata": "{}",
+      "operation_batch_id": "22c265ea-a0b9-4c92-8bc5-7c5d67c72f16",
+      "created_at": "2026-09-12T04:06:31.121Z",
+      "updated_at": "2026-09-12T04:06:31.591Z",
+      "trashed_at": null,
+      "note_class": "user"
+    },
+    "canvas": {
+      "canvasObjects": [
+        {
+          "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+          "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+          "kind": "page_frame",
+          "backing": "none",
+          "object_class": "pure",
+          "status": "active",
+          "source": {
+            "source": "page_frame_collection"
+          },
+          "metadata": {
+            "frame_id": "b1d-legacy-primary-frame"
+          }
+        }
+      ],
+      "canvasPlacements": [
+        {
+          "placement_id": "canvas-placement:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+          "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+          "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "rotation": 0,
+          "frame_id": "b1d-legacy-primary-frame",
+          "surface": "formal_page",
+          "boundary_role": "inside",
+          "z_index": 0,
+          "order_index": null,
+          "snap_state": {},
+          "visibility_state": "normal",
+          "render_visibility": "visible",
+          "metadata": {
+            "placement_kind": "page_frame"
+          }
+        }
+      ],
+      "contentMounts": [],
+      "visualConnectors": [],
+      "imageObjects": [],
+      "structuredObjects": [],
+      "pageFrameCollection": {
+        "pageFrames": [
+          {
+            "id": "b1d-legacy-primary-frame",
+            "role": "primary_page_frame",
+            "templateId": "a4_portrait",
+            "pageSize": "A4",
+            "background": {},
+            "exportable": true,
+            "contentInset": {
+              "left": 72,
+              "right": 72,
+              "top": 0,
+              "bottom": 96
+            },
+            "x": 84,
+            "y": 0,
+            "width": 904,
+            "height": 1278,
+            "metadata": {
+              "role": "primary_page_frame"
+            }
+          }
+        ],
+        "pageStacks": [],
+        "primaryFrameId": "b1d-legacy-primary-frame",
+        "primaryStackId": null,
+        "selectedFrameId": "b1d-legacy-primary-frame",
+        "selectedStackId": null
+      },
+      "blockLayouts": []
+    }
+  },
+  "user": {
+    "id": "b1d00000-0000-4000-8000-000000000001",
+    "name": "B1d builder",
+    "settings": "{\"theme\":\"dark\",\"skin\":null}"
+  },
+  "project": {
+    "id": "b1d00000-0000-4000-8000-000000000002",
+    "user_id": "b1d00000-0000-4000-8000-000000000001",
+    "name": "Material study",
+    "code": null,
+    "color": "#756a5c",
+    "weight": 2,
+    "description": null,
+    "semester": null,
+    "skin": null,
+    "created_at": "2026-09-11T12:00:00.000Z",
+    "updated_at": "2026-09-11T12:00:00.000Z",
+    "system_kind": null
+  },
+  "board": {
+    "id": "b7e71610-d929-457f-a05f-84375321a0ae",
+    "user_id": "b1d00000-0000-4000-8000-000000000001",
+    "title": "Paper presets · Board",
+    "soul_id": "purpose-e6f0f38f-e036-4cb3-a868-bbf14640136e",
+    "project_id": "b1d00000-0000-4000-8000-000000000002",
+    "item_id": "248b249e-642c-4323-b9dd-2be5690696d8",
+    "viewport": "{\"x\":40,\"y\":20,\"zoom\":1}",
+    "created_at": "2026-09-12T04:06:31.120Z",
+    "updated_at": "2026-09-12T04:06:31.124Z",
+    "skin": null
+  },
+  "notes": [
+    {
+      "note": {
+        "id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "user_id": "b1d00000-0000-4000-8000-000000000001",
+        "course_id": "b1d00000-0000-4000-8000-000000000002",
+        "title": "Power series & the champion",
+        "description": "A quiet place for definitions, useful tests, and the ideas worth keeping.",
+        "status": "active",
+        "source_kind": "manual",
+        "page_format": "flow",
+        "metadata": "{}",
+        "operation_batch_id": "22c265ea-a0b9-4c92-8bc5-7c5d67c72f16",
+        "created_at": "2026-09-12T04:06:31.121Z",
+        "updated_at": "2026-09-12T04:06:31.591Z",
+        "trashed_at": null,
+        "note_class": "user"
+      },
+      "canvas": {
+        "canvasObjects": [
+          {
+            "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+            "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+            "kind": "page_frame",
+            "backing": "none",
+            "object_class": "pure",
+            "status": "active",
+            "source": {
+              "source": "page_frame_collection"
+            },
+            "metadata": {
+              "frame_id": "b1d-legacy-primary-frame"
+            }
+          }
+        ],
+        "canvasPlacements": [
+          {
+            "placement_id": "canvas-placement:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+            "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+            "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+            "x": 84,
+            "y": 0,
+            "width": 904,
+            "height": 1278,
+            "rotation": 0,
+            "frame_id": "b1d-legacy-primary-frame",
+            "surface": "formal_page",
+            "boundary_role": "inside",
+            "z_index": 0,
+            "order_index": null,
+            "snap_state": {},
+            "visibility_state": "normal",
+            "render_visibility": "visible",
+            "metadata": {
+              "placement_kind": "page_frame"
+            }
+          }
+        ],
+        "contentMounts": [],
+        "visualConnectors": [],
+        "imageObjects": [],
+        "structuredObjects": [],
+        "pageFrameCollection": {
+          "pageFrames": [
+            {
+              "id": "b1d-legacy-primary-frame",
+              "role": "primary_page_frame",
+              "templateId": "a4_portrait",
+              "pageSize": "A4",
+              "background": {},
+              "exportable": true,
+              "contentInset": {
+                "left": 72,
+                "right": 72,
+                "top": 0,
+                "bottom": 96
+              },
+              "x": 84,
+              "y": 0,
+              "width": 904,
+              "height": 1278,
+              "metadata": {
+                "role": "primary_page_frame"
+              }
+            }
+          ],
+          "pageStacks": [],
+          "primaryFrameId": "b1d-legacy-primary-frame",
+          "primaryStackId": null,
+          "selectedFrameId": "b1d-legacy-primary-frame",
+          "selectedStackId": null
+        },
+        "blockLayouts": []
+      }
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/notes/d8a48318-c5e6-4983-b3d3-2f53239226b0/blocks",
+      "status": 201,
+      "body": {
+        "block_type": "paragraph",
+        "plain_text": "POWER SERIES — A working definition. A power series is a sum of powers centred at a fixed point. Its interval of convergence describes where the series settles to a finite value."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes/d8a48318-c5e6-4983-b3d3-2f53239226b0/blocks",
+      "status": 201,
+      "body": {
+        "block_type": "paragraph",
+        "plain_text": "Inside the radius, the series converges absolutely. Outside it, the terms cannot settle. Check each endpoint separately."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes/d8a48318-c5e6-4983-b3d3-2f53239226b0/blocks",
+      "status": 201,
+      "body": {
+        "block_type": "paragraph",
+        "plain_text": "THE CHAMPION PRINCIPLE — Find the term that governs the limit. Divide by that term, then let the smaller contributions disappear."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes/d8a48318-c5e6-4983-b3d3-2f53239226b0/blocks",
+      "status": 201,
+      "body": {
+        "block_type": "paragraph",
+        "plain_text": "A useful question: what remains unchanged when the representation changes? The content and its coordinates stay fixed while the paper takes on a different material."
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d8a48318-c5e6-4983-b3d3-2f53239226b0",
+      "status": 200,
+      "body": {
+        "description": "A quiet place for definitions, useful tests, and the ideas worth keeping."
+      }
+    }
+  ]
+}

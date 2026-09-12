@@ -1,0 +1,1241 @@
+{
+  "status": "passed",
+  "syntheticOnly": true,
+  "readOnly": true,
+  "source": "Same note/canvas; auditPreset changes fixture memory only, no HTTP writes",
+  "screenshots": [
+    "workbench-overview-baseline-same-fixture.png",
+    "workbench-overview-current-same-fixture.png"
+  ],
+  "modes": {
+    "baseline": {
+      "rootRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1430,
+        "height": 1788
+      },
+      "text": "Overview 1\n1",
+      "descendants": [
+        {
+          "tag": "DIV",
+          "class": "noteOverviewPreview",
+          "rect": {
+            "x": 123.65625,
+            "y": 68,
+            "width": 1182.6875,
+            "height": 1672
+          },
+          "text": null,
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_16vjz_162 _blockBox_16vjz_1639    _blockScratch_16vjz_1691 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 68,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_16vjz_1933",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_16vjz_1938",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_16vjz_1956",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_16vjz_1967",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_16vjz_2026",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_16vjz_1916 _textUnitTextArea_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": "POWER SERIES — A working definition. A power series is a sum of powers centred at a fixed point. Its interval of convergence describes where the series settles to a finite value.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_16vjz_162 _blockBox_16vjz_1639    _blockScratch_16vjz_1691 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 153.03912353515625,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_16vjz_1933",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_16vjz_1938",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_16vjz_1956",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_16vjz_1967",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_16vjz_2026",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_16vjz_1916 _textUnitTextArea_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": "Inside the radius, the series converges absolutely. Outside it, the terms cannot settle. Check each endpoint separately.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_16vjz_162 _blockBox_16vjz_1639    _blockScratch_16vjz_1691 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 238.0782470703125,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_16vjz_1933",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_16vjz_1938",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_16vjz_1956",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_16vjz_1967",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_16vjz_2026",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_16vjz_1916 _textUnitTextArea_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": "THE CHAMPION PRINCIPLE — Find the term that governs the limit. Divide by that term, then let the smaller contributions disappear.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_16vjz_162 _blockBox_16vjz_1639    _blockScratch_16vjz_1691 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 323.11737060546875,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_16vjz_1933",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_16vjz_1938",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_16vjz_1956",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_16vjz_1967",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_16vjz_2026",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_16vjz_1916 _textUnitTextArea_16vjz_2170",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": "A useful question: what remains unchanged when the representation changes? The content and its coordinates stay fixed while the paper takes on a different material.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "noteOverviewPage",
+          "rect": {
+            "x": 123.65625,
+            "y": 68,
+            "width": 1182.6875,
+            "height": 1696
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "SPAN",
+          "class": "noteOverviewPageLabel",
+          "rect": {
+            "x": 123.65625,
+            "y": 1740,
+            "width": 1182.6875,
+            "height": 24
+          },
+          "text": "1",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        }
+      ]
+    },
+    "current": {
+      "rootRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1430,
+        "height": 1788
+      },
+      "text": "Overview 1\n1",
+      "descendants": [
+        {
+          "tag": "DIV",
+          "class": "noteOverviewPreview",
+          "rect": {
+            "x": 123.65625,
+            "y": 68,
+            "width": 1182.6875,
+            "height": 1672
+          },
+          "text": null,
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_78x1z_175 _blockBox_78x1z_1677    _blockScratch_78x1z_1729 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 68,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_78x1z_1971",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_78x1z_1976",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_78x1z_1994",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_78x1z_2005",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_78x1z_2064",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_78x1z_1954 _textUnitTextArea_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 78.46635437011719,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": "POWER SERIES — A working definition. A power series is a sum of powers centred at a fixed point. Its interval of convergence describes where the series settles to a finite value.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_78x1z_175 _blockBox_78x1z_1677    _blockScratch_78x1z_1729 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 153.03912353515625,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_78x1z_1971",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_78x1z_1976",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_78x1z_1994",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_78x1z_2005",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_78x1z_2064",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_78x1z_1954 _textUnitTextArea_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 163.50547790527344,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": "Inside the radius, the series converges absolutely. Outside it, the terms cannot settle. Check each endpoint separately.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_78x1z_175 _blockBox_78x1z_1677    _blockScratch_78x1z_1729 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 238.0782470703125,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_78x1z_1971",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_78x1z_1976",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_78x1z_1994",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_78x1z_2005",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_78x1z_2064",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_78x1z_1954 _textUnitTextArea_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 248.5446014404297,
+            "width": 968.1376953125,
+            "height": 64.10639953613281
+          },
+          "text": "THE CHAMPION PRINCIPLE — Find the term that governs the limit. Divide by that term, then let the smaller contributions disappear.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "ARTICLE",
+          "class": "_block_78x1z_175 _blockBox_78x1z_1677    _blockScratch_78x1z_1729 ",
+          "rect": {
+            "x": 13.759536743164062,
+            "y": 323.11737060546875,
+            "width": 994.3035888671875,
+            "height": 85.03912353515625
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "7px 9px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitEditor_78x1z_1971",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitRow_78x1z_1976",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitGutter_78x1z_1994",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "_textUnitGutterButton_78x1z_2005",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "text": "",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitLine_78x1z_2064",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "class": "_textUnitTextAreaWrap_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "TEXTAREA",
+          "class": "_pageTextArea_78x1z_1954 _textUnitTextArea_78x1z_2208",
+          "rect": {
+            "x": 26.842483520507812,
+            "y": 333.5837097167969,
+            "width": 968.1376953125,
+            "height": 64.10641479492188
+          },
+          "text": "A useful question: what remains unchanged when the representation changes? The content and its coordinates stay fixed while the paper takes on a different material.",
+          "overflow": "hidden",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "BUTTON",
+          "class": "noteOverviewPage",
+          "rect": {
+            "x": 123.65625,
+            "y": 68,
+            "width": 1182.6875,
+            "height": 1696
+          },
+          "text": null,
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        },
+        {
+          "tag": "SPAN",
+          "class": "noteOverviewPageLabel",
+          "rect": {
+            "x": 123.65625,
+            "y": 1740,
+            "width": 1182.6875,
+            "height": 24
+          },
+          "text": "1",
+          "overflow": "visible",
+          "clipPath": "none",
+          "transform": "none",
+          "padding": "0px"
+        }
+      ]
+    }
+  },
+  "errors": [],
+  "before": {
+    "canvasObjects": [
+      {
+        "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "kind": "page_frame",
+        "backing": "none",
+        "object_class": "pure",
+        "status": "active",
+        "source": {
+          "source": "page_frame_collection"
+        },
+        "metadata": {
+          "frame_id": "b1d-legacy-primary-frame"
+        }
+      }
+    ],
+    "canvasPlacements": [
+      {
+        "placement_id": "canvas-placement:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "x": 84,
+        "y": 0,
+        "width": 904,
+        "height": 1278,
+        "rotation": 0,
+        "frame_id": "b1d-legacy-primary-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "z_index": 0,
+        "order_index": null,
+        "snap_state": {},
+        "visibility_state": "normal",
+        "render_visibility": "visible",
+        "metadata": {
+          "placement_kind": "page_frame"
+        }
+      }
+    ],
+    "contentMounts": [],
+    "visualConnectors": [],
+    "imageObjects": [],
+    "structuredObjects": [],
+    "pageFrameCollection": {
+      "pageFrames": [
+        {
+          "id": "b1d-legacy-primary-frame",
+          "role": "primary_page_frame",
+          "templateId": "a4_portrait",
+          "pageSize": "A4",
+          "background": {},
+          "exportable": true,
+          "contentInset": {
+            "left": 72,
+            "right": 72,
+            "top": 0,
+            "bottom": 96
+          },
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ],
+      "pageStacks": [],
+      "primaryFrameId": "b1d-legacy-primary-frame",
+      "primaryStackId": null,
+      "selectedFrameId": "b1d-legacy-primary-frame",
+      "selectedStackId": null
+    },
+    "blockLayouts": []
+  },
+  "after": {
+    "canvasObjects": [
+      {
+        "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "kind": "page_frame",
+        "backing": "none",
+        "object_class": "pure",
+        "status": "active",
+        "source": {
+          "source": "page_frame_collection"
+        },
+        "metadata": {
+          "frame_id": "b1d-legacy-primary-frame"
+        }
+      }
+    ],
+    "canvasPlacements": [
+      {
+        "placement_id": "canvas-placement:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "object_id": "canvas-object:d8a48318-c5e6-4983-b3d3-2f53239226b0:page-frame:b1d-legacy-primary-frame",
+        "canvas_id": "d8a48318-c5e6-4983-b3d3-2f53239226b0",
+        "x": 84,
+        "y": 0,
+        "width": 904,
+        "height": 1278,
+        "rotation": 0,
+        "frame_id": "b1d-legacy-primary-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "z_index": 0,
+        "order_index": null,
+        "snap_state": {},
+        "visibility_state": "normal",
+        "render_visibility": "visible",
+        "metadata": {
+          "placement_kind": "page_frame"
+        }
+      }
+    ],
+    "contentMounts": [],
+    "visualConnectors": [],
+    "imageObjects": [],
+    "structuredObjects": [],
+    "pageFrameCollection": {
+      "pageFrames": [
+        {
+          "id": "b1d-legacy-primary-frame",
+          "role": "primary_page_frame",
+          "templateId": "a4_portrait",
+          "pageSize": "A4",
+          "background": {},
+          "exportable": true,
+          "contentInset": {
+            "left": 72,
+            "right": 72,
+            "top": 0,
+            "bottom": 96
+          },
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ],
+      "pageStacks": [],
+      "primaryFrameId": "b1d-legacy-primary-frame",
+      "primaryStackId": null,
+      "selectedFrameId": "b1d-legacy-primary-frame",
+      "selectedStackId": null
+    },
+    "blockLayouts": []
+  },
+  "storedCanvasUnchanged": true,
+  "projectedGeometryEqual": true,
+  "textEqual": true,
+  "observation": "Both screenshots visibly reproduce left-side clipping of the same text. Grid paint differs as intended; the projected descendant geometry and text are compared independently of CSS class hashes."
+}
