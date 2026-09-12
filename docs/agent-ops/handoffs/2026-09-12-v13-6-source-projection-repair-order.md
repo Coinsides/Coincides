@@ -156,3 +156,68 @@ Result 必含:交付清单+numstat、database_meta 契约值实测、六节逐�
 ### 二轮范围
 
 裁一接线+server 定向 3 红转绿+裁二冒烟补齐+Result 更新(含最终测试数字);其余六节交付现物零动。完成后 status 翻 done。
+
+## Result · 补遗一二轮执行（2026-09-12，codex builder）
+
+**裁一完成，server 原 3 红全部转绿；裁二 API→真浏览器→两次重投影已实际跑完，但发现新的浏览器页对齐阻塞。header 保持 ready，不冒领 done。** 上一份 Result 是首轮历史收据，以下是二轮最新结果；首轮两处停线已按补遗解除，当前停线原因已不同。
+
+### 交付与六节状态
+
+- **唯一产品变更**：`server/src/services/sourceProjectionMaterializer.ts` A4 本地镜像改为 904/1278/760/inset `{top:0,right:72,bottom:96,left:72}`，注释明示 shared 真源、禁止手改、测试逐字段强制对齐。PAGE_GAP/PAGE_X/PAGE_Y/BLOCK_GAP 不动。
+- **唯一测试变更**：`server/src/__tests__/v13SourceProjectionRepair.test.ts` 保留测试侧 shared import，逐字段断言 frame 宽高、四个 inset 与 contentWidth；没有降低既有预期。
+- **二轮产品/测试 numstat：2 文件，+14 / −6**（materializer +8/−5，测试 +6/−1）。按开工文本快照逐行 LCS 统计，非 Git diff；完整含本回执增量见 `docs/audits/2026-09-12-srcproj-builder/round2-numstat.json`。首轮 23 文件 +1589/−91 为当轮历史统计，不冒充二轮新增量。
+- shared/client A4 接线、其余六节实现、静态门及白名单均零动。独立复核：**21 个列明保留文件**哈希与二轮基线一致，其中 **20 个首轮交付文件**也与首轮最终哈希一致；第 21 个是 shared-runtime-import 静态门。两件授权修改文件的基线/最终哈希均核验。此为明确交付集的边界证明，不宣称全库扫描。
+
+| 节 | 二轮后状态 |
+| --- | --- |
+| 一 几何统一 | **完成**：按 HQ 镜像+机械对齐裁定落地，测试与门通过。 |
+| 二 页对齐 | **服务端通过，浏览器验收阻塞**：SQL 实测 page N 块全在 frame N；客户端 hydration 失配导致正文落默认连续布局，详见下节。该客户端链本轮未改。 |
+| 三 页渣剥离 | 现物零动；定向通过，合成 PDF 页眉页脚在 typography 收据保留、正文剥离。 |
+| 四 heading | 现物零动；定向通过。 |
+| 五 封面 | 现物零动；浏览器前后均显示无后缀题名及指定 description。 |
+| 六 重投影 v1 | 现物零动；8/8 定向通过，隔离真实 HTTP 两次确认替换成功，稳定 ID/收据/新 note 均验证；整体浏览器放行仍受页对齐缺陷阻塞。 |
+
+### 裁二冒烟与新停线证据
+
+1. 全新隔离库 `.codex-tmp/srcproj-13-6/smoke-run-wkxsqo/synthetic-smoke.db`，非用户库副本。初始 `database_meta=[]`/默认 v1；seed 仅对该库显式置 v2，后续 SQL 快照读回 **v2**。**没有查询用户库，不能申报用户库契约值。**
+2. 合成五页 PDF 经现役 **`POST /api/sources/upload`** 上传（201）并 `/materialize`（202）铸造；补遗简写 `/api/sources`，实际路由据现物执行，路由零修改。未再尝试浏览器 UI 上传。
+3. SQL：**5 帧 / 5 块**，帧 904×1278、内容列 760、四 inset 对齐，页块一一对应。Chrome：Overview **5** 个帧入口；普通阅读块均住 760 列、左右边界等于内容列，无正文左切；封面 `Projection Alignment (2)`，description `源文档 · 5 页 · 导入于 2026-09-12`。
+4. 无 confirm 预览六类计数全为 0，note ID 不变；两次 API `confirm:true` 各生成新 note，共两份快照收据。初次/一次/二次投影的全部 frame 行及选定 block 行深比较一致，块/帧 ID 稳定；旧 note 已清。第一轮真实 HTTP 重投影 **16.96ms**，只代表本合成样本。
+5. **新阻塞**：浏览器五页正文全部连续出现在首帧，DOM top=`0/276/552/828/1104`，总览第 2–5 帧为空；点击 `Read page 3` 到空白区。重投影前后同样复现。Preview Boundary seed 显示 Primary frame 1 有 5 块、其余 4 帧均 0。**帧数相同、重投影前后页貌相同，不等于原页对齐验收通过。**
+6. 只读定因：`/notes/:id/blocks` 的 `placement_id` 为裸 UUID，而 canvas `blockLayouts[].placement_id` 为 `canvas-placement:<UUID>`；`canvasObjectRepository.ts` 按前者查后者，**5/5 失配**，于是未 hydrate `canvas_layout` 并落默认连续布局。SQL 中的 frame_id 完整正确。证据 `round2-browser-hydration-api.json`、`round2-browser-finding.md`。
+7. 按本轮“**其余六节交付现物零动**”以及原单“**冲突停线举证⛔自作主张**”，未改客户端 hydration/默认布局，也未用手工改隔离库绕过。此缺陷需 HQ 追加最小修单后再验，故不满足“完成后翻 done”的前提。
+
+### 最终验证数字、存量与未做项
+
+| 验证 | 结果与来源 |
+| --- | --- |
+| Server 三族（二轮亲跑） | **23/23 PASS，0 fail / 0 skip**：投影修复 10、重投影 8、坐标契约 5；首轮 3 FAIL 全部转绿。 |
+| Server typecheck + build（二轮亲跑） | **PASS**。 |
+| 受影响静态/模型组（二轮亲跑） | **13 阶段 PASS**，含 runtime-import 233 产品文件/0违规/7 type-only、canvas 168、model 60、performance 5 场景、docs:check。 |
+| Client 全库（沿用首轮，二轮 client/shared 零动） | **145 文件 / 1547 项收集，1543 PASS，4 凭据项显式 skip**；不是二轮重跑，不冒称无过滤全绿。 |
+| Shared/client typecheck + build（沿用首轮） | **PASS**；本轮未改相关现物。 |
+| 首轮其余定向（沿用，不重复累加） | materialization 非安全精确测试名集合 **9/9**；manifest **10/10**；Sources UI **9/9** 已含 client 全库。 |
+| 隔离 API + 浏览器 | API/宽度/封面/稳定 ID/重投影一致性通过；**原页→浏览器页对齐 FAIL**，不是未执行。三组前后截图逐字节相同，反而确认错误页分布也稳定复现。 |
+
+- **存量投影零操作**：只新铸/重投影本轮合成 Source，未接触用户库。几何修复已可惠及后续新铸和显式重投影；不会追改旧投影。客户端页定位缺陷另待修。
+- 并发、事务、资产 sweep 仍为首轮现物，**600000ms 窗口零动**；首轮解析/事务/图片复用测试仍有效，本轮 8 项重投影回归复跑通过。未声称任意规模耗时上限。
+- 证据落 `docs/audits/2026-09-12-srcproj-builder/round2-*`，含 `round2-verification/` 的测试日志、API/SQL/DOM JSON、真实截图、边界哈希、冒烟说明；不含构建产物、PDF 或数据库。专用标签页已关闭，任务进程/端口关闭见 `round2-smoke-shutdown.json`。
+- 未做：超范围的客户端 hydration 修复及其回归、所有安全类测试、原样 runtime 聚合（含 Git/密钥扫描/安全语义分支，与禁令冲突）、Git diff/secret scan、凭据 4 项、用户主观验收。**零 commit、零 `.git` 接触、零用户库接触、零 `.env` key 值读取。**
+
+---
+
+## 补遗二(HQ 裁定,2026-09-12 施工夜三轮:placement id 同形修)
+
+二轮浏览器阻塞(五页挤首帧)根因收账:`note_block_placements` 侧 placement_id(裸 UUID)与 `canvas_placements` 侧(`canvas-placement:<UUID>` 前缀形)失配,hydration 查不到 canvas_layout 落默认连续布局。
+
+**HQ 判断**:现役真机上旧 materializer 铸的投影(33 页 IELTS)分页 hydration 是通的——强烈指向失配为**本单确定性 id 改动引入的形状回归**(两表 id 的对应关系被派生逻辑写岔),而非现役缺陷。
+
+### 三轮指令
+
+1. **先取证**:对照 git 历史中旧 materializer(HEAD 现役版)两表 id 的写入形状与对应关系,确认现役契约(哪张表带前缀、client 按什么键匹配);
+2. **分支 A(预期)**:新铸造的确定性 id 恢复与现役**同形**——对应关系照旧,只把随机换确定;⛔改 client hydration/canvasObjectRepository/契约面;
+3. **分支 B(若取证证明现役同样失配)**:停线举证(SQL+现役形状对照),⛔修,交 HQ 另裁;
+4. 修后:server 定向复绿+浏览器复验(五页各住其帧、Read page 3 到位、重投影后同验)+确定性 id 复核(二次重投影 id 稳定)仍成立;
+5. Result 更新;全部通过后 status 翻 done。
+
+射程=materializer id 派生;其余现物零动。禁区照旧。
