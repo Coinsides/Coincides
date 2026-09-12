@@ -1,0 +1,318 @@
+{
+  "stableReload": "2026-09-12T18:35:18.087Z",
+  "postReloadErrorCount": 0,
+  "logs": [
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:29:48.612Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:29:48.627Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:29:49.679Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:29:49.819Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:29:50.569Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:30:38.830Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:30:38.875Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:30:39.678Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:30:39.751Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:30:40.071Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "timestamp": "2026-09-12T18:30:56.714Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "timestamp": "2026-09-12T18:30:56.719Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "timestamp": "2026-09-12T18:30:56.727Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "timestamp": "2026-09-12T18:30:56.728Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "timestamp": "2026-09-12T18:31:51.671Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "timestamp": "2026-09-12T18:31:51.674Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:33:38.554Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:33:38.602Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:33:39.460Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:33:39.537Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:33:39.693Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "timestamp": "2026-09-12T18:34:51.861Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] hot updated: /src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "timestamp": "2026-09-12T18:34:51.862Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "Warning: React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n%s ForwardRef(NoteCanvasRuntime2) 1. useContext                 useContext\n2. useContext                 useContext\n3. useRef                     useRef\n4. useRef                     useRef\n5. useRef                     useRef\n6. useRef                     useRef\n7. useMemo                    useMemo\n8. useSyncExternalStore       useSyncExternalStore\n9. useEffect                  useEffect\n10. useDebugValue             useDebugValue\n11. useDebugValue             useDebugValue\n12. useState                  useState\n13. useCallback               useCallback\n14. useRef                    useRef\n15. useRef                    useRef\n16. useRef                    useRef\n17. useCallback               useCallback\n18. useState                  useState\n19. useState                  useState\n20. useCallback               useCallback\n21. useCallback               useCallback\n22. useCallback               useCallback\n23. useCallback               useCallback\n24. useCallback               useCallback\n25. useState                  useState\n26. useState                  useState\n27. useState                  useState\n28. useState                  useState\n29. useState                  useState\n30. useCallback               useCallback\n31. useCallback               useCallback\n32. useCallback               useCallback\n33. useCallback               useCallback\n34. useState                  useState\n35. useState                  useState\n36. useState                  useState\n37. useState                  useState\n38. useRef                    useRef\n39. useCallback               useCallback\n40. useCallback               useCallback\n41. useCallback               useCallback\n42. useCallback               useCallback\n43. useCallback               useCallback\n44. useCallback               useCallback\n45. useCallback               useCallback\n46. useMemo                   useMemo\n47. useState                  useState\n48. useCallback               useCallback\n49. useState                  useState\n50. useLayoutEffect           useLayoutEffect\n51. useCallback               useCallback\n52. useCallback               useCallback\n53. useCallback               useCallback\n54. useCallback               useCallback\n55. useState                  useState\n56. useCallback               useCallback\n57. useRef                    useRef\n58. useLayoutEffect           useLayoutEffect\n59. useCallback               useCallback\n60. useState                  useState\n61. useCallback               useCallback\n62. useCallback               useCallback\n63. useCallback               useCallback\n64. useCallback               useCallback\n65. useCallback               useCallback\n66. useCallback               useCallback\n67. useMemo                   useMemo\n68. useContext                useContext\n69. useContext                useContext\n70. useContext                useContext\n71. useRef                    useRef\n72. useContext                useContext\n73. useLayoutEffect           useLayoutEffect\n74. useCallback               useCallback\n75. useRef                    useRef\n76. useMemo                   useMemo\n77. useSyncExternalStore      useSyncExternalStore\n78. useEffect                 useEffect\n79. useDebugValue             useDebugValue\n80. useDebugValue             useDebugValue\n81. useState                  useState\n82. useMemo                   useMemo\n83. useMemo                   useMemo\n84. useState                  useState\n85. useState                  useState\n86. useRef                    useRef\n87. useRef                    useRef\n88. useState                  useState\n89. useState                  useState\n90. useState                  useState\n91. useState                  useState\n92. useRef                    useRef\n93. useRef                    useRef\n94. useRef                    useRef\n95. useCallback               useCallback\n96. useCallback               useCallback\n97. useState                  useState\n98. useState                  useState\n99. useState                  useState\n100. useState                 useState\n101. useState                 useState\n102. useRef                   useRef\n103. useState                 useState\n104. useState                 useState\n105. useState                 useState\n106. useState                 useState\n107. useRef                   useRef\n108. useState                 useState\n109. useState                 useState\n110. useState                 useState\n111. useState                 useState\n112. useState                 useState\n113. useRef                   useRef\n114. useRef                   useRef\n115. useMemo                  useMemo\n116. useState                 useState\n117. useRef                   useRef\n118. useState                 useState\n119. useState                 useState\n120. useState                 useState\n121. useState                 useState\n122. useState                 useState\n123. useState                 useState\n124. useState                 useState\n125. useState                 useState\n126. useRef                   useRef\n127. useRef                   useRef\n128. useState                 useState\n129. useState                 useState\n130. useState                 useState\n131. useCallback              useCallback\n132. useCallback              useCallback\n133. useCallback              useCallback\n134. useCallback              useCallback\n135. useRef                   useRef\n136. useState                 useState\n137. useRef                   useRef\n138. useRef                   useRef\n139. useRef                   useRef\n140. useRef                   useRef\n141. useRef                   useRef\n142. useRef                   useRef\n143. useRef                   useRef\n144. useRef                   useRef\n145. useRef                   useRef\n146. useRef                   useRef\n147. useRef                   useRef\n148. useRef                   useRef\n149. useRef                   useRef\n150. useRef                   useRef\n151. useRef                   useRef\n152. useRef                   useRef\n153. useRef                   useRef\n154. useRef                   useRef\n155. useEffect                useEffect\n156. useMemo                  useMemo\n157. useEffect                useEffect\n158. useEffect                useEffect\n159. useCallback              useCallback\n160. useCallback              useCallback\n161. useMemo                  useMemo\n162. useCallback              useCallback\n163. useCallback              useCallback\n164. useMemo                  useMemo\n165. useMemo                  useMemo\n166. useMemo                  useMemo\n167. useMemo                  useMemo\n168. useCallback              useCallback\n169. useEffect                useEffect\n170. useEffect                useEffect\n171. useCallback              useCallback\n172. useEffect                useEffect\n173. useCallback              useCallback\n174. useCallback              useCallback\n175. useCallback              useCallback\n176. useCallback              useCallback\n177. useRef                   useRef\n178. useState                 useState\n179. useCallback              useCallback\n180. useCallback              useCallback\n181. useCallback              useCallback\n182. useCallback              useCallback\n183. useCallback              useCallback\n184. useCallback              useCallback\n185. useCallback              useCallback\n186. useCallback              useCallback\n187. useCallback              useCallback\n188. useCallback              useCallback\n189. useCallback              useCallback\n190. useCallback              useCallback\n191. useCallback              useCallback\n192. useCallback              useCallback\n193. useCallback              useCallback\n194. useEffect                useEffect\n195. useCallback              useCallback\n196. useCallback              useCallback\n197. useCallback              useCallback\n198. useCallback              useCallback\n199. useCallback              useCallback\n200. useCallback              useCallback\n201. useCallback              useCallback\n202. useCallback              useCallback\n203. useCallback              useCallback\n204. useCallback              useCallback\n205. useCallback              useCallback\n206. useCallback              useCallback\n207. useCallback              useCallback\n208. useCallback              useCallback\n209. useCallback              useCallback\n210. useCallback              useCallback\n211. useCallback              useCallback\n212. useCallback              useCallback\n213. useCallback              useCallback\n214. useCallback              useCallback\n215. useCallback              useCallback\n216. useCallback              useCallback\n217. useCallback              useCallback\n218. useMemo                  useMemo\n219. useRef                   useRef\n220. useMemo                  useMemo\n221. useRef                   useRef\n222. useState                 useState\n223. useState                 useState\n224. useState                 useState\n225. useEffect                useEffect\n226. useEffect                useEffect\n227. useCallback              useCallback\n228. useMemo                  useMemo\n229. useRef                   useRef\n230. useMemo                  useMemo\n231. useSyncExternalStore     useSyncExternalStore\n232. useEffect                useEffect\n233. useDebugValue            useDebugValue\n234. useDebugValue            useDebugValue\n235. useState                 useState\n236. useState                 useState\n237. useState                 useState\n238. useEffect                useEffect\n239. useMemo                  useMemo\n240. useMemo                  useMemo\n241. useMemo                  useMemo\n242. useMemo                  useMemo\n243. useState                 useState\n244. useState                 useState\n245. useState                 useState\n246. useState                 useState\n247. useRef                   useRef\n248. useRef                   useRef\n249. useEffect                useEffect\n250. useCallback              useCallback\n251. useCallback              useCallback\n252. useCallback              useCallback\n253. useCallback              useCallback\n254. useState                 useState\n255. useLayoutEffect          useLayoutEffect\n256. useMemo                  useMemo\n257. useMemo                  useMemo\n258. useMemo                  useMemo\n259. useMemo                  useMemo\n260. useMemo                  useMemo\n261. useMemo                  useMemo\n262. useCallback              useCallback\n263. useCallback              useCallback\n264. useRef                   useRef\n265. useRef                   useRef\n266. useRef                   useRef\n267. useState                 useState\n268. useState                 useState\n269. useRef                   useRef\n270. useLayoutEffect          useLayoutEffect\n271. useEffect                useEffect\n272. useMemo                  useMemo\n273. useRef                   useRef\n274. useRef                   useRef\n275. useCallback              useCallback\n276. useCallback              useCallback\n277. useCallback              useCallback\n278. useCallback              useCallback\n279. useCallback              useCallback\n280. useCallback              useCallback\n281. useCallback              useCallback\n282. useCallback              useCallback\n283. useCallback              useCallback\n284. useRef                   useRef\n285. useCallback              useCallback\n286. useRef                   useRef\n287. useMemo                  useMemo\n288. useSyncExternalStore     useSyncExternalStore\n289. useEffect                useEffect\n290. useDebugValue            useDebugValue\n291. useDebugValue            useDebugValue\n292. useRef                   useRef\n293. useState                 useState\n294. useCallback              useCallback\n295. useCallback              useCallback\n296. useEffect                useEffect\n297. useCallback              useCallback\n298. useCallback              useCallback\n299. useCallback              useCallback\n300. useCallback              useCallback\n301. useCallback              useCallback\n302. useCallback              useCallback\n303. useCallback              useCallback\n304. useCallback              useCallback\n305. useCallback              useCallback\n306. useCallback              useCallback\n307. useCallback              useCallback\n308. useEffect                useEffect\n309. useCallback              useCallback\n310. useCallback              useCallback\n311. useCallback              useCallback\n312. useCallback              useCallback\n313. useCallback              useCallback\n314. useCallback              useCallback\n315. useState                 useState\n316. useState                 useState\n317. useState                 useState\n318. useState                 useState\n319. useState                 useState\n320. useState                 useState\n321. useState                 useState\n322. useState                 useState\n323. useState                 useState\n324. useRef                   useRef\n325. useRef                   useRef\n326. useRef                   useRef\n327. useRef                   useRef\n328. useRef                   useRef\n329. useRef                   useRef\n330. useRef                   useRef\n331. useRef                   useRef\n332. useRef                   useRef\n333. useRef                   useRef\n334. useRef                   useRef\n335. useRef                   useRef\n336. useRef                   useRef\n337. useRef                   useRef\n338. useRef                   useRef\n339. useRef                   useRef\n340. useRef                   useRef\n341. useRef                   useRef\n342. useRef                   useRef\n343. useRef                   useRef\n344. useRef                   useRef\n345. useRef                   useRef\n346. useRef                   useRef\n347. useCallback              useCallback\n348. useCallback              useCallback\n349. useCallback              useCallback\n350. useLayoutEffect          useLayoutEffect\n351. useLayoutEffect          useLayoutEffect\n352. useCallback              useCallback\n353. useCallback              useCallback\n354. useCallback              useCallback\n355. useLayoutEffect          useLayoutEffect\n356. useCallback              useCallback\n357. useCallback              useCallback\n358. useCallback              useCallback\n359. useCallback              useCallback\n360. useCallback              useCallback\n361. useCallback              useCallback\n362. useCallback              useCallback\n363. useState                 useState\n364. useState                 useState\n365. useState                 useState\n366. useRef                   useRef\n367. useRef                   useRef\n368. useRef                   useRef\n369. useRef                   useRef\n370. useCallback              useCallback\n371. useMemo                  useMemo\n372. useEffect                useEffect\n373. useEffect                useEffect\n374. useLayoutEffect          useLayoutEffect\n375. useCallback              useCallback\n376. useCallback              useCallback\n377. useCallback              useCallback\n378. useCallback              useCallback\n379. useCallback              useCallback\n380. useCallback              useCallback\n381. useCallback              useCallback\n382. useCallback              useCallback\n383. useCallback              useCallback\n384. useCallback              useCallback\n385. useCallback              useCallback\n386. useCallback              useCallback\n387. useCallback              useCallback\n388. useCallback              useCallback\n389. useCallback              useCallback\n390. useCallback              useCallback\n391. useCallback              useCallback\n392. useCallback              useCallback\n393. useCallback              useCallback\n394. useRef                   useRef\n395. useEffect                useEffect\n396. useMemo                  useMemo\n397. useCallback              useCallback\n398. useCallback              useCallback\n399. useRef                   useRef\n400. useMemo                  useMemo\n401. useRef                   useRef\n402. useMemo                  useMemo\n403. useCallback              useCallback\n404. useCallback              useCallback\n405. useCallback              useCallback\n406. useState                 useState\n407. useRef                   useRef\n408. useState                 useState\n409. useRef                   useRef\n410. useRef                   useRef\n411. useRef                   useRef\n412. useEffect                useEffect\n413. useState                 useState\n414. useState                 useState\n415. useState                 useState\n416. useState                 useState\n417. useState                 useState\n418. useState                 useState\n419. useCallback              useCallback\n420. useSyncExternalStore     useSyncExternalStore\n421. useEffect                useEffect\n422. useMemo                  useMemo\n423. useMemo                  useMemo\n424. useMemo                  useMemo\n425. useMemo                  useMemo\n426. useMemo                  useMemo\n427. useMemo                  useMemo\n428. useMemo                  useMemo\n429. useMemo                  useMemo\n430. useMemo                  useMemo\n431. useMemo                  useMemo\n432. useCallback              useCallback\n433. useCallback              useCallback\n434. useCallback              useCallback\n435. useCallback              useCallback\n436. useCallback              useCallback\n437. useCallback              useCallback\n438. useCallback              useCallback\n439. useCallback              useCallback\n440. useCallback              useCallback\n441. useCallback              useCallback\n442. useCallback              useCallback\n443. useCallback              useCallback\n444. useCallback              useCallback\n445. useCallback              useRef\n \n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:25:79)\n    at NoteCanvasRuntimeProvider (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider.tsx:20:3)\n    at NoteDetailPage (http://127.0.0.1:51122/src/pages/Notes/NoteDetail.tsx?t=1789237911488:25:22)\n    at RenderedRoute (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4131:5)\n    at Outlet (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4537:26)\n    at div\n    at main\n    at div\n    at AppLayout (http://127.0.0.1:51122/src/components/Layout/AppLayout.tsx:52:20)\n    at ProtectedRoute (http://127.0.0.1:51122/src/App.tsx?t=1789237911488:52:27)\n    at RenderedRoute (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4131:5)\n    at Outlet (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4537:26)\n    at AppRoot\n    at RenderedRoute (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4131:5)\n    at RenderErrorBoundary (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4091:5)\n    at DataRoutes (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:5282:5)\n    at Router (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4544:15)\n    at RouterProvider (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:5096:5)\n    at App",
+      "timestamp": "2026-09-12T18:34:51.899Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "error",
+      "message": "TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142)",
+      "timestamp": "2026-09-12T18:34:51.902Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "error",
+      "message": "Error handled by React Router default ErrorBoundary: TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142)",
+      "timestamp": "2026-09-12T18:34:51.906Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "error",
+      "message": "Error handled by React Router default ErrorBoundary: TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142)",
+      "timestamp": "2026-09-12T18:34:51.906Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "error",
+      "message": "TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142)",
+      "timestamp": "2026-09-12T18:34:51.915Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "error",
+      "message": "Error handled by React Router default ErrorBoundary: TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142)",
+      "timestamp": "2026-09-12T18:34:51.915Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "error",
+      "message": "Error handled by React Router default ErrorBoundary: TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142)",
+      "timestamp": "2026-09-12T18:34:51.915Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "error",
+      "message": "The above error occurred in the <ForwardRef(NoteCanvasRuntime2)> component:\n\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:25:79)\n    at NoteCanvasRuntimeProvider (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider.tsx:20:3)\n    at NoteDetailPage (http://127.0.0.1:51122/src/pages/Notes/NoteDetail.tsx?t=1789237911488:25:22)\n    at RenderedRoute (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4131:5)\n    at Outlet (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4537:26)\n    at div\n    at main\n    at div\n    at AppLayout (http://127.0.0.1:51122/src/components/Layout/AppLayout.tsx:52:20)\n    at ProtectedRoute (http://127.0.0.1:51122/src/App.tsx?t=1789237911488:52:27)\n    at RenderedRoute (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4131:5)\n    at Outlet (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4537:26)\n    at AppRoot\n    at RenderedRoute (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4131:5)\n    at RenderErrorBoundary (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4091:5)\n    at DataRoutes (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:5282:5)\n    at Router (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:4544:15)\n    at RouterProvider (http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec:5096:5)\n    at App\n\nReact will try to recreate this component tree from scratch using the error boundary you provided, RenderErrorBoundary.",
+      "timestamp": "2026-09-12T18:34:51.919Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "error",
+      "message": "React Router caught the following error during render TypeError: Cannot read properties of null (reading 'getSnapshot')\n    at updateSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:11936:20)\n    at Object.useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a:12781:22)\n    at useSyncExternalStore (http://127.0.0.1:51122/node_modules/.vite/deps/chunk-KGBGKWGZ.js?v=e8ad547a:1120:29)\n    at exports.useSyncExternalStoreWithSelector (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:63:21)\n    at useStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:137:17)\n    at useBoundStore (http://127.0.0.1:51122/node_modules/.vite/deps/zustand.js?v=a897eab0:154:51)\n    at useNoteCanvasLayerProps (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts?t=1789237911488:7:20)\n    at useRuntimePresentationController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts?t=1789238091823:144:22)\n    at useNoteCanvasRuntimeController (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts?t=1789238091827:451:54)\n    at NoteCanvasRuntime2 (http://127.0.0.1:51122/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx?t=1789238091827:28:142) Object",
+      "timestamp": "2026-09-12T18:34:51.920Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:35:18.087Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:35:18.137Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:35:18.943Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:35:19.020Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:35:19.159Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:39:41.638Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:39:41.663Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:39:42.569Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:39:42.662Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:39:43.306Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:40:31.573Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:40:31.606Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:40:32.440Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:40:32.514Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:40:32.664Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connecting...",
+      "timestamp": "2026-09-12T18:41:15.238Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "debug",
+      "message": "[vite] connected.",
+      "timestamp": "2026-09-12T18:41:15.280Z",
+      "url": "http://127.0.0.1:51122/@vite/client"
+    },
+    {
+      "level": "info",
+      "message": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-09-12T18:41:16.091Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-WE2PF65S.js?v=e8ad547a"
+    },
+    {
+      "level": "info",
+      "message": "🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙",
+      "timestamp": "2026-09-12T18:41:16.163Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/chunk-VK2SMPWN.js?v=e8ad547a"
+    },
+    {
+      "level": "warn",
+      "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-09-12T18:41:16.297Z",
+      "url": "http://127.0.0.1:51122/node_modules/.vite/deps/react-router-dom.js?v=132b28ec"
+    }
+  ]
+}

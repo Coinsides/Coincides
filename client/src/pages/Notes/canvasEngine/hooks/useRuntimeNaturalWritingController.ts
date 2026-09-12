@@ -189,21 +189,6 @@ export function resolvePageDraftSessionAuthority({
     : null;
 }
 
-const canvasWorldSessionAuthority: DraftSessionAuthority = {
-  frameId: null,
-  pageBoundary: null,
-  canonicalizeLayout: (layout) => (
-    layout.coordinate_space === 'canvas_world'
-      ? layout
-      : {
-        ...layout,
-        surface: 'canvas_workspace',
-        coordinate_space: 'canvas_world',
-        boundary_role: 'outside',
-      }
-  ),
-};
-
 interface PageStackContentFlowRuntimeOptions {
   coordinateContract?: CoordinateContract;
   documentTypographyProfile?: DocumentTypographyProfile;
@@ -232,9 +217,6 @@ export interface UseRuntimeNaturalWritingControllerOptions
 
 export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWritingControllerOptions) {
   const canonicalizeDraftLayoutForCurrentSurface = useCallback((layout: BlockBoxLayout) => {
-    if (!options.surfacePolicy.isPageMode) {
-      return canvasWorldSessionAuthority.canonicalizeLayout(layout);
-    }
     const authority = resolvePageDraftSessionAuthority({
       coordinateContract: options.coordinateContract,
       collection: options.pageFrameCollection,
@@ -365,10 +347,6 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
     layoutCoordinates: 'page_frame_local' | 'runtime_surface' = 'page_frame_local',
   ) => {
     const nextLayout = layout || options.defaultDraftLayout;
-    if (!options.surfacePolicy.isPageMode) {
-      activateDraft(nextLayout, canvasWorldSessionAuthority);
-      return;
-    }
     const authority = resolvePageDraftSessionAuthority({
       coordinateContract: options.coordinateContract,
       collection: options.pageFrameCollection,

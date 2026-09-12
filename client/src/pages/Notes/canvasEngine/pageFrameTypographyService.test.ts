@@ -102,7 +102,7 @@ describe('page-frame typography families and physical baseline', () => {
   it('preserves active user overrides even when they reuse the legacy default profile ID', () => {
     const hydratedProfile = createDefaultDocumentTypographyProfile({ fontSizePx: 20, lineHeightPx: 29 });
     const metadata = writeTypographyProfileMetadata({}, hydratedProfile);
-    for (const surfaceMode of ['page', 'canvas'] as const) {
+    for (const surfaceMode of ['page'] as const) {
       for (const pageSize of ['A4', 'Letter'] as const) {
         expect(resolveEffectiveDocumentTypographyProfile({
           surfaceMode,
@@ -114,7 +114,7 @@ describe('page-frame typography families and physical baseline', () => {
     }
   });
 
-  it('uses the first frame only as the page default and leaves canvas hydration unchanged', () => {
+  it('uses the first frame only as the page default', () => {
     const hydratedProfile = createDefaultDocumentTypographyProfile();
     const a4 = frameFixture('A4');
     const letter = frameFixture('Letter');
@@ -122,9 +122,6 @@ describe('page-frame typography families and physical baseline', () => {
       expect(resolveEffectiveDocumentTypographyProfile({
         surfaceMode: 'page', metadata: {}, pageFrames, hydratedProfile,
       })).toEqual(createPageFrameDefaultTypographyProfile(pageFrames[0]));
-      expect(resolveEffectiveDocumentTypographyProfile({
-        surfaceMode: 'canvas', metadata: {}, pageFrames, hydratedProfile,
-      })).toBe(hydratedProfile);
     }
     expect(hydratedProfile).toMatchObject({ fontSizePx: 15, lineHeightPx: 22, averageCharWidthPx: 7.2 });
   });

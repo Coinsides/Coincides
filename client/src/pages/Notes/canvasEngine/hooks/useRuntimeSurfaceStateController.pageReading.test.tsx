@@ -85,7 +85,7 @@ describe('page reading programmatic focus scheduling', () => {
     expect(result.current.viewportTransform).toEqual(beforeViewport);
   });
 
-  it('cancels pending page focus on note changes and preserves it after a retired mode toggle', () => {
+  it('cancels pending page focus on note changes and reschedules it on Page', () => {
     const raf = animationFrames();
     const dom = pageDom();
     const subject = renderHook(({ noteId }) => useRuntimeSurfaceStateController({ noteId }), {
@@ -104,7 +104,7 @@ describe('page reading programmatic focus scheduling', () => {
 
     act(() => subject.result.current.focusViewportOnRect(target));
     const secondId = [...raf.pending.keys()][0];
-    act(() => subject.result.current.toggleSurfaceMode());
+    expect(subject.result.current).not.toHaveProperty('toggleSurfaceMode');
     expect(subject.result.current.surfaceMode).toBe('page');
     expect(raf.cancel).not.toHaveBeenCalledWith(secondId);
     expect(raf.pending.size).toBe(1);
@@ -112,13 +112,13 @@ describe('page reading programmatic focus scheduling', () => {
     expect(dom.scroll).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps page focus scheduled and reading state untouched after a retired toggle', () => {
+  it('keeps page focus scheduled and reading state untouched without a toggle export', () => {
     const raf = animationFrames();
     const dom = pageDom();
     const { result } = renderHook(() => useRuntimeSurfaceStateController({ noteId: 'note-a' }));
     result.current.blockListRef.current = dom.blockList;
     act(() => result.current.setPageReadingGear('fit_page'));
-    act(() => result.current.toggleSurfaceMode());
+    expect(result.current).not.toHaveProperty('toggleSurfaceMode');
     const world = { origin: { x: 0, y: 0 }, width: 8000, height: 8000 };
     act(() => result.current.setViewportSize(1000, 800, world));
     const beforeZoom = result.current.viewportTransform.zoom;

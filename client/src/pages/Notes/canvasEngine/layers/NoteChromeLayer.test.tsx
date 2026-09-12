@@ -117,7 +117,6 @@ function noteChromeProps(
     onTogglePreviewBlockTypes: noop,
     onTogglePreviewExportStatus: noop,
     onTogglePreviewLabelOverlay: noop,
-    onToggleSurfaceMode: noop,
     ...overrides,
   };
 }

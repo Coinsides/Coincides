@@ -9,8 +9,6 @@ import { textFocusReceiptForBlock } from './textFocusReceipt';
 import type {
   CanvasObject,
   CanvasPlacement,
-  ContentMount,
-  ImageCanvasObject,
   StructuredCanvasObject,
 } from './types';
 import {
@@ -98,49 +96,9 @@ describe('meaningful renderable block content', () => {
     canvasPlacements: [],
     contentMounts: [],
     imageObjects: [],
-    surfaceMode: 'canvas',
+    surfaceMode: 'page',
     structuredObjects: [],
     visibleBlocks: [],
-  });
-
-  it('counts placed Canvas image, table, and mounted shape text outside visible NoteBlocks', () => {
-    const imageObjectId = 'image-object';
-    expect(hasMeaningfulWritingSurfaceContent({
-      ...emptySurface(),
-      canvasObjects: [canvasObject(imageObjectId, 'image')],
-      canvasPlacements: [canvasPlacement(imageObjectId)],
-      imageObjects: [{ objectId: imageObjectId } as ImageCanvasObject],
-    })).toBe(true);
-
-    const tableObjectId = 'table-object';
-    expect(hasMeaningfulWritingSurfaceContent({
-      ...emptySurface(),
-      canvasObjects: [canvasObject(tableObjectId, 'table')],
-      canvasPlacements: [canvasPlacement(tableObjectId)],
-      structuredObjects: [{ objectId: tableObjectId } as StructuredCanvasObject],
-    })).toBe(true);
-
-    const shapeBlock = block({ id: 'shape-block', plain_text: 'inside shape' });
-    const shape = canvasObject('shape-1', 'shape');
-    const mount = {
-      objectId: shape.objectId,
-      targetKind: 'note_block',
-      targetId: shapeBlock.id,
-    } as ContentMount;
-    expect(hasMeaningfulWritingSurfaceContent({
-      ...emptySurface(),
-      allBlocks: [shapeBlock],
-      canvasObjects: [shape],
-      canvasPlacements: [canvasPlacement(shape.objectId)],
-      contentMounts: [mount],
-    })).toBe(true);
-    expect(hasMeaningfulWritingSurfaceContent({
-      ...emptySurface(),
-      allBlocks: [{ ...shapeBlock, plain_text: '', content_json: { body: '' } }],
-      canvasObjects: [shape],
-      canvasPlacements: [canvasPlacement(shape.objectId)],
-      contentMounts: [mount],
-    })).toBe(false);
   });
 
   it('keeps the Page entry visible for a live-shaped inside table that only Canvas renders', () => {
@@ -202,23 +160,13 @@ describe('meaningful renderable block content', () => {
       hasMeaningfulRenderableContent: meaningful,
       hasPendingEditor: false,
     })).toBe(true);
-    expect(hasMeaningfulWritingSurfaceContent({
-      ...pageInput,
-      surfaceMode: 'canvas',
-    })).toBe(true);
   });
 
-  it('counts visible block content on both Page and Canvas surfaces', () => {
+  it('counts visible block content on the Page surface', () => {
     const visibleBlock = block({ plain_text: 'visible writing' });
     expect(hasMeaningfulWritingSurfaceContent({
       ...emptySurface(),
       surfaceMode: 'page',
-      allBlocks: [visibleBlock],
-      visibleBlocks: [visibleBlock],
-    })).toBe(true);
-    expect(hasMeaningfulWritingSurfaceContent({
-      ...emptySurface(),
-      surfaceMode: 'canvas',
       allBlocks: [visibleBlock],
       visibleBlocks: [visibleBlock],
     })).toBe(true);

@@ -59,7 +59,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   useImperativeHandle(ref, () => ({ resumeEditingForExit: overview.resumeForExit }));
   const document = (
     <div
-      className={`${styles.documentShell} ${surfaceMode === 'canvas' ? styles.documentShellCanvas : ''}`}
+      className={styles.documentShell}
       data-note-overview-active={overview.open ? 'true' : 'false'}
       data-page-reading-target-frame={overview.targetFrameId || undefined}
       onMouseDown={overview.open ? undefined : onSurfacePointerDown}

@@ -1,0 +1,101 @@
+[
+  {
+    "step": "paper edit persisted after reload",
+    "pass": true,
+    "text": "Verified after purge."
+  },
+  {
+    "step": "Page left wall drag",
+    "before": {
+      "left": "72",
+      "right": "72"
+    },
+    "after": {
+      "left": "107.0530612244898",
+      "right": "72",
+      "skin": "warm-paper"
+    }
+  },
+  {
+    "step": "wall and skin persist after reload",
+    "pass": true,
+    "actual": {
+      "left": "107.0530612244898",
+      "right": "72",
+      "skin": "warm-paper"
+    }
+  },
+  {
+    "step": "transient while editing controllers",
+    "result": "Vite HMR hook state error; retry requires full reload"
+  },
+  {
+    "step": "Page image paste and reload",
+    "pass": true,
+    "images": [
+      {
+        "alt": "clipboard.png",
+        "complete": true,
+        "naturalHeight": 90,
+        "naturalWidth": 180
+      }
+    ]
+  },
+  {
+    "step": "clipboard cleanup",
+    "pass": true,
+    "detail": "original clipboard returned empty; cleared synthetic PNG using empty text"
+  },
+  {
+    "step": "Page overview opens",
+    "pass": true,
+    "pages": 1
+  },
+  {
+    "step": "Overview returns to Page",
+    "pass": true
+  },
+  {
+    "step": "Board chalk drag and reload",
+    "pass": true,
+    "before": {
+      "rect": {
+        "bottom": 394,
+        "height": 180,
+        "left": 610,
+        "right": 850,
+        "top": 214,
+        "width": 240,
+        "x": 610,
+        "y": 214
+      },
+      "style": "left: 550px; top: 100px; width: 240px; height: 180px; transform: scale(1); z-index: 0;"
+    },
+    "after": {
+      "rect": {
+        "bottom": 546,
+        "height": 180,
+        "left": 828,
+        "right": 1068,
+        "top": 366,
+        "width": 240,
+        "x": 828,
+        "y": 366
+      },
+      "style": "left: 768px; top: 252px; width: 240px; height: 180px; transform: scale(1); z-index: 0;"
+    },
+    "reloaded": {
+      "rect": {
+        "bottom": 546,
+        "height": 180,
+        "left": 828,
+        "right": 1068,
+        "top": 366,
+        "width": 240,
+        "x": 828,
+        "y": 366
+      },
+      "style": "left: 768px; top: 252px; width: 240px; height: 180px; transform: scale(1); z-index: 0;"
+    }
+  }
+]

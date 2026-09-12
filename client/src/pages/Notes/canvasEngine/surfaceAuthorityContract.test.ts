@@ -152,6 +152,7 @@ describe('canvas surface authority classifier contract', () => {
       x,
       y: 0,
       width,
+      width_mode: 'manual',
       height: 72,
       surface: 'canvas_workspace',
       coordinate_space: 'canvas_world',

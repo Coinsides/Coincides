@@ -20,7 +20,6 @@ const CLIENT_CALL_SITES = [
   'client/src/pages/Notes/canvasEngine/hooks/useBlockTextFlowEditController.ts',
   'client/src/pages/Notes/canvasEngine/hooks/useSlashBlockRollbackController.ts',
   'client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx',
-  'client/src/pages/Notes/canvasEngine/layers/ShapeObjectLayer.tsx',
 ] as const;
 
 function normalizedPath(path: string): string {

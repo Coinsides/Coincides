@@ -669,12 +669,6 @@ export interface BlockPlacementModel extends CanvasPlacement {
   objectKind: 'note_block';
 }
 
-export interface CanvasObjectReserve extends CanvasRect {
-  id: string;
-  kind: 'shape' | 'freehand' | 'image' | 'frame' | 'region';
-  rotation?: number;
-}
-
 export interface RelationEndpointReserve {
   id: string;
   ownerId: string;
@@ -705,6 +699,5 @@ export interface NoteCanvasRuntimeModel {
   structuredObjects: StructuredCanvasObject[];
   canvasAIReadableSnapshot: CanvasAIReadableSnapshot;
   visibleBlockIds: string[];
-  canvasObjectReserve: CanvasObjectReserve[];
   relationEndpointReserve: RelationEndpointReserve[];
 }

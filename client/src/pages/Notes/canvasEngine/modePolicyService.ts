@@ -1,7 +1,6 @@
 import { deriveFrameLocalAutoWidth, resolveWorldRect, selectPlacementFrame, type CoordinateContract } from './placementContractService';
 import { getPrimaryPageOffsetX } from './viewportService';
 import {
-  CANVAS_WORKSPACE_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
   DEFAULT_PAGE_CONTENT_WIDTH,
   ELASTIC_AVOIDANCE_ACTIVATION_DISTANCE,
@@ -18,9 +17,6 @@ import {
   derivePlacementPageFrameAffiliation,
 } from './pageFrameAffiliationService';
 import {
-  snapRectToPageFrameGuides,
-} from './pageFrameGuideService';
-import {
   isCanvasObjectBackingBlock,
 } from './shapeTextMountService';
 import type { PageFrameModel } from './types';
@@ -34,13 +30,6 @@ export interface SurfaceModePolicy {
   pageOffsetX: number;
   showWorkspaceBlocks: boolean;
   useGlobalPageScroll: boolean;
-}
-
-export interface SurfaceModeTransitionPolicy {
-  nextMode: SurfaceMode;
-  closeOverlay: boolean;
-  clearSnapGuide: boolean;
-  clearBlockSelection: boolean;
 }
 
 export interface SurfaceVisibilityContext {
@@ -80,44 +69,28 @@ export function isPageFrameAffiliatedWorkspaceBlock(
   }).kind !== 'workspace_only';
 }
 
-export function createSurfaceModePolicy(surfaceMode: SurfaceMode): SurfaceModePolicy {
-  const isCanvasMode = surfaceMode === 'canvas';
+export function createSurfaceModePolicy(_surfaceMode: SurfaceMode): SurfaceModePolicy {
   return {
-    mode: surfaceMode,
-    isPageMode: !isCanvasMode,
-    isCanvasMode,
-    label: isCanvasMode ? 'Canvas' : 'Page',
-    nextModeLabel: isCanvasMode ? 'Switch to locked page mode' : 'Switch to open canvas mode',
-    pageOffsetX: getPrimaryPageOffsetX(surfaceMode),
-    showWorkspaceBlocks: isCanvasMode,
-    useGlobalPageScroll: !isCanvasMode,
-  };
-}
-
-export function getNextSurfaceMode(surfaceMode: SurfaceMode): SurfaceMode {
-  return surfaceMode === 'page' ? 'canvas' : 'page';
-}
-
-export function createSurfaceModeTransitionPolicy(surfaceMode: SurfaceMode): SurfaceModeTransitionPolicy {
-  return {
-    nextMode: getNextSurfaceMode(surfaceMode),
-    closeOverlay: true,
-    clearSnapGuide: true,
-    clearBlockSelection: true,
+    mode: 'page',
+    isPageMode: true,
+    isCanvasMode: false,
+    label: 'Page',
+    nextModeLabel: '',
+    pageOffsetX: getPrimaryPageOffsetX('page'),
+    showWorkspaceBlocks: false,
+    useGlobalPageScroll: true,
   };
 }
 
 export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock & { metadata?: Record<string, unknown> }>(
   blocks: TBlock[],
-  policy: SurfaceModePolicy,
+  _policy: SurfaceModePolicy,
   contentWidth: number,
   context: SurfaceVisibilityContext = {},
 ): TBlock[] {
   const renderableBlocks = blocks.filter((block) => !isCanvasObjectBackingBlock(block)
     && readStoredLayout(block)?.surface !== 'tray');
-  return policy.showWorkspaceBlocks
-    ? renderableBlocks
-    : renderableBlocks.filter((block) => (
+  return renderableBlocks.filter((block) => (
       !isCanvasWorkspaceBlock(block, contentWidth, { contract: context.coordinateContract, pageFrames: context.pageFrames })
       || isPageFrameAffiliatedWorkspaceBlock(
         block,
@@ -164,7 +137,7 @@ export function createBlankDraftLayout({
 }): BlockBoxLayout {
   if (snapEnabled && policy.isPageMode) return defaultDraftLayout;
 
-  const maxPlacementWidth = policy.isCanvasMode ? CANVAS_WORKSPACE_WIDTH : contentWidth;
+  const maxPlacementWidth = contentWidth;
   const clampedRawX = Math.min(Math.max(rawX, 0), Math.max(0, maxPlacementWidth - MIN_BLOCK_WIDTH));
   const availableWidth = Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth - clampedRawX);
   const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, availableWidth);
@@ -172,30 +145,5 @@ export function createBlankDraftLayout({
   const y = Math.max(0, rawY);
   const rawLayout = { x, y, width, height: DEFAULT_BLOCK_HEIGHT };
 
-  if (!snapEnabled || !policy.isCanvasMode) return rawLayout;
-
-  const contentPageFrame: PageFrameModel = {
-    id: 'local-content-page-frame',
-    role: 'primary_page_frame',
-    exportable: true,
-    x: 0,
-    y: 0,
-    width: contentWidth,
-    height: 0,
-    contentInset: {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-    },
-  };
-  const snapped = snapRectToPageFrameGuides({
-    rect: rawLayout,
-    pageFrame: contentPageFrame,
-  });
-
-  return {
-    ...rawLayout,
-    x: Math.min(Math.max(snapped.rect.x, 0), Math.max(0, maxPlacementWidth - width)),
-  };
+  return rawLayout;
 }

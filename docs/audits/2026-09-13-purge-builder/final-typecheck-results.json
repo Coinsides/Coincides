@@ -1,0 +1,18 @@
+{
+  "requested": "--typecheck",
+  "scratch": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-purge-final-gfVuF4",
+  "results": [
+    {
+      "label": "client typecheck",
+      "code": 0
+    },
+    {
+      "label": "shared build",
+      "code": 0
+    },
+    {
+      "label": "server typecheck",
+      "code": 0
+    }
+  ]
+}

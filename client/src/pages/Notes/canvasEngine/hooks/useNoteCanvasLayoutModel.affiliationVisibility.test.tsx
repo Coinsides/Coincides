@@ -79,6 +79,7 @@ describe('Page-mode geometry-derived workspace visibility', () => {
     };
     const crossingBlock = blockFixture('outer-crossing-canvas-block', {
       ...persistedCrossingRect,
+      width_mode: 'manual',
       surface: 'canvas_workspace',
       coordinate_space: 'canvas_world',
       boundary_role: 'crossing',

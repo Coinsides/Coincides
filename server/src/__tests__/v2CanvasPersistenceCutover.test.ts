@@ -199,8 +199,8 @@ function makeImageCanvasObjectPayload(objectId: string, assetId: string) {
       width: 320,
       height: 180,
       rotation: 0,
-      surface: 'canvas_workspace',
-      boundary_role: 'outside',
+      surface: 'formal_page',
+      boundary_role: 'inside',
       z_index: 12,
       visibility_state: 'normal',
       render_visibility: 'visible',
@@ -234,8 +234,8 @@ function makeTableCanvasObjectPayload(objectId = 'table-object-power-series') {
       width: 360,
       height: 108,
       rotation: 0,
-      surface: 'canvas_workspace',
-      boundary_role: 'outside',
+      surface: 'formal_page',
+      boundary_role: 'inside',
       z_index: 25,
       visibility_state: 'normal',
       render_visibility: 'visible',
@@ -420,7 +420,7 @@ function blockBackedShapePayload(
       y: 180,
       width: 220,
       height: 120,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     },
   });
 }
@@ -441,7 +441,7 @@ function pureShapePayload(
       y: 180,
       width: 220,
       height: 120,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     },
   });
 }
@@ -626,7 +626,7 @@ test('Block CanvasObject identity stays per placement when the same block is reu
     });
     saveBlockCanvasPlacement(db, ids.userId, noteBId, placementBId, {
       block_id: blockId,
-      layout: { x: 420, y: 30, width: 300, height: 110, surface: 'canvas_workspace' },
+      layout: { x: 420, y: 30, width: 300, height: 110, surface: 'formal_page' },
     });
 
     const noteA = getNoteCanvasPersistence(db, ids.userId, noteAId);
@@ -651,24 +651,30 @@ test('Block CanvasObject identity stays per placement when the same block is reu
   });
 });
 
-test('Block placement round-trips the coordinate and Page boundary receipt', async () => {
+test('Historical Block placement keeps its coordinate and Page boundary receipt readable while retired writes are rejected', async () => {
   await withDb((db) => {
     const ids = seedUserCourseNote(db);
     const { blockId, placementId } = seedBlockPlacement(db, ids);
+    const historicalLayout = {
+      x: 900,
+      y: 30,
+      width: 80,
+      height: 110,
+      surface: 'canvas_workspace',
+      boundary_role: 'crossing',
+      frame_id: 'page-frame-receipt',
+      coordinate_space: 'canvas_world',
+    };
 
-    const saved = saveBlockCanvasPlacement(db, ids.userId, ids.noteId, placementId, {
+    saveBlockCanvasPlacement(db, ids.userId, ids.noteId, placementId, {
       block_id: blockId,
-      layout: {
-        x: 900,
-        y: 30,
-        width: 80,
-        height: 110,
-        surface: 'canvas_workspace',
-        boundary_role: 'crossing',
-        frame_id: 'page-frame-receipt',
-        coordinate_space: 'canvas_world',
-      },
+      layout: { ...historicalLayout, surface: 'formal_page', boundary_role: 'inside' },
     });
+    // Seed a pre-retirement row directly; current writers must never mint these values.
+    db.prepare("UPDATE canvas_placements SET surface = 'canvas_workspace', boundary_role = 'crossing' WHERE id = ?")
+      .run(placementId);
+    const saved = getNoteCanvasPersistence(db, ids.userId, ids.noteId).blockLayouts[0];
+    assert.ok(saved);
 
     assert.equal(saved.layout.surface, 'canvas_workspace');
     assert.equal(saved.layout.boundary_role, 'crossing');
@@ -679,6 +685,16 @@ test('Block placement round-trips the coordinate and Page boundary receipt', asy
     assert.equal(persistence.blockLayouts[0]?.layout.boundary_role, 'crossing');
     assert.equal(persistence.blockLayouts[0]?.layout.frame_id, 'page-frame-receipt');
     assert.equal(persistence.blockLayouts[0]?.layout.coordinate_space, 'canvas_world');
+
+    assert.throws(() => saveBlockCanvasPlacement(db, ids.userId, ids.noteId, placementId, {
+      block_id: blockId,
+      layout: historicalLayout,
+    }), { statusCode: 400, message: 'canvas_workspace_retired' });
+    assert.throws(() => saveBlockCanvasPlacement(db, ids.userId, ids.noteId, placementId, {
+      block_id: blockId,
+      layout: { ...historicalLayout, surface: 'formal_page' },
+    }), { statusCode: 400, message: 'canvas_crossing_retired' });
+    assert.deepEqual(getNoteCanvasPersistence(db, ids.userId, ids.noteId), persistence);
   });
 });
 
@@ -1512,7 +1528,7 @@ test('Generic CanvasObject pipeline round-trips and hard-deletes a test-only pro
         y: 180,
         width: 240,
         height: 96,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
         z_index: 12,
       },
       metadata: { role: 'pipeline-proof' },
@@ -1522,7 +1538,7 @@ test('Generic CanvasObject pipeline round-trips and hard-deletes a test-only pro
     assert.equal((saved.canvasObject as any).kind, '__test_probe');
     assert.equal((saved.canvasObject as any).metadata.role, 'pipeline-proof');
     assert.equal((saved.placement as any).placement_id, placementId);
-    assert.equal((saved.placement as any).surface, 'canvas_workspace');
+    assert.equal((saved.placement as any).surface, 'formal_page');
     assert.equal((saved.placement as any).z_index, 12);
     assert.equal((saved.placement as any).width, 240);
 
@@ -1579,7 +1595,7 @@ test('Shape CanvasObject round-trips through generic persistence without content
         width: 180,
         height: 110,
         rotation: 0,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
         z_index: 30,
       },
     });
@@ -1590,7 +1606,7 @@ test('Shape CanvasObject round-trips through generic persistence without content
     assert.equal((saved.canvasObject as any).object_class, 'pure');
     assert.equal((saved.canvasObject as any).metadata.shape_type, 'rectangle');
     assert.equal((saved.placement as any).placement_id, placementId);
-    assert.equal((saved.placement as any).surface, 'canvas_workspace');
+    assert.equal((saved.placement as any).surface, 'formal_page');
     assert.equal((saved.placement as any).z_index, 30);
 
     const persistence = getNoteCanvasPersistence(db, ids.userId, ids.noteId);
@@ -1620,7 +1636,7 @@ test('Shape CanvasObject delete cascades placement rows', async () => {
         y: 180,
         width: 160,
         height: 110,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
     }));
 
@@ -1648,7 +1664,7 @@ test('Visual Connector CanvasObject round-trips with visual-only endpoints', asy
         y: 160,
         width: 160,
         height: 100,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
     }));
     saveCanvasObject(db, ids.userId, ids.noteId, endShapeId, saveCanvasObjectSchema.parse({
@@ -1662,7 +1678,7 @@ test('Visual Connector CanvasObject round-trips with visual-only endpoints', asy
         y: 260,
         width: 140,
         height: 140,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
     }));
 
@@ -1678,7 +1694,7 @@ test('Visual Connector CanvasObject round-trips with visual-only endpoints', asy
         y: 210,
         width: 290,
         height: 120,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
         z_index: 44,
       },
       extension: {
@@ -1721,7 +1737,7 @@ test('Visual Connector accepts point endpoints but rejects semantic or content-b
       y: 40,
       width: 260,
       height: 160,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     };
 
     const parsed = saveCanvasObjectSchema.parse({
@@ -1795,7 +1811,7 @@ test('Deleting a Visual Connector endpoint object hard-deletes the connector', a
           y: 160,
           width: 160,
           height: 100,
-          surface: 'canvas_workspace',
+          surface: 'formal_page',
         },
       }));
     }
@@ -1810,7 +1826,7 @@ test('Deleting a Visual Connector endpoint object hard-deletes the connector', a
         y: 210,
         width: 320,
         height: 0,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
       extension: {
         start: { kind: 'object', object_id: startShapeId, anchor: 'center' },
@@ -1861,7 +1877,7 @@ test('Block-backed Shape CanvasObject round-trips with an owned note_block mount
         width: 220,
         height: 120,
         rotation: 0,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
         z_index: 35,
       },
     }));
@@ -1935,7 +1951,7 @@ test('Paragraph block projection still disappears when its backing block is tras
         y: 140,
         width: 360,
         height: 120,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
     });
     const objectId = `canvas-object:${ids.noteId}:block-placement:${placementId}`;
@@ -2015,7 +2031,7 @@ test('Block-backed Shape CanvasObject rejects missing or mismatched backing bloc
       y: 0,
       width: 120,
       height: 90,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     };
     const { blockId } = seedShapeBackingBlock(db, ids, objectId);
     const otherBlock = seedShapeBackingBlock(db, ids, `${objectId}:other`);
@@ -2069,7 +2085,7 @@ test('Deleting a block-backed Shape CanvasObject removes its owned backing block
         y: 180,
         width: 180,
         height: 120,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
     }));
 
@@ -2236,7 +2252,7 @@ test('Generic CanvasObject delete clears ContentGroupMember soft pointers', asyn
         y: 180,
         width: 240,
         height: 96,
-        surface: 'canvas_workspace',
+        surface: 'formal_page',
       },
     }));
     const groupId = uuidv4();
@@ -2338,7 +2354,7 @@ test('Generic CanvasObject save refuses PageFrame kind-flip by existing object i
             y: 0,
             width: 100,
             height: 100,
-            surface: 'canvas_workspace',
+            surface: 'formal_page',
           },
         }),
       ),

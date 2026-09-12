@@ -49,7 +49,6 @@ export function createPageFrameDefaultTypographyProfile(
 }
 
 export function resolveEffectiveDocumentTypographyProfile({
-  surfaceMode,
   metadata,
   pageFrames,
   hydratedProfile,
@@ -59,7 +58,7 @@ export function resolveEffectiveDocumentTypographyProfile({
   pageFrames: PageFrameModel[] | undefined;
   hydratedProfile: DocumentTypographyProfile;
 }): DocumentTypographyProfile {
-  if (surfaceMode === 'canvas' || hasDocumentTypographyProfileOverride(metadata)) {
+  if (hasDocumentTypographyProfileOverride(metadata)) {
     return hydratedProfile;
   }
   // A note has one effective profile: selection changes never change the family.

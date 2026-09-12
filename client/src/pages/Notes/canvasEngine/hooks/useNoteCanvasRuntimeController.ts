@@ -43,7 +43,6 @@ export function useNoteCanvasRuntimeController() {
     markDraftFocused,
     markBlockSelected,
     releaseTextFocus,
-    resolveInitialSurfaceMode,
     movingBlockIdRef,
     openBlockTrash,
     openLayoutPanel,
@@ -53,10 +52,7 @@ export function useNoteCanvasRuntimeController() {
     nudgePageReadingStep,
     setPageReadingViewport,
     pageOffsetX,
-    panViewportBy,
-    resetViewport,
     selectedBlockId,
-    scrollViewportBy,
     setActiveBlockId,
     setFocusBlockId,
     setInteractionState,
@@ -87,9 +83,7 @@ export function useNoteCanvasRuntimeController() {
     togglePreviewBlockTypes,
     togglePreviewExportStatus,
     togglePreviewLabelOverlay,
-    toggleSurfaceMode,
     viewportTransform,
-    zoomViewportAt,
   } = useRuntimeSurfaceStateController({ noteId });
   const {
     applyMeasuredBlockHeightDraft,
@@ -274,15 +268,6 @@ export function useNoteCanvasRuntimeController() {
     surfaceMode,
     surfacePolicy,
   });
-
-  useLayoutEffect(() => {
-    resolveInitialSurfaceMode({
-      blocks: sortedBlocks,
-      contentWidth,
-      loadedNoteId: note?.id,
-      loading,
-    });
-  }, [contentWidth, loading, note?.id, resolveInitialSurfaceMode, sortedBlocks]);
 
   const textHistory = useTextFlowHistory({
     noteId: noteId ?? '', generation: textHistoryGeneration, blocks,
@@ -561,7 +546,6 @@ export function useNoteCanvasRuntimeController() {
     onApplyBlockEditRecovery: applyBlockEditRecovery,
     onInspectBlockEditRecovery: inspectBlockEditRecovery,
     onReplayBlockEditRecovery: replayBlockEditRecovery,
-    onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },
     onClearSlashTarget: clearSlashTarget,
     onCloseOverlay: closeOverlay,
     onDiscardDraft: discardDraft,
@@ -576,11 +560,7 @@ export function useNoteCanvasRuntimeController() {
     onMeasuredBlockHeight: (...args) => { if (!walls.activeWall && !walls.saving) handleMeasuredBlockHeight(...args); },
     onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
     onPersistDraft: (text, options) => persistDraft(text, undefined, options),
-    onPersistChangedBlockLayouts: (layouts) => {
-      if (textHistory.boundary()) void enqueueRuntimeHistoryOperation(() => persistChangedBlockLayouts(layouts));
-    },
     onResizeDraftFromTextarea: resizeDraftFromTextarea,
-    onResetViewport: resetViewport,
     onSaveBlock: saveBlock,
     onSaveTitle: saveTitle,
     descriptionDraft,
@@ -591,7 +571,6 @@ export function useNoteCanvasRuntimeController() {
     onSaveGroupFolders: saveGroupFolders,
     onSavePageFrameCollection: savePageFrameCollection,
     onPersistCanvasObject: inkCommands.persistCanvasObject,
-    onPushStructuredMutationHistory: pushStructuredMutationHistory,
     onDeleteCanvasObject: inkCommands.deleteCanvasObject,
     onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
     onSelectBlock: markBlockSelected,
@@ -613,15 +592,8 @@ export function useNoteCanvasRuntimeController() {
     onTogglePreviewBlockTypes: togglePreviewBlockTypes,
     onTogglePreviewExportStatus: togglePreviewExportStatus,
     onTogglePreviewLabelOverlay: togglePreviewLabelOverlay,
-    onToggleSurfaceMode: toggleSurfaceMode,
     onTrashBlock: handleTrashBlock,
-    onForgetBlockLocally: forgetBlockLocally,
-    onRestoreBlockById: restoreBlockById,
-    onPanViewportBy: panViewportBy,
-    onScrollViewportBy: scrollViewportBy,
-    onViewportSizeChange: setViewportSize,
     onViewSource: handleViewSource,
-    onZoomViewportAt: zoomViewportAt,
     onWritingSurfaceFocusBlock: handleWritingSurfaceFocusBlock,
     onWritingSurfaceRequestBlockFocus: setFocusBlockId,
   });

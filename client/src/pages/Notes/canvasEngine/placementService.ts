@@ -5,7 +5,6 @@ import {
 } from '../../../../../shared/types/canvasSurfaceAuthority';
 import {
   DEFAULT_BLOCK_GAP,
-  CANVAS_WORKSPACE_WIDTH,
   DEFAULT_PAGE_CONTENT_WIDTH,
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
@@ -415,13 +414,10 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
     selectPlacementFrame(stored, pageFrames, contract), contract) !== undefined;
   const useStoredPlacement = hasFrameLocalAutoWidth
     || !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
-  const isWorkspaceLayout = surfaceMode === 'canvas' && stored?.surface === 'canvas_workspace';
-  const maxPlacementWidth = isWorkspaceLayout
-    ? CANVAS_WORKSPACE_WIDTH
-    : contentWidth;
+  const maxPlacementWidth = contentWidth;
   const shouldUseStoredWidth = useStoredPlacement
     && typeof stored?.width === 'number'
-    && (isWorkspaceLayout || stored.width_mode === 'manual');
+    && stored.width_mode === 'manual';
   const preserveWorldCoordinates = useStoredPlacement
     && preserveContractLayoutCoordinates(stored, contract);
   const requestedX = useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x;
@@ -468,7 +464,6 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   block,
   layout,
   contentWidth,
-  surfaceMode,
   estimateHeight,
   contract = 'v1',
   pageFrames = [],
@@ -484,12 +479,9 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   if (contract === 'v2' && layout.coordinate_space === 'page_frame_local' && layout.width_mode !== 'manual') {
     layout = toStoredLayout(layout, pageFrames, contract);
   }
-  const isWorkspaceLayout = surfaceMode === 'canvas' && layout.surface === 'canvas_workspace';
-  const maxPlacementWidth = isWorkspaceLayout
-    ? CANVAS_WORKSPACE_WIDTH
-    : contentWidth;
+  const maxPlacementWidth = contentWidth;
   const placementWidth = clamp(
-    isWorkspaceLayout || layout.width_mode === 'manual'
+    layout.width_mode === 'manual'
       ? layout.width
       : Math.min(deriveFrameLocalAutoWidth(layout, selectPlacementFrame(layout, pageFrames, contract), contract)
         ?? DEFAULT_PAGE_CONTENT_WIDTH, contentWidth),

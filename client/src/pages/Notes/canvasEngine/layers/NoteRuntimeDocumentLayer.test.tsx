@@ -85,7 +85,6 @@ const runtimeModel = {
   structuredObjects: [],
   canvasAIReadableSnapshot: { nodes: [] },
   visibleBlockIds: [codeBlock.id],
-  canvasObjectReserve: [],
   relationEndpointReserve: [],
 } as unknown as NoteCanvasRuntimeModel;
 
@@ -155,7 +154,6 @@ function writingSurfaceProps(
     visibleBlocks: [codeBlock],
     onCreateBlock: vi.fn(async () => null),
     onPersistCanvasObject: vi.fn(async () => true),
-    onPushStructuredMutationHistory: noOp,
     onDeleteCanvasObject: vi.fn(async () => true),
     onSaveAnnotationTruths: vi.fn(async () => undefined),
     onSaveContentGroups: vi.fn(async () => true),
@@ -170,13 +168,6 @@ function writingSurfaceProps(
     onBlockTextFlowChange: noOp,
     onApplyBlockTextFlowEdit: vi.fn(async () => undefined),
     onClearSlashTarget: noOp,
-    onAddPageBelow: noOp,
-    onCreatePageFrame: noOp,
-    onCreatePageStack: noOp,
-    onDeletePageFrame: noOp,
-    onDetachPageFromStack: noOp,
-    onDuplicatePageFrame: noOp,
-    onMovePageFrame: noOp,
     onDiscardDraft: noOp,
     onDraftChange: noOp,
     onDraftFocusReceipt: noOp,
@@ -187,33 +178,22 @@ function writingSurfaceProps(
     onRequestFocusBlock: noOp,
     onMeasuredBlockHeight: noOp,
     onPageSpaceDoubleClick: noOp,
-    onPanViewportBy: noOp,
     onPersistDraft: vi.fn(async () => undefined),
     onResizeDraftFromTextarea: noOp,
-    onResetViewport: noOp,
     onSaveBlock,
-    onScrollViewportBy: noOp,
     onSelectBlock: noOp,
-    onSelectPageFrame: noOp,
     onSelectSlashCommand: noOp,
-    onResizePageFrame: noOp,
-    onSetPrimaryPageFrame: noOp,
-    onTogglePageStackCollapse: noOp,
     onToggleAIVisibility: noOp,
     onToggleExportRole: noOp,
     onTrashBlock: noOp,
-    onForgetBlockLocally: noOp,
-    onRestoreBlockById: vi.fn(async () => null),
-    onViewportSizeChange: noOp,
     onViewSource: noOp,
-    onZoomViewportAt: noOp,
   };
 }
 
 describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('renders the effective page typography without a frame extension and preserves the canvas fallback', () => {
+  it('renders the effective page typography without a frame extension', () => {
     vi.stubGlobal('ResizeObserver', class {
       observe() {}
       disconnect() {}
@@ -235,16 +215,12 @@ describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
         writingSurfaceProps={{ ...props, surfaceMode }}
       />
     );
-    const { container, rerender } = render(renderDocument('page'));
+    const { container } = render(renderDocument('page'));
     const surface = () => container.querySelector<HTMLElement>('[data-document-font-size]')!;
     expect(surface().dataset.documentFontSize).toBe(String(profile.fontSizePx));
     expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${profile.fontSizePx}px`);
     expect(surface().style.getPropertyValue('--document-line-height')).toBe(`${profile.lineHeightPx}px`);
 
-    rerender(renderDocument('canvas'));
-    const canvasDefault = createDefaultDocumentTypographyProfile();
-    expect(surface().dataset.documentFontSize).toBe(String(canvasDefault.fontSizePx));
-    expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${canvasDefault.fontSizePx}px`);
   });
 
   it('shows the current-note receipt and exposes explicit Apply and Dismiss actions', () => {
@@ -421,8 +397,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
       props.onSaveBlock, props.onPersistDraft, props.onBlockTextChange,
       props.onBlockTextFlowChange, props.onApplyBlockTextFlowEdit, props.onFieldDraftChange,
       props.onSaveDocumentTypographyProfile, props.onPersistCanvasObject, props.onMeasuredBlockHeight,
-      props.onBeginMoveBlock, props.onBeginResizeBlock, props.onMovePageFrame, props.onResizePageFrame,
-      props.onSelectPageFrame, props.onSetPrimaryPageFrame,
+      props.onBeginMoveBlock, props.onBeginResizeBlock,
     ];
   }
 
@@ -464,7 +439,6 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
       return this.querySelector<HTMLTextAreaElement>('[aria-label="Note title"]')!.value.length > 40 ? 500 : 120;
     });
     const props = overviewProps(1);
-    props.onMovePageFrame = vi.fn();
     props.blockLayouts = { [codeBlock.id]: { x: 34, y: 85, width: 540, height: 120 } };
     const original = JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks });
     const { container, rerender } = render(documentFor(props));
@@ -492,12 +466,10 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     expect(header.onSaveDescription).toHaveBeenCalledOnce();
     expect(props.onPersistCanvasObject).not.toHaveBeenCalled();
     expect(props.onSaveBlock).not.toHaveBeenCalled();
-    expect(props.onMovePageFrame).not.toHaveBeenCalled();
   });
 
   it('D2 keeps a negative local-y block after the header without rewriting its stored position', () => {
     const props = { ...overviewProps(1), paperHeader: paperHeader() };
-    props.onMovePageFrame = vi.fn();
     props.noteCanvasRuntime = { ...props.noteCanvasRuntime, coordinateContract: 'v2' };
     props.blockLayouts = { [codeBlock.id]: { x: -24, y: -90, width: 540, height: 120,
       surface: 'formal_page', coordinate_space: 'page_frame_local', frame_id: props.noteCanvasRuntime.primaryPageFrame!.id } };
@@ -514,7 +486,6 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     expect(bodyTop).toBeGreaterThanOrEqual(120 * scale);
     expect(JSON.stringify(props.blockLayouts)).toBe(original);
     expect(props.onPersistCanvasObject).not.toHaveBeenCalled();
-    expect(props.onMovePageFrame).not.toHaveBeenCalled();
   });
 
   it('D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body', () => {

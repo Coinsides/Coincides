@@ -1,0 +1,107 @@
+{
+  "migrated": [
+    {
+      "line": 202,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 237,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 423,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 444,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 629,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1515,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1582,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1623,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1651,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1665,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1681,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1724,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1798,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1813,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1864,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 1938,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 2018,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 2072,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 2239,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 2341,
+      "kind": "fixture surface"
+    },
+    {
+      "line": 203,
+      "kind": "fixture boundary"
+    },
+    {
+      "line": 238,
+      "kind": "fixture boundary"
+    },
+    {
+      "line": 1525,
+      "kind": "Page-equivalent surface round-trip assertion"
+    },
+    {
+      "line": 1593,
+      "kind": "Page-equivalent surface round-trip assertion"
+    }
+  ],
+  "testCount": 49,
+  "assetTestsByteIdentical": true,
+  "historicalMigrationByteIdentical": true,
+  "originalAssertionLinesMissing": [
+    "\n    assert.equal((saved.placement as any).surface, 'canvas_workspace');",
+    "\n    assert.equal((saved.placement as any).surface, 'canvas_workspace');"
+  ]
+}

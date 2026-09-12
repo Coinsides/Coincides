@@ -26,7 +26,6 @@ import {
   type SurfaceModePolicy,
 } from '../modePolicyService';
 import {
-  CANVAS_WORKSPACE_WIDTH,
   LAYOUT_MEASURE_SUPPRESSION_MS,
   type BlockBoxLayout,
   type SnapGuide,
@@ -172,7 +171,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
         deltaX,
         deltaY,
         contentWidth,
-        dragBoundsWidth: surfacePolicy.isCanvasMode ? CANVAS_WORKSPACE_WIDTH : contentWidth,
+        dragBoundsWidth: contentWidth,
         snapEnabled,
         orderedBlockIds,
         resolveCollisions: shouldResolvePageCollisions(surfacePolicy) || snapEnabled,

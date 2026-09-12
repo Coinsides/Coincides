@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { requireCanvasPlacementWritePayload, resolveActiveNoteCanvasMode } from './canvasRetirementPolicy';
@@ -14,20 +14,15 @@ const geometry = { x: 12, y: 14, width: 300, height: 72 };
 describe('S5 retired canvas doors', () => {
   beforeEach(() => api.put.mockReset());
 
-  it('opens legacy canvas route/state as Page and keeps it Page after hydration and stale toggle calls', () => {
+  it('opens legacy canvas route/state as Page without hydration or toggle callbacks', () => {
     const persisted = { mode: 'canvas', surfaceMode: 'canvas' };
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <MemoryRouter initialEntries={[{ pathname: '/notes/s5-note', search: '?mode=canvas', state: persisted }]}>{children}</MemoryRouter>
     );
-    const subject = renderHook(() => useSurfaceModeController({
-      noteId: 's5-note', clearBlockSelection: vi.fn(), closeOverlay: vi.fn(), setSnapGuide: vi.fn(),
-    }), { wrapper });
+    const subject = renderHook(() => useSurfaceModeController(), { wrapper });
     expect(resolveActiveNoteCanvasMode(persisted.mode)).toBe('page');
-    act(() => subject.result.current.resolveInitialSurfaceMode({
-      blocks: [{ id: 'legacy', canvas_layout: { ...geometry, surface: 'canvas_workspace', boundary_role: 'crossing' } }],
-      contentWidth: 650, loadedNoteId: 's5-note', loading: false,
-    }));
-    act(() => subject.result.current.toggleSurfaceMode());
+    expect(subject.result.current).not.toHaveProperty('resolveInitialSurfaceMode');
+    expect(subject.result.current).not.toHaveProperty('toggleSurfaceMode');
     expect(subject.result.current.surfaceMode).toBe('page');
     expect(subject.result.current.surfacePolicy.isCanvasMode).toBe(false);
     expect(persisted).toEqual({ mode: 'canvas', surfaceMode: 'canvas' });

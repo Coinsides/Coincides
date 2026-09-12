@@ -1,0 +1,162 @@
+{
+  "files": [
+    {
+      "file": "client/src/pages/Notes/canvasEngine/engineModel.ts",
+      "added": 0,
+      "deleted": 42,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/types.ts",
+      "added": 0,
+      "deleted": 7,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts",
+      "added": 0,
+      "deleted": 1,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/shapeProjectionService.ts",
+      "added": 1,
+      "deleted": 1,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/imageObjectService.ts",
+      "added": 1,
+      "deleted": 1,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/tableObjectService.ts",
+      "added": 1,
+      "deleted": 1,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/viewportService.ts",
+      "added": 6,
+      "deleted": 45,
+      "attribution": "shared with controller batch 2; reserve contribution is only -2 lines"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "added": 2,
+      "deleted": 27,
+      "attribution": "this subtask"
+    },
+    {
+      "file": "client/scripts/canvasEngineModelContractCheck.ts",
+      "added": 49,
+      "deleted": 64,
+      "attribution": "this subtask"
+    }
+  ],
+  "ownNumstat": {
+    "added": 54,
+    "deleted": 146
+  },
+  "modelAsserts": {
+    "before": 1108,
+    "after": 1094,
+    "removed": [
+      {
+        "line": 547,
+        "text": "assert(canvasViewport.x < 0, 'canvas viewport starts with left-side workspace headroom')"
+      },
+      {
+        "line": 548,
+        "text": "assert(canvasViewport.y < 0, 'canvas viewport starts with top-side workspace headroom')"
+      },
+      {
+        "line": 550,
+        "text": "assert(canvasViewport.width > pageViewport.width, 'canvas viewport is wider than the formal page')"
+      },
+      {
+        "line": 552,
+        "text": "assert(canvasWorld.width > pageWorld.width, 'canvas world is wider than page world')"
+      },
+      {
+        "line": 591,
+        "text": "assertAtLeast(\n    dynamicWorld.width,\n    farPageFrame.x + farPageFrame.width + 800,\n    'canvas world expands to include far PageFrame width',\n  )"
+      },
+      {
+        "line": 596,
+        "text": "assertAtLeast(\n    dynamicWorld.height,\n    farPageFrame.y + farPageFrame.height + 800,\n    'canvas world expands to include far PageFrame height',\n  )"
+      },
+      {
+        "line": 654,
+        "text": "assertEqual(canvasPolicy.showWorkspaceBlocks, true, 'canvas mode shows workspace blocks')"
+      },
+      {
+        "line": 655,
+        "text": "assertEqual(canvasPolicy.useGlobalPageScroll, false, 'canvas mode disables global page scroll')"
+      },
+      {
+        "line": 657,
+        "text": "assertEqual(canvasVisible.length, 2, 'canvas mode preserves workspace block')"
+      },
+      {
+        "line": 3957,
+        "text": "assertEqual(shouldResolvePageCollisions(canvasPolicy), false, 'canvas mode does not force page collision resolution')"
+      },
+      {
+        "line": 3960,
+        "text": "assertEqual(shouldUseElasticAvoidance({ policy: canvasPolicy, snapEnabled: false, deltaY: 12 }), false, 'canvas mode disables page elastic avoidance')"
+      },
+      {
+        "line": 3963,
+        "text": "assertEqual(transition.nextMode, 'canvas', 'page transition targets canvas')"
+      },
+      {
+        "line": 3964,
+        "text": "assertEqual(transition.closeOverlay, true, 'mode transition closes overlay')"
+      },
+      {
+        "line": 3965,
+        "text": "assertEqual(transition.clearBlockSelection, true, 'mode transition clears block selection')"
+      }
+    ]
+  },
+  "layerAsserts": {
+    "before": 82,
+    "after": 80,
+    "removed": [
+      {
+        "line": 246,
+        "text": "expect(surface().dataset.documentFontSize).toBe(String(canvasDefault.fontSizePx))"
+      },
+      {
+        "line": 247,
+        "text": "expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${canvasDefault.fontSizePx}px`)"
+      }
+    ]
+  },
+  "modelGroups": 60,
+  "documentLayerTests": 15,
+  "textFlowIdentityCleanup": {
+    "file": "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "added": 0,
+    "deleted": 1,
+    "wholeFileIdenticalExceptDeadArrayElement": true,
+    "before": {
+      "tests": 4,
+      "pass": 3,
+      "fail": 1,
+      "skipped": 0
+    },
+    "after": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "ownNumstatIncludingIdentity": {
+    "added": 54,
+    "deleted": 147
+  }
+}

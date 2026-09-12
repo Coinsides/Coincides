@@ -105,25 +105,13 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
 
   const {
     pageOffsetX,
-    resolveInitialSurfaceMode,
     surfaceMode,
     surfacePolicy,
-    toggleSurfaceMode,
-  } = useSurfaceModeController({
-    noteId,
-    clearBlockSelection,
-    closeOverlay,
-    setSnapGuide,
-  });
+  } = useSurfaceModeController();
 
   const {
-    focusViewportOnRect: focusCanvasViewportOnRect,
-    panViewportBy,
-    resetViewport,
-    scrollViewportBy,
     setViewportSize,
     viewportTransform,
-    zoomViewportAt,
   } = useViewportTransformController({ surfaceMode });
 
   const pageReading = usePageReadingViewportController({ noteId });
@@ -139,16 +127,14 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     if (pageFocusFrameRef.current !== null) cancelAnimationFrame(pageFocusFrameRef.current);
     pageFocusFrameRef.current = null;
   }, [noteId, surfaceMode]);
-  const focusViewportOnRect = useCallback((rect: CanvasRect, world?: CanvasWorldModel) => {
-    if (surfaceMode === 'page') {
-      if (pageFocusFrameRef.current !== null) cancelAnimationFrame(pageFocusFrameRef.current);
-      // New-page/continuation callers focus before their taller DOM has committed.
-      pageFocusFrameRef.current = requestAnimationFrame(() => {
-        pageFocusFrameRef.current = null;
-        scrollPageReadingToRect(blockListRef.current, rect);
-      });
-    } else focusCanvasViewportOnRect(rect, world);
-  }, [blockListRef, focusCanvasViewportOnRect, surfaceMode]);
+  const focusViewportOnRect = useCallback((rect: CanvasRect, _world?: CanvasWorldModel) => {
+    if (pageFocusFrameRef.current !== null) cancelAnimationFrame(pageFocusFrameRef.current);
+    // New-page/continuation callers focus before their taller DOM has committed.
+    pageFocusFrameRef.current = requestAnimationFrame(() => {
+      pageFocusFrameRef.current = null;
+      scrollPageReadingToRect(blockListRef.current, rect);
+    });
+  }, [blockListRef]);
 
   return {
     ...pageReading,
@@ -174,11 +160,7 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     openBlockTrash,
     openLayoutPanel,
     pageOffsetX,
-    panViewportBy,
-    resetViewport,
-    resolveInitialSurfaceMode,
     selectedBlockId,
-    scrollViewportBy,
     setActiveBlockId,
     setFocusBlockId,
     setInteractionState,
@@ -209,8 +191,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     togglePreviewBlockTypes,
     togglePreviewExportStatus,
     togglePreviewLabelOverlay,
-    toggleSurfaceMode,
     viewportTransform,
-    zoomViewportAt,
   };
 }

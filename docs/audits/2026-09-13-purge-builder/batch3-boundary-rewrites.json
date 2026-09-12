@@ -1,0 +1,307 @@
+[
+  {
+    "old": "Mode policy service owns page canvas visibility and blank draft policy",
+    "new": "Page policy owns visibility and blank draft placement",
+    "kind": "all",
+    "input": "modePolicyService",
+    "tokens": [
+      "createSurfaceModePolicy",
+      "getVisibleBlocksForSurface",
+      "shouldResolvePageCollisions",
+      "shouldUseElasticAvoidance",
+      "createBlankDraftLayout",
+      "showWorkspaceBlocks: false",
+      "useGlobalPageScroll: true"
+    ]
+  },
+  {
+    "old": "Mode policy keeps Canvas draft placement free while allowing PageFrame guide snapping",
+    "new": "Page draft placement retains snap and content-width bounds",
+    "kind": "all",
+    "input": "modePolicyService",
+    "tokens": [
+      "snapEnabled && policy.isPageMode",
+      "const maxPlacementWidth = contentWidth",
+      "Math.max(0, rawY)"
+    ]
+  },
+  {
+    "old": "Writing surface exposes PageFrame template background and style markers",
+    "new": "Writing surface exposes Page template background and style markers",
+    "kind": "all",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "data-page-frame-template",
+      "data-page-frame-background",
+      "primaryPageFrameTemplateStyle"
+    ]
+  },
+  {
+    "old": "Writing surface renders PageFrame collection in Canvas Mode",
+    "new": "Writing surface has no retired Canvas frame collection",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "data-page-frame-index",
+      "formalPageBoundaryPrimary",
+      "formalPageBoundarySecondary"
+    ]
+  },
+  {
+    "old": "Writing surface routes PageFrame command surface actions",
+    "new": "Writing surface has no retired Canvas frame context menus",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "buildCanvasBlankMenu",
+      "buildPageFrameShellMenu",
+      "canvasBlankContextMenu",
+      "pageFrameContextMenu",
+      "handleBlankSurfaceContextMenu"
+    ]
+  },
+  {
+    "old": "Writing surface renders and persists generic shape CanvasObjects",
+    "new": "Writing surface has no retired generic shape layer or handlers",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "ShapeObjectLayer",
+      "createPureShapeProjection",
+      "shapePlacements",
+      "shapeSavePayload",
+      "handleShapePointerDown",
+      "handleShapeResizePointerDown",
+      "buildCanvasObjectShellMenu"
+    ]
+  },
+  {
+    "old": "Writing surface renders and persists visual connector CanvasObjects",
+    "new": "Writing surface has no retired connector layer or commands",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "VisualConnectorLayer",
+      "createVisualConnectorProjection",
+      "visualConnectorSavePayload",
+      "visualConnectorDraft",
+      "start_visual_connector_from_object",
+      "finish_visual_connector_to_object"
+    ]
+  },
+  {
+    "old": "Writing surface renders and persists image CanvasObjects",
+    "new": "Writing surface has no retired generic image layer or commands",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "ImageObjectLayer",
+      "createImageObjectProjection",
+      "uploadCanvasImageAsset",
+      "imageObjectSavePayload",
+      "imagePlacements",
+      "imageObjectById",
+      "buildImageObjectShellMenu",
+      "edit_image_caption",
+      "edit_image_alt_text",
+      "toggle_image_fit"
+    ]
+  },
+  {
+    "old": "Writing surface renders and persists structured table CanvasObjects",
+    "new": "Writing surface has no retired table layer or mutations",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "TableObjectLayer",
+      "createTableObjectProjection",
+      "tableObjectSavePayload",
+      "persistTableMutationPayload",
+      "confirmDeleteNonEmptyTablePart",
+      "tableRowHasText",
+      "tableColumnHasText",
+      "create_table_object",
+      "tablePlacements",
+      "structuredObjectById",
+      "buildTableObjectShellMenu"
+    ]
+  },
+  {
+    "old": "Writing surface commits pending table cell draft before opening table menu",
+    "new": "Writing surface has no retired table editor context menu",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "PendingTableCellEdit",
+      "handleTableCellTextCommit",
+      "setTableContextMenu"
+    ]
+  },
+  {
+    "old": "Writing surface wires Object Inspector and safe object actions",
+    "new": "Writing surface has no retired generic Object Inspector injection",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "ObjectInspectorLayer",
+      "selectedCanvasObjectInspectorModel",
+      "flattenCanvasAIReadableNodes",
+      "createCanvasObjectInspectorModel",
+      "createCanvasObjectInspectorActions",
+      "createCanvasObjectDuplicateDraft",
+      "toggleCanvasPlacementExportVisibility",
+      "objectContextActionsForObject",
+      "handleCanvasObjectContextAction",
+      "deleteCanvasObjectWithBacking",
+      "persistCanvasObjectDuplicateDraft"
+    ]
+  },
+  {
+    "old": "Object Inspector layer exposes inspectable object metadata and action markers",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Shape object layer renders pure shape CanvasObject markers",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Image object layer renders asset-backed media CanvasObject markers",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Table object layer renders structured table CanvasObject markers",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Table object layer gives Escape cancel authority over blur autosave",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Table object layer forwards pending cell edit into context menu flow",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Visual connector layer renders pure visual-only connector markers",
+    "new": "retired layer file absence"
+  },
+  {
+    "old": "Writing surface exposes PageFrame operable object controls",
+    "new": "Writing surface retains Page wall editing and ink persistence",
+    "kind": "all",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "PageFrameWallLayer",
+      "onPageFrameWallPointerDown",
+      "interactive={layoutMode && !contentReadOnly",
+      "PaperInkLayer",
+      "onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject}"
+    ]
+  },
+  {
+    "old": "Writing surface exposes PageStack identity and collapsed-tail markers",
+    "new": "Writing surface has no retired Canvas PageStack controls",
+    "kind": "none",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "data-page-stack-id",
+      "data-page-stack-page-index",
+      "data-page-stack-page-total",
+      "data-page-stack-collapsed",
+      "data-page-stack-tail",
+      "data-page-stack-number-label",
+      "data-page-frame-selected",
+      "data-page-frame-resize-handle"
+    ]
+  },
+  {
+    "old": "Writing surface exposes Canvas zoom control for browser testing",
+    "new": "Writing surface exposes the active Page reading controls",
+    "kind": "all",
+    "input": "writingSurfaceLayer",
+    "tokens": [
+      "data-page-reading-control=\"true\"",
+      "pageReading.displayScale",
+      "onPageReadingStep",
+      "canvasZoomControl",
+      "canvasZoomButton",
+      "canvasZoomReset"
+    ]
+  },
+  {
+    "old": "Note detail styles apply PageFrame template background variables",
+    "new": "Note detail styles apply Page template background variables",
+    "kind": "all",
+    "input": "noteDetailStyles",
+    "tokens": [
+      "--page-frame-background",
+      "--page-frame-border-color",
+      "--page-frame-shadow",
+      ".pageReadingPaper"
+    ]
+  },
+  {
+    "old": "Note detail styles render PageStack shell controls",
+    "new": "Note detail styles retain the active PageFrame panel controls",
+    "kind": "all",
+    "input": "noteDetailStyles",
+    "tokens": [
+      ".pageFramePanelStackRow",
+      ".pageFramePanelChildRow",
+      ".pageFramePanelSectionLabel"
+    ]
+  },
+  {
+    "old": "Note detail styles render basic shape CanvasObjects",
+    "new": "Note detail styles exclude retired basic shape CanvasObjects",
+    "kind": "none",
+    "input": "noteDetailStyles",
+    "tokens": [
+      ".canvasShapeObject",
+      ".canvasShapeRectangle",
+      ".canvasShapeEllipse",
+      ".canvasShapeSelected",
+      ".canvasShapeResizeHandle"
+    ]
+  },
+  {
+    "old": "Note detail styles render asset-backed image CanvasObjects",
+    "new": "Note detail styles exclude retired asset-backed image CanvasObjects",
+    "kind": "none",
+    "input": "noteDetailStyles",
+    "tokens": [
+      ".canvasImageObject",
+      ".canvasImageOperable",
+      ".canvasImageSelected",
+      ".canvasImageMedia",
+      ".canvasImageCaption",
+      ".canvasImageResizeHandle"
+    ]
+  },
+  {
+    "old": "Note detail styles render structured table CanvasObjects",
+    "new": "Note detail styles exclude retired structured table CanvasObjects",
+    "kind": "none",
+    "input": "noteDetailStyles",
+    "tokens": [
+      ".canvasTableObject",
+      ".canvasTableSelected",
+      ".canvasTableHeader",
+      ".canvasTableGrid",
+      ".canvasTableResizeHandle"
+    ]
+  },
+  {
+    "old": "Note detail styles render Object Inspector panel",
+    "new": "Note detail styles exclude retired Object Inspector panel",
+    "kind": "none",
+    "input": "noteDetailStyles",
+    "tokens": [
+      ".canvasObjectInspector",
+      ".canvasObjectInspectorHeader",
+      ".canvasObjectInspectorGrid",
+      ".canvasObjectInspectorBadge",
+      ".canvasObjectInspectorActions",
+      ".canvasObjectInspectorAction"
+    ]
+  }
+]

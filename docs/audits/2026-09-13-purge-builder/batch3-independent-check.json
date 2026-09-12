@@ -1,0 +1,726 @@
+{
+  "protectedDecls": [
+    {
+      "name": "handleExtractTextUnit",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handleBlankSurfaceDragOver",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handleStagingDragOver",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handleStagingDrop",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handleBlankSurfaceDrop",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handlePasteImage",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "blankDropTextFromEvent",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "isBlankSurfaceDropTarget",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handleBlockTextFlowChange",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "handlePlainTextBackedBlockChange",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "documentTextSelection",
+      "exists": true,
+      "identical": true
+    },
+    {
+      "name": "paperInkEnabled",
+      "exists": true,
+      "identical": true
+    }
+  ],
+  "protectedJsx": [
+    {
+      "name": "PageFrameWallLayer",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "identical": true
+    },
+    {
+      "name": "PaperInkLayer",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "identical": true
+    },
+    {
+      "name": "BlockEditorLayer",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "identical": false
+    },
+    {
+      "name": "DraftWritingEntryLayer",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "identical": true
+    }
+  ],
+  "blockEditorProps": {
+    "beforeCount": 61,
+    "afterCount": 61,
+    "removed": [],
+    "changed": [
+      {
+        "name": "onBlockContextMenu",
+        "before": "onBlockContextMenu={(point) => {\n                setAnnotationContextMenu(null);\n                setAnnotationHighlightContextMenu(null);\n                setCanvasBlankContextMenu(null);\n                setPageFrameContextMenu(null);\n                setShapeContextMenu(null);\n                setImageContextMenu(null);\n                setVisualConnectorContextMenu(null);\n                setBlockContextMenu({ blockId: block.id, point });\n              }}",
+        "after": "onBlockContextMenu={(point) => {\n                setAnnotationContextMenu(null);\n                setAnnotationHighlightContextMenu(null);\n                setBlockContextMenu({ blockId: block.id, point });\n              }}"
+      }
+    ]
+  },
+  "changedDeclarations": [
+    "documentTypography",
+    "visiblePageFrames",
+    "navigationLayout",
+    "pageFrameGuides",
+    "pageFrameSlotEntries",
+    "hiddenByCollapsedStack",
+    "displayedFrame",
+    "handleGlobalMouseDown",
+    "handleGlobalKeyDown",
+    "handleBlockListMouseDownForDraft",
+    "handleTextUnitContextMenu",
+    "handleAnnotationContextMenu",
+    "getBlockControlAnchorForLayout",
+    "layoutForBlankDrop"
+  ],
+  "css": {
+    "beforeCount": 732,
+    "afterCount": 664,
+    "unchangedCount": 660,
+    "transformedRules": [
+      {
+        "selector": ".page[data-note-host-mode='page']",
+        "sameBodyAndContext": true
+      },
+      {
+        "selector": ".page[data-note-skin-preset='workbench'],\n.page[data-note-skin-preset='workbench'] :global(.noteOverview)",
+        "sameBodyAndContext": true
+      },
+      {
+        "selector": ".page[data-note-skin-preset='warm-paper'],\n.page[data-note-skin-preset='warm-paper'] :global(.noteOverview)",
+        "sameBodyAndContext": true
+      },
+      {
+        "selector": ".page[data-note-skin-preset='warm-paper'] :global(.noteOverviewPreview)",
+        "sameBodyAndContext": true
+      }
+    ],
+    "removedRules": [
+      {
+        "selector": ".page[data-note-host-mode='page']:not(.pageCanvas)",
+        "context": "",
+        "body": "margin: -28px;min-height: 100vh;/* Paint the desk behind horizontally overflowing zoomed paper. The app\n     scrollport clips this solid spread; measured layout widths stay intact. */;box-shadow: 0 0 0 100vmax var(--sk-desk, transparent)"
+      },
+      {
+        "selector": ".page[data-note-skin-preset='workbench'],\n.page[data-note-skin-preset='workbench'] .writingSurfaceCanvas,\n.page[data-note-skin-preset='workbench'] :global(.noteOverview)",
+        "context": "",
+        "body": "background-color: var(--sk-desk);background-image:\n    linear-gradient(var(--paper-workbench-grid) 1px, transparent 1px),\n    linear-gradient(90deg, var(--paper-workbench-grid) 1px, transparent 1px);background-size: 24px 24px"
+      },
+      {
+        "selector": ".page[data-note-skin-preset='warm-paper'],\n.page[data-note-skin-preset='warm-paper'] .writingSurfaceCanvas,\n.page[data-note-skin-preset='warm-paper'] :global(.noteOverview)",
+        "context": "",
+        "body": "background: var(--paper-material-desk)"
+      },
+      {
+        "selector": ".pageCanvas",
+        "context": "",
+        "body": "display: flex;flex-direction: column;height: 100vh;min-height: 0;overflow: hidden"
+      },
+      {
+        "selector": ".writingSurfaceCanvas",
+        "context": "",
+        "body": "left: 0;align-items: flex-start;justify-content: flex-start;height: 100%;min-height: 0;padding: 0;border: 0;overflow: hidden;background:\n    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--border-default) 45%, transparent) 1px, transparent 0),\n    repeating-linear-gradient(\n      0deg,\n      color-mix(in srgb, var(--border-subtle) 26%, transparent) 0,\n      color-mix(in srgb, var(--border-subtle) 26%, transparent) 1px,\n      transparent 1px,\n      transparent 24px\n    ),\n    repeating-linear-gradient(\n      90deg,\n      color-mix(in srgb, var(--border-subtle) 26%, transparent) 0,\n      color-mix(in srgb, var(--border-subtle) 26%, transparent) 1px,\n      transparent 1px,\n      transparent 24px\n    );background-color: color-mix(in srgb, var(--bg-primary) 90%, var(--bg-secondary));background-size: 24px 24px, 24px 24px, 24px 24px;box-shadow: none;cursor: default;touch-action: none"
+      },
+      {
+        "selector": ".canvasPanReady",
+        "context": "",
+        "body": "cursor: grab"
+      },
+      {
+        "selector": ".canvasPanning",
+        "context": "",
+        "body": "cursor: grabbing;user-select: none"
+      },
+      {
+        "selector": ".canvasZoomSlider",
+        "context": "",
+        "body": "width: 116px;accent-color: var(--accent-primary)"
+      },
+      {
+        "selector": ".page[data-note-skin-preset='warm-paper'] .formalPageBoundary,\n.page[data-note-skin-preset='warm-paper'] :global(.noteOverviewPreview)",
+        "context": "",
+        "body": "background: var(--paper-material-fill);box-shadow: var(--paper-material-shadow)"
+      },
+      {
+        "selector": ".formalPageBoundary",
+        "context": "",
+        "body": "position: absolute;top: 0;left: var(--formal-page-offset-x, 0px);z-index: 1;width: var(--formal-page-width, 760px);border: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-default)));border-radius: 2px;background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));box-shadow: var(--paper-template-shadow, var(--page-frame-shadow, 0 16px 42px var(--paper-shadow-22)));pointer-events: none"
+      },
+      {
+        "selector": ".formalPageBoundaryPrimary",
+        "context": "",
+        "body": "border-color: color-mix(in srgb, var(--accent-primary) 42%, var(--border-default));box-shadow: 0 18px 46px var(--paper-shadow-24)"
+      },
+      {
+        "selector": ".formalPageBoundarySecondary",
+        "context": "",
+        "body": "border-style: dashed;opacity: 0.72;box-shadow: 0 10px 28px var(--paper-shadow-16)"
+      },
+      {
+        "selector": ".formalPageBoundaryOperable",
+        "context": "",
+        "body": "pointer-events: auto;cursor: move"
+      },
+      {
+        "selector": ".formalPageBoundarySelected",
+        "context": "",
+        "body": "border-color: var(--accent-primary);box-shadow:\n    0 0 0 2px color-mix(in srgb, var(--accent-primary) 38%, transparent),\n    var(--paper-template-shadow, var(--page-frame-shadow, 0 16px 42px var(--paper-shadow-22)))"
+      },
+      {
+        "selector": ".pageStackNumberBadge",
+        "context": "",
+        "body": "font-family: var(--sk-label-font, inherit);position: absolute;right: 12px;bottom: 10px;z-index: 2;color: var(--text-muted);font-size: 11px;font-weight: 800;font-variant-numeric: tabular-nums;pointer-events: none"
+      },
+      {
+        "selector": ".pageStackCollapsedTail",
+        "context": "",
+        "body": "position: absolute;z-index: 2;display: inline-flex;align-items: center;justify-content: center;height: 38px;border: 1px dashed color-mix(in srgb, var(--accent-primary) 48%, var(--border-default));border-radius: 6px;background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);color: var(--text-muted);font-size: 12px;font-weight: 800"
+      },
+      {
+        "selector": ".pageStackCollapsedTail:hover,\n.pageStackCollapsedTail:focus-visible",
+        "context": "",
+        "body": "border-color: var(--accent-primary);color: var(--text-primary);outline: none"
+      },
+      {
+        "selector": ".pageFrameResizeHandle",
+        "context": "",
+        "body": "position: absolute;right: -6px;bottom: -6px;z-index: 2;width: 14px;height: 14px;border: 1px solid color-mix(in srgb, var(--accent-primary) 68%, var(--border-default));border-radius: 4px;background: var(--bg-primary);box-shadow: 0 6px 14px var(--paper-shadow-22);cursor: nwse-resize;pointer-events: auto"
+      },
+      {
+        "selector": ".pageFrameResizeHandle::after",
+        "context": "",
+        "body": "content: '';position: absolute;right: 3px;bottom: 3px;width: 5px;height: 5px;border-right: 2px solid var(--accent-primary);border-bottom: 2px solid var(--accent-primary)"
+      },
+      {
+        "selector": ".canvasShapeObject",
+        "context": "",
+        "body": "position: absolute;box-sizing: border-box;border: var(--canvas-object-stroke-width, 2px) solid var(--canvas-object-stroke, color-mix(in srgb, var(--accent-primary) 70%, var(--border-default)));background: var(--canvas-object-fill, color-mix(in srgb, var(--accent-primary) 14%, transparent));opacity: var(--canvas-object-opacity, 1);box-shadow: 0 10px 24px var(--paper-shadow-14);overflow: hidden;pointer-events: auto"
+      },
+      {
+        "selector": ".canvasShapeRectangle",
+        "context": "",
+        "body": "border-radius: var(--canvas-object-border-radius, 8px)"
+      },
+      {
+        "selector": ".canvasShapeEllipse",
+        "context": "",
+        "body": "border-radius: 999px"
+      },
+      {
+        "selector": ".canvasObjectStyleDefaultShape",
+        "context": "",
+        "body": "color: var(--text-primary)"
+      },
+      {
+        "selector": ".canvasObjectStyleStickyNote",
+        "context": "",
+        "body": "color: var(--paper-sticky-ink);box-shadow:\n    0 16px 30px var(--paper-shadow-22),\n    inset 0 1px 0 var(--paper-highlight-edge)"
+      },
+      {
+        "selector": ".canvasShapeOperable",
+        "context": "",
+        "body": "cursor: move"
+      },
+      {
+        "selector": ".canvasShapeSelected",
+        "context": "",
+        "body": "border-color: var(--accent-primary);box-shadow:\n    0 0 0 2px color-mix(in srgb, var(--accent-primary) 36%, transparent),\n    0 14px 30px var(--paper-shadow-18)"
+      },
+      {
+        "selector": ".canvasShapeTextArea",
+        "context": "",
+        "body": "position: absolute;inset: var(--canvas-object-text-inset, 10px);width: auto;height: auto;padding: 0;border: 0;outline: none;background: transparent;color: inherit;font: inherit;font-size: 14px;line-height: 1.45;resize: none;pointer-events: auto"
+      },
+      {
+        "selector": ".canvasShapeTextArea:disabled",
+        "context": "",
+        "body": "opacity: 0.72"
+      },
+      {
+        "selector": ".canvasShapeTextAreaActive",
+        "context": "",
+        "body": "color: var(--text-primary)"
+      },
+      {
+        "selector": ".canvasShapeResizeHandle",
+        "context": "",
+        "body": "position: absolute;right: -7px;bottom: -7px;width: 14px;height: 14px;border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));border-radius: 4px;background: var(--bg-primary);box-shadow: 0 6px 14px var(--paper-shadow-22);cursor: nwse-resize"
+      },
+      {
+        "selector": ".canvasImageObject",
+        "context": "",
+        "body": "position: absolute;box-sizing: border-box;border: 1px solid color-mix(in srgb, var(--border-default) 78%, transparent);border-radius: 8px;background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);box-shadow: 0 12px 28px var(--paper-shadow-18);overflow: hidden;pointer-events: auto"
+      },
+      {
+        "selector": ".canvasImageOperable",
+        "context": "",
+        "body": "cursor: move"
+      },
+      {
+        "selector": ".canvasImageSelected",
+        "context": "",
+        "body": "border-color: var(--accent-primary);box-shadow:\n    0 0 0 2px color-mix(in srgb, var(--accent-primary) 34%, transparent),\n    0 14px 30px var(--paper-shadow-20)"
+      },
+      {
+        "selector": ".canvasImageMedia",
+        "context": "",
+        "body": "display: block;width: 100%;height: 100%;user-select: none;pointer-events: none"
+      },
+      {
+        "selector": ".canvasImageCaption",
+        "context": "",
+        "body": "position: absolute;left: 8px;right: 8px;bottom: 8px;padding: 4px 6px;border-radius: 6px;background: var(--paper-image-label-bg);color: var(--paper-image-label-ink);font-size: 11px;line-height: 1.3;pointer-events: none"
+      },
+      {
+        "selector": ".canvasImageResizeHandle",
+        "context": "",
+        "body": "position: absolute;right: -7px;bottom: -7px;width: 14px;height: 14px;border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));border-radius: 4px;background: var(--bg-primary);box-shadow: 0 6px 14px var(--paper-shadow-22);cursor: nwse-resize"
+      },
+      {
+        "selector": ".canvasTableObject",
+        "context": "",
+        "body": "position: absolute;box-sizing: border-box;display: grid;grid-template-rows: 28px minmax(0, 1fr);border: 1px solid color-mix(in srgb, var(--border-default) 82%, transparent);border-radius: 8px;background: color-mix(in srgb, var(--bg-primary) 94%, var(--bg-secondary));box-shadow: 0 12px 28px var(--paper-shadow-17);overflow: hidden;pointer-events: auto"
+      },
+      {
+        "selector": ".canvasTableOperable",
+        "context": "",
+        "body": "cursor: move"
+      },
+      {
+        "selector": ".canvasTableSelected",
+        "context": "",
+        "body": "border-color: var(--accent-primary);box-shadow:\n    0 0 0 2px color-mix(in srgb, var(--accent-primary) 32%, transparent),\n    0 14px 30px var(--paper-shadow-20)"
+      },
+      {
+        "selector": ".canvasTableHeader",
+        "context": "",
+        "body": "display: flex;align-items: center;justify-content: space-between;gap: 8px;min-width: 0;padding: 0 9px;border-bottom: 1px solid var(--border-subtle);background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);color: var(--text-muted);font-size: 10px;font-weight: 850;letter-spacing: 0;text-transform: uppercase"
+      },
+      {
+        "selector": ".canvasTableHeader span",
+        "context": "",
+        "body": "min-width: 0;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
+      },
+      {
+        "selector": ".canvasTableGridWrap",
+        "context": "",
+        "body": "min-height: 0;overflow: hidden"
+      },
+      {
+        "selector": ".canvasTableGrid",
+        "context": "",
+        "body": "width: 100%;height: 100%;border-collapse: collapse;table-layout: fixed;color: var(--text-secondary);font-size: 12px;line-height: 1.35"
+      },
+      {
+        "selector": ".canvasTableGrid th,\n.canvasTableGrid td",
+        "context": "",
+        "body": "min-width: 0;padding: 7px 8px;border-right: 1px solid var(--border-subtle);border-bottom: 1px solid var(--border-subtle);overflow: hidden;text-overflow: ellipsis;white-space: pre-wrap;word-break: break-word"
+      },
+      {
+        "selector": ".canvasTableGrid th",
+        "context": "",
+        "body": "background: color-mix(in srgb, var(--bg-secondary) 84%, transparent);color: var(--text-primary);font-size: 11px;font-weight: 800"
+      },
+      {
+        "selector": ".canvasTableGrid td",
+        "context": "",
+        "body": "background: color-mix(in srgb, var(--bg-primary) 90%, transparent)"
+      },
+      {
+        "selector": ".canvasTableCellSelected",
+        "context": "",
+        "body": "outline: 2px solid color-mix(in srgb, var(--accent-primary) 68%, transparent);outline-offset: -2px;background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-primary)) !important"
+      },
+      {
+        "selector": ".canvasTableCellText",
+        "context": "",
+        "body": "display: block;min-width: 0;min-height: 16px;overflow: hidden"
+      },
+      {
+        "selector": ".canvasTableCellEditor",
+        "context": "",
+        "body": "display: block;width: 100%;height: 100%;min-height: 38px;resize: none;border: 0;outline: 0;padding: 0;background: transparent;color: var(--text-primary);font: inherit;line-height: inherit"
+      },
+      {
+        "selector": ".canvasTableResizeHandle",
+        "context": "",
+        "body": "position: absolute;right: -7px;bottom: -7px;width: 14px;height: 14px;border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));border-radius: 4px;background: var(--bg-primary);box-shadow: 0 6px 14px var(--paper-shadow-22);cursor: nwse-resize"
+      },
+      {
+        "selector": ".canvasVisualConnector",
+        "context": "",
+        "body": "position: absolute;overflow: visible;pointer-events: none"
+      },
+      {
+        "selector": ".canvasVisualConnectorLine",
+        "context": "",
+        "body": "fill: none;pointer-events: stroke;cursor: context-menu;filter: drop-shadow(0 1px 3px var(--paper-shadow-22))"
+      },
+      {
+        "selector": ".canvasVisualConnectorSelected .canvasVisualConnectorLine",
+        "context": "",
+        "body": "stroke: var(--accent-primary);stroke-width: 2.25px"
+      },
+      {
+        "selector": ".canvasObjectInspector",
+        "context": "",
+        "body": "position: fixed;top: 76px;right: 18px;z-index: 148;display: grid;gap: 10px;width: min(318px, calc(100vw - 36px));max-height: calc(100vh - 96px);overflow: auto;padding: 12px;border: 1px solid var(--border-default);border-radius: var(--radius-md);background: color-mix(in srgb, var(--bg-primary) 97%, var(--paper-black));box-shadow: var(--glass-shadow-lg)"
+      },
+      {
+        "selector": ".canvasObjectInspectorHeader",
+        "context": "",
+        "body": "display: flex;align-items: flex-start;justify-content: space-between;gap: 10px"
+      },
+      {
+        "selector": ".canvasObjectInspectorKicker",
+        "context": "",
+        "body": "margin-bottom: 3px;color: var(--text-muted);font-family: var(--font-mono, monospace);font-size: 10px;font-weight: 760;letter-spacing: 0;text-transform: uppercase"
+      },
+      {
+        "selector": ".canvasObjectInspectorTitle",
+        "context": "",
+        "body": "margin: 0;color: var(--text-primary);font-size: 14px;font-weight: 850;line-height: 1.2"
+      },
+      {
+        "selector": ".canvasObjectInspectorSubtitle",
+        "context": "",
+        "body": "margin: 4px 0 0;color: var(--text-muted);font-size: 11px;line-height: 1.35"
+      },
+      {
+        "selector": ".canvasObjectInspectorClose",
+        "context": "",
+        "body": "display: inline-flex;align-items: center;justify-content: center;width: 27px;height: 27px;border: 1px solid var(--border-subtle);border-radius: var(--radius-sm);background: transparent;color: var(--text-muted)"
+      },
+      {
+        "selector": ".canvasObjectInspectorClose:hover,\n.canvasObjectInspectorClose:focus-visible",
+        "context": "",
+        "body": "border-color: var(--border-default);background: var(--bg-hover);color: var(--text-primary);outline: none"
+      },
+      {
+        "selector": ".canvasObjectInspectorSection",
+        "context": "",
+        "body": "padding: 9px;border: 1px solid var(--border-subtle);border-radius: var(--radius-sm);background: color-mix(in srgb, var(--bg-secondary) 72%, transparent)"
+      },
+      {
+        "selector": ".canvasObjectInspectorGrid",
+        "context": "",
+        "body": "display: grid;grid-template-columns: minmax(80px, auto) minmax(0, 1fr);gap: 7px 10px;align-items: baseline;color: var(--text-muted);font-size: 11px;line-height: 1.25"
+      },
+      {
+        "selector": ".canvasObjectInspectorGrid strong",
+        "context": "",
+        "body": "min-width: 0;overflow-wrap: anywhere;color: var(--text-secondary);font-family: var(--font-mono, monospace);font-size: 11px;font-weight: 720"
+      },
+      {
+        "selector": ".canvasObjectInspectorBadgeRow",
+        "context": "",
+        "body": "display: flex;flex-wrap: wrap;gap: 6px"
+      },
+      {
+        "selector": ".canvasObjectInspectorBadge",
+        "context": "",
+        "body": "display: inline-flex;align-items: center;min-height: 22px;padding: 0 7px;border: 1px solid var(--border-subtle);border-radius: var(--radius-sm);background: var(--bg-primary);color: var(--text-secondary);font-family: var(--font-mono, monospace);font-size: 10px;font-weight: 720"
+      },
+      {
+        "selector": ".canvasObjectInspectorSummary",
+        "context": "",
+        "body": "margin: 0;color: var(--text-secondary);font-size: 11px;line-height: 1.45"
+      },
+      {
+        "selector": ".canvasObjectInspectorActions",
+        "context": "",
+        "body": "display: grid;gap: 6px"
+      },
+      {
+        "selector": ".canvasObjectInspectorAction",
+        "context": "",
+        "body": "display: grid;grid-template-columns: 18px minmax(0, 1fr);align-items: center;gap: 7px;min-height: 31px;padding: 0 9px;border: 1px solid var(--border-subtle);border-radius: var(--radius-sm);background: transparent;color: var(--text-secondary);font-size: 12px;font-weight: 730;text-align: left"
+      },
+      {
+        "selector": ".canvasObjectInspectorAction span",
+        "context": "",
+        "body": "min-width: 0;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
+      },
+      {
+        "selector": ".canvasObjectInspectorAction:hover:not(:disabled),\n.canvasObjectInspectorAction:focus-visible",
+        "context": "",
+        "body": "border-color: var(--border-default);background: var(--bg-hover);color: var(--text-primary);outline: none"
+      },
+      {
+        "selector": ".canvasObjectInspectorActionDanger:hover:not(:disabled),\n.canvasObjectInspectorActionDanger:focus-visible",
+        "context": "",
+        "body": "border-color: color-mix(in srgb, var(--danger, var(--paper-danger)) 62%, var(--border-default));color: color-mix(in srgb, var(--danger, var(--paper-danger)) 82%, var(--text-primary))"
+      },
+      {
+        "selector": ".canvasObjectInspectorAction:disabled",
+        "context": "",
+        "body": "cursor: not-allowed;opacity: 0.42"
+      }
+    ],
+    "addedRules": [
+      {
+        "selector": ".page[data-note-host-mode='page']",
+        "context": "",
+        "body": "margin: -28px;min-height: 100vh;/* Paint the desk behind horizontally overflowing zoomed paper. The app\n     scrollport clips this solid spread; measured layout widths stay intact. */;box-shadow: 0 0 0 100vmax var(--sk-desk, transparent)"
+      },
+      {
+        "selector": ".page[data-note-skin-preset='workbench'],\n.page[data-note-skin-preset='workbench'] :global(.noteOverview)",
+        "context": "",
+        "body": "background-color: var(--sk-desk);background-image:\n    linear-gradient(var(--paper-workbench-grid) 1px, transparent 1px),\n    linear-gradient(90deg, var(--paper-workbench-grid) 1px, transparent 1px);background-size: 24px 24px"
+      },
+      {
+        "selector": ".page[data-note-skin-preset='warm-paper'],\n.page[data-note-skin-preset='warm-paper'] :global(.noteOverview)",
+        "context": "",
+        "body": "background: var(--paper-material-desk)"
+      },
+      {
+        "selector": ".page[data-note-skin-preset='warm-paper'] :global(.noteOverviewPreview)",
+        "context": "",
+        "body": "background: var(--paper-material-fill);box-shadow: var(--paper-material-shadow)"
+      }
+    ],
+    "removedClasses": [
+      "pageCanvas",
+      "writingSurfaceCanvas",
+      "canvasPanReady",
+      "canvasPanning",
+      "canvasZoomSlider",
+      "formalPageBoundary",
+      "formalPageBoundaryPrimary",
+      "formalPageBoundarySecondary",
+      "formalPageBoundaryOperable",
+      "formalPageBoundarySelected",
+      "pageStackNumberBadge",
+      "pageStackCollapsedTail",
+      "pageFrameResizeHandle",
+      "canvasShapeObject",
+      "canvasShapeRectangle",
+      "canvasShapeEllipse",
+      "canvasObjectStyleDefaultShape",
+      "canvasObjectStyleStickyNote",
+      "canvasShapeOperable",
+      "canvasShapeSelected",
+      "canvasShapeTextArea",
+      "canvasShapeTextAreaActive",
+      "canvasShapeResizeHandle",
+      "canvasImageObject",
+      "canvasImageOperable",
+      "canvasImageSelected",
+      "canvasImageMedia",
+      "canvasImageCaption",
+      "canvasImageResizeHandle",
+      "canvasTableObject",
+      "canvasTableOperable",
+      "canvasTableSelected",
+      "canvasTableHeader",
+      "canvasTableGridWrap",
+      "canvasTableGrid",
+      "canvasTableCellSelected",
+      "canvasTableCellText",
+      "canvasTableCellEditor",
+      "canvasTableResizeHandle",
+      "canvasVisualConnector",
+      "canvasVisualConnectorLine",
+      "canvasVisualConnectorSelected",
+      "canvasObjectInspector",
+      "canvasObjectInspectorHeader",
+      "canvasObjectInspectorKicker",
+      "canvasObjectInspectorTitle",
+      "canvasObjectInspectorSubtitle",
+      "canvasObjectInspectorClose",
+      "canvasObjectInspectorSection",
+      "canvasObjectInspectorGrid",
+      "canvasObjectInspectorBadgeRow",
+      "canvasObjectInspectorBadge",
+      "canvasObjectInspectorSummary",
+      "canvasObjectInspectorActions",
+      "canvasObjectInspectorAction",
+      "canvasObjectInspectorActionDanger"
+    ],
+    "classRefs": [
+      {
+        "file": "client/src/pages/Notes/canvasEngine/objectStyleService.ts",
+        "name": "canvasObjectStyleDefaultShape"
+      },
+      {
+        "file": "client/src/pages/Notes/canvasEngine/objectStyleService.ts",
+        "name": "canvasObjectStyleStickyNote"
+      }
+    ]
+  },
+  "boundary": {
+    "beforeCount": 134,
+    "afterCount": 138,
+    "identicalCount": 103,
+    "removed": [
+      "Runtime model exposes viewport placement and reserve contracts",
+      "Viewport transform controller clamps and focuses against dynamic runtime world",
+      "Runtime presentation controller routes PageFrame object geometry updates",
+      "Note canvas layout model derives Canvas world from runtime content",
+      "Mode policy service owns page canvas visibility and blank draft policy",
+      "Mode policy keeps Canvas draft placement free while allowing PageFrame guide snapping",
+      "Writing surface exposes PageFrame template background and style markers",
+      "Writing surface renders PageFrame collection in Canvas Mode",
+      "Writing surface routes PageFrame command surface actions",
+      "Writing surface renders and persists generic shape CanvasObjects",
+      "Writing surface renders and persists visual connector CanvasObjects",
+      "Writing surface renders and persists image CanvasObjects",
+      "Writing surface renders and persists structured table CanvasObjects",
+      "Writing surface commits pending table cell draft before opening table menu",
+      "Writing surface wires Object Inspector and safe object actions",
+      "Object Inspector layer exposes inspectable object metadata and action markers",
+      "Shape object layer renders pure shape CanvasObject markers",
+      "Image object layer renders asset-backed media CanvasObject markers",
+      "Table object layer renders structured table CanvasObject markers",
+      "Table object layer gives Escape cancel authority over blur autosave",
+      "Table object layer forwards pending cell edit into context menu flow",
+      "Visual connector layer renders pure visual-only connector markers",
+      "Writing surface exposes PageFrame operable object controls",
+      "Writing surface exposes PageStack identity and collapsed-tail markers",
+      "Writing surface exposes Canvas zoom control for browser testing",
+      "Note detail styles apply PageFrame template background variables",
+      "Note detail styles render PageStack shell controls",
+      "Note detail styles render basic shape CanvasObjects",
+      "Note detail styles render asset-backed image CanvasObjects",
+      "Note detail styles render structured table CanvasObjects",
+      "Note detail styles render Object Inspector panel"
+    ],
+    "changed": [],
+    "added": [
+      "Runtime model exposes viewport and historical placement contracts",
+      "Viewport transform controller retains Page viewport state and measured size",
+      "Viewport transform controller has no retired pan zoom or reset callbacks",
+      "Runtime presentation controller retains live PageFrame collection actions",
+      "Runtime presentation controller has no retired Canvas frame drag handlers",
+      "Note canvas layout model derives the Page world from runtime content",
+      "Runtime types have no retired workspace reserve generator",
+      "Layout assembly has no retired workspace reserve input",
+      "Page policy owns visibility and blank draft placement",
+      "Page draft placement retains snap and content-width bounds",
+      "Writing surface exposes Page template background and style markers",
+      "Writing surface has no retired Canvas frame collection",
+      "Writing surface has no retired Canvas frame context menus",
+      "Writing surface has no retired generic shape layer or handlers",
+      "Writing surface has no retired connector layer or commands",
+      "Writing surface has no retired generic image layer or commands",
+      "Writing surface has no retired table layer or mutations",
+      "Writing surface has no retired table editor context menu",
+      "Writing surface has no retired generic Object Inspector injection",
+      "Writing surface retains Page wall editing and ink persistence",
+      "Writing surface has no retired Canvas PageStack controls",
+      "Writing surface exposes the active Page reading controls",
+      "Note detail styles apply Page template background variables",
+      "Note detail styles retain the active PageFrame panel controls",
+      "Note detail styles exclude retired basic shape CanvasObjects",
+      "Note detail styles exclude retired asset-backed image CanvasObjects",
+      "Note detail styles exclude retired structured table CanvasObjects",
+      "Note detail styles exclude retired Object Inspector panel",
+      "Shape placement generator defaults to Page or tray",
+      "Image placement generator defaults to Page or tray",
+      "Table placement generator defaults to Page or tray",
+      "Page policy has no retired transition or workspace generator",
+      "Writing surface has no retired pan zoom or Canvas DOM branch",
+      "Note detail styles have no retired Canvas host or pan controls",
+      "Page reading styles retain the shared reading control classes"
+    ]
+  },
+  "layerRefs": [
+    {
+      "file": "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "name": "ImageObjectLayer"
+    },
+    {
+      "file": "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "name": "ObjectInspectorLayer"
+    },
+    {
+      "file": "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "name": "ShapeObjectLayer"
+    },
+    {
+      "file": "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "name": "TableObjectLayer"
+    },
+    {
+      "file": "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "name": "VisualConnectorLayer"
+    }
+  ],
+  "deletedLayers": [
+    {
+      "name": "ImageObjectLayer",
+      "deleted": true
+    },
+    {
+      "name": "ObjectInspectorLayer",
+      "deleted": true
+    },
+    {
+      "name": "ShapeObjectLayer",
+      "deleted": true
+    },
+    {
+      "name": "TableObjectLayer",
+      "deleted": true
+    },
+    {
+      "name": "VisualConnectorLayer",
+      "deleted": true
+    }
+  ],
+  "scannedRoots": [
+    "client/src",
+    "client/scripts",
+    "server/src",
+    "server/scripts",
+    "shared",
+    "scripts"
+  ],
+  "currentHashes": {
+    "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx": "2feb19992bb4ea0a447de6a0364c7e9730dc81cc8e889011aad82352d49ad1a5",
+    "client/src/pages/Notes/NoteDetail.module.css": "8a7ab4f1e2265a7671d3fc4451e12f1a9b87991941a8b85f741f15ab97de82f1",
+    "client/scripts/canvasRuntimeBoundaryCheck.mjs": "e47bca0c6ede40ceaaa5053f347645b00c59443ef8bda7916d6590475b4ae3b2"
+  }
+}

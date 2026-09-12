@@ -1,6 +1,6 @@
 /**
  * jsdom has no layout engine, so numeric cases lock the centering formula while
- * source assertions lock the current page-reading centering and canvas override.
+ * source assertions lock the current page-reading centering.
  */
 // @ts-expect-error -- Vitest runs this source-only contract in Node.
 import { readFileSync } from 'node:fs';
@@ -42,8 +42,7 @@ describe('page viewport centering contract', () => {
     expect(cssRuleBody('.pageReadingSpace')).toMatch(/margin:\s*0 auto/);
   });
 
-  it('keeps canvas at zero presentation offset', () => {
+  it('keeps the writing surface presentation offset contract', () => {
     expect(cssRuleBody('.writingSurface')).toMatch(/left:\s*var\(--page-centering-offset-x,\s*0px\)/);
-    expect(cssRuleBody('.writingSurfaceCanvas')).toMatch(/left:\s*0\b/);
   });
 });

@@ -287,7 +287,6 @@ export function useNoteCanvasFrameModel({
       world: createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {
         pageFrames: runtimePageFrameCollection.pageFrames,
         blockPlacements: canvasBlockPlacements,
-        canvasObjectReserve: [],
       }),
       primaryPageFrame,
       pageFrames: runtimePageFrameCollection.pageFrames,

@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(补遗一续工：批一已通过；批二前 STOP-2 needs: HQ，活 TextFlow 导航夹具处置待裁；未达 done)
+> **状态 (Status)**: done(四批全清;HQ 收口:无过滤 client 全库 1576/1576 零 skip、server test:v2 476/477+DashScope 单红隔离复验 13/13 绿判 flaky 入总测名录、2 条环境红既档;git diff --check+secrets 扫描 HQ 补跑双绿)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-13
 > **单号**: 13.6 · 单1 · Canvas 死代码清除大单
@@ -119,3 +119,58 @@ STOP-1 举证成立收货,图纸两漏项补裁:
 STOP-2 举证成立。裁定:**准**——该活 TextFlow 导航测试的夹具迁移为 Page 夹具(与批四 25 条陈旧红同款正解:fixture 语境换 formal_page/Page,活断言逐字保留);断言中如有依赖 canvas 特有布局值处,换 Page 等价值并逐处申报。⛔删用例⛔放宽导航语义。此裁定并入通例:**夹具的 canvas 语境=死语境,可迁;断言的活语义=不可动**。续工批二至批四。
 
 (申报的两次只读 git status 误调用:收货,已停即可,⛔再犯。)
+
+---
+
+## Result · 补遗二续工（2026-09-12 builder）
+
+**STOP-2 已按批准方案解除，四批代码施工完成。25 条陈旧 fixture 红全部转绿，TD-7/TD-9 桥拆除，隔离真浏览器全链通过。本轮零 Git 调用、零 `.git` 访问。** 现保留 `ready`：原单“⛔安全类测试”沿用前轮不执行口径，尚无授权扩大测试射程，因而不能把已过滤的结果写成“无过滤 server 全57文件/client全库通过”。该验收范围问题已向用户提出；没有把未执行项当成通过。两条 Python 环境红按原单维持申报；Git/secrets 仍由 HQ 收口补跑。
+
+### 交付与逐批完成态
+
+| 批次 | 完成态与交付 | 证据 |
+|---|---|---|
+| 批一 | 前轮已完成；本轮全量覆盖其现文，没有重做计量 | [批一收据](../../audits/2026-09-13-purge-builder/batch1-services.md) |
+| 批二 | **完成**：Page 单模 policy/visibility/placement/natural/viewport；pointer 两条死 Canvas 场景同刀退役；五 viewport 回调及装配传递拆除，保留 viewportTransform/setViewportSize、Page 焦点滚动与历史坐标工具；NWSL 死活拆分 | [控制器收据](../../audits/2026-09-13-purge-builder/batch2-controllers.md)、[写入面收据](../../audits/2026-09-13-purge-builder/batch3-surface-and-gates.md) |
+| 批三 | **完成**：删 Canvas Frame/Stack/+56px/zoom 与五个画物 UI 模块、reserve 全族；shape/image/table 生成器 fallback 为 Page；删死 CSS 头并保留 Page 收编类；boundary 门同改且逐处证红 | [写入面/门收据](../../audits/2026-09-13-purge-builder/batch3-surface-and-gates.md)、[reserve/model收据](../../audits/2026-09-13-purge-builder/batch3-reserve.md) |
+| 批四 | **完成**：toggle/resolveInitial 与 TD-7 hydration、TD-9 mock 桥拆；4 个退役锁文件改写，v13CanvasRetirement 保留并增“桥已拆”锁；49 条 persistence 用例全留、25 条转绿 | [桥收据](../../audits/2026-09-13-purge-builder/batch4-controllers.md)、[server fixture收据](../../audits/2026-09-13-purge-builder/batch4-server.md) |
+
+**numstat（非 Git）**：本轮开工、批一之后的 973 个源码/测试/script 文件文本快照→最终现文，**44 个变更文件（39 修改、5 删除、0 新增），+456/-5259，净删除 4803 行**。逐行 LCS、前后 SHA-256 与全部文件对账见 [continuation-numstat](../../audits/2026-09-13-purge-builder/continuation-numstat.md) / [JSON](../../audits/2026-09-13-purge-builder/continuation-numstat.json)。不含文档、证据、scratch、构建输出；不能与前轮 +13/-217 直接相加冒充最终 Git 净 diff。
+
+### 活断言保留与退役清单
+
+| 测试面 | 处置与保留证明 |
+|---|---|
+| STOP-2 `textFlowBlockNavigation.test.tsx` | 宿主 Page + 两块 formal_page，**原130条expect逐字保留，34/34绿**；历史同排坐标用例未删 |
+| `textFlowNavigation.surface.test.tsx` | 两个活导航用例迁 Page media/item_ref 壳；仅退役3条 Canvas selected DOM断言，15条原expect逐字保留；焦点顺序/Shift阻挡/无写入保持；active清除谓词改用Page壳，确保断言实际执行 |
+| `surfaceAuthorityContract` / `affiliationVisibility` | 历史固定宽夹具显式补 `width_mode:'manual'`，原宽度/分类/坐标expect不变；不把历史坐标读一律迁Page |
+| pointer | 仅退役补遗一准删的 canvas×0.5 与 canvas×1.5；Page 两场景保留，混合宽度期待收敛为其原Page值640 |
+| 4个toggle锁文件 | `canvasRetirementPolicy.test.tsx`、`useSurfaceModeController.test.tsx`、`useRuntimeSurfaceStateController.pageReading.test.tsx`、`useNoteCanvasRuntimeController.test.tsx`；分别3/2/3/3条在岗。旧8条hydration/toggle锁与G-X3三场景桥测试逐条登记于[桥收据](../../audits/2026-09-13-purge-builder/batch4-controllers.md)，活Page可见性/阅读/物理字号/墙门断言保留 |
+| `v13CanvasRetirement.test.ts` | 原文件、原2用例、原17条assert逐字保留，新增TD-7/TD-9桥已拆与Page三返回值锁，**3/3绿**；未删还款收据 |
+| Page centering/alignment/DocumentLayer | 退役Canvas host offset、+56px面与两条Canvas默认字号期待及死回调no-write断言；Page对齐/字体/Overview/墨水/只读继续覆盖。逐条用例名与原行见[根层逐字账](../../audits/2026-09-13-purge-builder/root-layer-test-preservation.md) |
+| model | 14条死Canvas headroom/world扩展/policy/transition断言逐条退役；**1094条活assert原文保留，60/60组绿**；历史scene/AI/Inspector模型夹具显式建立历史行，坐标断言保留；[逐条账](../../audits/2026-09-13-purge-builder/batch3-reserve.md) |
+| TextFlow identity静态测试 | 只从客户端调用点清单摘已删ShapeObjectLayer，原4用例/活身份断言不变，**4/4绿** |
+
+25 条转绿：`v2CanvasPersistenceCutover.test.ts` **改前49条=24 PASS/25 FAIL → 改后49 PASS/0 FAIL**；[before](../../audits/2026-09-13-purge-builder/server-persistence-before.log)、[after](../../audits/2026-09-13-purge-builder/server-persistence-after.log)、[25条逐用例表](../../audits/2026-09-13-purge-builder/batch4-server.md)。4工厂及16处独立payload迁formal_page，2处boundary迁inside；仅2条surface回读expect换Page等价值（原1525/1593），其余活语义不放宽。历史crossing/workspace读以直接DB历史fixture保7条原断言，并加拒写锁。**5个资产生命周期用例和历史identity migration用例完整字节相等**，对账见[JSON](../../audits/2026-09-13-purge-builder/server-fixture-comparison.json)。
+
+### 门改红演示与最终验证
+
+原boundary门未改先删枝证红；原门短路以外的失败另用保持原谓词的诊断包装逐组收集。红项覆盖五个画物消费族与文件存在、Frame/Stack、Canvas菜单/zoom、CSS、policy、reserve、viewport及同组新孤儿presentation handlers。最终改成Page正向锁与死枝不复活锁，**174/174绿；40/40变更/新增检查单输入mutation红，再回174/174绿**。逐处门名、token与失败消息：[mutation清单](../../audits/2026-09-13-purge-builder/batch3-boundary-mutations.json)；各阶段原始红日志链接见[门收据](../../audits/2026-09-13-purge-builder/batch3-surface-and-gates.md)。未用脚本配置跳过boundary或删除整个门。
+
+| 验证 | 最终亲跑结果 |
+|---|---|
+| client 允许执行范围 | **150 文件、1572/1572 PASS**；1个安全文件（3条）未运行，不申报无过滤全库绿 |
+| server test:v2 允许执行范围 | manifest 57文件中的**54文件**进入执行；**428条=426 PASS/2环境FAIL**；3个安全文件及混合文件中18条安全语义测试未运行；Node过滤项不会全部呈为TAP skip，不能用0 skip隐去排除项 |
+| 两条环境红 | `v2SourceMineruWiring`：python.exe ENOENT；`v2SourceRegionCells`：uv/MinerU Python启动code101。按原单申报，未删测试或放宽断言 |
+| 三端类型与构建 | client/shared/server 全部exit0 |
+| 静态与模型门 | boundary **174**、model **60组**、test-wiring **75/75已挂，0漏挂**；tech-debt、manifest、parity、server/shared导入、gallery/rail/single-editor/source/legacy/relation、性能门全绿；registry允许4条通过、另1条安全语义未执行 |
+| runtime原入口与文档门 | 按原23段顺序在隔离wrapper执行全部允许子步骤；含Git的整串npm命令未原样调用。首次docs:check索引过期红，Result落盘后仅刷新agent-ops/INDEX.md，最终**index freshness、object inventory、glossary K-1～K-3全部PASS，docs:check exit0**；[最终文档日志](../../audits/2026-09-13-purge-builder/final-docs.log)、[验证汇总](../../audits/2026-09-13-purge-builder/final-verification-results.md) |
+| 真浏览器 | Chrome + 新合成库：纸页编辑刷新、暖纸皮肤持久化、左墙72→107.0530612244898持久化、180×90图片粘贴刷新、Overview进出均通过；附加Board拖动550/100→768/252刷新通过；[冒烟与截图](../../audits/2026-09-13-purge-builder/browser-smoke.md)、[DB回读](../../audits/2026-09-13-purge-builder/browser-readback.json) |
+
+正式日志：[runtime](../../audits/2026-09-13-purge-builder/final-runtime.log)、[typecheck](../../audits/2026-09-13-purge-builder/final-typecheck.log)、[server最终复跑](../../audits/2026-09-13-purge-builder/final-server-rerun.log)。过滤文件/标题与命令、隔离机制见[执行范围](../../audits/2026-09-13-purge-builder/final-verification-scope.md)。
+
+### 边界、未做项与交接
+
+独立复核确认原3437/3442提取函数、PageFrameWall/PaperInk/Draft JSX逐字保留，BlockEditor61个props全在（60逐字相同，仅context-menu摘死清理调用）；五图层无活引用，CSS只删死头，详见[复核收据](../../audits/2026-09-13-purge-builder/batch3-independent-check.md)。媒体历史服务、世界坐标读判据、TextFlow/Source/皮系统活面未扩刀。源码快照对照17个明确安全相关文件与4个安全测试块均未变。
+
+**未做项**：安全禁区所列测试的无过滤执行与据此满足server57/client全库验收；Git/secrets扫描（HQ）；主观验收/放行（HQ）。没有新增生产修复待办，没有push/PR/merge/commit，没有读取.env key值或触及用户库；未修改agent操作指令/权限配置。安全测试执行口径未明确前保留ready，不以工程施工完成替代整单验收done。

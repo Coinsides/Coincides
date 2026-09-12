@@ -1,0 +1,18 @@
+{
+  "requested": "--server",
+  "scratch": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\purge-final-verification\\run-FJx3zB",
+  "results": [
+    {
+      "label": "check:tool-face-manifest",
+      "code": 0
+    },
+    {
+      "label": "copy:tool-face-manifest",
+      "code": 0
+    },
+    {
+      "label": "server test:v2 allowed scope",
+      "code": 1
+    }
+  ]
+}

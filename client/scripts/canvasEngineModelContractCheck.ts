@@ -1,3 +1,4 @@
+import type { CanvasPlacement } from '../src/pages/Notes/canvasEngine/types';
 import {
   buildNoteCanvasRuntimeModel,
   createViewport,
@@ -195,7 +196,6 @@ import {
 import {
   createBlankDraftLayout,
   createSurfaceModePolicy,
-  createSurfaceModeTransitionPolicy,
   getVisibleBlocksForSurface,
   shouldResolvePageCollisions,
   shouldUseElasticAvoidance,
@@ -518,6 +518,14 @@ function createBlock(id: string, layout?: Partial<BlockBoxLayout>, type = 'parag
   };
 }
 
+// Historical model fixtures retain old surface/boundary/snap values without using a retired writer.
+function historicalWorkspaceProjection<T extends { placement: CanvasPlacement }>(projection: T): T {
+  return {
+    ...projection,
+    placement: { ...projection.placement, frameId: undefined, surface: 'canvas_workspace', boundaryRole: 'outside', snapState: 'free' },
+  };
+}
+
 // historyService is browser-aware. The model contract smoke runs in Node, so provide
 // a minimal HTMLElement constructor before calling keyboard-intent helpers.
 class RuntimeContractHTMLElement {
@@ -538,18 +546,14 @@ Object.defineProperty(globalThis, 'window', {
 
 function testViewportAndWorld(): void {
   const pageViewport = createRuntimeViewport('page', 920);
-  const canvasViewport = createRuntimeViewport('canvas', 920);
+  // Explicit historical viewport fixture for the retained coordinate-transform checks.
+  const canvasViewport = createViewport({ x: -180, y: -64, width: 1120, height: 920, zoom: 1 });
   const pageWorld = createRuntimeWorld('page', 920);
-  const canvasWorld = createRuntimeWorld('canvas', 920);
 
   assertEqual(pageViewport.zoom, 1, 'page viewport keeps seed zoom');
   assertEqual(canvasViewport.zoom, 1, 'canvas viewport keeps seed zoom');
-  assert(canvasViewport.x < 0, 'canvas viewport starts with left-side workspace headroom');
-  assert(canvasViewport.y < 0, 'canvas viewport starts with top-side workspace headroom');
   assertEqual(pageViewport.width, DEFAULT_PAGE_CONTENT_WIDTH, 'page viewport uses page content width');
-  assert(canvasViewport.width > pageViewport.width, 'canvas viewport is wider than the formal page');
   assertEqual(pageWorld.height, 920, 'page world height follows PageFrame height');
-  assert(canvasWorld.width > pageWorld.width, 'canvas world is wider than page world');
 
   const originFromInitialViewport = viewportPointToWorldPoint({ x: 180, y: 64 }, canvasViewport);
   assertEqual(originFromInitialViewport.x, 0, 'initial canvas viewport leaves page-origin headroom on x');
@@ -582,22 +586,12 @@ function testDynamicCanvasWorldAndFocus(): void {
     x: 3600,
     y: 5200,
   };
-  const dynamicWorld = createRuntimeWorld('canvas', DEFAULT_PAGE_FRAME_HEIGHT, {
-    pageFrames: [baseFrame, farPageFrame],
-    blockPlacements: [],
-    canvasObjectReserve: [],
-  });
-
-  assertAtLeast(
-    dynamicWorld.width,
-    farPageFrame.x + farPageFrame.width + 800,
-    'canvas world expands to include far PageFrame width',
-  );
-  assertAtLeast(
-    dynamicWorld.height,
-    farPageFrame.y + farPageFrame.height + 800,
-    'canvas world expands to include far PageFrame height',
-  );
+  // Historical world geometry remains readable by the pure focus/scroll utilities.
+  const dynamicWorld = {
+    origin: { x: 0, y: 0 },
+    width: farPageFrame.x + farPageFrame.width + 800,
+    height: farPageFrame.y + farPageFrame.height + 800,
+  };
 
   const focusViewport = focusViewportOnWorldRect({
     viewport: createViewport({
@@ -645,16 +639,11 @@ function testPageFrameAndWorkspacePolicy(): void {
   });
 
   const pagePolicy = createSurfaceModePolicy('page');
-  const canvasPolicy = createSurfaceModePolicy('canvas');
   const pageVisible = getVisibleBlocksForSurface([pageBlock, workspaceBlock], pagePolicy, DEFAULT_PAGE_CONTENT_WIDTH);
-  const canvasVisible = getVisibleBlocksForSurface([pageBlock, workspaceBlock], canvasPolicy, DEFAULT_PAGE_CONTENT_WIDTH);
 
   assertEqual(pagePolicy.showWorkspaceBlocks, false, 'page mode hides workspace blocks');
   assertEqual(pagePolicy.useGlobalPageScroll, true, 'page mode uses natural page scroll');
-  assertEqual(canvasPolicy.showWorkspaceBlocks, true, 'canvas mode shows workspace blocks');
-  assertEqual(canvasPolicy.useGlobalPageScroll, false, 'canvas mode disables global page scroll');
   assertEqual(pageVisible.length, 1, 'page mode filters workspace block');
-  assertEqual(canvasVisible.length, 2, 'canvas mode preserves workspace block');
 
   const defaultDraft = createDefaultDraftLayout({
     [pageBlock.id]: { x: 0, y: 0, width: 320, height: 88 },
@@ -2398,7 +2387,7 @@ function testPlacementAndRuntimeModel(): void {
   assertEqual(normalizedInPage.width, 300, 'page mode uses fallback width for hidden workspace block');
 
   const normalizedInCanvas = normalizeBlockLayout({
-    block: withOverride,
+    block: { ...withOverride, canvas_layout: { ...stored, coordinate_space: 'canvas_world' } },
     fallback: { x: 0, y: 10, width: 300, height: 70 },
     contentWidth: DEFAULT_PAGE_CONTENT_WIDTH,
     surfaceMode: 'canvas',
@@ -2791,7 +2780,7 @@ function testTableObjectMutationMath(): void {
       y: 160,
       width: 420,
       height: 220,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     },
     zIndex: 1,
   });
@@ -2902,7 +2891,7 @@ async function testStructuredMutationHistory(): Promise<void> {
       y: 10,
       width: 320,
       height: 180,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     },
     zIndex: 1,
   });
@@ -3182,13 +3171,16 @@ function testCanvasRuntimeKernelSeed(): void {
     primaryPageFrame: pageFrame,
     viewport: createViewport({ x: 48, y: 32, width: 900, height: 640, zoom: 1.5 }),
     blockPlacements: [pagePlacement, workspacePlacement],
-    canvasObjectReserve: [{
-      id: 'shape-kernel-1',
-      kind: 'shape',
-      x: 620,
-      y: 180,
-      width: 120,
-      height: 80,
+    // Seed persisted historical rows through the retained generic hydration path.
+    genericCanvasObjects: [{
+      objectId: 'shape-kernel-1', canvasId: 'kernel-canvas', kind: 'shape',
+      backing: 'none', objectClass: 'pure', status: 'active', source: 'runtime_seed',
+    }],
+    genericCanvasPlacements: [{
+      placementId: 'shape-kernel-1:placement', objectId: 'shape-kernel-1', canvasId: 'kernel-canvas',
+      surface: 'canvas_workspace', boundaryRole: 'outside',
+      x: 620, y: 180, width: 120, height: 80, rotation: 0, zIndex: 2,
+      snapState: 'free', visibilityState: 'normal', renderVisibility: 'visible',
     }],
   });
 
@@ -3295,6 +3287,7 @@ function testBlockProjectionV1Foundation(): void {
       width: 260,
       height: 90,
       surface: 'canvas_workspace',
+      coordinate_space: 'canvas_world',
       export_role: 'scratch',
     },
     pageFrame,
@@ -3318,7 +3311,7 @@ function testBlockProjectionV1Foundation(): void {
 }
 
 function testShapeAndVisualConnectorFoundation(): void {
-  const pureShape = createPureShapeProjection({
+  const pureShape = historicalWorkspaceProjection(createPureShapeProjection({
     objectId: 'shape-object-1',
     canvasId: 'shape-canvas',
     layout: {
@@ -3327,7 +3320,7 @@ function testShapeAndVisualConnectorFoundation(): void {
       width: 180,
       height: 96,
       rotation: 8,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     },
     zIndex: 8,
     style: {
@@ -3336,7 +3329,7 @@ function testShapeAndVisualConnectorFoundation(): void {
       strokeWidth: 2,
       borderRadius: 6,
     },
-  });
+  }));
 
   assertEqual(pureShape.canvasObject.kind, 'shape', 'pure shape creates a shape CanvasObject');
   assertEqual(pureShape.canvasObject.backing, 'none', 'pure shape does not create a NoteBlock backing');
@@ -3458,7 +3451,7 @@ function testShapeAndVisualConnectorFoundation(): void {
 }
 
 function testCanvasObjectInspectorAndSafeActions(): void {
-  const pureShape = createPureShapeProjection({
+  const pureShape = historicalWorkspaceProjection(createPureShapeProjection({
     objectId: 'inspector-shape-1',
     canvasId: 'inspector-canvas',
     layout: {
@@ -3467,10 +3460,10 @@ function testCanvasObjectInspectorAndSafeActions(): void {
       width: 160,
       height: 90,
       rotation: 0,
-      surface: 'canvas_workspace',
+      surface: 'formal_page',
     },
     zIndex: 4,
-  });
+  }));
   const pureShapeModel = createCanvasObjectInspectorModel({
     canvasObject: pureShape.canvasObject,
     placement: pureShape.placement,
@@ -3528,7 +3521,7 @@ function testCanvasObjectInspectorAndSafeActions(): void {
     'export visibility toggle restores normal visibility',
   );
 
-  const imageProjection = createImageObjectProjection({
+  const imageProjection = historicalWorkspaceProjection(createImageObjectProjection({
     objectId: 'inspector-image-1',
     canvasId: 'inspector-canvas',
     asset: {
@@ -3541,10 +3534,10 @@ function testCanvasObjectInspectorAndSafeActions(): void {
       height: 180,
       blobUrl: '/assets/figure.png',
     },
-    layout: { x: 220, y: 140, width: 320, height: 180, surface: 'canvas_workspace' },
+    layout: { x: 220, y: 140, width: 320, height: 180, surface: 'formal_page' },
     zIndex: 5,
     caption: 'Figure one',
-  });
+  }));
   const duplicatedImage = createCanvasObjectDuplicateDraft({
     canvasObject: imageProjection.canvasObject,
     placement: imageProjection.placement,
@@ -3557,14 +3550,14 @@ function testCanvasObjectInspectorAndSafeActions(): void {
   assertEqual(duplicatedImage.imageObject.assetId, imageProjection.imageObject.assetId, 'image duplicate reuses the same asset');
   assertEqual(duplicatedImage.imageObject.caption, 'Figure one', 'image duplicate preserves caption');
 
-  const tableProjection = createTableObjectProjection({
+  const tableProjection = historicalWorkspaceProjection(createTableObjectProjection({
     objectId: 'inspector-table-1',
     canvasId: 'inspector-canvas',
-    layout: { x: 260, y: 220, width: 360, height: 180, surface: 'canvas_workspace' },
+    layout: { x: 260, y: 220, width: 360, height: 180, surface: 'formal_page' },
     zIndex: 6,
     rowCount: 2,
     columnCount: 2,
-  });
+  }));
   const tablePayload = updateTableCellText(
     tableProjection.structuredObject.payload,
     tableProjection.structuredObject.payload.cells[0]!.cellId,
@@ -3603,13 +3596,13 @@ function testCanvasCommandDispatcherFoundation(): void {
     viewport: createViewport(),
     blockPlacements: [],
   });
-  const shape = createPureShapeProjection({
+  const shape = historicalWorkspaceProjection(createPureShapeProjection({
     objectId: 'command-shape-1',
     canvasId,
-    layout: { x: 120, y: 80, width: 160, height: 96, surface: 'canvas_workspace' },
+    layout: { x: 120, y: 80, width: 160, height: 96, surface: 'formal_page' },
     zIndex: 3,
     style: { fill: '#111827', stroke: '#38bdf8' },
-  });
+  }));
 
   const createShapeResult = applyCanvasCommandToRuntime(
     buildCanvasSceneRuntime(baseModel),
@@ -3746,12 +3739,12 @@ function testCanvasAIReadableTreeFoundation(): void {
     viewport: createViewport(),
     blockPlacements: [blockProjection.placement],
   });
-  const shape = createPureShapeProjection({
+  const shape = historicalWorkspaceProjection(createPureShapeProjection({
     objectId: 'ai-tree-shape-1',
     canvasId,
-    layout: { x: DEFAULT_PAGE_CONTENT_WIDTH + 180, y: 96, width: 160, height: 100, surface: 'canvas_workspace' },
+    layout: { x: DEFAULT_PAGE_CONTENT_WIDTH + 180, y: 96, width: 160, height: 100, surface: 'formal_page' },
     zIndex: 8,
-  });
+  }));
   const connector = createVisualConnectorProjection({
     connectorId: 'ai-tree-connector-1',
     canvasId,
@@ -3931,7 +3924,6 @@ function testMeasurementModeAndHistory(): void {
   assertAtLeast(snapResolved.layouts.b.y, 96, 'snap-on drag collision keeps lower block below measured upper block');
 
   const pagePolicy = createSurfaceModePolicy('page');
-  const canvasPolicy = createSurfaceModePolicy('canvas');
   const defaultDraft: BlockBoxLayout = { x: 0, y: 120, width: 420, height: 72 };
   const snapDraft = createBlankDraftLayout({
     policy: pagePolicy,
@@ -3954,15 +3946,8 @@ function testMeasurementModeAndHistory(): void {
   assertEqual(freeDraft.x, 300, 'snap-off page draft uses click x');
   assertEqual(freeDraft.y, 300, 'snap-off page draft uses click y');
   assertEqual(shouldResolvePageCollisions(pagePolicy), true, 'page mode resolves page collisions');
-  assertEqual(shouldResolvePageCollisions(canvasPolicy), false, 'canvas mode does not force page collision resolution');
   assertEqual(shouldUseElasticAvoidance({ policy: pagePolicy, snapEnabled: false, deltaY: 12 }), true, 'elastic avoidance is page/snap-off only');
   assertEqual(shouldUseElasticAvoidance({ policy: pagePolicy, snapEnabled: true, deltaY: 12 }), false, 'snap-on disables elastic avoidance');
-  assertEqual(shouldUseElasticAvoidance({ policy: canvasPolicy, snapEnabled: false, deltaY: 12 }), false, 'canvas mode disables page elastic avoidance');
-
-  const transition = createSurfaceModeTransitionPolicy('page');
-  assertEqual(transition.nextMode, 'canvas', 'page transition targets canvas');
-  assertEqual(transition.closeOverlay, true, 'mode transition closes overlay');
-  assertEqual(transition.clearBlockSelection, true, 'mode transition clears block selection');
 
   assertEqual(getRuntimeHistoryKeyboardIntent({
     ctrlKey: true,

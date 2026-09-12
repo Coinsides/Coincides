@@ -1,0 +1,2061 @@
+[
+  {
+    "file": "client/src/pages/Notes/canvasEngine/pageCenteringContract.test.ts",
+    "before": {
+      "declarations": 3,
+      "expandedCases": 3,
+      "expectations": 10
+    },
+    "after": {
+      "declarations": 3,
+      "expandedCases": 3,
+      "expectations": 9
+    },
+    "preservedExpectations": [
+      {
+        "test": "<helper>",
+        "beforeLine": 26,
+        "afterLine": 26,
+        "text": "expect(match, `${selector} rule must exist`).not.toBeNull()"
+      },
+      {
+        "test": "computes the inverse offset from the post-sidebar main center",
+        "beforeLine": 32,
+        "afterLine": 32,
+        "text": "expect(getPageViewportCenteringOffsetX(270, 1650, 1920)).toBe(-135)"
+      },
+      {
+        "test": "computes the inverse offset from the post-sidebar main center",
+        "beforeLine": 33,
+        "afterLine": 33,
+        "text": "expect(getPageViewportCenteringOffsetX(60, 1860, 1920)).toBe(-30)"
+      },
+      {
+        "test": "computes the inverse offset from the post-sidebar main center",
+        "beforeLine": 34,
+        "afterLine": 34,
+        "text": "expect(getPageViewportCenteringOffsetX(270, 1633, 1920)).toBe(-126.5)"
+      },
+      {
+        "test": "centers the scaled reading space inside the available page surface",
+        "beforeLine": 39,
+        "afterLine": 39,
+        "text": "expect(layerSource).toContain(\"enabled: surfaceMode === 'page'\")"
+      },
+      {
+        "test": "centers the scaled reading space inside the available page surface",
+        "beforeLine": 40,
+        "afterLine": 40,
+        "text": "expect(layerSource).toContain(\"surfaceMode === 'page' ? styles.pageReadingSpace\")"
+      },
+      {
+        "test": "centers the scaled reading space inside the available page surface",
+        "beforeLine": 41,
+        "afterLine": 41,
+        "text": "expect(cssRuleBody('.writingSurface.pageReadingSurface')).toMatch(/left:\\s*0\\b/)"
+      },
+      {
+        "test": "centers the scaled reading space inside the available page surface",
+        "beforeLine": 42,
+        "afterLine": 42,
+        "text": "expect(cssRuleBody('.pageReadingSpace')).toMatch(/margin:\\s*0 auto/)"
+      },
+      {
+        "test": "keeps the writing surface presentation offset contract",
+        "beforeLine": 46,
+        "afterLine": 46,
+        "text": "expect(cssRuleBody('.writingSurface')).toMatch(/left:\\s*var\\(--page-centering-offset-x,\\s*0px\\)/)"
+      }
+    ],
+    "removedExpectations": [
+      {
+        "test": "keeps canvas at zero presentation offset",
+        "line": 47,
+        "text": "expect(cssRuleBody('.writingSurfaceCanvas')).toMatch(/left:\\s*0\\b/)",
+        "classification": "retired Canvas UI behavior"
+      }
+    ],
+    "addedExpectations": [],
+    "caseChanges": [
+      {
+        "beforeName": "computes the inverse offset from the post-sidebar main center",
+        "afterName": "computes the inverse offset from the post-sidebar main center",
+        "beforeLine": 31,
+        "afterLine": 31,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "centers the scaled reading space inside the available page surface",
+        "afterName": "centers the scaled reading space inside the available page surface",
+        "beforeLine": 37,
+        "afterLine": 37,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "keeps canvas at zero presentation offset",
+        "afterName": "keeps the writing surface presentation offset contract",
+        "beforeLine": 45,
+        "afterLine": 45,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": false
+      }
+    ],
+    "removedCallbackFixtureProperties": [],
+    "beforeHash": "ce8c71cc1131e5ba65c1d180390f7796bbb08a7ee44eb095caf6a9d96c36b49c",
+    "afterHash": "2577102efc005d4a2589fe6c1854bc490b5238685a5b7e975e6cb73535980071"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+    "before": {
+      "declarations": 19,
+      "expandedCases": 25,
+      "expectations": 136
+    },
+    "after": {
+      "declarations": 18,
+      "expandedCases": 23,
+      "expectations": 131
+    },
+    "preservedExpectations": [
+      {
+        "test": "<helper>",
+        "beforeLine": 150,
+        "afterLine": 143,
+        "text": "expect(ruler.closest('[data-page-display-scale]')).toBe(paper)"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 164,
+        "afterLine": 157,
+        "text": "expect(JSON.stringify(pageFrame)).toBe(before)"
+      },
+      {
+        "test": "C4 paper tools are available in writing and disabled in layout and read-only modes",
+        "beforeLine": 172,
+        "afterLine": 165,
+        "text": "expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(false)"
+      },
+      {
+        "test": "C4 paper tools are available in writing and disabled in layout and read-only modes",
+        "beforeLine": 173,
+        "afterLine": 166,
+        "text": "expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(false)"
+      },
+      {
+        "test": "C4 paper tools are available in writing and disabled in layout and read-only modes",
+        "beforeLine": 175,
+        "afterLine": 168,
+        "text": "expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(true)"
+      },
+      {
+        "test": "C4 paper tools are available in writing and disabled in layout and read-only modes",
+        "beforeLine": 177,
+        "afterLine": 170,
+        "text": "expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(true)"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 196,
+        "afterLine": 189,
+        "text": "expect(controls.querySelector('[data-page-reading-select]')).toBeNull()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 198,
+        "afterLine": 191,
+        "text": "expect(onPageReadingGearChange).toHaveBeenCalledExactlyOnceWith('fit_page')"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 199,
+        "afterLine": 192,
+        "text": "expect(appMain.scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 0, behavior: 'auto' })"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 200,
+        "afterLine": 193,
+        "text": "expect(onCloseViewOptions).toHaveBeenCalledOnce()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 202,
+        "afterLine": 195,
+        "text": "expect(onToggleViewOptions).toHaveBeenCalledOnce()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 205,
+        "afterLine": 198,
+        "text": "expect(overview.previousElementSibling?.getAttribute('data-page-reading-view-options')).toBe('true')"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 207,
+        "afterLine": 200,
+        "text": "expect(onToggleOverview).toHaveBeenCalledOnce()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 208,
+        "afterLine": 201,
+        "text": "expect(view.getByRole('button', { name: 'Decrease page reading step' })).not.toBeNull()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 209,
+        "afterLine": 202,
+        "text": "expect(view.getByRole('button', { name: 'Increase page reading step' })).not.toBeNull()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 210,
+        "afterLine": 203,
+        "text": "expect(view.getByRole('button', { name: 'Selection' })).not.toBeNull()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 211,
+        "afterLine": 204,
+        "text": "expect(view.getByRole('button', { name: 'Pen' })).not.toBeNull()"
+      },
+      {
+        "test": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 212,
+        "afterLine": 205,
+        "text": "expect(view.getByRole('button', { name: 'Eraser' })).not.toBeNull()"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 237,
+        "afterLine": 230,
+        "text": "expect(view.container.querySelector<HTMLElement>('[data-text-unit-drop-indicator=\"synthetic-press-unit\"]')?.dataset.dropEdge).toBe('before')"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 241,
+        "afterLine": 234,
+        "text": "expect(blockListMouseDown).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 242,
+        "afterLine": 235,
+        "text": "expect(selectBlock).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 243,
+        "afterLine": 236,
+        "text": "expect(view.container.querySelector('[data-text-unit-drop-indicator=\"synthetic-press-unit\"]')).not.toBeNull()"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 247,
+        "afterLine": 240,
+        "text": "expect(view.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 248,
+        "afterLine": 241,
+        "text": "expect(view.getByRole('menu', { name: 'Text unit' })).toBeTruthy()"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 249,
+        "afterLine": 242,
+        "text": "expect(props.onApplyBlockTextFlowEdit).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 250,
+        "afterLine": 243,
+        "text": "expect(extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 262,
+        "afterLine": 255,
+        "text": "expect(resolved.result.current.visibleBlocks.map((block) => block.id)).toEqual([landed.id])"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 264,
+        "afterLine": 257,
+        "text": "expect(persistedLayout.x).toBeCloseTo(layout.x)"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 265,
+        "afterLine": 258,
+        "text": "expect(persistedLayout.y).toBeCloseTo(layout.y)"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 266,
+        "afterLine": 259,
+        "text": "expect(persistedLayout.width).toBeCloseTo(layout.width)"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 272,
+        "afterLine": 265,
+        "text": "expect(shell).not.toBeNull()"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 273,
+        "afterLine": 266,
+        "text": "expect(shell.hidden).toBe(false)"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 275,
+        "afterLine": 268,
+        "text": "expect(Number.parseFloat(shell.style.left)).toBeCloseTo(screen.x)"
+      },
+      {
+        "test": "<helper>",
+        "beforeLine": 276,
+        "afterLine": 269,
+        "text": "expect(Number.parseFloat(shell.style.top)).toBeCloseTo(screen.y)"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 294,
+        "afterLine": 287,
+        "text": "expect(props.defaultDraftLayout.width).toBe(760)"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 315,
+        "afterLine": 308,
+        "text": "expect(extract).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 318,
+        "afterLine": 311,
+        "text": "expect(20 + (rendered.x - viewport.x) * viewport.zoom).toBeCloseTo(release.x)"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 319,
+        "afterLine": 312,
+        "text": "expect(30 + (rendered.y - viewport.y) * viewport.zoom).toBeCloseTo(release.y)"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 320,
+        "afterLine": 313,
+        "text": "expect(layout).toMatchObject({ coordinate_space: 'page_frame_local', frame_id: pageFrame.id, surface: 'formal_page' })"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 321,
+        "afterLine": 314,
+        "text": "expect(layout.width).toBeLessThanOrEqual(760 - layout.x)"
+      },
+      {
+        "test": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 324,
+        "afterLine": 317,
+        "text": "expect(extract).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 342,
+        "afterLine": 335,
+        "text": "expect(props.defaultDraftLayout.width).toBe(760)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 348,
+        "afterLine": 341,
+        "text": "expect(scale).toBeGreaterThan(0)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 349,
+        "afterLine": 342,
+        "text": "expect(scale).not.toBe(1)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 369,
+        "afterLine": 362,
+        "text": "expect(extract).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 370,
+        "afterLine": 363,
+        "text": "expect(extract.mock.calls[0][0]).toMatchObject({ id: source.id })"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 371,
+        "afterLine": 364,
+        "text": "expect(extract.mock.calls[0][1]).toBe('synthetic-extract-unit')"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 373,
+        "afterLine": 366,
+        "text": "expect(layout.x).toBeCloseTo(releaseX)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 374,
+        "afterLine": 367,
+        "text": "expect(layout.y).toBeCloseTo(280)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 375,
+        "afterLine": 368,
+        "text": "expect(layout).toMatchObject({ coordinate_space: 'page_frame_local', frame_id: pageFrame.id, surface: 'formal_page' })"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 376,
+        "afterLine": 369,
+        "text": "expect(layout.width).toBeLessThanOrEqual(760 - layout.x)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 377,
+        "afterLine": 370,
+        "text": "expect(layout.width).toBeCloseTo(MIN_BLOCK_WIDTH)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 379,
+        "afterLine": 372,
+        "text": "expect(120 + rendered.x * scale).toBeCloseTo(point.x)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 380,
+        "afterLine": 373,
+        "text": "expect(180 + rendered.y * scale).toBeCloseTo(point.y)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 392,
+        "afterLine": 385,
+        "text": "expect(extract).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 396,
+        "afterLine": 389,
+        "text": "expect(extract).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 397,
+        "afterLine": 390,
+        "text": "expect(props.onCreateBlock).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 479,
+        "afterLine": 472,
+        "text": "expect(editor.sourceEditor.dataset.textUnitMoveEnabled).toBe('true')"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 480,
+        "afterLine": 473,
+        "text": "expect(editor.targetEditor.dataset.textUnitMoveEnabled).toBe('true')"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 484,
+        "afterLine": 477,
+        "text": "expect(line?.dataset.dropEdge).toBe(edge)"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 485,
+        "afterLine": 478,
+        "text": "expect(editor.sourceEditor.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 486,
+        "afterLine": 479,
+        "text": "expect(editor.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 487,
+        "afterLine": 480,
+        "text": "expect(editor.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 489,
+        "afterLine": 482,
+        "text": "expect(editor.move).toHaveBeenCalledExactlyOnceWith(editor.source, 'c3-move', editor.target, 'c3-target-1', edge)"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 492,
+        "afterLine": 485,
+        "text": "expect(editor.move.mock.calls[0][0].content_json).toEqual(before[0].content_json)"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 493,
+        "afterLine": 486,
+        "text": "expect(editor.sourceFlow.units[0]).toMatchObject({ writing_role: 'todo_item', indent_level: 2,\n        metadata: { checked: true, retained: { field: 'source' } } })"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 495,
+        "afterLine": 488,
+        "text": "expect(editor.blocks).toEqual(before)"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 496,
+        "afterLine": 489,
+        "text": "expect(editor.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 497,
+        "afterLine": 490,
+        "text": "expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 505,
+        "afterLine": 498,
+        "text": "expect(editor.targetEditor.querySelector('[data-text-unit-drop-indicator]')).not.toBeNull()"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 509,
+        "afterLine": 502,
+        "text": "expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 511,
+        "afterLine": 504,
+        "text": "expect(editor.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 512,
+        "afterLine": 505,
+        "text": "expect(editor.extract).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 513,
+        "afterLine": 506,
+        "text": "expect(editor.extract.mock.calls[0].slice(0, 2)).toEqual([editor.source, 'c3-move'])"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 516,
+        "afterLine": 509,
+        "text": "expect(100 + screen.x * editor.scale).toBeCloseTo(blank.x)"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 517,
+        "afterLine": 510,
+        "text": "expect(100 + screen.y * editor.scale).toBeCloseTo(blank.y)"
+      },
+      {
+        "test": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 518,
+        "afterLine": 511,
+        "text": "expect(layout.surface).toBe('formal_page')"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 527,
+        "afterLine": 520,
+        "text": "expect(editor.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 528,
+        "afterLine": 521,
+        "text": "expect(editor.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 529,
+        "afterLine": 522,
+        "text": "expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 533,
+        "afterLine": 526,
+        "text": "expect(editor.targetEditor.querySelector('[data-text-unit-drop-indicator]')).not.toBeNull()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 536,
+        "afterLine": 529,
+        "text": "expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 539,
+        "afterLine": 532,
+        "text": "expect(editor.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 540,
+        "afterLine": 533,
+        "text": "expect(editor.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 542,
+        "afterLine": 535,
+        "text": "expect(editor.move).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "beforeLine": 548,
+        "afterLine": 541,
+        "text": "expect(codeShell).not.toBeNull()"
+      },
+      {
+        "test": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "beforeLine": 549,
+        "afterLine": 542,
+        "text": "expect(codeShell.querySelector('[data-text-unit-editor]')).toBeNull()"
+      },
+      {
+        "test": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "beforeLine": 552,
+        "afterLine": 545,
+        "text": "expect(editor.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "beforeLine": 553,
+        "afterLine": 546,
+        "text": "expect(editor.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "beforeLine": 554,
+        "afterLine": 547,
+        "text": "expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "beforeLine": 563,
+        "afterLine": 556,
+        "text": "expect(editor.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "beforeLine": 564,
+        "afterLine": 557,
+        "text": "expect(editor.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "beforeLine": 565,
+        "afterLine": 558,
+        "text": "expect(other.move).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "beforeLine": 566,
+        "afterLine": 559,
+        "text": "expect(other.extract).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "beforeLine": 567,
+        "afterLine": 560,
+        "text": "expect(document.querySelector('[data-text-unit-drop-indicator]')).toBeNull()"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 587,
+        "afterLine": 580,
+        "text": "expect(slot).not.toBeNull()"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 588,
+        "afterLine": 581,
+        "text": "expect(Number.parseFloat(slot.style.width)).toBe(Number.parseFloat(block.style.width))"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 589,
+        "afterLine": 582,
+        "text": "expect(Number.parseFloat(slot.style.left)).toBe(Number.parseFloat(ruler.style.left))"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 591,
+        "afterLine": 584,
+        "text": "expect(Number.parseFloat(slot.style.top) - blockTop).toBe(topInFrame - pageFrame.contentInset.top)"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 593,
+        "afterLine": 585,
+        "text": "expect(Number.parseFloat(slot.style.left)).toBe(blockLeft)"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 594,
+        "afterLine": 586,
+        "text": "expect(slot.closest('[data-page-display-scale]')).toBe(block.closest('[data-page-display-scale]'))"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 600,
+        "afterLine": 588,
+        "text": "expect({ pageFrame, extensions: props.noteCanvasRuntime.pageFrameExtensions }).toEqual(original)"
+      },
+      {
+        "test": "aligns the page top ruler with the block column despite a historical frame x",
+        "beforeLine": 605,
+        "afterLine": 593,
+        "text": "expect(sample.rulerOffset, 'top ruler minus block column in CSS px').toBe(0)"
+      },
+      {
+        "test": "aligns the page top ruler with the block column despite a historical frame x",
+        "beforeLine": 606,
+        "afterLine": 594,
+        "text": "expect(sample.rulerWidth).toBe(sample.blockWidth)"
+      },
+      {
+        "test": "aligns the page top ruler with the block column despite a historical frame x",
+        "beforeLine": 607,
+        "afterLine": 595,
+        "text": "expect(sample.boundaryOffset).toBeNull()"
+      },
+      {
+        "test": "preserves a collection whose frame content origin already matches page offset",
+        "beforeLine": 619,
+        "afterLine": 599,
+        "text": "expect(alignment(-72, 'page').rulerOffset).toBe(0)"
+      },
+      {
+        "test": "uses the same block coordinate origin with non-default frame y and content insets",
+        "beforeLine": 628,
+        "afterLine": 606,
+        "text": "expect(sample.rulerOffset).toBe(0)"
+      },
+      {
+        "test": "uses the same block coordinate origin with non-default frame y and content insets",
+        "beforeLine": 629,
+        "afterLine": 607,
+        "text": "expect(sample.rulerTopOffset).toBe(0)"
+      },
+      {
+        "test": "uses the same block coordinate origin with non-default frame y and content insets",
+        "beforeLine": 630,
+        "afterLine": 608,
+        "text": "expect(sample.rulerWidth).toBe(sample.blockWidth)"
+      },
+      {
+        "test": "keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for %s",
+        "beforeLine": 637,
+        "afterLine": 615,
+        "text": "expect(sample.transformedOffset).toBe(0)"
+      },
+      {
+        "test": "keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for %s",
+        "beforeLine": 638,
+        "afterLine": 616,
+        "text": "expect(sample.rulerTopOffset * sample.scale).toBe(0)"
+      },
+      {
+        "test": "keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for %s",
+        "beforeLine": 639,
+        "afterLine": 617,
+        "text": "expect(sample.rulerWidth * sample.scale).toBe(sample.blockWidth * sample.scale)"
+      },
+      {
+        "test": "keeps Fit width alignment as available space changes",
+        "beforeLine": 648,
+        "afterLine": 626,
+        "text": "expect(sample.scale).toBe(width / 904)"
+      },
+      {
+        "test": "keeps Fit width alignment as available space changes",
+        "beforeLine": 649,
+        "afterLine": 627,
+        "text": "expect(sample.transformedOffset).toBe(0)"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 666,
+        "afterLine": 644,
+        "text": "expect(canvas.style.width).toBe('904px')"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 667,
+        "afterLine": 645,
+        "text": "expect(canvas.style.height).toBe('1278px')"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 670,
+        "afterLine": 648,
+        "text": "expect(fragment.style.left).toBe('72px')"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 671,
+        "afterLine": 649,
+        "text": "expect(fragment.style.top).toBe('0px')"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 672,
+        "afterLine": 650,
+        "text": "expect(fragment.style.width).toBe('760px')"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 673,
+        "afterLine": 651,
+        "text": "expect(fragment.querySelector<HTMLElement>('[data-note-block-shell]')!.style.left).toBe('0px')"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 675,
+        "afterLine": 653,
+        "text": "expect(JSON.stringify(props.noteCanvasRuntime.pageFrames)).toBe(before)"
+      },
+      {
+        "test": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 677,
+        "afterLine": 655,
+        "text": "expect(document.querySelector('[data-note-print-root]')).toBeNull()"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 692,
+        "afterLine": 670,
+        "text": "expect(button.textContent).toBe('')"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 693,
+        "afterLine": 671,
+        "text": "expect(button.getAttribute('title')).toBe(label)"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 694,
+        "afterLine": 672,
+        "text": "expect(button.querySelector('svg')).not.toBeNull()"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 696,
+        "afterLine": 674,
+        "text": "expect(view.getByRole('button', { name: 'Selection' }).getAttribute('aria-pressed')).toBe('true')"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 699,
+        "afterLine": 677,
+        "text": "expect(view.getByRole('button', { name: 'Pen' }).getAttribute('aria-pressed')).toBe('true')"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 712,
+        "afterLine": 690,
+        "text": "expect(view.container.querySelector('[data-paper-ink-selected]')).not.toBeNull()"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 713,
+        "afterLine": 691,
+        "text": "expect(props.onBlockListMouseDown).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 716,
+        "afterLine": 694,
+        "text": "expect(view.container.querySelector('[data-paper-ink-selected]')).not.toBeNull()"
+      },
+      {
+        "test": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 718,
+        "afterLine": 696,
+        "text": "expect(props.onDeleteCanvasObject).toHaveBeenCalledExactlyOnceWith('e3-selected')"
+      }
+    ],
+    "removedExpectations": [
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "line": 596,
+        "text": "expect(Number.parseFloat(slot.style.left)).toBe(pageFrame.x + pageFrame.contentInset.left)",
+        "classification": "retired Canvas UI behavior"
+      },
+      {
+        "test": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "line": 597,
+        "text": "expect(Number.parseFloat(slot.style.top)).toBe(pageFrame.y + topInFrame)",
+        "classification": "retired Canvas UI behavior"
+      },
+      {
+        "test": "preserves canvas world frame geometry while the page-only repair leaves its separate mismatch explicit",
+        "line": 614,
+        "text": "expect(sample.rulerOffset).toBe(56)",
+        "classification": "retired Canvas UI behavior"
+      },
+      {
+        "test": "preserves canvas world frame geometry while the page-only repair leaves its separate mismatch explicit",
+        "line": 615,
+        "text": "expect(sample.boundaryOffset).toBe(56)",
+        "classification": "retired Canvas UI behavior"
+      },
+      {
+        "test": "preserves a collection whose frame content origin already matches page offset",
+        "line": 621,
+        "text": "expect(alignment(canvasOffset - 72, 'canvas').rulerOffset).toBe(0)",
+        "classification": "retired Canvas UI behavior"
+      }
+    ],
+    "addedExpectations": [],
+    "caseChanges": [
+      {
+        "beforeName": "C4 paper tools are available in writing and disabled in layout and read-only modes",
+        "afterName": "C4 paper tools are available in writing and disabled in layout and read-only modes",
+        "beforeLine": 169,
+        "afterLine": 162,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "afterName": "forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action",
+        "beforeLine": 181,
+        "afterLine": 174,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "afterName": "F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu",
+        "beforeLine": 217,
+        "afterLine": 210,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "afterName": "round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper",
+        "beforeLine": 281,
+        "afterLine": 274,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "afterName": "maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops",
+        "beforeLine": 331,
+        "afterLine": 324,
+        "beforeRows": [
+          "220",
+          "760 - MIN_BLOCK_WIDTH"
+        ],
+        "afterRows": [
+          "220",
+          "760 - MIN_BLOCK_WIDTH"
+        ],
+        "beforeExpandedCount": 2,
+        "afterExpandedCount": 2,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "afterName": "smoke 1: paints the target $edge line and dispatches one move with the original role and fields",
+        "beforeLine": 475,
+        "afterLine": 468,
+        "beforeRows": [
+          "{ y: 340, edge: 'before' }",
+          "{ y: 375, edge: 'after' }"
+        ],
+        "afterRows": [
+          "{ y: 340, edge: 'before' }",
+          "{ y: 375, edge: 'after' }"
+        ],
+        "beforeExpandedCount": 2,
+        "afterExpandedCount": 2,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "afterName": "smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction",
+        "beforeLine": 501,
+        "afterLine": 494,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "afterName": "smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line",
+        "beforeLine": 521,
+        "afterLine": 514,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "afterName": "smoke 5: a code block rejects the unit without becoming a blank-paper extraction",
+        "beforeLine": 545,
+        "afterLine": 538,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "afterName": "smoke 5: another mounted writing surface (note %s) cannot receive this drag",
+        "beforeLine": 557,
+        "afterLine": 550,
+        "beforeRows": [
+          "'synthetic-c3-note'",
+          "'synthetic-other-note'"
+        ],
+        "afterRows": [
+          "'synthetic-c3-note'",
+          "'synthetic-other-note'"
+        ],
+        "beforeExpandedCount": 2,
+        "afterExpandedCount": 2,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "afterName": "F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry",
+        "beforeLine": 573,
+        "afterLine": 566,
+        "beforeRows": [
+          "'page'",
+          "'canvas'"
+        ],
+        "afterRows": [
+          "'page'"
+        ],
+        "beforeExpandedCount": 2,
+        "afterExpandedCount": 1,
+        "bodyIdentical": false
+      },
+      {
+        "beforeName": "aligns the page top ruler with the block column despite a historical frame x",
+        "afterName": "aligns the page top ruler with the block column despite a historical frame x",
+        "beforeLine": 603,
+        "afterLine": 591,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "preserves canvas world frame geometry while the page-only repair leaves its separate mismatch explicit",
+        "afterName": null,
+        "beforeLine": 610,
+        "afterLine": null,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 0,
+        "bodyIdentical": false
+      },
+      {
+        "beforeName": "preserves a collection whose frame content origin already matches page offset",
+        "afterName": "preserves a collection whose frame content origin already matches page offset",
+        "beforeLine": 618,
+        "afterLine": 598,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": false
+      },
+      {
+        "beforeName": "uses the same block coordinate origin with non-default frame y and content insets",
+        "afterName": "uses the same block coordinate origin with non-default frame y and content insets",
+        "beforeLine": 624,
+        "afterLine": 602,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for %s",
+        "afterName": "keeps both edges aligned at every 0.1 step from 0.5 to 2.0 for %s",
+        "beforeLine": 633,
+        "afterLine": 611,
+        "beforeRows": [
+          "'fit_width'",
+          "'fit_page'",
+          "'physical'"
+        ],
+        "afterRows": [
+          "'fit_width'",
+          "'fit_page'",
+          "'physical'"
+        ],
+        "beforeExpandedCount": 3,
+        "afterExpandedCount": 3,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "keeps Fit width alignment as available space changes",
+        "afterName": "keeps Fit width alignment as available space changes",
+        "beforeLine": 644,
+        "afterLine": 622,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "afterName": "leaves print and overview frame-local page projections unchanged for the same historical collection",
+        "beforeLine": 653,
+        "afterLine": 631,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "afterName": "E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection",
+        "beforeLine": 681,
+        "afterLine": 659,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      }
+    ],
+    "removedCallbackFixtureProperties": [
+      {
+        "name": "onPushStructuredMutationHistory",
+        "line": 97,
+        "text": "onPushStructuredMutationHistory: noOp"
+      },
+      {
+        "name": "onAddPageBelow",
+        "line": 103,
+        "text": "onAddPageBelow: noOp"
+      },
+      {
+        "name": "onCreatePageFrame",
+        "line": 103,
+        "text": "onCreatePageFrame: noOp"
+      },
+      {
+        "name": "onCreatePageStack",
+        "line": 103,
+        "text": "onCreatePageStack: noOp"
+      },
+      {
+        "name": "onDeletePageFrame",
+        "line": 104,
+        "text": "onDeletePageFrame: noOp"
+      },
+      {
+        "name": "onDetachPageFromStack",
+        "line": 104,
+        "text": "onDetachPageFromStack: noOp"
+      },
+      {
+        "name": "onDuplicatePageFrame",
+        "line": 104,
+        "text": "onDuplicatePageFrame: noOp"
+      },
+      {
+        "name": "onMovePageFrame",
+        "line": 105,
+        "text": "onMovePageFrame: noOp"
+      },
+      {
+        "name": "onPanViewportBy",
+        "line": 108,
+        "text": "onPanViewportBy: noOp"
+      },
+      {
+        "name": "onResetViewport",
+        "line": 110,
+        "text": "onResetViewport: noOp"
+      },
+      {
+        "name": "onScrollViewportBy",
+        "line": 110,
+        "text": "onScrollViewportBy: noOp"
+      },
+      {
+        "name": "onSelectPageFrame",
+        "line": 111,
+        "text": "onSelectPageFrame: noOp"
+      },
+      {
+        "name": "onResizePageFrame",
+        "line": 111,
+        "text": "onResizePageFrame: noOp"
+      },
+      {
+        "name": "onSetPrimaryPageFrame",
+        "line": 112,
+        "text": "onSetPrimaryPageFrame: noOp"
+      },
+      {
+        "name": "onTogglePageStackCollapse",
+        "line": 112,
+        "text": "onTogglePageStackCollapse: noOp"
+      },
+      {
+        "name": "onForgetBlockLocally",
+        "line": 113,
+        "text": "onForgetBlockLocally: noOp"
+      },
+      {
+        "name": "onRestoreBlockById",
+        "line": 114,
+        "text": "onRestoreBlockById: vi.fn(async () => null)"
+      },
+      {
+        "name": "onViewportSizeChange",
+        "line": 114,
+        "text": "onViewportSizeChange: noOp"
+      },
+      {
+        "name": "onZoomViewportAt",
+        "line": 115,
+        "text": "onZoomViewportAt: noOp"
+      }
+    ],
+    "beforeHash": "da3656f4eb88cfb62f2c0a57c3c8ad4bff7fe6b4db3c0903fb87bdddaa73f78d",
+    "afterHash": "0c73cf08afc87aff94449bef08a1a647918ddb1e16bd9621feeade0707e79305"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+    "before": {
+      "declarations": 13,
+      "expandedCases": 15,
+      "expectations": 83
+    },
+    "after": {
+      "declarations": 13,
+      "expandedCases": 15,
+      "expectations": 79
+    },
+    "preservedExpectations": [
+      {
+        "test": "renders the effective page typography without a frame extension",
+        "beforeLine": 240,
+        "afterLine": 220,
+        "text": "expect(surface().dataset.documentFontSize).toBe(String(profile.fontSizePx))"
+      },
+      {
+        "test": "renders the effective page typography without a frame extension",
+        "beforeLine": 241,
+        "afterLine": 221,
+        "text": "expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${profile.fontSizePx}px`)"
+      },
+      {
+        "test": "renders the effective page typography without a frame extension",
+        "beforeLine": 242,
+        "afterLine": 222,
+        "text": "expect(surface().style.getPropertyValue('--document-line-height')).toBe(`${profile.lineHeightPx}px`)"
+      },
+      {
+        "test": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "beforeLine": 271,
+        "afterLine": 247,
+        "text": "expect(screen.getByText('recover this edit').closest('[role=\"status\"]')?.textContent).toContain('recover this edit')"
+      },
+      {
+        "test": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "beforeLine": 281,
+        "afterLine": 257,
+        "text": "expect(applyMouseDown.defaultPrevented).toBe(true)"
+      },
+      {
+        "test": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "beforeLine": 282,
+        "afterLine": 258,
+        "text": "expect(dismissMouseDown.defaultPrevented).toBe(true)"
+      },
+      {
+        "test": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "beforeLine": 283,
+        "afterLine": 259,
+        "text": "expect(onApplyBlockEditRecovery).toHaveBeenCalledWith(receipt.recoveryKey)"
+      },
+      {
+        "test": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "beforeLine": 284,
+        "afterLine": 260,
+        "text": "expect(onDismissBlockEditRecovery).toHaveBeenCalledWith(receipt.recoveryKey)"
+      },
+      {
+        "test": "keeps the focused code editor from blur-saving before the selected recovery Apply runs",
+        "beforeLine": 325,
+        "afterLine": 301,
+        "text": "expect(document.activeElement).toBe(editor)"
+      },
+      {
+        "test": "keeps the focused code editor from blur-saving before the selected recovery Apply runs",
+        "beforeLine": 334,
+        "afterLine": 310,
+        "text": "expect(onApplyBlockEditRecovery).toHaveBeenCalledWith(receipt.recoveryKey)"
+      },
+      {
+        "test": "keeps the focused code editor from blur-saving before the selected recovery Apply runs",
+        "beforeLine": 335,
+        "afterLine": 311,
+        "text": "expect(events).toEqual(['apply'])"
+      },
+      {
+        "test": "keeps the focused code editor from blur-saving before the selected recovery Apply runs",
+        "beforeLine": 336,
+        "afterLine": 312,
+        "text": "expect(durableText === receipt.text || selectedReceiptRecoverable).toBe(true)"
+      },
+      {
+        "test": "passes recovery conflict choices and comparison through the document layer",
+        "beforeLine": 350,
+        "afterLine": 326,
+        "text": "expect(comparison.textContent).toContain('current editor text')"
+      },
+      {
+        "test": "passes recovery conflict choices and comparison through the document layer",
+        "beforeLine": 351,
+        "afterLine": 327,
+        "text": "expect(comparison.textContent).toContain('recover this edit')"
+      },
+      {
+        "test": "passes recovery conflict choices and comparison through the document layer",
+        "beforeLine": 353,
+        "afterLine": 329,
+        "text": "expect(replay).toHaveBeenCalledWith(receipt.recoveryKey)"
+      },
+      {
+        "test": "passes recovery conflict choices and comparison through the document layer",
+        "beforeLine": 354,
+        "afterLine": 330,
+        "text": "expect(inspect).toHaveBeenCalledWith(receipt.recoveryKey)"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 441,
+        "afterLine": 416,
+        "text": "expect(container.querySelectorAll('[data-note-paper-header=\"true\"]')).toHaveLength(1)"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 442,
+        "afterLine": 417,
+        "text": "expect(header.style.paddingLeft).toBe('72px')"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 443,
+        "afterLine": 418,
+        "text": "expect(header.style.paddingRight).toBe('72px')"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 448,
+        "afterLine": 423,
+        "text": "expect(header.style.paddingLeft).toBe('110px')"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 449,
+        "afterLine": 424,
+        "text": "expect(header.style.paddingRight).toBe('48px')"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 452,
+        "afterLine": 427,
+        "text": "expect(overview.querySelector('[data-note-paper-header]')).toBeNull()"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 453,
+        "afterLine": 428,
+        "text": "expect(container.querySelectorAll('[data-note-paper-header]')).toHaveLength(1)"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 456,
+        "afterLine": 431,
+        "text": "expect(print.querySelectorAll('[data-note-print-page]')).toHaveLength(4)"
+      },
+      {
+        "test": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 457,
+        "afterLine": 432,
+        "text": "expect(print.querySelector('[data-note-paper-header]')).toBeNull()"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 478,
+        "afterLine": 452,
+        "text": "expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(120 * scale)"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 483,
+        "afterLine": 457,
+        "text": "expect(header.onTitleDraftChange).toHaveBeenCalledWith('Changed title '.repeat(30))"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 484,
+        "afterLine": 458,
+        "text": "expect(header.onDescriptionDraftChange).toHaveBeenCalledWith('Changed description '.repeat(40))"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 486,
+        "afterLine": 460,
+        "text": "expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(240 * scale)"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 487,
+        "afterLine": 461,
+        "text": "expect({ top: shell.style.top, left: shell.style.left }).toEqual(localPosition)"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 488,
+        "afterLine": 462,
+        "text": "expect(JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks })).toBe(original)"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 491,
+        "afterLine": 465,
+        "text": "expect(header.onSaveTitle).toHaveBeenCalledOnce()"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 492,
+        "afterLine": 466,
+        "text": "expect(header.onSaveDescription).toHaveBeenCalledOnce()"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 493,
+        "afterLine": 467,
+        "text": "expect(props.onPersistCanvasObject).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 494,
+        "afterLine": 468,
+        "text": "expect(props.onSaveBlock).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "beforeLine": 513,
+        "afterLine": 485,
+        "text": "expect(shell.style.top).toBe('-90px')"
+      },
+      {
+        "test": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "beforeLine": 514,
+        "afterLine": 486,
+        "text": "expect(bodyTop).toBeGreaterThanOrEqual(120 * scale)"
+      },
+      {
+        "test": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "beforeLine": 515,
+        "afterLine": 487,
+        "text": "expect(JSON.stringify(props.blockLayouts)).toBe(original)"
+      },
+      {
+        "test": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "beforeLine": 516,
+        "afterLine": 488,
+        "text": "expect(props.onPersistCanvasObject).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "beforeLine": 538,
+        "afterLine": 509,
+        "text": "expect(activateDraft).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "beforeLine": 540,
+        "afterLine": 511,
+        "text": "expect(activateDraft).toHaveBeenCalledOnce()"
+      },
+      {
+        "test": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "beforeLine": 541,
+        "afterLine": 512,
+        "text": "expect(activateDraft.mock.calls[0][0].x).toBeCloseTo(120)"
+      },
+      {
+        "test": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "beforeLine": 542,
+        "afterLine": 513,
+        "text": "expect(activateDraft.mock.calls[0][0].y).toBeCloseTo(300)"
+      },
+      {
+        "test": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "beforeLine": 543,
+        "afterLine": 514,
+        "text": "expect(props.blockListRef.current).toBe(blockList)"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 552,
+        "afterLine": 523,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).not.toBeNull()"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 554,
+        "afterLine": 525,
+        "text": "expect(grid.dataset.columns).toBe(pageCount === 1 ? '1' : '3')"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 555,
+        "afterLine": 526,
+        "text": "expect(Array.from(container.querySelectorAll('[data-note-overview-page]'))\n      .map((page) => page.getAttribute('data-page-frame-id')))\n      .toEqual(props.noteCanvasRuntime.pageFrames.map((frame) => frame.id))"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 558,
+        "afterLine": 529,
+        "text": "expect(container.querySelector('[data-note-overview-next]')).toBeNull()"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 559,
+        "afterLine": 530,
+        "text": "expect(container.querySelector('[data-note-overview-previous]')).toBeNull()"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 561,
+        "afterLine": 532,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 562,
+        "afterLine": 533,
+        "text": "expect(callback).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 577,
+        "afterLine": 548,
+        "text": "expect(mouseDown.defaultPrevented).toBe(true)"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 579,
+        "afterLine": 550,
+        "text": "expect(container.contains(editor)).toBe(true)"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 581,
+        "afterLine": 552,
+        "text": "expect(scroll).toHaveBeenCalledWith(\n      props.blockListRef.current,\n      expect.objectContaining({ ...props.noteCanvasRuntime.pageFrames[8], x: 0 }),\n    )"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 585,
+        "afterLine": 556,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 586,
+        "afterLine": 557,
+        "text": "expect(screen.getByRole('textbox')).toBe(editor)"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 587,
+        "afterLine": 558,
+        "text": "expect(document.activeElement).toBe(editor)"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 588,
+        "afterLine": 559,
+        "text": "expect((editor as HTMLTextAreaElement).value).toBe(dirtyText)"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 589,
+        "afterLine": 560,
+        "text": "expect(callback).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 593,
+        "afterLine": 564,
+        "text": "expect(props.onSaveBlock).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 594,
+        "afterLine": 565,
+        "text": "expect(props.onSaveBlock).toHaveBeenCalledWith(codeBlock, dirtyText, expect.objectContaining({ silent: true }))"
+      },
+      {
+        "test": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "beforeLine": 617,
+        "afterLine": 588,
+        "text": "expect(currentPages).toHaveLength(1)"
+      },
+      {
+        "test": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "beforeLine": 618,
+        "afterLine": 589,
+        "text": "expect(currentPages[0].getAttribute('data-page-frame-id')).toBe(ninthPage.id)"
+      },
+      {
+        "test": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "beforeLine": 619,
+        "afterLine": 590,
+        "text": "expect(props.selectedPageFrameId).toBe('overview-page-1')"
+      },
+      {
+        "test": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "beforeLine": 620,
+        "afterLine": 591,
+        "text": "expect(JSON.stringify(props.noteCanvasRuntime)).toBe(before)"
+      },
+      {
+        "test": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "beforeLine": 621,
+        "afterLine": 592,
+        "text": "expect(callback).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "does not resurrect overview across note or surface-mode changes",
+        "beforeLine": 628,
+        "afterLine": 599,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).not.toBeNull()"
+      },
+      {
+        "test": "does not resurrect overview across note or surface-mode changes",
+        "beforeLine": 630,
+        "afterLine": 601,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "does not resurrect overview across note or surface-mode changes",
+        "beforeLine": 632,
+        "afterLine": 603,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "does not resurrect overview across note or surface-mode changes",
+        "beforeLine": 635,
+        "afterLine": 606,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "does not resurrect overview across note or surface-mode changes",
+        "beforeLine": 637,
+        "afterLine": 608,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 650,
+        "afterLine": 621,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).not.toBeNull()"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 653,
+        "afterLine": 624,
+        "text": "expect(container.querySelector('[data-note-overview-root]')).toBeNull()"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 654,
+        "afterLine": 625,
+        "text": "expect(document.activeElement).toBe(editor)"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 655,
+        "afterLine": 626,
+        "text": "expect((editor as HTMLTextAreaElement).value).toBe(dirtyText)"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 656,
+        "afterLine": 627,
+        "text": "expect(callback).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 660,
+        "afterLine": 631,
+        "text": "expect(callback).not.toHaveBeenCalled()"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 662,
+        "afterLine": 633,
+        "text": "expect(props.onSaveBlock).toHaveBeenCalledTimes(1)"
+      },
+      {
+        "test": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 663,
+        "afterLine": 634,
+        "text": "expect(props.onSaveBlock).toHaveBeenCalledWith(codeBlock, dirtyText, expect.objectContaining({ silent: true }))"
+      }
+    ],
+    "removedExpectations": [
+      {
+        "test": "renders the effective page typography without a frame extension and preserves the canvas fallback",
+        "line": 246,
+        "text": "expect(surface().dataset.documentFontSize).toBe(String(canvasDefault.fontSizePx))",
+        "classification": "retired Canvas UI behavior"
+      },
+      {
+        "test": "renders the effective page typography without a frame extension and preserves the canvas fallback",
+        "line": 247,
+        "text": "expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${canvasDefault.fontSizePx}px`)",
+        "classification": "retired Canvas UI behavior"
+      },
+      {
+        "test": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "line": 495,
+        "text": "expect(props.onMovePageFrame).not.toHaveBeenCalled()",
+        "classification": "retired NWSL callback assertion"
+      },
+      {
+        "test": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "line": 517,
+        "text": "expect(props.onMovePageFrame).not.toHaveBeenCalled()",
+        "classification": "retired NWSL callback assertion"
+      }
+    ],
+    "addedExpectations": [],
+    "caseChanges": [
+      {
+        "beforeName": "renders the effective page typography without a frame extension and preserves the canvas fallback",
+        "afterName": "renders the effective page typography without a frame extension",
+        "beforeLine": 216,
+        "afterLine": 196,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": false
+      },
+      {
+        "beforeName": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "afterName": "shows the current-note receipt and exposes explicit Apply and Dismiss actions",
+        "beforeLine": 250,
+        "afterLine": 226,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "keeps the focused code editor from blur-saving before the selected recovery Apply runs",
+        "afterName": "keeps the focused code editor from blur-saving before the selected recovery Apply runs",
+        "beforeLine": 287,
+        "afterLine": 263,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "passes recovery conflict choices and comparison through the document layer",
+        "afterName": "passes recovery conflict choices and comparison through the document layer",
+        "beforeLine": 339,
+        "afterLine": 315,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "afterName": "D2 renders one header across multiple pages, follows live side walls, and declares projection differences",
+        "beforeLine": 437,
+        "afterLine": 412,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "afterName": "D2 title and description edits move only the outer paper origin within the bounded display band",
+        "beforeLine": 461,
+        "afterLine": 436,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": false
+      },
+      {
+        "beforeName": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "afterName": "D2 keeps a negative local-y block after the header without rewriting its stored position",
+        "beforeLine": 498,
+        "afterLine": 471,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": false
+      },
+      {
+        "beforeName": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "afterName": "D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body",
+        "beforeLine": 520,
+        "afterLine": 491,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "opens %i pages in a continuous grid and closes without invoking writers",
+        "afterName": "opens %i pages in a continuous grid and closes without invoking writers",
+        "beforeLine": 546,
+        "afterLine": 517,
+        "beforeRows": [
+          "1",
+          "4",
+          "9"
+        ],
+        "afterRows": [
+          "1",
+          "4",
+          "9"
+        ],
+        "beforeExpandedCount": 3,
+        "afterExpandedCount": 3,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "afterName": "restores the dirty editor after local page navigation and resumes its ordinary blur save",
+        "beforeLine": 565,
+        "afterLine": 536,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "afterName": "highlights the currently read page after scrolling without changing the selected frame collection",
+        "beforeLine": 597,
+        "afterLine": 568,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "does not resurrect overview across note or surface-mode changes",
+        "afterName": "does not resurrect overview across note or surface-mode changes",
+        "beforeLine": 624,
+        "afterLine": 595,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      },
+      {
+        "beforeName": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "afterName": "resumes an overview editor synchronously for host exit without writing before the host blur",
+        "beforeLine": 640,
+        "afterLine": 611,
+        "beforeRows": null,
+        "afterRows": null,
+        "beforeExpandedCount": 1,
+        "afterExpandedCount": 1,
+        "bodyIdentical": true
+      }
+    ],
+    "removedCallbackFixtureProperties": [
+      {
+        "name": "onPushStructuredMutationHistory",
+        "line": 158,
+        "text": "onPushStructuredMutationHistory: noOp"
+      },
+      {
+        "name": "onAddPageBelow",
+        "line": 173,
+        "text": "onAddPageBelow: noOp"
+      },
+      {
+        "name": "onCreatePageFrame",
+        "line": 174,
+        "text": "onCreatePageFrame: noOp"
+      },
+      {
+        "name": "onCreatePageStack",
+        "line": 175,
+        "text": "onCreatePageStack: noOp"
+      },
+      {
+        "name": "onDeletePageFrame",
+        "line": 176,
+        "text": "onDeletePageFrame: noOp"
+      },
+      {
+        "name": "onDetachPageFromStack",
+        "line": 177,
+        "text": "onDetachPageFromStack: noOp"
+      },
+      {
+        "name": "onDuplicatePageFrame",
+        "line": 178,
+        "text": "onDuplicatePageFrame: noOp"
+      },
+      {
+        "name": "onMovePageFrame",
+        "line": 179,
+        "text": "onMovePageFrame: noOp"
+      },
+      {
+        "name": "onPanViewportBy",
+        "line": 190,
+        "text": "onPanViewportBy: noOp"
+      },
+      {
+        "name": "onResetViewport",
+        "line": 193,
+        "text": "onResetViewport: noOp"
+      },
+      {
+        "name": "onScrollViewportBy",
+        "line": 195,
+        "text": "onScrollViewportBy: noOp"
+      },
+      {
+        "name": "onSelectPageFrame",
+        "line": 197,
+        "text": "onSelectPageFrame: noOp"
+      },
+      {
+        "name": "onResizePageFrame",
+        "line": 199,
+        "text": "onResizePageFrame: noOp"
+      },
+      {
+        "name": "onSetPrimaryPageFrame",
+        "line": 200,
+        "text": "onSetPrimaryPageFrame: noOp"
+      },
+      {
+        "name": "onTogglePageStackCollapse",
+        "line": 201,
+        "text": "onTogglePageStackCollapse: noOp"
+      },
+      {
+        "name": "onForgetBlockLocally",
+        "line": 205,
+        "text": "onForgetBlockLocally: noOp"
+      },
+      {
+        "name": "onRestoreBlockById",
+        "line": 206,
+        "text": "onRestoreBlockById: vi.fn(async () => null)"
+      },
+      {
+        "name": "onViewportSizeChange",
+        "line": 207,
+        "text": "onViewportSizeChange: noOp"
+      },
+      {
+        "name": "onZoomViewportAt",
+        "line": 209,
+        "text": "onZoomViewportAt: noOp"
+      }
+    ],
+    "beforeHash": "284ddc85ad02c3edbfa46057577903d593ce16a36c063925614cad7b4a83359e",
+    "afterHash": "a386e381e0c705998126e3261cb1de3c40ef02d6e1772a8598083d90b7e9324c"
+  }
+]

@@ -1,0 +1,98 @@
+{
+  "requested": "--runtime",
+  "scratch": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-purge-final-pgNrj4",
+  "results": [
+    {
+      "label": "shared build",
+      "code": 0
+    },
+    {
+      "label": "check:test-wiring",
+      "code": 0
+    },
+    {
+      "label": "check:tech-debt-table",
+      "code": 0
+    },
+    {
+      "label": "test:unit",
+      "code": 0
+    },
+    {
+      "label": "test:tool-face-registry",
+      "code": 0
+    },
+    {
+      "label": "test:tool-face-manifest",
+      "code": 0
+    },
+    {
+      "label": "check:tool-face-manifest",
+      "code": 0
+    },
+    {
+      "label": "test:tool-face-parity",
+      "code": 0
+    },
+    {
+      "label": "check:tool-face-parity",
+      "code": 0
+    },
+    {
+      "label": "check:server-shared-runtime-import",
+      "code": 0
+    },
+    {
+      "label": "check:canvas-runtime-boundary",
+      "code": 0
+    },
+    {
+      "label": "check:group-gallery-shell",
+      "code": 0
+    },
+    {
+      "label": "check:groups-rail-shell",
+      "code": 0
+    },
+    {
+      "label": "check:single-editor-shell",
+      "code": 0
+    },
+    {
+      "label": "check:source-experience",
+      "code": 0
+    },
+    {
+      "label": "check:v2-bn11-legacy-shutdown",
+      "code": 0
+    },
+    {
+      "label": "check:v2-bn11-relation-freshness",
+      "code": 0
+    },
+    {
+      "label": "smoke:canvas-engine-model-contract",
+      "code": 0
+    },
+    {
+      "label": "client build typecheck",
+      "code": 0
+    },
+    {
+      "label": "client build",
+      "code": 0
+    },
+    {
+      "label": "build",
+      "code": 0
+    },
+    {
+      "label": "smoke:canvas-engine-performance",
+      "code": 0
+    },
+    {
+      "label": "docs:check",
+      "code": 1
+    }
+  ]
+}

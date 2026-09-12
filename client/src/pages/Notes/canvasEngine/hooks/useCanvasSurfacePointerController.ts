@@ -63,7 +63,7 @@ export function useCanvasSurfacePointerController({
       contentWidth,
       defaultDraftLayout,
     });
-    activateDraft(nextLayout === defaultDraftLayout || surfacePolicy.isCanvasMode
+    activateDraft(nextLayout === defaultDraftLayout
       ? nextLayout
       : screenLayoutToLocal(nextLayout, pageFrames || [], coordinateContract));
   }, [

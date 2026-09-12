@@ -2,7 +2,6 @@ import type {
   BlockPlacementModel,
   CanvasAIReadableSnapshot,
   CanvasObject,
-  CanvasObjectReserve,
   CanvasPlacement,
   CanvasViewport,
   CanvasWorldModel,
@@ -239,37 +238,6 @@ function buildCanvasPlacementFromBlockPlacement(placement: BlockPlacementModel):
   };
 }
 
-function buildCanvasObjectFromReserve(reserve: CanvasObjectReserve, canvasId: string): CanvasObject {
-  return {
-    objectId: reserve.id,
-    canvasId,
-    kind: reserve.kind === 'image' ? 'image' : 'shape',
-    backing: 'none',
-    objectClass: 'pure',
-    status: 'active',
-    source: 'runtime_seed',
-  };
-}
-
-function buildPlacementFromReserve(reserve: CanvasObjectReserve, canvasId: string, zIndex: number): CanvasPlacement {
-  return {
-    placementId: `${reserve.id}:placement`,
-    objectId: reserve.id,
-    canvasId,
-    surface: 'canvas_workspace',
-    boundaryRole: 'outside',
-    x: reserve.x,
-    y: reserve.y,
-    width: reserve.width,
-    height: reserve.height,
-    rotation: reserve.rotation || 0,
-    zIndex,
-    snapState: 'free',
-    visibilityState: 'normal',
-    renderVisibility: 'visible',
-  };
-}
-
 function buildCanvasAIReadableSnapshot({
   canvasId,
   objects,
@@ -322,7 +290,6 @@ export function buildNoteCanvasRuntimeModel({
   viewport,
   blockPlacements: inputBlockPlacements,
   documentTypography = createDefaultDocumentTypographyProfile(),
-  canvasObjectReserve = [],
   relationEndpointReserve = [],
   genericCanvasObjects = [],
   genericCanvasPlacements = [],
@@ -340,7 +307,6 @@ export function buildNoteCanvasRuntimeModel({
   viewport: CanvasViewport;
   blockPlacements: BlockPlacementModel[];
   documentTypography?: DocumentTypographyProfile;
-  canvasObjectReserve?: CanvasObjectReserve[];
   relationEndpointReserve?: RelationEndpointReserve[];
   genericCanvasObjects?: CanvasObject[];
   genericCanvasPlacements?: CanvasPlacement[];
@@ -389,14 +355,9 @@ export function buildNoteCanvasRuntimeModel({
   ));
   const blockCanvasObjects = blockPlacements.map(buildBlockCanvasObject);
   const blockCanvasPlacements = blockPlacements.map(buildCanvasPlacementFromBlockPlacement);
-  const reserveObjects = canvasObjectReserve.map((reserve) => buildCanvasObjectFromReserve(reserve, canvasId));
-  const reservePlacements = canvasObjectReserve.map((reserve, index) => (
-    buildPlacementFromReserve(reserve, canvasId, blockPlacements.length + index)
-  ));
   const builtObjectIds = new Set([
     ...pageFrameObjects,
     ...blockCanvasObjects,
-    ...reserveObjects,
   ].map((object) => object.objectId));
   const runtimeGenericObjects = genericCanvasObjects.filter((object) => (
     object.kind !== 'page_frame'
@@ -415,13 +376,11 @@ export function buildNoteCanvasRuntimeModel({
   const canvasObjects: CanvasObject[] = [
     ...pageFrameObjects,
     ...blockCanvasObjects,
-    ...reserveObjects,
     ...runtimeGenericObjects,
   ];
   const baseCanvasPlacements: CanvasPlacement[] = [
     ...pageFramePlacements,
     ...blockCanvasPlacements,
-    ...reservePlacements,
     ...runtimeGenericPlacements,
   ];
   const contentMounts = [
@@ -477,7 +436,6 @@ export function buildNoteCanvasRuntimeModel({
     structuredObjects,
     canvasAIReadableSnapshot,
     visibleBlockIds: getVisibleBlockIds(blockPlacements, viewport),
-    canvasObjectReserve,
     relationEndpointReserve,
   };
 }

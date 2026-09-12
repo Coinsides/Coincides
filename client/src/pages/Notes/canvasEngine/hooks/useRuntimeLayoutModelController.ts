@@ -47,8 +47,6 @@ export function useRuntimeLayoutModelController({
 }: UseRuntimeLayoutModelControllerOptions) {
   const measuredContentWidth = useCanvasContentWidth({
     containerRef: blockListRef,
-    pageOffsetX,
-    surfaceMode,
   });
 
   const pageFrames = useMemo(() => {

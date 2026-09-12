@@ -1,20 +1,13 @@
-import { useLayoutEffect } from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NoteBlock } from '../runtimeDataTypes';
+import type { UseRuntimePresentationControllerOptions } from './useRuntimePresentationController';
 import { DEFAULT_PAGE_CONTENT_WIDTH, type BlockBoxLayout } from '../runtimeLayout';
 import { createPageFramePrintProfile } from '../pageFramePrintScaleService';
 import { createDefaultDocumentTypographyProfile, documentTypographyToCssVars } from '../typographyProfileService';
 import { estimateTypographyTextBlockHeight } from '../typographyMeasurementService';
 import { buildExportPreviewModel } from '../exportPreviewService';
 import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from '../types';
-
-interface ResolverCall {
-  blocks: NoteBlock[];
-  contentWidth: number;
-  loadedNoteId?: string;
-  loading: boolean;
-}
 
 const rootBridgeContract = vi.hoisted(() => ({
   blocks: [] as NoteBlock[],
@@ -29,12 +22,8 @@ const rootBridgeContract = vi.hoisted(() => ({
   hydratedProfile: undefined as DocumentTypographyProfile | undefined,
   dispatchedProfiles: {} as Record<string, DocumentTypographyProfile>,
   blockLayouts: {} as Record<string, BlockBoxLayout>,
-  toggleSurfaceMode: () => undefined as void,
-  resolverCalls: [] as ResolverCall[],
-  layoutPhaseReceipts: [] as Array<{
-    resolverCallCount: number;
-    surfaceMode: string;
-  }>,
+  surfaceMode: 'page',
+  presentationOptions: null as UseRuntimePresentationControllerOptions | null,
   noop: () => undefined,
 }));
 
@@ -43,7 +32,6 @@ vi.mock('./useNoteCanvasRuntime', () => ({
 }));
 
 vi.mock('./useRuntimeSurfaceStateController', async () => {
-  const React = await vi.importActual<typeof import('react')>('react');
   const surfaceModule = await vi.importActual<typeof import('./useSurfaceModeController')>(
     './useSurfaceModeController',
   );
@@ -52,25 +40,14 @@ vi.mock('./useRuntimeSurfaceStateController', async () => {
   const suppressMeasuredReflowUntilRef = { current: 0 };
 
   return {
-    useRuntimeSurfaceStateController: ({ noteId }: { noteId?: string }) => {
-      const surface = surfaceModule.useSurfaceModeController({
-        noteId,
-        clearBlockSelection: rootBridgeContract.noop,
-        closeOverlay: rootBridgeContract.noop,
-        setSnapGuide: rootBridgeContract.noop,
-      });
-      const resolveInitialSurfaceMode = React.useCallback((input: ResolverCall) => {
-        rootBridgeContract.resolverCalls.push(input);
-        surface.resolveInitialSurfaceMode(input);
-      }, [surface.resolveInitialSurfaceMode]);
-      rootBridgeContract.toggleSurfaceMode = surface.toggleSurfaceMode;
+    useRuntimeSurfaceStateController: () => {
+      const surface = surfaceModule.useSurfaceModeController();
 
       return new Proxy({
         ...surface,
         layoutMode: rootBridgeContract.layoutMode,
         blockListRef,
         movingBlockIdRef,
-        resolveInitialSurfaceMode,
         suppressMeasuredReflowUntilRef,
       }, {
         get(target, property, receiver) {
@@ -149,10 +126,10 @@ vi.mock('./useRuntimeBlockOperationsController', () => ({
 }));
 
 vi.mock('./useRuntimePresentationController', () => ({
-  useRuntimePresentationController: ({ surfaceMode, documentTypographyProfile }: {
-    surfaceMode: string;
-    documentTypographyProfile: DocumentTypographyProfile;
-  }) => {
+  useRuntimePresentationController: (options: UseRuntimePresentationControllerOptions) => {
+    const { surfaceMode, documentTypographyProfile } = options;
+    rootBridgeContract.presentationOptions = options;
+    rootBridgeContract.surfaceMode = surfaceMode;
     rootBridgeContract.dispatchedProfiles.presentation = documentTypographyProfile;
     return { layerProps: { surfaceMode } };
   },
@@ -230,20 +207,13 @@ const formalPageSpecimen: NoteBlock = {
 };
 
 function RootBridgeHarness() {
-  const { layerProps } = useNoteCanvasRuntimeController();
-  const surfaceMode = (layerProps as unknown as { surfaceMode: string }).surfaceMode;
-
-  useLayoutEffect(() => {
-    rootBridgeContract.layoutPhaseReceipts.push({
-      resolverCallCount: rootBridgeContract.resolverCalls.length,
-      surfaceMode,
-    });
-  }, [surfaceMode]);
+  useNoteCanvasRuntimeController();
+  const surfaceMode = rootBridgeContract.surfaceMode;
 
   return <output data-testid="root-surface-mode">{surfaceMode}</output>;
 }
 
-describe('useNoteCanvasRuntimeController initial-surface production bridge', () => {
+describe('useNoteCanvasRuntimeController Page runtime assembly after bridge removal', () => {
   beforeEach(() => {
     rootBridgeContract.blocks = [];
     rootBridgeContract.contentWidth = DEFAULT_PAGE_CONTENT_WIDTH;
@@ -257,8 +227,13 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     rootBridgeContract.hydratedProfile = createDefaultDocumentTypographyProfile();
     rootBridgeContract.dispatchedProfiles = {};
     rootBridgeContract.blockLayouts = {};
-    rootBridgeContract.resolverCalls = [];
-    rootBridgeContract.layoutPhaseReceipts = [];
+  });
+
+  it('assembles Page without a surface toggle prop', () => {
+    render(<RootBridgeHarness />);
+    expect(rootBridgeContract.presentationOptions).not.toBeNull();
+    expect(rootBridgeContract.presentationOptions).not.toHaveProperty('onToggleSurfaceMode');
+    expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
   });
 
   it('gates both wall hook and runtime boundary with the current Layout state', () => {
@@ -288,43 +263,7 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     expect(previousBoundary()).toBe(false);
   });
 
-  it.each([
-    {
-      label: 'canvas-only',
-      blocks: [canvasOnlySpecimen],
-      expectedSurfaceMode: 'page',
-    },
-    {
-      label: 'mixed formal and canvas',
-      blocks: [formalPageSpecimen, canvasOnlySpecimen],
-      expectedSurfaceMode: 'page',
-    },
-    {
-      label: 'empty',
-      blocks: [],
-      expectedSurfaceMode: 'page',
-    },
-  ])('G-X3: resolves $label hydration through the root before the later layout observer', ({
-    blocks,
-    expectedSurfaceMode,
-  }) => {
-    rootBridgeContract.blocks = blocks;
-
-    render(<RootBridgeHarness />);
-
-    expect(rootBridgeContract.resolverCalls).toHaveLength(1);
-    expect(rootBridgeContract.resolverCalls[0]).toEqual({
-      blocks,
-      contentWidth: DEFAULT_PAGE_CONTENT_WIDTH,
-      loadedNoteId: NOTE_ID,
-      loading: false,
-    });
-    expect(rootBridgeContract.resolverCalls[0]?.blocks).toBe(blocks);
-    expect(rootBridgeContract.layoutPhaseReceipts[0]?.resolverCallCount).toBe(1);
-    expect(screen.getByTestId('root-surface-mode').textContent).toBe(expectedSurfaceMode);
-  });
-
-  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 11pt before and after a retired mode toggle', () => {
+  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 11pt across repeated Page rerenders', () => {
     const frameFor = (pageSize: 'A4' | 'Letter'): PageFrameModel => {
       const print = createPageFramePrintProfile(pageSize);
       return {
@@ -394,7 +333,7 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
       expect(Math.abs(physicalPt - 11) / 11).toBeLessThanOrEqual(0.005);
     }
 
-    act(() => rootBridgeContract.toggleSurfaceMode());
+    rerender(<RootBridgeHarness />);
     const letterCanvas = snapshot(letter);
     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
     setFrame(a4);

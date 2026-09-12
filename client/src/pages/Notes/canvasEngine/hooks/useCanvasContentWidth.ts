@@ -2,19 +2,14 @@ import { useLayoutEffect, useState, type RefObject } from 'react';
 import {
   DEFAULT_PAGE_CONTENT_WIDTH,
   MIN_BLOCK_WIDTH,
-  type SurfaceMode,
 } from '../runtimeLayout';
 
 export interface UseCanvasContentWidthOptions {
   containerRef: RefObject<HTMLElement>;
-  pageOffsetX: number;
-  surfaceMode: SurfaceMode;
 }
 
 export function useCanvasContentWidth({
   containerRef,
-  pageOffsetX,
-  surfaceMode,
 }: UseCanvasContentWidthOptions): number {
   const [contentWidth, setContentWidth] = useState(DEFAULT_PAGE_CONTENT_WIDTH);
 
@@ -22,7 +17,7 @@ export function useCanvasContentWidth({
     const updateContentWidth = () => {
       const width = containerRef.current?.clientWidth;
       if (width && Number.isFinite(width)) {
-        const availableWidth = surfaceMode === 'canvas' ? width - pageOffsetX : width;
+        const availableWidth = width;
         setContentWidth(Math.max(MIN_BLOCK_WIDTH, availableWidth));
       }
     };
@@ -42,7 +37,7 @@ export function useCanvasContentWidth({
       observer?.disconnect();
       window.removeEventListener('resize', updateContentWidth);
     };
-  }, [containerRef, pageOffsetX, surfaceMode]);
+  }, [containerRef]);
 
   return contentWidth;
 }

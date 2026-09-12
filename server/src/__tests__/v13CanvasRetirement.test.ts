@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import express from 'express';
 import { initDb, closeDb } from '../db/init.js';
 import canvasRouter from '../routes/canvasObjects.js';
@@ -12,6 +13,25 @@ const retired = [
   { surface: 'canvas_workspace', boundary_role: 'outside', error: 'canvas_workspace_retired' },
   { surface: 'formal_page', boundary_role: 'crossing', error: 'canvas_crossing_retired' },
 ] as const;
+
+test('13.6 TD-7/TD-9: Page authority remains after hydration and toggle bridges are removed', () => {
+  const readClient = (file: string) => readFileSync(new URL(
+    `../../../client/src/pages/Notes/canvasEngine/${file}`, import.meta.url,
+  ), 'utf8');
+  for (const file of [
+    'hooks/useSurfaceModeController.ts',
+    'hooks/useRuntimeSurfaceStateController.ts',
+    'hooks/useNoteCanvasRuntimeController.ts',
+    'hooks/useNoteCanvasLayerProps.ts',
+    'layers/NoteChromeLayer.tsx',
+  ]) {
+    assert.doesNotMatch(readClient(file), /resolveInitialSurfaceMode|toggleSurfaceMode|onToggleSurfaceMode/, file);
+  }
+  const authority = readClient('hooks/useSurfaceModeController.ts');
+  assert.match(authority, /createSurfaceModePolicy\('page'\)/);
+  for (const field of ['surfaceMode', 'surfacePolicy', 'pageOffsetX']) assert.ok(authority.includes(field), field);
+  assert.doesNotMatch(readClient('hooks/useNoteCanvasRuntimeController.test.tsx'), /resolverCalls|resolverCallCount|layoutPhaseReceipts/);
+});
 
 test('S5 validator names both retired values at block and generic placement doors', async () => {
   // CLI is outside the server build root; exercise its existing source entry with tsx.

@@ -1,6 +1,5 @@
 import {
   hasMeaningfulRenderableBlockContent,
-  textFromContent,
 } from './blockContentService';
 import type { RuntimeInteractionState } from './interactionController';
 import type {
@@ -33,15 +32,8 @@ export interface MeaningfulWritingSurfaceContentInput {
 }
 
 export function hasMeaningfulWritingSurfaceContent({
-  allBlocks,
   annotationTruths,
   blockTextDrafts,
-  canvasObjects,
-  canvasPlacements,
-  contentMounts,
-  imageObjects,
-  surfaceMode,
-  structuredObjects,
   visibleBlocks,
 }: MeaningfulWritingSurfaceContentInput): boolean {
   const visibleBlockIds = new Set(visibleBlocks.map((block) => block.id));
@@ -55,38 +47,7 @@ export function hasMeaningfulWritingSurfaceContent({
     && annotation.ranges.some((range) => Boolean(range.block_id && visibleBlockIds.has(range.block_id)))
   ))) return true;
 
-  // Image, table, and shape layers are Canvas-only. Page must not hide its
-  // writing entry for an object that the current surface cannot render.
-  if (surfaceMode !== 'canvas') return false;
-
-  const canvasObjectById = new Map(canvasObjects.map((object) => [object.objectId, object]));
-  const renderableCanvasObjectIds = new Set(
-    canvasPlacements
-      .filter((placement) => canvasObjectById.get(placement.objectId)?.status === 'active')
-      .map((placement) => placement.objectId),
-  );
-  const imageObjectIds = new Set(imageObjects.map((object) => object.objectId));
-  const structuredObjectIds = new Set(structuredObjects.map((object) => object.objectId));
-  if ([...renderableCanvasObjectIds].some((objectId) => {
-    const object = canvasObjectById.get(objectId);
-    return (object?.kind === 'image' && imageObjectIds.has(objectId))
-      || (object?.kind === 'table' && structuredObjectIds.has(objectId));
-  })) return true;
-
-  const activeShapeIds = new Set(
-    [...renderableCanvasObjectIds]
-      .filter((objectId) => canvasObjectById.get(objectId)?.kind === 'shape'),
-  );
-  const blockById = new Map(allBlocks.map((block) => [block.id, block]));
-  return contentMounts.some((mount) => {
-    if (!activeShapeIds.has(mount.objectId) || mount.targetKind !== 'note_block') return false;
-    const block = blockById.get(mount.targetId);
-    if (!block) return false;
-    if (Object.prototype.hasOwnProperty.call(blockTextDrafts, block.id)) {
-      return Boolean(blockTextDrafts[block.id]?.trim());
-    }
-    return hasMeaningfulRenderableBlockContent(block) || Boolean(textFromContent(block).trim());
-  });
+  return false;
 }
 
 export interface PendingWritingEditorInput {

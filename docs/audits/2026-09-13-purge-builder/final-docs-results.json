@@ -1,0 +1,14 @@
+{
+  "requested": "--docs-refresh",
+  "scratch": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-purge-final-Ht0uFf",
+  "results": [
+    {
+      "label": "docs:index (generated metadata only)",
+      "code": 0
+    },
+    {
+      "label": "docs:check",
+      "code": 0
+    }
+  ]
+}

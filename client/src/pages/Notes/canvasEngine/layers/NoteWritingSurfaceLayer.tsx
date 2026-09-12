@@ -17,23 +17,7 @@ import type { ItemRefBlockData } from '@shared/types/itemRef';
 import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
 import { createDefaultPageReadingViewState, type PageReadingGear, type PageReadingViewState } from '../pageReadingViewportService';
 import type { TemplateOption } from '@/services/templateOptions';
-import {
-  useEffect,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type CSSProperties,
-  type Dispatch,
-  type DragEvent,
-  type KeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
-  type SetStateAction,
-  type WheelEvent,
-} from 'react';
+import { useEffect, useContext, useMemo, useRef, useState, type CSSProperties, type Dispatch, type DragEvent, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type RefObject, type SetStateAction } from 'react';
 import type { NoteSlashCommand } from '../../noteSlashCommands';
 import {
   presentationKindForBlock,
@@ -115,104 +99,19 @@ import {
 import {
   systemGroupFolderId,
 } from '../groupFolderService';
-import {
-  buildAnnotationHighlightMenu,
-  buildBlockShellMenu,
-  buildCanvasBlankMenu,
-  buildImageObjectShellMenu,
-  buildCanvasObjectShellMenu,
-  buildPageFrameShellMenu,
-  buildTableObjectShellMenu,
-  buildTextSelectionMenu,
-  buildVisualConnectorShellMenu,
-  WRITING_ROLE_BY_COMMAND,
-  type CommandActionId,
-  type CommandSurfaceMenu,
-  type ObjectContextActionAvailability,
-} from '../commandSurfaceService';
+import { buildAnnotationHighlightMenu, buildBlockShellMenu, buildTextSelectionMenu, WRITING_ROLE_BY_COMMAND, type CommandActionId, type CommandSurfaceMenu } from '../commandSurfaceService';
 import {
   DEFAULT_BLOCK_HEIGHT,
   type BlockBoxLayout,
 } from '../runtimeLayout';
-import {
-  createVisualConnectorProjection,
-  createPureShapeProjection,
-} from '../shapeProjectionService';
-import {
-  createImageObjectProjection,
-  imageObjectSavePayload,
-} from '../imageObjectService';
-import {
-  addTableColumnRight,
-  addTableRowBelow,
-  createTableObjectProjection,
-  deleteTableColumn,
-  deleteTableRow,
-  normalizeTablePayload,
-  type TableCellSelection,
-  tableObjectSavePayload,
-  updateTableCellText,
-} from '../tableObjectService';
-import {
-  uploadCanvasImageAsset,
-} from '../canvasAssetRepository';
-import {
-  findBackingBlockForShape,
-  findShapeTextMount,
-  isBlockBackedShapeObject,
-  readRememberedShapeBackingBlockId,
-  rememberShapeBackingBlock,
-  shapeBackedBlockMetadata,
-} from '../shapeTextMountService';
-import {
-  ensureDefaultShapeStyle,
-  ensureDefaultStyleForPureShape,
-  ensureStickyStyleForBlockBackedShape,
-  isStickyNoteCanvasObject,
-  readCanvasObjectStyleMetadata,
-  writeCanvasObjectStyleMetadata,
-} from '../objectStyleService';
-import {
-  placementForVisualConnector,
-  pointForPlacementAnchor,
-  visualConnectorSavePayload,
-} from '../visualConnectorService';
-import {
-  createCanvasObjectDuplicateDraft,
-  createCanvasObjectInspectorActions,
-  createCanvasObjectInspectorModel,
-  toggleCanvasPlacementExportVisibility,
-  type CanvasObjectInspectorActionId,
-} from '../objectInspectorService';
-import type {
-  CanvasObject,
-  CanvasAIReadableNode,
-  CanvasPoint,
-  CanvasPlacement,
-  CanvasViewport,
-  CanvasWorldModel,
-  ContentMount,
-  DocumentTypographyProfile,
-  NoteCanvasRuntimeModel,
-  PageFrameModel,
-  PageFrameSlot,
-  PageStackBlockFragmentProjection,
-  ImageCanvasObject,
-  StructuredCanvasObject,
-  VisualConnector,
-} from '../types';
-import {
-  getBlockControlAnchorFromRect,
-  worldRectToViewportRect,
-} from '../overlayService';
+
+import type { CanvasObject, CanvasPoint, CanvasPlacement, CanvasViewport, CanvasWorldModel, ContentMount, DocumentTypographyProfile, NoteCanvasRuntimeModel, PageFrameModel, PageFrameSlot, PageStackBlockFragmentProjection, ImageCanvasObject, StructuredCanvasObject } from '../types';
+import { getBlockControlAnchorFromRect } from '../overlayService';
 import {
   createPageFrameGuides,
   shouldShowPageFrameGuides,
 } from '../pageFrameGuideService';
-import {
-  DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
-  documentTypographyToCssVars,
-} from '../pageFramePrintScaleService';
+import { documentTypographyToCssVars } from '../pageFramePrintScaleService';
 import {
   pageFrameTemplateToCssVars,
 } from '../pageFrameTemplateService';
@@ -230,19 +129,14 @@ import { BlockEditorLayer } from './BlockEditorLayer';
 import { DraftWritingEntryLayer } from './DraftWritingEntryLayer';
 import { ContextMenuLayer } from './ContextMenuLayer';
 import { InlineNamePromptLayer } from './InlineNamePromptLayer';
-import { ObjectInspectorLayer } from './ObjectInspectorLayer';
-import { ImageObjectLayer } from './ImageObjectLayer';
+
 import { SelectionToolbarLayer } from './SelectionToolbarLayer';
 import { SelectionTypographyToolbarLayer } from './SelectionTypographyToolbarLayer';
 import { useBoardReferenceClipboard } from '../hooks/useBoardReferenceClipboard';
 import { useBoardStagingSelection } from '../hooks/useBoardStagingSelection';
-import { ShapeObjectLayer } from './ShapeObjectLayer';
+
 import { SlashMenuLayer } from './SlashMenuLayer';
-import {
-  TableObjectLayer,
-  type PendingTableCellEdit,
-} from './TableObjectLayer';
-import { VisualConnectorLayer } from './VisualConnectorLayer';
+
 import styles from '../../NoteDetail.module.css';
 import { TRAY_DRAG_TYPE } from '../trayService';
 import type { DraftBlockLifecyclePhase } from '../draftBlockLifecycleReducer';
@@ -344,11 +238,6 @@ export interface NoteWritingSurfaceLayerProps {
     structuredObject?: StructuredCanvasObject | null;
     payload: Record<string, unknown>;
   }) => Promise<boolean>;
-  onPushStructuredMutationHistory: (
-    objectId: string,
-    before: StructuredCanvasObject['payload'],
-    after: StructuredCanvasObject['payload'],
-  ) => void;
   onDeleteCanvasObject: (objectId: string) => Promise<boolean>;
   onSaveAnnotationTruths: (annotations: AnnotationTruthV1[]) => Promise<void>;
   onSaveContentGroups: (groups: ContentGroupV1[]) => Promise<boolean | void>;
@@ -367,13 +256,6 @@ export interface NoteWritingSurfaceLayerProps {
   onMoveTextUnit?: (block: NoteBlock, unitId: string, targetBlock: NoteBlock, targetUnitId: string, edge: 'before' | 'after') => Promise<boolean>;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
-  onAddPageBelow: (frameId: string) => void;
-  onCreatePageFrame: () => void;
-  onCreatePageStack: () => void;
-  onDeletePageFrame: (frameId: string) => void;
-  onDetachPageFromStack: (frameId: string) => void;
-  onDuplicatePageFrame: (frameId: string) => void;
-  onMovePageFrame: (frameId: string, delta: CanvasPoint) => void;
   onDiscardDraft: () => void;
   onDraftChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onDraftKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
@@ -384,45 +266,24 @@ export interface NoteWritingSurfaceLayerProps {
   onRequestFocusBlock: (blockId: string) => void;
   onMeasuredBlockHeight: (block: NoteBlock, layout: BlockBoxLayout, isActive: boolean, height: number) => void;
   onPageSpaceDoubleClick: (event: ReactPointerEvent<HTMLDivElement>) => void;
-  onPanViewportBy: (delta: CanvasPoint, world?: CanvasWorldModel) => void;
   onPersistDraft: (text: string, options?: { textFlow?: TextBlockContentV1; layout?: BlockBoxLayout }) => Promise<void>;
   onResizeDraftFromTextarea: (textarea: HTMLTextAreaElement) => void;
-  onResetViewport: () => void;
   onSaveBlock: (
     block: NoteBlock,
     text: string,
     options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
   ) => Promise<BlockSaveOutcome>;
-  onScrollViewportBy: (delta: CanvasPoint, world?: CanvasWorldModel) => void;
   onSelectBlock: (blockId: string) => void;
   onClearBlockSelection?: () => void;
-  onSelectPageFrame: (frameId: string) => void;
   onSelectSlashCommand: (command: NoteSlashCommand) => void;
-  onResizePageFrame: (frameId: string, size: { width: number; height: number }) => void;
-  onSetPrimaryPageFrame: (frameId: string) => void;
-  onTogglePageStackCollapse: (frameId: string) => void;
   onToggleAIVisibility: (block: NoteBlock, layout: BlockBoxLayout) => void;
   onToggleExportRole: (block: NoteBlock, layout: BlockBoxLayout) => void;
   onTrashBlock: (blockId: string) => void | Promise<boolean | void>;
-  onForgetBlockLocally: (blockId: string) => void;
-  onRestoreBlockById: (
-    blockId: string,
-    options?: { silent?: boolean; metadataPatch?: Record<string, unknown> },
-  ) => Promise<NoteBlock | null>;
-  onViewportSizeChange: (width: number, height: number, world?: CanvasWorldModel) => void;
   onViewSource: (anchorId: string) => void;
-  onZoomViewportAt: (point: CanvasPoint, nextZoom: number, world?: CanvasWorldModel) => void;
 }
 
 type AnnotationNamePromptState = {
   kind: 'label';
-  point: { x: number; y: number };
-  initialValue: string;
-} | null;
-
-type ImageMetadataPromptState = {
-  objectId: string;
-  field: 'caption' | 'altText';
   point: { x: number; y: number };
   initialValue: string;
 } | null;
@@ -438,112 +299,6 @@ function nextNeutralLabelName(annotations: AnnotationTruthV1[]): string {
     index += 1;
   }
   return `Label ${index}`;
-}
-
-type ShapeType = 'rectangle' | 'ellipse';
-
-function createCanvasRuntimeId(prefix: string): string {
-  const randomId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  return `${prefix}-${randomId}`;
-}
-
-function shapeTypeFromCanvasObject(object: CanvasObject | undefined): ShapeType {
-  return object?.metadata?.shapeType === 'ellipse' || object?.metadata?.shape_type === 'ellipse'
-    ? 'ellipse'
-    : 'rectangle';
-}
-
-function shapeSavePayload(
-  canvasObject: CanvasObject,
-  placement: CanvasPlacement,
-  contentMount?: ContentMount | null,
-): Record<string, unknown> {
-  const shapeType = shapeTypeFromCanvasObject(canvasObject);
-  const blockBacked = canvasObject.backing === 'note_block'
-    && canvasObject.objectClass === 'block_backed'
-    && Boolean(contentMount?.targetId);
-  const baseMetadata: Record<string, unknown> = {
-    ...(canvasObject.metadata || {}),
-    shape_type: shapeType,
-  };
-  const metadata = blockBacked
-    ? writeCanvasObjectStyleMetadata(baseMetadata, readCanvasObjectStyleMetadata(baseMetadata))
-    : ensureDefaultStyleForPureShape(baseMetadata);
-  return {
-    kind: 'shape',
-    backing: blockBacked ? 'note_block' : 'none',
-    object_class: blockBacked ? 'block_backed' : 'pure',
-    placement: {
-      placement_id: placement.placementId,
-      x: placement.x,
-      y: placement.y,
-      width: placement.width,
-      height: placement.height,
-      rotation: placement.rotation,
-      frame_id: placement.frameId || null,
-      surface: placement.surface,
-      boundary_role: placement.boundaryRole,
-      z_index: placement.zIndex,
-      order_index: placement.orderIndex ?? null,
-      visibility_state: placement.visibilityState || 'normal',
-      render_visibility: placement.renderVisibility || 'visible',
-    },
-    metadata,
-    ...(blockBacked ? {
-      extension: {
-        block_id: contentMount?.targetId,
-      },
-      mount: {
-        mount_id: contentMount?.mountId,
-        target_id: contentMount?.targetId,
-        projection_mode: contentMount?.projectionMode || 'owned',
-        sync_policy: contentMount?.syncPolicy || 'manual',
-      },
-    } : {}),
-    source: {
-      source: 'shape_object',
-    },
-  };
-}
-
-function createShapeTextContentMount(objectId: string, blockId: string): ContentMount {
-  return {
-    mountId: `${objectId}:mount:shape-text`,
-    objectId,
-    targetKind: 'note_block',
-    targetId: blockId,
-    projectionMode: 'owned',
-    syncPolicy: 'manual',
-  };
-}
-
-function flattenCanvasAIReadableNodes(nodes: CanvasAIReadableNode[]): CanvasAIReadableNode[] {
-  return nodes.flatMap((node) => [
-    node,
-    ...flattenCanvasAIReadableNodes(node.children || []),
-  ]);
-}
-
-function readImageFileDimensions(file: File): Promise<{ width: number; height: number } | null> {
-  if (typeof Image === 'undefined' || typeof URL === 'undefined') return Promise.resolve(null);
-  return new Promise((resolve) => {
-    const image = new Image();
-    const objectUrl = URL.createObjectURL(file);
-    image.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      resolve({
-        width: image.naturalWidth || image.width,
-        height: image.naturalHeight || image.height,
-      });
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      resolve(null);
-    };
-    image.src = objectUrl;
-  });
 }
 
 export function NoteWritingSurfaceLayer({
@@ -592,7 +347,6 @@ export function NoteWritingSurfaceLayer({
   primaryPageFrameWidth,
   savingBlockId,
   selectedBlockId,
-  selectedPageFrameId,
   showPreviewAIVisibility,
   showPreviewBlockTypes,
   showPreviewExportStatus,
@@ -619,7 +373,6 @@ export function NoteWritingSurfaceLayer({
   visibleBlocks,
   onCreateBlock,
   onPersistCanvasObject,
-  onPushStructuredMutationHistory,
   onDeleteCanvasObject,
   onSaveAnnotationTruths,
   onSaveContentGroups,
@@ -638,13 +391,6 @@ export function NoteWritingSurfaceLayer({
   onMoveTextUnit,
   onTextEditBoundary,
   onClearSlashTarget,
-  onAddPageBelow,
-  onCreatePageFrame,
-  onCreatePageStack,
-  onDeletePageFrame,
-  onDetachPageFromStack,
-  onDuplicatePageFrame,
-  onMovePageFrame,
   onDiscardDraft,
   onDraftChange,
   onDraftFocusReceipt,
@@ -655,56 +401,21 @@ export function NoteWritingSurfaceLayer({
   onRequestFocusBlock,
   onMeasuredBlockHeight,
   onPageSpaceDoubleClick,
-  onPanViewportBy,
   onPersistDraft,
   onResizeDraftFromTextarea,
-  onResetViewport,
   onSaveBlock,
-  onScrollViewportBy,
   onSelectBlock,
   onClearBlockSelection,
-  onSelectPageFrame,
   onSelectSlashCommand,
-  onResizePageFrame,
-  onSetPrimaryPageFrame,
-  onTogglePageStackCollapse,
   onToggleAIVisibility,
   onToggleExportRole,
   onTrashBlock,
-  onForgetBlockLocally,
-  onRestoreBlockById,
-  onViewportSizeChange,
   onViewSource,
-  onZoomViewportAt,
 }: NoteWritingSurfaceLayerProps) {
   const paperSkin = usePaperSkin();
   const addToast = useUIStore((state) => state.addToast);
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
-  const objectNavigationColumnRef = useRef<number | null>(null);
-  const panSessionRef = useRef<{ pointerId: number; clientX: number; clientY: number } | null>(null);
-  const pageFrameOperationRef = useRef<{
-    kind: 'move' | 'resize';
-    frameId: string;
-    pointerId: number;
-    startClientX: number;
-    startClientY: number;
-    startX: number;
-    startY: number;
-    startWidth: number;
-    startHeight: number;
-  } | null>(null);
-  const shapeOperationRef = useRef<{
-    kind: 'move' | 'resize';
-    objectId: string;
-    pointerId: number;
-    startClientX: number;
-    startClientY: number;
-    startX: number;
-    startY: number;
-    startWidth: number;
-    startHeight: number;
-  } | null>(null);
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
   const itemDropPending = useRef(false);
   const mediaPastePending = useRef(false);
@@ -718,23 +429,7 @@ export function NoteWritingSurfaceLayer({
   const paperInkEnabled = !contentReadOnly && !layoutMode && !overviewOpen
     && noteCanvasRuntime.coordinateContract === 'v2';
   useEffect(() => { setPaperInkTool('selection'); }, [noteId, contentReadOnly, layoutMode, overviewOpen, surfaceMode]);
-  const [spacePanReady, setSpacePanReady] = useState(false);
   const [unitMoveTarget, setUnitMoveTarget] = useState<CrossBlockUnitDropTarget | null>(null);
-  const [canvasPanning, setCanvasPanning] = useState(false);
-  const [pageFrameInteractionPreview, setPageFrameInteractionPreview] = useState<{
-    frameId: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const [shapeInteractionPreview, setShapeInteractionPreview] = useState<{
-    objectId: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
   const [selectedCanvasObjectId, setSelectedCanvasObjectId] = useState<string | null>(null);
   useEffect(() => { setSelectedCanvasObjectId(null); }, [noteId, surfaceMode, paperInkTool, paperInkEnabled]);
   const [selectedAnnotationIds, setSelectedAnnotationIds] = useState<string[]>([]);
@@ -747,41 +442,9 @@ export function NoteWritingSurfaceLayer({
     blockId: string;
     point: { x: number; y: number };
   } | null>(null);
-  const [canvasBlankContextMenu, setCanvasBlankContextMenu] = useState<{
-    point: { x: number; y: number };
-  } | null>(null);
-  const [pageFrameContextMenu, setPageFrameContextMenu] = useState<{
-    frameId: string;
-    primary: boolean;
-    point: { x: number; y: number };
-  } | null>(null);
-  const [shapeContextMenu, setShapeContextMenu] = useState<{
-    objectId: string;
-    point: { x: number; y: number };
-  } | null>(null);
-  const [imageContextMenu, setImageContextMenu] = useState<{
-    objectId: string;
-    point: { x: number; y: number };
-  } | null>(null);
-  const [tableContextMenu, setTableContextMenu] = useState<{
-    objectId: string;
-    point: { x: number; y: number };
-  } | null>(null);
-  const [selectedTableCell, setSelectedTableCell] = useState<TableCellSelection | null>(null);
-  const [editingTableCell, setEditingTableCell] = useState<TableCellSelection | null>(null);
-  const [visualConnectorContextMenu, setVisualConnectorContextMenu] = useState<{
-    objectId: string;
-    point: { x: number; y: number };
-  } | null>(null);
-  const [visualConnectorDraft, setVisualConnectorDraft] = useState<{
-    startObjectId: string;
-  } | null>(null);
   const [contentGroupPanelOpen, setContentGroupPanelOpen] = useState(false);
   const [annotationNamePrompt, setAnnotationNamePrompt] = useState<AnnotationNamePromptState>(null);
-  const [imageMetadataPrompt, setImageMetadataPrompt] = useState<ImageMetadataPromptState>(null);
   const [, setOverlayPositionRevision] = useState(0);
-  const imageFileInputRef = useRef<HTMLInputElement | null>(null);
-  const pendingImageInsertionPointRef = useRef<CanvasPoint | null>(null);
   const selectedAnnotationId = selectedAnnotationIds[0] || null;
   const primaryPageFrame = noteCanvasRuntime.primaryPageFrame;
   const primaryPageFrameId = primaryPageFrame?.id || 'none';
@@ -790,9 +453,7 @@ export function NoteWritingSurfaceLayer({
   const primaryPageFrameExportable = primaryPageFrame?.exportable ? 'true' : 'false';
   const primaryPageFrameExtension = noteCanvasRuntime.pageFrameExtensions
     .find((extension) => extension.frameId === primaryPageFrame?.id);
-  const documentTypography = surfaceMode === 'page'
-    ? documentTypographyProfile
-    : primaryPageFrameExtension?.documentTypography || DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE;
+  const documentTypography = documentTypographyProfile;
   const documentTypographyStyle = documentTypographyToCssVars(documentTypography);
   const primaryPageFrameTemplateStyle = pageFrameTemplateToCssVars(
     primaryPageFrameExtension?.background || primaryPageFrame?.background,
@@ -828,180 +489,24 @@ export function NoteWritingSurfaceLayer({
     layoutMode,
     interactionMode: interactionState.mode,
   });
-  const visiblePageFrames = useMemo(() => (
-    surfaceMode === 'canvas'
-      ? noteCanvasRuntime.pageFrames
-      : primaryPageFrame
-        ? [primaryPageFrame]
-        : []
-  ), [noteCanvasRuntime.pageFrames, primaryPageFrame, surfaceMode]);
-  const canvasObjectById = useMemo(() => (
-    new Map(noteCanvasRuntime.canvasObjects.map((object) => [object.objectId, object]))
-  ), [noteCanvasRuntime.canvasObjects]);
-  const placementByObjectId = useMemo(() => (
-    new Map(noteCanvasRuntime.canvasPlacements.map((placement) => [placement.objectId, placement]))
-  ), [noteCanvasRuntime.canvasPlacements]);
+  const visiblePageFrames = useMemo(() => primaryPageFrame ? [primaryPageFrame] : [], [primaryPageFrame]);
   const blockPlacementByBlockId = useMemo(() => (
     new Map(noteCanvasRuntime.blockPlacements.map((placement) => [placement.blockId, placement]))
   ), [noteCanvasRuntime.blockPlacements]);
-  const shapePlacements = useMemo(() => (
-    noteCanvasRuntime.canvasPlacements.filter((placement) => (
-      canvasObjectById.get(placement.objectId)?.kind === 'shape'
-    ))
-  ), [canvasObjectById, noteCanvasRuntime.canvasPlacements]);
-  const imageObjectById = useMemo(() => (
-    new Map(noteCanvasRuntime.imageObjects.map((imageObject) => [imageObject.objectId, imageObject]))
-  ), [noteCanvasRuntime.imageObjects]);
-  const imagePlacements = useMemo(() => (
-    noteCanvasRuntime.canvasPlacements.filter((placement) => (
-      canvasObjectById.get(placement.objectId)?.kind === 'image'
-    ))
-  ), [canvasObjectById, noteCanvasRuntime.canvasPlacements]);
-  const structuredObjectById = useMemo(() => (
-    new Map(noteCanvasRuntime.structuredObjects.map((structuredObject) => [
-      structuredObject.objectId,
-      structuredObject,
-    ]))
-  ), [noteCanvasRuntime.structuredObjects]);
-  const tablePlacements = useMemo(() => (
-    noteCanvasRuntime.canvasPlacements.filter((placement) => (
-      canvasObjectById.get(placement.objectId)?.kind === 'table'
-    ))
-  ), [canvasObjectById, noteCanvasRuntime.canvasPlacements]);
-  const navigationObstacles = useMemo(() => surfaceMode === 'canvas' ? [
-    ...imagePlacements.filter((placement) => imageObjectById.has(placement.objectId)),
-    ...tablePlacements.filter((placement) => structuredObjectById.has(placement.objectId)),
-  ].map((placement) => ({ id: 'object:' + placement.objectId, x: placement.x, y: placement.y })) : [],
-  [surfaceMode, imagePlacements, imageObjectById, tablePlacements, structuredObjectById]);
   const navigationLayout = { blockLayouts, pageFrames: noteCanvasRuntime.pageFrames,
-    coordinateContract: noteCanvasRuntime.coordinateContract, pageOffsetX, obstacles: navigationObstacles };
+    coordinateContract: noteCanvasRuntime.coordinateContract, pageOffsetX };
   const documentTextSelection = useDocumentTextFlowSelection({ noteId, visibleBlocks, ...navigationLayout,
     disabled: contentReadOnly || layoutMode, applyDocumentEdit: onApplyDocumentTextFlowEdit });
   const navigateBoundary = (fromBlockId: string, request: Parameters<TextFlowNavigationTarget>[0]) =>
     navigateTextFlowBlockBoundary({ visibleBlocks, ...navigationLayout, fromBlockId, request,
       targets: textNavigationTargetsRef.current, disabled: contentReadOnly || layoutMode });
-  const registerObjectNavigation = (id: string, node: HTMLDivElement | null) => {
-    const key = 'object:' + id;
-    if (!node || contentReadOnly || layoutMode) { textNavigationTargetsRef.current.delete(key); return; }
-    textNavigationTargetsRef.current.set(key, (request) => {
-      if (request.selectionAnchor) return false;
-      documentTextSelection.clear();
-      clearDraft();
-      objectNavigationColumnRef.current = request.columnX;
-      onClearBlockSelection?.();
-      setSelectedCanvasObjectId(id);
-      node.focus({ preventScroll: true });
-      node.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
-      return true;
-    });
-  };
-  const handleObjectNavigation = (id: string, event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget || contentReadOnly || layoutMode
-      || event.ctrlKey || event.metaKey || event.altKey || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229
-      || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
-    event.preventDefault();
-    if (!event.shiftKey) navigateBoundary('object:' + id, { direction: event.key === 'ArrowDown' ? 'down' : 'up',
-      columnX: objectNavigationColumnRef.current });
-  };
-  const visualConnectorByObjectId = useMemo(() => (
-    new Map(noteCanvasRuntime.visualConnectors.map((connector) => [connector.objectId, connector]))
-  ), [noteCanvasRuntime.visualConnectors]);
-  const contentMountByObjectId = useMemo(() => (
-    new Map(noteCanvasRuntime.contentMounts.map((mount) => [mount.objectId, mount]))
-  ), [noteCanvasRuntime.contentMounts]);
-  const aiNodeByObjectId = useMemo(() => (
-    new Map(flattenCanvasAIReadableNodes(noteCanvasRuntime.canvasAIReadableSnapshot.nodes).map((node) => [node.id, node]))
-  ), [noteCanvasRuntime.canvasAIReadableSnapshot.nodes]);
-  const getCanvasObjectInspectorInput = (objectId: string) => ({
-    canvasObject: canvasObjectById.get(objectId) || null,
-    placement: placementByObjectId.get(objectId) || null,
-    contentMount: contentMountByObjectId.get(objectId) || null,
-    aiNode: aiNodeByObjectId.get(objectId) || null,
-    visualConnector: visualConnectorByObjectId.get(objectId) || null,
-    imageObject: imageObjectById.get(objectId) || null,
-    structuredObject: structuredObjectById.get(objectId) || null,
-  });
-  const selectedCanvasObjectInspectorModel = useMemo(() => (
-    selectedCanvasObjectId
-      ? createCanvasObjectInspectorModel(getCanvasObjectInspectorInput(selectedCanvasObjectId))
-      : null
-  ), [
-    aiNodeByObjectId,
-    canvasObjectById,
-    contentMountByObjectId,
-    imageObjectById,
-    placementByObjectId,
-    selectedCanvasObjectId,
-    structuredObjectById,
-    visualConnectorByObjectId,
-  ]);
-  const objectContextActionsForObject = (objectId: string): ObjectContextActionAvailability => {
-    const actions = createCanvasObjectInspectorActions(getCanvasObjectInspectorInput(objectId));
-    const actionById = new Map(actions.map((action) => [action.actionId, action]));
-    const openOriginal = actionById.get('open_original');
-    const duplicate = actionById.get('duplicate_canvas_object');
-    const exportVisibility = actionById.get('toggle_export_visibility');
-    return {
-      openOriginal: openOriginal ? {
-        enabled: openOriginal.enabled,
-        disabledReason: openOriginal.disabledReason,
-      } : undefined,
-      duplicate: duplicate ? {
-        enabled: duplicate.enabled,
-        disabledReason: duplicate.disabledReason,
-      } : undefined,
-      exportVisibility: exportVisibility ? {
-        label: exportVisibility.label,
-        enabled: exportVisibility.enabled,
-        disabledReason: exportVisibility.disabledReason,
-      } : undefined,
-    };
-  };
-  const shapeTextBindingByObjectId = useMemo(() => {
-    const next = new Map<string, {
-      block: NoteBlock;
-      text: string;
-      saving: boolean;
-      active: boolean;
-      autoFocus: boolean;
-    }>();
-    shapePlacements.forEach((placement) => {
-      const canvasObject = canvasObjectById.get(placement.objectId);
-      if (!isBlockBackedShapeObject(canvasObject)) return;
-      const block = findBackingBlockForShape(
-        placement.objectId,
-        noteCanvasRuntime.contentMounts,
-        allBlocks,
-      );
-      if (!block) return;
-      next.set(placement.objectId, {
-        block,
-        text: blockTextDrafts[block.id] ?? textFromContent(block),
-        saving: savingBlockId === block.id,
-        active: activeBlockId === block.id || focusBlockId === block.id || selectedBlockId === block.id,
-        autoFocus: focusBlockId === block.id,
-      });
-    });
-    return next;
-  }, [
-    activeBlockId,
-    allBlocks,
-    blockTextDrafts,
-    canvasObjectById,
-    focusBlockId,
-    noteCanvasRuntime.contentMounts,
-    savingBlockId,
-    selectedBlockId,
-    shapePlacements,
-  ]);
   const pageFrameExtensionByFrameId = useMemo(() => (
     new Map(noteCanvasRuntime.pageFrameExtensions.map((extension) => [extension.frameId, extension]))
   ), [noteCanvasRuntime.pageFrameExtensions]);
   const pageFrameGuides = useMemo(() => (
-    visiblePageFrames.map((frame) => createPageFrameGuides(surfaceMode === 'page'
-      ? projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)
-      : frame))
-  ), [visiblePageFrames, surfaceMode, noteCanvasRuntime.coordinateContract, pageOffsetX]);
+    visiblePageFrames.map((frame) => createPageFrameGuides(
+      projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)))
+  ), [visiblePageFrames, noteCanvasRuntime.coordinateContract, pageOffsetX]);
   const blockFragmentsByBlockId = useMemo(() => {
     const next = new Map<string, PageStackBlockFragmentProjection[]>();
     noteCanvasRuntime.blockFragmentProjections.forEach((fragment) => {
@@ -1022,9 +527,7 @@ export function NoteWritingSurfaceLayer({
           && extension.pageStackPageIndex >= collapsedPreviewPages,
         );
         if (hiddenByCollapsedStack || !extension?.slots) return null;
-        const displayedFrame = surfaceMode === 'page'
-          ? projectPageFrameToReadingSurface(pageFrame, noteCanvasRuntime.coordinateContract, pageOffsetX)
-          : pageFrame;
+        const displayedFrame = projectPageFrameToReadingSurface(pageFrame, noteCanvasRuntime.coordinateContract, pageOffsetX);
         // Slots are world rectangles. Follow the same reading-column translation
         // as the frame and guides while preserving their text and local geometry.
         const slotOffsetX = displayedFrame.x - pageFrame.x;
@@ -1035,12 +538,12 @@ export function NoteWritingSurfaceLayer({
           frameId: pageFrame.id,
           headerFooterEnabled: extension.headerFooterEnabled,
           pageNumberEnabled: extension.pageNumberEnabled,
-          slots: surfaceMode === 'page' ? {
+          slots: {
             ...extension.slots,
             header: projectSlot(extension.slots.header),
             footer: projectSlot(extension.slots.footer),
             pageNumber: projectSlot(extension.slots.pageNumber),
-          } : extension.slots,
+          },
         };
       })
       .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
@@ -1152,79 +655,12 @@ export function NoteWritingSurfaceLayer({
   });
 
   useEffect(() => {
-    if (!surfaceRef.current || surfaceMode !== 'canvas') return undefined;
-    const target = surfaceRef.current;
-    const observer = new ResizeObserver(([entry]) => {
-      onViewportSizeChange(entry.contentRect.width, entry.contentRect.height, noteCanvasRuntime.world);
-    });
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [noteCanvasRuntime.world, onViewportSizeChange, surfaceMode]);
-
-  useEffect(() => {
-    if (surfaceMode !== 'canvas') {
-      setSpacePanReady(false);
-      setCanvasPanning(false);
-      panSessionRef.current = null;
-      pageFrameOperationRef.current = null;
-      shapeOperationRef.current = null;
-      setPageFrameInteractionPreview(null);
-      setShapeInteractionPreview(null);
-      // A paper ink save rebuilds world geometry. Keep its selection so Delete
-      // and the next drag still act on the stroke after persistence completes.
-      setSelectedCanvasObjectId((id) => noteCanvasRuntime.canvasObjects.some(
-        (object) => object.objectId === id && object.kind === 'freehand' && object.status === 'active',
-      ) ? id : null);
-      setSelectedTableCell(null);
-      setEditingTableCell(null);
-      return undefined;
-    }
-
-    const isTextEditingTarget = (target: EventTarget | null) => (
-      target instanceof HTMLElement
-      && Boolean(target.closest('textarea, input, select, [contenteditable="true"], [role="dialog"]'))
-    );
-    const isPanBlockedTarget = (target: EventTarget | null) => (
-      target instanceof HTMLElement
-      && Boolean(target.closest('textarea, input, select, button, [contenteditable="true"], [role="dialog"]'))
-    );
-    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && !isTextEditingTarget(event.target)) {
-        const isZoomIn = event.key === '=' || event.key === '+';
-        const isZoomOut = event.key === '-';
-        const isZoomReset = event.key === '0';
-        if (isZoomIn || isZoomOut || isZoomReset) {
-          event.preventDefault();
-          if (isZoomReset) {
-            onResetViewport();
-            return;
-          }
-
-          const rect = surfaceRef.current?.getBoundingClientRect();
-          onZoomViewportAt({
-            x: rect ? rect.width / 2 : 0,
-            y: rect ? rect.height / 2 : 0,
-          }, viewportTransform.zoom * (isZoomIn ? 1.12 : 0.88), noteCanvasRuntime.world);
-          return;
-        }
-      }
-
-      if (event.code !== 'Space' || isPanBlockedTarget(event.target)) return;
-      event.preventDefault();
-      setSpacePanReady(true);
-    };
-    const handleKeyUp = (event: globalThis.KeyboardEvent) => {
-      if (event.code !== 'Space') return;
-      setSpacePanReady(false);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [noteCanvasRuntime.world, noteCanvasRuntime.canvasObjects, onResetViewport, onZoomViewportAt, surfaceMode, viewportTransform.zoom]);
+    // A paper ink save rebuilds world geometry. Keep its selection so Delete
+    // and the next drag still act on the stroke after persistence completes.
+    setSelectedCanvasObjectId((id) => noteCanvasRuntime.canvasObjects.some(
+      (object) => object.objectId === id && object.kind === 'freehand' && object.status === 'active',
+    ) ? id : null);
+  }, [noteCanvasRuntime.canvasObjects]);
 
   useEffect(() => {
     if (!selectedBlockId) return undefined;
@@ -1261,10 +697,6 @@ export function NoteWritingSurfaceLayer({
       if (target.closest('[data-text-unit-id][data-text-flow-id][data-block-id]')) return;
       clearDraft();
       setAnnotationContextMenu(null);
-      setCanvasBlankContextMenu(null);
-      setShapeContextMenu(null);
-      setTableContextMenu(null);
-      setVisualConnectorContextMenu(null);
     };
 
     const handleGlobalKeyDown = (event: globalThis.KeyboardEvent) => {
@@ -1273,12 +705,6 @@ export function NoteWritingSurfaceLayer({
       setAnnotationContextMenu(null);
       setAnnotationHighlightContextMenu(null);
       setBlockContextMenu(null);
-      setCanvasBlankContextMenu(null);
-      setPageFrameContextMenu(null);
-      setShapeContextMenu(null);
-      setTableContextMenu(null);
-      setVisualConnectorContextMenu(null);
-      setVisualConnectorDraft(null);
       setSelectedCanvasObjectId(null);
     };
 
@@ -1289,176 +715,6 @@ export function NoteWritingSurfaceLayer({
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, [clearDraft, selectionDraft]);
-
-  const transformedWorldStyle = useMemo(() => {
-    if (surfaceMode !== 'canvas') return {};
-    return {
-      transform: `translate(${-viewportTransform.x * viewportTransform.zoom}px, ${-viewportTransform.y * viewportTransform.zoom}px) scale(${viewportTransform.zoom})`,
-      transformOrigin: '0 0',
-    } satisfies CSSProperties;
-  }, [surfaceMode, viewportTransform.x, viewportTransform.y, viewportTransform.zoom]);
-
-  const handleCanvasPointerDown = (event: ReactPointerEvent<HTMLElement>) => {
-    if (surfaceMode !== 'canvas') return;
-    const target = event.target as HTMLElement;
-    const isPanIntent = event.button === 1 || spacePanReady;
-    if (!isPanIntent) return;
-    if (target.closest('textarea, input, select, button, [role="dialog"]')) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    panSessionRef.current = {
-      pointerId: event.pointerId,
-      clientX: event.clientX,
-      clientY: event.clientY,
-    };
-    setCanvasPanning(true);
-  };
-
-  const handleCanvasPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
-    if (surfaceMode !== 'canvas' || !panSessionRef.current) return;
-    const session = panSessionRef.current;
-    if (session.pointerId !== event.pointerId) return;
-    const delta = {
-      x: event.clientX - session.clientX,
-      y: event.clientY - session.clientY,
-    };
-    panSessionRef.current = {
-      ...session,
-      clientX: event.clientX,
-      clientY: event.clientY,
-    };
-    onPanViewportBy(delta, noteCanvasRuntime.world);
-  };
-
-  const endCanvasPan = (event: ReactPointerEvent<HTMLElement>) => {
-    if (panSessionRef.current?.pointerId === event.pointerId) {
-      panSessionRef.current = null;
-      setCanvasPanning(false);
-    }
-  };
-
-  const getPageFrameOperationDelta = (
-    event: ReactPointerEvent<HTMLElement>,
-    session: NonNullable<typeof pageFrameOperationRef.current>,
-  ): CanvasPoint => ({
-    x: (event.clientX - session.startClientX) / viewportTransform.zoom,
-    y: (event.clientY - session.startClientY) / viewportTransform.zoom,
-  });
-
-  const handlePageFramePointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    pageFrame: PageFrameModel,
-  ) => {
-    if (contentReadOnly) return;
-    if (surfaceMode !== 'canvas' || event.button !== 0) return;
-    if ((event.target as HTMLElement).closest('[data-page-frame-resize-handle="true"]')) return;
-    setCanvasBlankContextMenu(null);
-    setPageFrameContextMenu(null);
-    if (!layoutMode) {
-      onSelectPageFrame(pageFrame.id);
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pageFrameOperationRef.current = {
-      kind: 'move',
-      frameId: pageFrame.id,
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startX: pageFrame.x,
-      startY: pageFrame.y,
-      startWidth: pageFrame.width,
-      startHeight: pageFrame.height,
-    };
-    setPageFrameInteractionPreview({
-      frameId: pageFrame.id,
-      x: pageFrame.x,
-      y: pageFrame.y,
-      width: pageFrame.width,
-      height: pageFrame.height,
-    });
-  };
-
-  const handlePageFrameResizePointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    pageFrame: PageFrameModel,
-  ) => {
-    if (contentReadOnly) return;
-    if (surfaceMode !== 'canvas' || event.button !== 0 || !layoutMode) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pageFrameOperationRef.current = {
-      kind: 'resize',
-      frameId: pageFrame.id,
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startX: pageFrame.x,
-      startY: pageFrame.y,
-      startWidth: pageFrame.width,
-      startHeight: pageFrame.height,
-    };
-    setPageFrameInteractionPreview({
-      frameId: pageFrame.id,
-      x: pageFrame.x,
-      y: pageFrame.y,
-      width: pageFrame.width,
-      height: pageFrame.height,
-    });
-  };
-
-  const handlePageFramePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const session = pageFrameOperationRef.current;
-    if (!session || session.pointerId !== event.pointerId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const delta = getPageFrameOperationDelta(event, session);
-    if (session.kind === 'move') {
-      setPageFrameInteractionPreview({
-        frameId: session.frameId,
-        x: session.startX + delta.x,
-        y: session.startY + delta.y,
-        width: session.startWidth,
-        height: session.startHeight,
-      });
-      return;
-    }
-    setPageFrameInteractionPreview({
-      frameId: session.frameId,
-      x: session.startX,
-      y: session.startY,
-      width: Math.max(260, session.startWidth + delta.x),
-      height: Math.max(360, session.startHeight + delta.y),
-    });
-  };
-
-  const endPageFrameOperation = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const session = pageFrameOperationRef.current;
-    if (!session || session.pointerId !== event.pointerId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const preview = pageFrameInteractionPreview;
-    pageFrameOperationRef.current = null;
-    setPageFrameInteractionPreview(null);
-    if (!preview || preview.frameId !== session.frameId) return;
-    if (session.kind === 'move') {
-      onMovePageFrame(session.frameId, {
-        x: preview.x - session.startX,
-        y: preview.y - session.startY,
-      });
-      return;
-    }
-    onResizePageFrame(session.frameId, {
-      width: preview.width,
-      height: preview.height,
-    });
-  };
 
   const worldPointFromClientPoint = (point: CanvasPoint): CanvasPoint => {
     const surfaceRect = surfaceRef.current?.getBoundingClientRect();
@@ -1477,677 +733,6 @@ export function NoteWritingSurfaceLayer({
     )) || null
   );
 
-  const placeShapeInCurrentSurface = (placement: CanvasPlacement): CanvasPlacement => {
-    const center = {
-      x: placement.x + placement.width / 2,
-      y: placement.y + placement.height / 2,
-    };
-    const pageFrame = pageFrameAtWorldPoint(center);
-    return {
-      ...placement,
-      frameId: pageFrame?.id,
-      surface: pageFrame ? 'formal_page' : 'canvas_workspace',
-      boundaryRole: pageFrame ? 'inside' : 'outside',
-      snapState: pageFrame ? 'snapped' : 'free',
-    };
-  };
-
-  const persistShapePlacement = async (
-    canvasObject: CanvasObject,
-    placement: CanvasPlacement,
-  ): Promise<boolean> => {
-    const nextPlacement = placeShapeInCurrentSurface(placement);
-    return persistCanvasObjectPlacement(canvasObject, nextPlacement);
-  };
-
-  const persistCanvasObjectPlacement = async (
-    canvasObject: CanvasObject,
-    nextPlacement: CanvasPlacement,
-  ): Promise<boolean> => {
-    if (canvasObject.kind === 'image') {
-      const imageObject = imageObjectById.get(canvasObject.objectId);
-      if (!imageObject) return false;
-      return onPersistCanvasObject({
-        canvasObject,
-        placement: nextPlacement,
-        contentMounts: [],
-        imageObject,
-        payload: imageObjectSavePayload(canvasObject, nextPlacement, imageObject),
-      });
-    }
-    if (canvasObject.kind === 'table') {
-      const structuredObject = structuredObjectById.get(canvasObject.objectId);
-      if (!structuredObject) return false;
-      return onPersistCanvasObject({
-        canvasObject,
-        placement: nextPlacement,
-        contentMounts: [],
-        structuredObject,
-        payload: tableObjectSavePayload(canvasObject, nextPlacement, structuredObject),
-      });
-    }
-    if (canvasObject.kind === 'visual_connector') {
-      const visualConnector = visualConnectorByObjectId.get(canvasObject.objectId);
-      if (!visualConnector) return false;
-      return onPersistCanvasObject({
-        canvasObject,
-        placement: nextPlacement,
-        contentMounts: [],
-        visualConnector,
-        payload: visualConnectorSavePayload(canvasObject, nextPlacement, visualConnector),
-      });
-    }
-    const contentMount = findShapeTextMount(canvasObject.objectId, noteCanvasRuntime.contentMounts);
-    return onPersistCanvasObject({
-      canvasObject,
-      placement: nextPlacement,
-      contentMounts: contentMount ? [contentMount] : [],
-      payload: shapeSavePayload(canvasObject, nextPlacement, contentMount),
-    });
-  };
-
-  const persistTablePayload = async (
-    objectId: string,
-    payload: StructuredCanvasObject['payload'],
-  ): Promise<boolean> => {
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = placementByObjectId.get(objectId);
-    const structuredObject = structuredObjectById.get(objectId);
-    if (!canvasObject || !placement || !structuredObject) return false;
-    const nextStructuredObject: StructuredCanvasObject = {
-      ...structuredObject,
-      rowCount: payload.rows.length,
-      columnCount: payload.columns.length,
-      payload,
-    };
-    return onPersistCanvasObject({
-      canvasObject,
-      placement,
-      contentMounts: [],
-      structuredObject: nextStructuredObject,
-      payload: tableObjectSavePayload(canvasObject, placement, nextStructuredObject),
-    });
-  };
-
-  const persistTableMutationPayload = async (
-    objectId: string,
-    before: StructuredCanvasObject['payload'],
-    after: StructuredCanvasObject['payload'],
-  ): Promise<boolean> => {
-    if (JSON.stringify(before) === JSON.stringify(after)) return false;
-    const saved = await persistTablePayload(objectId, after);
-    if (saved) onPushStructuredMutationHistory(objectId, before, after);
-    return saved;
-  };
-
-  const tableRowHasText = (
-    payload: StructuredCanvasObject['payload'],
-    selection: Pick<TableCellSelection, 'rowId'> | null,
-  ): boolean => {
-    const normalized = normalizeTablePayload(payload);
-    if (normalized.rows.length <= 1) return false;
-    const selectedRow = selection
-      ? normalized.rows.find((row) => row.rowId === selection.rowId)
-      : null;
-    const rowId = selectedRow?.rowId || normalized.rows[normalized.rows.length - 1]?.rowId;
-    if (!rowId) return false;
-    return normalized.cells.some((cell) => cell.rowId === rowId && cell.text.trim().length > 0);
-  };
-
-  const tableColumnHasText = (
-    payload: StructuredCanvasObject['payload'],
-    selection: Pick<TableCellSelection, 'columnId'> | null,
-  ): boolean => {
-    const normalized = normalizeTablePayload(payload);
-    if (normalized.columns.length <= 1) return false;
-    const selectedColumn = selection
-      ? normalized.columns.find((column) => column.columnId === selection.columnId)
-      : null;
-    const columnId = selectedColumn?.columnId || normalized.columns[normalized.columns.length - 1]?.columnId;
-    if (!columnId) return false;
-    return normalized.cells.some((cell) => cell.columnId === columnId && cell.text.trim().length > 0);
-  };
-
-  const confirmDeleteNonEmptyTablePart = (
-    hasText: boolean,
-    label: 'row' | 'column',
-  ): boolean => (
-    !hasText
-    || window.confirm(`Delete this ${label}? You can press Ctrl+Z to undo.`)
-  );
-
-  const createShapeAtPoint = async (shapeType: ShapeType, clientPoint: CanvasPoint): Promise<void> => {
-    const worldPoint = worldPointFromClientPoint(clientPoint);
-    const pageFrame = pageFrameAtWorldPoint(worldPoint);
-    const objectId = createCanvasRuntimeId(`canvas-object:${noteId}:shape`);
-    const defaultWidth = shapeType === 'ellipse' ? 132 : 168;
-    const defaultHeight = shapeType === 'ellipse' ? 132 : 104;
-    const projection = createPureShapeProjection({
-      objectId,
-      canvasId: noteId,
-      layout: {
-        x: Math.round(worldPoint.x - defaultWidth / 2),
-        y: Math.round(worldPoint.y - defaultHeight / 2),
-        width: defaultWidth,
-        height: defaultHeight,
-        rotation: 0,
-        surface: pageFrame ? 'formal_page' : 'canvas_workspace',
-      },
-      zIndex: Math.max(1, ...noteCanvasRuntime.canvasPlacements.map((placement) => placement.zIndex)) + 1,
-      frameId: pageFrame?.id,
-    });
-    const canvasObject: CanvasObject = {
-      ...projection.canvasObject,
-      source: 'entity',
-      metadata: {
-        shapeType,
-        shape_type: shapeType,
-      },
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject,
-      placement: projection.placement,
-      contentMounts: [],
-      payload: shapeSavePayload(canvasObject, projection.placement),
-    });
-    if (saved) setSelectedCanvasObjectId(objectId);
-  };
-
-  const createTableObjectAtPoint = async (clientPoint: CanvasPoint): Promise<void> => {
-    const worldPoint = worldPointFromClientPoint(clientPoint);
-    const pageFrame = pageFrameAtWorldPoint(worldPoint);
-    const objectId = createCanvasRuntimeId(`canvas-object:${noteId}:table`);
-    const defaultWidth = 420;
-    const defaultHeight = 220;
-    const projection = createTableObjectProjection({
-      objectId,
-      canvasId: noteId,
-      layout: {
-        x: Math.round(worldPoint.x - defaultWidth / 2),
-        y: Math.round(worldPoint.y - defaultHeight / 2),
-        width: defaultWidth,
-        height: defaultHeight,
-        rotation: 0,
-        surface: pageFrame ? 'formal_page' : 'canvas_workspace',
-      },
-      zIndex: Math.max(1, ...noteCanvasRuntime.canvasPlacements.map((placement) => placement.zIndex)) + 1,
-      frameId: pageFrame?.id,
-    });
-    const canvasObject: CanvasObject = {
-      ...projection.canvasObject,
-      source: 'entity',
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject,
-      placement: projection.placement,
-      contentMounts: [],
-      structuredObject: projection.structuredObject,
-      payload: tableObjectSavePayload(
-        canvasObject,
-        projection.placement,
-        projection.structuredObject,
-        projection.visualStyle,
-      ),
-    });
-    if (saved) setSelectedCanvasObjectId(objectId);
-  };
-
-  const createImageObjectAtPoint = async (clientPoint: CanvasPoint, file: File): Promise<void> => {
-    const dimensions = await readImageFileDimensions(file);
-    const asset = await uploadCanvasImageAsset({
-      noteId,
-      file,
-      width: dimensions?.width,
-      height: dimensions?.height,
-    });
-    const worldPoint = worldPointFromClientPoint(clientPoint);
-    const pageFrame = pageFrameAtWorldPoint(worldPoint);
-    const naturalWidth = asset.width || dimensions?.width || 320;
-    const naturalHeight = asset.height || dimensions?.height || 180;
-    const defaultWidth = Math.min(420, Math.max(180, naturalWidth));
-    const defaultHeight = Math.max(96, Math.round(defaultWidth * (naturalHeight / Math.max(1, naturalWidth))));
-    const objectId = createCanvasRuntimeId(`canvas-object:${noteId}:image`);
-    const projection = createImageObjectProjection({
-      objectId,
-      canvasId: noteId,
-      asset,
-      layout: {
-        x: Math.round(worldPoint.x - defaultWidth / 2),
-        y: Math.round(worldPoint.y - defaultHeight / 2),
-        width: defaultWidth,
-        height: defaultHeight,
-        rotation: 0,
-        surface: pageFrame ? 'formal_page' : 'canvas_workspace',
-      },
-      zIndex: Math.max(1, ...noteCanvasRuntime.canvasPlacements.map((placement) => placement.zIndex)) + 1,
-      frameId: pageFrame?.id,
-    });
-    const canvasObject: CanvasObject = {
-      ...projection.canvasObject,
-      source: 'entity',
-      metadata: {
-        assetKind: 'image',
-        asset_kind: 'image',
-      },
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject,
-      placement: projection.placement,
-      contentMounts: [],
-      imageObject: projection.imageObject,
-      payload: imageObjectSavePayload(canvasObject, projection.placement, projection.imageObject, projection.visualStyle),
-    });
-    if (saved) setSelectedCanvasObjectId(objectId);
-  };
-
-  const triggerImagePickerAtPoint = (clientPoint: CanvasPoint): void => {
-    pendingImageInsertionPointRef.current = clientPoint;
-    imageFileInputRef.current?.click();
-  };
-
-  const handleImageFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const file = event.currentTarget.files?.[0] || null;
-    event.currentTarget.value = '';
-    const point = pendingImageInsertionPointRef.current;
-    pendingImageInsertionPointRef.current = null;
-    if (!file || !point) return;
-    void createImageObjectAtPoint(point, file).catch((err) => {
-      console.error('Failed to create image canvas object:', err);
-    });
-  };
-
-  const createStickyNoteAtPoint = async (clientPoint: CanvasPoint): Promise<void> => {
-    const worldPoint = worldPointFromClientPoint(clientPoint);
-    const pageFrame = pageFrameAtWorldPoint(worldPoint);
-    const objectId = createCanvasRuntimeId(`canvas-object:${noteId}:sticky-note`);
-    const defaultWidth = 188;
-    const defaultHeight = 132;
-    const projection = createPureShapeProjection({
-      objectId,
-      canvasId: noteId,
-      layout: {
-        x: Math.round(worldPoint.x - defaultWidth / 2),
-        y: Math.round(worldPoint.y - defaultHeight / 2),
-        width: defaultWidth,
-        height: defaultHeight,
-        rotation: 0,
-        surface: pageFrame ? 'formal_page' : 'canvas_workspace',
-      },
-      zIndex: Math.max(1, ...noteCanvasRuntime.canvasPlacements.map((placement) => placement.zIndex)) + 1,
-      frameId: pageFrame?.id,
-    });
-    const createdBlock = await onCreateBlock(defaultTextTemplate, '', {
-      metadataPatch: shapeBackedBlockMetadata(objectId),
-      silent: true,
-    });
-    if (!createdBlock) return;
-
-    const contentMount = createShapeTextContentMount(objectId, createdBlock.id);
-    const canvasObject: CanvasObject = {
-      ...projection.canvasObject,
-      backing: 'note_block',
-      objectClass: 'block_backed',
-      source: 'entity',
-      metadata: ensureStickyStyleForBlockBackedShape({
-        shapeType: 'rectangle',
-        shape_type: 'rectangle',
-      }),
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject,
-      placement: projection.placement,
-      contentMounts: [contentMount],
-      payload: shapeSavePayload(canvasObject, projection.placement, contentMount),
-    });
-    if (!saved) {
-      await onTrashBlock(createdBlock.id);
-      return;
-    }
-
-    setSelectedCanvasObjectId(objectId);
-    onRequestFocusBlock(createdBlock.id);
-  };
-
-  const createVisualConnectorBetweenObjects = async (
-    startObjectId: string,
-    endObjectId: string,
-  ): Promise<void> => {
-    if (startObjectId === endObjectId) return;
-    const startPlacement = placementByObjectId.get(startObjectId);
-    const endPlacement = placementByObjectId.get(endObjectId);
-    const start = pointForPlacementAnchor(startPlacement, 'center');
-    const end = pointForPlacementAnchor(endPlacement, 'center');
-    if (!start || !end) return;
-    const connectorId = createCanvasRuntimeId(`canvas-object:${noteId}:visual-connector`);
-    const projection = createVisualConnectorProjection({
-      connectorId,
-      canvasId: noteId,
-      start,
-      end,
-      startObjectId,
-      endObjectId,
-      zIndex: Math.max(1, ...noteCanvasRuntime.canvasPlacements.map((placement) => placement.zIndex)) + 1,
-      style: {
-        stroke: '#8aa4c2',
-        strokeWidth: 1.75,
-      },
-    });
-    const visualConnector = {
-      ...projection.visualConnector,
-      startKind: 'object' as const,
-      endKind: 'object' as const,
-      startAnchor: 'center' as const,
-      endAnchor: 'center' as const,
-      lineStyle: 'solid' as const,
-      stroke: '#8aa4c2',
-      strokeWidth: 1.75,
-      startMarker: 'none' as const,
-      endMarker: 'arrow' as const,
-      relationKind: 'visual_only' as const,
-    };
-    const canvasObject: CanvasObject = {
-      ...projection.canvasObject,
-      source: 'entity',
-      metadata: {
-        connector_type: 'visual_only',
-      },
-    };
-    const placement = placementForVisualConnector(projection.placement, visualConnector);
-    const saved = await onPersistCanvasObject({
-      canvasObject,
-      placement,
-      contentMounts: [],
-      visualConnector,
-      payload: visualConnectorSavePayload(canvasObject, placement, visualConnector, projection.visualStyle),
-    });
-    if (!saved) return;
-    setSelectedCanvasObjectId(connectorId);
-  };
-
-  const promoteShapeToBlockBacked = async (objectId: string): Promise<void> => {
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = noteCanvasRuntime.canvasPlacements.find((item) => item.objectId === objectId);
-    if (!canvasObject || !placement) return;
-
-    const existingBlock = findBackingBlockForShape(objectId, noteCanvasRuntime.contentMounts, allBlocks);
-    if (existingBlock) {
-      setSelectedCanvasObjectId(objectId);
-      onRequestFocusBlock(existingBlock.id);
-      return;
-    }
-
-    let backingBlock: NoteBlock | null = null;
-    let createdBlock: NoteBlock | null = null;
-    let restoredRememberedBlock = false;
-    const rememberedBackingBlockId = readRememberedShapeBackingBlockId(canvasObject.metadata);
-    if (rememberedBackingBlockId) {
-      backingBlock = await onRestoreBlockById(rememberedBackingBlockId, {
-        metadataPatch: shapeBackedBlockMetadata(objectId),
-        silent: true,
-      });
-      restoredRememberedBlock = Boolean(backingBlock);
-    }
-
-    if (!backingBlock) {
-      createdBlock = await onCreateBlock(defaultTextTemplate, '', {
-        metadataPatch: shapeBackedBlockMetadata(objectId),
-        silent: true,
-      });
-      backingBlock = createdBlock;
-    }
-    if (!backingBlock) return;
-
-    const contentMount = createShapeTextContentMount(objectId, backingBlock.id);
-    const nextCanvasObject: CanvasObject = {
-      ...canvasObject,
-      backing: 'note_block',
-      objectClass: 'block_backed',
-      metadata: rememberShapeBackingBlock(canvasObject.metadata, backingBlock.id),
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject: nextCanvasObject,
-      placement,
-      contentMounts: [contentMount],
-      payload: shapeSavePayload(nextCanvasObject, placement, contentMount),
-    });
-    if (!saved) {
-      if (createdBlock || restoredRememberedBlock) await onTrashBlock(backingBlock.id);
-      return;
-    }
-
-    setSelectedCanvasObjectId(objectId);
-    onRequestFocusBlock(backingBlock.id);
-  };
-
-  const applyShapeStylePreset = async (
-    objectId: string,
-    preset: 'default' | 'sticky',
-  ): Promise<void> => {
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = noteCanvasRuntime.canvasPlacements.find((item) => item.objectId === objectId);
-    const contentMount = findShapeTextMount(objectId, noteCanvasRuntime.contentMounts);
-    if (!canvasObject || !placement || !contentMount) return;
-    if (!isBlockBackedShapeObject(canvasObject)) return;
-
-    const shapeType = shapeTypeFromCanvasObject(canvasObject);
-    const baseMetadata: Record<string, unknown> = {
-      ...(canvasObject.metadata || {}),
-      shapeType,
-      shape_type: shapeType,
-    };
-    const nextCanvasObject: CanvasObject = {
-      ...canvasObject,
-      metadata: preset === 'sticky'
-        ? ensureStickyStyleForBlockBackedShape(baseMetadata)
-        : ensureDefaultShapeStyle(baseMetadata),
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject: nextCanvasObject,
-      placement,
-      contentMounts: [contentMount],
-      payload: shapeSavePayload(nextCanvasObject, placement, contentMount),
-    });
-    if (saved) setSelectedCanvasObjectId(objectId);
-  };
-
-  const editShapeText = (objectId: string): void => {
-    const backingBlock = findBackingBlockForShape(objectId, noteCanvasRuntime.contentMounts, allBlocks);
-    if (!backingBlock) return;
-    setSelectedCanvasObjectId(objectId);
-    onRequestFocusBlock(backingBlock.id);
-  };
-
-  const demoteShapeText = async (objectId: string): Promise<void> => {
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = noteCanvasRuntime.canvasPlacements.find((item) => item.objectId === objectId);
-    if (!canvasObject || !placement) return;
-
-    const backingBlock = findBackingBlockForShape(objectId, noteCanvasRuntime.contentMounts, allBlocks);
-    const backingText = backingBlock
-      ? (blockTextDrafts[backingBlock.id] ?? textFromContent(backingBlock)).trim()
-      : '';
-    if (backingText.length > 0) {
-      const confirmed = typeof window === 'undefined'
-        ? true
-        : window.confirm('Remove this shape text? The text block will move to trash and can be restored.');
-      if (!confirmed) return;
-    }
-    const nextCanvasObject: CanvasObject = {
-      ...canvasObject,
-      backing: 'none',
-      objectClass: 'pure',
-      metadata: backingBlock
-        ? rememberShapeBackingBlock(canvasObject.metadata, backingBlock.id)
-        : canvasObject.metadata,
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject: nextCanvasObject,
-      placement,
-      contentMounts: [],
-      payload: shapeSavePayload(nextCanvasObject, placement),
-    });
-    if (!saved) return;
-
-    if (backingBlock) await onTrashBlock(backingBlock.id);
-    setSelectedCanvasObjectId(objectId);
-  };
-
-  const getShapeOperationDelta = (
-    event: ReactPointerEvent<HTMLElement>,
-    session: NonNullable<typeof shapeOperationRef.current>,
-  ): CanvasPoint => ({
-    x: (event.clientX - session.startClientX) / viewportTransform.zoom,
-    y: (event.clientY - session.startClientY) / viewportTransform.zoom,
-  });
-
-  const handleShapePointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    canvasObject: CanvasObject,
-    placement: CanvasPlacement,
-  ) => {
-    if (surfaceMode !== 'canvas' || event.button !== 0) return;
-    if ((event.target as HTMLElement).closest('[data-canvas-shape-resize-handle="true"]')) return;
-    event.preventDefault();
-    event.stopPropagation();
-    setCanvasBlankContextMenu(null);
-    setPageFrameContextMenu(null);
-    setShapeContextMenu(null);
-    setImageContextMenu(null);
-    setTableContextMenu(null);
-    setVisualConnectorContextMenu(null);
-    setSelectedCanvasObjectId(canvasObject.objectId);
-    if (!layoutMode) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    shapeOperationRef.current = {
-      kind: 'move',
-      objectId: canvasObject.objectId,
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startX: placement.x,
-      startY: placement.y,
-      startWidth: placement.width,
-      startHeight: placement.height,
-    };
-    setShapeInteractionPreview({
-      objectId: canvasObject.objectId,
-      x: placement.x,
-      y: placement.y,
-      width: placement.width,
-      height: placement.height,
-    });
-  };
-
-  const handleShapeResizePointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    canvasObject: CanvasObject,
-    placement: CanvasPlacement,
-  ) => {
-    if (surfaceMode !== 'canvas' || event.button !== 0 || !layoutMode) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    shapeOperationRef.current = {
-      kind: 'resize',
-      objectId: canvasObject.objectId,
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startX: placement.x,
-      startY: placement.y,
-      startWidth: placement.width,
-      startHeight: placement.height,
-    };
-    setShapeInteractionPreview({
-      objectId: canvasObject.objectId,
-      x: placement.x,
-      y: placement.y,
-      width: placement.width,
-      height: placement.height,
-    });
-  };
-
-  const handleShapePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const session = shapeOperationRef.current;
-    if (!session || session.pointerId !== event.pointerId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const delta = getShapeOperationDelta(event, session);
-    if (session.kind === 'move') {
-      setShapeInteractionPreview({
-        objectId: session.objectId,
-        x: session.startX + delta.x,
-        y: session.startY + delta.y,
-        width: session.startWidth,
-        height: session.startHeight,
-      });
-      return;
-    }
-    setShapeInteractionPreview({
-      objectId: session.objectId,
-      x: session.startX,
-      y: session.startY,
-      width: Math.max(32, session.startWidth + delta.x),
-      height: Math.max(32, session.startHeight + delta.y),
-    });
-  };
-
-  const endShapeOperation = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const session = shapeOperationRef.current;
-    if (!session || session.pointerId !== event.pointerId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const preview = shapeInteractionPreview;
-    shapeOperationRef.current = null;
-    setShapeInteractionPreview(null);
-    if (!preview || preview.objectId !== session.objectId) return;
-    const canvasObject = canvasObjectById.get(session.objectId);
-    const placement = noteCanvasRuntime.canvasPlacements.find((item) => item.objectId === session.objectId);
-    if (!canvasObject || !placement) return;
-    void persistShapePlacement(canvasObject, {
-      ...placement,
-      x: preview.x,
-      y: preview.y,
-      width: preview.width,
-      height: preview.height,
-    });
-  };
-
-  const handleCanvasWheel = (event: WheelEvent<HTMLElement>) => {
-    if (surfaceMode !== 'canvas') return;
-    event.preventDefault();
-
-    if (event.ctrlKey || event.metaKey) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const zoomFactor = event.deltaY < 0 ? 1.08 : 0.92;
-      onZoomViewportAt({
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      }, viewportTransform.zoom * zoomFactor, noteCanvasRuntime.world);
-      return;
-    }
-
-    onScrollViewportBy({
-      x: event.shiftKey ? event.deltaY : event.deltaX,
-      y: event.shiftKey ? 0 : event.deltaY,
-    }, noteCanvasRuntime.world);
-  };
-
-  const canvasZoomPercent = Math.round(viewportTransform.zoom * 100);
-  const zoomCanvasAtCenter = (nextZoom: number) => {
-    const rect = surfaceRef.current?.getBoundingClientRect();
-    onZoomViewportAt({
-      x: rect ? rect.width / 2 : 0,
-      y: rect ? rect.height / 2 : 0,
-    }, nextZoom, noteCanvasRuntime.world);
-  };
-  const handleCanvasZoomSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
-    zoomCanvasAtCenter(Number(event.currentTarget.value) / 100);
-  };
-  const nudgeCanvasZoom = (factor: number) => {
-    zoomCanvasAtCenter(viewportTransform.zoom * factor);
-  };
-
   const handleBlockListMouseDownForDraft = (event: ReactPointerEvent<HTMLDivElement>) => {
     onBlockListMouseDown(event);
     if (event.target !== event.currentTarget) return;
@@ -2155,12 +740,6 @@ export function NoteWritingSurfaceLayer({
     setAnnotationContextMenu(null);
     setAnnotationHighlightContextMenu(null);
     setBlockContextMenu(null);
-    setCanvasBlankContextMenu(null);
-    setPageFrameContextMenu(null);
-    setShapeContextMenu(null);
-    setImageContextMenu(null);
-    setTableContextMenu(null);
-    setVisualConnectorContextMenu(null);
     setSelectedAnnotationIds([]);
     if (!draftActive || draftText.trim()) return;
     onDiscardDraft();
@@ -2211,8 +790,6 @@ export function NoteWritingSurfaceLayer({
     }
     setBlockContextMenu(null);
     setAnnotationHighlightContextMenu(null);
-    setCanvasBlankContextMenu(null);
-    setPageFrameContextMenu(null);
     setAnnotationContextMenu({ selection, point });
   };
 
@@ -2555,8 +1132,6 @@ export function NoteWritingSurfaceLayer({
     setSelectedAnnotationIds([annotationId]);
     setAnnotationContextMenu(null);
     setBlockContextMenu(null);
-    setCanvasBlankContextMenu(null);
-    setPageFrameContextMenu(null);
     setAnnotationHighlightContextMenu({ annotationId, point });
   };
 
@@ -2642,17 +1217,6 @@ export function NoteWritingSurfaceLayer({
   const getBlockControlAnchorForLayout = (layout: BlockBoxLayout) => {
     const worldRect = resolveScreenRect(layout, selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract), noteCanvasRuntime.coordinateContract, pageOffsetX);
 
-    if (surfaceMode === 'canvas') {
-      const surfaceRect = surfaceRef.current?.getBoundingClientRect();
-      if (!surfaceRect) return null;
-      return getBlockControlAnchorFromRect(worldRectToViewportRect({
-        worldRect,
-        viewport: viewportTransform,
-        viewportElementRect: surfaceRect,
-        source: 'block',
-      }));
-    }
-
     const blockListRect = blockListRef.current?.getBoundingClientRect();
     if (!blockListRect) return null;
     return getBlockControlAnchorFromRect({
@@ -2688,665 +1252,6 @@ export function NoteWritingSurfaceLayer({
       || visibleBlocks.find((block) => block.id === blockContextMenu.blockId)?.block_type !== 'item_ref'),
   } : null;
 
-  const canvasBlankMenu: CommandSurfaceMenu | null = canvasBlankContextMenu && !contentReadOnly ? {
-    id: 'canvas-blank-context-menu',
-    kind: 'canvas_blank',
-    point: canvasBlankContextMenu.point,
-    title: 'Canvas',
-    items: buildCanvasBlankMenu(),
-  } : null;
-
-  const pageFrameShellMenuExtension = pageFrameContextMenu
-    ? pageFrameExtensionByFrameId.get(pageFrameContextMenu.frameId)
-    : null;
-  const pageFrameShellMenu: CommandSurfaceMenu | null = pageFrameContextMenu && !contentReadOnly ? {
-    id: `page-frame-shell-menu-${pageFrameContextMenu.frameId}`,
-    kind: 'page_frame_shell',
-    point: pageFrameContextMenu.point,
-    title: 'PageFrame',
-    items: buildPageFrameShellMenu({
-      primary: pageFrameContextMenu.primary,
-      inPageStack: Boolean(pageFrameShellMenuExtension?.pageStackId),
-      stackCollapsed: Boolean(pageFrameShellMenuExtension?.pageStackCollapsed),
-    }),
-  } : null;
-
-  const shapeShellMenuCanvasObject = shapeContextMenu
-    ? canvasObjectById.get(shapeContextMenu.objectId)
-    : null;
-  const shapeShellMenu: CommandSurfaceMenu | null = shapeContextMenu && !contentReadOnly ? {
-    id: `canvas-object-shell-menu-${shapeContextMenu.objectId}`,
-    kind: 'canvas_blank',
-    point: shapeContextMenu.point,
-    title: 'Shape',
-    items: buildCanvasObjectShellMenu({
-      blockBacked: isBlockBackedShapeObject(shapeShellMenuCanvasObject),
-      sticky: isStickyNoteCanvasObject(shapeShellMenuCanvasObject),
-      objectActions: objectContextActionsForObject(shapeContextMenu.objectId),
-      connectorDraftState: !visualConnectorDraft
-        ? 'none'
-        : visualConnectorDraft.startObjectId === shapeContextMenu.objectId
-          ? 'same_object'
-          : 'ready',
-    }),
-  } : null;
-  const imageShellMenuImageObject = imageContextMenu
-    ? imageObjectById.get(imageContextMenu.objectId)
-    : null;
-  const imageShellMenu: CommandSurfaceMenu | null = imageContextMenu && !contentReadOnly ? {
-    id: `image-object-shell-menu-${imageContextMenu.objectId}`,
-    kind: 'canvas_blank',
-    point: imageContextMenu.point,
-    title: 'Image',
-    items: buildImageObjectShellMenu({
-      fit: imageShellMenuImageObject?.fit || 'contain',
-      objectActions: objectContextActionsForObject(imageContextMenu.objectId),
-      connectorDraftState: !visualConnectorDraft
-        ? 'none'
-        : visualConnectorDraft.startObjectId === imageContextMenu.objectId
-          ? 'same_object'
-      : 'ready',
-    }),
-  } : null;
-  const tableShellMenu: CommandSurfaceMenu | null = tableContextMenu && !contentReadOnly ? {
-    id: `table-object-shell-menu-${tableContextMenu.objectId}`,
-    kind: 'canvas_blank',
-    point: tableContextMenu.point,
-    title: 'Table',
-    items: buildTableObjectShellMenu({
-      rowCount: structuredObjectById.get(tableContextMenu.objectId)?.rowCount || 1,
-      columnCount: structuredObjectById.get(tableContextMenu.objectId)?.columnCount || 1,
-      objectActions: objectContextActionsForObject(tableContextMenu.objectId),
-      connectorDraftState: !visualConnectorDraft
-        ? 'none'
-        : visualConnectorDraft.startObjectId === tableContextMenu.objectId
-          ? 'same_object'
-          : 'ready',
-    }),
-  } : null;
-  const visualConnectorShellMenu: CommandSurfaceMenu | null = visualConnectorContextMenu && !contentReadOnly ? {
-    id: `visual-connector-shell-menu-${visualConnectorContextMenu.objectId}`,
-    kind: 'canvas_blank',
-    point: visualConnectorContextMenu.point,
-    title: 'Visual connector',
-    items: buildVisualConnectorShellMenu({
-      objectActions: objectContextActionsForObject(visualConnectorContextMenu.objectId),
-    }),
-  } : null;
-
-  const isBlockedContextMenuTarget = (target: EventTarget | null): boolean => (
-    target instanceof Element
-    && Boolean(target.closest([
-      '[data-note-block-shell="true"]',
-      '[data-command-context-menu="true"]',
-      '[data-content-group-panel="true"]',
-      '[data-selection-toolbar="true"]',
-      '[data-inline-name-prompt="true"]',
-      '[data-canvas-shape="true"]',
-      '[data-canvas-image="true"]',
-      '[data-canvas-table="true"]',
-      '[data-canvas-visual-connector="true"]',
-      'textarea',
-      'input',
-      'select',
-      'button',
-      'a',
-      '[role="button"]',
-      '[role="dialog"]',
-    ].join(',')))
-  );
-
-  const getPageFrameAtCanvasPoint = (event: ReactMouseEvent<HTMLDivElement>): {
-    frameId: string;
-    primary: boolean;
-  } | null => {
-    if (surfaceMode !== 'canvas') return null;
-    const surfaceRect = surfaceRef.current?.getBoundingClientRect();
-    if (!surfaceRect) return null;
-    const worldPoint = viewportPointToWorldPoint({
-      x: event.clientX - surfaceRect.left,
-      y: event.clientY - surfaceRect.top,
-    }, viewportTransform);
-    const hitFrame = [...noteCanvasRuntime.pageFrames].reverse().find((pageFrame) => (
-      worldPoint.x >= pageFrame.x
-      && worldPoint.x <= pageFrame.x + pageFrame.width
-      && worldPoint.y >= pageFrame.y
-      && worldPoint.y <= pageFrame.y + pageFrame.height
-    ));
-    if (!hitFrame) return null;
-    return {
-      frameId: hitFrame.id,
-      primary: hitFrame.id === primaryPageFrame?.id,
-    };
-  };
-
-  const handleBlankSurfaceContextMenu = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (contentReadOnly) return;
-    if (surfaceMode !== 'canvas') return;
-    if (isBlockedContextMenuTarget(event.target)) return;
-    event.preventDefault();
-    event.stopPropagation();
-
-    clearDraft();
-    setAnnotationContextMenu(null);
-    setAnnotationHighlightContextMenu(null);
-    setBlockContextMenu(null);
-    setShapeContextMenu(null);
-    setImageContextMenu(null);
-    setTableContextMenu(null);
-    setSelectedTableCell(null);
-    setEditingTableCell(null);
-    setVisualConnectorContextMenu(null);
-    setSelectedAnnotationIds([]);
-
-    const point = { x: event.clientX, y: event.clientY };
-    const hitFrame = getPageFrameAtCanvasPoint(event);
-    if (hitFrame) {
-      setCanvasBlankContextMenu(null);
-      setPageFrameContextMenu({ ...hitFrame, point });
-      return;
-    }
-
-    setPageFrameContextMenu(null);
-    setCanvasBlankContextMenu({ point });
-  };
-
-  const handleCanvasBlankContextAction = (actionId: CommandActionId) => {
-    if (actionId === 'create_page_frame') {
-      onCreatePageFrame();
-      return;
-    }
-    if (actionId === 'create_page_stack') {
-      onCreatePageStack();
-      return;
-    }
-    if (actionId === 'create_shape_rectangle' && canvasBlankContextMenu) {
-      void createShapeAtPoint('rectangle', canvasBlankContextMenu.point);
-      setCanvasBlankContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_shape_ellipse' && canvasBlankContextMenu) {
-      void createShapeAtPoint('ellipse', canvasBlankContextMenu.point);
-      setCanvasBlankContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_sticky_note' && canvasBlankContextMenu) {
-      void createStickyNoteAtPoint(canvasBlankContextMenu.point);
-      setCanvasBlankContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_table_object' && canvasBlankContextMenu) {
-      void createTableObjectAtPoint(canvasBlankContextMenu.point);
-      setCanvasBlankContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_image_object' && canvasBlankContextMenu) {
-      triggerImagePickerAtPoint(canvasBlankContextMenu.point);
-      setCanvasBlankContextMenu(null);
-      return;
-    }
-  };
-
-  const handlePageFrameContextAction = (actionId: CommandActionId) => {
-    if (!pageFrameContextMenu) return;
-    if (actionId === 'create_shape_rectangle') {
-      void createShapeAtPoint('rectangle', pageFrameContextMenu.point);
-      setPageFrameContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_shape_ellipse') {
-      void createShapeAtPoint('ellipse', pageFrameContextMenu.point);
-      setPageFrameContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_sticky_note') {
-      void createStickyNoteAtPoint(pageFrameContextMenu.point);
-      setPageFrameContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_table_object') {
-      void createTableObjectAtPoint(pageFrameContextMenu.point);
-      setPageFrameContextMenu(null);
-      return;
-    }
-    if (actionId === 'create_image_object') {
-      triggerImagePickerAtPoint(pageFrameContextMenu.point);
-      setPageFrameContextMenu(null);
-      return;
-    }
-    if (actionId === 'add_page_below') {
-      onAddPageBelow(pageFrameContextMenu.frameId);
-      return;
-    }
-    if (actionId === 'detach_page_from_stack') {
-      onDetachPageFromStack(pageFrameContextMenu.frameId);
-      return;
-    }
-    if (actionId === 'toggle_page_stack_collapse') {
-      onTogglePageStackCollapse(pageFrameContextMenu.frameId);
-      return;
-    }
-    if (actionId === 'duplicate_page_frame') {
-      onDuplicatePageFrame(pageFrameContextMenu.frameId);
-      return;
-    }
-    if (actionId === 'set_primary_page_frame') {
-      onSetPrimaryPageFrame(pageFrameContextMenu.frameId);
-      return;
-    }
-    if (actionId === 'delete_page_frame') {
-      onDeletePageFrame(pageFrameContextMenu.frameId);
-    }
-  };
-
-  const clearCanvasObjectContextMenus = (): void => {
-    setShapeContextMenu(null);
-    setImageContextMenu(null);
-    setTableContextMenu(null);
-    setVisualConnectorContextMenu(null);
-  };
-
-  const isCanvasObjectContextCommand = (
-    actionId: CommandActionId,
-  ): actionId is 'inspect_canvas_object' | 'open_original' | 'duplicate_canvas_object' | 'toggle_export_visibility' => (
-    actionId === 'inspect_canvas_object'
-    || actionId === 'open_original'
-    || actionId === 'duplicate_canvas_object'
-    || actionId === 'toggle_export_visibility'
-  );
-
-  const persistCanvasObjectDuplicateDraft = async (
-    draft: NonNullable<ReturnType<typeof createCanvasObjectDuplicateDraft>>,
-  ): Promise<boolean> => {
-    if (draft.imageObject) {
-      return onPersistCanvasObject({
-        canvasObject: draft.canvasObject,
-        placement: draft.placement,
-        contentMounts: [],
-        imageObject: draft.imageObject,
-        payload: imageObjectSavePayload(draft.canvasObject, draft.placement, draft.imageObject),
-      });
-    }
-    if (draft.structuredObject) {
-      return onPersistCanvasObject({
-        canvasObject: draft.canvasObject,
-        placement: draft.placement,
-        contentMounts: [],
-        structuredObject: draft.structuredObject,
-        payload: tableObjectSavePayload(draft.canvasObject, draft.placement, draft.structuredObject),
-      });
-    }
-    return onPersistCanvasObject({
-      canvasObject: draft.canvasObject,
-      placement: draft.placement,
-      contentMounts: draft.contentMounts,
-      payload: shapeSavePayload(draft.canvasObject, draft.placement),
-    });
-  };
-
-  const toggleImageObjectFit = async (objectId: string): Promise<boolean> => {
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = placementByObjectId.get(objectId);
-    const imageObject = imageObjectById.get(objectId);
-    if (!canvasObject || !placement || !imageObject) return false;
-    const nextImageObject: ImageCanvasObject = {
-      ...imageObject,
-      fit: imageObject.fit === 'cover' ? 'contain' : 'cover',
-    };
-    return onPersistCanvasObject({
-      canvasObject,
-      placement,
-      contentMounts: [],
-      imageObject: nextImageObject,
-      payload: imageObjectSavePayload(canvasObject, placement, nextImageObject),
-    });
-  };
-
-  const deleteCanvasObjectWithBacking = async (objectId: string): Promise<boolean> => {
-    const canvasObject = canvasObjectById.get(objectId);
-    const backingBlock = canvasObject?.kind === 'shape'
-      ? findBackingBlockForShape(objectId, noteCanvasRuntime.contentMounts, allBlocks)
-      : null;
-    const deleted = await onDeleteCanvasObject(objectId);
-    if (!deleted) return false;
-    if (backingBlock) onForgetBlockLocally(backingBlock.id);
-    if (selectedCanvasObjectId === objectId) setSelectedCanvasObjectId(null);
-    if (selectedTableCell?.objectId === objectId) setSelectedTableCell(null);
-    if (editingTableCell?.objectId === objectId) setEditingTableCell(null);
-    if (visualConnectorDraft?.startObjectId === objectId) setVisualConnectorDraft(null);
-    return true;
-  };
-
-  const handleCanvasObjectContextAction = async (
-    actionId: CanvasObjectInspectorActionId | 'inspect_canvas_object',
-    objectId: string | null = selectedCanvasObjectId,
-  ): Promise<void> => {
-    if (!objectId) return;
-    const input = getCanvasObjectInspectorInput(objectId);
-    const { canvasObject, placement, contentMount } = input;
-    if (!canvasObject || !placement) return;
-
-    if (actionId === 'inspect_canvas_object') {
-      setSelectedCanvasObjectId(objectId);
-      clearCanvasObjectContextMenus();
-      return;
-    }
-
-    if (actionId === 'open_original') {
-      if (contentMount?.targetKind === 'note_block' && contentMount.targetId) {
-        setSelectedCanvasObjectId(objectId);
-        onSelectBlock(contentMount.targetId);
-        onRequestFocusBlock(contentMount.targetId);
-      }
-      clearCanvasObjectContextMenus();
-      return;
-    }
-
-    if (actionId === 'duplicate_canvas_object') {
-      const draft = createCanvasObjectDuplicateDraft({
-        ...input,
-        nextObjectId: createCanvasRuntimeId(`canvas-object:${noteId}:${canvasObject.kind}:duplicate`),
-      });
-      if (draft) {
-        const saved = await persistCanvasObjectDuplicateDraft(draft);
-        if (saved) setSelectedCanvasObjectId(draft.canvasObject.objectId);
-      }
-      clearCanvasObjectContextMenus();
-      return;
-    }
-
-    if (actionId === 'toggle_export_visibility') {
-      const saved = await persistCanvasObjectPlacement(
-        canvasObject,
-        toggleCanvasPlacementExportVisibility(placement),
-      );
-      if (saved) setSelectedCanvasObjectId(objectId);
-      clearCanvasObjectContextMenus();
-      return;
-    }
-
-    if (actionId === 'toggle_shape_style') {
-      await applyShapeStylePreset(
-        objectId,
-        isStickyNoteCanvasObject(canvasObject) ? 'default' : 'sticky',
-      );
-      clearCanvasObjectContextMenus();
-      return;
-    }
-
-    if (actionId === 'toggle_image_fit') {
-      const saved = await toggleImageObjectFit(objectId);
-      if (saved) setSelectedCanvasObjectId(objectId);
-      clearCanvasObjectContextMenus();
-      return;
-    }
-
-    if (actionId === 'delete_canvas_object') {
-      await deleteCanvasObjectWithBacking(objectId);
-      clearCanvasObjectContextMenus();
-    }
-  };
-
-  const handleShapeContextAction = async (actionId: CommandActionId) => {
-    if (!shapeContextMenu) return;
-    const objectId = shapeContextMenu.objectId;
-    if (isCanvasObjectContextCommand(actionId)) {
-      await handleCanvasObjectContextAction(actionId, objectId);
-      return;
-    }
-    if (actionId === 'add_shape_text') {
-      await promoteShapeToBlockBacked(objectId);
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'edit_shape_text') {
-      editShapeText(objectId);
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'remove_shape_text') {
-      await demoteShapeText(objectId);
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'set_shape_style_sticky') {
-      await applyShapeStylePreset(objectId, 'sticky');
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'set_shape_style_default') {
-      await applyShapeStylePreset(objectId, 'default');
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'start_visual_connector_from_object') {
-      setVisualConnectorDraft({ startObjectId: objectId });
-      setSelectedCanvasObjectId(objectId);
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'finish_visual_connector_to_object') {
-      const startObjectId = visualConnectorDraft?.startObjectId;
-      if (startObjectId && startObjectId !== objectId) {
-        await createVisualConnectorBetweenObjects(startObjectId, objectId);
-      }
-      setVisualConnectorDraft(null);
-      setShapeContextMenu(null);
-      return;
-    }
-    if (actionId === 'delete_canvas_object') {
-      await deleteCanvasObjectWithBacking(objectId);
-      setShapeContextMenu(null);
-    }
-  };
-
-  const handleImageContextAction = async (actionId: CommandActionId) => {
-    if (!imageContextMenu) return;
-    const objectId = imageContextMenu.objectId;
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = noteCanvasRuntime.canvasPlacements.find((item) => item.objectId === objectId);
-    const imageObject = imageObjectById.get(objectId);
-    if (!canvasObject || !placement || !imageObject) {
-      setImageContextMenu(null);
-      return;
-    }
-
-    if (isCanvasObjectContextCommand(actionId)) {
-      await handleCanvasObjectContextAction(actionId, objectId);
-      return;
-    }
-
-    if (actionId === 'edit_image_caption') {
-      setImageMetadataPrompt({
-        objectId,
-        field: 'caption',
-        point: imageContextMenu.point,
-        initialValue: imageObject.caption || '',
-      });
-      setImageContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'edit_image_alt_text') {
-      setImageMetadataPrompt({
-        objectId,
-        field: 'altText',
-        point: imageContextMenu.point,
-        initialValue: imageObject.altText || '',
-      });
-      setImageContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'toggle_image_fit') {
-      const saved = await toggleImageObjectFit(objectId);
-      if (saved) setSelectedCanvasObjectId(objectId);
-      setImageContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'start_visual_connector_from_object') {
-      setVisualConnectorDraft({ startObjectId: objectId });
-      setSelectedCanvasObjectId(objectId);
-      setImageContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'finish_visual_connector_to_object') {
-      const startObjectId = visualConnectorDraft?.startObjectId;
-      if (startObjectId && startObjectId !== objectId) {
-        await createVisualConnectorBetweenObjects(startObjectId, objectId);
-      }
-      setVisualConnectorDraft(null);
-      setImageContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'delete_canvas_object') {
-      await deleteCanvasObjectWithBacking(objectId);
-      setImageContextMenu(null);
-    }
-  };
-
-  const handleImageMetadataPromptCommit = async (value: string): Promise<void> => {
-    if (!imageMetadataPrompt) return;
-    const { objectId, field } = imageMetadataPrompt;
-    const canvasObject = canvasObjectById.get(objectId);
-    const placement = noteCanvasRuntime.canvasPlacements.find((item) => item.objectId === objectId);
-    const imageObject = imageObjectById.get(objectId);
-    if (!canvasObject || !placement || !imageObject) {
-      setImageMetadataPrompt(null);
-      return;
-    }
-
-    const trimmed = value.trim();
-    const nextImageObject: ImageCanvasObject = {
-      ...imageObject,
-      [field]: trimmed || undefined,
-    };
-    const saved = await onPersistCanvasObject({
-      canvasObject,
-      placement,
-      contentMounts: [],
-      imageObject: nextImageObject,
-      payload: imageObjectSavePayload(canvasObject, placement, nextImageObject),
-    });
-    if (saved) setSelectedCanvasObjectId(objectId);
-    setImageMetadataPrompt(null);
-  };
-
-  const handleTableContextAction = async (actionId: CommandActionId) => {
-    if (!tableContextMenu) return;
-    const objectId = tableContextMenu.objectId;
-    const structuredObject = structuredObjectById.get(objectId);
-    const tableSelection = selectedTableCell?.objectId === objectId ? selectedTableCell : null;
-
-    if (isCanvasObjectContextCommand(actionId)) {
-      await handleCanvasObjectContextAction(actionId, objectId);
-      return;
-    }
-
-    if (structuredObject && actionId === 'add_table_row_below') {
-      const before = structuredObject.payload;
-      const saved = await persistTableMutationPayload(objectId, before, addTableRowBelow(before, tableSelection));
-      if (saved) setSelectedCanvasObjectId(objectId);
-      setTableContextMenu(null);
-      return;
-    }
-
-    if (structuredObject && actionId === 'add_table_column_right') {
-      const before = structuredObject.payload;
-      const saved = await persistTableMutationPayload(objectId, before, addTableColumnRight(before, tableSelection));
-      if (saved) setSelectedCanvasObjectId(objectId);
-      setTableContextMenu(null);
-      return;
-    }
-
-    if (structuredObject && actionId === 'delete_table_row') {
-      const before = structuredObject.payload;
-      if (!confirmDeleteNonEmptyTablePart(tableRowHasText(before, tableSelection), 'row')) {
-        setTableContextMenu(null);
-        return;
-      }
-      const saved = await persistTableMutationPayload(objectId, before, deleteTableRow(before, tableSelection));
-      if (saved) {
-        setSelectedCanvasObjectId(objectId);
-        setSelectedTableCell(null);
-        setEditingTableCell(null);
-      }
-      setTableContextMenu(null);
-      return;
-    }
-
-    if (structuredObject && actionId === 'delete_table_column') {
-      const before = structuredObject.payload;
-      if (!confirmDeleteNonEmptyTablePart(tableColumnHasText(before, tableSelection), 'column')) {
-        setTableContextMenu(null);
-        return;
-      }
-      const saved = await persistTableMutationPayload(objectId, before, deleteTableColumn(before, tableSelection));
-      if (saved) {
-        setSelectedCanvasObjectId(objectId);
-        setSelectedTableCell(null);
-        setEditingTableCell(null);
-      }
-      setTableContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'start_visual_connector_from_object') {
-      setVisualConnectorDraft({ startObjectId: objectId });
-      setSelectedCanvasObjectId(objectId);
-      setTableContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'finish_visual_connector_to_object') {
-      const startObjectId = visualConnectorDraft?.startObjectId;
-      if (startObjectId && startObjectId !== objectId) {
-        await createVisualConnectorBetweenObjects(startObjectId, objectId);
-      }
-      setVisualConnectorDraft(null);
-      setTableContextMenu(null);
-      return;
-    }
-
-    if (actionId === 'delete_canvas_object') {
-      await deleteCanvasObjectWithBacking(objectId);
-      setTableContextMenu(null);
-    }
-  };
-
-  const handleTableCellTextCommit = async (
-    selection: TableCellSelection,
-    text: string,
-  ): Promise<void> => {
-    const structuredObject = structuredObjectById.get(selection.objectId);
-    if (!structuredObject) {
-      setEditingTableCell(null);
-      return;
-    }
-    setEditingTableCell(null);
-    setSelectedTableCell(selection);
-    const saved = await persistTablePayload(
-      selection.objectId,
-      updateTableCellText(structuredObject.payload, selection.cellId, text),
-    );
-    if (saved) setSelectedCanvasObjectId(selection.objectId);
-  };
-
-  const handleVisualConnectorContextAction = async (actionId: CommandActionId) => {
-    if (!visualConnectorContextMenu) return;
-    const objectId = visualConnectorContextMenu.objectId;
-    if (isCanvasObjectContextCommand(actionId)) {
-      await handleCanvasObjectContextAction(actionId, objectId);
-      return;
-    }
-    if (actionId !== 'delete_canvas_object') return;
-    await deleteCanvasObjectWithBacking(objectId);
-    setVisualConnectorContextMenu(null);
-  };
-
   const blankDropTextFromEvent = (event: DragEvent<HTMLElement>): string | null => {
     const payload = readContentGroupDragPayload(event.dataTransfer);
     if (!payload) return null;
@@ -3376,21 +1281,6 @@ export function NoteWritingSurfaceLayer({
 
   const layoutForBlankDrop = (event: DragEvent<HTMLElement>): BlockBoxLayout | null => {
     const height = Math.max(DEFAULT_BLOCK_HEIGHT, defaultDraftLayout.height);
-    if (surfaceMode === 'canvas') {
-      const surfaceRect = surfaceRef.current?.getBoundingClientRect();
-      if (!surfaceRect) return null;
-      const worldPoint = viewportPointToWorldPoint({
-        x: event.clientX - surfaceRect.left,
-        y: event.clientY - surfaceRect.top,
-      }, viewportTransform);
-      return {
-        ...defaultDraftLayout,
-        x: Math.max(0, worldPoint.x - pageOffsetX),
-        y: Math.max(0, worldPoint.y),
-        height,
-        surface: 'canvas_workspace',
-      };
-    }
 
     const blockListRect = blockListRef.current?.getBoundingClientRect();
     if (!blockListRect) return null;
@@ -3543,28 +1433,14 @@ export function NoteWritingSurfaceLayer({
     <section
       ref={surfaceRef}
       data-text-unit-move-scope={noteId}
-      className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
+      className={`${styles.writingSurface} ${styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''}`}
       data-page-frame-template={primaryPageFrameExtension?.templateId || primaryPageFrame?.templateId || 'none'}
       data-page-frame-background={primaryPageFrameExtension?.background.kind || primaryPageFrame?.background?.kind || 'none'}
       style={surfaceMode === 'page' ? primaryPageFrameTemplateStyle as CSSProperties & Record<string, string> : undefined}
-      onPointerDown={handleCanvasPointerDown}
-      onPointerMove={handleCanvasPointerMove}
-      onPointerUp={endCanvasPan}
-      onPointerCancel={endCanvasPan}
-      onWheel={handleCanvasWheel}
     >
       {hostMode === 'modal' && !hasMeaningfulRenderableContent && (
         <p data-staging-empty-hint="true">Drag items from staging</p>
       )}
-      <input
-        ref={imageFileInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif"
-        hidden
-        aria-hidden="true"
-        tabIndex={-1}
-        onChange={handleImageFileChange}
-      />
       <div
         className={surfaceMode === 'page' ? styles.pageReadingSpace : undefined}
         data-page-reading-space={surfaceMode === 'page' ? 'true' : undefined}
@@ -3612,7 +1488,7 @@ export function NoteWritingSurfaceLayer({
       <div
         ref={blockListRef}
         tabIndex={-1}
-        className={`${styles.blockList} ${surfaceMode === 'canvas' ? styles.blockListCanvas : styles.blockListPage} ${layoutMode && !contentReadOnly ? styles.layoutMode : ''}`}
+        className={`${styles.blockList} ${styles.blockListPage} ${layoutMode && !contentReadOnly ? styles.layoutMode : ''}`}
         data-source-content-read-only={contentReadOnly ? 'true' : 'false'}
         data-canvas-engine-version={noteCanvasRuntime.version}
         data-canvas-engine-route={noteCanvasRuntime.route}
@@ -3641,18 +1517,14 @@ export function NoteWritingSurfaceLayer({
         data-document-font-size={documentTypography.fontSizePx}
         data-document-line-height={documentTypography.lineHeightPx}
         style={{
-          minHeight: surfaceMode === 'canvas' ? noteCanvasRuntime.world.height : pageReading.paperHeight - pageReading.inset.top - pageReading.inset.bottom,
+          minHeight: pageReading.paperHeight - pageReading.inset.top - pageReading.inset.bottom,
           ...(surfaceMode === 'page' ? { width: pageReading.layoutWidth } : {}),
-          ...transformedWorldStyle,
           ...documentTypographyStyle,
           ...primaryPageFrameTemplateStyle,
           '--formal-page-offset-x': `${primaryPageFrameX}px`,
           '--formal-page-width': `${primaryPageFrameWidth}px`,
-          '--canvas-world-width': `${noteCanvasRuntime.world.width}px`,
-          '--canvas-world-height': `${noteCanvasRuntime.world.height}px`,
         } as CSSProperties & Record<string, string | number>}
         onMouseDown={contentReadOnly ? undefined : handleBlockListMouseDownForDraft}
-        onContextMenu={contentReadOnly ? undefined : handleBlankSurfaceContextMenu}
         onDoubleClick={contentReadOnly ? undefined : onPageSpaceDoubleClick}
         onDragOver={contentReadOnly ? undefined : handleBlankSurfaceDragOver}
         onDrop={contentReadOnly ? undefined : handleBlankSurfaceDrop}
@@ -3675,105 +1547,6 @@ export function NoteWritingSurfaceLayer({
             enabled={paperInkEnabled} selectedObjectId={selectedCanvasObjectId} onSelect={setSelectedCanvasObjectId}
             onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject} />
         ))}
-        {surfaceMode === 'canvas' && (
-          <>
-            {noteCanvasRuntime.pageFrames.map((pageFrame, index) => {
-              const primary = pageFrame.id === primaryPageFrame?.id;
-              const selected = pageFrame.id === selectedPageFrameId;
-              const extension = pageFrameExtensionByFrameId.get(pageFrame.id);
-              const pageStackId = extension?.pageStackId || 'none';
-              const pageStackPageIndex = extension?.pageStackPageIndex ?? -1;
-              const pageStackPageTotal = extension?.pageStackPageTotal || 0;
-              const pageStackCollapsed = Boolean(extension?.pageStackCollapsed);
-              const collapsedPreviewPages = extension?.pageStackCollapsedPreviewPages || 1;
-              const hiddenByCollapsedStack = Boolean(
-                pageStackCollapsed
-                && pageStackPageIndex >= collapsedPreviewPages,
-              );
-              const preview = pageFrameInteractionPreview?.frameId === pageFrame.id
-                ? pageFrameInteractionPreview
-                : null;
-              const pageFrameTemplateStyle = pageFrameTemplateToCssVars(
-                extension?.background || pageFrame.background,
-              );
-              if (hiddenByCollapsedStack) {
-                if (pageStackPageIndex !== collapsedPreviewPages) return null;
-                return (
-                  <button
-                    key={`${pageStackId}:collapsed-tail`}
-                    type="button"
-                    className={styles.pageStackCollapsedTail}
-                    data-page-stack-tail={pageStackId}
-                    data-page-stack-id={pageStackId}
-                    data-page-stack-page-index={pageStackPageIndex}
-                    data-page-stack-page-total={pageStackPageTotal}
-                    data-page-stack-collapsed="true"
-                    onClick={() => onTogglePageStackCollapse(pageFrame.id)}
-                    disabled={contentReadOnly}
-                    style={{
-                      left: pageFrame.x,
-                      top: pageFrame.y,
-                      width: Math.min(320, pageFrame.width),
-                    }}
-                  >
-                    {`${Math.max(0, pageStackPageTotal - collapsedPreviewPages)} pages hidden`}
-                  </button>
-                );
-              }
-              return (
-                <div
-                  key={pageFrame.id}
-                  className={`${styles.formalPageBoundary} ${primary ? styles.formalPageBoundaryPrimary : styles.formalPageBoundarySecondary} ${layoutMode && !contentReadOnly ? styles.formalPageBoundaryOperable : ''} ${selected ? styles.formalPageBoundarySelected : ''}`}
-                  data-canvas-object-id={pageFrame.id}
-                  data-page-frame-id={pageFrame.id}
-                  data-page-frame-role={pageFrame.role}
-                  data-page-frame-primary={primary ? 'true' : 'false'}
-                  data-page-frame-exportable={pageFrame.exportable ? 'true' : 'false'}
-                  data-page-frame-template={extension?.templateId || pageFrame.templateId || 'none'}
-                  data-page-frame-background={extension?.background.kind || pageFrame.background?.kind || 'none'}
-                  data-page-frame-index={index}
-                  data-page-frame-selected={selected ? 'true' : 'false'}
-                  data-page-stack-id={pageStackId}
-                  data-page-stack-page-index={pageStackPageIndex}
-                  data-page-stack-page-total={pageStackPageTotal}
-                  data-page-stack-collapsed={pageStackCollapsed ? 'true' : 'false'}
-                  onPointerDown={(event) => handlePageFramePointerDown(event, pageFrame)}
-                  onPointerMove={handlePageFramePointerMove}
-                  onPointerUp={endPageFrameOperation}
-                  onPointerCancel={endPageFrameOperation}
-                  style={{
-                    ...pageFrameTemplateStyle,
-                    left: preview?.x ?? pageFrame.x,
-                    top: preview?.y ?? pageFrame.y,
-                    width: preview?.width ?? pageFrame.width,
-                    height: preview?.height ?? pageFrame.height,
-                    minHeight: preview?.height ?? pageFrame.height,
-                  }}
-                >
-                  {extension?.pageStackNumberLabel && (
-                    <span
-                      className={styles.pageStackNumberBadge}
-                      data-page-stack-number-label={extension.pageStackNumberLabel}
-                    >
-                      {extension.pageStackNumberLabel}
-                    </span>
-                  )}
-                  {selected && layoutMode && !contentReadOnly && (
-                    <div
-                      className={styles.pageFrameResizeHandle}
-                      data-page-frame-resize-handle="true"
-                      onPointerDown={(event) => handlePageFrameResizePointerDown(event, pageFrame)}
-                      onPointerMove={handlePageFramePointerMove}
-                      onPointerUp={endPageFrameOperation}
-                      onPointerCancel={endPageFrameOperation}
-                    />
-                  )}
-                </div>
-              );
-            })}
-            <div className={styles.scratchWorkspaceLabel}>Scratch workspace</div>
-          </>
-        )}
         {pageFrameSlotEntries.map(({ frameId, headerFooterEnabled, pageNumberEnabled, slots }) => (
           <div key={`${frameId}:slots`}>
             {headerFooterEnabled && slots.header && (
@@ -3881,167 +1654,6 @@ export function NoteWritingSurfaceLayer({
             )}
           </div>
         ))}
-        {surfaceMode === 'canvas' && (
-          <VisualConnectorLayer
-            connectors={noteCanvasRuntime.visualConnectors}
-            placementByObjectId={placementByObjectId}
-            canvasObjectById={canvasObjectById}
-            selectedObjectId={selectedCanvasObjectId}
-            readOnly={contentReadOnly}
-            onConnectorContextMenu={(event, canvasObject) => {
-              event.preventDefault();
-              event.stopPropagation();
-              setCanvasBlankContextMenu(null);
-              setPageFrameContextMenu(null);
-              setBlockContextMenu(null);
-              setShapeContextMenu(null);
-              setTableContextMenu(null);
-              setImageContextMenu(null);
-              setVisualConnectorContextMenu({
-                objectId: canvasObject.objectId,
-                point: { x: event.clientX, y: event.clientY },
-              });
-              setSelectedCanvasObjectId(canvasObject.objectId);
-            }}
-          />
-        )}
-        {surfaceMode === 'canvas' && (
-          <ImageObjectLayer
-            onNavigationElement={registerObjectNavigation}
-            onNavigationKeyDown={handleObjectNavigation}
-            placements={imagePlacements}
-            canvasObjectById={canvasObjectById}
-            imageObjectById={imageObjectById}
-            selectedObjectId={selectedCanvasObjectId}
-            interactionPreview={shapeInteractionPreview}
-            layoutMode={layoutMode}
-            readOnly={contentReadOnly}
-            onImagePointerDown={handleShapePointerDown}
-            onImageResizePointerDown={handleShapeResizePointerDown}
-            onImagePointerMove={handleShapePointerMove}
-            onImagePointerEnd={endShapeOperation}
-            onImageContextMenu={(event, canvasObject) => {
-              event.preventDefault();
-              event.stopPropagation();
-              setCanvasBlankContextMenu(null);
-              setPageFrameContextMenu(null);
-              setBlockContextMenu(null);
-              setShapeContextMenu(null);
-              setVisualConnectorContextMenu(null);
-              setTableContextMenu(null);
-              setSelectedTableCell(null);
-              setEditingTableCell(null);
-              setImageContextMenu({
-                objectId: canvasObject.objectId,
-                point: { x: event.clientX, y: event.clientY },
-              });
-              setSelectedCanvasObjectId(canvasObject.objectId);
-            }}
-          />
-        )}
-        {surfaceMode === 'canvas' && (
-          <TableObjectLayer
-            onNavigationElement={registerObjectNavigation}
-            onNavigationKeyDown={handleObjectNavigation}
-            placements={tablePlacements}
-            canvasObjectById={canvasObjectById}
-            structuredObjectById={structuredObjectById}
-            selectedObjectId={selectedCanvasObjectId}
-            interactionPreview={shapeInteractionPreview}
-            layoutMode={layoutMode}
-            readOnly={contentReadOnly}
-            selectedCell={selectedTableCell}
-            editingCell={editingTableCell}
-            onTablePointerDown={handleShapePointerDown}
-            onTableResizePointerDown={handleShapeResizePointerDown}
-            onTablePointerMove={handleShapePointerMove}
-            onTablePointerEnd={endShapeOperation}
-            onSelectCell={(selection) => {
-              setSelectedTableCell(selection);
-              setSelectedCanvasObjectId(selection.objectId);
-            }}
-            onStartCellEdit={(selection) => {
-              setSelectedTableCell(selection);
-              setSelectedCanvasObjectId(selection.objectId);
-              setEditingTableCell(selection);
-            }}
-            onCancelCellEdit={() => setEditingTableCell(null)}
-            onCommitCellText={(selection, text) => {
-              void handleTableCellTextCommit(selection, text);
-            }}
-            onTableContextMenu={(event, canvasObject, selection, pendingEdit: PendingTableCellEdit | null = null) => {
-              event.preventDefault();
-              event.stopPropagation();
-              const menuPoint = { x: event.clientX, y: event.clientY };
-              setCanvasBlankContextMenu(null);
-              setPageFrameContextMenu(null);
-              setBlockContextMenu(null);
-              setShapeContextMenu(null);
-              setImageContextMenu(null);
-              setVisualConnectorContextMenu(null);
-              void (async () => {
-                if (pendingEdit) {
-                  await handleTableCellTextCommit(pendingEdit.selection, pendingEdit.text);
-                } else {
-                  setEditingTableCell(null);
-                }
-                if (selection) setSelectedTableCell(selection);
-                setTableContextMenu({
-                  objectId: canvasObject.objectId,
-                  point: menuPoint,
-                });
-                setSelectedCanvasObjectId(canvasObject.objectId);
-              })();
-            }}
-          />
-        )}
-        {surfaceMode === 'canvas' && (
-          <ShapeObjectLayer
-            placements={shapePlacements}
-            canvasObjectById={canvasObjectById}
-            shapeTextBindingByObjectId={shapeTextBindingByObjectId}
-            selectedObjectId={selectedCanvasObjectId}
-            interactionPreview={shapeInteractionPreview}
-            layoutMode={layoutMode}
-            readOnly={contentReadOnly}
-            onShapePointerDown={handleShapePointerDown}
-            onShapeResizePointerDown={handleShapeResizePointerDown}
-            onShapePointerMove={handleShapePointerMove}
-            onShapePointerEnd={endShapeOperation}
-            onShapeContextMenu={(event, canvasObject) => {
-              event.preventDefault();
-              event.stopPropagation();
-              setCanvasBlankContextMenu(null);
-              setPageFrameContextMenu(null);
-              setBlockContextMenu(null);
-              setTableContextMenu(null);
-              setImageContextMenu(null);
-              setVisualConnectorContextMenu(null);
-              setSelectedTableCell(null);
-              setEditingTableCell(null);
-              setShapeContextMenu({
-                objectId: canvasObject.objectId,
-                point: { x: event.clientX, y: event.clientY },
-              });
-              setSelectedCanvasObjectId(canvasObject.objectId);
-            }}
-            onShapeTextFocus={onFocusBlock}
-            onShapeTextBlur={onReleaseTextFocus}
-            onShapeTextChange={(block, value, caret, anchorElement) => {
-              handlePlainTextBackedBlockChange(block, value, caret, anchorElement);
-            }}
-            onShapeTextSave={async (objectId, block, value) => {
-              if (value.trim().length === 0) {
-                await demoteShapeText(objectId);
-                return null;
-              }
-              return onSaveBlock(block, value, {
-                silent: true,
-                textFlow: textFlowWithPlainText(block, value),
-              });
-            }}
-          />
-        )}
         {snapGuide?.x !== undefined && (
           <div className={styles.snapGuideVertical} style={{ left: screenSnapGuide.x }} />
         )}
@@ -4102,11 +1714,6 @@ export function NoteWritingSurfaceLayer({
               onBlockContextMenu={(point) => {
                 setAnnotationContextMenu(null);
                 setAnnotationHighlightContextMenu(null);
-                setCanvasBlankContextMenu(null);
-                setPageFrameContextMenu(null);
-                setShapeContextMenu(null);
-                setImageContextMenu(null);
-                setVisualConnectorContextMenu(null);
                 setBlockContextMenu({ blockId: block.id, point });
               }}
               onTextChange={(value, caret, anchorElement) => {
@@ -4239,50 +1846,6 @@ export function NoteWritingSurfaceLayer({
             disabled={overviewOpen || readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
         </div>
       )}
-      {surfaceMode === 'canvas' && (
-        <div
-          className={styles.canvasZoomControl}
-          data-canvas-zoom-control="true"
-          aria-label="Canvas zoom controls"
-        >
-          <button
-            type="button"
-            className={styles.canvasZoomButton}
-            onClick={() => nudgeCanvasZoom(0.88)}
-            aria-label="Zoom out"
-          >
-            -
-          </button>
-          <input
-            className={styles.canvasZoomSlider}
-            data-canvas-zoom-slider="true"
-            type="range"
-            min={40}
-            max={180}
-            step={5}
-            value={Math.min(180, Math.max(40, canvasZoomPercent))}
-            onChange={handleCanvasZoomSliderChange}
-            aria-label="Canvas zoom"
-          />
-          <button
-            type="button"
-            className={styles.canvasZoomButton}
-            onClick={() => nudgeCanvasZoom(1.12)}
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            className={styles.canvasZoomReset}
-            data-canvas-zoom-reset="true"
-            onClick={onResetViewport}
-            aria-label="Reset canvas zoom"
-          >
-            {canvasZoomPercent}%
-          </button>
-        </div>
-      )}
       <AnnotationOverlayLayer
         annotations={annotationTruths}
         selectedAnnotationId={selectedAnnotationId}
@@ -4322,13 +1885,6 @@ export function NoteWritingSurfaceLayer({
         onSaveTypographyProfile={onSaveDocumentTypographyProfile}
         onClose={clearDraft}
       />
-      <ObjectInspectorLayer
-        model={surfaceMode === 'canvas' && !contentReadOnly ? selectedCanvasObjectInspectorModel : null}
-        onClose={() => setSelectedCanvasObjectId(null)}
-        onAction={(actionId) => {
-          void handleCanvasObjectContextAction(actionId);
-        }}
-      />
       <ContextMenuLayer
         menu={textSelectionContextMenu}
         onClose={() => setAnnotationContextMenu(null)}
@@ -4344,44 +1900,6 @@ export function NoteWritingSurfaceLayer({
         onClose={() => setBlockContextMenu(null)}
         onAction={(actionId) => handleBlockContextAction(actionId)}
       />
-      <ContextMenuLayer
-        menu={canvasBlankMenu}
-        onClose={() => setCanvasBlankContextMenu(null)}
-        onAction={(actionId) => handleCanvasBlankContextAction(actionId)}
-      />
-      <ContextMenuLayer
-        menu={pageFrameShellMenu}
-        onClose={() => setPageFrameContextMenu(null)}
-        onAction={(actionId) => handlePageFrameContextAction(actionId)}
-      />
-      <ContextMenuLayer
-        menu={shapeShellMenu}
-        onClose={() => setShapeContextMenu(null)}
-        onAction={(actionId) => {
-          void handleShapeContextAction(actionId);
-        }}
-      />
-      <ContextMenuLayer
-        menu={imageShellMenu}
-        onClose={() => setImageContextMenu(null)}
-        onAction={(actionId) => {
-          void handleImageContextAction(actionId);
-        }}
-      />
-      <ContextMenuLayer
-        menu={tableShellMenu}
-        onClose={() => setTableContextMenu(null)}
-        onAction={(actionId) => {
-          void handleTableContextAction(actionId);
-        }}
-      />
-      <ContextMenuLayer
-        menu={visualConnectorShellMenu}
-        onClose={() => setVisualConnectorContextMenu(null)}
-        onAction={(actionId) => {
-          void handleVisualConnectorContextAction(actionId);
-        }}
-      />
       <InlineNamePromptLayer
         prompt={annotationNamePrompt ? {
           point: annotationNamePrompt.point,
@@ -4391,18 +1909,6 @@ export function NoteWritingSurfaceLayer({
         } : null}
         onCancel={() => setAnnotationNamePrompt(null)}
         onCommit={handleAnnotationNamePromptCommit}
-      />
-      <InlineNamePromptLayer
-        prompt={imageMetadataPrompt ? {
-          point: imageMetadataPrompt.point,
-          title: imageMetadataPrompt.field === 'caption' ? 'Image caption' : 'Image alt text',
-          initialValue: imageMetadataPrompt.initialValue,
-          confirmLabel: 'Save',
-        } : null}
-        onCancel={() => setImageMetadataPrompt(null)}
-        onCommit={(value) => {
-          void handleImageMetadataPromptCommit(value);
-        }}
       />
       {!contentGroupPanelOpen && selectedAnnotationIds.length > 0 && (
         <AnnotationInspectorPanel

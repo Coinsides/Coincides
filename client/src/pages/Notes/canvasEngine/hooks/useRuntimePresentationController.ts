@@ -12,9 +12,7 @@ import {
   duplicatePageFrame,
   createPageFrameCollectionSeed,
   insertPageFrameAfter,
-  movePageFrameInCollection,
   selectPageFrame,
-  resizePageFrameInCollection,
   setPrimaryPageFrame,
 } from '../pageFrameCollectionService';
 import {
@@ -26,12 +24,7 @@ import {
   setPageStackCollapsed,
   splitPageStackAtFrame,
 } from '../pageStackCollectionService';
-import {
-  movePageFrameAffiliatedBlockLayouts,
-} from '../layoutAffiliationService';
-import type { BlockBoxLayout } from '../runtimeLayout';
 import type {
-  CanvasPoint,
   CanvasWorldModel,
   PageFrameCollectionModel,
   PageFrameModel,
@@ -57,17 +50,13 @@ export type UseRuntimePresentationControllerOptions =
     | 'onDetachPageFromStack'
     | 'onDuplicatePageFrame'
     | 'onInsertPageFrame'
-    | 'onMovePageFrame'
-    | 'onResizePageFrame'
     | 'onSelectPageFrame'
     | 'onSetPrimaryPageFrame'
     | 'onSplitPageStackAtFrame'
     | 'onMergePageStackWithPrevious'
     | 'onTogglePageStackCollapse'
   > & {
-    onApplyBlockLayoutDrafts: (layouts: Record<string, BlockBoxLayout>) => void;
     onFocusPageFrame: (pageFrame: PageFrameModel, world: CanvasWorldModel) => void;
-    onPersistChangedBlockLayouts: (layouts: Record<string, BlockBoxLayout>) => void;
     onSavePageFrameCollection: (collection: PageFrameCollectionModel) => void | Promise<void>;
   };
 
@@ -217,35 +206,6 @@ export function useRuntimePresentationController(
     if (nextCollection.selectedFrameId) focusPageFrame(nextCollection.selectedFrameId, nextCollection);
   }, [currentPageFrameCollection, focusPageFrame, options]);
 
-  const handleMovePageFrame = useCallback((frameId: string, delta: CanvasPoint) => {
-    const pageFrame = currentPageFrameCollection.pageFrames.find((frame) => frame.id === frameId);
-    const movedBlockLayouts = pageFrame
-      ? movePageFrameAffiliatedBlockLayouts({
-        coordinateContract: options.coordinateContract,
-        pageFrames: currentPageFrameCollection.pageFrames,
-        pageFrame,
-        blockLayouts: options.blockLayouts,
-        blockWorldOffsetX: options.pageOffsetX,
-        delta,
-      })
-      : {};
-    const nextCollection = movePageFrameInCollection(currentPageFrameCollection, frameId, {
-      dx: delta.x,
-      dy: delta.y,
-    });
-    if (Object.keys(movedBlockLayouts).length > 0) {
-      options.onApplyBlockLayoutDrafts(movedBlockLayouts);
-      options.onPersistChangedBlockLayouts(movedBlockLayouts);
-    }
-    void options.onSavePageFrameCollection(nextCollection);
-  }, [currentPageFrameCollection, options]);
-
-  const handleResizePageFrame = useCallback((frameId: string, size: { width: number; height: number }) => {
-    if (options.note?.page_format === 'screen_note') return;
-    const nextCollection = resizePageFrameInCollection(currentPageFrameCollection, frameId, size);
-    void options.onSavePageFrameCollection(nextCollection);
-  }, [currentPageFrameCollection, options]);
-
   const layerProps = useNoteCanvasLayerProps({
     ...options,
     exportPreview,
@@ -264,8 +224,6 @@ export function useRuntimePresentationController(
     onDetachPageFromStack: handleDetachPageFromStack,
     onDuplicatePageFrame: handleDuplicatePageFrame,
     onInsertPageFrame: handleInsertPageFrame,
-    onMovePageFrame: handleMovePageFrame,
-    onResizePageFrame: handleResizePageFrame,
     onSelectPageFrame: handleSelectPageFrame,
     onSetPrimaryPageFrame: handleSetPrimaryPageFrame,
     onSplitPageStackAtFrame: handleSplitPageStackAtFrame,

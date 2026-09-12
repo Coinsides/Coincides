@@ -1,0 +1,180 @@
+{
+  "file": "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+  "numstat": {
+    "added": 52,
+    "deleted": 36,
+    "beforeLines": 2743,
+    "afterLines": 2759
+  },
+  "before": {
+    "tests": 49,
+    "pass": 24,
+    "fail": 25,
+    "skipped": 0
+  },
+  "after": {
+    "tests": 49,
+    "pass": 49,
+    "fail": 0,
+    "skipped": 0
+  },
+  "protectedBodies": [
+    {
+      "title": "Image CanvasObject saves as asset-backed media without becoming text content truth",
+      "bytes": 2158,
+      "sha256": "f6319c8d56ec04cf1d110bee98c6bdacbebc79695acf5c572d16c1c2d9a7c56d"
+    },
+    {
+      "title": "Image asset lifecycle keeps shared duplicate blobs until the final reference is deleted",
+      "bytes": 1864,
+      "sha256": "9e901c83825a0b8501a7727442eff881ab8deb557a6df7797da2a6ecc958cf57"
+    },
+    {
+      "title": "Course delete releases exclusive image assets before cascade removes extensions",
+      "bytes": 1174,
+      "sha256": "5b7c31028c77905bc015cb72a2c7d67f95afb811bd05984739617ddedb19ac0e"
+    },
+    {
+      "title": "Course delete keeps cross-course shared image assets until the final course reference is deleted",
+      "bytes": 1940,
+      "sha256": "4a951e64e34e403aae50d0bc31ed63729dc66da2c86739f78cbd00cb56ea644d"
+    },
+    {
+      "title": "Course delete releases same-course shared image assets only after all course references are removed",
+      "bytes": 1491,
+      "sha256": "48f42488f2e5b10833fbbd2fcc27c855089ac540723e47d14feca0b92ef03273"
+    },
+    {
+      "title": "Block identity hardening migration repairs old block-id CanvasObject rows",
+      "bytes": 3576,
+      "sha256": "e29702ab09b61e5fd6419d3515f1683d404e07728e312b0654f15ce486d732c6"
+    }
+  ],
+  "convertedTitles": [
+    {
+      "number": 3,
+      "beforeTitle": "Block CanvasObject identity stays per placement when the same block is reused across notes",
+      "afterTitle": "Block CanvasObject identity stays per placement when the same block is reused across notes"
+    },
+    {
+      "number": 4,
+      "beforeTitle": "Block placement round-trips the coordinate and Page boundary receipt",
+      "afterTitle": "Historical Block placement keeps its coordinate and Page boundary receipt readable while retired writes are rejected"
+    },
+    {
+      "number": 5,
+      "beforeTitle": "Image CanvasObject saves as asset-backed media without becoming text content truth",
+      "afterTitle": "Image CanvasObject saves as asset-backed media without becoming text content truth"
+    },
+    {
+      "number": 6,
+      "beforeTitle": "Image asset lifecycle keeps shared duplicate blobs until the final reference is deleted",
+      "afterTitle": "Image asset lifecycle keeps shared duplicate blobs until the final reference is deleted"
+    },
+    {
+      "number": 7,
+      "beforeTitle": "Course delete releases exclusive image assets before cascade removes extensions",
+      "afterTitle": "Course delete releases exclusive image assets before cascade removes extensions"
+    },
+    {
+      "number": 8,
+      "beforeTitle": "Course delete keeps cross-course shared image assets until the final course reference is deleted",
+      "afterTitle": "Course delete keeps cross-course shared image assets until the final course reference is deleted"
+    },
+    {
+      "number": 9,
+      "beforeTitle": "Course delete releases same-course shared image assets only after all course references are removed",
+      "afterTitle": "Course delete releases same-course shared image assets only after all course references are removed"
+    },
+    {
+      "number": 10,
+      "beforeTitle": "Table CanvasObject saves structured rows columns and cells without becoming TextFlow content truth",
+      "afterTitle": "Table CanvasObject saves structured rows columns and cells without becoming TextFlow content truth"
+    },
+    {
+      "number": 11,
+      "beforeTitle": "Table CanvasObject validator rejects malformed structured object payloads",
+      "afterTitle": "Table CanvasObject validator rejects malformed structured object payloads"
+    },
+    {
+      "number": 21,
+      "beforeTitle": "Generic CanvasObject pipeline round-trips and hard-deletes a test-only probe kind",
+      "afterTitle": "Generic CanvasObject pipeline round-trips and hard-deletes a test-only probe kind"
+    },
+    {
+      "number": 22,
+      "beforeTitle": "Shape CanvasObject round-trips through generic persistence without content mounts",
+      "afterTitle": "Shape CanvasObject round-trips through generic persistence without content mounts"
+    },
+    {
+      "number": 23,
+      "beforeTitle": "Shape CanvasObject delete cascades placement rows",
+      "afterTitle": "Shape CanvasObject delete cascades placement rows"
+    },
+    {
+      "number": 24,
+      "beforeTitle": "Visual Connector CanvasObject round-trips with visual-only endpoints",
+      "afterTitle": "Visual Connector CanvasObject round-trips with visual-only endpoints"
+    },
+    {
+      "number": 25,
+      "beforeTitle": "Visual Connector accepts point endpoints but rejects semantic or content-backed payloads",
+      "afterTitle": "Visual Connector accepts point endpoints but rejects semantic or content-backed payloads"
+    },
+    {
+      "number": 26,
+      "beforeTitle": "Deleting a Visual Connector endpoint object hard-deletes the connector",
+      "afterTitle": "Deleting a Visual Connector endpoint object hard-deletes the connector"
+    },
+    {
+      "number": 27,
+      "beforeTitle": "Block-backed Shape CanvasObject round-trips with an owned note_block mount",
+      "afterTitle": "Block-backed Shape CanvasObject round-trips with an owned note_block mount"
+    },
+    {
+      "number": 28,
+      "beforeTitle": "Projection snapshot excludes canvas object backing blocks",
+      "afterTitle": "Projection snapshot excludes canvas object backing blocks"
+    },
+    {
+      "number": 29,
+      "beforeTitle": "Canvas persistence keeps block-backed shape geometry when backing block is trashed",
+      "afterTitle": "Canvas persistence keeps block-backed shape geometry when backing block is trashed"
+    },
+    {
+      "number": 30,
+      "beforeTitle": "Paragraph block projection still disappears when its backing block is trashed",
+      "afterTitle": "Paragraph block projection still disappears when its backing block is trashed"
+    },
+    {
+      "number": 31,
+      "beforeTitle": "Live shape backing block cannot be independently trashed but demoted shape releases it",
+      "afterTitle": "Live shape backing block cannot be independently trashed but demoted shape releases it"
+    },
+    {
+      "number": 32,
+      "beforeTitle": "Demoting block-backed shape clears its content mount and note block placement without hard-deleting the block",
+      "afterTitle": "Demoting block-backed shape clears its content mount and note block placement without hard-deleting the block"
+    },
+    {
+      "number": 33,
+      "beforeTitle": "Restoring an orphaned canvas-object backing block strips backing metadata and recreates an ordinary note placement",
+      "afterTitle": "Restoring an orphaned canvas-object backing block strips backing metadata and recreates an ordinary note placement"
+    },
+    {
+      "number": 35,
+      "beforeTitle": "Deleting a block-backed Shape CanvasObject removes its owned backing block from active note content",
+      "afterTitle": "Deleting a block-backed Shape CanvasObject removes its owned backing block from active note content"
+    },
+    {
+      "number": 39,
+      "beforeTitle": "Generic CanvasObject delete clears ContentGroupMember soft pointers",
+      "afterTitle": "Generic CanvasObject delete clears ContentGroupMember soft pointers"
+    },
+    {
+      "number": 42,
+      "beforeTitle": "Generic CanvasObject save refuses PageFrame kind-flip by existing object id",
+      "afterTitle": "Generic CanvasObject save refuses PageFrame kind-flip by existing object id"
+    }
+  ]
+}

@@ -71,7 +71,7 @@ function renderBlocks(blocks: NoteBlock[], options: {
     const resolved = useNoteCanvasResolvedLayoutModel({
       contentWidth: 760, documentTypographyProfile: createDefaultDocumentTypographyProfile(),
       layoutDrafts: {}, sortedBlocks: [...blocks].sort((a, b) => a.order_index - b.order_index),
-      surfaceMode: 'canvas', surfacePolicy: createSurfaceModePolicy('canvas'), pageFrames: [],
+      surfaceMode: 'page', surfacePolicy: createSurfaceModePolicy('page'), pageFrames: [],
     });
     const visibleBlocks = options.realLayout ? resolved.visibleBlocks : blocks;
     const layoutOrder = options.realLayout ? { blockLayouts: resolved.blockLayouts, pageFrames: [] } : {};
@@ -136,8 +136,8 @@ describe('B6 cross-block cursor navigation', () => {
 
   it('fix1 smoke 3: follows real Layout placement after movement leaves order_index unchanged', () => {
     const editor = renderBlocks([
-      block('lower', 'lower paragraph', { order_index: 0, canvas_layout: { x: 0, y: 220, width: 320, height: 72, surface: 'canvas_workspace' } }),
-      block('upper', 'upper paragraph', { order_index: 1, canvas_layout: { x: 0, y: 0, width: 320, height: 72, surface: 'canvas_workspace' } }),
+      block('lower', 'lower paragraph', { order_index: 0, canvas_layout: { x: 0, y: 220, width: 320, height: 72, surface: 'formal_page' } }),
+      block('upper', 'upper paragraph', { order_index: 1, canvas_layout: { x: 0, y: 0, width: 320, height: 72, surface: 'formal_page' } }),
     ], { documentSelection: true, realLayout: true });
     const upper = editor.unit('upper');
     act(() => { upper.focus(); upper.setSelectionRange(5, 5); });

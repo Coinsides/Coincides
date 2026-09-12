@@ -93,26 +93,19 @@ function propsFor(pageFrame: PageFrameModel, surfaceMode: SurfaceMode): NoteWrit
     showPreviewLabelOverlay: false, slashCommands: [], slashTarget: null, snapGuide: null,
     sortedBlockCount: 1, sourceJumpBusy: null, surfaceMode, surfacePolicyMode: surfaceMode,
     viewportTransform: viewport, visibleBlocks: [block],
-    onCreateBlock: vi.fn(async () => null), onPersistCanvasObject: vi.fn(async () => true),
-    onPushStructuredMutationHistory: noOp, onDeleteCanvasObject: vi.fn(async () => true),
+    onCreateBlock: vi.fn(async () => null), onPersistCanvasObject: vi.fn(async () => true), onDeleteCanvasObject: vi.fn(async () => true),
     onSaveAnnotationTruths: vi.fn(async () => undefined), onSaveContentGroups: vi.fn(async () => true),
     onSaveDocumentTypographyProfile: noOp, onSaveGroupFolders: vi.fn(async () => undefined),
     onActivateDraft: noOp, onBeginMoveBlock: noOp, onBeginResizeBlock: noOp,
     onBlockKeyDown: noOp, onBlockListMouseDown: noOp, onBlockTextChange: noOp,
     onBlockTextFlowChange: noOp, onApplyBlockTextFlowEdit: vi.fn(async () => undefined),
-    onClearSlashTarget: noOp, onAddPageBelow: noOp, onCreatePageFrame: noOp, onCreatePageStack: noOp,
-    onDeletePageFrame: noOp, onDetachPageFromStack: noOp, onDuplicatePageFrame: noOp,
-    onMovePageFrame: noOp, onDiscardDraft: noOp, onDraftChange: noOp,
+    onClearSlashTarget: noOp, onDiscardDraft: noOp, onDraftChange: noOp,
     onDraftFocusReceipt: noOp, onDraftKeyDown: noOp, onFieldDraftChange: noOp,
     onFocusBlock: noOp, onReleaseTextFocus: noOp, onRequestFocusBlock: noOp,
-    onMeasuredBlockHeight: noOp, onPageSpaceDoubleClick: noOp, onPanViewportBy: noOp,
+    onMeasuredBlockHeight: noOp, onPageSpaceDoubleClick: noOp,
     onPersistDraft: vi.fn(async () => undefined), onResizeDraftFromTextarea: noOp,
-    onResetViewport: noOp, onSaveBlock: vi.fn(), onScrollViewportBy: noOp, onSelectBlock: noOp,
-    onSelectPageFrame: noOp, onSelectSlashCommand: noOp, onResizePageFrame: noOp,
-    onSetPrimaryPageFrame: noOp, onTogglePageStackCollapse: noOp, onToggleAIVisibility: noOp,
-    onToggleExportRole: noOp, onTrashBlock: noOp, onForgetBlockLocally: noOp,
-    onRestoreBlockById: vi.fn(async () => null), onViewportSizeChange: noOp, onViewSource: noOp,
-    onZoomViewportAt: noOp,
+    onSaveBlock: vi.fn(), onSelectBlock: noOp, onSelectSlashCommand: noOp, onToggleAIVisibility: noOp,
+    onToggleExportRole: noOp, onTrashBlock: noOp, onViewSource: noOp,
   };
 }
 
@@ -570,7 +563,7 @@ describe('C3/F15 cross-block unit handle events through the production layer-pro
 });
 
 describe('page frame decoration alignment on synthetic collections', () => {
-  it.each(['page', 'canvas'] as const)('F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry', (mode) => {
+  it.each(['page'] as const)('F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry', (mode) => {
     const pageFrame = { ...frame(208), y: 136,
       contentInset: { left: 54, right: 86, top: 44, bottom: 92 } };
     const props = propsFor(pageFrame, mode);
@@ -589,13 +582,8 @@ describe('page frame decoration alignment on synthetic collections', () => {
       expect(Number.parseFloat(slot.style.left)).toBe(Number.parseFloat(ruler.style.left));
       // The frame's vertical origin stays shared by slots and the block column.
       expect(Number.parseFloat(slot.style.top) - blockTop).toBe(topInFrame - pageFrame.contentInset.top);
-      if (mode === 'page') {
         expect(Number.parseFloat(slot.style.left)).toBe(blockLeft);
         expect(slot.closest('[data-page-display-scale]')).toBe(block.closest('[data-page-display-scale]'));
-      } else {
-        expect(Number.parseFloat(slot.style.left)).toBe(pageFrame.x + pageFrame.contentInset.left);
-        expect(Number.parseFloat(slot.style.top)).toBe(pageFrame.y + topInFrame);
-      }
     }
     expect({ pageFrame, extensions: props.noteCanvasRuntime.pageFrameExtensions }).toEqual(original);
   });
@@ -607,18 +595,8 @@ describe('page frame decoration alignment on synthetic collections', () => {
     expect(sample.boundaryOffset).toBeNull();
   });
 
-  it('preserves canvas world frame geometry while the page-only repair leaves its separate mismatch explicit', () => {
-    const sample = alignment(80, 'canvas');
-    // Red investigation measured +56 px for both. Correcting this needs a canvas
-    // block projection/frame interaction decision beyond the full-page repair.
-    expect(sample.rulerOffset).toBe(56);
-    expect(sample.boundaryOffset).toBe(56);
-  });
-
   it('preserves a collection whose frame content origin already matches page offset', () => {
     expect(alignment(-72, 'page').rulerOffset).toBe(0);
-    const canvasOffset = createSurfaceModePolicy('canvas').pageOffsetX;
-    expect(alignment(canvasOffset - 72, 'canvas').rulerOffset).toBe(0);
   });
 
   it('uses the same block coordinate origin with non-default frame y and content insets', () => {

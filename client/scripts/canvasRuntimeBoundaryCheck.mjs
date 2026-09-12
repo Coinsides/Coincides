@@ -99,7 +99,7 @@ assertContainsNone('Runtime root does not import lower-level controllers directl
 ]);
 
 const runtimeTypes = readProjectFile('src/pages/Notes/canvasEngine/types.ts');
-assertContainsAll('Runtime model exposes viewport placement and reserve contracts', runtimeTypes, [
+assertContainsAll('Runtime model exposes viewport and historical placement contracts', runtimeTypes, [
   'export interface CanvasViewport',
   'zoom: number',
   'export type PageFrameCrossingExportPolicy',
@@ -138,10 +138,8 @@ assertContainsAll('Runtime model exposes viewport placement and reserve contract
   'connectorRef?:',
   'imageRef?:',
   'structuredRef?:',
-  'rotation?: number',
   'export interface StructuredCanvasObject',
   'export interface TableStructuredPayload',
-  'export interface CanvasObjectReserve',
   'export interface RelationEndpointReserve',
   'canvasObjects: CanvasObject[]',
   'canvasPlacements: CanvasPlacement[]',
@@ -292,11 +290,15 @@ assertContainsAll('Viewport service owns runtime viewport and world seed', viewp
 ]);
 
 const viewportTransformController = readProjectFile('src/pages/Notes/canvasEngine/hooks/useViewportTransformController.ts');
-assertContainsAll('Viewport transform controller clamps and focuses against dynamic runtime world', viewportTransformController, [
+assertContainsAll('Viewport transform controller retains Page viewport state and measured size', viewportTransformController, [
   'world?: CanvasWorldModel',
-  'focusViewportOnRect',
-  'focusViewportOnWorldRect',
+  'viewportTransform',
+  'setViewportSize',
+  'clampViewportToWorld',
   'world || DEFAULT_CANVAS_WORLD',
+]);
+assertContainsNone('Viewport transform controller has no retired pan zoom or reset callbacks', viewportTransformController, [
+  'panViewportBy', 'scrollViewportBy', 'zoomViewportAt', 'focusViewportOnRect', 'resetViewport',
 ]);
 
 const runtimeKernelService = readProjectFile('src/pages/Notes/canvasEngine/canvasRuntimeKernelService.ts');
@@ -522,22 +524,16 @@ assertContainsAll('Runtime presentation controller can create a PageFrame from a
   'if (!afterFrameId)',
   'seedCollection',
 ]);
-assertContainsAll('Runtime presentation controller routes PageFrame object geometry updates', runtimePresentationController, [
-  'movePageFrameInCollection',
-  'resizePageFrameInCollection',
-  'handleMovePageFrame',
-  'handleResizePageFrame',
+assertContainsAll('Runtime presentation controller retains live PageFrame collection actions', runtimePresentationController, [
   'handleCreatePageStack',
   'handleAddPageBelow',
   'handleDetachPageFromStack',
   'handleSplitPageStackAtFrame',
   'handleMergePageStackWithPrevious',
   'handleTogglePageStackCollapse',
-  'onMovePageFrame',
-  'onResizePageFrame',
-  'movePageFrameAffiliatedBlockLayouts',
-  'onPersistChangedBlockLayouts',
-  'onApplyBlockLayoutDrafts',
+]);
+assertContainsNone('Runtime presentation controller has no retired Canvas frame drag handlers', runtimePresentationController, [
+  'handleMovePageFrame', 'handleResizePageFrame', 'onMovePageFrame', 'onResizePageFrame',
 ]);
 
 const pageFrameAffiliationService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameAffiliationService.ts');
@@ -687,12 +683,17 @@ assertContainsAll('Note canvas layout model focuses Page Mode on primary PageFra
   'runtimePageFrameCollection',
   'pageFrames: runtimePageFrameCollection.pageFrames',
 ]);
-assertContainsAll('Note canvas layout model derives Canvas world from runtime content', noteCanvasLayoutModel, [
+assertContainsAll('Note canvas layout model derives the Page world from runtime content', noteCanvasLayoutModel, [
   'createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {',
   'measurePresetPageContentHeight(runtimePageFrameCollection, presetContentLayouts, coordinateContract)',
   'pageFrames: runtimePageFrameCollection.pageFrames',
   'blockPlacements: canvasBlockPlacements',
-  'canvasObjectReserve: []',
+]);
+assertContainsNone('Runtime types have no retired workspace reserve generator', runtimeTypes, [
+  'export interface CanvasObjectReserve',
+]);
+assertContainsNone('Layout assembly has no retired workspace reserve input', noteCanvasLayoutModel, [
+  'canvasObjectReserve',
 ]);
 assertContainsAll('Note canvas layout model feeds runtime PageFrame context into Export Preview', noteCanvasLayoutModel, [
   'buildExportPreviewModel(visibleBlocks, blockLayouts, {',
@@ -733,21 +734,19 @@ assertContainsAll('Measurement service owns measured height and reflow boundary'
 ]);
 
 const modePolicyService = readProjectFile('src/pages/Notes/canvasEngine/modePolicyService.ts');
-assertContainsAll('Mode policy service owns page canvas visibility and blank draft policy', modePolicyService, [
-  'createSurfaceModePolicy',
-  'createSurfaceModeTransitionPolicy',
-  'getVisibleBlocksForSurface',
-  'shouldResolvePageCollisions',
-  'shouldUseElasticAvoidance',
-  'createBlankDraftLayout',
-  'showWorkspaceBlocks',
-  'useGlobalPageScroll',
+assertContainsAll("Page policy owns visibility and blank draft placement", modePolicyService, [
+  "createSurfaceModePolicy",
+  "getVisibleBlocksForSurface",
+  "shouldResolvePageCollisions",
+  "shouldUseElasticAvoidance",
+  "createBlankDraftLayout",
+  "showWorkspaceBlocks: false",
+  "useGlobalPageScroll: true",
 ]);
-assertContainsAll('Mode policy keeps Canvas draft placement free while allowing PageFrame guide snapping', modePolicyService, [
-  'CANVAS_WORKSPACE_WIDTH',
-  'snapRectToPageFrameGuides',
-  'policy.isCanvasMode',
-  'snapEnabled && policy.isPageMode',
+assertContainsAll("Page draft placement retains snap and content-width bounds", modePolicyService, [
+  "snapEnabled && policy.isPageMode",
+  "const maxPlacementWidth = contentWidth",
+  "Math.max(0, rawY)",
 ]);
 
 const historyService = readProjectFile('src/pages/Notes/canvasEngine/historyService.ts');
@@ -920,9 +919,6 @@ assertContainsAll('Server ContentGroup service preserves page_slice member kind'
   'src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx',
-  'src/pages/Notes/canvasEngine/layers/ShapeObjectLayer.tsx',
-  'src/pages/Notes/canvasEngine/layers/ImageObjectLayer.tsx',
-  'src/pages/Notes/canvasEngine/layers/VisualConnectorLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/SlashMenuLayer.tsx',
@@ -954,11 +950,6 @@ assertContainsAll('Server ContentGroup service preserves page_slice member kind'
 });
 
 const writingSurfaceLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx');
-const shapeObjectLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ShapeObjectLayer.tsx');
-const imageObjectLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ImageObjectLayer.tsx');
-const tableObjectLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/TableObjectLayer.tsx');
-const visualConnectorLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/VisualConnectorLayer.tsx');
-const objectInspectorLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ObjectInspectorLayer.tsx');
 const selectionTypographyToolbarLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/SelectionTypographyToolbarLayer.tsx');
 const noteCanvasLayerProps = readProjectFile('src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts');
 assertContainsAll('Writing surface exposes runtime smoke attributes', writingSurfaceLayer, [
@@ -994,12 +985,10 @@ assertContainsAll('Writing surface exposes PageFrame print scale and document ty
   'data-document-line-height',
   'documentTypographyStyle',
 ]);
-assertContainsAll('Writing surface exposes PageFrame template background and style markers', writingSurfaceLayer, [
-  'pageFrameTemplateToCssVars',
-  'primaryPageFrameTemplateStyle',
-  'data-page-frame-template',
-  'data-page-frame-background',
-  'pageFrameTemplateStyle',
+assertContainsAll("Writing surface exposes Page template background and style markers", writingSurfaceLayer, [
+  "data-page-frame-template",
+  "data-page-frame-background",
+  "primaryPageFrameTemplateStyle",
 ]);
 assertContainsAll('Writing surface renders PageFrame slot markers', writingSurfaceLayer, [
   'pageFrameSlotEntries',
@@ -1010,181 +999,108 @@ assertContainsAll('Writing surface renders PageFrame slot markers', writingSurfa
   'pageFrameFooterSlot',
   'pageFramePageNumberSlot',
 ]);
-assertContainsAll('Writing surface renders PageFrame collection in Canvas Mode', writingSurfaceLayer, [
-  'noteCanvasRuntime.pageFrames.map',
-  'data-page-frame-index',
-  'formalPageBoundaryPrimary',
-  'formalPageBoundarySecondary',
+assertContainsNone("Writing surface has no retired Canvas frame collection", writingSurfaceLayer, [
+  "data-page-frame-index",
+  "formalPageBoundaryPrimary",
+  "formalPageBoundarySecondary",
 ]);
-assertContainsAll('Writing surface routes PageFrame command surface actions', writingSurfaceLayer, [
-  'buildCanvasBlankMenu',
-  'buildPageFrameShellMenu',
-  'canvasBlankContextMenu',
-  'pageFrameContextMenu',
-  'handleBlankSurfaceContextMenu',
-  'onCreatePageFrame',
-  'onCreatePageStack',
-  'onAddPageBelow',
-  'onDetachPageFromStack',
-  'onTogglePageStackCollapse',
+assertContainsNone("Writing surface has no retired Canvas frame context menus", writingSurfaceLayer, [
+  "buildCanvasBlankMenu",
+  "buildPageFrameShellMenu",
+  "canvasBlankContextMenu",
+  "pageFrameContextMenu",
+  "handleBlankSurfaceContextMenu",
 ]);
-assertContainsAll('Writing surface renders and persists generic shape CanvasObjects', writingSurfaceLayer, [
-  'ShapeObjectLayer',
-  'createPureShapeProjection',
-  'shapePlacements',
-  'shapeSavePayload',
-  'onPersistCanvasObject',
-  'onDeleteCanvasObject',
-  'handleShapePointerDown',
-  'handleShapeResizePointerDown',
-  'buildCanvasObjectShellMenu',
+assertContainsNone("Writing surface has no retired generic shape layer or handlers", writingSurfaceLayer, [
+  "ShapeObjectLayer",
+  "createPureShapeProjection",
+  "shapePlacements",
+  "shapeSavePayload",
+  "handleShapePointerDown",
+  "handleShapeResizePointerDown",
+  "buildCanvasObjectShellMenu",
 ]);
-assertContainsAll('Writing surface renders and persists visual connector CanvasObjects', writingSurfaceLayer, [
-  'VisualConnectorLayer',
-  'createVisualConnectorProjection',
-  'visualConnectorSavePayload',
-  'visualConnectorDraft',
-  'start_visual_connector_from_object',
-  'finish_visual_connector_to_object',
-  'noteCanvasRuntime.visualConnectors',
+assertContainsNone("Writing surface has no retired connector layer or commands", writingSurfaceLayer, [
+  "VisualConnectorLayer",
+  "createVisualConnectorProjection",
+  "visualConnectorSavePayload",
+  "visualConnectorDraft",
+  "start_visual_connector_from_object",
+  "finish_visual_connector_to_object",
 ]);
-assertContainsAll('Writing surface renders and persists image CanvasObjects', writingSurfaceLayer, [
-  'ImageObjectLayer',
-  'createImageObjectProjection',
-  'uploadCanvasImageAsset',
-  'imageObjectSavePayload',
-  'imagePlacements',
-  'imageObjectById',
-  'buildImageObjectShellMenu',
-  'edit_image_caption',
-  'edit_image_alt_text',
-  'toggle_image_fit',
+assertContainsNone("Writing surface has no retired generic image layer or commands", writingSurfaceLayer, [
+  "ImageObjectLayer",
+  "createImageObjectProjection",
+  "uploadCanvasImageAsset",
+  "imageObjectSavePayload",
+  "imagePlacements",
+  "imageObjectById",
+  "buildImageObjectShellMenu",
+  "edit_image_caption",
+  "edit_image_alt_text",
+  "toggle_image_fit",
 ]);
-assertContainsAll('Writing surface renders and persists structured table CanvasObjects', writingSurfaceLayer, [
-  'TableObjectLayer',
-  'createTableObjectProjection',
-  'tableObjectSavePayload',
-  'persistTableMutationPayload',
-  'onPushStructuredMutationHistory(objectId, before, after)',
-  'confirmDeleteNonEmptyTablePart',
-  'tableRowHasText',
-  'tableColumnHasText',
-  'create_table_object',
-  'tablePlacements',
-  'structuredObjectById',
-  'buildTableObjectShellMenu',
+assertContainsNone("Writing surface has no retired table layer or mutations", writingSurfaceLayer, [
+  "TableObjectLayer",
+  "createTableObjectProjection",
+  "tableObjectSavePayload",
+  "persistTableMutationPayload",
+  "confirmDeleteNonEmptyTablePart",
+  "tableRowHasText",
+  "tableColumnHasText",
+  "create_table_object",
+  "tablePlacements",
+  "structuredObjectById",
+  "buildTableObjectShellMenu",
 ]);
-assertContainsAll('Writing surface commits pending table cell draft before opening table menu', writingSurfaceLayer, [
-  'pendingEdit: PendingTableCellEdit | null = null',
-  'await handleTableCellTextCommit(pendingEdit.selection, pendingEdit.text)',
-  'setTableContextMenu({',
+assertContainsNone("Writing surface has no retired table editor context menu", writingSurfaceLayer, [
+  "PendingTableCellEdit",
+  "handleTableCellTextCommit",
+  "setTableContextMenu",
 ]);
-assertContainsAll('Writing surface wires Object Inspector and safe object actions', writingSurfaceLayer, [
-  'ObjectInspectorLayer',
-  'selectedCanvasObjectInspectorModel',
-  'flattenCanvasAIReadableNodes',
-  'createCanvasObjectInspectorModel',
-  'createCanvasObjectInspectorActions',
-  'createCanvasObjectDuplicateDraft',
-  'toggleCanvasPlacementExportVisibility',
-  'objectContextActionsForObject',
-  'handleCanvasObjectContextAction',
-  'deleteCanvasObjectWithBacking',
-  'persistCanvasObjectDuplicateDraft',
-  'inspect_canvas_object',
-  'open_original',
-  'duplicate_canvas_object',
-  'toggle_export_visibility',
+assertContainsNone("Writing surface has no retired generic Object Inspector injection", writingSurfaceLayer, [
+  "ObjectInspectorLayer",
+  "selectedCanvasObjectInspectorModel",
+  "flattenCanvasAIReadableNodes",
+  "createCanvasObjectInspectorModel",
+  "createCanvasObjectInspectorActions",
+  "createCanvasObjectDuplicateDraft",
+  "toggleCanvasPlacementExportVisibility",
+  "objectContextActionsForObject",
+  "handleCanvasObjectContextAction",
+  "deleteCanvasObjectWithBacking",
+  "persistCanvasObjectDuplicateDraft",
 ]);
-assertContainsAll('Object Inspector layer exposes inspectable object metadata and action markers', objectInspectorLayer, [
-  'data-canvas-object-inspector="true"',
-  'data-canvas-object-inspector-action',
-  'model.actions.map',
-  'model.bbox',
-  'model.exportVisible',
-  'model.aiReadable',
-  'model.contentRef',
-  'model.connectorRef',
-  'model.imageRef',
-  'model.structuredRef',
+
+assertContainsAll("Writing surface retains Page wall editing and ink persistence", writingSurfaceLayer, [
+  "PageFrameWallLayer",
+  "onPageFrameWallPointerDown",
+  "interactive={layoutMode && !contentReadOnly",
+  "PaperInkLayer",
+  "onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject}",
 ]);
-assertContainsAll('Shape object layer renders pure shape CanvasObject markers', shapeObjectLayer, [
-  'data-canvas-shape="true"',
-  'data-canvas-shape-object="true"',
-  'data-canvas-object-kind="shape"',
-  'data-canvas-shape-type',
-  'data-canvas-shape-resize-handle="true"',
-  'canvasShapeObject',
-  'canvasShapeRectangle',
-  'canvasShapeEllipse',
-]);
-assertContainsAll('Image object layer renders asset-backed media CanvasObject markers', imageObjectLayer, [
-  'loadCanvasImageAssetBlobUrl',
-  'data-canvas-image="true"',
-  'data-canvas-object-kind="image"',
-  'data-canvas-object-backing="asset"',
-  'data-canvas-image-fit',
-  'data-canvas-image-media-loaded',
-  'canvasImageObject',
-  'canvasImageMedia',
-  'canvasImageResizeHandle',
-]);
-assertContainsAll('Table object layer renders structured table CanvasObject markers', tableObjectLayer, [
-  'data-canvas-table="true"',
-  'data-canvas-structured-object="table"',
-  'data-canvas-object-kind="table"',
-  'data-canvas-object-backing="structured_object"',
-  'data-canvas-table-schema',
-  'data-canvas-table-cell',
-  'canvasTableCellEditor',
-  'canvasTableObject',
-  'canvasTableGrid',
-  'canvasTableResizeHandle',
-]);
-assertContainsAll('Table object layer gives Escape cancel authority over blur autosave', tableObjectLayer, [
-  'cancelledEditRef',
-  "event.key === 'Escape'",
-  'cancelledEditRef.current = true',
-  'if (cancelledEditRef.current)',
-  'onBlur={commitEditingCell}',
-]);
-assertContainsAll('Table object layer forwards pending cell edit into context menu flow', tableObjectLayer, [
-  'export type PendingTableCellEdit',
-  'pendingEdit()',
-  'onTableContextMenu(event, canvasObject, selection, pendingEdit())',
-]);
-assertContainsAll('Visual connector layer renders pure visual-only connector markers', visualConnectorLayer, [
-  'data-canvas-visual-connector="true"',
-  'data-canvas-object-kind="visual_connector"',
-  'canvasVisualConnector',
-  'canvasVisualConnectorLine',
-  'markerEnd',
-]);
-assertContainsAll('Writing surface exposes PageFrame operable object controls', writingSurfaceLayer, [
-  'selectedPageFrameId',
-  'onMovePageFrame',
-  'onResizePageFrame',
-  'data-page-frame-selected',
-  'data-page-frame-resize-handle',
-]);
-assertContainsAll('Writing surface exposes PageStack identity and collapsed-tail markers', writingSurfaceLayer, [
-  'data-page-stack-id',
-  'data-page-stack-page-index',
-  'data-page-stack-page-total',
-  'data-page-stack-collapsed',
-  'data-page-stack-tail',
-  'data-page-stack-number-label',
+assertContainsNone("Writing surface has no retired Canvas PageStack controls", writingSurfaceLayer, [
+  "data-page-stack-id",
+  "data-page-stack-page-index",
+  "data-page-stack-page-total",
+  "data-page-stack-collapsed",
+  "data-page-stack-tail",
+  "data-page-stack-number-label",
+  "data-page-frame-selected",
+  "data-page-frame-resize-handle",
 ]);
 assertContainsAll('Writing surface passes cross-page Block fragments to Block shells', writingSurfaceLayer, [
   'blockFragmentsByBlockId',
   'noteCanvasRuntime.blockFragmentProjections',
   'blockFragments={blockFragmentsByBlockId.get(block.id)}',
 ]);
-assertContainsAll('Writing surface exposes Canvas zoom control for browser testing', writingSurfaceLayer, [
-  'data-canvas-zoom-control="true"',
-  'data-canvas-zoom-slider="true"',
-  'data-canvas-zoom-reset="true"',
-  'viewportTransform.zoom',
+assertContainsAll("Writing surface exposes the active Page reading controls", writingSurfaceLayer, [
+  "data-page-reading-control=\"true\"",
+  "pageReading.displayScale",
+  "onPageReadingStep",
+  "canvasZoomControl",
+  "canvasZoomButton",
+  "canvasZoomReset",
 ]);
 assertContainsAll('Writing surface renders selection typography toolbar from TextFlow selection draft', writingSurfaceLayer, [
   'SelectionTypographyToolbarLayer',
@@ -1298,11 +1214,11 @@ assertContainsAll('Note detail styles render selection typography mini toolbar',
   '.selectionTypographyNumber',
   '.selectionTypographyButton',
 ]);
-assertContainsAll('Note detail styles apply PageFrame template background variables', noteDetailStyles, [
-  '--page-frame-background',
-  '--page-frame-border-color',
-  '--page-frame-shadow',
-  '.formalPageBoundary',
+assertContainsAll("Note detail styles apply Page template background variables", noteDetailStyles, [
+  "--page-frame-background",
+  "--page-frame-border-color",
+  "--page-frame-shadow",
+  ".pageReadingPaper",
 ]);
 assertContainsAll('Note detail styles render PageFrame slots as quiet page chrome', noteDetailStyles, [
   '.pageFrameSlot',
@@ -1320,42 +1236,40 @@ assertContainsAll('Note detail styles render PageFrame-aware Export Preview grou
   '.exportPreviewPageFrameMeta {',
   '.exportPreviewPageFrameTypography {',
 ]);
-assertContainsAll('Note detail styles render PageStack shell controls', noteDetailStyles, [
-  '.pageStackNumberBadge',
-  '.pageStackCollapsedTail',
-  '.pageFramePanelStackRow',
-  '.pageFramePanelChildRow',
-  '.pageFramePanelSectionLabel',
+assertContainsAll("Note detail styles retain the active PageFrame panel controls", noteDetailStyles, [
+  ".pageFramePanelStackRow",
+  ".pageFramePanelChildRow",
+  ".pageFramePanelSectionLabel",
 ]);
-assertContainsAll('Note detail styles render basic shape CanvasObjects', noteDetailStyles, [
-  '.canvasShapeObject',
-  '.canvasShapeRectangle',
-  '.canvasShapeEllipse',
-  '.canvasShapeSelected',
-  '.canvasShapeResizeHandle',
+assertContainsNone("Note detail styles exclude retired basic shape CanvasObjects", noteDetailStyles, [
+  ".canvasShapeObject",
+  ".canvasShapeRectangle",
+  ".canvasShapeEllipse",
+  ".canvasShapeSelected",
+  ".canvasShapeResizeHandle",
 ]);
-assertContainsAll('Note detail styles render asset-backed image CanvasObjects', noteDetailStyles, [
-  '.canvasImageObject',
-  '.canvasImageOperable',
-  '.canvasImageSelected',
-  '.canvasImageMedia',
-  '.canvasImageCaption',
-  '.canvasImageResizeHandle',
+assertContainsNone("Note detail styles exclude retired asset-backed image CanvasObjects", noteDetailStyles, [
+  ".canvasImageObject",
+  ".canvasImageOperable",
+  ".canvasImageSelected",
+  ".canvasImageMedia",
+  ".canvasImageCaption",
+  ".canvasImageResizeHandle",
 ]);
-assertContainsAll('Note detail styles render structured table CanvasObjects', noteDetailStyles, [
-  '.canvasTableObject',
-  '.canvasTableSelected',
-  '.canvasTableHeader',
-  '.canvasTableGrid',
-  '.canvasTableResizeHandle',
+assertContainsNone("Note detail styles exclude retired structured table CanvasObjects", noteDetailStyles, [
+  ".canvasTableObject",
+  ".canvasTableSelected",
+  ".canvasTableHeader",
+  ".canvasTableGrid",
+  ".canvasTableResizeHandle",
 ]);
-assertContainsAll('Note detail styles render Object Inspector panel', noteDetailStyles, [
-  '.canvasObjectInspector',
-  '.canvasObjectInspectorHeader',
-  '.canvasObjectInspectorGrid',
-  '.canvasObjectInspectorBadge',
-  '.canvasObjectInspectorActions',
-  '.canvasObjectInspectorAction',
+assertContainsNone("Note detail styles exclude retired Object Inspector panel", noteDetailStyles, [
+  ".canvasObjectInspector",
+  ".canvasObjectInspectorHeader",
+  ".canvasObjectInspectorGrid",
+  ".canvasObjectInspectorBadge",
+  ".canvasObjectInspectorActions",
+  ".canvasObjectInspectorAction",
 ]);
 
 const exportPreviewLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx');
@@ -1411,4 +1325,33 @@ assertContainsAll('Chrome Layout panel exposes PageStack navigator controls', no
 ]);
 
 console.table(checks.map(({ name, pass }) => ({ check: name, status: pass ? 'passed' : 'failed' })));
+
+assertContainsAll('Shape placement generator defaults to Page or tray', shapeProjectionService, [
+  "return layout.surface === 'tray' ? 'tray' : 'formal_page';",
+]);
+assertContainsAll('Image placement generator defaults to Page or tray', imageObjectService, [
+  "return layout.surface === 'tray' ? 'tray' : 'formal_page';",
+]);
+assertContainsAll('Table placement generator defaults to Page or tray', tableObjectService, [
+  "return layout.surface === 'tray' ? 'tray' : 'formal_page';",
+]);
+// 13.6: historical object services remain readable; the retired UI cannot return.
+for (const name of ["ShapeObjectLayer","ImageObjectLayer","TableObjectLayer","VisualConnectorLayer","ObjectInspectorLayer"]) {
+  const file = `src/pages/Notes/canvasEngine/layers/${name}.tsx`;
+  record(`Retired Canvas layer is absent: ${name}`, !existsSync(projectPath(file)), file);
+}
+assertContainsNone('Page policy has no retired transition or workspace generator', modePolicyService, [
+  'createSurfaceModeTransitionPolicy', 'getNextSurfaceMode', 'CANVAS_WORKSPACE_WIDTH', 'snapRectToPageFrameGuides',
+]);
+assertContainsNone('Writing surface has no retired pan zoom or Canvas DOM branch', writingSurfaceLayer, [
+  "surfaceMode === 'canvas'", 'panSessionRef', 'onPanViewportBy', 'onScrollViewportBy', 'onZoomViewportAt', 'onResetViewport',
+  'data-canvas-zoom-control', 'data-canvas-zoom-slider', 'data-canvas-zoom-reset',
+]);
+assertContainsNone('Note detail styles have no retired Canvas host or pan controls', noteDetailStyles, [
+  '.pageCanvas', '.writingSurfaceCanvas', '.canvasPanReady', '.canvasPanning', '.canvasZoomSlider',
+  '.formalPageBoundary', '.pageStackNumberBadge', '.pageStackCollapsedTail', '.pageFrameResizeHandle',
+]);
+assertContainsAll('Page reading styles retain the shared reading control classes', noteDetailStyles, [
+  '.canvasZoomControl', '.canvasZoomButton', '.canvasZoomReset', '.pageReadingControl',
+]);
 console.log(`Canvas runtime boundary check passed (${checks.length} checks).`);

@@ -349,7 +349,7 @@
 | [handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md](handoffs/2026-09-12-v13-5-b1e-appearance-cleanup-order.md) | B1e · 外观清扫小单 | `done(2026-09-12 Codex builder 六件施工与功能验收完成；待 HQ 复核/放行；原施工授权与裁定不变)` | — | — |
 | [handoffs/2026-09-12-v13-6-media-block-paste-order.md](handoffs/2026-09-12-v13-6-media-block-paste-order.md) | 媒体块先遣 · 粘贴图片进纸 | `done（builder 工程施工与申报完成；待 HQ/reviewer 复核，非主观放行）` | — | — |
 | [handoffs/2026-09-12-v13-6-source-projection-repair-order.md](handoffs/2026-09-12-v13-6-source-projection-repair-order.md) | 源投影修单 · 页码契约与重投影 v1 | `done(2026-09-12 补遗三四轮六步工程验收通过;历史三轮 Result 原样保留)` | — | — |
-| [handoffs/2026-09-13-v13-6-deadcode-purge-order.md](handoffs/2026-09-13-v13-6-deadcode-purge-order.md) | 单1 · Canvas 死代码清除大单 | `ready(13.6 裁决半场执行单1;单2 已收口,回归网已补全——57 文件 test:v2+漏挂机关在岗)` | — | — |
+| [handoffs/2026-09-13-v13-6-deadcode-purge-order.md](handoffs/2026-09-13-v13-6-deadcode-purge-order.md) | 单1 · Canvas 死代码清除大单 | `done(四批全清;HQ 收口:无过滤 client 全库 1576/1576 零 skip、server test:v2 476/477+DashScope 单红隔离复验 13/13 绿判 flaky 入总测名录、2 条环境红既档;git diff --check+secrets 扫描 HQ 补跑双绿)` | — | — |
 | [handoffs/2026-09-13-v13-6-test-gate-repair-order.md](handoffs/2026-09-13-v13-6-test-gate-repair-order.md) | 单2 · 测试门修复:漏挂发现机关+24 文件接门 | `done(补遗二三轮终态达成;保留25条已裁归单1 Canvas红+2条已知环境红;HQ收口补跑git/secrets)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |

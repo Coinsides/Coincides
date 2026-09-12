@@ -1,0 +1,319 @@
+{
+  "baselineChecks": 174,
+  "mutations": 40,
+  "red": 40,
+  "restoredChecks": 174,
+  "method": "Evaluate actual gate with read-only single-input substitutions. No production source or predicates mutated.",
+  "rows": [
+    {
+      "name": "Runtime model exposes viewport and historical placement contracts",
+      "input": "client/src/pages/Notes/canvasEngine/types.ts",
+      "mutation": "remove required live token",
+      "token": "export interface CanvasViewport",
+      "red": true,
+      "detail": "Missing: export interface CanvasViewport"
+    },
+    {
+      "name": "Viewport transform controller retains Page viewport state and measured size",
+      "input": "client/src/pages/Notes/canvasEngine/hooks/useViewportTransformController.ts",
+      "mutation": "remove required live token",
+      "token": "world?: CanvasWorldModel",
+      "red": true,
+      "detail": "Missing: world?: CanvasWorldModel"
+    },
+    {
+      "name": "Viewport transform controller has no retired pan zoom or reset callbacks",
+      "input": "client/src/pages/Notes/canvasEngine/hooks/useViewportTransformController.ts",
+      "mutation": "reintroduce retired token",
+      "token": "panViewportBy",
+      "red": true,
+      "detail": "Forbidden: panViewportBy"
+    },
+    {
+      "name": "Runtime presentation controller retains live PageFrame collection actions",
+      "input": "client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts",
+      "mutation": "remove required live token",
+      "token": "handleCreatePageStack",
+      "red": true,
+      "detail": "Missing: handleCreatePageStack"
+    },
+    {
+      "name": "Runtime presentation controller has no retired Canvas frame drag handlers",
+      "input": "client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts",
+      "mutation": "reintroduce retired token",
+      "token": "handleMovePageFrame",
+      "red": true,
+      "detail": "Forbidden: handleMovePageFrame"
+    },
+    {
+      "name": "Note canvas layout model derives the Page world from runtime content",
+      "input": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts",
+      "mutation": "remove required live token",
+      "token": "createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {",
+      "red": true,
+      "detail": "Missing: createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {"
+    },
+    {
+      "name": "Runtime types have no retired workspace reserve generator",
+      "input": "client/src/pages/Notes/canvasEngine/types.ts",
+      "mutation": "reintroduce retired token",
+      "token": "export interface CanvasObjectReserve",
+      "red": true,
+      "detail": "Forbidden: export interface CanvasObjectReserve"
+    },
+    {
+      "name": "Layout assembly has no retired workspace reserve input",
+      "input": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts",
+      "mutation": "reintroduce retired token",
+      "token": "canvasObjectReserve",
+      "red": true,
+      "detail": "Forbidden: canvasObjectReserve"
+    },
+    {
+      "name": "Page policy owns visibility and blank draft placement",
+      "input": "client/src/pages/Notes/canvasEngine/modePolicyService.ts",
+      "mutation": "remove required live token",
+      "token": "createSurfaceModePolicy",
+      "red": true,
+      "detail": "Missing: createSurfaceModePolicy"
+    },
+    {
+      "name": "Page draft placement retains snap and content-width bounds",
+      "input": "client/src/pages/Notes/canvasEngine/modePolicyService.ts",
+      "mutation": "remove required live token",
+      "token": "snapEnabled && policy.isPageMode",
+      "red": true,
+      "detail": "Missing: snapEnabled && policy.isPageMode"
+    },
+    {
+      "name": "Writing surface exposes Page template background and style markers",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "remove required live token",
+      "token": "data-page-frame-template",
+      "red": true,
+      "detail": "Missing: data-page-frame-template"
+    },
+    {
+      "name": "Writing surface has no retired Canvas frame collection",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "data-page-frame-index",
+      "red": true,
+      "detail": "Forbidden: data-page-frame-index"
+    },
+    {
+      "name": "Writing surface has no retired Canvas frame context menus",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "buildCanvasBlankMenu",
+      "red": true,
+      "detail": "Forbidden: buildCanvasBlankMenu"
+    },
+    {
+      "name": "Writing surface has no retired generic shape layer or handlers",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "ShapeObjectLayer",
+      "red": true,
+      "detail": "Forbidden: ShapeObjectLayer"
+    },
+    {
+      "name": "Writing surface has no retired connector layer or commands",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "VisualConnectorLayer",
+      "red": true,
+      "detail": "Forbidden: VisualConnectorLayer"
+    },
+    {
+      "name": "Writing surface has no retired generic image layer or commands",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "ImageObjectLayer",
+      "red": true,
+      "detail": "Forbidden: ImageObjectLayer"
+    },
+    {
+      "name": "Writing surface has no retired table layer or mutations",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "TableObjectLayer",
+      "red": true,
+      "detail": "Forbidden: TableObjectLayer"
+    },
+    {
+      "name": "Writing surface has no retired table editor context menu",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "PendingTableCellEdit",
+      "red": true,
+      "detail": "Forbidden: PendingTableCellEdit"
+    },
+    {
+      "name": "Writing surface has no retired generic Object Inspector injection",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "ObjectInspectorLayer",
+      "red": true,
+      "detail": "Forbidden: ObjectInspectorLayer"
+    },
+    {
+      "name": "Writing surface retains Page wall editing and ink persistence",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "remove required live token",
+      "token": "PageFrameWallLayer",
+      "red": true,
+      "detail": "Missing: PageFrameWallLayer"
+    },
+    {
+      "name": "Writing surface has no retired Canvas PageStack controls",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "data-page-stack-id",
+      "red": true,
+      "detail": "Forbidden: data-page-stack-id"
+    },
+    {
+      "name": "Writing surface exposes the active Page reading controls",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "remove required live token",
+      "token": "data-page-reading-control=\"true\"",
+      "red": true,
+      "detail": "Missing: data-page-reading-control=\"true\""
+    },
+    {
+      "name": "Note detail styles apply Page template background variables",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "remove required live token",
+      "token": "--page-frame-background",
+      "red": true,
+      "detail": "Missing: --page-frame-background"
+    },
+    {
+      "name": "Note detail styles retain the active PageFrame panel controls",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "remove required live token",
+      "token": ".pageFramePanelStackRow",
+      "red": true,
+      "detail": "Missing: .pageFramePanelStackRow"
+    },
+    {
+      "name": "Note detail styles exclude retired basic shape CanvasObjects",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "reintroduce retired token",
+      "token": ".canvasShapeObject",
+      "red": true,
+      "detail": "Forbidden: .canvasShapeObject"
+    },
+    {
+      "name": "Note detail styles exclude retired asset-backed image CanvasObjects",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "reintroduce retired token",
+      "token": ".canvasImageObject",
+      "red": true,
+      "detail": "Forbidden: .canvasImageObject"
+    },
+    {
+      "name": "Note detail styles exclude retired structured table CanvasObjects",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "reintroduce retired token",
+      "token": ".canvasTableObject",
+      "red": true,
+      "detail": "Forbidden: .canvasTableObject"
+    },
+    {
+      "name": "Note detail styles exclude retired Object Inspector panel",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "reintroduce retired token",
+      "token": ".canvasObjectInspector",
+      "red": true,
+      "detail": "Forbidden: .canvasObjectInspector"
+    },
+    {
+      "name": "Shape placement generator defaults to Page or tray",
+      "input": "client/src/pages/Notes/canvasEngine/shapeProjectionService.ts",
+      "mutation": "remove required live token",
+      "token": "return layout.surface === 'tray' ? 'tray' : 'formal_page';",
+      "red": true,
+      "detail": "Missing: return layout.surface === 'tray' ? 'tray' : 'formal_page';"
+    },
+    {
+      "name": "Image placement generator defaults to Page or tray",
+      "input": "client/src/pages/Notes/canvasEngine/imageObjectService.ts",
+      "mutation": "remove required live token",
+      "token": "return layout.surface === 'tray' ? 'tray' : 'formal_page';",
+      "red": true,
+      "detail": "Missing: return layout.surface === 'tray' ? 'tray' : 'formal_page';"
+    },
+    {
+      "name": "Table placement generator defaults to Page or tray",
+      "input": "client/src/pages/Notes/canvasEngine/tableObjectService.ts",
+      "mutation": "remove required live token",
+      "token": "return layout.surface === 'tray' ? 'tray' : 'formal_page';",
+      "red": true,
+      "detail": "Missing: return layout.surface === 'tray' ? 'tray' : 'formal_page';"
+    },
+    {
+      "name": "Page policy has no retired transition or workspace generator",
+      "input": "client/src/pages/Notes/canvasEngine/modePolicyService.ts",
+      "mutation": "reintroduce retired token",
+      "token": "createSurfaceModeTransitionPolicy",
+      "red": true,
+      "detail": "Forbidden: createSurfaceModeTransitionPolicy"
+    },
+    {
+      "name": "Writing surface has no retired pan zoom or Canvas DOM branch",
+      "input": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "mutation": "reintroduce retired token",
+      "token": "surfaceMode === 'canvas'",
+      "red": true,
+      "detail": "Forbidden: surfaceMode === 'canvas'"
+    },
+    {
+      "name": "Note detail styles have no retired Canvas host or pan controls",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "reintroduce retired token",
+      "token": ".pageCanvas",
+      "red": true,
+      "detail": "Forbidden: .pageCanvas"
+    },
+    {
+      "name": "Page reading styles retain the shared reading control classes",
+      "input": "client/src/pages/Notes/NoteDetail.module.css",
+      "mutation": "remove required live token",
+      "token": ".canvasZoomControl",
+      "red": true,
+      "detail": "Missing: .canvasZoomControl"
+    },
+    {
+      "name": "Retired Canvas layer is absent: ShapeObjectLayer",
+      "input": "client/src/pages/Notes/canvasEngine/layers/ShapeObjectLayer.tsx",
+      "mutation": "retired file exists again (read-only filesystem substitution)",
+      "red": true
+    },
+    {
+      "name": "Retired Canvas layer is absent: ImageObjectLayer",
+      "input": "client/src/pages/Notes/canvasEngine/layers/ImageObjectLayer.tsx",
+      "mutation": "retired file exists again (read-only filesystem substitution)",
+      "red": true
+    },
+    {
+      "name": "Retired Canvas layer is absent: TableObjectLayer",
+      "input": "client/src/pages/Notes/canvasEngine/layers/TableObjectLayer.tsx",
+      "mutation": "retired file exists again (read-only filesystem substitution)",
+      "red": true
+    },
+    {
+      "name": "Retired Canvas layer is absent: VisualConnectorLayer",
+      "input": "client/src/pages/Notes/canvasEngine/layers/VisualConnectorLayer.tsx",
+      "mutation": "retired file exists again (read-only filesystem substitution)",
+      "red": true
+    },
+    {
+      "name": "Retired Canvas layer is absent: ObjectInspectorLayer",
+      "input": "client/src/pages/Notes/canvasEngine/layers/ObjectInspectorLayer.tsx",
+      "mutation": "retired file exists again (read-only filesystem substitution)",
+      "red": true
+    }
+  ]
+}

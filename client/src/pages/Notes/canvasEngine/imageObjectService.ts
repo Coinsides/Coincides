@@ -30,7 +30,7 @@ export interface ImageObjectProjection {
 }
 
 function surfaceForLayout(layout: BlockBoxLayout): CanvasSurface {
-  return layout.surface === 'tray' ? 'tray' : layout.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
+  return layout.surface === 'tray' ? 'tray' : 'formal_page';
 }
 
 function createImagePlacement({

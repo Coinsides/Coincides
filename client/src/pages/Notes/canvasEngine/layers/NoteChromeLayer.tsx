@@ -16,7 +16,6 @@ import {
   X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CANVAS_MODE_RETIRED } from '../canvasRetirementPolicy';
 import type { ChangeEvent } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note, NoteBlock } from '../runtimeDataTypes';
@@ -101,7 +100,6 @@ export interface NoteChromeLayerProps {
   onTogglePreviewBlockTypes: () => void;
   onTogglePreviewExportStatus: () => void;
   onTogglePreviewLabelOverlay: () => void;
-  onToggleSurfaceMode: () => void;
 }
 
 export function NoteChromeLayer({
@@ -156,7 +154,6 @@ export function NoteChromeLayer({
   onTogglePreviewBlockTypes,
   onTogglePreviewExportStatus,
   onTogglePreviewLabelOverlay,
-  onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
   const skin = usePaperSkin();
   const continuousWeb = note.page_format === 'screen_note';
@@ -399,18 +396,6 @@ export function NoteChromeLayer({
           {contentReadOnly && <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
             <LockKeyhole size={13} /> Source locked
           </span>}
-            {/* V13.2: unmount the entry; retain its implementation for the 13.6 inventory. */}
-            {!CANVAS_MODE_RETIRED && (
-            <button
-              className={`${styles.modePill} ${surfaceMode === 'canvas' ? styles.modePillActive : ''}`}
-              onClick={onToggleSurfaceMode}
-              title={surfacePolicy.nextModeLabel}
-              aria-pressed={surfaceMode === 'canvas'}
-            >
-              <FileText size={15} />
-              {surfacePolicy.label}
-            </button>
-            )}
             <button
               className={`${styles.modePill} ${showExportPreview ? styles.modePillActive : ''}`}
               onClick={onToggleExportPreview}

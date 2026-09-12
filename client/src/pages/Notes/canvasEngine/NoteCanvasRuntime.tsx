@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { useNoteCanvasRuntimeController } from './hooks/useNoteCanvasRuntimeController';
 import { NoteChromeLayer } from './layers/NoteChromeLayer';
@@ -21,20 +21,6 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
     dismissControllerUI();
   }, [dismissControllerUI]);
   useImperativeHandle(ref, () => ({ dismissTransientUI, flushPendingSaves, refreshBoardTextRanges }), [dismissTransientUI, flushPendingSaves, refreshBoardTextRanges]);
-  const surfaceMode = layerProps?.documentLayerProps.surfaceMode;
-
-  useEffect(() => {
-    if (hostMode === 'modal') return;
-    const lockClass = 'canvas-runtime-lock';
-    if (surfaceMode === 'canvas') {
-      document.body.classList.add(lockClass);
-      return () => {
-        document.body.classList.remove(lockClass);
-      };
-    }
-    document.body.classList.remove(lockClass);
-    return undefined;
-  }, [hostMode, surfaceMode]);
 
   if (hostMode === 'modal' && loadError) {
     return <div className={styles.page}>
@@ -55,7 +41,7 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
 
   return (
     <PaperSkinContext.Provider value={skin}>
-    <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`} data-note-host-mode={hostMode}
+    <div className={styles.page} data-note-host-mode={hostMode}
       data-note-skin-preset={skin.preset} style={skin.style}>
       {skin.error && <div role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></div>}
       <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps}

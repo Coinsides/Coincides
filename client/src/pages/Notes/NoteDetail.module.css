@@ -8,7 +8,7 @@
 
 /* Page reading does not acquire the canvas body lock. Fill the app's inset
    from this note host only; embedded BoardNoteModal keeps its own bounds. */
-.page[data-note-host-mode='page']:not(.pageCanvas) {
+.page[data-note-host-mode='page'] {
   margin: -28px;
   min-height: 100vh;
   /* Paint the desk behind horizontally overflowing zoomed paper. The app
@@ -17,7 +17,6 @@
 }
 
 .page[data-note-skin-preset='workbench'],
-.page[data-note-skin-preset='workbench'] .writingSurfaceCanvas,
 .page[data-note-skin-preset='workbench'] :global(.noteOverview) {
   background-color: var(--sk-desk);
   background-image:
@@ -27,21 +26,12 @@
 }
 
 .page[data-note-skin-preset='warm-paper'],
-.page[data-note-skin-preset='warm-paper'] .writingSurfaceCanvas,
 .page[data-note-skin-preset='warm-paper'] :global(.noteOverview) {
   background: var(--paper-material-desk);
 }
 
 .page[data-note-skin-preset='workbench'] :global(.noteOverviewPreview) {
   outline-color: var(--paper-template-border);
-}
-
-.pageCanvas {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  min-height: 0;
-  overflow: hidden;
 }
 
 .loading {
@@ -102,17 +92,6 @@
   min-height: calc(100vh - 160px);
   margin: 0 auto;
   padding: 26px 0 72px;
-}
-
-.documentShellCanvas {
-  flex: 1 1 auto;
-  width: 100%;
-  max-width: none;
-  height: 100%;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
 }
 
 .header {
@@ -859,14 +838,6 @@
   pointer-events: auto;
 }
 
-.pageCanvas .pageToolRail,
-.pageToolRailCanvas {
-  top: 50%;
-  right: 16px;
-  z-index: 60;
-  transform: translateY(-50%);
-}
-
 .pageToolBtn {
   display: inline-flex;
   align-items: center;
@@ -904,15 +875,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   background: var(--bg-primary);
   box-shadow: var(--glass-shadow-lg);
   pointer-events: auto;
-}
-
-.pageCanvas .insertPanel,
-.insertPanelCanvas {
-  top: 50%;
-  right: 16px;
-  max-height: calc(100vh - 84px);
-  overflow: auto;
-  transform: translateY(-50%);
 }
 
 .primaryBtn {
@@ -1002,47 +964,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   box-shadow: var(--paper-template-shadow, var(--page-frame-shadow, 0 1px 2px var(--paper-shadow-18)));
 }
 
-.writingSurfaceCanvas {
-  left: 0;
-  align-items: flex-start;
-  justify-content: flex-start;
-  height: 100%;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--border-default) 45%, transparent) 1px, transparent 0),
-    repeating-linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--border-subtle) 26%, transparent) 0,
-      color-mix(in srgb, var(--border-subtle) 26%, transparent) 1px,
-      transparent 1px,
-      transparent 24px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--border-subtle) 26%, transparent) 0,
-      color-mix(in srgb, var(--border-subtle) 26%, transparent) 1px,
-      transparent 1px,
-      transparent 24px
-    );
-  background-color: color-mix(in srgb, var(--bg-primary) 90%, var(--bg-secondary));
-  background-size: 24px 24px, 24px 24px, 24px 24px;
-  box-shadow: none;
-  cursor: default;
-  touch-action: none;
-}
-
-.canvasPanReady {
-  cursor: grab;
-}
-
-.canvasPanning {
-  cursor: grabbing;
-  user-select: none;
-}
-
 .canvasZoomControl {
   position: absolute;
   left: 16px;
@@ -1093,11 +1014,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   border-color: color-mix(in srgb, var(--accent-primary) 58%, var(--border-default));
   color: var(--text-primary);
   outline: none;
-}
-
-.canvasZoomSlider {
-  width: 116px;
-  accent-color: var(--accent-primary);
 }
 
 .blockList {
@@ -1194,7 +1110,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   pointer-events: none;
 }
 
-.page[data-note-skin-preset='warm-paper'] .formalPageBoundary,
 .page[data-note-skin-preset='warm-paper'] :global(.noteOverviewPreview) {
   background: var(--paper-material-fill);
   box-shadow: var(--paper-material-shadow);
@@ -1263,407 +1178,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   color: var(--text-secondary);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-}
-
-.blockListCanvas {
-  width: var(--canvas-world-width, 4096px);
-  min-width: var(--canvas-world-width, 4096px);
-  min-height: var(--canvas-world-height, 2600px);
-  will-change: transform;
-}
-
-.formalPageBoundary {
-  position: absolute;
-  top: 0;
-  left: var(--formal-page-offset-x, 0px);
-  z-index: 1;
-  width: var(--formal-page-width, 760px);
-  border: 1px solid var(--paper-template-border, var(--page-frame-border-color, var(--border-default)));
-  border-radius: 2px;
-  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
-  box-shadow: var(--paper-template-shadow, var(--page-frame-shadow, 0 16px 42px var(--paper-shadow-22)));
-  pointer-events: none;
-}
-
-.formalPageBoundaryPrimary {
-  border-color: color-mix(in srgb, var(--accent-primary) 42%, var(--border-default));
-  box-shadow: 0 18px 46px var(--paper-shadow-24);
-}
-
-.formalPageBoundarySecondary {
-  border-style: dashed;
-  opacity: 0.72;
-  box-shadow: 0 10px 28px var(--paper-shadow-16);
-}
-
-.formalPageBoundaryOperable {
-  pointer-events: auto;
-  cursor: move;
-}
-
-.formalPageBoundarySelected {
-  border-color: var(--accent-primary);
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--accent-primary) 38%, transparent),
-    var(--paper-template-shadow, var(--page-frame-shadow, 0 16px 42px var(--paper-shadow-22)));
-}
-
-.pageStackNumberBadge {
-  font-family: var(--sk-label-font, inherit);
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  z-index: 2;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}
-
-.pageStackCollapsedTail {
-  position: absolute;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 38px;
-  border: 1px dashed color-mix(in srgb, var(--accent-primary) 48%, var(--border-default));
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.pageStackCollapsedTail:hover,
-.pageStackCollapsedTail:focus-visible {
-  border-color: var(--accent-primary);
-  color: var(--text-primary);
-  outline: none;
-}
-
-.pageFrameResizeHandle {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  z-index: 2;
-  width: 14px;
-  height: 14px;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 68%, var(--border-default));
-  border-radius: 4px;
-  background: var(--bg-primary);
-  box-shadow: 0 6px 14px var(--paper-shadow-22);
-  cursor: nwse-resize;
-  pointer-events: auto;
-}
-
-.pageFrameResizeHandle::after {
-  content: '';
-  position: absolute;
-  right: 3px;
-  bottom: 3px;
-  width: 5px;
-  height: 5px;
-  border-right: 2px solid var(--accent-primary);
-  border-bottom: 2px solid var(--accent-primary);
-}
-
-.canvasShapeObject {
-  position: absolute;
-  box-sizing: border-box;
-  border: var(--canvas-object-stroke-width, 2px) solid var(--canvas-object-stroke, color-mix(in srgb, var(--accent-primary) 70%, var(--border-default)));
-  background: var(--canvas-object-fill, color-mix(in srgb, var(--accent-primary) 14%, transparent));
-  opacity: var(--canvas-object-opacity, 1);
-  box-shadow: 0 10px 24px var(--paper-shadow-14);
-  overflow: hidden;
-  pointer-events: auto;
-}
-
-.canvasShapeRectangle {
-  border-radius: var(--canvas-object-border-radius, 8px);
-}
-
-.canvasShapeEllipse {
-  border-radius: 999px;
-}
-
-.canvasObjectStyleDefaultShape {
-  color: var(--text-primary);
-}
-
-.canvasObjectStyleStickyNote {
-  color: var(--paper-sticky-ink);
-  box-shadow:
-    0 16px 30px var(--paper-shadow-22),
-    inset 0 1px 0 var(--paper-highlight-edge);
-}
-
-.canvasShapeOperable {
-  cursor: move;
-}
-
-.canvasShapeSelected {
-  border-color: var(--accent-primary);
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--accent-primary) 36%, transparent),
-    0 14px 30px var(--paper-shadow-18);
-}
-
-.canvasShapeTextArea {
-  position: absolute;
-  inset: var(--canvas-object-text-inset, 10px);
-  width: auto;
-  height: auto;
-  padding: 0;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 14px;
-  line-height: 1.45;
-  resize: none;
-  pointer-events: auto;
-}
-
-.canvasShapeTextArea:disabled {
-  opacity: 0.72;
-}
-
-.canvasShapeTextAreaActive {
-  color: var(--text-primary);
-}
-
-.canvasShapeResizeHandle {
-  position: absolute;
-  right: -7px;
-  bottom: -7px;
-  width: 14px;
-  height: 14px;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
-  border-radius: 4px;
-  background: var(--bg-primary);
-  box-shadow: 0 6px 14px var(--paper-shadow-22);
-  cursor: nwse-resize;
-}
-
-.canvasImageObject {
-  position: absolute;
-  box-sizing: border-box;
-  border: 1px solid color-mix(in srgb, var(--border-default) 78%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
-  box-shadow: 0 12px 28px var(--paper-shadow-18);
-  overflow: hidden;
-  pointer-events: auto;
-}
-
-.canvasImageOperable {
-  cursor: move;
-}
-
-.canvasImageSelected {
-  border-color: var(--accent-primary);
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--accent-primary) 34%, transparent),
-    0 14px 30px var(--paper-shadow-20);
-}
-
-.canvasImageMedia {
-  display: block;
-  width: 100%;
-  height: 100%;
-  user-select: none;
-  pointer-events: none;
-}
-
-.canvasImageCaption {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  background: var(--paper-image-label-bg);
-  color: var(--paper-image-label-ink);
-  font-size: 11px;
-  line-height: 1.3;
-  pointer-events: none;
-}
-
-.canvasImageResizeHandle {
-  position: absolute;
-  right: -7px;
-  bottom: -7px;
-  width: 14px;
-  height: 14px;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
-  border-radius: 4px;
-  background: var(--bg-primary);
-  box-shadow: 0 6px 14px var(--paper-shadow-22);
-  cursor: nwse-resize;
-}
-
-.canvasTableObject {
-  position: absolute;
-  box-sizing: border-box;
-  display: grid;
-  grid-template-rows: 28px minmax(0, 1fr);
-  border: 1px solid color-mix(in srgb, var(--border-default) 82%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-primary) 94%, var(--bg-secondary));
-  box-shadow: 0 12px 28px var(--paper-shadow-17);
-  overflow: hidden;
-  pointer-events: auto;
-}
-
-.canvasTableOperable {
-  cursor: move;
-}
-
-.canvasTableSelected {
-  border-color: var(--accent-primary);
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--accent-primary) 32%, transparent),
-    0 14px 30px var(--paper-shadow-20);
-}
-
-.canvasTableHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-width: 0;
-  padding: 0 9px;
-  border-bottom: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
-  color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.canvasTableHeader span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.canvasTableGridWrap {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.canvasTableGrid {
-  width: 100%;
-  height: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1.35;
-}
-
-.canvasTableGrid th,
-.canvasTableGrid td {
-  min-width: 0;
-  padding: 7px 8px;
-  border-right: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.canvasTableGrid th {
-  background: color-mix(in srgb, var(--bg-secondary) 84%, transparent);
-  color: var(--text-primary);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.canvasTableGrid td {
-  background: color-mix(in srgb, var(--bg-primary) 90%, transparent);
-}
-
-.canvasTableCellSelected {
-  outline: 2px solid color-mix(in srgb, var(--accent-primary) 68%, transparent);
-  outline-offset: -2px;
-  background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-primary)) !important;
-}
-
-.canvasTableCellText {
-  display: block;
-  min-width: 0;
-  min-height: 16px;
-  overflow: hidden;
-}
-
-.canvasTableCellEditor {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 38px;
-  resize: none;
-  border: 0;
-  outline: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  line-height: inherit;
-}
-
-.canvasTableResizeHandle {
-  position: absolute;
-  right: -7px;
-  bottom: -7px;
-  width: 14px;
-  height: 14px;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
-  border-radius: 4px;
-  background: var(--bg-primary);
-  box-shadow: 0 6px 14px var(--paper-shadow-22);
-  cursor: nwse-resize;
-}
-
-.canvasVisualConnector {
-  position: absolute;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.canvasVisualConnectorLine {
-  fill: none;
-  pointer-events: stroke;
-  cursor: context-menu;
-  filter: drop-shadow(0 1px 3px var(--paper-shadow-22));
-}
-
-.canvasVisualConnectorSelected .canvasVisualConnectorLine {
-  stroke: var(--accent-primary);
-  stroke-width: 2.25px;
-}
-
-.scratchWorkspaceLabel {
-  position: absolute;
-  top: 24px;
-  left: calc(var(--formal-page-offset-x, 0px) + var(--formal-page-width, 760px) + 24px);
-  z-index: 3;
-  padding: 5px 9px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  pointer-events: none;
 }
 
 .emptyPagePrompt {
@@ -2751,175 +2265,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--bg-primary) 96%, var(--paper-black));
   box-shadow: var(--glass-shadow-lg);
-}
-
-.canvasObjectInspector {
-  position: fixed;
-  top: 76px;
-  right: 18px;
-  z-index: 148;
-  display: grid;
-  gap: 10px;
-  width: min(318px, calc(100vw - 36px));
-  max-height: calc(100vh - 96px);
-  overflow: auto;
-  padding: 12px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--bg-primary) 97%, var(--paper-black));
-  box-shadow: var(--glass-shadow-lg);
-}
-
-.canvasObjectInspectorHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.canvasObjectInspectorKicker {
-  margin-bottom: 3px;
-  color: var(--text-muted);
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  font-weight: 760;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.canvasObjectInspectorTitle {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 850;
-  line-height: 1.2;
-}
-
-.canvasObjectInspectorSubtitle {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.35;
-}
-
-.canvasObjectInspectorClose {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 27px;
-  height: 27px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-muted);
-}
-
-.canvasObjectInspectorClose:hover,
-.canvasObjectInspectorClose:focus-visible {
-  border-color: var(--border-default);
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  outline: none;
-}
-
-.canvasObjectInspectorSection {
-  padding: 9px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--bg-secondary) 72%, transparent);
-}
-
-.canvasObjectInspectorGrid {
-  display: grid;
-  grid-template-columns: minmax(80px, auto) minmax(0, 1fr);
-  gap: 7px 10px;
-  align-items: baseline;
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.25;
-}
-
-.canvasObjectInspectorGrid strong {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  color: var(--text-secondary);
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  font-weight: 720;
-}
-
-.canvasObjectInspectorBadgeRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.canvasObjectInspectorBadge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 22px;
-  padding: 0 7px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  font-weight: 720;
-}
-
-.canvasObjectInspectorSummary {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 1.45;
-}
-
-.canvasObjectInspectorActions {
-  display: grid;
-  gap: 6px;
-}
-
-.canvasObjectInspectorAction {
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr);
-  align-items: center;
-  gap: 7px;
-  min-height: 31px;
-  padding: 0 9px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 730;
-  text-align: left;
-}
-
-.canvasObjectInspectorAction span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.canvasObjectInspectorAction:hover:not(:disabled),
-.canvasObjectInspectorAction:focus-visible {
-  border-color: var(--border-default);
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  outline: none;
-}
-
-.canvasObjectInspectorActionDanger:hover:not(:disabled),
-.canvasObjectInspectorActionDanger:focus-visible {
-  border-color: color-mix(in srgb, var(--danger, var(--paper-danger)) 62%, var(--border-default));
-  color: color-mix(in srgb, var(--danger, var(--paper-danger)) 82%, var(--text-primary));
-}
-
-.canvasObjectInspectorAction:disabled {
-  cursor: not-allowed;
-  opacity: 0.42;
 }
 
 .annotationOverlayLayer {

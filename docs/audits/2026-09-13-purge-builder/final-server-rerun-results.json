@@ -1,0 +1,18 @@
+{
+  "requested": "--server",
+  "scratch": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-purge-final-WbGoiq",
+  "results": [
+    {
+      "label": "check:tool-face-manifest",
+      "code": 0
+    },
+    {
+      "label": "copy:tool-face-manifest",
+      "code": 0
+    },
+    {
+      "label": "server test:v2 allowed scope",
+      "code": 1
+    }
+  ]
+}

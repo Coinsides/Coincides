@@ -70,7 +70,7 @@ function ReadingHarness({
   const [pageViewport, setPageViewport] = useState<CanvasViewport>();
   const policy = createSurfaceModePolicy(mode);
   const controller = usePageReadingViewportController({ noteId: 'reading-note' });
-  const contentWidth = useCanvasContentWidth({ containerRef: blockListRef, pageOffsetX: policy.pageOffsetX, surfaceMode: mode });
+  const contentWidth = useCanvasContentWidth({ containerRef: blockListRef });
   const resolved = useNoteCanvasResolvedLayoutModel({
     contentWidth, documentTypographyProfile: typography, layoutDrafts: noDrafts,
     sortedBlocks: data.blocks, pageFrames: data.collection.pageFrames, surfaceMode: mode, surfacePolicy: policy,
@@ -198,19 +198,6 @@ describe('K-reading-gears: presentation → clientWidth → resolved layout → 
     }
     expect(transforms.size).toBe(3);
     expect(screenWidths.size).toBe(3);
-  });
-
-  it('leaves canvas viewport, transform and all block geometry unchanged when page gear state changes', () => {
-    const subject = render(<ReadingHarness data={specimen()} mode="canvas" scrollTo={vi.fn()} />);
-    const list = subject.getByTestId('block-list');
-    const before = { layouts: list.dataset.layouts, placements: list.dataset.runtimePlacements, viewport: list.dataset.runtimeViewport, transform: list.style.transform, contentWidth: list.dataset.contentWidth };
-    for (const gear of ['physical', 'fit_page', 'fit_width']) {
-      fireEvent.click(subject.getByRole('button', { name: gear }));
-      act(() => window.dispatchEvent(new Event('resize')));
-      expect({ layouts: list.dataset.layouts, placements: list.dataset.runtimePlacements, viewport: list.dataset.runtimeViewport, transform: list.style.transform, contentWidth: list.dataset.contentWidth }).toEqual(before);
-      expect(JSON.parse(list.dataset.runtimeViewport || '{}').zoom).toBe(1.25);
-      expect(subject.getByTestId('paper').dataset.pageDisplayScale).toBeUndefined();
-    }
   });
 
   it('excludes note chrome from fit_page, keeps fit stable while scrolling, and tracks same-size DOM origin shifts', () => {

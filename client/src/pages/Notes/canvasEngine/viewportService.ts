@@ -1,5 +1,4 @@
 import {
-  CANVAS_PRIMARY_PAGE_OFFSET_X,
   CANVAS_VIEWPORT_MAX_ZOOM,
   CANVAS_VIEWPORT_MIN_ZOOM,
   DEFAULT_CANVAS_WORLD,
@@ -7,15 +6,12 @@ import {
 } from './engineModel';
 import { clamp, worldToScreen } from './geometry';
 import {
-  CANVAS_WORKSPACE_HEIGHT,
-  CANVAS_WORKSPACE_WIDTH,
   DEFAULT_PAGE_CONTENT_WIDTH,
   type SurfaceMode,
 } from './runtimeLayout';
 import type {
   BlockPlacementModel,
   CanvasPoint,
-  CanvasObjectReserve,
   CanvasRect,
   CanvasViewport,
   CanvasWorldModel,
@@ -24,11 +20,9 @@ import type {
 
 const CANVAS_VIEWPORT_HEADROOM = 360;
 export const CANVAS_WORLD_PADDING = 800;
-const INITIAL_CANVAS_VIEWPORT_X = -180;
-const INITIAL_CANVAS_VIEWPORT_Y = -64;
 
-export function getPrimaryPageOffsetX(surfaceMode: SurfaceMode): number {
-  return surfaceMode === 'canvas' ? CANVAS_PRIMARY_PAGE_OFFSET_X : 0;
+export function getPrimaryPageOffsetX(_surfaceMode: SurfaceMode): number {
+  return 0;
 }
 
 export function getPageViewportCenteringOffsetX(
@@ -40,19 +34,11 @@ export function getPageViewportCenteringOffsetX(
 }
 
 export function createRuntimeViewport(
-  surfaceMode: SurfaceMode,
+  _surfaceMode: SurfaceMode,
   pageFrameHeight: number,
   viewport?: Partial<CanvasViewport>,
 ): CanvasViewport {
-  const seed = surfaceMode === 'canvas'
-    ? {
-      x: INITIAL_CANVAS_VIEWPORT_X,
-      y: INITIAL_CANVAS_VIEWPORT_Y,
-      width: CANVAS_WORKSPACE_WIDTH,
-      height: CANVAS_WORKSPACE_HEIGHT,
-      zoom: 1,
-    }
-    : {
+  const seed = {
       x: 0,
       y: 0,
       width: DEFAULT_PAGE_CONTENT_WIDTH,
@@ -68,39 +54,14 @@ export function createRuntimeViewport(
   });
 }
 
-function rectRight(rect: CanvasRect): number {
-  return rect.x + rect.width;
-}
-
-function rectBottom(rect: CanvasRect): number {
-  return rect.y + rect.height;
-}
-
 export function createRuntimeWorld(
-  surfaceMode: SurfaceMode,
+  _surfaceMode: SurfaceMode,
   pageFrameHeight: number,
-  options: {
+  _options: {
     pageFrames?: PageFrameModel[];
     blockPlacements?: BlockPlacementModel[];
-    canvasObjectReserve?: CanvasObjectReserve[];
   } = {},
 ): CanvasWorldModel {
-  if (surfaceMode === 'canvas') {
-    const contentRects: CanvasRect[] = [
-      ...(options.pageFrames || []),
-      ...(options.blockPlacements || []),
-      ...(options.canvasObjectReserve || []),
-    ];
-    const maxRight = contentRects.reduce((value, rect) => Math.max(value, rectRight(rect)), DEFAULT_CANVAS_WORLD.width);
-    const maxBottom = contentRects.reduce((value, rect) => Math.max(value, rectBottom(rect)), DEFAULT_CANVAS_WORLD.height);
-
-    return {
-      origin: DEFAULT_CANVAS_WORLD.origin,
-      width: Math.max(DEFAULT_CANVAS_WORLD.width, Math.ceil(maxRight + CANVAS_WORLD_PADDING)),
-      height: Math.max(DEFAULT_CANVAS_WORLD.height, Math.ceil(maxBottom + CANVAS_WORLD_PADDING)),
-    };
-  }
-
   return {
     origin: { x: 0, y: 0 },
     width: DEFAULT_PAGE_CONTENT_WIDTH,
