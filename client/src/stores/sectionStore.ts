@@ -27,7 +27,7 @@ export const useSectionStore = create<SectionState>((set, get) => ({
     }
   },
 
-  createSection: async (deckId, name, orderIndex = 0) => {
+  createSection: async (deckId, name, orderIndex) => {
     const { data } = await api.post('/sections', { deck_id: deckId, name, order_index: orderIndex });
     set({ sections: [...get().sections, data] });
     return data;

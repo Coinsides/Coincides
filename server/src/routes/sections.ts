@@ -1,10 +1,10 @@
 import { Router, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createSectionSchema, updateSectionSchema, reorderSectionsSchema } from '../validators/index.js';
+import { updateSectionSchema, reorderSectionsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import { createSection } from '../services/sections.js';
 
 const router = Router();
 
@@ -32,22 +32,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
 // POST /api/sections
 router.post('/', (req: AuthRequest, res: Response) => {
   try {
-    const data = createSectionSchema.parse(req.body);
-    const db = getDb();
-
-    const deck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(data.deck_id, req.userId!);
-    if (!deck) {
-      throw new AppError(404, 'Deck not found');
-    }
-
-    const id = uuidv4();
-    const now = new Date().toISOString();
-
-    db.prepare(
-      'INSERT INTO card_sections (id, deck_id, user_id, name, order_index, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(id, data.deck_id, req.userId!, data.name, data.order_index, now);
-
-    const section = db.prepare('SELECT * FROM card_sections WHERE id = ?').get(id);
+    const section = createSection(getDb(), req.userId!, req.body);
     res.status(201).json(section);
   } catch (err) {
     if (err instanceof ZodError) {

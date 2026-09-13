@@ -1,10 +1,10 @@
 import { Router, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createDeckSchema, updateDeckSchema } from '../validators/index.js';
+import { updateDeckSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import { createDeck } from '../services/decks.js';
 
 const router = Router();
 
@@ -29,23 +29,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
 // POST /api/decks
 router.post('/', (req: AuthRequest, res: Response) => {
   try {
-    const data = createDeckSchema.parse(req.body);
-    const db = getDb();
-
-    // Verify course belongs to user
-    const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(data.course_id, req.userId!);
-    if (!course) {
-      throw new AppError(404, 'Course not found');
-    }
-
-    const id = uuidv4();
-    const now = new Date().toISOString();
-
-    db.prepare(
-      'INSERT INTO card_decks (id, user_id, course_id, name, description, card_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)'
-    ).run(id, req.userId!, data.course_id, data.name, data.description || null, now, now);
-
-    const deck = db.prepare('SELECT * FROM card_decks WHERE id = ?').get(id);
+    const deck = createDeck(getDb(), req.userId!, req.body);
     res.status(201).json(deck);
   } catch (err) {
     if (err instanceof ZodError) {

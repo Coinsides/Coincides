@@ -98,6 +98,41 @@ export const batchCreateTasksSchema = z.object({
   tasks: z.array(createTaskSchema).min(1, 'At least one task is required').max(100),
 });
 
+export const completeTaskSchema = updateTaskSchema.pick({ status: true, completed_at: true });
+
+export const linkTaskCardSchema = z.object({
+  card_id: z.string().min(1, 'card_id is required'),
+  checklist_index: z.number().int().nullable().optional(),
+});
+
+// --- Time Block ---
+
+const timeBlockTimeSchema = z.string().regex(/^\d{2}:\d{2}$/, 'start_time and end_time must be HH:MM format');
+export const createTimeBlockSchema = z.object({
+  label: z.string().min(1, 'Each block requires label, date, start_time, end_time'),
+  type: z.string().nullable().optional(),
+  date: dateString,
+  start_time: timeBlockTimeSchema,
+  end_time: timeBlockTimeSchema,
+  color: z.string().nullable().optional(),
+  template_id: z.string().nullable().optional(),
+});
+
+export const batchCreateTimeBlocksSchema = z.object({ blocks: z.array(createTimeBlockSchema) });
+
+export const createTimeBlocksSchema = z.preprocess((input) => {
+  if (input && typeof input === 'object' && Array.isArray((input as { blocks?: unknown }).blocks)) return input;
+  return { blocks: [input] };
+}, batchCreateTimeBlocksSchema);
+
+export const updateTimeBlockSchema = z.object({
+  label: z.string().optional(),
+  type: z.string().optional(),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  color: z.string().nullable().optional(),
+});
+
 // --- Recurring Task ---
 
 export const createRecurringTaskSchema = z.object({
@@ -224,7 +259,7 @@ export const reorderSectionsSchema = z.object({
 export const createSectionSchema = z.object({
   deck_id: z.string().uuid('Invalid deck ID'),
   name: z.string().min(1, 'Section name is required').max(200),
-  order_index: z.number().int().min(0).optional().default(0),
+  order_index: z.number().int().min(0).optional(),
 });
 
 export const updateSectionSchema = z.object({

@@ -3,14 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { ZodError } from 'zod';
+import { createTimeBlocks, updateTimeBlock, type TimeBlockRow } from '../services/timeBlocks.js';
 
 // Inline types
-interface TimeBlockRow {
-  id: string; user_id: string; template_id: string | null; label: string;
-  type: string; date: string; start_time: string; end_time: string;
-  color: string | null; created_at: string; updated_at: string;
-}
-
 interface TemplateSetRow {
   id: string; user_id: string; name: string;
   created_at: string; updated_at: string;
@@ -145,79 +141,32 @@ router.get('/week/:date', (req: AuthRequest, res: Response) => {
   res.json(weekData);
 });
 
-// POST /api/time-blocks — create instance(s) for specific date(s)
+// POST /api/time-blocks: create instance(s) for specific date(s)
 router.post('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const { blocks } = req.body;
-  const items: Array<{
-    label: string; type?: string; date: string;
-    start_time: string; end_time: string; color?: string; template_id?: string;
-  }> = Array.isArray(blocks) ? blocks : [req.body];
-
-  for (const item of items) {
-    if (!item.label || !item.date || !item.start_time || !item.end_time) {
-      throw new AppError(400, 'Each block requires label, date, start_time, end_time');
+  try {
+    const created = createTimeBlocks(getDb(), req.userId!, req.body);
+    res.status(201).json(Array.isArray(req.body.blocks) ? created : created[0]);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
-      throw new AppError(400, 'date must be YYYY-MM-DD format');
-    }
-    if (!/^\d{2}:\d{2}$/.test(item.start_time) || !/^\d{2}:\d{2}$/.test(item.end_time)) {
-      throw new AppError(400, 'start_time and end_time must be HH:MM format');
-    }
+    throw err;
   }
-
-  const stmt = db.prepare(
-    `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-
-  const now = new Date().toISOString();
-  const created: any[] = [];
-
-  db.transaction(() => {
-    for (const item of items) {
-      const id = uuidv4();
-      stmt.run(id, req.userId!, item.template_id || null, item.label, item.type || 'custom',
-        item.date, item.start_time, item.end_time, item.color || null, now, now);
-      created.push({
-        id, user_id: req.userId!, template_id: item.template_id || null,
-        label: item.label, type: item.type || 'custom', date: item.date,
-        start_time: item.start_time, end_time: item.end_time,
-        color: item.color || null, created_at: now, updated_at: now,
-      });
-    }
-  })();
-
-  res.status(201).json(Array.isArray(blocks) ? created : created[0]);
 });
 
-// PUT /api/time-blocks/:id — update a single instance
+// PUT /api/time-blocks/:id: update a single instance
 router.put('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT * FROM time_blocks WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
-  if (!existing) throw new AppError(404, 'Time block not found');
-
-  const { label, type, start_time, end_time, color } = req.body;
-  const fields: string[] = [];
-  const values: unknown[] = [];
-
-  if (label !== undefined) { fields.push('label = ?'); values.push(label); }
-  if (type !== undefined) { fields.push('type = ?'); values.push(type); }
-  if (start_time !== undefined) { fields.push('start_time = ?'); values.push(start_time); }
-  if (end_time !== undefined) { fields.push('end_time = ?'); values.push(end_time); }
-  if (color !== undefined) { fields.push('color = ?'); values.push(color); }
-
-  if (fields.length === 0) throw new AppError(400, 'No fields to update');
-
-  fields.push('updated_at = ?');
-  values.push(new Date().toISOString());
-  values.push(req.params.id);
-
-  db.prepare(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-  const updated = db.prepare('SELECT * FROM time_blocks WHERE id = ?').get(req.params.id);
-  res.json(updated);
+  try {
+    const { after } = updateTimeBlock(getDb(), req.userId!, req.params.id as string, req.body);
+    res.json(after);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
 });
 
 // DELETE /api/time-blocks/:id — delete a single instance

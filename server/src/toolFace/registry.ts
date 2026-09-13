@@ -1,6 +1,12 @@
 import { z, type ZodTypeAny } from 'zod';
 import {
   createGoalSchema,
+  createTaskSchema,
+  createDeckSchema,
+  createSectionSchema,
+  batchCreateTimeBlocksSchema,
+  updateTimeBlockSchema,
+  linkTaskCardSchema,
   createNoteSchema,
   updateNoteSchema,
 } from '../validators/index.js';
@@ -646,8 +652,8 @@ export const resolveSelectionOutputSchema = z.object({
   results: z.array(resolveSelectionResultSchema),
 }).strict();
 
-// Migrate only the existing chat create_goal surface. Parent/exam controls stay
-// with the human door; create_sub_goal has its own later migration order.
+// The root-goal chat surface retains its A1 fields; sub-goals use the same
+// human creation schema through their own registered projection below.
 export const createAgentGoalInputSchema = createGoalSchema.pick({
   title: true, course_id: true, deadline: true, description: true,
 });
@@ -672,6 +678,109 @@ export const CREATE_GOAL_TOOL: ToolRegistryEntry = {
   exposure: 'internal',
   scopes: ['goals:write'],
 };
+
+export const createAgentSubGoalInputSchema = createAgentGoalInputSchema.extend({
+  parent_id: createGoalSchema.shape.parent_id.unwrap(),
+  course_id: createGoalSchema.shape.course_id.optional(),
+});
+export const createAgentTimeBlocksInputSchema = batchCreateTimeBlocksSchema.extend({
+  blocks: batchCreateTimeBlocksSchema.shape.blocks.min(1),
+});
+export const updateAgentTimeBlockInputSchema = updateTimeBlockSchema.extend({
+  block_id: z.string().min(1),
+});
+export const linkAgentTaskCardsInputSchema = z.object({
+  task_id: z.string().min(1),
+  links: z.array(linkTaskCardSchema).min(1),
+});
+export const completeAgentTaskInputSchema = z.object({
+  task_id: z.string().min(1),
+  user_utterance_anchor: z.string().refine((value) => value.trim().length > 0, 'User utterance anchor is required'),
+});
+
+const actionReceiptOutputShape = { message: z.string(), receipt_id: z.string().uuid() };
+const createdActionOutputShape = { id: z.string().uuid(), ...actionReceiptOutputShape };
+
+export const CREATE_SUB_GOAL_TOOL: ToolRegistryEntry = {
+  name: 'create_sub_goal',
+  description: 'Create a sub-goal under an existing goal. Inherits course_id from the parent when omitted.',
+  input_schema: createAgentSubGoalInputSchema,
+  output_schema: z.object({ ...createdActionOutputShape, title: z.string(), parent_id: z.string().uuid() }).strict(),
+  truth: 'purpose', tier: 'immediate', exposure: 'internal', scopes: ['goals:write'],
+  human_entry: { route: 'POST /api/goals', client_call_site: 'client/src/stores/goalStore.ts#createGoal' },
+};
+
+export const CREATE_TASK_TOOL: ToolRegistryEntry = {
+  name: 'create_task',
+  description: 'Create an individual task explicitly requested by the student. Generated study plans still use create_proposal.',
+  input_schema: createTaskSchema,
+  output_schema: z.object({ ...createdActionOutputShape, title: z.string() }).strict(),
+  truth: 'purpose', tier: 'immediate', exposure: 'internal', scopes: ['tasks:write'],
+  human_entry: { route: 'POST /api/tasks', client_call_site: 'client/src/stores/taskStore.ts#createTask' },
+};
+
+export const CREATE_DECK_TOOL: ToolRegistryEntry = {
+  name: 'create_deck',
+  description: 'Create a card deck in a course when no suitable deck exists.',
+  input_schema: createDeckSchema,
+  output_schema: z.object({ ...createdActionOutputShape, name: z.string(), course_id: z.string().uuid(), course_name: z.string() }).strict(),
+  truth: 'knowledge', tier: 'immediate', exposure: 'internal', scopes: ['decks:write'],
+  human_entry: { route: 'POST /api/decks', client_call_site: 'client/src/stores/deckStore.ts#createDeck' },
+};
+
+export const CREATE_SECTION_TOOL: ToolRegistryEntry = {
+  name: 'create_section',
+  description: 'Create a deck section. Omitted order_index appends after the current maximum.',
+  input_schema: createSectionSchema,
+  output_schema: z.object({ ...createdActionOutputShape, name: z.string(), deck_id: z.string().uuid(), order_index: z.number().int() }).strict(),
+  truth: 'knowledge', tier: 'immediate', exposure: 'internal', scopes: ['sections:write'],
+  human_entry: { route: 'POST /api/sections', client_call_site: 'client/src/stores/sectionStore.ts#createSection' },
+};
+
+export const CREATE_TIME_BLOCKS_TOOL: ToolRegistryEntry = {
+  name: 'create_time_blocks',
+  description: 'Create time blocks for specific dates. All blocks, their event and the receipt are created together.',
+  input_schema: createAgentTimeBlocksInputSchema,
+  output_schema: z.object({ created: z.array(jsonObjectSchema).min(1), ...actionReceiptOutputShape }).strict(),
+  truth: 'purpose', tier: 'immediate', exposure: 'internal', scopes: ['time_blocks:write'],
+  human_entry: { route: 'POST /api/time-blocks', client_call_site: 'client/src/stores/timeBlockStore.ts#createInstances' },
+};
+
+export const UPDATE_TIME_BLOCK_TOOL: ToolRegistryEntry = {
+  name: 'update_time_block',
+  description: 'Update one time block instance, retaining its original field values in a reversible receipt.',
+  input_schema: updateAgentTimeBlockInputSchema,
+  output_schema: z.object({ updated: jsonObjectSchema, ...actionReceiptOutputShape }).strict(),
+  truth: 'purpose', tier: 'immediate', exposure: 'internal', scopes: ['time_blocks:write'],
+  human_entry: { route: 'PUT /api/time-blocks/:id', client_call_site: 'client/src/stores/timeBlockStore.ts#updateInstance' },
+};
+
+export const LINK_TASK_CARDS_TOOL: ToolRegistryEntry = {
+  name: 'link_task_cards',
+  description: 'Link cards to a task using the strict single-card door. Any missing or duplicate card link fails the entire batch; the error identifies card_id.',
+  input_schema: linkAgentTaskCardsInputSchema,
+  output_schema: z.object({ task_id: z.string(), created: z.number().int().min(1), links: z.array(jsonObjectSchema).min(1), ...actionReceiptOutputShape }).strict(),
+  truth: 'knowledge', tier: 'immediate', exposure: 'internal', scopes: ['tasks:write'],
+  // The existing human door is REST-only; TaskViewModal reads links but has no
+  // link creation call site. Do not claim a nonexistent UI writer.
+  human_entry: { route: 'POST /api/tasks/:taskId/cards', client_call_site: 'none (human REST only)' },
+};
+
+export const COMPLETE_TASK_TOOL: ToolRegistryEntry = {
+  name: 'complete_task',
+  description: 'Transcribe the student\'s explicit statement that this task is complete. Require their original words in user_utterance_anchor; never infer completion.',
+  input_schema: completeAgentTaskInputSchema,
+  output_schema: z.object({ task_id: z.string(), status: z.literal('completed'), ...actionReceiptOutputShape }).strict(),
+  truth: 'purpose', tier: 'immediate', exposure: 'internal', scopes: ['tasks:write'],
+  human_entry: { route: 'PUT /api/tasks/:id', client_call_site: 'client/src/stores/taskStore.ts#updateTask' },
+};
+
+/** Chat provider definitions project these registered writes from the manifest. */
+export const AGENT_ACTION_TOOLS = [
+  CREATE_GOAL_TOOL, CREATE_SUB_GOAL_TOOL, CREATE_TASK_TOOL, CREATE_DECK_TOOL,
+  CREATE_SECTION_TOOL, CREATE_TIME_BLOCKS_TOOL, UPDATE_TIME_BLOCK_TOOL,
+  LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,
+];
 
 /**
  * The only authoritative V2.BN.12 tool directory. JSON manifests are derived
@@ -876,5 +985,5 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     exposure: 'public',
     scopes: ['notes:write'],
   },
-  CREATE_GOAL_TOOL,
+  ...AGENT_ACTION_TOOLS,
 ];

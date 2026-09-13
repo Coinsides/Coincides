@@ -4,8 +4,18 @@ import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
 import { normalizeCardContent } from './normalizeContent.js';
 import { createGoal } from '../../services/goals.js';
+import { createTask, completeTask, linkTaskCard } from '../../services/tasks.js';
+import { createDeck } from '../../services/decks.js';
+import { createSection } from '../../services/sections.js';
+import { createTimeBlocks, updateTimeBlock } from '../../services/timeBlocks.js';
 import { recordAgentAction, type AgentActionContext } from '../../services/recordAgentAction.js';
-import { CREATE_GOAL_TOOL } from '../../toolFace/registry.js';
+import { recordChatTranscription } from '../../services/recordChatTranscription.js';
+import { AppError } from '../../middleware/errorHandler.js';
+import {
+  CREATE_GOAL_TOOL, CREATE_SUB_GOAL_TOOL, CREATE_TASK_TOOL, CREATE_DECK_TOOL,
+  CREATE_SECTION_TOOL, CREATE_TIME_BLOCKS_TOOL, UPDATE_TIME_BLOCK_TOOL,
+  LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,
+} from '../../toolFace/registry.js';
 import { goalReceiptHash } from '../../services/toolFaceReceiptRevert.js';
 
 export async function executeTool(
@@ -44,18 +54,36 @@ export async function executeTool(
     }
 
     case 'create_task': {
-      // GUARD: Direct task creation by Agent is blocked. Use create_proposal(study_plan) instead.
-      return JSON.stringify({ error: 'BLOCKED: Direct task creation is not allowed. You MUST use create_proposal with type "study_plan" or "goal_breakdown" to create tasks. The student must review and approve the proposal first. This is a Design Constitution requirement — do not attempt to bypass it.' });
+      const { result: task, receipt } = recordAgentAction(db, userId, context, {
+        tool: CREATE_TASK_TOOL, input: args, verb: 'task_created', summary: 'Created a task',
+        execute: (input) => createTask(db, userId, input),
+        resources: (created) => [{ kind: 'task', id: created.id, outcome: 'created', state_hash: goalReceiptHash(created) }],
+        courseId: (created) => created.course_id,
+      });
+      return JSON.stringify(CREATE_TASK_TOOL.output_schema.parse({
+        id: task.id, title: task.title, message: 'Task created successfully', receipt_id: receipt.id,
+      }));
     }
 
     case 'complete_task': {
-      const { task_id } = args as { task_id: string };
-      const now = new Date().toISOString();
-      const result = db.prepare(
-        'UPDATE tasks SET status = ?, completed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?',
-      ).run('completed', now, now, task_id, userId);
-      if (result.changes === 0) return JSON.stringify({ error: 'Task not found or not owned by user' });
-      return JSON.stringify({ task_id, status: 'completed', message: 'Task marked as completed' });
+      const { result: change, receipt } = recordChatTranscription(db, userId, context, {
+        tool: COMPLETE_TASK_TOOL, input: args, verb: 'task_completed', summary: 'Transcribed task completion',
+        execute: (input) => {
+          const data = input as { task_id: string };
+          return completeTask(db, userId, data.task_id, { status: 'completed' });
+        },
+        resources: (changed) => [{
+          kind: 'task', id: changed.after.id, outcome: 'completed', state_hash: goalReceiptHash(changed.after),
+          before: { status: changed.before.status, completed_at: changed.before.completed_at, updated_at: changed.before.updated_at },
+          activity: changed.activity,
+          recurring_group_before: changed.recurringGroupBefore,
+          recurring_group_after: changed.recurringGroupAfter,
+        }],
+        courseId: (changed) => changed.after.course_id,
+      });
+      return JSON.stringify(COMPLETE_TASK_TOOL.output_schema.parse({
+        task_id: change.after.id, status: 'completed', message: 'Task marked as completed', receipt_id: receipt.id,
+      }));
     }
 
     case 'list_goals': {
@@ -113,21 +141,21 @@ export async function executeTool(
     }
 
     case 'create_sub_goal': {
-      const { title, parent_id, course_id, deadline, description } = args as Record<string, string | undefined>;
-      // Look up parent to inherit course_id if not provided
-      let resolvedCourseId = course_id;
-      if (!resolvedCourseId && parent_id) {
-        const parent = db.prepare('SELECT course_id FROM goals WHERE id = ? AND user_id = ?').get(parent_id, userId) as { course_id: string } | undefined;
-        if (!parent) return JSON.stringify({ error: 'Parent goal not found' });
-        resolvedCourseId = parent.course_id;
-      }
-      if (!resolvedCourseId) return JSON.stringify({ error: 'course_id required (could not inherit from parent)' });
-      const id = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, resolvedCourseId, parent_id || null, title, description || null, deadline || null, 'active', now, now);
-      return JSON.stringify({ id, title, parent_id, message: 'Sub-goal created successfully' });
+      const { result: goal, receipt } = recordAgentAction(db, userId, context, {
+        tool: CREATE_SUB_GOAL_TOOL, input: args, verb: 'goal_created', summary: 'Created a sub-goal',
+        execute: (input) => {
+          const data = input as { parent_id: string; course_id?: string };
+          const parent = db.prepare('SELECT course_id FROM goals WHERE id = ? AND user_id = ?')
+            .get(data.parent_id, userId) as { course_id: string } | undefined;
+          if (!parent) throw new AppError(404, 'Parent goal not found');
+          return createGoal(db, userId, { ...data, course_id: data.course_id ?? parent.course_id });
+        },
+        resources: (created) => [{ kind: 'goal', id: created.id, outcome: 'created', state_hash: goalReceiptHash(created) }],
+        courseId: (created) => created.course_id,
+      });
+      return JSON.stringify(CREATE_SUB_GOAL_TOOL.output_schema.parse({
+        id: goal.id, title: goal.title, parent_id: goal.parent_id, message: 'Sub-goal created successfully', receipt_id: receipt.id,
+      }));
     }
 
     case 'list_decks': {
@@ -141,16 +169,18 @@ export async function executeTool(
     }
 
     case 'create_deck': {
-      const { course_id, name, description } = args as { course_id: string; name: string; description?: string };
-      // Verify course exists and belongs to user
-      const course = db.prepare('SELECT id, name FROM courses WHERE id = ? AND user_id = ?').get(course_id, userId) as { id: string; name: string } | undefined;
-      if (!course) return JSON.stringify({ error: 'Course not found' });
-      const deckId = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO card_decks (id, user_id, course_id, name, description, card_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
-      ).run(deckId, userId, course_id, name, description || null, now, now);
-      return JSON.stringify({ id: deckId, name, course_id, course_name: course.name, message: 'Deck created successfully' });
+      const { result: deck, receipt } = recordAgentAction(db, userId, context, {
+        tool: CREATE_DECK_TOOL, input: args, verb: 'deck_created', summary: 'Created a deck',
+        execute: (input) => createDeck(db, userId, input),
+        resources: (created) => [{ kind: 'deck', id: created.id, outcome: 'created', state_hash: goalReceiptHash(created) }],
+        courseId: (created) => created.course_id,
+      });
+      const course = db.prepare('SELECT name FROM courses WHERE id = ? AND user_id = ?')
+        .get(deck.course_id, userId) as { name: string };
+      return JSON.stringify(CREATE_DECK_TOOL.output_schema.parse({
+        id: deck.id, name: deck.name, course_id: deck.course_id, course_name: course.name,
+        message: 'Deck created successfully', receipt_id: receipt.id,
+      }));
     }
 
     case 'list_sections': {
@@ -162,24 +192,17 @@ export async function executeTool(
     }
 
     case 'create_section': {
-      const { deck_id: csDeckId, name: csName, order_index: csOrder } = args as { deck_id: string; name: string; order_index?: number };
-      // Verify deck exists and belongs to user
-      const csDeck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(csDeckId, userId);
-      if (!csDeck) return JSON.stringify({ error: 'Deck not found' });
-      const csId = uuidv4();
-      const csNow = new Date().toISOString();
-      // Default order_index: append after existing sections
-      let resolvedOrder = csOrder;
-      if (resolvedOrder === undefined) {
-        const maxOrder = db.prepare(
-          'SELECT MAX(order_index) as mx FROM card_sections WHERE deck_id = ? AND user_id = ?',
-        ).get(csDeckId, userId) as { mx: number | null };
-        resolvedOrder = (maxOrder?.mx ?? -1) + 1;
-      }
-      db.prepare(
-        'INSERT INTO card_sections (id, deck_id, user_id, name, order_index, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(csId, csDeckId, userId, csName, resolvedOrder, csNow);
-      return JSON.stringify({ id: csId, name: csName, deck_id: csDeckId, order_index: resolvedOrder, message: 'Section created successfully' });
+      const { result: section, receipt } = recordAgentAction(db, userId, context, {
+        tool: CREATE_SECTION_TOOL, input: args, verb: 'section_created', summary: 'Created a section',
+        execute: (input) => createSection(db, userId, input),
+        resources: (created) => [{ kind: 'section', id: created.id, outcome: 'created', state_hash: goalReceiptHash(created) }],
+        courseId: (created) => (db.prepare('SELECT course_id FROM card_decks WHERE id = ? AND user_id = ?')
+          .get(created.deck_id, userId) as { course_id: string }).course_id,
+      });
+      return JSON.stringify(CREATE_SECTION_TOOL.output_schema.parse({
+        id: section.id, name: section.name, deck_id: section.deck_id, order_index: section.order_index,
+        message: 'Section created successfully', receipt_id: receipt.id,
+      }));
     }
 
     case 'list_cards': {
@@ -191,11 +214,6 @@ export async function executeTool(
       query += ' ORDER BY created_at DESC LIMIT 50';
       const cards = db.prepare(query).all(...params);
       return JSON.stringify(cards);
-    }
-
-    case 'create_card': {
-      // GUARD: Direct card creation by Agent is blocked. Use create_proposal(batch_cards) instead.
-      return JSON.stringify({ error: 'BLOCKED: Direct card creation is not allowed. You MUST use create_proposal with type "batch_cards" to create cards. The student must review and approve the proposal first. This is a Design Constitution requirement — do not attempt to bypass it.' });
     }
 
     case 'get_review_due': {
@@ -806,86 +824,33 @@ export async function executeTool(
     }
 
     case 'create_time_blocks': {
-      // v1.7.3: Date-based instances
-      const { blocks } = args as {
-        blocks: Array<{
-          label: string; type?: string; date: string;
-          start_time: string; end_time: string; color?: string;
-        }>;
-      };
-
-      if (!blocks || blocks.length === 0) {
-        return JSON.stringify({ error: 'No blocks provided' });
-      }
-
-      for (const item of blocks) {
-        if (!item.label || !item.date || !item.start_time || !item.end_time) {
-          return JSON.stringify({ error: 'Each block requires label, date, start_time, end_time' });
-        }
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
-          return JSON.stringify({ error: 'date must be YYYY-MM-DD format' });
-        }
-        if (!/^\d{2}:\d{2}$/.test(item.start_time) || !/^\d{2}:\d{2}$/.test(item.end_time)) {
-          return JSON.stringify({ error: 'start_time and end_time must be HH:MM format' });
-        }
-      }
-
-      const stmt = db.prepare(
-        `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      );
-
-      const now = new Date().toISOString();
-      const created: Array<{ id: string; label: string; type: string; date: string; start_time: string; end_time: string }> = [];
-
-      db.transaction(() => {
-        for (const item of blocks) {
-          const id = uuidv4();
-          stmt.run(id, userId, null, item.label, item.type || 'custom', item.date, item.start_time, item.end_time, item.color || null, now, now);
-          created.push({
-            id, label: item.label, type: item.type || 'custom',
-            date: item.date, start_time: item.start_time, end_time: item.end_time,
-          });
-        }
-      })();
-
-      return JSON.stringify({ created, message: `Created ${created.length} time block(s)` });
+      const { result: created, receipt } = recordAgentAction(db, userId, context, {
+        tool: CREATE_TIME_BLOCKS_TOOL, input: args, verb: 'time_blocks_created', summary: 'Created time blocks',
+        execute: (input) => createTimeBlocks(db, userId, input),
+        resources: (rows) => rows.map((row) => ({ kind: 'time_block', id: row.id, outcome: 'created', state_hash: goalReceiptHash(row) })),
+        courseId: () => null,
+      });
+      return JSON.stringify(CREATE_TIME_BLOCKS_TOOL.output_schema.parse({
+        created, message: 'Created ' + created.length + ' time block(s)', receipt_id: receipt.id,
+      }));
     }
 
     case 'update_time_block': {
-      const { block_id, label, type, start_time, end_time, color } = args as {
-        block_id: string; label?: string; type?: string;
-        start_time?: string; end_time?: string; color?: string;
-      };
-
-      const existing = db.prepare(
-        'SELECT * FROM time_blocks WHERE id = ? AND user_id = ?'
-      ).get(block_id, userId) as any;
-      if (!existing) {
-        return JSON.stringify({ error: 'Time block not found' });
-      }
-
-      const fields: string[] = [];
-      const values: unknown[] = [];
-
-      if (label !== undefined) { fields.push('label = ?'); values.push(label); }
-      if (type !== undefined) { fields.push('type = ?'); values.push(type); }
-      if (start_time !== undefined) { fields.push('start_time = ?'); values.push(start_time); }
-      if (end_time !== undefined) { fields.push('end_time = ?'); values.push(end_time); }
-      if (color !== undefined) { fields.push('color = ?'); values.push(color); }
-
-      if (fields.length === 0) {
-        return JSON.stringify({ error: 'No fields to update' });
-      }
-
-      fields.push('updated_at = ?');
-      values.push(new Date().toISOString());
-      values.push(block_id);
-
-      db.prepare(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-
-      const updated = db.prepare('SELECT * FROM time_blocks WHERE id = ?').get(block_id);
-      return JSON.stringify({ updated, message: 'Time block updated' });
+      const { result: change, receipt } = recordAgentAction(db, userId, context, {
+        tool: UPDATE_TIME_BLOCK_TOOL, input: args, verb: 'time_block_updated', summary: 'Updated a time block',
+        execute: (input) => {
+          const { block_id, ...patch } = input as { block_id: string } & Record<string, unknown>;
+          return updateTimeBlock(db, userId, block_id, patch);
+        },
+        resources: (changed) => [{
+          kind: 'time_block', id: changed.after.id, outcome: 'updated',
+          state_hash: goalReceiptHash(changed.after), before: changed.before,
+        }],
+        courseId: () => null,
+      });
+      return JSON.stringify(UPDATE_TIME_BLOCK_TOOL.output_schema.parse({
+        updated: change.after, message: 'Time block updated', receipt_id: receipt.id,
+      }));
     }
 
     case 'delete_time_block': {
@@ -903,38 +868,20 @@ export async function executeTool(
     }
 
     case 'link_task_cards': {
-      const { task_id, links } = args as { task_id: string; links: { card_id: string; checklist_index?: number }[] };
-
-      // Verify task belongs to user
-      const taskRow = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(task_id, userId);
-      if (!taskRow) {
-        return JSON.stringify({ error: 'Task not found' });
-      }
-
-      let created = 0;
-      let skipped = 0;
-
-      const insertLink = db.prepare(
-        'INSERT OR IGNORE INTO task_cards (id, task_id, card_id, checklist_index) VALUES (?, ?, ?, ?)'
-      );
-
-      const batch = db.transaction(() => {
-        for (const link of links) {
-          // Verify card belongs to user
-          const cardRow = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(link.card_id, userId);
-          if (!cardRow) {
-            skipped++;
-            continue;
-          }
-          const linkId = uuidv4();
-          const result = insertLink.run(linkId, task_id, link.card_id, link.checklist_index ?? null);
-          if (result.changes > 0) created++;
-          else skipped++;
-        }
+      const { result: linked, receipt } = recordAgentAction(db, userId, context, {
+        tool: LINK_TASK_CARDS_TOOL, input: args, verb: 'task_cards_linked', summary: 'Linked cards to a task',
+        execute: (input) => {
+          const data = input as { task_id: string; links: { card_id: string; checklist_index?: number | null }[] };
+          return data.links.map((link) => linkTaskCard(db, userId, data.task_id, link));
+        },
+        resources: (rows) => rows.map((row) => ({ kind: 'task_card', id: row.id, outcome: 'linked', state_hash: goalReceiptHash(row) })),
+        courseId: (rows) => (db.prepare('SELECT course_id FROM tasks WHERE id = ? AND user_id = ?')
+          .get(rows[0].task_id, userId) as { course_id: string }).course_id,
       });
-
-      batch();
-      return JSON.stringify({ task_id, created, skipped, message: `Linked ${created} card(s) to task` });
+      return JSON.stringify(LINK_TASK_CARDS_TOOL.output_schema.parse({
+        task_id: linked[0].task_id, created: linked.length, links: linked,
+        message: 'Linked ' + linked.length + ' card(s) to task', receipt_id: receipt.id,
+      }));
     }
 
     default:

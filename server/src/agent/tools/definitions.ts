@@ -1,10 +1,14 @@
 import type { ToolDefinition } from '../providers/types.js';
-import { CREATE_GOAL_TOOL } from '../../toolFace/registry.js';
+import { AGENT_ACTION_TOOLS } from '../../toolFace/registry.js';
 import { loadToolFaceManifest } from '../../mcp/manifest.js';
 
 // The build projects the authoritative Zod registry into this runtime artifact.
-const goalProjection = loadToolFaceManifest().find((entry) => entry.name === CREATE_GOAL_TOOL.name);
-if (!goalProjection) throw new Error('create_goal registry projection is missing');
+const manifest = loadToolFaceManifest();
+const actionDefinitions: ToolDefinition[] = AGENT_ACTION_TOOLS.map((tool) => {
+  const projection = manifest.find((entry) => entry.name === tool.name);
+  if (!projection) throw new Error(tool.name + ' registry projection is missing');
+  return { name: tool.name, description: tool.description, parameters: projection.input_schema };
+});
 
 export const toolDefinitions: ToolDefinition[] = [
   {
@@ -31,20 +35,7 @@ export const toolDefinitions: ToolDefinition[] = [
       required: [],
     },
   },
-  // NOTE: create_task has been REMOVED from Agent tools.
-  // Tasks MUST be created via create_proposal (study_plan / goal_breakdown).
-  // The proposal apply route handles actual task insertion.
-  {
-    name: 'complete_task',
-    description: 'Mark a task as completed.',
-    parameters: {
-      type: 'object',
-      properties: {
-        task_id: { type: 'string', description: 'Task ID to complete' },
-      },
-      required: ['task_id'],
-    },
-  },
+  ...actionDefinitions,
   {
     name: 'list_goals',
     description: "List the student's goals, optionally filtered by course. Use include_hierarchy=true to get full tree with children and tasks.",
@@ -55,26 +46,6 @@ export const toolDefinitions: ToolDefinition[] = [
         include_hierarchy: { type: 'boolean', description: 'If true, return goals with their sub-goals (children) and associated tasks' },
       },
       required: [],
-    },
-  },
-  {
-    name: CREATE_GOAL_TOOL.name,
-    description: CREATE_GOAL_TOOL.description,
-    parameters: goalProjection.input_schema,
-  },
-  {
-    name: 'create_sub_goal',
-    description: 'Create a sub-goal under an existing goal. Inherits course_id from parent if not specified.',
-    parameters: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', description: 'Sub-goal title' },
-        parent_id: { type: 'string', description: 'Parent goal ID' },
-        course_id: { type: 'string', description: 'Course ID (optional, inherited from parent)' },
-        deadline: { type: 'string', description: 'Optional deadline (YYYY-MM-DD)' },
-        description: { type: 'string', description: 'Optional description' },
-      },
-      required: ['title', 'parent_id'],
     },
   },
   {
@@ -89,19 +60,6 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
-    name: 'create_deck',
-    description: 'Create a new card deck for a course. Use this when the student needs cards but no suitable deck exists. Returns the new deck ID.',
-    parameters: {
-      type: 'object',
-      properties: {
-        course_id: { type: 'string', description: 'Course ID this deck belongs to' },
-        name: { type: 'string', description: 'Deck name (e.g., "Chapter 5 Review", "Midterm Formulas")' },
-        description: { type: 'string', description: 'Optional deck description' },
-      },
-      required: ['course_id', 'name'],
-    },
-  },
-  {
     name: 'list_sections',
     description: 'List sections in a deck. Sections organize cards by chapter/topic within a deck.',
     parameters: {
@@ -110,19 +68,6 @@ export const toolDefinitions: ToolDefinition[] = [
         deck_id: { type: 'string', description: 'Deck ID' },
       },
       required: ['deck_id'],
-    },
-  },
-  {
-    name: 'create_section',
-    description: 'Create a new section within a deck. Use to organize cards by chapter, topic, or module. Returns the new section ID.',
-    parameters: {
-      type: 'object',
-      properties: {
-        deck_id: { type: 'string', description: 'Deck ID this section belongs to' },
-        name: { type: 'string', description: 'Section name (e.g., "Chapter 3: Vectors", "Week 5: Integration")' },
-        order_index: { type: 'number', description: 'Position in section list (0-based). Higher = further down.' },
-      },
-      required: ['deck_id', 'name'],
     },
   },
   {
@@ -138,9 +83,6 @@ export const toolDefinitions: ToolDefinition[] = [
       required: ['deck_id'],
     },
   },
-  // NOTE: create_card has been REMOVED from Agent tools.
-  // Cards MUST be created via create_proposal (batch_cards).
-  // The proposal apply route handles actual card insertion.
   {
     name: 'get_review_due',
     description: 'Get the count and list of cards due for review.',
@@ -361,48 +303,6 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
-    name: 'create_time_blocks',
-    description: 'Create one or more Time Block instances for specific dates. Time Blocks are now date-based (each instance belongs to a single date). Use when the student needs time blocks for specific dates that don\'t already have them.',
-    parameters: {
-      type: 'object',
-      properties: {
-        blocks: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              label: { type: 'string', description: 'Block label (e.g., "Morning Study", "Lunch Break")' },
-              type: { type: 'string', enum: ['study', 'rest', 'meal', 'exercise', 'custom'], description: 'Block type. Use "study" for study sessions.' },
-              date: { type: 'string', description: 'Specific date (YYYY-MM-DD) for this time block instance' },
-              start_time: { type: 'string', description: 'Start time in HH:MM format (e.g., "08:00")' },
-              end_time: { type: 'string', description: 'End time in HH:MM format (e.g., "18:00")' },
-              color: { type: 'string', description: 'Optional hex color (e.g., "#4CAF50")' },
-            },
-            required: ['label', 'type', 'date', 'start_time', 'end_time'],
-          },
-          description: 'Array of Time Block instances to create',
-        },
-      },
-      required: ['blocks'],
-    },
-  },
-  {
-    name: 'update_time_block',
-    description: 'Update an existing Time Block instance. Only affects this specific instance (date), not other days.',
-    parameters: {
-      type: 'object',
-      properties: {
-        block_id: { type: 'string', description: 'Time Block instance ID to update' },
-        label: { type: 'string', description: 'New label' },
-        type: { type: 'string', enum: ['study', 'rest', 'meal', 'exercise', 'custom'], description: 'New type' },
-        start_time: { type: 'string', description: 'New start time (HH:MM)' },
-        end_time: { type: 'string', description: 'New end time (HH:MM)' },
-        color: { type: 'string', description: 'New color' },
-      },
-      required: ['block_id'],
-    },
-  },
-  {
     name: 'delete_time_block',
     description: 'Delete a Time Block instance. Only removes this specific instance (date), not other days.',
     parameters: {
@@ -411,29 +311,6 @@ export const toolDefinitions: ToolDefinition[] = [
         block_id: { type: 'string', description: 'Time Block instance ID to delete' },
       },
       required: ['block_id'],
-    },
-  },
-  {
-    name: 'link_task_cards',
-    description: 'Batch-create Task-Card associations. Links cards to a task, optionally at the checklist-item level. Use after creating tasks and cards to establish knowledge relationships.',
-    parameters: {
-      type: 'object',
-      properties: {
-        task_id: { type: 'string', description: 'Task ID to link cards to' },
-        links: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              card_id: { type: 'string', description: 'Card ID to link' },
-              checklist_index: { type: 'integer', description: 'Index of the checklist item this card relates to (0-based). Omit for task-level association.' },
-            },
-            required: ['card_id'],
-          },
-          description: 'Array of card links to create',
-        },
-      },
-      required: ['task_id', 'links'],
     },
   },
 ];

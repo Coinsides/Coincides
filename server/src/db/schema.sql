@@ -1265,6 +1265,8 @@ CREATE TABLE IF NOT EXISTS events (
   channel TEXT NOT NULL,
   verb TEXT NOT NULL CHECK (verb IN (
     'migrated', 'rolled_back', 'note_created', 'board_created', 'board_deleted', 'goal_created',
+    'task_created', 'deck_created', 'section_created', 'time_blocks_created',
+    'time_block_updated', 'task_cards_linked', 'task_completed',
     'mounted', 'unmounted', 'purpose_created', 'purpose_amended',
     'purpose_sealed', 'proposal_issued', 'proposal_approved',
     'proposal_rejected', 'published'

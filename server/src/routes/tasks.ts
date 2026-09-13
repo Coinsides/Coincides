@@ -3,8 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createTaskSchema, updateTaskSchema, batchCreateTasksSchema } from '../validators/index.js';
+import { updateTaskSchema, batchCreateTasksSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import { completeTask, createTask, linkTaskCard } from '../services/tasks.js';
 
 const router = Router();
 
@@ -53,36 +54,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
 // POST /api/tasks
 router.post('/', (req: AuthRequest, res: Response) => {
   try {
-    const data = createTaskSchema.parse(req.body);
-    verifyCourseBelongsToUser(data.course_id, req.userId!);
-
-    const db = getDb();
-    const id = uuidv4();
-    const now = new Date().toISOString();
-
-    db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      id,
-      req.userId!,
-      data.course_id,
-      data.goal_id || null,
-      data.recurring_group_id || null,
-      data.title,
-      data.date,
-      data.priority,
-      data.order_index ?? 0,
-      data.start_time || null,
-      data.end_time || null,
-      data.description || null,
-      data.checklist ? JSON.stringify(data.checklist) : null,
-      data.time_block_id || null,
-      now,
-      now
-    );
-
-    const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+    const task = createTask(getDb(), req.userId!, req.body);
     res.status(201).json(parseTask(task));
   } catch (err) {
     if (err instanceof ZodError) {
@@ -157,74 +129,33 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
     const data = updateTaskSchema.parse(req.body);
     const db = getDb();
+    const updated = db.transaction(() => {
+      const existing = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+      if (!existing) throw new AppError(404, 'Task not found');
 
-    const existing = db.prepare('SELECT * FROM tasks WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
-    if (!existing) {
-      throw new AppError(404, 'Task not found');
-    }
+      const fields: string[] = [];
+      const values: unknown[] = [];
+      if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
+      if (data.date !== undefined) { fields.push('date = ?'); values.push(data.date); }
+      if (data.priority !== undefined) { fields.push('priority = ?'); values.push(data.priority); }
+      if (data.order_index !== undefined) { fields.push('order_index = ?'); values.push(data.order_index); }
+      if (data.start_time !== undefined) { fields.push('start_time = ?'); values.push(data.start_time); }
+      if (data.end_time !== undefined) { fields.push('end_time = ?'); values.push(data.end_time); }
+      if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+      if (data.checklist !== undefined) { fields.push('checklist = ?'); values.push(data.checklist ? JSON.stringify(data.checklist) : null); }
+      if (data.time_block_id !== undefined) { fields.push('time_block_id = ?'); values.push(data.time_block_id); }
 
-    const fields: string[] = [];
-    const values: unknown[] = [];
-
-    if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
-    if (data.date !== undefined) { fields.push('date = ?'); values.push(data.date); }
-    if (data.priority !== undefined) { fields.push('priority = ?'); values.push(data.priority); }
-    if (data.order_index !== undefined) { fields.push('order_index = ?'); values.push(data.order_index); }
-    if (data.start_time !== undefined) { fields.push('start_time = ?'); values.push(data.start_time); }
-    if (data.end_time !== undefined) { fields.push('end_time = ?'); values.push(data.end_time); }
-    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
-    if (data.checklist !== undefined) { fields.push('checklist = ?'); values.push(data.checklist ? JSON.stringify(data.checklist) : null); }
-    if (data.time_block_id !== undefined) { fields.push('time_block_id = ?'); values.push(data.time_block_id); }
-
-    if (data.status !== undefined) {
-      fields.push('status = ?');
-      values.push(data.status);
-
-      // Auto-set completed_at when marking complete, clear when marking pending
-      if (data.status === 'completed' && existing.status !== 'completed') {
-        fields.push('completed_at = ?');
-        values.push(new Date().toISOString());
-
-        // Log activity
-        const activityDate = new Date().toISOString().split('T')[0];
-        db.prepare(
-          'INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES (?, ?, ?, ?, ?, ?)'
-        ).run(uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task');
-
-        // Update recurring group count if applicable
-        if (existing.recurring_group_id) {
-          db.prepare(
-            'UPDATE recurring_task_groups SET completed_tasks = completed_tasks + 1 WHERE id = ?'
-          ).run(existing.recurring_group_id);
-        }
-      } else if (data.status === 'pending' && existing.status === 'completed') {
-        fields.push('completed_at = ?');
-        values.push(null);
-
-        if (existing.recurring_group_id) {
-          db.prepare(
-            'UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = ?'
-          ).run(existing.recurring_group_id);
-        }
+      const hasCompletionFields = data.status !== undefined || data.completed_at !== undefined;
+      if (hasCompletionFields) completeTask(db, req.userId!, req.params.id as string, data);
+      if (fields.length > 0) {
+        fields.push('updated_at = ?');
+        values.push(new Date().toISOString(), req.params.id);
+        db.prepare(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+      } else if (!hasCompletionFields) {
+        throw new AppError(400, 'No fields to update');
       }
-    }
-
-    if (data.completed_at !== undefined && data.status === undefined) {
-      fields.push('completed_at = ?');
-      values.push(data.completed_at);
-    }
-
-    if (fields.length === 0) {
-      throw new AppError(400, 'No fields to update');
-    }
-
-    fields.push('updated_at = ?');
-    values.push(new Date().toISOString());
-    values.push(req.params.id);
-
-    db.prepare(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-
-    const updated = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
+      return db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
+    })();
     res.json(parseTask(updated));
   } catch (err) {
     if (err instanceof ZodError) {
@@ -292,44 +223,18 @@ router.get('/:taskId/cards', (req: AuthRequest, res: Response) => {
   res.json(links);
 });
 
-// POST /api/tasks/:taskId/cards — create a task-card link
+// POST /api/tasks/:taskId/cards: create a task-card link
 router.post('/:taskId/cards', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const { taskId } = req.params;
-  const { card_id, checklist_index } = req.body;
-
-  if (!card_id) {
-    throw new AppError(400, 'card_id is required');
+  try {
+    const link = linkTaskCard(getDb(), req.userId!, req.params.taskId as string, req.body);
+    res.status(201).json(link);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
   }
-
-  // Verify task belongs to user
-  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
-  if (!task) {
-    throw new AppError(404, 'Task not found');
-  }
-
-  // Verify card belongs to user
-  const card = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(card_id, req.userId!);
-  if (!card) {
-    throw new AppError(404, 'Card not found');
-  }
-
-  // Check for duplicate
-  const existing = db.prepare(
-    'SELECT id FROM task_cards WHERE task_id = ? AND card_id = ? AND checklist_index IS ?'
-  ).get(taskId, card_id, checklist_index ?? null);
-  if (existing) {
-    res.status(409).json({ error: 'Link already exists' });
-    return;
-  }
-
-  const id = uuidv4();
-  db.prepare(
-    'INSERT INTO task_cards (id, task_id, card_id, checklist_index) VALUES (?, ?, ?, ?)'
-  ).run(id, taskId, card_id, checklist_index ?? null);
-
-  const link = db.prepare('SELECT * FROM task_cards WHERE id = ?').get(id);
-  res.status(201).json(link);
 });
 
 // DELETE /api/tasks/:taskId/cards/:linkId — remove a task-card link
