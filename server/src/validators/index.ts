@@ -3,6 +3,7 @@ import { PROPOSAL_TYPES } from '../services/proposalTypes.js';
 import { skinSelectionSchema } from './skin.js';
 import { paperFreehandDataSchema } from './paperInk.js';
 import { noteMetadataSchema } from './noteCover.js';
+import { agentContextHintSchema } from './agentContextHint.js';
 
 // --- Auth ---
 
@@ -302,10 +303,7 @@ export const rateCardSchema = z.object({
 
 export const sendMessageSchema = z.object({
   message: z.string().min(1, 'Message is required').max(10000),
-  context_hint: z.object({
-    type: z.string(),
-    data: z.any(),
-  }).optional(),
+  context_hint: agentContextHintSchema.optional(),
   image: z.object({
     media_type: z.string(),
     data: z.string(),

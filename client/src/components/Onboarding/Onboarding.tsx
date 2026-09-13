@@ -4,6 +4,7 @@ import { Upload, Clock, MessageSquare, X, ChevronRight, GraduationCap } from 'lu
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import type { AgentContextHint } from '@shared/types';
 import styles from './Onboarding.module.css';
 
 interface StepConfig {
@@ -12,7 +13,7 @@ interface StepConfig {
   descriptionKey: string;
   actionKey: string;
   route: string | null;
-  agentContext?: { type: string; data?: unknown };
+  agentContext?: AgentContextHint;
 }
 
 const STEPS: StepConfig[] = [
@@ -66,7 +67,7 @@ export default function Onboarding() {
       }
     } else if (currentStep.agentContext) {
       // Step 4: open agent with L1 context
-      openAgentWithContext(currentStep.agentContext.type, currentStep.agentContext.data);
+      openAgentWithContext(currentStep.agentContext);
     }
     handleNext();
   };

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Plus, Send, ChevronDown, Trash2, ImagePlus } from 'lucide-react';
 import { useAgentStore } from '@/stores/agentStore';
-import { useUIStore } from '@/stores/uiStore';
+import { selectAgentContextHint, useUIStore } from '@/stores/uiStore';
+import { describeAgentContextHint } from '@/lib/agentContextHint';
 import { useAuthStore } from '@/stores/authStore';
 import MessageBubble, { StreamingBubble } from './MessageBubble';
 import PreferenceForm from './PreferenceForm';
@@ -11,6 +12,8 @@ export default function AgentPanel() {
   const agentPanelOpen = useUIStore((s) => s.agentPanelOpen);
   const setAgentPanelOpen = useUIStore((s) => s.setAgentPanelOpen);
   const agentContextHint = useUIStore((s) => s.agentContextHint);
+  const effectiveContextHint = useUIStore(selectAgentContextHint);
+  const dismissContextHint = useUIStore((s) => s.dismissAgentContextHint);
   const user = useAuthStore((s) => s.user);
 
   const {
@@ -79,11 +82,11 @@ export default function AgentPanel() {
     setInput('');
     const imageData = pendingImage ? { media_type: pendingImage.media_type, data: pendingImage.data } : undefined;
     setPendingImage(null);
-    const contextHint = agentContextHint || undefined;
-    // Clear context hint after sending
+    const contextHint = effectiveContextHint || undefined;
+    // Explicit context is one-shot; ambient context remains for later user messages.
     useUIStore.setState({ agentContextHint: null });
     await sendMessage(text, contextHint, imageData);
-  }, [input, streaming, agentContextHint, pendingImage, sendMessage]);
+  }, [input, streaming, effectiveContextHint, pendingImage, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -190,10 +193,10 @@ export default function AgentPanel() {
             </div>
 
             {/* Context hint indicator */}
-            {agentContextHint && (
+            {effectiveContextHint && (
               <div className={styles.contextHint}>
-                Viewing: {agentContextHint.type}
-                <button onClick={() => useUIStore.setState({ agentContextHint: null })}>
+                Viewing: {describeAgentContextHint(effectiveContextHint)}
+                <button onClick={dismissContextHint}>
                   <X size={12} />
                 </button>
               </div>

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from './canvasEngine/NoteCanvasRuntime';
 import { NoteCanvasRuntimeProvider } from './canvasEngine/NoteCanvasRuntimeProvider';
 import { NoteRouteSaveBoundary } from './canvasEngine/hooks/useNoteRouteSaveBoundary';
+import { NoteAgentContextRoute } from './NoteAgentContextRoute';
 
 export default function NoteDetailPage() {
   const { noteId } = useParams<{ noteId: string }>();
@@ -14,9 +15,11 @@ export default function NoteDetailPage() {
   }, []);
 
   return (
-    <NoteCanvasRuntimeProvider noteId={noteId}>
-      <NoteCanvasRuntime ref={retainRuntime} />
-      <NoteRouteSaveBoundary noteId={noteId} runtimeRef={runtime} />
-    </NoteCanvasRuntimeProvider>
+    <NoteAgentContextRoute.Provider value={true}>
+      <NoteCanvasRuntimeProvider noteId={noteId}>
+        <NoteCanvasRuntime ref={retainRuntime} />
+        <NoteRouteSaveBoundary noteId={noteId} runtimeRef={runtime} />
+      </NoteCanvasRuntimeProvider>
+    </NoteAgentContextRoute.Provider>
   );
 }

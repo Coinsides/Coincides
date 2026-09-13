@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAmbientAgentContextHint } from '@/hooks/useAmbientAgentContextHint';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers, List } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
@@ -45,6 +46,9 @@ function strokePath(visual: BoardVisual): string {
 
 export default function BoardPage() {
   const { boardId } = useParams();
+  const contextHint = useMemo(() => boardId
+    ? { type: 'board_view' as const, data: { board_id: boardId } } : null, [boardId]);
+  useAmbientAgentContextHint(contextHint);
   const navigate = useNavigate();
   const board = useBoard(boardId);
   const skin = useBoardSkin(board.detail?.board ?? null, board.updateBoard);

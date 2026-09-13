@@ -15,6 +15,7 @@ import { NotePrintLayer } from './NotePrintLayer';
 import { NoteOverviewLayer } from './NoteOverviewLayer';
 import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
 import { useNoteNavigationController } from '../hooks/useNoteNavigationController';
+import { useNoteAmbientAgentContextHint } from '../hooks/useNoteAmbientAgentContextHint';
 import { NoteNavigationPane } from './NoteNavigationPane';
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import styles from '../../NoteDetail.module.css';
@@ -63,6 +64,14 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     enabled: surfaceMode === 'page' && !overview.open,
     blockListRef: writingSurfaceProps.blockListRef,
     pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
+  });
+  useNoteAmbientAgentContextHint({
+    noteId: writingSurfaceProps.noteId,
+    surfaceMode,
+    blockListRef: writingSurfaceProps.blockListRef,
+    pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
+    overviewOpen: overview.open,
+    overviewFrameId: overview.currentFrameId,
   });
   useImperativeHandle(ref, () => ({ resumeEditingForExit: overview.resumeForExit }));
   const document = (

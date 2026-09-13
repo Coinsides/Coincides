@@ -5,6 +5,7 @@ import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
 import { buildSystemPrompt } from './system-prompt.js';
+import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
 
 const MAX_TOOL_ROUNDS = 8;
 
@@ -28,7 +29,7 @@ export async function* runAgent(
   userId: string,
   conversationId: string,
   userMessage: string,
-  contextHint?: { type: string; data?: unknown },
+  contextHint?: AgentContextHint,
   image?: { media_type: string; data: string },
 ): AsyncGenerator<StreamChunk> {
   const db = getDb();
@@ -113,7 +114,15 @@ export async function* runAgent(
   // 5. Add context hint if provided
   let augmentedMessage = userMessage;
   if (contextHint) {
-    augmentedMessage = `[Context: user is viewing ${contextHint.type} — ${JSON.stringify(contextHint.data)}]\n\n${userMessage}`;
+    let contextDescription = `user is viewing ${contextHint.type} — ${JSON.stringify(contextHint.data)}`;
+    if (contextHint.type === 'note_view') {
+      const { note_id, page_index } = contextHint.data;
+      const pageDescription = page_index === undefined ? '' : `, page ${page_index + 1} (page_index ${page_index})`;
+      contextDescription = `user is viewing note ${JSON.stringify(note_id)}${pageDescription}. You may use read_note with ${JSON.stringify(contextHint.data)} to read it when relevant to the user's message`;
+    } else if (contextHint.type === 'board_view') {
+      contextDescription = `user is viewing board ${JSON.stringify(contextHint.data.board_id)}. You may use read_board with ${JSON.stringify(contextHint.data)} to read it when relevant to the user's message`;
+    }
+    augmentedMessage = `[Context: ${contextDescription}]\n\n${userMessage}`;
   }
 
   // 6. Save user message

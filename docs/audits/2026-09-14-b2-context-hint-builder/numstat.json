@@ -1,0 +1,182 @@
+{
+  "basis": "In-session pre-edit snapshot of bounded source paths; normalized CRLF; LCS line counts; no Git access",
+  "scope": "Deliverable source, tests, package wiring, handoff, generated index and curated audit receipts; temporary runners, raw logs and build outputs excluded",
+  "files": 29,
+  "total_added": 1368,
+  "total_removed": 31,
+  "changes": [
+    {
+      "file": "client/src/components/AgentPanel/AgentPanel.contextHint.test.tsx",
+      "added": 126,
+      "removed": 0,
+      "sha256": "9743b405049cad64cb2ef774ab72632023fae466626d6d4cc0888af67e4ad856"
+    },
+    {
+      "file": "client/src/components/AgentPanel/AgentPanel.tsx",
+      "added": 10,
+      "removed": 7,
+      "sha256": "f5cc6fce7b44f15192aeb87fe4c4c1c2c81da4515977d9923f366ba3ebf356bd"
+    },
+    {
+      "file": "client/src/components/Onboarding/Onboarding.tsx",
+      "added": 3,
+      "removed": 2,
+      "sha256": "ce7fe0f962b2017d9ab796dd3ce51d4cf6a618c3ae63b0f9167081b13ba9e5fc"
+    },
+    {
+      "file": "client/src/hooks/useAmbientAgentContextHint.ts",
+      "added": 16,
+      "removed": 0,
+      "sha256": "1fa2e113b316aa6d1450c8523d34e33d64c9a7505a8de1ee1f327026bb4fdb4a"
+    },
+    {
+      "file": "client/src/lib/agentContextHint.ts",
+      "added": 22,
+      "removed": 0,
+      "sha256": "2f006b8895dcc35ca09dbfb0b3ff77f21a8f4a9a2a03868f40b6e92084a743f0"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.contextHint.test.tsx",
+      "added": 50,
+      "removed": 0,
+      "sha256": "1f59698fc31b55c2405c9fcae5d28b93f2ec65ab27adcfc6718ef2cafe960bbf"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.tsx",
+      "added": 5,
+      "removed": 1,
+      "sha256": "a21b09b07b4ca01c0b2a9315bfa389aac1d7f8da78237277b4ae02768023ea28"
+    },
+    {
+      "file": "client/src/pages/Calendar/Calendar.tsx",
+      "added": 1,
+      "removed": 1,
+      "sha256": "741b7f944aec301594b4d16ae7937e836f65c461e88c54169be0e32300e3fb2a"
+    },
+    {
+      "file": "client/src/pages/Decks/DeckDetail.tsx",
+      "added": 1,
+      "removed": 1,
+      "sha256": "85f0e102ee0816b0a1337b49e6a1ff3c2488b0d973df79dabc459179ce2b8f71"
+    },
+    {
+      "file": "client/src/pages/Notes/NoteAgentContextRoute.ts",
+      "added": 4,
+      "removed": 0,
+      "sha256": "3cb23175407334997eb77ad5eb0c4359a45fcdbf49cdaa11d0df0e8493549ac4"
+    },
+    {
+      "file": "client/src/pages/Notes/NoteDetail.tsx",
+      "added": 7,
+      "removed": 4,
+      "sha256": "0ba46f94c1f5a439e747f79ded5a8f4b09513d3cf8869941a46246f0b20d82c1"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteAmbientAgentContextHint.test.tsx",
+      "added": 166,
+      "removed": 0,
+      "sha256": "9bfb6ad6b14bbfa3cd3b53d0ea5476e8c2251e47b6a226c7a5defd551a156136"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteAmbientAgentContextHint.ts",
+      "added": 74,
+      "removed": 0,
+      "sha256": "7ce336b9799e0bba352450cd0f3d9d46f3b6ce76ec23635d91fbdf580ec56095"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx",
+      "added": 9,
+      "removed": 0,
+      "sha256": "9536b1b1419ed759fe90e6e2d02247b466f3503e58073d3a7560b3c6e8228846"
+    },
+    {
+      "file": "client/src/stores/agentStore.ts",
+      "added": 2,
+      "removed": 2,
+      "sha256": "bf11cc53a1abe270bec004ec5de98e53f81b06c2431adea1ca5a54a9ea56c233"
+    },
+    {
+      "file": "client/src/stores/uiStore.ts",
+      "added": 39,
+      "removed": 3,
+      "sha256": "603ca52146438ca39a8f8a955ccc8eb716550a2bd68ce8769cecec20c7a43136"
+    },
+    {
+      "file": "docs/agent-ops/INDEX.md",
+      "added": 3,
+      "removed": 2,
+      "sha256": "011b8e97f8cd1654b759a4b0a038f2937b55301b896337c62539d7ca697264d0"
+    },
+    {
+      "file": "docs/agent-ops/handoffs/2026-09-14-v14-2-b2-context-hint-order.md",
+      "added": 57,
+      "removed": 1,
+      "sha256": "3eaea829260d1a08b48a5156933d874a88836884217f72434f05e3eacca2ed73"
+    },
+    {
+      "file": "docs/audits/2026-09-14-b2-context-hint-builder/README.md",
+      "added": 60,
+      "removed": 0,
+      "sha256": "70b1dc21bfcdf58fd7fae1132cd631b7056348a8aec732d4a219af0ac8471cf1"
+    },
+    {
+      "file": "docs/audits/2026-09-14-b2-context-hint-builder/browser-smoke.json",
+      "added": 110,
+      "removed": 0,
+      "sha256": "9a625debc7af7ca147d9d274bc5d3dd805eda5f4bc1debb008ebe29c5f48509d"
+    },
+    {
+      "file": "docs/audits/2026-09-14-b2-context-hint-builder/numstat.json",
+      "added": 182,
+      "removed": 0
+    },
+    {
+      "file": "docs/audits/2026-09-14-b2-context-hint-builder/validation-summary.json",
+      "added": 183,
+      "removed": 0,
+      "sha256": "c5508fda2ba7eb758f1d0fce0633025b2c33d0b1fd4386d293e4bedea6cd316f"
+    },
+    {
+      "file": "server/package.json",
+      "added": 1,
+      "removed": 1,
+      "sha256": "ffb9d7d0d6e6f23d5ec65a489df4a2800c3e8decf39a5f572eaa2ede0a5b269e"
+    },
+    {
+      "file": "server/src/__tests__/v14ContextHint.test.ts",
+      "added": 150,
+      "removed": 0,
+      "sha256": "d4af5b4f7c0190c51e169809ebc0874ab5c54d787385577229c5c0337c57778b"
+    },
+    {
+      "file": "server/src/agent/orchestrator.ts",
+      "added": 11,
+      "removed": 2,
+      "sha256": "6d0b2115a51c18df9ce8178ba0028d9a635b9f22558179f8ff6e84d407f75c55"
+    },
+    {
+      "file": "server/src/validators/agentContextHint.ts",
+      "added": 42,
+      "removed": 0,
+      "sha256": "34a9892a1c298f793dfb48f1d1da68d9ad849e6e94ecac077f78f30277e3d41d"
+    },
+    {
+      "file": "server/src/validators/index.ts",
+      "added": 2,
+      "removed": 4,
+      "sha256": "b0ecfa28cf4230ea8759fa34c85092d158be02d3c3ca4ccca7ceb92853aefdd3"
+    },
+    {
+      "file": "shared/types/agentContextHint.ts",
+      "added": 31,
+      "removed": 0,
+      "sha256": "f8794e69ecb30093ff9a4e062051a817408c29e50911dd4b0d2101ab6044c1aa"
+    },
+    {
+      "file": "shared/types/index.ts",
+      "added": 1,
+      "removed": 0,
+      "sha256": "dc0f82def8ba8b4249cfb47bb8e53e9dc5855503db6f5f324783e45c99105593"
+    }
+  ]
+}

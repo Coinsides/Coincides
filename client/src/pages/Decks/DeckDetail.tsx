@@ -184,7 +184,7 @@ export default function DeckDetailPage() {
         onBack={() => navigate('/decks')}
         onToggleSelect={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
         onToggleNewSection={() => setShowNewSection(!showNewSection)}
-        onOpenAI={() => openAgentWithContext('deck', { deck_id: deckId, deck_name: deck?.name })}
+        onOpenAI={() => { if (deckId) openAgentWithContext({ type: 'deck', data: { deck_id: deckId, deck_name: deck?.name } }); }}
         onAddCard={() => openModal('card-create', { deckId })}
         onReview={() => navigate('/review')}
         onReviewSelected={handleReviewSelected}

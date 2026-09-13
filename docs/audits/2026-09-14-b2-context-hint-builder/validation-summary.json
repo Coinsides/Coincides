@@ -1,0 +1,183 @@
+{
+  "order": "14.2-B2",
+  "all_non_git_runtime_gates_pass": true,
+  "gates": [
+    {
+      "name": "shared-build",
+      "exit_code": 0,
+      "seconds": 0.4
+    },
+    {
+      "name": "check:test-wiring",
+      "exit_code": 0,
+      "seconds": 0.21
+    },
+    {
+      "name": "check:tech-debt-table",
+      "exit_code": 0,
+      "seconds": 0.2
+    },
+    {
+      "name": "test:unit",
+      "exit_code": 0,
+      "seconds": 26.99,
+      "rerun": true
+    },
+    {
+      "name": "test:tool-face-registry",
+      "exit_code": 0,
+      "seconds": 0.64
+    },
+    {
+      "name": "test:tool-face-manifest",
+      "exit_code": 0,
+      "seconds": 3.69
+    },
+    {
+      "name": "check:tool-face-manifest",
+      "exit_code": 0,
+      "seconds": 0.61
+    },
+    {
+      "name": "test:tool-face-parity",
+      "exit_code": 0,
+      "seconds": 5.33
+    },
+    {
+      "name": "check:tool-face-parity",
+      "exit_code": 0,
+      "seconds": 0.53
+    },
+    {
+      "name": "check:server-shared-runtime-import",
+      "exit_code": 0,
+      "seconds": 0.55
+    },
+    {
+      "name": "check:canvas-runtime-boundary",
+      "exit_code": 0,
+      "seconds": 0.47
+    },
+    {
+      "name": "check:group-gallery-shell",
+      "exit_code": 0,
+      "seconds": 0.46
+    },
+    {
+      "name": "check:groups-rail-shell",
+      "exit_code": 0,
+      "seconds": 0.41
+    },
+    {
+      "name": "check:single-editor-shell",
+      "exit_code": 0,
+      "seconds": 0.43
+    },
+    {
+      "name": "check:source-experience",
+      "exit_code": 0,
+      "seconds": 0.94
+    },
+    {
+      "name": "check:v2-bn11-legacy-shutdown",
+      "exit_code": 0,
+      "seconds": 0.45
+    },
+    {
+      "name": "check:v2-bn11-relation-freshness",
+      "exit_code": 0,
+      "seconds": 0.45
+    },
+    {
+      "name": "smoke:canvas-engine-model-contract",
+      "exit_code": 0,
+      "seconds": 1.96
+    },
+    {
+      "name": "build:client",
+      "exit_code": 0,
+      "seconds": 13.52
+    },
+    {
+      "name": "build",
+      "exit_code": 0,
+      "seconds": 7.33
+    },
+    {
+      "name": "smoke:canvas-engine-performance",
+      "exit_code": 0,
+      "seconds": 1.2
+    },
+    {
+      "name": "docs:check",
+      "exit_code": 0,
+      "seconds": 0.28,
+      "rerun": true
+    }
+  ],
+  "client": {
+    "files": 170,
+    "tests": 1737,
+    "pass": 1737,
+    "fail": 0,
+    "excluded": 0
+  },
+  "targeted": {
+    "client_files": 3,
+    "client_pass": 15,
+    "server_files": 1,
+    "server_pass": 5
+  },
+  "server_full": {
+    "files": 84,
+    "tests": 768,
+    "pass": 766,
+    "fail": 2,
+    "skipped": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "excluded": 0,
+    "seconds": 107.39,
+    "remaining": [
+      {
+        "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+        "reason": "spawnSync python.exe ENOENT; suite fails during initialization",
+        "owner": "HQ",
+        "kind": "environment"
+      },
+      {
+        "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+        "test": "V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable",
+        "reason": "MinerU process exit 101: configured Python executable cannot launch",
+        "owner": "HQ",
+        "kind": "environment"
+      }
+    ]
+  },
+  "prior_run_resolution": [
+    {
+      "issue": "Temporary runner used repository-local credential directory and omitted npm_execpath",
+      "resolution": "Runner corrected to new system-temp empty appdata and actual npm lifecycle executable; product guards unchanged"
+    },
+    {
+      "issue": "Existing wilderness fixture compared created_at across a second boundary in second full run",
+      "resolution": "No code/test edits; third full run passed this test"
+    },
+    {
+      "issue": "New board test observed mount reads before async effects settled",
+      "resolution": "Wait for existing bookmarks read and state flush; full client suite rerun passes"
+    }
+  ],
+  "deferred": [
+    {
+      "command": "git diff --check",
+      "owner": "HQ",
+      "reason": "User prohibits every Git command"
+    },
+    {
+      "command": "npm run check:changed-file-secrets",
+      "owner": "HQ",
+      "reason": "Scanner invokes Git; user assigns git/secrets to HQ"
+    }
+  ]
+}

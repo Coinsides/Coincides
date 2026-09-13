@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api, { getToken, API_BASE } from '@/services/api';
-import type { AgentConversation, AgentMessage } from '@shared/types';
+import type { AgentContextHint, AgentConversation, AgentMessage } from '@shared/types';
 
 export interface PreferenceQuestion {
   id: string;
@@ -38,7 +38,7 @@ interface AgentState {
   selectConversation: (id: string) => Promise<void>;
   fetchMessages: (conversationId: string) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
-  sendMessage: (message: string, contextHint?: { type: string; data?: unknown }, image?: { media_type: string; data: string }) => Promise<void>;
+  sendMessage: (message: string, contextHint?: AgentContextHint, image?: { media_type: string; data: string }) => Promise<void>;
   submitPreferenceForm: (formId: string, responses: Record<string, unknown>) => void;
 }
 

@@ -1,0 +1,110 @@
+{
+  "synthetic": true,
+  "browser": "Connected Chrome extension through CUA",
+  "server": "Loopback-only :memory: fixture; production routes and current client build; provider chat stub",
+  "ui_steps": [
+    {
+      "action": "Open NoteDetail and Ctrl+J",
+      "visible": "Note ... ? Page 1"
+    },
+    {
+      "action": "Send user message",
+      "status": 200
+    },
+    {
+      "action": "Close panel, scroll reading surface, reopen",
+      "visible": "Note ... ? Page 2"
+    },
+    {
+      "action": "Send user message",
+      "status": 200
+    },
+    {
+      "action": "Navigate to BoardPage with panel open",
+      "visible": "Board ..."
+    },
+    {
+      "action": "Send user message",
+      "status": 200
+    },
+    {
+      "action": "Leave board for Home",
+      "visible": "No Viewing context indicator"
+    },
+    {
+      "action": "Send user message",
+      "status": 200
+    }
+  ],
+  "before_user_send": {
+    "message_posts": 0,
+    "provider_calls": 0
+  },
+  "messages": [
+    {
+      "context_hint": {
+        "type": "note_view",
+        "data": {
+          "note_id": "20000000-0000-4000-8000-000000000002",
+          "page_index": 0
+        }
+      },
+      "http_status": 200,
+      "provider_user_content": "[Context: user is viewing note \"20000000-0000-4000-8000-000000000002\", page 1 (page_index 0). You may use read_note with {\"note_id\":\"20000000-0000-4000-8000-000000000002\",\"page_index\":0} to read it when relevant to the user's message]\n\nExplain this note page.",
+      "available_readers": [
+        "read_note",
+        "read_board"
+      ]
+    },
+    {
+      "context_hint": {
+        "type": "note_view",
+        "data": {
+          "note_id": "20000000-0000-4000-8000-000000000002",
+          "page_index": 1
+        }
+      },
+      "http_status": 200,
+      "provider_user_content": "[Context: user is viewing note \"20000000-0000-4000-8000-000000000002\", page 2 (page_index 1). You may use read_note with {\"note_id\":\"20000000-0000-4000-8000-000000000002\",\"page_index\":1} to read it when relevant to the user's message]\n\nExplain page two.",
+      "available_readers": [
+        "read_note",
+        "read_board"
+      ]
+    },
+    {
+      "context_hint": {
+        "type": "board_view",
+        "data": {
+          "board_id": "61ea3a27-e801-44de-a1af-93b864bfa7df"
+        }
+      },
+      "http_status": 200,
+      "provider_user_content": "[Context: user is viewing board \"61ea3a27-e801-44de-a1af-93b864bfa7df\". You may use read_board with {\"board_id\":\"61ea3a27-e801-44de-a1af-93b864bfa7df\"} to read it when relevant to the user's message]\n\nExplain this board.",
+      "available_readers": [
+        "read_note",
+        "read_board"
+      ]
+    },
+    {
+      "context_hint": null,
+      "http_status": 200,
+      "provider_user_content": "Hello without a view.",
+      "available_readers": [
+        "read_note",
+        "read_board"
+      ]
+    }
+  ],
+  "provider_call_count": 4,
+  "automatic_tool_calls": 0,
+  "final_http_errors": 0,
+  "limitations": [
+    "Existing AgentPanel backdrop blocks wheel gestures on the underlying reading surface; browser tested close-scroll-reopen; open-panel tracking covered by persistent tests.",
+    "Direct hash departure from NoteDetail displayed one save notice with no failed HTTP request; save-boundary acceptance is outside this context-hint smoke scope.",
+    "Initial helper omitted two production routers; corrected helper was restarted before the four final messages."
+  ],
+  "cleanup": {
+    "browser_tab_closed": true,
+    "server_shutdown": "confirmed: process stopped and its empty synthetic appdata directory removed non-recursively"
+  }
+}

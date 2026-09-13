@@ -772,7 +772,7 @@ export default function CalendarPage() {
           )}
           <button
             className={styles.aiBtn}
-            onClick={() => openAgentWithContext('calendar', { date: format(currentMonth, 'yyyy-MM-dd') })}
+            onClick={() => openAgentWithContext({ type: 'calendar', data: { date: format(currentMonth, 'yyyy-MM-dd') } })}
             title="Ask AI to help plan this week"
           >
             <Sparkles size={14} />
