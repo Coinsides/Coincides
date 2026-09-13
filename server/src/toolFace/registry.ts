@@ -689,6 +689,11 @@ export const createAgentTimeBlocksInputSchema = batchCreateTimeBlocksSchema.exte
 export const updateAgentTimeBlockInputSchema = updateTimeBlockSchema.extend({
   block_id: z.string().min(1),
 });
+export const deleteAgentTimeBlockInputSchema = z.object({
+  block_id: z.string().min(1),
+  authorization_id: z.string().min(1).optional(),
+  user_confirmation_anchor: z.string().optional(),
+}).strict();
 export const linkAgentTaskCardsInputSchema = z.object({
   task_id: z.string().min(1),
   links: z.array(linkTaskCardSchema).min(1),
@@ -755,6 +760,36 @@ export const UPDATE_TIME_BLOCK_TOOL: ToolRegistryEntry = {
   human_entry: { route: 'PUT /api/time-blocks/:id', client_call_site: 'client/src/stores/timeBlockStore.ts#updateInstance' },
 };
 
+export const DELETE_TIME_BLOCK_TOOL: ToolRegistryEntry = {
+  name: 'delete_time_block',
+  description: 'First call with block_id only to receive a system-generated deletion restatement and authorization_id; this does not delete anything. Present the complete restatement to the user and obtain their explicit confirmation. Then call with the same block_id, authorization_id and the user\'s exact reply in user_confirmation_anchor. Authorization expires after 24 hours and can be consumed only once; changed consequences require a new restatement.',
+  input_schema: deleteAgentTimeBlockInputSchema,
+  output_schema: z.union([
+    z.object({
+      authorization_id: z.string(),
+      restatement: z.object({
+        block: z.object({
+          id: z.string(), user_id: z.string(), template_id: z.string().nullable(),
+          label: z.string(), type: z.string(), date: z.string(),
+          start_time: z.string(), end_time: z.string(), color: z.string().nullable(),
+          created_at: z.string(), updated_at: z.string(),
+        }).strict(),
+        affected_task_ids: z.array(z.string()),
+        consequences: z.string(),
+      }).strict(),
+      expires_at: z.string(),
+    }).strict(),
+    z.object({
+      message: z.literal('Time block deleted'),
+      receipt_id: z.string().uuid(),
+      deleted_block_id: z.string(),
+      unbound_task_ids: z.array(z.string()),
+    }).strict(),
+  ]),
+  truth: 'purpose', tier: 'immediate', exposure: 'internal', scopes: ['time_blocks:write'],
+  human_entry: { route: 'DELETE /api/time-blocks/:id', client_call_site: 'client/src/stores/timeBlockStore.ts#deleteInstance' },
+};
+
 export const LINK_TASK_CARDS_TOOL: ToolRegistryEntry = {
   name: 'link_task_cards',
   description: 'Link cards to a task using the strict single-card door. Any missing or duplicate card link fails the entire batch; the error identifies card_id.',
@@ -778,7 +813,7 @@ export const COMPLETE_TASK_TOOL: ToolRegistryEntry = {
 /** Chat provider definitions project these registered writes from the manifest. */
 export const AGENT_ACTION_TOOLS = [
   CREATE_GOAL_TOOL, CREATE_SUB_GOAL_TOOL, CREATE_TASK_TOOL, CREATE_DECK_TOOL,
-  CREATE_SECTION_TOOL, CREATE_TIME_BLOCKS_TOOL, UPDATE_TIME_BLOCK_TOOL,
+  CREATE_SECTION_TOOL, CREATE_TIME_BLOCKS_TOOL, UPDATE_TIME_BLOCK_TOOL, DELETE_TIME_BLOCK_TOOL,
   LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,
 ];
 

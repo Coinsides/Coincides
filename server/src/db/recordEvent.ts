@@ -14,6 +14,7 @@ export const EVENT_VERBS = [
   'section_created',
   'time_blocks_created',
   'time_block_updated',
+  'time_block_deleted',
   'task_cards_linked',
   'task_completed',
   'mounted',

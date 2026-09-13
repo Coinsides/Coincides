@@ -9,12 +9,13 @@ import migration054 from '../db/migrations/054_v13_events_ledger.js';
 import migration058 from '../db/migrations/058_v13_board_deleted_event.js';
 import migration073 from '../db/migrations/073_v14_agent_goal_event.js';
 import migration074 from '../db/migrations/074_v14_agent_planning_events.js';
+import migration075 from '../db/migrations/075_v14_delete_authorizations.js';
 import { EVENT_VERBS, recordEvent, type EventEntry } from '../db/recordEvent.js';
 
 const VERBS = [
   'migrated', 'rolled_back', 'note_created', 'board_created', 'board_deleted', 'goal_created',
   'task_created', 'deck_created', 'section_created', 'time_blocks_created',
-  'time_block_updated', 'task_cards_linked', 'task_completed', 'mounted', 'unmounted',
+  'time_block_updated', 'time_block_deleted', 'task_cards_linked', 'task_completed', 'mounted', 'unmounted',
   'purpose_created', 'purpose_amended', 'purpose_sealed', 'proposal_issued',
   'proposal_approved', 'proposal_rejected', 'published',
 ] as const;
@@ -39,6 +40,7 @@ function ledgerDb(t: TestContext): Database.Database {
   db.transaction(() => migration058.up(db))();
   db.transaction(() => migration073.up(db))();
   db.transaction(() => migration074.up(db))();
+  db.transaction(() => migration075.up(db))();
   return db;
 }
 
@@ -218,7 +220,7 @@ test('recordEvent requires the caller transaction and does not commit or replace
   assert.deepEqual(db.prepare('SELECT * FROM events').all(), []);
 });
 
-test('all twenty-two event verbs work and unknown verbs are rejected by both helper and SQL', (t) => {
+test('all twenty-three event verbs work and unknown verbs are rejected by both helper and SQL', (t) => {
   const db = ledgerDb(t);
   assert.deepEqual(EVENT_VERBS, VERBS);
   for (const verb of VERBS) db.transaction(() => recordEvent(db, entry({ verb })))();
@@ -230,7 +232,7 @@ test('all twenty-two event verbs work and unknown verbs are rejected by both hel
       VALUES ('synthetic-user', 'system', 'synthetic', ?, '[]', 'synthetic')
     `).run(verb), /constraint failed/i);
   }
-  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 22);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 23);
 });
 
 test('objects must be an array of kind/id string pairs; invalid input rolls back the action', (t) => {

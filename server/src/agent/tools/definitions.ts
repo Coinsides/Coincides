@@ -302,15 +302,4 @@ export const toolDefinitions: ToolDefinition[] = [
       required: ['questions'],
     },
   },
-  {
-    name: 'delete_time_block',
-    description: 'Delete a Time Block instance. Only removes this specific instance (date), not other days.',
-    parameters: {
-      type: 'object',
-      properties: {
-        block_id: { type: 'string', description: 'Time Block instance ID to delete' },
-      },
-      required: ['block_id'],
-    },
-  },
 ];

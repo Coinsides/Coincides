@@ -1,0 +1,877 @@
+{
+  "schema": "coincides-validation-metadata.v1",
+  "workOrder": "V14 14.1-A2b delete_time_block ceremony",
+  "generatedAt": "2026-09-13T08:47:53.293Z",
+  "scope": "Execution metadata and parsed counts only; no raw log or diagnostic body.",
+  "isolation": {
+    "database": ":memory: or test-owned disposable databases",
+    "dotenv": "An explicit empty file under the system temporary directory",
+    "vite": "COINCIDES_VALIDATION_ENV_DIR points at an empty temporary directory",
+    "credentials": "COINCIDES_APP_DATA_DIR is isolated outside the repository; provider environment values are not inherited",
+    "assets": "Temporary CANVAS_ASSET_DIR, SOURCE_BLOB_DIR, UPLOAD_DIR",
+    "inheritedEnvironment": "Only OS and tool location variables from an explicit allowlist",
+    "testExclusions": 0,
+    "gitCommandsExecuted": 0,
+    "rawLogs": "Retained only in system TEMP and excluded from this archive"
+  },
+  "outcome": {
+    "client": {
+      "files": 167,
+      "tests": 1722,
+      "pass": 1722,
+      "fail": 0
+    },
+    "serverLatestRunId": "server-full-1789288975146",
+    "serverLatestCounts": {
+      "tests": 739,
+      "suites": 0,
+      "pass": 737,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "finalDocsCheck": {
+      "runId": "docs-check-1789289265377",
+      "exitCode": 0
+    },
+    "gate": {
+      "originalStages": 23,
+      "authorizedStages": 21,
+      "hqOnlyStages": 2,
+      "status": "21 authorized stages passed; original wrapper not executed; git and secrets remain HQ pending"
+    }
+  },
+  "corrections": [
+    {
+      "item": "Existing event verb closed-set expectation",
+      "file": "server/src/__tests__/v13EventsLedger.test.ts",
+      "firstRun": "server-full-1789288777396",
+      "status": "fixed",
+      "evidence": "Subsequent targeted 8/8 and full server 737/739; only two Python/MinerU environment failures remain"
+    },
+    {
+      "item": "Generated documentation index and object inventory drift",
+      "firstRun": "gate-1789288777568",
+      "status": "fixed and docs:check passed",
+      "evidence": "Generation correction reported by main thread; only docs:check is eligible for the requested final rerun"
+    }
+  ],
+  "remainingHq": [
+    {
+      "item": "Python launcher unavailable",
+      "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "code": "python.exe ENOENT",
+      "status": "environment failure; existing suite executed without exclusion"
+    },
+    {
+      "item": "MinerU interpreter cannot start",
+      "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+      "code": "MinerU 101",
+      "status": "environment failure; existing suite executed without exclusion"
+    },
+    {
+      "item": "git diff --check",
+      "status": "not executed under explicit zero-git instruction"
+    },
+    {
+      "item": "check:changed-file-secrets",
+      "status": "not executed; HQ closure per work order"
+    }
+  ],
+  "runs": [
+    {
+      "runId": "docs-check-1789289265377",
+      "mode": "docs-check",
+      "exitCode": 0,
+      "stageCount": 1,
+      "passedStages": 1,
+      "failedStages": 0,
+      "testFileCount": null,
+      "testExclusions": 0,
+      "hqPending": [],
+      "stages": [
+        {
+          "label": "docs:check",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:check"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 609
+        }
+      ]
+    },
+    {
+      "runId": "gate-1789288777568",
+      "mode": "gate",
+      "exitCode": 1,
+      "stageCount": 22,
+      "passedStages": 21,
+      "failedStages": 1,
+      "testFileCount": null,
+      "testExclusions": 0,
+      "hqPending": [
+        "git diff --check",
+        "npm run check:changed-file-secrets"
+      ],
+      "stages": [
+        {
+          "label": "shared-build",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "-b",
+            "D:\\Coinsides\\v2.x\\Coincides\\shared\\tsconfig.json"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 79
+        },
+        {
+          "label": "check:test-wiring",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:test-wiring"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 202,
+          "counts": {
+            "testFilesTotal": 81,
+            "wired": 81,
+            "exempted": 0,
+            "unwired": 0
+          }
+        },
+        {
+          "label": "check:tech-debt-table",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tech-debt-table"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 191
+        },
+        {
+          "label": "test:unit",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:unit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 40899,
+          "counts": {
+            "testFilesPassed": 167,
+            "testFilesTotal": 167,
+            "pass": 1722,
+            "tests": 1722,
+            "fail": 0
+          }
+        },
+        {
+          "label": "test:tool-face-registry",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:tool-face-registry"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 1281,
+          "counts": {
+            "tests": 5,
+            "suites": 0,
+            "pass": 5,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        },
+        {
+          "label": "test:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 5563,
+          "counts": {
+            "tests": 10,
+            "suites": 0,
+            "pass": 10,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        },
+        {
+          "label": "check:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 922
+        },
+        {
+          "label": "test:tool-face-parity",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:tool-face-parity"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 6092,
+          "counts": {
+            "tests": 10,
+            "suites": 0,
+            "pass": 10,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        },
+        {
+          "label": "check:tool-face-parity",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-parity"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 558
+        },
+        {
+          "label": "check:server-shared-runtime-import",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:server-shared-runtime-import"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 581
+        },
+        {
+          "label": "check:canvas-runtime-boundary",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:canvas-runtime-boundary"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 490
+        },
+        {
+          "label": "check:group-gallery-shell",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:group-gallery-shell"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 468
+        },
+        {
+          "label": "check:groups-rail-shell",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:groups-rail-shell"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 475
+        },
+        {
+          "label": "check:single-editor-shell",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:single-editor-shell"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 466
+        },
+        {
+          "label": "check:source-experience",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:source-experience"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 994
+        },
+        {
+          "label": "check:v2-bn11-legacy-shutdown",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:v2-bn11-legacy-shutdown"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 452
+        },
+        {
+          "label": "check:v2-bn11-relation-freshness",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:v2-bn11-relation-freshness"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 468
+        },
+        {
+          "label": "smoke:canvas-engine-model-contract",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "smoke:canvas-engine-model-contract"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 2107
+        },
+        {
+          "label": "build:client",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "build:client"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 13668
+        },
+        {
+          "label": "build",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "build"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 7600
+        },
+        {
+          "label": "smoke:canvas-engine-performance",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "smoke:canvas-engine-performance"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 1266
+        },
+        {
+          "label": "docs:check",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:check"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 1,
+          "durationMs": 308
+        }
+      ]
+    },
+    {
+      "runId": "server-full-1789288777396",
+      "mode": "server-full",
+      "exitCode": 1,
+      "stageCount": 3,
+      "passedStages": 2,
+      "failedStages": 1,
+      "testFileCount": 81,
+      "testExclusions": 0,
+      "hqPending": [],
+      "stages": [
+        {
+          "label": "manifest-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 363
+        },
+        {
+          "label": "manifest-copy-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 201
+        },
+        {
+          "label": "server-full",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+            "src/__tests__/providerCredentials.test.ts",
+            "src/__tests__/textFlowIdentityContract.test.ts",
+            "src/__tests__/v13AgentMemories.test.ts",
+            "src/__tests__/v13AtomicTextSave.test.ts",
+            "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+            "src/__tests__/v13BoardCeremonyNote.test.ts",
+            "src/__tests__/v13BoardChalk.test.ts",
+            "src/__tests__/v13BoardIdentity.test.ts",
+            "src/__tests__/v13BoardRoutes.test.ts",
+            "src/__tests__/v13BoardSchema.test.ts",
+            "src/__tests__/v13BoardServices.test.ts",
+            "src/__tests__/v13BoardStaging.test.ts",
+            "src/__tests__/v13BoardTextRanges.test.ts",
+            "src/__tests__/v13BoardTrayRelocation.test.ts",
+            "src/__tests__/v13BoardViewportBookmarks.test.ts",
+            "src/__tests__/v13BoardWave1.test.ts",
+            "src/__tests__/v13CanvasRetirement.test.ts",
+            "src/__tests__/v13CoordinateContract.test.ts",
+            "src/__tests__/v13EventsLedger.test.ts",
+            "src/__tests__/v13GraphemeTextRanges.test.ts",
+            "src/__tests__/v13ItemFloor.test.ts",
+            "src/__tests__/v13ItemRefBlocks.test.ts",
+            "src/__tests__/v13MediaBlocks.test.ts",
+            "src/__tests__/v13NoteMetadata.test.ts",
+            "src/__tests__/v13PagePresets.test.ts",
+            "src/__tests__/v13PaperInk.test.ts",
+            "src/__tests__/v13PaperSkin.test.ts",
+            "src/__tests__/v13ProjectDeletionReferences.test.ts",
+            "src/__tests__/v13RecordedAction.test.ts",
+            "src/__tests__/v13SourceProjectionRepair.test.ts",
+            "src/__tests__/v13SourceReprojection.test.ts",
+            "src/__tests__/v13Tray.test.ts",
+            "src/__tests__/v13TrayOrder.test.ts",
+            "src/__tests__/v13WallCollectionBatch.test.ts",
+            "src/__tests__/v14AgentVerbTransfer.test.ts",
+            "src/__tests__/v14AgentWriteDoor.test.ts",
+            "src/__tests__/v14CardCover.test.ts",
+            "src/__tests__/v14DeleteCeremony.test.ts",
+            "src/__tests__/v14PaletteColors.test.ts",
+            "src/__tests__/v14SkinSuites.test.ts",
+            "src/__tests__/v2BlockRestoreDoor.test.ts",
+            "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+            "src/__tests__/v2ContentGroups.test.ts",
+            "src/__tests__/v2DevQuickLogin.test.ts",
+            "src/__tests__/v2DocumentParserPdf.test.ts",
+            "src/__tests__/v2GroupFolders.test.ts",
+            "src/__tests__/v2ImprintCitations.test.ts",
+            "src/__tests__/v2ImprintEmbedding.test.ts",
+            "src/__tests__/v2ImprintRetrieval.test.ts",
+            "src/__tests__/v2ItemRelationFloor.test.ts",
+            "src/__tests__/v2Items.test.ts",
+            "src/__tests__/v2MaterialLibrary.test.ts",
+            "src/__tests__/v2McpArtifact.test.ts",
+            "src/__tests__/v2McpTransport.test.ts",
+            "src/__tests__/v2NoteBlockLifecycle.test.ts",
+            "src/__tests__/v2NoteFoundation.test.ts",
+            "src/__tests__/v2NotesLifecycle.test.ts",
+            "src/__tests__/v2NotesListService.test.ts",
+            "src/__tests__/v2Purposes.test.ts",
+            "src/__tests__/v2RelationLifecycleClosure.test.ts",
+            "src/__tests__/v2Relations.test.ts",
+            "src/__tests__/v2SourceContainerIntake.test.ts",
+            "src/__tests__/v2SourceFileIntake.test.ts",
+            "src/__tests__/v2SourceIdentityFloor.test.ts",
+            "src/__tests__/v2SourceImprints.test.ts",
+            "src/__tests__/v2SourceLifecycleClosure.test.ts",
+            "src/__tests__/v2SourceMaterialization.test.ts",
+            "src/__tests__/v2SourceMineruWiring.test.ts",
+            "src/__tests__/v2SourceNeverReject.test.ts",
+            "src/__tests__/v2SourceRegionCells.test.ts",
+            "src/__tests__/v2SourceT0Alignment.test.ts",
+            "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+            "src/__tests__/v2TemplateStudioDecommission.test.ts",
+            "src/__tests__/v2TestV2ManifestHook.test.ts",
+            "src/__tests__/v2TrashNotesTool.test.ts",
+            "src/agent/providers/index.test.ts",
+            "src/toolFace/registry.test.ts",
+            "scripts/v13WildernessExecute.test.ts",
+            "scripts/v13WildernessShadowRun.test.ts",
+            "scripts/v2Bn12LifecycleMigration.test.ts",
+            "scripts/v2OperationBatchTimestampMigration.test.ts"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 1,
+          "durationMs": 125461,
+          "counts": {
+            "tests": 739,
+            "suites": 0,
+            "pass": 736,
+            "fail": 3,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        }
+      ]
+    },
+    {
+      "runId": "server-full-1789288975146",
+      "mode": "server-full",
+      "exitCode": 1,
+      "stageCount": 3,
+      "passedStages": 2,
+      "failedStages": 1,
+      "testFileCount": 81,
+      "testExclusions": 0,
+      "hqPending": [],
+      "stages": [
+        {
+          "label": "manifest-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 364
+        },
+        {
+          "label": "manifest-copy-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 207
+        },
+        {
+          "label": "server-full",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+            "src/__tests__/providerCredentials.test.ts",
+            "src/__tests__/textFlowIdentityContract.test.ts",
+            "src/__tests__/v13AgentMemories.test.ts",
+            "src/__tests__/v13AtomicTextSave.test.ts",
+            "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+            "src/__tests__/v13BoardCeremonyNote.test.ts",
+            "src/__tests__/v13BoardChalk.test.ts",
+            "src/__tests__/v13BoardIdentity.test.ts",
+            "src/__tests__/v13BoardRoutes.test.ts",
+            "src/__tests__/v13BoardSchema.test.ts",
+            "src/__tests__/v13BoardServices.test.ts",
+            "src/__tests__/v13BoardStaging.test.ts",
+            "src/__tests__/v13BoardTextRanges.test.ts",
+            "src/__tests__/v13BoardTrayRelocation.test.ts",
+            "src/__tests__/v13BoardViewportBookmarks.test.ts",
+            "src/__tests__/v13BoardWave1.test.ts",
+            "src/__tests__/v13CanvasRetirement.test.ts",
+            "src/__tests__/v13CoordinateContract.test.ts",
+            "src/__tests__/v13EventsLedger.test.ts",
+            "src/__tests__/v13GraphemeTextRanges.test.ts",
+            "src/__tests__/v13ItemFloor.test.ts",
+            "src/__tests__/v13ItemRefBlocks.test.ts",
+            "src/__tests__/v13MediaBlocks.test.ts",
+            "src/__tests__/v13NoteMetadata.test.ts",
+            "src/__tests__/v13PagePresets.test.ts",
+            "src/__tests__/v13PaperInk.test.ts",
+            "src/__tests__/v13PaperSkin.test.ts",
+            "src/__tests__/v13ProjectDeletionReferences.test.ts",
+            "src/__tests__/v13RecordedAction.test.ts",
+            "src/__tests__/v13SourceProjectionRepair.test.ts",
+            "src/__tests__/v13SourceReprojection.test.ts",
+            "src/__tests__/v13Tray.test.ts",
+            "src/__tests__/v13TrayOrder.test.ts",
+            "src/__tests__/v13WallCollectionBatch.test.ts",
+            "src/__tests__/v14AgentVerbTransfer.test.ts",
+            "src/__tests__/v14AgentWriteDoor.test.ts",
+            "src/__tests__/v14CardCover.test.ts",
+            "src/__tests__/v14DeleteCeremony.test.ts",
+            "src/__tests__/v14PaletteColors.test.ts",
+            "src/__tests__/v14SkinSuites.test.ts",
+            "src/__tests__/v2BlockRestoreDoor.test.ts",
+            "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+            "src/__tests__/v2ContentGroups.test.ts",
+            "src/__tests__/v2DevQuickLogin.test.ts",
+            "src/__tests__/v2DocumentParserPdf.test.ts",
+            "src/__tests__/v2GroupFolders.test.ts",
+            "src/__tests__/v2ImprintCitations.test.ts",
+            "src/__tests__/v2ImprintEmbedding.test.ts",
+            "src/__tests__/v2ImprintRetrieval.test.ts",
+            "src/__tests__/v2ItemRelationFloor.test.ts",
+            "src/__tests__/v2Items.test.ts",
+            "src/__tests__/v2MaterialLibrary.test.ts",
+            "src/__tests__/v2McpArtifact.test.ts",
+            "src/__tests__/v2McpTransport.test.ts",
+            "src/__tests__/v2NoteBlockLifecycle.test.ts",
+            "src/__tests__/v2NoteFoundation.test.ts",
+            "src/__tests__/v2NotesLifecycle.test.ts",
+            "src/__tests__/v2NotesListService.test.ts",
+            "src/__tests__/v2Purposes.test.ts",
+            "src/__tests__/v2RelationLifecycleClosure.test.ts",
+            "src/__tests__/v2Relations.test.ts",
+            "src/__tests__/v2SourceContainerIntake.test.ts",
+            "src/__tests__/v2SourceFileIntake.test.ts",
+            "src/__tests__/v2SourceIdentityFloor.test.ts",
+            "src/__tests__/v2SourceImprints.test.ts",
+            "src/__tests__/v2SourceLifecycleClosure.test.ts",
+            "src/__tests__/v2SourceMaterialization.test.ts",
+            "src/__tests__/v2SourceMineruWiring.test.ts",
+            "src/__tests__/v2SourceNeverReject.test.ts",
+            "src/__tests__/v2SourceRegionCells.test.ts",
+            "src/__tests__/v2SourceT0Alignment.test.ts",
+            "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+            "src/__tests__/v2TemplateStudioDecommission.test.ts",
+            "src/__tests__/v2TestV2ManifestHook.test.ts",
+            "src/__tests__/v2TrashNotesTool.test.ts",
+            "src/agent/providers/index.test.ts",
+            "src/toolFace/registry.test.ts",
+            "scripts/v13WildernessExecute.test.ts",
+            "scripts/v13WildernessShadowRun.test.ts",
+            "scripts/v2Bn12LifecycleMigration.test.ts",
+            "scripts/v2OperationBatchTimestampMigration.test.ts"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 1,
+          "durationMs": 108299,
+          "counts": {
+            "tests": 739,
+            "suites": 0,
+            "pass": 737,
+            "fail": 2,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        }
+      ]
+    },
+    {
+      "runId": "targeted-1789288731935",
+      "mode": "targeted",
+      "exitCode": 0,
+      "stageCount": 3,
+      "passedStages": 3,
+      "failedStages": 0,
+      "testFileCount": 1,
+      "testExclusions": 0,
+      "hqPending": [],
+      "stages": [
+        {
+          "label": "manifest-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 377
+        },
+        {
+          "label": "manifest-copy-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 205
+        },
+        {
+          "label": "targeted",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+            "src/__tests__/v14DeleteCeremony.test.ts"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 2372,
+          "counts": {
+            "tests": 16,
+            "suites": 0,
+            "pass": 16,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        }
+      ]
+    },
+    {
+      "runId": "targeted-1789288949536",
+      "mode": "targeted",
+      "exitCode": 0,
+      "stageCount": 3,
+      "passedStages": 3,
+      "failedStages": 0,
+      "testFileCount": 1,
+      "testExclusions": 0,
+      "hqPending": [],
+      "stages": [
+        {
+          "label": "manifest-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 361
+        },
+        {
+          "label": "manifest-copy-prerequisite",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 202
+        },
+        {
+          "label": "targeted",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+            "src/__tests__/v13EventsLedger.test.ts"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 773,
+          "counts": {
+            "tests": 8,
+            "suites": 0,
+            "pass": 8,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        }
+      ]
+    },
+    {
+      "runId": "typecheck-1789288732094",
+      "mode": "typecheck",
+      "exitCode": 0,
+      "stageCount": 4,
+      "passedStages": 4,
+      "failedStages": 0,
+      "testFileCount": null,
+      "testExclusions": 0,
+      "hqPending": [],
+      "stages": [
+        {
+          "label": "shared-typecheck",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "-p",
+            "D:\\Coinsides\\v2.x\\Coincides\\shared\\tsconfig.json",
+            "--noEmit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 293
+        },
+        {
+          "label": "shared-build",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "-b",
+            "D:\\Coinsides\\v2.x\\Coincides\\shared\\tsconfig.json"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "exitCode": 0,
+          "durationMs": 76
+        },
+        {
+          "label": "server-typecheck",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "--noEmit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "exitCode": 0,
+          "durationMs": 5016
+        },
+        {
+          "label": "client-typecheck",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\client\\node_modules\\typescript\\bin\\tsc",
+            "--noEmit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\client",
+          "exitCode": 0,
+          "durationMs": 8458
+        }
+      ]
+    }
+  ]
+}

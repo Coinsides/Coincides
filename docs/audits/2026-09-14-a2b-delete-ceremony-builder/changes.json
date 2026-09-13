@@ -1,0 +1,125 @@
+{
+  "basis": "This task pre-edit byte snapshots, not repository history. Explicit owned file inventory only.",
+  "method": "LCS of lines, CRLF/LF equivalent; added=new-LCS and removed=old-LCS; SHA-256 hashes are over original bytes.",
+  "files": [
+    {
+      "path": "server/package.json",
+      "added": 1,
+      "removed": 1,
+      "before_sha256": "0ddd186569d3add2d37bdecd7ad3f9d6ad2a2e5d4e439f883b495d10630bfa90",
+      "after_sha256": "cec5673dc1711a78df6a01e944b9d0f710dbeed1de3e8d06e86f31d7ad33ec4d"
+    },
+    {
+      "path": "server/src/agent/tools/executor.ts",
+      "added": 2,
+      "removed": 11,
+      "before_sha256": "28a8d5380a5547fc3f0773c82f65cfe8055cd48bd1dcfd995d6b2a988102acff",
+      "after_sha256": "7c405c43307bd2043062be91813162b8bf6836402365dc590027cfebf44a2268"
+    },
+    {
+      "path": "server/src/agent/tools/definitions.ts",
+      "added": 0,
+      "removed": 11,
+      "before_sha256": "de260e58046c47f76d5e05a0cccedcd449e48ffa3be8cb193a33e63d04fd7f35",
+      "after_sha256": "a2fb502881997489ab08906b36e39281e81722d3d80fec15a6dded4ca18fa512"
+    },
+    {
+      "path": "server/src/db/schema.sql",
+      "added": 16,
+      "removed": 1,
+      "before_sha256": "027c05b618f7820abd903287d600cc12e18174dcdc43ccecd03d5ab4c22e7384",
+      "after_sha256": "8203c53ad96451ee90dd6cc72e91213acb7a4a5db007d50ba6c068354a2f9b6b"
+    },
+    {
+      "path": "server/src/db/migrations/075_v14_delete_authorizations.ts",
+      "added": 68,
+      "removed": 0,
+      "before_sha256": null,
+      "after_sha256": "3297f9696a6abc4dce1cd51159bfeba4a26e05de686c8e3e988a69ba7c15b529"
+    },
+    {
+      "path": "server/src/db/recordEvent.ts",
+      "added": 1,
+      "removed": 0,
+      "before_sha256": "29928d506e16d3b78d030c5c33f43094f5d8301ddbcd11644b778dca95ce7c42",
+      "after_sha256": "d55ed02010f8cdd3c72995c1ec7b5cb910bb21fa023ed9841c53e97aec272f8b"
+    },
+    {
+      "path": "server/src/routes/timeBlocks.ts",
+      "added": 2,
+      "removed": 8,
+      "before_sha256": "f1ac374eff723bcb7a7f5effadc2f216e045c1a873e43497c0c4fb0193f2d730",
+      "after_sha256": "a94190f174d255960b57fde81b47dedfffefc6e26f43b0232e3fc87b2f873205"
+    },
+    {
+      "path": "server/src/services/agentAuthorizations.ts",
+      "added": 144,
+      "removed": 0,
+      "before_sha256": null,
+      "after_sha256": "a78370bfd9041f2531229a4716a89179ab9f06561c2731c67d06795e63f3a256"
+    },
+    {
+      "path": "server/src/services/timeBlocks.ts",
+      "added": 26,
+      "removed": 0,
+      "before_sha256": "1e2ac8f2069a01bbc64ab096575cfbd51546fb50d7d3c8a17af4d818a3ed0eaf",
+      "after_sha256": "8a42e9ad01e9363a191315668acf53fe92e458faac4b378c5723180f8a50526c"
+    },
+    {
+      "path": "server/src/services/toolFaceReceiptRevert.ts",
+      "added": 54,
+      "removed": 0,
+      "before_sha256": "b279d61014987d5309a61d0ce11e65e2ed460763d6154dd338d4093b1ddbb491",
+      "after_sha256": "0eb2572f887d2a42a10f4d41af0cd1847c0ac5cbb0fc97475837c64afdf96b62"
+    },
+    {
+      "path": "server/src/toolFace/registry.ts",
+      "added": 36,
+      "removed": 1,
+      "before_sha256": "c2732fabffe6540a42e2b11491726353085668c0d9e7cd41e6d8e082858fe4fc",
+      "after_sha256": "a159f50b5334c05431057cddbb5996ed914549cb6fe749ca580c012979bda7d6"
+    },
+    {
+      "path": "server/src/__tests__/v14DeleteCeremony.test.ts",
+      "added": 266,
+      "removed": 0,
+      "before_sha256": null,
+      "after_sha256": "64f99635fa71692a81b2ff22eaaa3b992015c9324f27c08b9f55ba33f5a98ff1"
+    },
+    {
+      "path": "server/src/__tests__/v13EventsLedger.test.ts",
+      "added": 5,
+      "removed": 3,
+      "before_sha256": "07c106999f504fe648d250c51bb5c6ae9d9c47ddc2c4ddbe72c5a76d91b732e7",
+      "after_sha256": "d802b3f46452fd463d2a1d47fd7a570934bf2f90171e043dee043e3b698f12c4"
+    },
+    {
+      "path": "docs/generated/tool-face-manifest.json",
+      "added": 162,
+      "removed": 0,
+      "before_sha256": "c2c2fa397f1f84503137e29efeebfc4a65ff07a19fd21cdad14127db01fba6ef",
+      "after_sha256": "1ce85c286cf22fb2f19020d4cdd3ed18ed2329b78df9a9c130bd933825f225c8"
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "added": 100,
+      "removed": 99,
+      "before_sha256": "a3d2ae8897b2c35399825de47087fbd703ec089d7cc83259892f2211702d9c8e",
+      "after_sha256": "88185c1450f945616a353a787f3130e05eb2e8333d7540bc0fde3e6b06648385"
+    },
+    {
+      "path": "docs/agent-ops/INDEX.md",
+      "added": 3,
+      "removed": 2,
+      "before_sha256": "7c20a9e490f4d63a851d637bf959b45b3be2346b39dd72ba6ea5ec536b106c0d",
+      "after_sha256": "6f581661a61308dab74b39e97583af52e25a2d667b49a6d49a8daffe1735e3fd"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-14-v14-1-a2b-delete-ceremony-order.md",
+      "added": 52,
+      "removed": 1,
+      "before_sha256": "e0581e3b5a316e072e83ba42526b63aec848a86f2f4b632305206856b3a00c31",
+      "after_sha256": "d214dae4f3d8942c3aba158f99007803bb7990943607aa5214732e720b1fc1b5"
+    }
+  ]
+}

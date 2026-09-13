@@ -4,7 +4,7 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { ZodError } from 'zod';
-import { createTimeBlocks, updateTimeBlock, type TimeBlockRow } from '../services/timeBlocks.js';
+import { createTimeBlocks, updateTimeBlock, deleteTimeBlock, type TimeBlockRow } from '../services/timeBlocks.js';
 
 // Inline types
 interface TemplateSetRow {
@@ -171,13 +171,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 
 // DELETE /api/time-blocks/:id — delete a single instance
 router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
-  if (!existing) throw new AppError(404, 'Time block not found');
-
-  db.prepare('DELETE FROM time_blocks WHERE id = ?').run(req.params.id);
+  deleteTimeBlock(getDb(), req.userId!, req.params.id as string);
   res.json({ message: 'Time block deleted' });
 });
 

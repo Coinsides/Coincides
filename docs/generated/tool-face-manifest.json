@@ -5364,6 +5364,168 @@
     ]
   },
   {
+    "name": "delete_time_block",
+    "description": "First call with block_id only to receive a system-generated deletion restatement and authorization_id; this does not delete anything. Present the complete restatement to the user and obtain their explicit confirmation. Then call with the same block_id, authorization_id and the user's exact reply in user_confirmation_anchor. Authorization expires after 24 hours and can be consumed only once; changed consequences require a new restatement.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "block_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorization_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "user_confirmation_anchor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "authorization_id": {
+              "type": "string"
+            },
+            "restatement": {
+              "type": "object",
+              "properties": {
+                "block": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "template_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string"
+                    },
+                    "start_time": {
+                      "type": "string"
+                    },
+                    "end_time": {
+                      "type": "string"
+                    },
+                    "color": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "user_id",
+                    "template_id",
+                    "label",
+                    "type",
+                    "date",
+                    "start_time",
+                    "end_time",
+                    "color",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "affected_task_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "consequences": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "block",
+                "affected_task_ids",
+                "consequences"
+              ],
+              "additionalProperties": false
+            },
+            "expires_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "authorization_id",
+            "restatement",
+            "expires_at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "const": "Time block deleted"
+            },
+            "receipt_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "deleted_block_id": {
+              "type": "string"
+            },
+            "unbound_task_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "message",
+            "receipt_id",
+            "deleted_block_id",
+            "unbound_task_ids"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "truth": "purpose",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "DELETE /api/time-blocks/:id",
+      "client_call_site": "client/src/stores/timeBlockStore.ts#deleteInstance"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "time_blocks:write"
+    ]
+  },
+  {
     "name": "link_task_cards",
     "description": "Link cards to a task using the strict single-card door. Any missing or duplicate card link fails the entire batch; the error identifies card_id.",
     "input_schema": {

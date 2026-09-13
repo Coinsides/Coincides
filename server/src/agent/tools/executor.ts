@@ -10,6 +10,7 @@ import { createSection } from '../../services/sections.js';
 import { createTimeBlocks, updateTimeBlock } from '../../services/timeBlocks.js';
 import { recordAgentAction, type AgentActionContext } from '../../services/recordAgentAction.js';
 import { recordChatTranscription } from '../../services/recordChatTranscription.js';
+import { deleteTimeBlockWithAuthorization } from '../../services/agentAuthorizations.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import {
   CREATE_GOAL_TOOL, CREATE_SUB_GOAL_TOOL, CREATE_TASK_TOOL, CREATE_DECK_TOOL,
@@ -854,17 +855,7 @@ export async function executeTool(
     }
 
     case 'delete_time_block': {
-      const { block_id } = args as { block_id: string };
-
-      const existing = db.prepare(
-        'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
-      ).get(block_id, userId) as any;
-      if (!existing) {
-        return JSON.stringify({ error: 'Time block not found' });
-      }
-
-      db.prepare('DELETE FROM time_blocks WHERE id = ?').run(block_id);
-      return JSON.stringify({ message: 'Time block deleted' });
+      return JSON.stringify(deleteTimeBlockWithAuthorization(db, userId, context, args));
     }
 
     case 'link_task_cards': {

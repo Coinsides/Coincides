@@ -9,6 +9,32 @@ export interface TimeBlockRow {
   color: string | null; created_at: string; updated_at: string;
 }
 
+export interface TimeBlockDeleteConsequences {
+  block: TimeBlockRow;
+  taskBindings: Array<{ id: string; time_block_id: string }>;
+}
+
+/** Capture the actual FK effect, including every task that will be unbound. */
+export function getTimeBlockDeleteConsequences(
+  db: Database.Database, userId: string, id: string,
+): TimeBlockDeleteConsequences {
+  const block = db.prepare('SELECT * FROM time_blocks WHERE id = ? AND user_id = ?')
+    .get(id, userId) as TimeBlockRow | undefined;
+  if (!block) throw new AppError(404, 'Time block not found');
+  const taskBindings = db.prepare('SELECT id, time_block_id FROM tasks WHERE time_block_id = ? ORDER BY id')
+    .all(id) as TimeBlockDeleteConsequences['taskBindings'];
+  return { block, taskBindings };
+}
+
+/** Shared human/agent domain door; the caller owns any additional ceremony. */
+export function deleteTimeBlock(db: Database.Database, userId: string, id: string): TimeBlockDeleteConsequences {
+  return db.transaction(() => {
+    const consequences = getTimeBlockDeleteConsequences(db, userId, id);
+    db.prepare('DELETE FROM time_blocks WHERE id = ? AND user_id = ?').run(id, userId);
+    return consequences;
+  })();
+}
+
 /** Return every actual row in request order, for both single and batch callers. */
 export function createTimeBlocks(db: Database.Database, userId: string, input: unknown): TimeBlockRow[] {
   const { blocks } = createTimeBlocksSchema.parse(input);

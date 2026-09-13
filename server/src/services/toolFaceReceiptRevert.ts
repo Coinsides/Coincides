@@ -182,6 +182,59 @@ function revertUpdatedTimeBlock(input: RevertTrashNotesReceiptInput): ToolFaceRe
   }).immediate();
 }
 
+function revertDeletedTimeBlock(input: RevertTrashNotesReceiptInput): ToolFaceReceipt {
+  const db = getDb();
+  return db.transaction(() => {
+    const receipt = appliedAgentReceipt(db, input);
+    const [resource, ...taskResources] = receipt.metadata.resources;
+    if (receipt.metadata.tool !== 'delete_time_block' || resource?.kind !== 'time_block'
+      || resource.outcome !== 'deleted' || typeof resource.id !== 'string'
+      || new Set(taskResources.map((task) => task.id)).size !== taskResources.length) {
+      changedResource('Time block deletion receipt is invalid');
+    }
+    const before = previousValues(resource);
+    const stringFields = ['id', 'user_id', 'label', 'type', 'date', 'start_time', 'end_time', 'created_at', 'updated_at'];
+    if (stringFields.some((field) => typeof before[field] !== 'string')
+      || (before.template_id !== null && typeof before.template_id !== 'string')
+      || (before.color !== null && typeof before.color !== 'string')
+      || before.id !== resource.id || before.user_id !== input.userId) {
+      changedResource('Deleted time block original values are incomplete');
+    }
+    if (db.prepare('SELECT 1 FROM time_blocks WHERE id = ?').get(resource.id)) {
+      changedResource('Deleted time block ID is already occupied; cannot restore');
+    }
+    if (before.template_id !== null
+      && !db.prepare('SELECT 1 FROM time_block_templates WHERE id = ? AND user_id = ?')
+        .get(before.template_id, input.userId)) {
+      changedResource('Deleted time block template is missing or unavailable; cannot restore');
+    }
+    for (const taskResource of taskResources) {
+      if (taskResource.kind !== 'task' || taskResource.outcome !== 'unbound'
+        || typeof taskResource.id !== 'string'
+        || previousValues(taskResource).time_block_id !== resource.id) {
+        changedResource('Time block deletion task binding receipt is invalid');
+      }
+      const task = db.prepare('SELECT time_block_id FROM tasks WHERE id = ? AND user_id = ?')
+        .get(taskResource.id, input.userId) as { time_block_id: string | null } | undefined;
+      if (!task || task.time_block_id !== null) {
+        changedResource(`Task ${taskResource.id} is missing or has a later time block binding; cannot restore`);
+      }
+    }
+    // Restore the original row and only the bindings removed by its deletion.
+    // Validate all references before writing, preserving later edits to task content.
+    const fields = ['id', 'user_id', 'template_id', 'label', 'type', 'date', 'start_time', 'end_time', 'color', 'created_at', 'updated_at'];
+    db.prepare(`INSERT INTO time_blocks (${fields.join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`)
+      .run(...fields.map((field) => before[field]));
+    for (const taskResource of taskResources) {
+      db.prepare('UPDATE tasks SET time_block_id = ? WHERE id = ? AND user_id = ?')
+        .run(resource.id, taskResource.id, input.userId);
+    }
+    return finishAgentRevert(db, receipt, input.userId, {
+      restored: [resource.id], restored_task_bindings: taskResources.map((task) => task.id),
+    });
+  }).immediate();
+}
+
 function completionSnapshot(value: unknown): Record<string, unknown> | null {
   if (value === null) return null;
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -251,6 +304,7 @@ const agentActionReverts = new Map<string, typeof revertCreatedGoalReceipt>([
   ['create_section', revertCreatedResources],
   ['create_time_blocks', revertCreatedResources],
   ['update_time_block', revertUpdatedTimeBlock],
+  ['delete_time_block', revertDeletedTimeBlock],
   ['link_task_cards', revertCreatedResources],
   ['complete_task', revertCompletedTask],
 ]);
