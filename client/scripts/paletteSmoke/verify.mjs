@@ -133,7 +133,7 @@ try {
     if (healthy) break; await delay(100);
   }
   assert.ok(healthy, 'isolated backend started');
-  const registration = await api('/auth/register', 'POST', { email: 'palette-smoke@example.invalid', password: 'SyntheticPalettePassword42', name: 'Palette smoke' });
+  const registration = await api('/auth/register', 'POST', { email: 'palette-smoke@example.invalid', password: 'SynthPalettePw42', name: 'Palette smoke' });
   token = registration.token;
   await api('/settings/onboarding-complete', 'PUT', {});
   const course = await api('/courses', 'POST', { name: 'Palette smoke project' });
