@@ -10,7 +10,8 @@ import { usePaperInkCommands } from './usePaperInkCommands';
 import { usePlacementHistory } from './usePlacementHistory';
 
 const api = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn(), addToast: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: api }));
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(), default: api }));
 vi.mock('@/stores/uiStore', () => ({ useUIStore: (selector: (state: { addToast: typeof api.addToast }) => unknown) => selector(api) }));
 
 const note = { id: 'ink-note', title: 'Synthetic paper ink', course_id: '', description: null, status: 'active', metadata: {} };
@@ -59,6 +60,7 @@ beforeEach(() => {
   layoutX = 0;
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   api.get.mockImplementation(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === '/canvas-objects/coordinate-contract') return { data: { coordinate_contract: 'v2' } };
     if (url === `/notes/${note.id}`) return { data: note };
     if (url === `/canvas-objects/by-note/${note.id}`) return { data: { coordinateContract: 'v2', pageFrameCollection: collection,

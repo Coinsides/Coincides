@@ -2,6 +2,14 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { SkinControls } from './SkinControls';
 
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(),
+  default: { get: vi.fn(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
+    throw new Error(`Unexpected synthetic GET: ${url}`);
+  }) },
+}));
+
 describe('SkinControls appearance choices', () => {
   it('offers a labeled header rule switch and resets only its override', () => {
     const onChange = vi.fn();

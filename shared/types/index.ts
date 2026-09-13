@@ -4,6 +4,7 @@
 
 import type { SkinSelection } from './skin.js';
 export * from './skin.js';
+export * from './palette.js';
 
 // --- Enums ---
 
@@ -782,6 +783,7 @@ export interface LoginRequest {
 
 export interface CreateCourseRequest {
   name: string;
+  skin?: SkinSelection | null;
   code?: string;
   color?: string;
   weight?: number;
@@ -791,6 +793,7 @@ export interface CreateCourseRequest {
 
 export interface UpdateCourseRequest {
   name?: string;
+  skin?: SkinSelection | null;
   code?: string;
   color?: string;
   weight?: number;

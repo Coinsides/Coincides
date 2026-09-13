@@ -10,7 +10,8 @@ import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { usePlacementHistory } from './usePlacementHistory';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn(), addToast: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: mocks }));
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(), default: mocks }));
 vi.mock('@/stores/uiStore', () => ({
   useUIStore: (select: (state: { addToast: typeof mocks.addToast }) => unknown) => select({ addToast: mocks.addToast }),
 }));
@@ -102,6 +103,7 @@ describe('page wall adapter persistence through the real collection repository',
     vi.clearAllMocks();
     fixtures = { 'note-1': fixture('note-1'), 'note-2': fixture('note-2') };
     mocks.get.mockImplementation(async (url: string) => {
+      if (url === '/palette-colors') return { data: [] };
       if (url === '/canvas-objects/coordinate-contract') return { data: { coordinate_contract: 'v2' } };
       if (url.startsWith('/boards/text-ranges/by-note/')) return { data: { text_ranges: [] } };
       for (const [id, data] of Object.entries(fixtures)) {

@@ -8,6 +8,7 @@ import { AppError } from '../middleware/errorHandler.js';
 import { registerSchema, loginSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 import { publicSettings } from '../services/publicSettings.js';
+import { seedFactoryPaletteColors } from '../db/paletteSeed.js';
 
 const router = Router();
 
@@ -39,6 +40,7 @@ router.post('/register', (req: AuthRequest, res: Response) => {
 
     // Seed system tags for new user
     seedSystemTags(id);
+    seedFactoryPaletteColors(db, id);
 
     const token = generateToken(id);
 

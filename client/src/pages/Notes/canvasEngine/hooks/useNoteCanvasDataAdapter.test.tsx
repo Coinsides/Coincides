@@ -43,8 +43,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(),
   default: {
-    get: (url: string, ...args: unknown[]) => url.startsWith('/boards/text-ranges/by-note/')
+    get: (url: string, ...args: unknown[]) => url === '/palette-colors'
+      ? Promise.resolve({ data: [] })
+      : url.startsWith('/boards/text-ranges/by-note/')
       ? mocks.boardRangesGet(url, ...args)
       : url === '/canvas-objects/coordinate-contract'
       ? Promise.resolve({ data: { coordinate_contract: mocks.coordinateContract } })

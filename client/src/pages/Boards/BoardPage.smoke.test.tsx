@@ -20,7 +20,8 @@ import type { Note, NoteBlock, PurposeFrameV1 } from '../Notes/canvasEngine/runt
 // Mock transport and unrelated shell initialization; board/paper hooks, AppLayout and uiStore are production code.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
 const addToast = vi.hoisted(() => vi.fn());
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(), default: http }));
 vi.mock('@/stores/courseStore', () => ({ useCourseStore: (select: any) => select({ courses: [], fetchCourses: () => undefined }) }));
 vi.mock('@/stores/tagStore', () => ({ useTagStore: (select: any) => select({ fetchTags: () => undefined }) }));
 vi.mock('@/stores/authStore', () => ({ useAuthStore: (select: any) => select({ user: null, loadUser: () => undefined }) }));
@@ -187,6 +188,7 @@ beforeEach(() => {
   Object.defineProperty(SVGElement.prototype, 'releasePointerCapture', { configurable: true, value: noOp });
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string; note_id?: string } }) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === '/boards') return response({ boards: boards.map(({ board }) => board) });
     if (url.startsWith('/boards/text-ranges/by-note/')) return response({ text_ranges: [] });
     if (/^\/boards\/[^/]+\/viewport-bookmarks$/.test(url)) {

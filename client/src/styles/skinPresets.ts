@@ -1,4 +1,5 @@
 import { SKIN_COMPONENT_OPTIONS, SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinComponents, type SkinPresetId, type SkinSelection, type SkinTokens } from '@shared/types';
+import { SKIN_COLOR_VALUE_PATTERN } from '@shared/types';
 
 /** Factory snapshots. The default column is the incumbent paper palette, not a redesign. */
 export const SKIN_PRESETS: Record<SkinPresetId, SkinTokens> = {
@@ -26,7 +27,7 @@ export function readSkin(value: unknown): SkinSelection | null {
   if (!SKIN_PRESET_IDS.includes(raw.preset as SkinPresetId)) return null;
   const overrides = Object.fromEntries(SKIN_TOKEN_NAMES.flatMap((key) => {
     const color = raw.overrides?.[key];
-    return typeof color === 'string' && /^#[\da-f]{6}([\da-f]{2})?$/i.test(color) ? [[key, color]] : [];
+    return typeof color === 'string' && SKIN_COLOR_VALUE_PATTERN.test(color) ? [[key, color]] : [];
   }));
   const components = Object.fromEntries(Object.entries(SKIN_COMPONENT_OPTIONS).flatMap(([key, options]) => {
     const option = raw.components?.[key as keyof SkinComponents];
@@ -36,7 +37,7 @@ export function readSkin(value: unknown): SkinSelection | null {
 }
 
 /** An absent mounting point inherits. A named snapshot replaces its parent's palette. */
-export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null) {
+export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null, palette: Readonly<Record<string, string>> = {}) {
   let preset: SkinPresetId = 'default';
   let tokens = { ...SKIN_PRESETS.default };
   let components = { ...SKIN_PRESET_COMPONENTS.default };
@@ -44,7 +45,12 @@ export function resolveSkin(global?: SkinSelection | null, project?: SkinSelecti
     const skin = readSkin(candidate);
     if (!skin) continue;
     preset = skin.preset;
-    tokens = { ...SKIN_PRESETS[preset], ...skin.overrides };
+    tokens = { ...SKIN_PRESETS[preset] };
+    for (const key of SKIN_TOKEN_NAMES) {
+      const stored = skin.overrides?.[key];
+      const value = stored?.startsWith('palette:') ? palette[stored.slice(8)] : stored;
+      if (value && /^#[\da-f]{6}([\da-f]{2})?$/i.test(value)) tokens[key] = value;
+    }
     components = { ...SKIN_PRESET_COMPONENTS[preset], ...skin.components };
   }
   return { preset, tokens, components };

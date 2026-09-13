@@ -7,8 +7,10 @@ import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
 import type { Course } from '@shared/types';
 import type { SkinSelection } from '@shared/types/skin';
 import type { Note } from '../runtimeDataTypes';
+import { detachSkinSelection, usePaletteColors, usePaletteStore } from '@/hooks/usePaletteColors';
 
 export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null) => Promise<void>, saveError = false) {
+  const palette = usePaletteColors();
   const global = useAuthStore((s) => s.user?.settings.skin);
   const [project, setProject] = useState<{ id: string; skin: SkinSelection | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +27,9 @@ export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null
   }, [courseId, attempt]);
   const selection = useMemo(() => readSkin(note?.metadata?.skin), [note?.metadata?.skin]);
   const inheritedSelection = (project && project.id === courseId ? project.skin : null) ?? readSkin(global);
-  const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === courseId ? project.skin : null, selection), [global, project, courseId, selection]);
+  const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === courseId ? project.skin : null, selection, palette.values), [global, project, courseId, selection, palette.values]);
   const style = useMemo(() => ({ ...buildPaperSkinStyles(resolved.tokens),
     ...buildPaperMaterialStyles(resolved.tokens, resolved.preset), ...buildSkinComponentStyles(resolved.components),
   }), [resolved.tokens, resolved.components, resolved.preset]);
-  return { ...resolved, style, selection, inheritedSelection, save, saveError, error, retry: () => setAttempt((n) => n + 1) };
+  return { ...resolved, style, selection, inheritedSelection, save: (skin: SkinSelection | null) => save(detachSkinSelection(skin, usePaletteStore.getState().detached)), saveError, error, retry: () => setAttempt((n) => n + 1) };
 }

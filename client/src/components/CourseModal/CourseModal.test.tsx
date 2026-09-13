@@ -1,13 +1,24 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Course } from '@shared/types';
 import CourseModal from './CourseModal';
+import { usePaletteStore } from '@/hooks/usePaletteColors';
+
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(),
+  default: { get: vi.fn(async (url: string) => {
+    if (url === '/palette-colors') return { data: mocks.paletteColors };
+    throw new Error(`Unexpected synthetic GET: ${url}`);
+  }), delete: (url: string) => mocks.deletePaletteColor(url) },
+}));
 
 const mocks = vi.hoisted(() => ({
   addToast: vi.fn(),
   closeModal: vi.fn(),
   createCourse: vi.fn(),
   updateCourse: vi.fn(),
+  paletteColors: [] as Array<{ id: string; user_id: string; name: string; value: string; origin: 'user'; sort: number; created_at: string }>,
+  deletePaletteColor: vi.fn(),
   uiState: {
     modal: null as { type: string; data?: unknown } | null,
   },
@@ -59,6 +70,8 @@ async function submitEditedCourse() {
 describe('CourseModal project weight retirement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.paletteColors = [];
+    usePaletteStore.setState({ owner: undefined, colors: [], values: {}, detached: {}, loaded: false, loading: false, error: null });
     mocks.uiState.modal = {
       type: 'course-edit',
       data: { course: existingCourse },
@@ -72,6 +85,29 @@ describe('CourseModal project weight retirement', () => {
 
     expect(screen.getByText('Edit Project')).toBeTruthy();
     expect(screen.queryByText('Priority Weight')).toBeNull();
+  });
+
+  it('submitting a project after deleting another token color retains its detached hex and cannot restore the reference', async () => {
+    const id = '14000000-0000-4000-8000-000000000017';
+    mocks.paletteColors = [{ id, user_id: 'user-1', name: '自选/雾', value: '#aBcDeF80', origin: 'user', sort: 1, created_at: '2026-09-13' }];
+    const skin: Course['skin'] = { preset: 'warm-paper', overrides: { paper: `palette:${id}`, accent: '#112233' } };
+    mocks.uiState.modal = { type: 'course-edit', data: { course: { ...existingCourse, skin } } };
+    let finishDelete!: (value: unknown) => void;
+    mocks.deletePaletteColor.mockReturnValue(new Promise((resolve) => { finishDelete = resolve; }));
+    render(<CourseModal />);
+    await waitFor(() => expect(usePaletteStore.getState().colors).toHaveLength(1));
+    fireEvent.click(screen.getByText('高级颜色'));
+    fireEvent.click(screen.getByRole('button', { name: '强调' }));
+    fireEvent.click(screen.getByRole('button', { name: '编辑' }));
+    fireEvent.click(screen.getByRole('button', { name: '删除自选/雾' }));
+    await waitFor(() => expect(mocks.deletePaletteColor).toHaveBeenCalledWith(`/palette-colors/${id}`));
+    fireEvent.click(screen.getByRole('button', { name: 'Update' }));
+    expect(mocks.updateCourse).not.toHaveBeenCalled();
+    await act(async () => { finishDelete({ data: { id, value: '#aBcDeF80' } }); });
+    await waitFor(() => expect(mocks.updateCourse).toHaveBeenCalledTimes(1));
+    expect(mocks.updateCourse).toHaveBeenCalledWith(existingCourse.id, expect.objectContaining({
+      skin: { preset: 'warm-paper', overrides: { paper: '#aBcDeF80', accent: '#112233' } },
+    }));
   });
 
   it('K-3c submits an edit patch without its own weight field', async () => {

@@ -6,6 +6,7 @@ import type { SkinSelection } from '@shared/types/skin';
 import { readSkin } from '@/styles/skinPresets';
 import { SkinControls } from '@/components/Skin/SkinControls';
 import { useAuthStore } from '@/stores/authStore';
+import { saveSkinWithPalette } from '@/hooks/usePaletteColors';
 import styles from './CourseModal.module.css';
 
 const PRESET_COLORS = [
@@ -59,9 +60,11 @@ export default function CourseModal() {
       };
 
       if (isEdit && existing) {
-        const updated = await updateCourse(existing.id, payload);
-        const onUpdated = modal?.data?.onUpdated;
-        if (typeof onUpdated === 'function') onUpdated(updated);
+        await saveSkinWithPalette(skin, async (normalized) => {
+          const updated = await updateCourse(existing.id, { ...payload, skin: normalized });
+          const onUpdated = modal?.data?.onUpdated;
+          if (typeof onUpdated === 'function') onUpdated(updated);
+        });
         addToast('success', 'Project updated');
       } else {
         await createCourse(payload);

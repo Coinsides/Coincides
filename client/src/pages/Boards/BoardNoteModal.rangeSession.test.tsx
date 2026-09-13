@@ -15,7 +15,8 @@ const probe = vi.hoisted(() => ({
   saves: [] as Array<ReturnType<ReturnType<typeof useNoteCanvasDataAdapter>['saveBlock']>>,
 }));
 
-vi.mock('@/services/api', () => ({ default: { get: probe.get, put: probe.put } }));
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(), default: { get: probe.get, put: probe.put } }));
 vi.mock('@/stores/uiStore', () => ({
   useUIStore: (selector: (state: { addToast: typeof probe.addToast }) => unknown) => selector({ addToast: probe.addToast }),
 }));
@@ -111,6 +112,7 @@ it('registers a range minted in the open modal and keeps it Live after same-sess
   const registration = deferred<{ data: { text_ranges: BoardTextRangeV1[] } }>();
   let rangeReads = 0;
   probe.get.mockImplementation(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === byNoteUrl) {
       calls.push('ranges GET');
       rangeReads += 1;

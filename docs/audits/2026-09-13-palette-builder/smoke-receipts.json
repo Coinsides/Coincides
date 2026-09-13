@@ -1,0 +1,684 @@
+{
+  "run": ".tmp\\palette-validation\\smoke\\run-UrvCfH",
+  "isolation": {
+    "database": "fresh per run",
+    "profile": "fresh per run",
+    "dotenv": "synthetic empty file",
+    "sandbox": "isolated Chrome test-harness --no-sandbox; tool/filesystem sandbox unchanged"
+  },
+  "checks": [
+    {
+      "name": "actual migration and registration seed",
+      "factoryCount": 24,
+      "noteId": "cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "name": "unified picker renders all four sections",
+      "headings": [
+        "调色板",
+        "标准色",
+        "最近使用",
+        "自由取色"
+      ]
+    },
+    {
+      "name": "pool click persists reference and colors paper",
+      "reference": "palette:aede03cb-aa2c-4f1c-8d73-4590be0c5750",
+      "paper": "#D3E4F5"
+    },
+    {
+      "name": "editing pool hex updates live paper",
+      "paper": "#AbCDef88"
+    },
+    {
+      "name": "delete detaches without changing exact resolved bytes",
+      "beforeDelete": "#AbCDef88",
+      "afterDelete": "#AbCDef88",
+      "persisted": "#AbCDef88"
+    },
+    {
+      "name": "standard swatch persists an absolute color",
+      "value": "#4A6FA5"
+    },
+    {
+      "name": "验证/Hex新色",
+      "value": "#B1C2D3"
+    },
+    {
+      "name": "free hex and current-color add create named pool reference",
+      "added": {
+        "id": "dd72397b-dbb7-4201-b9d3-71226f86373b",
+        "user_id": "b992094b-27a5-40e3-86ac-401422cf069b",
+        "name": "验证/入池",
+        "value": "#C6D7E8",
+        "sort": 26000,
+        "origin": "user",
+        "created_at": "2026-09-13T02:30:35.658Z"
+      }
+    },
+    {
+      "name": "slash prefix group collapses"
+    },
+    {
+      "name": "Escape closes and restores trigger focus"
+    },
+    {
+      "name": "open picker responds to 360px viewport",
+      "bounds": {
+        "left": 8,
+        "right": 352,
+        "top": 52,
+        "bottom": 732
+      }
+    },
+    {
+      "name": "reference resolves after actual page reload"
+    },
+    {
+      "name": "browser runtime and application request ledger clean"
+    }
+  ],
+  "screenshots": [
+    "smoke-paper-before.png",
+    "smoke-four-sections.png",
+    "smoke-reference-bound.png",
+    "smoke-reference-edited.png",
+    "smoke-reference-detached.png",
+    "smoke-standard-literal.png",
+    "smoke-hex-created.png",
+    "smoke-hex-added.png",
+    "smoke-group-collapsed.png",
+    "smoke-narrow-viewport.png",
+    "smoke-reloaded.png"
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/palette-colors"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/courses"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/courses"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/palette-colors"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/group-folders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas-objects/coordinate-contract"
+    },
+    {
+      "method": "GET",
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/purposes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/group-folders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/purposes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata"
+    },
+    {
+      "method": "GET",
+      "path": "/api/courses/f6d5f311-59e5-4360-bf6f-1dbdeec92138/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/palette-colors/aede03cb-aa2c-4f1c-8d73-4590be0c5750"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/palette-colors/aede03cb-aa2c-4f1c-8d73-4590be0c5750"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "POST",
+      "path": "/api/palette-colors"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "POST",
+      "path": "/api/palette-colors"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/palette-colors"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/courses"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/courses"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/palette-colors"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/group-folders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas-objects/coordinate-contract"
+    },
+    {
+      "method": "GET",
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/purposes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/group-folders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/purposes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata"
+    },
+    {
+      "method": "GET",
+      "path": "/api/courses/f6d5f311-59e5-4360-bf6f-1dbdeec92138/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata"
+    }
+  ],
+  "responses": [
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks",
+      "status": 200
+    },
+    {
+      "path": "/api/templates",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/courses",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks",
+      "status": 200
+    },
+    {
+      "path": "/api/templates",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/courses",
+      "status": 200
+    },
+    {
+      "path": "/api/content-groups",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors",
+      "status": 200
+    },
+    {
+      "path": "/api/content-groups",
+      "status": 200
+    },
+    {
+      "path": "/api/group-folders",
+      "status": 200
+    },
+    {
+      "path": "/api/canvas-objects/coordinate-contract",
+      "status": 200
+    },
+    {
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/purposes",
+      "status": 200
+    },
+    {
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/group-folders",
+      "status": 200
+    },
+    {
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/purposes",
+      "status": 200
+    },
+    {
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata",
+      "status": 200
+    },
+    {
+      "path": "/api/courses/f6d5f311-59e5-4360-bf6f-1dbdeec92138/summary",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors/aede03cb-aa2c-4f1c-8d73-4590be0c5750",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors/aede03cb-aa2c-4f1c-8d73-4590be0c5750",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors",
+      "status": 201
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors",
+      "status": 201
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks",
+      "status": 200
+    },
+    {
+      "path": "/api/templates",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/courses",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/blocks",
+      "status": 200
+    },
+    {
+      "path": "/api/templates",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/courses",
+      "status": 200
+    },
+    {
+      "path": "/api/content-groups",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/palette-colors",
+      "status": 200
+    },
+    {
+      "path": "/api/content-groups",
+      "status": 200
+    },
+    {
+      "path": "/api/group-folders",
+      "status": 200
+    },
+    {
+      "path": "/api/canvas-objects/coordinate-contract",
+      "status": 200
+    },
+    {
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/purposes",
+      "status": 200
+    },
+    {
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/group-folders",
+      "status": 200
+    },
+    {
+      "path": "/api/annotation-truths/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/purposes",
+      "status": 200
+    },
+    {
+      "path": "/api/boards/text-ranges/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/canvas-objects/by-note/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata",
+      "status": 200
+    },
+    {
+      "path": "/api/courses/f6d5f311-59e5-4360-bf6f-1dbdeec92138/summary",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/notes/cc6fa5f7-183d-45c9-bed7-9c7dde8bc332/metadata",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "status": "passed"
+}

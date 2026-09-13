@@ -81,6 +81,7 @@ beforeEach(() => {
     });
   }
   http.get.mockImplementation(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === path) return response(detail);
     if (url === `${path}/viewport-bookmarks`) return response({ bookmarks: [] });
     if (url === '/courses' || url === '/items') return response([]);

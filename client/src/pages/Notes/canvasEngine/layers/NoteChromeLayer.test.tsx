@@ -33,8 +33,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(),
   default: {
-    get: mocks.get,
+    get: (url: string, ...args: unknown[]) => url === '/palette-colors'
+      ? Promise.resolve({ data: [] }) : mocks.get(url, ...args),
     delete: mocks.delete,
     post: mocks.post,
   },
@@ -294,7 +296,9 @@ describe('NoteChromeLayer appearance', () => {
     }
     fireEvent.click(screen.getByText('纸面外观'));
     fireEvent.click(screen.getByText('高级颜色'));
-    fireEvent.change(screen.getByRole('textbox', { name: '纸面' }), { target: { value: '#123456' } });
+    fireEvent.click(screen.getByRole('button', { name: '纸面' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Hex 颜色' }), { target: { value: '#123456' } });
+    fireEvent.keyDown(screen.getByRole('dialog', { name: '纸面颜色' }), { key: 'Escape' });
     await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { paper: '#123456' } }));
     fireEvent.click(screen.getByRole('button', { name: '关闭外观' }));
     expect(document.querySelector('[data-note-overlay="appearance"]')).toBeNull();

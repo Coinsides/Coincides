@@ -118,6 +118,7 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => [new DOMRect(0, 0, 1100, 800)] as unknown as DOMRectList);
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string } }) => {
+    if (url === '/palette-colors') return { data: [] };
     const asset = readCanvasAssetFixture(url);
     if (asset) return asset;
     if (url === '/boards/board') return response(board);

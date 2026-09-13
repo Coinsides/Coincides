@@ -1,0 +1,313 @@
+{
+  "basis": "filesystem originals captured before edits; difflib line numstat, no Git; audit evidence files excluded",
+  "files": 61,
+  "added": 1838,
+  "deleted": 96,
+  "entries": [
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "added": 2,
+      "deleted": 1
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "added": 2,
+      "deleted": 1
+    },
+    {
+      "path": "client/scripts/paletteSmoke/README.md",
+      "added": 21,
+      "deleted": 0
+    },
+    {
+      "path": "client/scripts/paletteSmoke/verify.mjs",
+      "added": 264,
+      "deleted": 0
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/ColorPicker/UnifiedColorPicker.module.css",
+      "added": 66,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/ColorPicker/UnifiedColorPicker.test.tsx",
+      "added": 164,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/ColorPicker/UnifiedColorPicker.tsx",
+      "added": 220,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/ColorPicker/paletteUtils.test.ts",
+      "added": 52,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/ColorPicker/paletteUtils.ts",
+      "added": 69,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.test.tsx",
+      "added": 37,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.tsx",
+      "added": 6,
+      "deleted": 3
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.test.tsx",
+      "added": 8,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.tsx",
+      "added": 14,
+      "deleted": 23
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.test.tsx",
+      "added": 8,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.tsx",
+      "added": 6,
+      "deleted": 3
+    },
+    {
+      "path": "client/src/hooks/usePaletteColors.test.ts",
+      "added": 86,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/hooks/usePaletteColors.ts",
+      "added": 117,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "added": 1,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.test.tsx",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.ts",
+      "added": 7,
+      "deleted": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "added": 38,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "added": 4,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "added": 12,
+      "deleted": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+      "added": 8,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "added": 4,
+      "deleted": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "added": 6,
+      "deleted": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.test.tsx",
+      "added": 2,
+      "deleted": 1
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "added": 17,
+      "deleted": 0
+    },
+    {
+      "path": "client/src/styles/skinPresets.ts",
+      "added": 9,
+      "deleted": 3
+    },
+    {
+      "path": "docs/agent-ops/INDEX.md",
+      "added": 3,
+      "deleted": 1
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-13-v14-palette-assets-order.md",
+      "added": 36,
+      "deleted": 0
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "added": 41,
+      "deleted": 39
+    },
+    {
+      "path": "server/package.json",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "server/src/__tests__/v14PaletteColors.test.ts",
+      "added": 244,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/db/migrations/070_v14_palette_colors.ts",
+      "added": 25,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/db/paletteSeed.ts",
+      "added": 27,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/index.ts",
+      "added": 2,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/routes/auth.ts",
+      "added": 2,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/routes/paletteColors.ts",
+      "added": 41,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/services/paletteColors.ts",
+      "added": 90,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/validators/paletteColors.ts",
+      "added": 12,
+      "deleted": 0
+    },
+    {
+      "path": "server/src/validators/skin.ts",
+      "added": 4,
+      "deleted": 1
+    },
+    {
+      "path": "shared/types/index.ts",
+      "added": 3,
+      "deleted": 0
+    },
+    {
+      "path": "shared/types/palette.ts",
+      "added": 24,
+      "deleted": 0
+    },
+    {
+      "path": "shared/types/skin.ts",
+      "added": 4,
+      "deleted": 0
+    }
+  ]
+}

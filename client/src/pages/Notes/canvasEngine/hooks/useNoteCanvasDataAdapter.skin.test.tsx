@@ -6,9 +6,11 @@ import type { SkinSelection } from '@shared/types';
 import type { Note } from '../runtimeDataTypes';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, writeTypographyProfileMetadata } from '../typographyProfileService';
+import { usePaletteColors, usePaletteStore } from '@/hooks/usePaletteColors';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn(), addToast: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: { get: mocks.get, put: mocks.put, post: mocks.post, delete: mocks.delete } }));
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(), default: { get: mocks.get, put: mocks.put, post: mocks.post, delete: mocks.delete } }));
 vi.mock('@/stores/uiStore', () => ({ useUIStore: (select: (state: { addToast: typeof mocks.addToast }) => unknown) => select({ addToast: mocks.addToast }) }));
 
 const callbacks = { onNoteLoaded: vi.fn(), clearLayoutDraftForBlock: vi.fn(), setLayoutDraftForBlock: vi.fn() };
@@ -40,12 +42,14 @@ describe('B1a adapter paper skin write intent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.put.mockReset();
+    usePaletteStore.setState({ owner: undefined, colors: [], values: {}, detached: {}, loaded: false, loading: false, error: null });
     sessionStorage.clear();
     storedNotes = Object.fromEntries(['paper-a', 'paper-b'].map((id) => [id, {
       id, course_id: '', title: id, description: null, status: 'active',
       metadata: { document_property: id, skin: { preset: 'default' } },
     }]));
     mocks.get.mockImplementation(async (url: string) => {
+      if (url === '/palette-colors') return { data: [] };
       if (url === '/canvas-objects/coordinate-contract') return { data: { coordinate_contract: 'v1' } };
       const noteId = /^\/notes\/([^/]+)$/.exec(url)?.[1];
       if (noteId && storedNotes[noteId]) return { data: structuredClone(storedNotes[noteId]) };
@@ -114,6 +118,39 @@ describe('B1a adapter paper skin write intent', () => {
     await act(async () => { second.resolve({ data: storedNotes['paper-a'] }); await secondSave; await oldIdle; });
     expect(oldDrained).toBe(true);
     expect(subject.result.current.note?.metadata).toEqual(storedNotes['paper-b'].metadata);
+  });
+
+  it('binds a skin intent before waiting for palette deletion so navigation cannot apply it to the next note', async () => {
+    const id = '14000000-0000-4000-8000-000000000019';
+    const skin: SkinSelection = { preset: 'warm-paper', overrides: { paper: `palette:${id}`, ink: '#112233' } };
+    const deletionResponse = deferred<{ data: { id: string; value: string } }>();
+    mocks.delete.mockReturnValueOnce(deletionResponse.promise);
+    const palette = renderHook(() => usePaletteColors());
+    await waitFor(() => expect(palette.result.current.loaded).toBe(true));
+    const subject = renderAdapter(); await loaded(subject);
+    const oldWhenIdle = subject.result.current.whenIdle;
+    let deletion!: Promise<unknown>; let saving!: Promise<void>;
+    act(() => {
+      deletion = palette.result.current.deleteColor(id);
+      saving = subject.result.current.saveSkin(skin);
+    });
+    let drained = false;
+    const idle = oldWhenIdle().then(() => { drained = true; });
+    await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith(`/palette-colors/${id}`));
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(drained).toBe(false);
+    subject.rerender({ noteId: 'paper-b' }); await loaded(subject, 'paper-b');
+    await act(async () => {
+      deletionResponse.resolve({ data: { id, value: '#aBcDeF80' } });
+      await Promise.all([deletion, saving, idle]);
+    });
+    expect(mocks.put).toHaveBeenCalledExactlyOnceWith('/notes/paper-a', {
+      skin: { preset: 'warm-paper', overrides: { paper: '#aBcDeF80', ink: '#112233' } },
+    });
+    expect(drained).toBe(true);
+    expect(subject.result.current.note?.id).toBe('paper-b');
+    expect(subject.result.current.note?.metadata?.skin).toEqual({ preset: 'default' });
+    expect(storedNotes['paper-a'].metadata?.skin).toEqual({ preset: 'warm-paper', overrides: { paper: '#aBcDeF80', ink: '#112233' } });
   });
 
   it('failed persistence keeps the latest local skin and the route drain rejects until a successful retry', async () => {

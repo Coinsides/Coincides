@@ -7,7 +7,7 @@ import { useNoteSkin } from './useNoteSkin';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), save: vi.fn() }));
 vi.mock('@/services/api', () => ({
-  default: { get: mocks.get, put: mocks.put }, getToken: () => null, setToken: vi.fn(),
+  default: { get: (url: string) => url === '/palette-colors' ? Promise.resolve({ data: [] }) : mocks.get(url), put: mocks.put }, getToken: () => null, setToken: vi.fn(),
 }));
 
 function note(courseId = 'project-a', skin?: SkinSelection | null): Note {

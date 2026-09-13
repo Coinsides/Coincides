@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock('@/services/api', () => ({ default: mocks }));
 vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => ({
+  useAuthStore: (select = (state: unknown) => state) => select({
     user: {
       name: 'Synthetic user', email: 'synthetic-user@example.invalid',
       settings: {
@@ -31,6 +31,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.get.mockImplementation(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === '/settings/providers') {
       return { data: { providers: ['anthropic', 'openai', 'generic', 'deepseek', 'dashscope', 'voyage'].map((provider) => ({
         provider, has_key: true, has_local_key: true, masked_key: '****1111', source: 'local',

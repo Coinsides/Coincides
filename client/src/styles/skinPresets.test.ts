@@ -1,6 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { readSkin, resolveSkin, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from './skinPresets';
 
+describe('live palette overrides', () => {
+  const id = '14000000-0000-4000-8000-000000000001';
+  const selected = { preset: 'warm-paper' as const, overrides: { paper: `palette:${id}`, ink: '#AbCdEf80' } };
+  it('preserves the reference in storage and resolves the current pool value without changing absolute colors', () => {
+    expect(readSkin(selected)).toEqual(selected);
+    expect(resolveSkin(selected, null, null, { [id]: '#E8B04B' }).tokens.paper).toBe('#E8B04B');
+    const changed = resolveSkin(selected, null, null, { [id]: '#C97B8E80' });
+    expect(changed.tokens.paper).toBe('#C97B8E80');
+    expect(changed.tokens.ink).toBe('#AbCdEf80');
+    expect(selected.overrides.paper).toBe(`palette:${id}`);
+  });
+  it('keeps missing references out of CSS and respects the existing snapshot inheritance', () => {
+    expect(resolveSkin(selected).tokens.paper).toBe(SKIN_PRESETS['warm-paper'].paper);
+    expect(resolveSkin(selected, { preset: 'quiet-ink' }, null, { [id]: '#E8B04B' }).tokens.paper).toBe(SKIN_PRESETS['quiet-ink'].paper);
+  });
+});
+
 describe('B1a factory paper snapshots', () => {
   it.each([
     ['default', { desk: '#0f0f10', paper: '#101114', ink: '#f5f5f5', 'ink-muted': '#b7b8bd', accent: '#2563eb', annotation: '#facc15', hairline: '#2c2d31', danger: '#ef4444', wall: '#777a8270' }],

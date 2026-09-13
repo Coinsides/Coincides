@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(V14 之交批首单;Henry 认对标报告后令"开始做")
+> **状态 (Status)**: done(七节全落;HQ 收口:server test:v2 484/484 全绿,git/secrets 双门补跑绿;client 1602/1602+真浏览器 13/13 builder 在案)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-13
 > **单号**: V14 之交批 · 单1 · 调色板资产 v1+统一取色器
@@ -66,3 +66,39 @@ Result 必含:交付清单+numstat、迁移与 seed 申报、detach 事务实现
 ## 补遗一(HQ 裁定,2026-09-13 二轮)
 
 裁:**是**——报告 §四 的"多命名板"在我们实现=**斜杠前缀派生分组**(不变量 9 优先于 Canva 的多板实体结构;"暖调/杏黄"的「暖调」即一块"板",零独立数据结构);本单落点=统一取色器内(调色板区分组折叠+就地编辑);设计室"抽屉的家"随后续壳单接入,届时读同一份数据(Canva"家与随身编辑口读写同一份"原则)。工单七节零变,续工。
+
+## Result
+
+> **From**: codex(builder)
+> **日期**: 2026-09-13
+> **施工结果**: 七节工程实现已交付；**验收未完成，status 保留 ready，不翻 done**。服务端全量存在既有运行时阻塞，未获绿色结论，不作放行裁定。
+
+### 交付清单
+
+- 新增 migration **070_v14_palette_colors** 与每用户精确 **24 色** seed。旧用户随迁移初始化、新注册用户初始化，GET/create 幂等兜底；factory PATCH/DELETE 一律 409 明码。seed 仅对合成隔离库执行，本轮没有用户库迁移。
+- 新增人面 GET/POST/PATCH/DELETE 路由、zod 输入校验、shared 调色板类型；ownership 为 `getOwnedPaletteColor(db, userId, colorId)`，返完整行。没有 Agent 面登记。
+- shared skin 契约、server validator、client readSkin/resolveSkin 同步支持 `palette:<uuid>`。保留现役 **13 个 token**（纸面 9 + Board 4）及五个 component key，不删改词汇。
+- `UnifiedColorPicker` 四区、斜杠前缀折叠分组、池色存引用、其他色存字面值、色源标注、常驻入池/组尾加号、hex6/8、就地增改删、用户色拖排与键盘移位、localStorage 最近色上限 12、Esc/关闭提交有效编辑并归还焦点。factory 禁改删，分组无独立实体。
+- SkinControls 高级颜色全部接入；SkinEditor、useNoteSkin、useBoardSkin 共享池现值。补齐项目表单提交的残留引用降级，以及笔记先捕获目标身份、再等待池事务的保存队列，防止导航后写错笔记。
+- 台账普查 **25 个测试消费场景 / 7 个浏览器合成传输**，全部显式登记；具体文件及间接挂点见 [fixture-census.md](../../audits/2026-09-13-palette-builder/fixture-census.md)。
+- **numstat：61 文件，+1838 / −96 行**，逐文件列表见 [numstat.json](../../audits/2026-09-13-palette-builder/numstat.json)。口径为编辑前文件系统镜像，未使用 Git，新增审计证据件另列；构建产物没有放进证据目录。
+
+### detach 实现与证据
+
+服务端 `immediate` 同一事务锁内读取池色当时值，枚举 `users.settings.skin.overrides`、`courses.skin.overrides`、`notes.metadata.skin.overrides`（含回收站）、`boards.skin.overrides`，逐项精确匹配引用并改写原始 hex，最后删除色行。后段失败会回滚此前全部改写和删除。
+
+客户端接收 DELETE 返回的权威 hex，保留临时降级映射供已挂载消费者解析，并在后续保存时把旧引用改为字面值。并发删除期间，保存队列等待池操作，目标身份由原保存所有者先绑定。定向和实际浏览器均验证 `#AbCDef88` 删除前后逐字相同、持久化引用清零，零确认弹窗。
+
+### 验证数字与待收口
+
+- shared/client/server 类型检查与构建通过；客户端最终全库 **154 文件 / 1602 测试通过**。
+- 新增 server palette **7/7**；palette + 既有 skin + manifest lifecycle 三套完整复跑 **15/15**；取色器 **17/17**；共享状态/并发保存 **5/5**；项目表单与笔记 adapter 相关回归 **16/16**。
+- `check:test-wiring` **76/76**、`check:tech-debt-table`、受影响静态门、runtime 模型/性能、`docs:check` 全部通过。runtime 总门允许段已拆跑，Git diff 与 secrets 按原单由 HQ 补跑。
+- 实际应用 + 实际 API + 新 SQLite + 真浏览器：**13 检查 / 73 请求全部成功 / 0 runtime exceptions / 11 截图**，见 [smoke.md](../../audits/2026-09-13-palette-builder/smoke.md)。
+- **服务端全量未绿**：全部 76 文件首跑 **650/653 通过、3 失败**，失败涉及 Python PATH、被拒绝执行的固定 MinerU Python、缺 npm 生命周期变量。补齐 PATH/npm 后按同一 76 文件原样重跑，MinerU 套件长期未返回；无界进程探测/回收等待的只读定位与终止记录见 [verification.md](../../audits/2026-09-13-palette-builder/verification.md)。npm lifecycle 完整复跑已绿。**没有过滤任何子例或套件，也没有修改安全语义断言。**
+
+需要 HQ 在固定 MinerU runtime 和 Windows 进程探测正常的环境补齐服务端原样全量；通过后再翻 done。完整日志位置、执行边界、启动时一次误用只读 Git status 的偏差均在 verification.md 明报。
+
+### 未做项
+
+墨水/标注/粉笔/墙的其他取色入口、快选条与浮卡、设计室抽屉壳、Agent 面均未接线；按原单和补遗留给后续单。用户数据库迁移、Git/commit/push/PR、主观签收与最终放行未执行。

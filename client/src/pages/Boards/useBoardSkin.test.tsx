@@ -5,7 +5,9 @@ import { useBoardSkin } from './useBoardSkin';
 import type { Board } from './boardTypes';
 
 const http = vi.hoisted(() => ({ get: vi.fn() }));
-vi.mock('@/services/api', async (importOriginal) => ({ ...await importOriginal<typeof import('@/services/api')>(), default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({ ...await importOriginal<typeof import('@/services/api')>(), default: {
+  get: (url: string) => url === '/palette-colors' ? Promise.resolve({ data: [] }) : http.get(url),
+} }));
 const board = (id: string, project_id: string | null, skin: Board['skin'] = null) => ({ id, project_id, skin } as Board);
 beforeEach(() => {
   vi.clearAllMocks();

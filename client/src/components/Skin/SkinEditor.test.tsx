@@ -3,6 +3,14 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SkinSelection } from '@shared/types/skin';
 import { SkinEditor } from './SkinEditor';
 
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(),
+  default: { get: vi.fn(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
+    throw new Error(`Unexpected synthetic GET: ${url}`);
+  }) },
+}));
+
 describe('SkinEditor save failure recovery', () => {
   it('shows inherited components and edits one switch without resetting the inherited preset or colors', () => {
     const save = vi.fn().mockResolvedValue(undefined);

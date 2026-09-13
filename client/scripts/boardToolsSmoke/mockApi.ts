@@ -84,6 +84,7 @@ function missing(url: string): never { throw new Error(`Synthetic transport: obj
 function record(method: string, url: string, input?: unknown) { writes.push({ method, url, input: copy(input) }); }
 const api = {
   async get(url: string) {
+    if (url === '/palette-colors') return response([]);
     const asset = readCanvasAssetFixture(url);
     if (asset) return asset;
     if (url === BOARD_PATH) return response(detail);

@@ -17,7 +17,8 @@ import { NoteTraySidebar } from './NoteTraySidebar';
 // Only HTTP is replaced. The gesture/controller/sidebar, collision calculation,
 // placement repository and history callbacks below are production code.
 const http = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(), default: http }));
 
 const noteId = 'synthetic-tray-note';
 const original: BlockBoxLayout = { x: 100, y: 20, width: 180, height: 60, surface: 'formal_page',
@@ -59,6 +60,7 @@ let failOrder: boolean;
 beforeEach(() => {
   store = initialStore(); writes = []; failOrder = false;
   http.get.mockReset().mockImplementation(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === '/boards') return { data: { boards: [] } };
     throw new Error(`Unexpected synthetic GET ${url}`);
   });

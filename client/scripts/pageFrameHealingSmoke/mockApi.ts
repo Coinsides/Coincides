@@ -97,7 +97,8 @@ const api = axios.create({ adapter: async (config) => {
   }
   let data: unknown;
   if (method === 'GET') {
-    if (url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
+    if (url === '/palette-colors') data = [];
+    else if (url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
     else if (url === `/notes/${NOTE_ID}`) data = fixtureNote;
     else if (url === `/courses/${fixtureNote.course_id}/summary`) data = { course: { id: fixtureNote.course_id, name: 'Synthetic healing project', skin: null }, goals: [], decks: [], documents: [] };
     else if (url === `/notes/${NOTE_ID}/blocks`) data = fixtureBlocks;

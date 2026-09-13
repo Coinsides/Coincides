@@ -55,6 +55,7 @@ beforeEach(() => {
     identity_item_id: null, identity_description: null,
     viewport: { x: 30, y: -20, zoom: 2 }, created_at: at, updated_at: at }, members: [], edges: [], visuals: [] };
   http.get.mockImplementation(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
     if (url === '/boards/board') return clone(detail);
     if (url === '/boards/board/viewport-bookmarks') return clone({ bookmarks: [] });
     if (url === '/courses') return clone([{ id: 'project', name: 'Synthetic project' }]);

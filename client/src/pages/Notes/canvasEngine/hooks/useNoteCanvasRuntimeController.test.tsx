@@ -9,6 +9,14 @@ import { estimateTypographyTextBlockHeight } from '../typographyMeasurementServi
 import { buildExportPreviewModel } from '../exportPreviewService';
 import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from '../types';
 
+vi.mock('@/services/api', () => ({
+  getToken: () => null, setToken: vi.fn(),
+  default: { get: vi.fn(async (url: string) => {
+    if (url === '/palette-colors') return { data: [] };
+    throw new Error(`Unexpected synthetic GET: ${url}`);
+  }) },
+}));
+
 const rootBridgeContract = vi.hoisted(() => ({
   blocks: [] as NoteBlock[],
   contentWidth: 0,
