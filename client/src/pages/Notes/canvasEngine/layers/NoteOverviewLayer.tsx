@@ -1,52 +1,15 @@
-import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { X } from 'lucide-react';
-import { documentTypographyToCssVars } from '../typographyProfileService';
 import { OVERVIEW_GAP, OVERVIEW_PADDING, overviewLayout, overviewPageIsVisible } from '../overviewLayout';
-import type { PageFrameModel } from '../types';
-import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
-import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+import { NotePageThumbnail, type NotePageThumbnailInput } from './NotePageThumbnail';
 import './NoteOverviewLayer.css';
 
-type OverviewInput = Pick<NoteWritingSurfaceLayerProps,
-  'noteId' | 'noteCanvasRuntime' | 'visibleBlocks' | 'blockTextDrafts'
-  | 'blockTextFlowDrafts' | 'blockFieldDrafts' | 'documentTypographyProfile'
-  | 'anchorsBySourceRef' | 'selectedPageFrameId'>;
-
 export interface NoteOverviewLayerProps {
-  writingSurfaceProps: OverviewInput;
+  writingSurfaceProps: NotePageThumbnailInput;
   currentPageFrameId?: string | null;
   onSelectPage: (frameId: string) => void;
   onClose: () => void;
 }
-
-const OverviewPage = memo(function OverviewPage({ input, frame, pageNumber, width, height, scale,
-  selected, renderContent, onSelectPage }: {
-  input: OverviewInput; frame: PageFrameModel; pageNumber: number; width: number; height: number;
-  scale: number; selected: boolean; renderContent: boolean; onSelectPage: (frameId: string) => void;
-}) {
-  return <div className="noteOverviewSheet" data-note-overview-sheet="true"
-    data-page-frame-id={frame.id} data-content-mounted={renderContent ? 'true' : 'false'}>
-    <div className="noteOverviewPreview" data-note-overview-preview="true"
-      aria-hidden="true" {...{ inert: '' }} style={{ width, height }}>
-      {renderContent && <div className="noteOverviewCanvas" data-note-overview-canvas="true"
-        style={{ ...documentTypographyToCssVars(input.documentTypographyProfile),
-          width: frame.width, height: frame.height, transform: `scale(${scale})` } as CSSProperties}>
-        <NoteReadOnlyPageContent frame={frame}
-          fragments={input.noteCanvasRuntime.blockFragmentProjections}
-          canvasObjects={input.noteCanvasRuntime.canvasObjects}
-          canvasPlacements={input.noteCanvasRuntime.canvasPlacements}
-          visibleBlocks={input.visibleBlocks} blockTextDrafts={input.blockTextDrafts}
-          blockTextFlowDrafts={input.blockTextFlowDrafts} blockFieldDrafts={input.blockFieldDrafts}
-          anchorsBySourceRef={input.anchorsBySourceRef} />
-      </div>}
-    </div>
-    <button type="button" className="noteOverviewPage" data-note-overview-page="true"
-      data-page-frame-id={frame.id} aria-label={`Read page ${pageNumber}`}
-      aria-current={selected ? 'page' : undefined} onClick={() => onSelectPage(frame.id)}>
-      <span className="noteOverviewPageLabel">{pageNumber}</span>
-    </button>
-  </div>;
-});
 
 function OverviewPages({ writingSurfaceProps: input, currentPageFrameId, onSelectPage, onClose }: NoteOverviewLayerProps) {
   const rootRef = useRef<HTMLElement>(null);
@@ -132,7 +95,7 @@ function OverviewPages({ writingSurfaceProps: input, currentPageFrameId, onSelec
           '--overview-gap': `${OVERVIEW_GAP}px` } as CSSProperties}>
         {frames.map((frame, index) => {
           const page = layout.pages[index];
-          return <OverviewPage key={frame.id} input={input} frame={frame} pageNumber={index + 1}
+          return <NotePageThumbnail key={frame.id} input={input} frame={frame} pageNumber={index + 1}
             width={layout.pageWidth} height={page.height} scale={page.scale} selected={currentId === frame.id}
             renderContent={size.width > 0 && overviewPageIsVisible(page.top + OVERVIEW_PADDING,
               page.height, scrollTop, size.height)} onSelectPage={onSelectPage} />;

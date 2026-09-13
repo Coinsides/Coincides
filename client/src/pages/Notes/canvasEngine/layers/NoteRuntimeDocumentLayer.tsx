@@ -14,6 +14,8 @@ import { BlockEditRecoveryQueue } from './BlockEditRecoveryQueue';
 import { NotePrintLayer } from './NotePrintLayer';
 import { NoteOverviewLayer } from './NoteOverviewLayer';
 import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
+import { useNoteNavigationController } from '../hooks/useNoteNavigationController';
+import { NoteNavigationPane } from './NoteNavigationPane';
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import styles from '../../NoteDetail.module.css';
 
@@ -56,6 +58,12 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     blockListRef: writingSurfaceProps.blockListRef,
     pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
   });
+  const navigation = useNoteNavigationController({
+    noteId: writingSurfaceProps.noteId,
+    enabled: surfaceMode === 'page' && !overview.open,
+    blockListRef: writingSurfaceProps.blockListRef,
+    pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
+  });
   useImperativeHandle(ref, () => ({ resumeEditingForExit: overview.resumeForExit }));
   const document = (
     <div
@@ -73,18 +81,28 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       {overview.open && <NoteOverviewLayer writingSurfaceProps={writingSurfaceProps}
         currentPageFrameId={overview.currentFrameId}
         onSelectPage={overview.selectPage} onClose={overview.close} />}
-      <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open} onToggleOverview={overview.toggle} />
+      <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open} onToggleOverview={overview.toggle}
+        navigationOpen={navigation.open} onToggleNavigation={navigation.toggle} />
       <NotePrintLayer {...writingSurfaceProps} />
     </div>
   );
-  if (surfaceMode !== 'page' || !tray) return document;
+  const navigableDocument = surfaceMode === 'page' ? <div className="noteNavigationDocumentRow" data-note-navigation-row="true"
+    data-note-navigation-with-tray={tray ? 'true' : undefined}>
+    {navigation.open && <NoteNavigationPane writingSurfaceProps={writingSurfaceProps}
+      tab={navigation.tab} onTabChange={navigation.setTab} currentPageFrameId={navigation.currentFrameId}
+      onSelectPage={navigation.selectPage}
+      onSelectResult={(result) => navigation.selectResult(result.blockId, result.frameId, result.rect)}
+      onClose={() => navigation.setOpen(false)} />}
+    {document}
+  </div> : document;
+  if (surfaceMode !== 'page' || !tray) return navigableDocument;
   return <div className={styles.trayViewport}>
     <button type="button" className={`${styles.contentGroupLauncher} ${styles.trayToggle}`} aria-expanded={tray.open}
       data-note-tray-toggle="true" onClick={() => tray.setOpen(!tray.open)}>
       <Inbox size={16} aria-hidden="true" /><span>Staging ({tray.entries.length})</span>
     </button>
     <div className={styles.trayDocumentRow}>
-      {document}
+      {navigableDocument}
       {tray.open && <NoteTraySidebar tray={tray} />}
     </div>
   </div>;

@@ -4,7 +4,7 @@ import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicySe
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
-import { Boxes, MousePointer2, Pencil, Eraser } from 'lucide-react';
+import { Boxes, MousePointer2, Pencil, Eraser, PanelLeft } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
 import { ViewOptionsMenu } from './ViewOptionsMenu';
@@ -216,6 +216,8 @@ export interface NoteWritingSurfaceLayerProps {
   activePageFrameWall?: ActivePageFrameWall | null;
   overviewOpen?: boolean;
   onToggleOverview?: () => void;
+  navigationOpen?: boolean;
+  onToggleNavigation?: () => void;
   visibleBlocks: NoteBlock[];
   onCreateBlock: (
     template: TemplateOption,
@@ -370,6 +372,8 @@ export function NoteWritingSurfaceLayer({
   activePageFrameWall,
   overviewOpen = false,
   onToggleOverview,
+  navigationOpen = false,
+  onToggleNavigation,
   visibleBlocks,
   onCreateBlock,
   onPersistCanvasObject,
@@ -1835,6 +1839,10 @@ export function NoteWritingSurfaceLayer({
                   surfaceRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]')?.scrollTo({ top: 0, behavior: 'auto' });
                 }
             }} />
+          {onToggleNavigation && <button type="button" className={styles.canvasZoomReset}
+            data-note-navigation-toggle="true" aria-label="Navigation pane" title="Navigation pane" aria-expanded={navigationOpen}
+            disabled={overviewOpen} onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
+            onClick={onToggleNavigation}><PanelLeft size={16} aria-hidden="true" /></button>}
           {onToggleOverview && <button type="button" className={styles.canvasZoomReset}
             data-note-overview-toggle="true" aria-label="Page overview" aria-pressed={overviewOpen}
             onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}

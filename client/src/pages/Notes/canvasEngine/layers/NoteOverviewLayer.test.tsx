@@ -29,7 +29,8 @@ vi.mock('./NoteReadOnlyPageContent', async () => {
   };
 });
 
-const overviewCss = readFileSync(fileURLToPath(import.meta.url).replace(/\.test\.tsx$/, '.css'), 'utf8');
+const overviewCss = readFileSync(fileURLToPath(import.meta.url).replace(/\.test\.tsx$/, '.css'), 'utf8')
+  + readFileSync(fileURLToPath(import.meta.url).replace('NoteOverviewLayer.test.tsx', 'NotePageThumbnail.css'), 'utf8');
 const ROOT = '[data-note-overview-root]';
 const VIEWPORT = '[data-note-overview-viewport]';
 const GRID = '[data-note-overview-grid]';

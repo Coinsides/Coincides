@@ -1,0 +1,23 @@
+.noteNavigationPages {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.noteNavigationPageList {
+  display: grid;
+  grid-template-columns: var(--navigation-page-width);
+  align-items: start;
+  justify-content: center;
+  gap: var(--navigation-page-gap);
+  padding: var(--navigation-page-padding);
+}
+.noteNavigationPagesEmpty {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}

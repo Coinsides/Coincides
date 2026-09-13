@@ -1,4 +1,8 @@
 import { createRef, type RefObject } from 'react';
+// @ts-expect-error Vitest runs in Node; the browser client has no @types/node dependency.
+import { readFileSync } from 'node:fs';
+// @ts-expect-error Inspect the production responsive stylesheet without adding a dependency.
+import { fileURLToPath } from 'node:url';
 import {
   act,
   createEvent,
@@ -7,6 +11,7 @@ import {
   renderHook,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
@@ -20,6 +25,9 @@ import { createSurfaceModePolicy } from '../modePolicyService';
 import { useCanvasSurfacePointerController } from '../hooks/useCanvasSurfacePointerController';
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+
+beforeEach(() => localStorage.clear());
+afterEach(() => localStorage.clear());
 
 vi.mock('../canvasAssetRepository', async (importOriginal) => ({
   ...await importOriginal<typeof import('../canvasAssetRepository')>(),
@@ -333,7 +341,10 @@ describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
 
 describe('NoteRuntimeDocumentLayer overview navigation', () => {
   beforeEach(() => {
-    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(960);
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.matches('[data-note-navigation-pages]') ? 256 : 960;
+    });
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(720);
     vi.stubGlobal('ResizeObserver', class {
       private callback: ResizeObserverCallback;
       constructor(callback: ResizeObserverCallback) { this.callback = callback; }
@@ -346,6 +357,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -408,6 +420,227 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
       onSaveTitle: vi.fn(), onSaveDescription: vi.fn(),
     };
   }
+
+  function searchableProps(): NoteWritingSurfaceLayerProps {
+    const props = overviewProps(3);
+    const visibleRect = { x: 172, y: 42, width: 540, height: 120 };
+    props.blockLayouts = { [codeBlock.id]: { x: 0, y: 42, width: 540, height: 120 } };
+    props.noteCanvasRuntime = { ...props.noteCanvasRuntime, coordinateContract: 'v2',
+      blockFragmentProjections: [{
+        blockId: codeBlock.id, pageStackId: 'navigation-stack', pageFrameId: props.selectedPageFrameId!,
+        pageIndex: 0, pageTotal: 3, fragmentIndex: 0, fragmentTotal: 1, role: 'single',
+        clippedTop: false, clippedBottom: false, blockRect: visibleRect, visibleRect, pageContentRect: visibleRect,
+      }] };
+    return props;
+  }
+
+  it('navigation keeps the real editor mounted, editable and saveable, and Escape leaves the pane open', async () => {
+    const props = overviewProps(3);
+    const { container, rerender } = render(documentFor(props));
+    const editor = screen.getByRole('textbox');
+    editor.focus();
+    vi.clearAllMocks();
+    const toggle = screen.getByRole('button', { name: 'Navigation pane' });
+    const mouseDown = createEvent.mouseDown(toggle, { button: 0 });
+    fireEvent(toggle, mouseDown);
+    fireEvent.click(toggle);
+    expect(mouseDown.defaultPrevented).toBe(true);
+    expect(screen.getByRole('complementary', { name: 'Note navigation' })).not.toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.getByRole('textbox')).toBe(editor);
+    expect(document.activeElement).toBe(editor);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+
+    const draft = 'Writing continues with navigation open';
+    fireEvent.change(editor, { target: { value: draft, selectionStart: draft.length } });
+    expect(props.onBlockTextChange).toHaveBeenCalledWith(codeBlock.id, draft, draft.length, editor);
+    rerender(documentFor({ ...props, blockTextDrafts: { [codeBlock.id]: draft } }));
+    expect(screen.getByRole('textbox')).toBe(editor);
+    expect((editor as HTMLTextAreaElement).value).toBe(draft);
+    fireEvent.keyDown(editor, { key: 'Escape' });
+    expect(container.querySelector('[data-note-navigation]')).not.toBeNull();
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'Pages' }), { key: 'Escape' });
+    expect(container.querySelector('[data-note-navigation]')).not.toBeNull();
+    fireEvent.blur(editor);
+    await waitFor(() => expect(props.onSaveBlock).toHaveBeenCalledOnce());
+    expect(props.onSaveBlock).toHaveBeenCalledWith(codeBlock, draft, expect.objectContaining({ silent: true }));
+  });
+
+  it('navigation remembers open and closed preference across mounts, and the chosen tab across closing', () => {
+    const props = overviewProps(3);
+    const first = render(documentFor(props));
+    const toggle = screen.getByRole('button', { name: 'Navigation pane' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole('tab', { name: 'Results' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close navigation pane' }));
+    expect(screen.queryByRole('complementary', { name: 'Note navigation' })).toBeNull();
+    fireEvent.click(toggle);
+    expect(screen.getByRole('tab', { name: 'Results' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('searchbox', { name: 'Search this note' })).not.toBeNull();
+    first.unmount();
+
+    const second = render(documentFor(overviewProps(3)));
+    expect(screen.getByRole('button', { name: 'Navigation pane' }).getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('complementary', { name: 'Note navigation' })).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    second.unmount();
+
+    render(documentFor(overviewProps(3)));
+    expect(screen.getByRole('button', { name: 'Navigation pane' }).getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('complementary', { name: 'Note navigation' })).toBeNull();
+  });
+
+  it('navigation follows paper scrolling and jumps to a clicked page without closing or writing', async () => {
+    const props = overviewProps(9);
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container } = render(documentFor(props));
+    const blockList = props.blockListRef.current!;
+    const appMain = blockList.closest<HTMLElement>('[data-app-main-scroll="true"]')!;
+    const paper = blockList.closest<HTMLElement>('[data-page-display-scale]')!;
+    const scale = Number(paper.dataset.pageDisplayScale);
+    const ninth = props.noteCanvasRuntime.pageFrames[8];
+    const before = JSON.stringify(props.noteCanvasRuntime);
+    const blockBounds = vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(new DOMRect(180, 60, 760 * scale, 12222 * scale));
+    vi.spyOn(appMain, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 60, 960, 720));
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    expect(screen.getByRole('button', { name: 'Read page 1' }).getAttribute('aria-current')).toBe('page');
+    blockBounds.mockReturnValue(new DOMRect(180, 60 - (ninth.y + 40) * scale, 760 * scale, 12222 * scale));
+    appMain.scrollTop = (ninth.y + 40) * scale;
+    vi.clearAllMocks();
+    fireEvent.scroll(appMain);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Read page 9' }).getAttribute('aria-current')).toBe('page'));
+    expect(screen.getByRole('button', { name: 'Read page 1' }).hasAttribute('aria-current')).toBe(false);
+    expect(container.querySelector<HTMLElement>('[data-note-navigation-pages]')!.scrollTop).toBeGreaterThan(0);
+    expect(scroll).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Read page 3' }));
+    expect(scroll).toHaveBeenCalledWith(blockList, expect.objectContaining({ ...props.noteCanvasRuntime.pageFrames[2], x: 0 }));
+    expect(screen.getByRole('button', { name: 'Read page 3' }).getAttribute('aria-current')).toBe('page');
+    expect(container.querySelector('[data-note-navigation]')).not.toBeNull();
+    expect(props.selectedPageFrameId).toBe('overview-page-1');
+    expect(JSON.stringify(props.noteCanvasRuntime)).toBe(before);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+  });
+
+  it('navigation debounces search, highlights the matching words and temporarily marks the jumped block', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const props = searchableProps();
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container } = render(documentFor(props));
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Results' }));
+    const search = screen.getByRole('searchbox', { name: 'Search this note' });
+    const results = screen.getByRole('list', { name: 'Search results' });
+    vi.clearAllMocks();
+    fireEvent.change(search, { target: { value: 'curr' } });
+    act(() => vi.advanceTimersByTime(120));
+    fireEvent.change(search, { target: { value: 'current' } });
+    act(() => vi.advanceTimersByTime(179));
+    expect(within(results).queryAllByRole('button')).toHaveLength(0);
+    expect(results.getAttribute('aria-busy')).toBe('true');
+    act(() => vi.advanceTimersByTime(1));
+    const result = within(results).getByRole('button', { name: 'Page 1 current editor text' });
+    expect(result.querySelector('mark')?.textContent).toBe('current');
+    expect(screen.getByText('1 result')).not.toBeNull();
+    expect(results.getAttribute('aria-busy')).toBe('false');
+    fireEvent.click(result);
+    expect(scroll).toHaveBeenCalledWith(props.blockListRef.current, { x: 0, y: 42, width: 540, height: 120 });
+    const block = container.querySelector<HTMLElement>('[data-note-block-shell="true"][data-block-id="block-a"]')!;
+    expect(block.dataset.noteNavigationHit).toBe('true');
+    act(() => vi.advanceTimersByTime(2199));
+    expect(block.dataset.noteNavigationHit).toBe('true');
+    act(() => vi.advanceTimersByTime(1));
+    expect(block.hasAttribute('data-note-navigation-hit')).toBe(false);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+  });
+
+  it('navigation clears results immediately, reports no matches and discards query and highlight on note changes', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const props = searchableProps();
+    vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container, rerender } = render(documentFor(props));
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Results' }));
+    const search = screen.getByRole('searchbox', { name: 'Search this note' });
+    const results = screen.getByRole('list', { name: 'Search results' });
+    fireEvent.change(search, { target: { value: 'current' } });
+    act(() => vi.advanceTimersByTime(180));
+    expect(within(results).getAllByRole('button')).toHaveLength(1);
+    fireEvent.change(search, { target: { value: '' } });
+    expect(within(results).queryAllByRole('button')).toHaveLength(0);
+    expect(screen.getByText('Search the loaded text in this note.')).not.toBeNull();
+    fireEvent.change(search, { target: { value: 'unmatched phrase' } });
+    act(() => vi.advanceTimersByTime(180));
+    expect(screen.getByText('No results in this note.')).not.toBeNull();
+    fireEvent.change(search, { target: { value: 'current' } });
+    act(() => vi.advanceTimersByTime(180));
+    fireEvent.click(within(results).getByRole('button'));
+    expect(container.querySelector('[data-note-navigation-hit]')).not.toBeNull();
+
+    rerender(documentFor({ ...props, noteId: 'another-note' }));
+
+    expect((screen.getByRole('searchbox', { name: 'Search this note' }) as HTMLInputElement).value).toBe('');
+    expect(within(screen.getByRole('list', { name: 'Search results' })).queryAllByRole('button')).toHaveLength(0);
+    expect(container.querySelector('[data-note-navigation-hit]')).toBeNull();
+    expect(screen.getByText('Search the loaded text in this note.')).not.toBeNull();
+  });
+
+  it('navigation exposes only the heading placeholder and supports arrow, Home and End tab navigation', () => {
+    const props = overviewProps(3);
+    const before = JSON.stringify({ blocks: props.visibleBlocks, runtime: props.noteCanvasRuntime });
+    render(documentFor(props));
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Headings', 'Pages', 'Results']);
+    vi.clearAllMocks();
+    tabs[1].focus();
+    fireEvent.keyDown(tabs[1], { key: 'ArrowLeft' });
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('tabpanel').textContent).toBe('The heading tree will arrive with chapter heading blocks.');
+    expect(screen.queryByRole('tree')).toBeNull();
+    fireEvent.keyDown(tabs[0], { key: 'End' });
+    expect(document.activeElement).toBe(tabs[2]);
+    expect(screen.getByRole('searchbox', { name: 'Search this note' })).not.toBeNull();
+    fireEvent.keyDown(tabs[2], { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(tabs[0]);
+    fireEvent.keyDown(tabs[0], { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(tabs[1]);
+    fireEvent.keyDown(tabs[1], { key: 'Home' });
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(tabs.map((tab) => tab.tabIndex)).toEqual([0, -1, -1]);
+    expect(JSON.stringify({ blocks: props.visibleBlocks, runtime: props.noteCanvasRuntime })).toBe(before);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+  });
+
+  it('navigation docks within the document row and declares a 900 px non-modal drawer with independent content scrolling', () => {
+    const sheetPath = fileURLToPath(import.meta.url).replace('NoteRuntimeDocumentLayer.test.tsx', 'NoteNavigationPane.css');
+    const style = document.createElement('style');
+    style.textContent = readFileSync(sheetPath, 'utf8');
+    document.head.appendChild(style);
+    try {
+      const { container } = render(documentFor(overviewProps(3)));
+      fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+      const navigation = screen.getByRole('complementary', { name: 'Note navigation' });
+      const row = container.querySelector<HTMLElement>('[data-note-navigation-row]')!;
+      expect(navigation.parentElement).toBe(row);
+      expect(row.children[1].hasAttribute('data-note-overview-active')).toBe(true);
+      expect(getComputedStyle(navigation).position).toBe('sticky');
+      expect(getComputedStyle(navigation).width).toBe('256px');
+      expect(navigation.hasAttribute('aria-modal')).toBe(false);
+      const narrow = Array.from(style.sheet!.cssRules).find((rule) =>
+        rule instanceof CSSMediaRule && rule.conditionText === '(max-width: 900px)') as CSSMediaRule;
+      expect(narrow).toBeDefined();
+      const narrowRules = Array.from(narrow.cssRules) as CSSStyleRule[];
+      expect(narrowRules.find((rule) => rule.selectorText === '.noteNavigationDock')!.style.width).toBe('0');
+      expect(narrowRules.find((rule) => rule.selectorText === '.noteNavigationPane')!.style.position).toBe('absolute');
+      fireEvent.click(screen.getByRole('tab', { name: 'Results' }));
+      expect(getComputedStyle(screen.getByRole('list', { name: 'Search results' })).overflow).toBe('auto');
+    } finally {
+      style.remove();
+    }
+  });
 
   it('D2 renders one header across multiple pages, follows live side walls, and declares projection differences', () => {
     const props = { ...overviewProps(4), paperHeader: paperHeader() };

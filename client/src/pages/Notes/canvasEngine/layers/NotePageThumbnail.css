@@ -1,0 +1,30 @@
+.noteOverviewSheet { position: relative; padding-bottom: 24px; }
+.noteOverviewPreview {
+  position: relative;
+  overflow: hidden;
+  outline: 1px solid var(--border-default);
+  background: var(--paper-template-fill, var(--page-frame-background, var(--bg-primary)));
+  pointer-events: none;
+  user-select: none;
+}
+.noteOverviewCanvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; pointer-events: none; }
+.noteOverviewPage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+}
+.noteOverviewPageLabel { width: 100%; height: 24px; line-height: 24px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+.noteOverviewSheet:has(.noteOverviewPage:hover) .noteOverviewPreview { outline-color: var(--text-secondary); }
+.noteOverviewSheet:has(.noteOverviewPage[aria-current]) .noteOverviewPreview { outline: 2px solid var(--border-focus); }
+.noteOverviewPage[aria-current] { color: var(--text-primary); }
+.noteOverviewPage[aria-current] .noteOverviewPageLabel { font-weight: 650; }
+.noteOverviewPage:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 4px; }

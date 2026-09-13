@@ -1,0 +1,60 @@
+.noteNavigationDocumentRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 1 0;
+  min-width: 0;
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+.noteNavigationDocumentRow > [data-note-overview-active] { flex: 1 1 0; min-width: 0; }
+.noteNavigationDocumentRow[data-note-navigation-with-tray] > [data-note-overview-active] { padding-top: 0; }
+.noteNavigationDocumentRow[data-note-navigation-with-tray] > .noteNavigationDock { margin-top: 0; }
+.noteNavigationDock {
+  position: sticky;
+  top: 16px;
+  flex: 0 0 256px;
+  width: 256px;
+  height: calc(100dvh - 100px);
+  min-height: 240px;
+  margin-top: 26px;
+}
+.noteNavigationPane {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  min-width: 0;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+.noteNavigationHeader { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; }
+.noteNavigationHeader h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.noteNavigationClose { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; color: var(--text-secondary); border-radius: var(--radius-sm); cursor: pointer; }
+.noteNavigationClose:hover { background: var(--bg-hover); color: var(--text-primary); }
+.noteNavigationTabs { display: flex; gap: 4px; padding: 0 8px 8px; border-bottom: 1px solid var(--border-default); }
+.noteNavigationTabs button { flex: 1; min-width: 0; padding: 8px 4px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.noteNavigationTabs button:hover { background: var(--bg-hover); }
+.noteNavigationTabs button[aria-selected='true'] { background: var(--bg-hover); color: var(--text-primary); font-weight: 650; }
+.noteNavigationPanel { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
+.noteNavigationEmpty { margin: 0; padding: 20px 16px; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.noteNavigationSearch { padding: 12px; }
+.noteNavigationSearch label { display: block; margin-bottom: 6px; font-size: 12px; }
+.noteNavigationSearch input { box-sizing: border-box; width: 100%; min-width: 0; height: 34px; padding: 6px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font: inherit; font-size: 13px; }
+.noteNavigationCount { margin: 0; padding: 0 12px 8px; color: var(--text-secondary); font-size: 12px; }
+.noteNavigationResults { margin: 0; padding: 0 12px 12px; list-style: none; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.noteNavigationResult { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--border-default); padding: 12px 4px; background: transparent; color: var(--text-primary); font: inherit; font-size: 13px; line-height: 1.5; cursor: pointer; overflow-wrap: anywhere; }
+.noteNavigationResult:hover { background: var(--bg-hover); }
+.noteNavigationResult small { display: block; margin-bottom: 4px; color: var(--text-secondary); font-size: 11px; }
+.noteNavigationResult mark { color: var(--text-primary); background: var(--bg-hover); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.noteNavigationPane :is(button, input):focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+[data-note-block-shell][data-note-navigation-hit='true'],
+[data-note-paper-header][data-note-navigation-hit='true'] { outline: 2px solid var(--border-focus); outline-offset: 4px; }
+@media (max-width: 900px) {
+  .noteNavigationDocumentRow { gap: 0; }
+  .noteNavigationDock { flex-basis: 0; width: 0; height: 0; min-height: 0; z-index: var(--z-floating-panel, 30); }
+  .noteNavigationPane { position: absolute; left: 0; top: 0; width: min(288px, calc(100vw - 80px)); height: calc(100dvh - 100px); min-height: 200px; }
+}
+@media print { .noteNavigationDock { display: none; } }

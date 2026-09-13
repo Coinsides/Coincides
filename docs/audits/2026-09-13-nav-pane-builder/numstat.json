@@ -1,0 +1,162 @@
+{
+  "method": "Pre-edit byte mirror; newline-normalized line LCS; no Git access",
+  "scope": "Notes source/tests, changed generated index, handoff, Markdown evidence; excludes transient build/log/helper outputs",
+  "files": [
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteNavigationController.test.tsx",
+      "added": 121,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "457e57cf88fcb518af0334fbc44bd0cbe2ba3c2ea0b39679ef6eac4b460b0049"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteNavigationController.ts",
+      "added": 105,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "a9b7b9d429f5f083238ba3351ce1b901db312c964cf4a83f31d768c13456bdac"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPages.css",
+      "added": 23,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "b9365f6c8eaca1abecadfc66958197829d150bd2a13c07fdc1de281f6a6858c2"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPages.requests.test.tsx",
+      "added": 140,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "7c91cc4e8a709845d64a4613ca7a9691e42d3dcbe360069c36cccaeb325696f2"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPages.test.tsx",
+      "added": 232,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "1fa1c7480549be71c65409cbbbf4badb33662c7bdaba515b162e29b65d5b5b86"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPages.tsx",
+      "added": 93,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "4e7008c7a9628f94f46bfc622d8624bd26b8c5bda21230469250ce435148cbfc"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPane.css",
+      "added": 60,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "8feb8759f79f8c5fdf0730a05bf618a773d524dc77e9a3140a096378489f5677"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPane.tsx",
+      "added": 98,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "4aa757b857c1b46b49b1d851109d536a21f474d660feebe86750ddc8c5cf79dd"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css",
+      "added": 0,
+      "removed": 29,
+      "beforeSha256": "1edca43a5491bd868ff604d7577cdcfba9d1a0a69136649160645132317cfdfd",
+      "afterSha256": "22466de278fa76ef632c7d4ac928426b6ff584e5494f01ac5e66f0c21ec47b69"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx",
+      "added": 2,
+      "removed": 1,
+      "beforeSha256": "35f6720af7b4a35d0c21618a6d2ad9fb6d319f1e815728f419789eebf9e7148b",
+      "afterSha256": "1bc1a0a5851352c57ef92366e8fbf4957ecde1ec7ec30c25f769cce65f7225b5"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.tsx",
+      "added": 4,
+      "removed": 41,
+      "beforeSha256": "1b84d426482bdca433d74b0ca0691790faa04dfc179b3355b9b2b0aa25129f40",
+      "afterSha256": "52ce69891c0bd0083c8735e39f154b7004d446d5a1e9437788d302125e507893"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NotePageThumbnail.css",
+      "added": 30,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "acb81df0f67f37c743334b130d9b8fa7ef60c3ea0fdb518bb73f804e97f5aa90"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NotePageThumbnail.tsx",
+      "added": 56,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "300863a71de540b363dd19c236e2be0ef2f751a24ec1b7a80d47c0b9a19c0521"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "added": 234,
+      "removed": 1,
+      "beforeSha256": "a386e381e0c705998126e3261cb1de3c40ef02d6e1772a8598083d90b7e9324c",
+      "afterSha256": "41f47073d4e025308a26c50493d3f7065a638652f42f13f7a04a3d8e0ed1e178"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx",
+      "added": 21,
+      "removed": 3,
+      "beforeSha256": "8c58ee2af814b3bac361fc38cf3e0243f37f20eec3555683aff41133a037d1f0",
+      "afterSha256": "31c9f076f47484a8d99b848014a81a1b9c6d33bcc9d81fe6572f79e791e59b7c"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "added": 9,
+      "removed": 1,
+      "beforeSha256": "9022653804ba9e210e421d4dc6b2922062e4712e5fc7ac22cd46a29169056bd7",
+      "afterSha256": "a8dd196a58da823b008fd52a12563e4501544675627f72894c429a9781dea30e"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/noteNavigationSearch.test.ts",
+      "added": 170,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "495ba5dfed0dddb57cbf5eb4c1d964c7a4d2dccc53c5f8acbfa189d96d75855e"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/noteNavigationSearch.ts",
+      "added": 137,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "8178c92303d41758c2893c15e2a9fdddce0389965c92e0c1ea23c594e9f250af"
+    },
+    {
+      "file": "docs/agent-ops/INDEX.md",
+      "added": 5,
+      "removed": 2,
+      "beforeSha256": "a047085e35f428d40c591321038a93ff382ade962e27f65cd77cbcdfa7a7199e",
+      "afterSha256": "a286bb88954ecd1117ac65c3be05963f59e623efb8fc499c3d7b82435eed84d6"
+    },
+    {
+      "file": "docs/agent-ops/handoffs/2026-09-13-v14-nav-pane-order.md",
+      "added": 63,
+      "removed": 1,
+      "beforeSha256": "1323ded219253b37f8fa7c449eb8657e9986fc1a8c4fca095d5d5dcc738e4171",
+      "afterSha256": "5b7a2656799c6c2d3238c5942812cdc0c28dfabc9f9b0edf48150ec9f0934fd6"
+    },
+    {
+      "file": "docs/audits/2026-09-13-nav-pane-builder/mount-request-census.md",
+      "added": 76,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "225e190c6eeebe34d625dc9dcbfe153fee66f11d1b4ecb2bfb206f5fc9b9b963"
+    },
+    {
+      "file": "docs/audits/2026-09-13-nav-pane-builder/verification.md",
+      "added": 97,
+      "removed": 0,
+      "beforeSha256": null,
+      "afterSha256": "984c4cfd28ff5b435feaafd24b2e712dcabacf14be0094653bf86c3e2a7127e8"
+    }
+  ],
+  "added": 1776,
+  "removed": 79
+}
