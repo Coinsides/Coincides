@@ -220,7 +220,9 @@ export async function* runAgent(
 
     const toolResultPromises = currentToolCalls.map(async (tc) => {
       try {
-        const result = await executeTool(tc.name, tc.arguments, userId);
+        const result = await executeTool(tc.name, tc.arguments, userId, {
+          actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
+        });
 
         // Detect preference_form from collect_preferences tool
         if (tc.name === 'collect_preferences') {

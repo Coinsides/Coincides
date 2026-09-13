@@ -7,10 +7,11 @@ import { closeDb, initDb } from '../db/init.js';
 import { runMigrations, type Migration } from '../db/migrate.js';
 import migration054 from '../db/migrations/054_v13_events_ledger.js';
 import migration058 from '../db/migrations/058_v13_board_deleted_event.js';
+import migration073 from '../db/migrations/073_v14_agent_goal_event.js';
 import { EVENT_VERBS, recordEvent, type EventEntry } from '../db/recordEvent.js';
 
-const VERBS_V13 = [
-  'migrated', 'rolled_back', 'note_created', 'board_created', 'board_deleted', 'mounted', 'unmounted',
+const VERBS = [
+  'migrated', 'rolled_back', 'note_created', 'board_created', 'board_deleted', 'goal_created', 'mounted', 'unmounted',
   'purpose_created', 'purpose_amended', 'purpose_sealed', 'proposal_issued',
   'proposal_approved', 'proposal_rejected', 'published',
 ] as const;
@@ -33,6 +34,7 @@ function ledgerDb(t: TestContext): Database.Database {
   db.pragma('foreign_keys = ON');
   db.transaction(() => migration054.up(db))();
   db.transaction(() => migration058.up(db))();
+  db.transaction(() => migration073.up(db))();
   return db;
 }
 
@@ -41,7 +43,7 @@ function ledgerSchema(db: Database.Database) {
     SELECT type, name, sql FROM sqlite_master
     WHERE tbl_name = 'events' ORDER BY type, name
   `).all() as Array<{ type: string; name: string; sql: string }>).map((row) => ({
-    // 058's ALTER TABLE rename quotes this identifier; keep all other SQL exact.
+    // Migration ALTER TABLE renames quote this identifier; keep all other SQL exact.
     ...row, sql: row.sql.replace(/\s+/g, ' ').trim()
       .replace(/^CREATE TABLE "events" \(/, 'CREATE TABLE events ('),
   }));
@@ -129,6 +131,45 @@ test('054 fresh startup and an actual pre-054 migration fixture converge and rer
   }
 });
 
+test('073 upgrades the prior CHECK while preserving event rows and the sequence high-water mark', (t) => {
+  const db = new Database(':memory:');
+  t.after(() => db.close());
+  db.transaction(() => migration054.up(db))();
+  db.transaction(() => migration058.up(db))();
+  const priorSchema = db.prepare("SELECT sql FROM sqlite_master WHERE name = 'events'")
+    .get() as { sql: string };
+  assert.equal(priorSchema.sql.includes("'goal_created'"), false);
+  db.transaction(() => recordEvent(db, entry({
+    actor_kind: 'agent:synthetic',
+    meta: { synthetic: true, detail: [null, '原样'] },
+  })))();
+  // Reconstruct an existing database with an AUTOINCREMENT high-water mark above
+  // its current last row; this metadata must survive the CHECK-table rebuild.
+  db.prepare("UPDATE sqlite_sequence SET seq = ? WHERE name = 'events'").run(40);
+  const before = db.prepare('SELECT * FROM events ORDER BY seq').all();
+  const sequence = db.prepare("SELECT seq FROM sqlite_sequence WHERE name = 'events'")
+    .get() as { seq: number };
+
+  db.transaction(() => migration073.up(db))();
+  assert.deepEqual(db.prepare('SELECT * FROM events ORDER BY seq').all(), before);
+  assert.deepEqual(db.prepare("SELECT seq FROM sqlite_sequence WHERE name = 'events'").get(), sequence);
+  const goalSeq = db.transaction(() => recordEvent(db, entry({
+    actor_kind: 'agent', channel: 'chat', verb: 'goal_created',
+    objects: [{ kind: 'goal', id: 'synthetic-goal' }],
+    meta: { synthetic: true },
+  })))();
+  assert.equal(goalSeq, sequence.seq + 1);
+  assert.deepEqual(db.prepare('SELECT actor_kind, channel, verb FROM events WHERE seq = ?').get(goalSeq), {
+    actor_kind: 'agent', channel: 'chat', verb: 'goal_created',
+  });
+  assertAppendOnly(db);
+  const after = db.prepare('SELECT * FROM events ORDER BY seq').all();
+  const schema = ledgerSchema(db);
+  db.transaction(() => migration073.up(db))();
+  assert.deepEqual(db.prepare('SELECT * FROM events ORDER BY seq').all(), after);
+  assert.deepEqual(ledgerSchema(db), schema);
+});
+
 test('recordEvent preserves the quoted summary, object order and JSON metadata, with generated seq/ts', (t) => {
   const db = ledgerDb(t);
   const input = entry({
@@ -173,11 +214,11 @@ test('recordEvent requires the caller transaction and does not commit or replace
   assert.deepEqual(db.prepare('SELECT * FROM events').all(), []);
 });
 
-test('all fourteen V13 verbs work and unknown verbs are rejected by both helper and SQL', (t) => {
+test('all fifteen event verbs work and unknown verbs are rejected by both helper and SQL', (t) => {
   const db = ledgerDb(t);
-  assert.deepEqual(EVENT_VERBS, VERBS_V13);
-  for (const verb of VERBS_V13) db.transaction(() => recordEvent(db, entry({ verb })))();
-  assert.deepEqual(db.prepare('SELECT verb FROM events ORDER BY seq').all(), VERBS_V13.map((verb) => ({ verb })));
+  assert.deepEqual(EVENT_VERBS, VERBS);
+  for (const verb of VERBS) db.transaction(() => recordEvent(db, entry({ verb })))();
+  assert.deepEqual(db.prepare('SELECT verb FROM events ORDER BY seq').all(), VERBS.map((verb) => ({ verb })));
   for (const verb of ['unknown', '', 'MIGRATED', null, 7]) {
     assert.throws(() => db.transaction(() => recordEvent(db, { ...entry(), verb } as unknown as EventEntry))(), /events_invalid_entry/);
     assert.throws(() => db.prepare(`
@@ -185,7 +226,7 @@ test('all fourteen V13 verbs work and unknown verbs are rejected by both helper 
       VALUES ('synthetic-user', 'system', 'synthetic', ?, '[]', 'synthetic')
     `).run(verb), /constraint failed/i);
   }
-  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 14);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 15);
 });
 
 test('objects must be an array of kind/id string pairs; invalid input rolls back the action', (t) => {

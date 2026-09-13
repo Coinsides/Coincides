@@ -1,4 +1,10 @@
 import type { ToolDefinition } from '../providers/types.js';
+import { CREATE_GOAL_TOOL } from '../../toolFace/registry.js';
+import { loadToolFaceManifest } from '../../mcp/manifest.js';
+
+// The build projects the authoritative Zod registry into this runtime artifact.
+const goalProjection = loadToolFaceManifest().find((entry) => entry.name === CREATE_GOAL_TOOL.name);
+if (!goalProjection) throw new Error('create_goal registry projection is missing');
 
 export const toolDefinitions: ToolDefinition[] = [
   {
@@ -52,18 +58,9 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
-    name: 'create_goal',
-    description: 'Create a new goal for a course.',
-    parameters: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', description: 'Goal title' },
-        course_id: { type: 'string', description: 'Course ID' },
-        deadline: { type: 'string', description: 'Optional deadline (YYYY-MM-DD)' },
-        description: { type: 'string', description: 'Optional description' },
-      },
-      required: ['title', 'course_id'],
-    },
+    name: CREATE_GOAL_TOOL.name,
+    description: CREATE_GOAL_TOOL.description,
+    parameters: goalProjection.input_schema,
   },
   {
     name: 'create_sub_goal',

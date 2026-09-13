@@ -3,7 +3,7 @@ import { getDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { trashNoteAsUser } from '../services/notes.js';
-import { revertTrashNotesReceipt } from '../services/toolFaceReceiptRevert.js';
+import { revertToolReceipt } from '../services/toolFaceReceiptRevert.js';
 import {
   dismissToolFaceReceipt,
   listToolFaceReceipts,
@@ -17,7 +17,7 @@ import { trashNotesInputSchema } from '../toolFace/registry.js';
 
 export interface ToolReceiptsRouterOptions {
   trashNoteExecutor?: typeof trashNoteAsUser;
-  revertReceipt?: typeof revertTrashNotesReceipt;
+  revertReceipt?: typeof revertToolReceipt;
 }
 
 function assertOwnedProposedTrashReceipt(
@@ -102,7 +102,7 @@ export function createToolReceiptsRouter(
 ) {
   const router = Router();
   const trashNoteExecutor = options.trashNoteExecutor ?? trashNoteAsUser;
-  const revertReceipt = options.revertReceipt ?? revertTrashNotesReceipt;
+  const revertReceipt = options.revertReceipt ?? revertToolReceipt;
 
   router.get('/', (req: AuthRequest, res: Response) => {
     const requestedStatus = req.query.status;

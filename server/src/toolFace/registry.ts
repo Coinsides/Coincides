@@ -1,5 +1,6 @@
 import { z, type ZodTypeAny } from 'zod';
 import {
+  createGoalSchema,
   createNoteSchema,
   updateNoteSchema,
 } from '../validators/index.js';
@@ -645,6 +646,33 @@ export const resolveSelectionOutputSchema = z.object({
   results: z.array(resolveSelectionResultSchema),
 }).strict();
 
+// Migrate only the existing chat create_goal surface. Parent/exam controls stay
+// with the human door; create_sub_goal has its own later migration order.
+export const createAgentGoalInputSchema = createGoalSchema.pick({
+  title: true, course_id: true, deadline: true, description: true,
+});
+
+export const CREATE_GOAL_TOOL: ToolRegistryEntry = {
+  name: 'create_goal',
+  description: 'Create a new goal for a course.',
+  input_schema: createAgentGoalInputSchema,
+  output_schema: z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    message: z.literal('Goal created successfully'),
+    receipt_id: z.string().uuid(),
+  }).strict(),
+  truth: 'purpose',
+  tier: 'immediate',
+  human_entry: {
+    route: 'POST /api/goals',
+    client_call_site: 'client/src/stores/goalStore.ts#createGoal',
+  },
+  // Chat already exposes this verb. A1 does not open a new MCP write channel.
+  exposure: 'internal',
+  scopes: ['goals:write'],
+};
+
 /**
  * The only authoritative V2.BN.12 tool directory. JSON manifests are derived
  * from these runtime entries; legacy v1 toolDefinitions are intentionally not
@@ -848,4 +876,5 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     exposure: 'public',
     scopes: ['notes:write'],
   },
+  CREATE_GOAL_TOOL,
 ];

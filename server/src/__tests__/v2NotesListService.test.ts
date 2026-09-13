@@ -282,7 +282,7 @@ function assertCanonicalNamedImport(
 
 function assertToolReceiptsDefaultFallback(
   variableName: 'trashNoteExecutor' | 'revertReceipt',
-  canonicalSymbolName: 'trashNoteAsUser' | 'revertTrashNotesReceipt',
+  canonicalSymbolName: 'trashNoteAsUser' | 'revertToolReceipt',
   fromModule: string,
 ): void {
   const file = 'server/src/routes/toolReceipts.ts';
@@ -655,7 +655,7 @@ test('A-1 route and MCP binding both call the same listNotes service export', ()
   );
   assertCanonicalNamedImport(
     'server/src/routes/toolReceipts.ts',
-    'revertTrashNotesReceipt',
+    'revertToolReceipt',
     '../services/toolFaceReceiptRevert.js',
   );
 
@@ -673,10 +673,10 @@ test('I-1 trashNoteExecutor default fallback is the canonical trashNoteAsUser im
   );
 });
 
-test('I-2 revertReceipt default fallback is the canonical revertTrashNotesReceipt import symbol', () => {
+test('I-2 revertReceipt default fallback is the canonical revertToolReceipt import symbol', () => {
   assertToolReceiptsDefaultFallback(
     'revertReceipt',
-    'revertTrashNotesReceipt',
+    'revertToolReceipt',
     '../services/toolFaceReceiptRevert.js',
   );
 });

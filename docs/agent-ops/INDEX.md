@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 371 份文档。
+共 374 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -89,6 +89,8 @@
 | [analysis/2026-09-13-deadcode-recheck.md](analysis/2026-09-13-deadcode-recheck.md) | Canvas 死代码清册 · 2026-09-13 现物复核 | `active` | — | — |
 | [analysis/2026-09-13-ownership-signature-ruling-draft.md](analysis/2026-09-13-ownership-signature-ruling-draft.md) | 权威 ownership 签名裁定稿(TD-15 设计步) | `active` | 2026-09-13 | — |
 | [analysis/2026-09-13-v13-6-adjudication.md](analysis/2026-09-13-v13-6-adjudication.md) | 13.6 裁决半场记录 | `active` | 2026-09-13 | — |
+| [analysis/2026-09-14-v14-1-census-adjudication.md](analysis/2026-09-14-v14-1-census-adjudication.md) | 14.1 普查候裁十项 · HQ 裁定书 | `active` | — | — |
+| [analysis/2026-09-14-v14-1-executor-census.md](analysis/2026-09-14-v14-1-executor-census.md) | V14 · 14.1 executor 动词→人门映射普查 | `active` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -360,7 +362,8 @@
 | [handoffs/2026-09-13-v14-nav-pane-order.md](handoffs/2026-09-13-v14-nav-pane-order.md) | 单5 · 导航窗格两步 | `done` | — | — |
 | [handoffs/2026-09-13-v14-palette-assets-order.md](handoffs/2026-09-13-v14-palette-assets-order.md) | 单1 · 调色板资产 v1 + 统一取色器 | `done(七节全落;HQ 收口:server test:v2 484/484 全绿,git/secrets 双门补跑绿;client 1602/1602+真浏览器 13/13 builder 在案)` | — | — |
 | [handoffs/2026-09-13-v14-skin-float-card-order.md](handoffs/2026-09-13-v14-skin-float-card-order.md) | 单2 · 「笔记外观」浮卡 v1 + 存为套装 | `done（补遗一 materialPreset 修约完成；HQ 收口项见末尾 Result）` | — | — |
-| [handoffs/2026-09-14-v14-1-executor-census-order.md](handoffs/2026-09-14-v14-1-executor-census-order.md) | 14.1-A0 · executor 动词普查(纯侦察,⛔改产品代码) | `draft` | — | — |
+| [handoffs/2026-09-14-v14-1-a1-agent-write-door-order.md](handoffs/2026-09-14-v14-1-a1-agent-write-door-order.md) | 14.1-A1 · Agent 写门公共机关 + create_goal 试点 | `ready` | — | — |
+| [handoffs/2026-09-14-v14-1-executor-census-order.md](handoffs/2026-09-14-v14-1-executor-census-order.md) | 14.1-A0 · executor 动词普查(纯侦察,⛔改产品代码) | `done` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

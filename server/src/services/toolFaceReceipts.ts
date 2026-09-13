@@ -1,9 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
+import type Database from 'better-sqlite3';
 import { getDb } from '../db/init.js';
 import { AppError } from '../middleware/errorHandler.js';
 import type { ToolRegistryHumanEntry, ToolTier } from '../toolFace/registry.js';
 
 const TOOL_FACE_RECEIPT_SOURCE_TYPE = 'mcp';
+export const AGENT_CHAT_RECEIPT_SOURCE_TYPE = 'agent_chat';
+type ReceiptSource = typeof TOOL_FACE_RECEIPT_SOURCE_TYPE | typeof AGENT_CHAT_RECEIPT_SOURCE_TYPE;
 
 export type ToolFaceReceiptTier = Extract<ToolTier, 'immediate' | 'propose'>;
 export type ToolFaceReceiptStatus = 'applied' | 'proposed' | 'dismissed' | 'reverted';
@@ -11,6 +14,8 @@ export type ToolFaceRevertOutcome = 'complete' | 'partial';
 export type ToolFaceReceiptResource = Record<string, unknown>;
 
 export interface WriteToolFaceReceiptInput {
+  sourceType?: ReceiptSource;
+  agentContext?: { actor: 'agent'; channel: 'chat'; conversation_id: string; event_seq: number };
   userId: string;
   courseId?: string | null;
   callId: string;
@@ -43,6 +48,7 @@ export interface ListToolFaceReceiptsInput {
 }
 
 export interface ToolFaceReceiptMetadata {
+  agent_context?: WriteToolFaceReceiptInput['agentContext'];
   tool: string;
   tier: ToolFaceReceiptTier;
   harness: string;
@@ -58,7 +64,7 @@ export interface ToolFaceReceipt {
   id: string;
   user_id: string;
   course_id: string | null;
-  source_type: typeof TOOL_FACE_RECEIPT_SOURCE_TYPE;
+  source_type: ReceiptSource;
   source_id: string;
   label: string | null;
   status: ToolFaceReceiptStatus;
@@ -102,18 +108,18 @@ function parseMetadata(value: string): ToolFaceReceiptMetadata {
 }
 
 function hydrateReceipt(row: ToolFaceReceiptRow): ToolFaceReceipt {
-  if (row.source_type !== TOOL_FACE_RECEIPT_SOURCE_TYPE) {
+  if (row.source_type !== TOOL_FACE_RECEIPT_SOURCE_TYPE && row.source_type !== AGENT_CHAT_RECEIPT_SOURCE_TYPE) {
     throw new AppError(409, 'Operation batch is not a tool face receipt');
   }
   return {
     ...row,
-    source_type: TOOL_FACE_RECEIPT_SOURCE_TYPE,
+    source_type: row.source_type,
     metadata: parseMetadata(row.metadata),
   };
 }
 
-export function readToolFaceReceipt(id: string): ToolFaceReceipt {
-  const row = getDb().prepare(`
+export function readToolFaceReceipt(id: string, db: Database.Database = getDb()): ToolFaceReceipt {
+  const row = db.prepare(`
     SELECT id, user_id, course_id, source_type, source_id, label, status, metadata,
            created_at, applied_at, reverted_at
     FROM operation_batches
@@ -132,19 +138,19 @@ export function listToolFaceReceipts({
     SELECT id, user_id, course_id, source_type, source_id, label, status, metadata,
            created_at, applied_at, reverted_at
     FROM operation_batches
-    WHERE user_id = ? AND source_type = 'mcp' AND status = ?
+    WHERE user_id = ? AND source_type IN ('mcp', 'agent_chat') AND status = ?
     ORDER BY created_at DESC, id DESC
   `).all(resolvedUserId, status) as ToolFaceReceiptRow[]).map(hydrateReceipt);
 }
 
-function assertOwnedCourse(userId: string, courseId: string | null): void {
+function assertOwnedCourse(db: Database.Database, userId: string, courseId: string | null): void {
   if (!courseId) return;
-  const course = getDb().prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
+  const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
     .get(courseId, userId);
   if (!course) throw new AppError(404, 'Course not found');
 }
 
-export function writeToolFaceReceipt(input: WriteToolFaceReceiptInput): ToolFaceReceipt {
+export function writeToolFaceReceipt(input: WriteToolFaceReceiptInput, db: Database.Database = getDb()): ToolFaceReceipt {
   const userId = requiredText(input.userId, 'userId');
   const callId = requiredText(input.callId, 'callId');
   const tool = requiredText(input.tool, 'tool');
@@ -155,6 +161,7 @@ export function writeToolFaceReceipt(input: WriteToolFaceReceiptInput): ToolFace
   const appliedAt = status === 'applied' ? receiptTimestamp() : null;
   const id = uuidv4();
   const metadata: ToolFaceReceiptMetadata = {
+    ...(input.agentContext && { agent_context: { ...input.agentContext } }),
     tool,
     tier: input.tier,
     harness,
@@ -164,22 +171,23 @@ export function writeToolFaceReceipt(input: WriteToolFaceReceiptInput): ToolFace
     ...(input.intendedInput && { intended_input: structuredClone(input.intendedInput) }),
   };
 
-  assertOwnedCourse(userId, courseId);
-  getDb().prepare(`
+  assertOwnedCourse(db, userId, courseId);
+  db.prepare(`
     INSERT INTO operation_batches (
       id, user_id, course_id, source_type, source_id, label, status, metadata, applied_at
-    ) VALUES (?, ?, ?, 'mcp', ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     userId,
     courseId,
+    input.sourceType ?? TOOL_FACE_RECEIPT_SOURCE_TYPE,
     callId,
-    `MCP ${tool}`,
+    `${input.sourceType === AGENT_CHAT_RECEIPT_SOURCE_TYPE ? 'Agent chat' : 'MCP'} ${tool}`,
     status,
     JSON.stringify(metadata),
     appliedAt,
   );
-  return readToolFaceReceipt(id);
+  return readToolFaceReceipt(id, db);
 }
 
 export function markToolFaceReceiptApplied(
@@ -235,8 +243,9 @@ export function dismissToolFaceReceipt({
 export function revertToolFaceReceipt(
   id: string,
   input: RevertToolFaceReceiptInput,
+  db: Database.Database = getDb(),
 ): ToolFaceReceipt {
-  const receipt = readToolFaceReceipt(requiredText(id, 'id'));
+  const receipt = readToolFaceReceipt(requiredText(id, 'id'), db);
   if (receipt.status === 'reverted') {
     throw new AppError(409, 'Tool face receipt is already reverted');
   }
@@ -248,11 +257,11 @@ export function revertToolFaceReceipt(
     revert_outcome: input.outcome,
     revert_details: { ...input.details },
   };
-  const result = getDb().prepare(`
+  const result = db.prepare(`
     UPDATE operation_batches
     SET status = 'reverted', metadata = ?, reverted_at = ?
-    WHERE id = ? AND source_type = 'mcp' AND status IN ('applied', 'proposed')
+    WHERE id = ? AND source_type IN ('mcp', 'agent_chat') AND status IN ('applied', 'proposed')
   `).run(JSON.stringify(metadata), receiptTimestamp(), receipt.id);
   if (result.changes !== 1) throw new AppError(409, 'Tool face receipt revert conflict');
-  return readToolFaceReceipt(receipt.id);
+  return readToolFaceReceipt(receipt.id, db);
 }

@@ -3,11 +3,16 @@ import { getDb } from '../../db/init.js';
 import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
 import { normalizeCardContent } from './normalizeContent.js';
+import { createGoal } from '../../services/goals.js';
+import { recordAgentAction, type AgentActionContext } from '../../services/recordAgentAction.js';
+import { CREATE_GOAL_TOOL } from '../../toolFace/registry.js';
+import { goalReceiptHash } from '../../services/toolFaceReceiptRevert.js';
 
 export async function executeTool(
   toolName: string,
   args: Record<string, unknown>,
   userId: string,
+  context?: AgentActionContext,
 ): Promise<string> {
   const db = getDb();
   const today = new Date().toISOString().split('T')[0];
@@ -93,13 +98,18 @@ export async function executeTool(
     }
 
     case 'create_goal': {
-      const { title, course_id, deadline, description } = args as Record<string, string | undefined>;
-      const id = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO goals (id, user_id, course_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, course_id, title, description || null, deadline || null, 'active', now, now);
-      return JSON.stringify({ id, title, message: 'Goal created successfully' });
+      const { result: goal, receipt } = recordAgentAction(db, userId, context, {
+        tool: CREATE_GOAL_TOOL,
+        input: args,
+        verb: 'goal_created',
+        summary: 'Created a goal',
+        execute: (input) => createGoal(db, userId, input),
+        resources: (created) => [{ kind: 'goal', id: created.id, outcome: 'created', state_hash: goalReceiptHash(created) }],
+        courseId: (created) => created.course_id,
+      });
+      return JSON.stringify(CREATE_GOAL_TOOL.output_schema.parse({
+        id: goal.id, title: goal.title, message: 'Goal created successfully', receipt_id: receipt.id,
+      }));
     }
 
     case 'create_sub_goal': {

@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createGoalSchema, updateGoalSchema, createTaskSchema } from '../validators/index.js';
+import { updateGoalSchema, createTaskSchema } from '../validators/index.js';
+import { createGoal } from '../services/goals.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -165,46 +166,7 @@ router.put('/reorder', (req: AuthRequest, res: Response) => {
 // POST /api/goals
 router.post('/', (req: AuthRequest, res: Response) => {
   try {
-    const data = createGoalSchema.parse(req.body);
-    const db = getDb();
-
-    // If parent_id is provided, verify parent exists and belongs to user
-    let courseId = data.course_id;
-    if (data.parent_id) {
-      const parent = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(data.parent_id, req.userId!) as any;
-      if (!parent) {
-        throw new AppError(404, 'Parent goal not found');
-      }
-      // Inherit course_id from parent if not explicitly provided differently
-      if (!data.course_id || data.course_id === parent.course_id) {
-        courseId = parent.course_id;
-      }
-    }
-
-    // Verify course belongs to user
-    const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, req.userId!);
-    if (!course) {
-      throw new AppError(404, 'Course not found');
-    }
-
-    // Auto-assign sort_order: max + 1 among siblings
-    const maxOrder = db.prepare(
-      data.parent_id
-        ? 'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = ? AND parent_id = ?'
-        : 'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = ? AND parent_id IS NULL'
-    ).get(...(data.parent_id ? [req.userId!, data.parent_id] : [req.userId!])) as any;
-
-    const sortOrder = (maxOrder?.max_order ?? -1) + 1;
-
-    const id = uuidv4();
-    const now = new Date().toISOString();
-
-    db.prepare(
-      `INSERT INTO goals (id, user_id, course_id, title, description, deadline, exam_mode, status, parent_id, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`
-    ).run(id, req.userId!, courseId, data.title, data.description || null, data.deadline || null, data.exam_mode ? 1 : 0, data.parent_id || null, sortOrder, now, now);
-
-    const goal = db.prepare('SELECT * FROM goals WHERE id = ?').get(id);
+    const goal = createGoal(getDb(), req.userId!, req.body);
     res.status(201).json(goal);
   } catch (err) {
     if (err instanceof ZodError) {

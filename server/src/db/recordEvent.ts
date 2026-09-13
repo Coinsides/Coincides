@@ -8,6 +8,7 @@ export const EVENT_VERBS = [
   'note_created',
   'board_created',
   'board_deleted',
+  'goal_created',
   'mounted',
   'unmounted',
   'purpose_created',
@@ -20,7 +21,7 @@ export const EVENT_VERBS = [
 ] as const;
 
 export type EventVerb = typeof EVENT_VERBS[number];
-export type EventActorKind = 'human' | 'system' | `agent:${string}`;
+export type EventActorKind = 'human' | 'system' | 'agent' | `agent:${string}`;
 export type EventJson = null | boolean | number | string | EventJson[] | { [name: string]: EventJson };
 
 const jsonSchema: z.ZodType<EventJson> = z.lazy(() => z.union([
@@ -31,7 +32,7 @@ const jsonSchema: z.ZodType<EventJson> = z.lazy(() => z.union([
 const entrySchema = z.object({
   user_id: z.string().regex(/\S/),
   actor_kind: z.custom<EventActorKind>((value) => (
-    value === 'human' || value === 'system'
+    value === 'human' || value === 'system' || value === 'agent'
     || (typeof value === 'string' && /^agent:\S.*$/.test(value))
   )),
   channel: z.string().regex(/\S/),
