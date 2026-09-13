@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.dialog {
+  width: min(680px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: 0;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.editorBody { padding: 20px; }
+
+.viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  touch-action: none;
+}
+
+.status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  text-align: center;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.zoomControl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.zoomControl input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.zoomControl output {
+  min-width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  margin: 14px 0 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.footer button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  color: var(--text-primary);
+}
+
+.footer button:hover:not(:disabled) { background: var(--bg-secondary); }
+.footer .saveButton { background: var(--accent-primary); color: var(--bg-primary); }
+.footer .saveButton:hover:not(:disabled) { opacity: 0.9; background: var(--accent-primary); }
+.dialog button:disabled,
+.dialog input:disabled { cursor: not-allowed; opacity: 0.5; }
+.dialog button:focus-visible,
+.dialog input:focus-visible,
+.viewport :global(.reactEasyCrop_CropArea):focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .overlay { padding: 12px; }
+  .dialog { max-height: calc(100dvh - 24px); }
+  .editorBody { padding: 16px; }
+}

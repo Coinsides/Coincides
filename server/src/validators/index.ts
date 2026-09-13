@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { skinSelectionSchema } from './skin.js';
 import { paperFreehandDataSchema } from './paperInk.js';
+import { noteMetadataSchema } from './noteCover.js';
 
 // --- Auth ---
 
@@ -361,7 +362,7 @@ export const createNoteSchema = z.object({
   title: z.string().min(1, 'Note title is required').max(300),
   description: z.string().max(2000).optional(),
   page_format: z.string().max(50).optional().default('flow'),
-  metadata: jsonObjectSchema.optional(),
+  metadata: noteMetadataSchema.optional(),
 });
 
 export const updateNoteSchema = z.object({
@@ -369,7 +370,7 @@ export const updateNoteSchema = z.object({
   title: z.string().min(1).max(300).optional(),
   description: z.string().max(2000).nullable().optional(),
   page_format: z.string().max(50).optional(),
-  metadata: jsonObjectSchema.optional(),
+  metadata: noteMetadataSchema.optional(),
   status: v2StatusSchema.optional(),
 });
 

@@ -45,7 +45,7 @@ router.post('/images', canvasImageUpload.single('file'), (req: AuthRequest, res:
     file: req.file,
     width,
     height,
-    metadata: { source: 'canvas_image_upload' },
+    metadata: { source: req.body.source === 'note_cover_upload' ? 'note_cover_upload' : 'canvas_image_upload' },
   });
   res.status(201).json(asset);
 });

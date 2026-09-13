@@ -37,6 +37,7 @@ import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
 import { assertMediaBlockAsset } from '../services/mediaBlocks.js';
 import { createNoteMetadataRouter } from './noteMetadata.js';
 import { mergeNoteSkin } from '../services/skin.js';
+import { assertNoteCoverAsset, mergeNoteCoverBinding } from '../services/noteCover.js';
 
 export { hydrateNote };
 
@@ -104,6 +105,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const data = createNoteSchema.parse(req.body);
     const db = getDb();
     getOwnedCourse(data.course_id, req.userId!);
+    assertNoteCoverAsset(db, req.userId!, data.metadata);
 
     const id = uuidv4();
     const now = new Date().toISOString();
@@ -150,6 +152,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     const noteId = req.params.id as string;
     const note = getOwnedNote(noteId, req.userId!);
     const data = updateNoteSchema.parse(req.body);
+    assertNoteCoverAsset(getDb(), req.userId!, data.metadata);
     assertSourceProjectionNoteUpdateAllowed(getDb(), req.userId!, noteId, data);
     if (
       data.page_format !== undefined
@@ -170,7 +173,8 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.metadata !== undefined || data.skin !== undefined) {
       const current = getDb().prepare('SELECT metadata FROM notes WHERE id = ? AND user_id = ?')
         .get(noteId, req.userId!) as { metadata: string };
-      const metadata = mergeNoteSkin(JSON.parse(current.metadata || '{}'), data.metadata, data.skin);
+      const currentMetadata = JSON.parse(current.metadata || '{}') as Record<string, unknown>;
+      const metadata = mergeNoteCoverBinding(currentMetadata, mergeNoteSkin(currentMetadata, data.metadata, data.skin));
       fields.push('metadata = ?');
       values.push(stringifyJson(metadata, {}));
     }

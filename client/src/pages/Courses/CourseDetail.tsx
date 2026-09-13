@@ -18,6 +18,7 @@ import {
 import { ProjectSourcesPanel } from '../Sources/ProjectSourcesPanel';
 import { ProjectDeleteDialog } from './ProjectDeleteDialog';
 import styles from './CourseDetail.module.css';
+import { ProjectNoteCard } from './noteCover/ProjectNoteCard';
 
 type ReconciliationGroupDecision = 'accepted_evidence_set' | 'kept_separate' | 'deferred' | 'excluded' | 'mark_conflict';
 
@@ -112,6 +113,7 @@ interface SourceBoardDetail {
 }
 
 interface NoteSummary {
+  metadata?: unknown;
   id: string;
   title: string;
   description: string | null;
@@ -156,6 +158,7 @@ interface ProjectNotesSectionProps {
   onCreateNote: (preset: NotePagePreset) => void;
   onOpenNote: (noteId: string) => void;
   refreshNotes: () => Promise<void>;
+  refreshCovers?: () => Promise<void>;
   addToast: NoteActionToast;
 }
 
@@ -166,6 +169,7 @@ export function ProjectNotesSection({
   onCreateNote,
   onOpenNote,
   refreshNotes,
+  refreshCovers = refreshNotes,
   addToast,
 }: ProjectNotesSectionProps) {
   const [busyNoteId, setBusyNoteId] = useState<string | null>(null);
@@ -220,45 +224,9 @@ export function ProjectNotesSection({
         <div className={styles.empty}>{status === 'trashed' ? 'Trash is empty.' : 'No notes yet.'}</div>
       ) : (
         <div className={styles.workspaceGrid}>
-          {notes.map((note) => {
-            const actionLabel = status === 'trashed'
-              ? `Restore ${note.title}`
-              : `Move ${note.title} to trash`;
-            return (
-              <div key={note.id} className={styles.workspaceCard}>
-                <button
-                  type="button"
-                  className={styles.workspaceCardOpen}
-                  aria-label={`Open note ${note.title}`}
-                  onClick={() => onOpenNote(note.id)}
-                >
-                  <div className={styles.workspaceCardIcon}>
-                    <FileText size={17} />
-                  </div>
-                  <div className={styles.workspaceCardBody}>
-                    <div className={styles.workspaceCardType}>Note</div>
-                    <div className={styles.workspaceCardTitle}>{note.title}</div>
-                    {note.description && (
-                      <div className={styles.workspaceCardDesc}>{note.description}</div>
-                    )}
-                    <div className={styles.workspaceCardMeta}>
-                      <span>Updated {new Date(note.updated_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.iconBtn} ${styles.workspaceCardAction} ${status === 'active' ? styles.workspaceCardDangerAction : ''}`}
-                  aria-label={actionLabel}
-                  title={actionLabel}
-                  disabled={busyNoteId === note.id}
-                  onClick={() => void runNoteAction(note.id)}
-                >
-                  {status === 'trashed' ? <RotateCcw size={13} /> : <Trash2 size={13} />}
-                </button>
-              </div>
-            );
-          })}
+          {notes.map((note) => <ProjectNoteCard key={note.id} note={note} status={status}
+            busy={busyNoteId === note.id} onOpen={() => onOpenNote(note.id)}
+            onLifecycle={() => void runNoteAction(note.id)} onCoverSaved={refreshCovers} addToast={addToast} />)}
         </div>
       )}
     </div>
@@ -462,6 +430,12 @@ export default function CourseDetailPage() {
     } finally {
       setLoading(false);
     }
+  }, [courseId, noteStatus]);
+
+  const refreshCovers = useCallback(async () => {
+    if (!courseId) return;
+    const response = await api.get(`/notes?course_id=${courseId}&status=${noteStatus}`);
+    setNotes(response.data);
   }, [courseId, noteStatus]);
 
   const fetchMaterials = useCallback(async () => {
@@ -956,6 +930,7 @@ export default function CourseDetailPage() {
       onCreateNote={handleCreateNote}
       onOpenNote={(noteId) => navigate(`/notes/${noteId}`)}
       refreshNotes={fetchSummary}
+      refreshCovers={refreshCovers}
       addToast={addToast}
     />
   );

@@ -1,0 +1,100 @@
+.withCover { flex-direction: column; }
+.openWithCover {
+  display: block;
+  padding: 0;
+  width: 100%;
+}
+.content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px 50px 15px 15px;
+}
+.banner {
+  display: block;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.banner img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.withCover .lifecycle { top: auto; bottom: 12px; }
+.toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: calc(100% - 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+.withoutCoverToolbar { right: 44px; }
+.card:hover .toolbar,
+.card:focus-within .toolbar { opacity: 1; pointer-events: auto; }
+.tool {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 5px 7px;
+  min-height: 30px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.tool:hover:not(:disabled) { background: var(--glass-elevated); }
+.tool:focus-visible,
+.dialog button:focus-visible,
+.dialog input:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+.tool:disabled { opacity: 0.6; cursor: wait; }
+.dialog {
+  margin: auto;
+  width: min(540px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+.dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+.header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.header h2 { font-size: 18px; margin: 0; }
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 32px 16px;
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  color: var(--text-secondary);
+}
+.dropZone p { margin: 0; }
+.dropZone input { max-width: 100%; font: inherit; }
+.dragging { border-color: var(--accent-primary); background: var(--glass-elevated); }
+.actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+.error { color: var(--error); font-size: 13px; }
+@media (hover: none) {
+  .toolbar { opacity: 1; pointer-events: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toolbar { transition: none; }
+}
