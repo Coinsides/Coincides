@@ -2,6 +2,7 @@ import { createHashRouter, createRoutesFromElements, RouterProvider, Route, Navi
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import AppLayout from '@/components/Layout/AppLayout';
+import DesignStudio from '@/pages/DesignStudio/DesignStudio';
 import Login from '@/pages/Auth/Login';
 import Register from '@/pages/Auth/Register';
 import DailyBrief from '@/pages/DailyBrief/DailyBrief';
@@ -113,6 +114,7 @@ const router = createHashRouter(createRoutesFromElements(
       <Route path="sources" element={<SourceLibraryPage />} />
       <Route path="group-gallery" element={<GroupGalleryPage />} />
       <Route path="group-gallery/editor" element={<SingleContentGroupEditorPage />} />
+      <Route path="design-studio/:drawer?" element={<DesignStudio />} />
       <Route path="decks" element={<DecksPage />} />
       <Route path="decks/:deckId" element={<DeckDetailPage />} />
       <Route path="review" element={<ReviewPage />} />

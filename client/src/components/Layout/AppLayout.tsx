@@ -15,6 +15,7 @@ import {
   Boxes,
   ListChecks,
   PanelsTopLeft,
+  SwatchBook,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -29,6 +30,7 @@ const navItems = [
   { to: '/sources', icon: LibraryBig, labelKey: 'nav.sources' },
   { to: '/boards', icon: PanelsTopLeft, label: 'Boards' },
   { to: '/group-gallery', icon: Boxes, label: 'Group Gallery' },
+  { to: '/design-studio', icon: SwatchBook, label: '设计室' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 
@@ -139,6 +141,8 @@ export default function AppLayout() {
             <NavLink
               key={to}
               to={to}
+              aria-label={label ?? (labelKey ? t(labelKey) : '')}
+              title={label ?? (labelKey ? t(labelKey) : '')}
               end={to === '/'}
               className={({ isActive }) =>
                 `${styles.navItem} ${isActive ? styles.active : ''}`

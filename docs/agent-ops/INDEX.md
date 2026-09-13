@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 367 份文档。
+共 368 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -355,6 +355,7 @@
 | [handoffs/2026-09-13-v13-6-deadcode-purge-order.md](handoffs/2026-09-13-v13-6-deadcode-purge-order.md) | 单1 · Canvas 死代码清除大单 | `done(四批全清;HQ 收口:无过滤 client 全库 1576/1576 零 skip、server test:v2 476/477+DashScope 单红隔离复验 13/13 绿判 flaky 入总测名录、2 条环境红既档;git diff --check+secrets 扫描 HQ 补跑双绿)` | — | — |
 | [handoffs/2026-09-13-v13-6-flaky-roster-order.md](handoffs/2026-09-13-v13-6-flaky-roster-order.md) | 尾单 · flaky 名录五笔清基线 | `done(builder 三笔修复+诊断;HQ 收口:DashScope 根因确诊=配真实 key 机器必红的夹具缺陷(本地凭据文件优先 env mock),应用 builder 隔离 patch 后 7/7 绿;三轮全库=server 477×3 全绿、client 轮1/2 各 1 无名间歇红后 4 连绿(身份未获挂观察位候现身);T-1 定向 1/1 绿历史红未复现;环境红 2 条诊断申报在档)` | — | — |
 | [handoffs/2026-09-13-v13-6-test-gate-repair-order.md](handoffs/2026-09-13-v13-6-test-gate-repair-order.md) | 单2 · 测试门修复:漏挂发现机关+24 文件接门 | `done(补遗二三轮终态达成;保留25条已裁归单1 Canvas红+2条已知环境红;HQ收口补跑git/secrets)` | — | — |
+| [handoffs/2026-09-13-v14-design-studio-shell-order.md](handoffs/2026-09-13-v14-design-studio-shell-order.md) | 单3 · 设计室壳 | `ready` | — | — |
 | [handoffs/2026-09-13-v14-palette-assets-order.md](handoffs/2026-09-13-v14-palette-assets-order.md) | 单1 · 调色板资产 v1 + 统一取色器 | `done(七节全落;HQ 收口:server test:v2 484/484 全绿,git/secrets 双门补跑绿;client 1602/1602+真浏览器 13/13 builder 在案)` | — | — |
 | [handoffs/2026-09-13-v14-skin-float-card-order.md](handoffs/2026-09-13-v14-skin-float-card-order.md) | 单2 · 「笔记外观」浮卡 v1 + 存为套装 | `done（补遗一 materialPreset 修约完成；HQ 收口项见末尾 Result）` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

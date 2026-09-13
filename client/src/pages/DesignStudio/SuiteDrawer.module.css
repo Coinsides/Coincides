@@ -1,0 +1,47 @@
+.drawer { min-width: 0; }
+.group { margin-bottom: 26px; }
+.group summary { display: flex; align-items: center; gap: 8px; padding: 8px 0; margin-bottom: 10px; cursor: pointer; list-style: none; font-size: 13px; font-weight: 600; }
+.group summary::-webkit-details-marker { display: none; }
+.group[open] summary > svg { transform: rotate(90deg); }
+.count { color: var(--text-secondary); font-weight: 400; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 14px; list-style: none; }
+.card { position: relative; min-width: 0; }
+.select { display: block; width: 100%; padding: 8px; border: 1px solid transparent; border-radius: 6px; text-align: left; transition: background-color 150ms ease-out, border-color 150ms ease-out; }
+.select:hover { background: var(--bg-hover); }
+.select[aria-pressed='true'] { border-color: var(--border-focus); background: var(--bg-surface); }
+.preview { display: block; padding: 16px 22px; background: var(--bg-surface); border-radius: 3px; }
+.preview > [data-skin-sample] { height: 100px; padding: 16px 10px; gap: 8px; }
+.name { display: block; margin-top: 10px; font-size: 13px; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lineage { display: block; margin-top: 2px; color: var(--text-secondary); font-size: 11px; }
+.manage { display: flex; align-items: center; justify-content: center; position: absolute; right: 12px; top: 12px; width: 30px; height: 30px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--bg-elevated); color: var(--text-primary); opacity: 0; transition: opacity 150ms ease-out; }
+.card:hover .manage, .card:focus-within .manage, .manage[aria-expanded='true'] { opacity: 1; }
+.manage:hover { background: var(--bg-hover); }
+.manage:disabled { cursor: default; }
+.empty, .message { color: var(--text-secondary); font-size: 13px; line-height: 1.6; max-width: 65ch; }
+.message { margin-bottom: 14px; overflow-wrap: anywhere; }
+.message button { text-decoration: underline; text-underline-offset: 3px; }
+.detail { padding-top: 20px; border-top: 1px solid var(--border-default); }
+.detail header { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.detail h3 { font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.detail header p { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+.detail header button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 4px; }
+.detail header button:hover { background: var(--bg-hover); }
+.detail h4 { font-size: 12px; font-weight: 600; margin: 20px 0 8px; }
+.tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); column-gap: 24px; }
+.tokens > div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; font-size: 11px; border-bottom: 1px solid var(--border-subtle); }
+.tokens dt { color: var(--text-secondary); }
+.tokens dd { display: flex; align-items: center; gap: 6px; }
+.tokens code { font-size: 11px; }
+.swatch { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--border-default); border-radius: 2px; }
+.rename { padding: 8px; }
+.rename input { width: 100%; min-height: 32px; padding: 4px 6px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 13px; }
+.rename span { display: block; margin-top: 4px; color: var(--text-secondary); font-size: 11px; }
+.menu { --studio-menu-layer: 1150; position: fixed; z-index: var(--studio-menu-layer); display: flex; flex-direction: column; min-width: 168px; max-width: calc(100vw - 16px); padding: 4px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-elevated); color: var(--text-primary); }
+.menu button { padding: 8px 10px; border-radius: 3px; text-align: left; font-size: 13px; }
+.menu button:hover { background: var(--bg-hover); }
+.menu button:last-child { border-top: 1px solid var(--border-subtle); }
+.drawer :is(button, input, summary):focus-visible, .menu button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (hover: none) { .manage { opacity: 1; } }
+@media (max-width: 480px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .preview { padding: 12px; } }
+@media (prefers-reduced-motion: reduce) { .select, .manage { transition: none; } }
