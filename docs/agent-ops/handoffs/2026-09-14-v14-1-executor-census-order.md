@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft(候单5 收口后派发)
+> **状态 (Status)**: done
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-14
 > **单号**: V14 主线 · 14.1-A0 · executor 双轨清偿侦察(动词→人门映射普查)
@@ -33,3 +33,14 @@
 ## 四 · 申报义务
 
 Result 必含:普查覆盖数(31/31)、四族计数、GAP 清单、报告路径。存疑归类=报告里标「候 HQ 裁」⛔自判;报告完成即翻 done(本单无测试/构建义务)。
+
+## Result
+
+**执行者**: codex builder。K-0 纯读普查完成；本单 done 表示报告交付，映射与后续重铸放行仍留 HQ。
+
+- **覆盖**: **31/31 case**，总表与31个逐动词明细齐全。现工作树为29个 legacy 定义 + 2个拒绝桩；实际持久写12个（包含 search_memories 的 last_accessed/FTS 写），纯读/计算16个、自域表单标记1个、拒绝桩2个。
+- **四族计数**: **A=0、B=9、C=1、D=16**；另 **5项归类「候 HQ 裁」**：create_task、create_card、create_proposal、search_memories、save_memory。`31 = 0 + 9 + 1 + 16 + 5`；未为凑四族总数擅自归类。B族9动词对应5个route文件、8个闭包抽取点；工程量估计及不包含的公共宪法工程见报告 §6。
+- **GAP清单（6项）**: create_proposal（通用五型创建人门）、search_memories（搜索+access-touch 同效果人门）、save_memory（创建人门）、suggest_next_topics（完整组合查询）、generate_weekly_review（指定周完整复盘）、search_documents（hybrid三路搜索人门）。自域 collect_preferences 与两个拒绝桩不混入缺门计数。
+- **报告**: [docs/agent-ops/analysis/2026-09-14-v14-1-executor-census.md](../analysis/2026-09-14-v14-1-executor-census.md)。含逐项人门route/service位置、SQL/校验/默认/级联/响应差异、宪法触点、GAP/B抽取估计，以及逐写动词史记/收据现状。
+- **现物要点**: HQ工具事件yield现位于 orchestrator.ts:208–247；已存在工具活动SSE及另行聊天存档，但12个域写均未接 events/tool-face receipt。create_task/create_card当前只返BLOCKED，未恢复写权。报告记下三份核心源码指纹，收口复读一致。
+- **执行边界**: 仅写报告与本工单；零产品代码改动，零git命令/`.git`接触，未commit，未读取`.env`或实际凭证，未接触用户库，未执行产品/测试/构建，未新设计安全对抗用例。完成静态清单闭合与文档核对，不将其表述为测试通过。
