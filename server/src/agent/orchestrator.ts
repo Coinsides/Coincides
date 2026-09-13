@@ -205,6 +205,14 @@ export async function* runAgent(
     }
     lastRoundHadTools = true;
 
+    // Surface tool activity to the SSE consumer at execution time — the
+    // provider-stream tool_call_start/end chunks above are consumed for
+    // argument assembly and never forwarded, so without these yields the
+    // route's tool_start/tool_end events can never fire.
+    for (const tc of currentToolCalls) {
+      yield { type: 'tool_call_start', tool_call: tc };
+    }
+
     // Execute tool calls in parallel for maximum efficiency
     // All tool calls in a single round are independent (Claude decides to call them together)
     let hasPreferenceForm = false;
@@ -234,6 +242,9 @@ export async function* runAgent(
     });
 
     const toolResults = await Promise.all(toolResultPromises);
+    for (const tc of currentToolCalls) {
+      yield { type: 'tool_call_end', tool_call: tc };
+    }
 
     // If a preference form was generated, emit it as a special SSE event
     if (hasPreferenceForm && preferenceFormData) {

@@ -41,7 +41,10 @@ const patterns = [
   ['bearer token', /Bearer\s+[A-Za-z0-9._~+/=-]{24,}/],
   [
     'assigned secret-like value',
-    /\b(?:api[_-]?key|secret|password|token)\b\s*[:=]\s*["']?[A-Za-z0-9_./+=-]{24,}/i,
+    // (?!\() excludes bare function-call assignments like
+    // `apiKey = resolveProviderCredential(...)` — a long identifier followed
+    // by `(` is code, not a literal credential.
+    /\b(?:api[_-]?key|secret|password|token)\b\s*[:=]\s*["']?[A-Za-z0-9_./+=-]{24,}(?![(\w./+=-])/i,
   ],
 ];
 

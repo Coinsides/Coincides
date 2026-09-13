@@ -43,7 +43,11 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   }
 
   if (!model) {
-    model = activeProvider === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o';
+    // Environment default outranks the hardcoded fallback; the hardcoded ID
+    // must be a currently served model or every fresh user 404s on first chat.
+    model = activeProvider === 'anthropic'
+      ? (process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6')
+      : (process.env.OPENAI_MODEL || 'gpt-4o');
   }
 
   return {
