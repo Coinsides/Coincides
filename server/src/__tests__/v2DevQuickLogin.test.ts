@@ -53,7 +53,7 @@ function reservePort(): Promise<number> {
 }
 
 async function waitForHealth(server: RunningServer): Promise<void> {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     if (server.child.exitCode !== null) {
       throw new Error(`Server exited before becoming ready (${server.child.exitCode})\n${server.output()}`);
@@ -66,7 +66,7 @@ async function waitForHealth(server: RunningServer): Promise<void> {
     }
     await new Promise((resolveWait) => setTimeout(resolveWait, 50));
   }
-  throw new Error(`Server did not become ready within 30s\n${server.output()}`);
+  throw new Error(`Server did not become ready within 60s\n${server.output()}`);
 }
 
 async function startServer(options: StartServerOptions): Promise<RunningServer> {
@@ -100,7 +100,7 @@ async function startServer(options: StartServerOptions): Promise<RunningServer> 
     delete childEnv.COINCIDES_DEV_QUICK_LOGIN;
   }
 
-  const child = spawn(process.execPath, ['--import', 'jiti/register', 'src/index.ts'], {
+  const child = spawn(process.execPath, ['--import', 'tsx', 'src/index.ts'], {
     cwd: SERVER_ROOT,
     env: childEnv,
     stdio: ['ignore', 'pipe', 'pipe'],
