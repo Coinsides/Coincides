@@ -56,10 +56,12 @@ export async function uploadCanvasImageAsset(input: {
   file: File;
   width?: number;
   height?: number;
+  source?: 'note_cover_upload';
 }): Promise<CanvasImageAsset> {
   const form = new FormData();
   form.append('file', input.file);
   form.append('note_id', input.noteId);
+  if (input.source) form.append('source', input.source);
   if (input.width !== undefined) form.append('width', String(Math.max(0, Math.round(input.width))));
   if (input.height !== undefined) form.append('height', String(Math.max(0, Math.round(input.height))));
   const response = await api.post('/canvas-assets/images', form, {
