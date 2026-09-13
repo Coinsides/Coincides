@@ -1,0 +1,138 @@
+{
+  "capturedAt": "2026-09-13T09:25:06.135Z",
+  "baselineCapturedAt": "2026-09-13T09:12:40.286Z",
+  "method": "Round 2 pre-edit byte snapshots to final files; line LCS with CRLF normalized only; no git; scoped to captured paths and newly authored evidence, not full worktree",
+  "sourceTotals": {
+    "files": 9,
+    "added": 68,
+    "deleted": 54
+  },
+  "documentTotalsExcludingThisManifest": {
+    "files": 4,
+    "added": 1351,
+    "deleted": 3
+  },
+  "changes": [
+    {
+      "file": "shared/types/index.ts",
+      "added": 11,
+      "deleted": 23,
+      "beforeSha256": "b6180332c311dc1958cda54d8c7edb8778bd5782c1a9e98b8233bcca4a808a79",
+      "afterSha256": "1bd22738e62f7f89692f5daa33292e6f7de5572ccb497cec82db602c9034ee57",
+      "lines": 948
+    },
+    {
+      "file": "server/src/agent/tools/definitions.ts",
+      "added": 1,
+      "deleted": 1,
+      "beforeSha256": "6c5f4b6f1b960b9267ed27f8ec5754518e1c4ef1ebce066f9cb1363480173cde",
+      "afterSha256": "41c2562e3804ce3153eccf866918ee7314d9dc1486a170ce488d1f6b4a1071e2",
+      "lines": 311
+    },
+    {
+      "file": "server/src/agent/tools/executor.ts",
+      "added": 2,
+      "deleted": 2,
+      "beforeSha256": "0e295158a89b2944f19599ee6b0fa001f0abe12167392826772e60ab3f5603d3",
+      "afterSha256": "5a3c82498e5894ac2bb31dda755885981b4c040bd0b5632277369b9aca92596b",
+      "lines": 897
+    },
+    {
+      "file": "server/src/validators/index.ts",
+      "added": 2,
+      "deleted": 2,
+      "beforeSha256": "d7fc67123694adadcd90d59cdd325ed20c438755b592e0585468df1ae5f5200e",
+      "afterSha256": "48ad7e21bff250a5ecf216b8890e1b3c8c470ababc02de973da82a78ce35bee8",
+      "lines": 1259
+    },
+    {
+      "file": "server/src/services/proposalTypes.ts",
+      "added": 28,
+      "deleted": 0,
+      "beforeSha256": null,
+      "afterSha256": "513ccc4e28edf66102cf2da4341008bd7064622b38a29dd232760925aff28a3b",
+      "lines": 28
+    },
+    {
+      "file": "server/src/services/materialMapProposals.ts",
+      "added": 1,
+      "deleted": 2,
+      "beforeSha256": "8437f65a177fdf8bca5ab5bf48fa73b2d22babc4fb26a951f08b43171e56c9f9",
+      "afterSha256": "cf3d9b23528ac6c7d14e1b5e5895c9bb73370aaf8f4e8382ea15d3d822eaf218",
+      "lines": 207
+    },
+    {
+      "file": "server/src/services/materialReconciliationProposals.ts",
+      "added": 1,
+      "deleted": 2,
+      "beforeSha256": "79323064931460868d2e578305bd2158157a071420e4316dcbd2bc08a9882ef5",
+      "afterSha256": "35afdf936f186e0d115f15e19e1b93d15e28cfa5843fea6853336ba799f552b0",
+      "lines": 858
+    },
+    {
+      "file": "server/src/services/organizedNoteProposals.ts",
+      "added": 1,
+      "deleted": 2,
+      "beforeSha256": "02107a24718417e184efe0b715929f83e926f55ae6ee114350f387247628bd94",
+      "afterSha256": "ddf68f86a64eb0c6f93d0c258f55bc3811587f9566ba4e56fd6b345494269bd1",
+      "lines": 519
+    },
+    {
+      "file": "server/src/__tests__/v14ProposalUnification.test.ts",
+      "added": 21,
+      "deleted": 20,
+      "beforeSha256": "acb663a9eeca60c4300b9d0da6fb1e6f9a94fcfd7e555ff222f6fb0c2272cc23",
+      "afterSha256": "9a490e836b149434d9e33b6e4e6673975a1c082ce932d9a905def48cc19d8fb5",
+      "lines": 299
+    },
+    {
+      "file": "docs/agent-ops/handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md",
+      "added": 56,
+      "deleted": 1,
+      "beforeSha256": "86071357f7e1b3d5a90ac58e783ee1f6d3777059a26b8a95e4ae7f5ce0a8a86a",
+      "afterSha256": "8f379d3d6c1c10bee195bb5b8d318bf7bd092e44867c79296ba01363b6927314",
+      "lines": 158
+    },
+    {
+      "file": "docs/agent-ops/INDEX.md",
+      "added": 3,
+      "deleted": 2,
+      "beforeSha256": "6f581661a61308dab74b39e97583af52e25a2d667b49a6d49a8daffe1735e3fd",
+      "afterSha256": "586f7251b5303c66bbad89c8acf4160d11158f07f369300545cef44b1662de24",
+      "lines": 391
+    },
+    {
+      "file": "docs/audits/2026-09-14-a3a-proposal-builder/report-round2.md",
+      "added": 76,
+      "deleted": 0,
+      "beforeSha256": null,
+      "afterSha256": "74bcf4e731438513b686f39293ddf0b8e79f54bb1d0ce67510eaa3466032b1dd",
+      "lines": 76
+    },
+    {
+      "file": "docs/audits/2026-09-14-a3a-proposal-builder/validation-round2.json",
+      "added": 1216,
+      "deleted": 0,
+      "beforeSha256": null,
+      "afterSha256": "366a31c362c5d9732b1609640e10e3451364c5b13d672416e0848824f3cf79cd",
+      "lines": 1216
+    }
+  ],
+  "unchangedSnapshotPaths": [
+    "server/package.json",
+    "server/src/services/proposals.ts",
+    "server/src/services/recordAgentAction.ts",
+    "server/src/db/recordEvent.ts",
+    "scripts/check-server-shared-runtime-import.mjs",
+    "package.json",
+    "package-lock.json",
+    "server/package-lock.json",
+    "client/package.json",
+    "client/package-lock.json",
+    "shared/package.json",
+    "docs/agent-ops/current-state/INDEX.md",
+    "docs/agent-ops/decisions/INDEX.md"
+  ],
+  "handoffPriorTextPreservedExceptStatus": true,
+  "selfExclusion": "This changes-round2.json manifest is new metadata and is not recursively hashed/counted within itself."
+}

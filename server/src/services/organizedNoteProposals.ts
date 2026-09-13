@@ -10,6 +10,7 @@ import {
 } from './templateDefinitions.js';
 import { resolveSourceBoardForProposal } from './sourceBoards.js';
 import { resolveSourceScopesForProposal } from './sourceScopes.js';
+import { createProposal, HUMAN_PROPOSAL_CONTEXT, type ProposalCreationContext } from './proposals.js';
 
 interface CreateOrganizedNoteProposalInput {
   course_id: string;
@@ -340,7 +341,8 @@ async function tryGenerateAiBlocks(
 export async function createOrganizedNoteProposal(
   db: Database.Database,
   userId: string,
-  input: CreateOrganizedNoteProposalInput
+  input: CreateOrganizedNoteProposalInput,
+  context: ProposalCreationContext = HUMAN_PROPOSAL_CONTEXT,
 ) {
   const course = getOwnedCourse(db, userId, input.course_id);
   const resolvedBoard = resolveSourceBoardForProposal(db, userId, input.course_id, input.source_board_id);
@@ -375,8 +377,6 @@ export async function createOrganizedNoteProposal(
     throw new AppError(400, 'No source-backed blocks could be generated for this proposal');
   }
 
-  const now = new Date().toISOString();
-  const proposalId = uuidv4();
   const data: OrganizedNoteData = {
     version: 'v2.1',
     proposal_kind: 'organized_note',
@@ -393,26 +393,15 @@ export async function createOrganizedNoteProposal(
     warnings: allWarnings,
   };
 
-  db.prepare(`
-    INSERT INTO proposals (id, user_id, type, status, data, created_at)
-    VALUES (?, ?, 'organized_note', 'pending', ?, ?)
-  `).run(proposalId, userId, JSON.stringify(data), now);
-
-  db.prepare(`
-    UPDATE source_materials
-    SET proposal_status = 'note_proposed', updated_at = ?
-    WHERE user_id = ? AND id IN (${sourceMaterialIds.map(() => '?').join(', ')})
-  `).run(now, userId, ...sourceMaterialIds);
-
-  return {
-    id: proposalId,
-    user_id: userId,
-    type: 'organized_note',
-    status: 'pending',
-    data,
-    created_at: now,
-    resolved_at: null,
-  };
+  return db.transaction(() => {
+    const proposal = createProposal(db, userId, { type: 'organized_note', data, context });
+    db.prepare(`
+      UPDATE source_materials
+      SET proposal_status = 'note_proposed', updated_at = ?
+      WHERE user_id = ? AND id IN (${sourceMaterialIds.map(() => '?').join(', ')})
+    `).run(proposal.created_at, userId, ...sourceMaterialIds);
+    return proposal;
+  }).immediate();
 }
 
 export function applyOrganizedNoteProposal(db: Database.Database, userId: string, proposal: ProposalRow) {

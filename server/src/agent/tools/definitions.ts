@@ -1,6 +1,9 @@
 import type { ToolDefinition } from '../providers/types.js';
 import { AGENT_ACTION_TOOLS } from '../../toolFace/registry.js';
 import { loadToolFaceManifest } from '../../mcp/manifest.js';
+import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
+import { createOrganizedNoteProposalSchema } from '../../validators/index.js';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // The build projects the authoritative Zod registry into this runtime artifact.
 const manifest = loadToolFaceManifest();
@@ -107,27 +110,30 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_proposal',
-    description: 'Create a proposal for the student to review and approve before applying. Use for batch cards, study plans, goal breakdowns, or schedule adjustments.',
+    description: 'Create a proposal for the student to review and approve before applying. Use for batch cards, study plans, goal breakdowns, schedule adjustments, time blocks, or source-backed organized notes.',
     parameters: {
       type: 'object',
       properties: {
         type: {
           type: 'string',
-          enum: ['batch_cards', 'study_plan', 'goal_breakdown', 'schedule_adjustment', 'time_block_setup'],
-          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks), time_block_setup (create Time Blocks for days missing study blocks)',
+          enum: [...CHAT_PROPOSAL_TYPES],
+          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks), time_block_setup (create Time Blocks for days missing study blocks), organized_note (generate a candidate note from project materials; data is the source selection, not authored blocks)',
         },
         data: {
-          type: 'object',
-          properties: {
-            title: { type: 'string', description: 'Proposal title' },
-            description: { type: 'string', description: 'Brief description of what this proposal does. NEVER include time estimates.' },
-            items: {
-              type: 'array',
-              items: { type: 'object' },
-              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, time_block_id, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }. For time_block_setup: each item should include { label, date (YYYY-MM-DD), start_time (HH:MM), end_time (HH:MM), type ("study") }.',
+          description: 'For organized_note, supply course_id and optional source selection fields or note_title. For the five planning types, supply title, description and items.',
+          anyOf: [{
+            type: 'object',
+            properties: {
+              title: { type: 'string', description: 'Proposal title' },
+              description: { type: 'string', description: 'Brief description of what this proposal does. NEVER include time estimates.' },
+              items: {
+                type: 'array',
+                items: { type: 'object' },
+                description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, time_block_id, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }. For time_block_setup: each item should include { label, date (YYYY-MM-DD), start_time (HH:MM), end_time (HH:MM), type ("study") }.',
+              },
             },
-          },
-          required: ['title', 'description', 'items'],
+            required: ['title', 'description', 'items'],
+          }, zodToJsonSchema(createOrganizedNoteProposalSchema, { $refStrategy: 'none' })],
         },
       },
       required: ['type', 'data'],

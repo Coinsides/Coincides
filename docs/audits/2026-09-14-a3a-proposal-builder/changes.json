@@ -1,0 +1,126 @@
+{
+  "capturedAt": "2026-09-13T09:05:31.918Z",
+  "baselineCapturedAt": "2026-09-13T08:53:56.060Z",
+  "method": "Line LCS against this turn pre-edit byte snapshots; CRLF normalized for counts only; no Git access. Scope is the ten product/test files, not the whole working tree or build outputs.",
+  "changes": [
+    {
+      "file": "shared/types/index.ts",
+      "added": 15,
+      "deleted": 0,
+      "beforeSha256": "1ec438bece8cbb56a10450e854bc17d3bd2c022f7fc068160215cdcd01c73ed7",
+      "afterSha256": "b6180332c311dc1958cda54d8c7edb8778bd5782c1a9e98b8233bcca4a808a79",
+      "lines": 960
+    },
+    {
+      "file": "server/package.json",
+      "added": 1,
+      "deleted": 1,
+      "beforeSha256": "cec5673dc1711a78df6a01e944b9d0f710dbeed1de3e8d06e86f31d7ad33ec4d",
+      "afterSha256": "1b02232804158d1cb55594497830c9bbd052cecd924b46c546aa30600005da6e",
+      "lines": 77
+    },
+    {
+      "file": "server/src/agent/tools/definitions.ts",
+      "added": 19,
+      "deleted": 13,
+      "beforeSha256": "a2fb502881997489ab08906b36e39281e81722d3d80fec15a6dded4ca18fa512",
+      "afterSha256": "6c5f4b6f1b960b9267ed27f8ec5754518e1c4ef1ebce066f9cb1363480173cde",
+      "lines": 311
+    },
+    {
+      "file": "server/src/agent/tools/executor.ts",
+      "added": 23,
+      "deleted": 7,
+      "beforeSha256": "7c405c43307bd2043062be91813162b8bf6836402365dc590027cfebf44a2268",
+      "afterSha256": "0e295158a89b2944f19599ee6b0fa001f0abe12167392826772e60ab3f5603d3",
+      "lines": 897
+    },
+    {
+      "file": "server/src/validators/index.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "9420fd67a4b0cfb95f7cecdee7469abaf409a84cae0669f4f6b950da398bc4ae",
+      "afterSha256": "d7fc67123694adadcd90d59cdd325ed20c438755b592e0585468df1ae5f5200e",
+      "lines": 1259
+    },
+    {
+      "file": "server/src/services/proposals.ts",
+      "added": 50,
+      "deleted": 0,
+      "beforeSha256": null,
+      "afterSha256": "64008a3250c104a6d1d4be18a3e2b479d755d2f6b17c11e70540ed1468d7097c",
+      "lines": 50
+    },
+    {
+      "file": "server/src/services/materialMapProposals.ts",
+      "added": 13,
+      "deleted": 23,
+      "beforeSha256": "6a2462e6ac256c8ee16dbb0120b485486f71590ceee0dcb9c94f424fb80da3f1",
+      "afterSha256": "8437f65a177fdf8bca5ab5bf48fa73b2d22babc4fb26a951f08b43171e56c9f9",
+      "lines": 208
+    },
+    {
+      "file": "server/src/services/materialReconciliationProposals.ts",
+      "added": 4,
+      "deleted": 16,
+      "beforeSha256": "1ebc2d860a62207d22b82aca97c270a46e8755c45519433e3de8ebd3440d214b",
+      "afterSha256": "79323064931460868d2e578305bd2158157a071420e4316dcbd2bc08a9882ef5",
+      "lines": 859
+    },
+    {
+      "file": "server/src/services/organizedNoteProposals.ts",
+      "added": 13,
+      "deleted": 23,
+      "beforeSha256": "ea38f4768be9816f4c6635bd6999c9d3a3c9cfc749051644ad5b914ee24270a1",
+      "afterSha256": "02107a24718417e184efe0b715929f83e926f55ae6ee114350f387247628bd94",
+      "lines": 520
+    },
+    {
+      "file": "server/src/__tests__/v14ProposalUnification.test.ts",
+      "added": 298,
+      "deleted": 0,
+      "beforeSha256": null,
+      "afterSha256": "acb663a9eeca60c4300b9d0da6fb1e6f9a94fcfd7e555ff222f6fb0c2272cc23",
+      "lines": 298
+    }
+  ],
+  "totals": {
+    "added": 439,
+    "deleted": 83
+  },
+  "protectedFiles": [
+    {
+      "file": "server/src/db/recordEvent.ts",
+      "unchanged": true,
+      "sha256": "d55ed02010f8cdd3c72995c1ec7b5cb910bb21fa023ed9841c53e97aec272f8b"
+    },
+    {
+      "file": "server/src/services/recordAgentAction.ts",
+      "unchanged": true,
+      "sha256": "5e3ca115010abbe6c9a5b5add9406115990944b2dfeccd2d272832078c8ca7b9"
+    }
+  ],
+  "documentationNumstat": [
+    {
+      "file": "docs/audits/2026-09-14-a3a-proposal-builder/report.md",
+      "added": 109,
+      "deleted": 0
+    },
+    {
+      "file": "docs/audits/2026-09-14-a3a-proposal-builder/validation.json",
+      "added": 1018,
+      "deleted": 0
+    },
+    {
+      "file": "docs/audits/2026-09-14-a3a-proposal-builder/changes.json",
+      "added": 126,
+      "deleted": 0
+    },
+    {
+      "file": "docs/agent-ops/handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md",
+      "added": 58,
+      "deleted": 0,
+      "status": "ready retained; appended stop Result only"
+    }
+  ]
+}

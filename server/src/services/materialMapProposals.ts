@@ -9,6 +9,7 @@ import {
 } from './courseMaterials.js';
 import { resolveSourceBoardForProposal } from './sourceBoards.js';
 import { resolveSourceScopesForProposal } from './sourceScopes.js';
+import { createProposal, HUMAN_PROPOSAL_CONTEXT, type ProposalCreationContext } from './proposals.js';
 
 interface CreateMaterialMapProposalInput {
   course_id: string;
@@ -95,7 +96,8 @@ function segmentSnapshot(db: Database.Database, segment: any): SegmentSnapshot {
 export function createMaterialMapProposal(
   db: Database.Database,
   userId: string,
-  input: CreateMaterialMapProposalInput
+  input: CreateMaterialMapProposalInput,
+  context: ProposalCreationContext = HUMAN_PROPOSAL_CONTEXT,
 ) {
   getOwnedCourse(db, userId, input.course_id);
   const resolvedBoard = resolveSourceBoardForProposal(db, userId, input.course_id, input.source_board_id);
@@ -131,8 +133,6 @@ export function createMaterialMapProposal(
     throw new AppError(400, 'No proposal-ready material segments found for the selected scope');
   }
 
-  const proposalId = uuidv4();
-  const now = new Date().toISOString();
   const data = {
     version: 'v2.1',
     proposal_kind: 'material_map',
@@ -147,26 +147,15 @@ export function createMaterialMapProposal(
     warnings,
   };
 
-  db.prepare(`
-    INSERT INTO proposals (id, user_id, type, status, data, created_at)
-    VALUES (?, ?, 'material_map', 'pending', ?, ?)
-  `).run(proposalId, userId, JSON.stringify(data), now);
-
-  db.prepare(`
-    UPDATE source_materials
-    SET proposal_status = 'map_proposed', updated_at = ?
-    WHERE user_id = ? AND id IN (${materials.map(() => '?').join(', ')})
-  `).run(now, userId, ...materials.map((material) => material.id));
-
-  return {
-    id: proposalId,
-    user_id: userId,
-    type: 'material_map',
-    status: 'pending',
-    data,
-    created_at: now,
-    resolved_at: null,
-  };
+  return db.transaction(() => {
+    const proposal = createProposal(db, userId, { type: 'material_map', data, context });
+    db.prepare(`
+      UPDATE source_materials
+      SET proposal_status = 'map_proposed', updated_at = ?
+      WHERE user_id = ? AND id IN (${materials.map(() => '?').join(', ')})
+    `).run(proposal.created_at, userId, ...materials.map((material) => material.id));
+    return proposal;
+  }).immediate();
 }
 
 export function applyMaterialMapProposal(db: Database.Database, userId: string, proposal: ProposalRow) {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PROPOSAL_TYPES } from '../services/proposalTypes.js';
 import { skinSelectionSchema } from './skin.js';
 import { paperFreehandDataSchema } from './paperInk.js';
 import { noteMetadataSchema } from './noteCover.js';
@@ -316,6 +317,8 @@ export const createConversationSchema = z.object({
 });
 
 // --- Proposals ---
+
+export const proposalTypeSchema = z.enum(PROPOSAL_TYPES);
 
 export const updateProposalSchema = z.object({
   data: z.any(),

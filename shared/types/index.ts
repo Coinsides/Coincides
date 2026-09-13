@@ -83,17 +83,20 @@ export enum AgentMemoryCategory {
   General = 'general',
 }
 
-export enum ProposalType {
-  StudyPlan = 'study_plan',
-  BatchCards = 'batch_cards',
-  ScheduleAdjustment = 'schedule_adjustment',
-}
+export type ProposalType =
+  | 'study_plan'
+  | 'batch_cards'
+  | 'schedule_adjustment'
+  | 'goal_breakdown'
+  | 'time_block_setup'
+  | 'material_map'
+  | 'organized_note'
+  | 'material_reconciliation';
 
-export enum ProposalStatus {
-  Pending = 'pending',
-  Applied = 'applied',
-  Discarded = 'discarded',
-}
+/** Chat can issue the five planning proposals and the existing organized-note proposal. */
+export type ChatProposalType = Exclude<ProposalType, 'material_map' | 'material_reconciliation'>;
+
+export type ProposalStatus = 'pending' | 'applied' | 'discarded';
 
 export enum SourceMaterialStatus {
   Active = 'active',

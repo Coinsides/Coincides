@@ -18,6 +18,10 @@ import {
   LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,
 } from '../../toolFace/registry.js';
 import { goalReceiptHash } from '../../services/toolFaceReceiptRevert.js';
+import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
+import { createOrganizedNoteProposalSchema, proposalTypeSchema } from '../../validators/index.js';
+import { createProposal } from '../../services/proposals.js';
+import { createOrganizedNoteProposal } from '../../services/organizedNoteProposals.js';
 
 export async function executeTool(
   toolName: string,
@@ -249,7 +253,23 @@ export async function executeTool(
     }
 
     case 'create_proposal': {
-      const { type, data } = args as { type: string; data: Record<string, unknown> };
+      const type = proposalTypeSchema.parse(args.type);
+      if (!CHAT_PROPOSAL_TYPES.some((chatType) => chatType === type)) {
+        throw new AppError(400, 'Proposal type is not available in chat');
+      }
+      if (context?.actor !== 'agent' || context.channel !== 'chat' || !context.conversationId?.trim()) {
+        throw new AppError(400, 'Proposal creation context is required');
+      }
+      if (type === 'organized_note') {
+        const input = createOrganizedNoteProposalSchema.parse(args.data);
+        const proposal = await createOrganizedNoteProposal(db, userId, input, context);
+        return JSON.stringify({
+          id: proposal.id, type: proposal.type, status: proposal.status,
+          course_id: proposal.data.course_id, blocks_count: proposal.data.blocks.length,
+          message: 'Organized note proposal created. Review and apply it from the project materials.',
+        });
+      }
+      const data = args.data as Record<string, unknown>;
 
       // Defensive: if data is missing or items is empty, warn the Agent
       if (!data || typeof data !== 'object') {
@@ -261,12 +281,8 @@ export async function executeTool(
         return JSON.stringify({ error: `Proposal has 0 items. You must include the actual items in data.items array. Do not call create_proposal with an empty items array.` });
       }
 
-      const id = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO proposals (id, user_id, type, status, data, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, type, 'pending', JSON.stringify(data), now);
-      return JSON.stringify({ id, type, items_count: items.length, message: `Proposal created with ${items.length} items. The student can review and apply it from the proposals panel.` });
+      const proposal = createProposal(db, userId, { type, data, context });
+      return JSON.stringify({ id: proposal.id, type, items_count: items.length, message: `Proposal created with ${items.length} items. The student can review and apply it from the proposals panel.` });
     }
 
     case 'get_study_templates': {

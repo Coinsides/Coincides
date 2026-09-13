@@ -5,6 +5,7 @@ import { listCourseMaterials, listSourceFragments } from './courseMaterials.js';
 import { getNoteBlockTemplate } from '../lib/noteBlockTemplates.js';
 import { resolveSourceBoardForProposal } from './sourceBoards.js';
 import { resolveSourceScopesForProposal } from './sourceScopes.js';
+import { createProposal, HUMAN_PROPOSAL_CONTEXT, type ProposalCreationContext } from './proposals.js';
 
 export const RECONCILIATION_GROUP_KINDS = [
   'DUPLICATE',
@@ -569,6 +570,7 @@ export function createMaterialReconciliationProposal(
   db: Database.Database,
   userId: string,
   input: CreateMaterialReconciliationProposalInput,
+  context: ProposalCreationContext = HUMAN_PROPOSAL_CONTEXT,
 ) {
   getOwnedCourse(db, userId, input.course_id);
   const resolvedBoard = resolveSourceBoardForProposal(db, userId, input.course_id, input.source_board_id);
@@ -590,8 +592,6 @@ export function createMaterialReconciliationProposal(
     throw new AppError(400, 'No reconciliation candidates found for the selected scope');
   }
 
-  const proposalId = uuidv4();
-  const now = new Date().toISOString();
   const data = {
     version: 'v2.2.3',
     proposal_kind: 'material_reconciliation',
@@ -616,20 +616,7 @@ export function createMaterialReconciliationProposal(
     apply_behavior: 'review_shell_only',
   };
 
-  db.prepare(`
-    INSERT INTO proposals (id, user_id, type, status, data, created_at)
-    VALUES (?, ?, 'material_reconciliation', 'pending', ?, ?)
-  `).run(proposalId, userId, JSON.stringify(data), now);
-
-  return {
-    id: proposalId,
-    user_id: userId,
-    type: 'material_reconciliation',
-    status: 'pending',
-    data,
-    created_at: now,
-    resolved_at: null,
-  };
+  return createProposal(db, userId, { type: 'material_reconciliation', data, context });
 }
 
 export function applyMaterialReconciliationProposal(
