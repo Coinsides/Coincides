@@ -1,0 +1,157 @@
+{
+  "pointerMethod": "CUA coordinate targeting; non-primary click enters hover without invoking the primary apply command. Earlier drag-target attempts preserved below as unsuccessful observations.",
+  "observations": [
+    {
+      "name": "default",
+      "material": "default",
+      "paper": "#101114",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "quiet-ink",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "warm-paper",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "workbench",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "warm-paper-recheck",
+      "material": "warm-paper",
+      "paper": "#F7F3EA",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)",
+      "wall": "0.55"
+    },
+    {
+      "name": "default-final",
+      "material": "default",
+      "paper": "#101114",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "quiet-ink-final",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "warm-paper-final",
+      "material": "warm-paper",
+      "paper": "#F7F3EA",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)",
+      "wall": "0.55"
+    },
+    {
+      "name": "workbench-final",
+      "material": "workbench",
+      "paper": "#1A1E25",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "1"
+    },
+    {
+      "name": "leave-final",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    }
+  ],
+  "final": [
+    {
+      "name": "default-final",
+      "material": "default",
+      "paper": "#101114",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "quiet-ink-final",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    },
+    {
+      "name": "warm-paper-final",
+      "material": "warm-paper",
+      "paper": "#F7F3EA",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)",
+      "wall": "0.55"
+    },
+    {
+      "name": "workbench-final",
+      "material": "workbench",
+      "paper": "#1A1E25",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "1"
+    },
+    {
+      "name": "leave-final",
+      "material": "quiet-ink",
+      "paper": "#17181C",
+      "selected": [
+        "quiet-ink"
+      ],
+      "shadow": "",
+      "wall": "0"
+    }
+  ]
+}

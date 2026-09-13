@@ -1,0 +1,144 @@
+{
+  "scope": "Exact fixture-census request registration edits; no git access. Concurrent integration behavior-test additions are excluded.",
+  "files": 27,
+  "added": 27,
+  "removed": 24,
+  "changes": [
+    {
+      "path": "client/src/components/CourseModal/CourseModal.test.tsx",
+      "added": 1,
+      "removed": 0
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "added": 1,
+      "removed": 1,
+      "concurrentIntegrationEditsExcluded": true
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.test.tsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+      "added": 1,
+      "removed": 0
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+      "added": 1,
+      "removed": 0
+    }
+  ]
+}

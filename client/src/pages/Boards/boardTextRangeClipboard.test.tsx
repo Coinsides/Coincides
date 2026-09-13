@@ -103,6 +103,7 @@ beforeEach(() => {
     members: [], visuals: [], edges: [],
   };
   http.get.mockImplementation(async (url: string) => {
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/boards/board') return { data: structuredClone(detail) };
     if (url === '/boards/board/viewport-bookmarks') return { data: { bookmarks: [] } };
     if (url === '/courses' || url === '/items') return { data: [] };

@@ -1,0 +1,507 @@
+{
+  "status": "allowed_segments_completed",
+  "recordedAt": "2026-09-13T02:56:10.227Z",
+  "verifyEntry": "verify:v2-bn8-runtime",
+  "executionMode": "Individual allowed segments; original aggregate not invoked because HQ owns git/secrets.",
+  "environment": {
+    "viteEnvDir": ".tmp/floatcard-empty-env",
+    "dotenvPath": ".tmp/floatcard-empty-env/runtime-empty.env",
+    "temporaryRoot": ".tmp/floatcard-runtime-tmp"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "command": "npm run check:test-wiring",
+      "status": "delegated_root"
+    },
+    {
+      "index": 2,
+      "command": "npm run check:tech-debt-table",
+      "status": "delegated_root"
+    },
+    {
+      "index": 3,
+      "command": "npm run test:unit",
+      "status": "delegated_root"
+    },
+    {
+      "index": 4,
+      "command": "npm run test:tool-face-registry",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:10.228Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/04-test-tool-face-registry.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "test:tool-face-registry"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 745
+    },
+    {
+      "index": 5,
+      "command": "npm run test:tool-face-manifest",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:10.975Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/05-test-tool-face-manifest.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "test:tool-face-manifest"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 3823
+    },
+    {
+      "index": 6,
+      "command": "npm run check:tool-face-manifest",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:14.800Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/06-check-tool-face-manifest.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:tool-face-manifest"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 587
+    },
+    {
+      "index": 7,
+      "command": "npm run test:tool-face-parity",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:15.389Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/07-test-tool-face-parity.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "test:tool-face-parity"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 5242
+    },
+    {
+      "index": 8,
+      "command": "npm run check:tool-face-parity",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:20.634Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/08-check-tool-face-parity.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:tool-face-parity"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 517
+    },
+    {
+      "index": 9,
+      "command": "npm run check:server-shared-runtime-import",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:21.154Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/09-check-server-shared-runtime-import.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:server-shared-runtime-import"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 533
+    },
+    {
+      "index": 10,
+      "command": "npm run check:canvas-runtime-boundary",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:21.689Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/10-check-canvas-runtime-boundary.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:canvas-runtime-boundary"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 444
+    },
+    {
+      "index": 11,
+      "command": "npm run check:group-gallery-shell",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:22.135Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/11-check-group-gallery-shell.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:group-gallery-shell"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 441
+    },
+    {
+      "index": 12,
+      "command": "npm run check:groups-rail-shell",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:22.578Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/12-check-groups-rail-shell.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:groups-rail-shell"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 432
+    },
+    {
+      "index": 13,
+      "command": "npm run check:single-editor-shell",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:23.013Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/13-check-single-editor-shell.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:single-editor-shell"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 452
+    },
+    {
+      "index": 14,
+      "command": "npm run check:source-experience",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:23.468Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/14-check-source-experience.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:source-experience"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 987
+    },
+    {
+      "index": 15,
+      "command": "npm run check:v2-bn11-legacy-shutdown",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:24.456Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/15-check-v2-bn11-legacy-shutdown.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:v2-bn11-legacy-shutdown"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 455
+    },
+    {
+      "index": 16,
+      "command": "npm run check:v2-bn11-relation-freshness",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:24.913Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/16-check-v2-bn11-relation-freshness.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:v2-bn11-relation-freshness"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 479
+    },
+    {
+      "index": 17,
+      "command": "npm run smoke:canvas-engine-model-contract",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:25.394Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/17-smoke-canvas-engine-model-contract.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "smoke:canvas-engine-model-contract"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 1931
+    },
+    {
+      "index": 18,
+      "command": "npm run build:client",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:59:22.235Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/build-client-recheck-1789268362235.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "build:client"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 36887,
+      "attempts": [
+        {
+          "index": 18,
+          "command": "npm run build:client",
+          "status": "failed",
+          "startedAt": "2026-09-13T02:56:27.327Z",
+          "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/18-build-client.log",
+          "executed": {
+            "executable": "C:\\Program Files\\nodejs\\node.exe",
+            "argv": [
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "run",
+              "build:client"
+            ]
+          },
+          "exitCode": 1,
+          "durationMs": 32280
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "command": "npm run build",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:58:29.048Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/build-recheck-1789268309048.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "build"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 21270,
+      "attempts": [
+        {
+          "index": 19,
+          "command": "npm run build",
+          "status": "reused_equivalent",
+          "reason": "Server builder already compiled current server + shared sources in an isolated output tree with references removed; standard server build was not repeated.",
+          "evidence": {
+            "typecheck": "cwd server: npx.cmd tsc -p .floatcard-check/tsconfig.json --noEmit",
+            "build": "cwd server: npx.cmd tsc -p .floatcard-check/tsconfig.json",
+            "exitCode": 0,
+            "producer": "/root/skin_suite_server",
+            "toolSession": 26509,
+            "config": "server/.floatcard-check/tsconfig.json"
+          }
+        }
+      ],
+      "note": "The standard root npm run build passed after the separate shared build refreshed shared/dist. Earlier isolated producer evidence is retained in attempts."
+    },
+    {
+      "index": 20,
+      "command": "npm run smoke:canvas-engine-performance",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:56:59.608Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/20-smoke-canvas-engine-performance.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "smoke:canvas-engine-performance"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 1142
+    },
+    {
+      "index": 21,
+      "command": "npm run docs:check",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:58:28.461Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/docs-check-recheck-1789268308461.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "docs:check"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 586,
+      "attempts": [
+        {
+          "index": 21,
+          "command": "npm run docs:check",
+          "status": "failed",
+          "startedAt": "2026-09-13T02:57:00.751Z",
+          "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/21-docs-check.log",
+          "executed": {
+            "executable": "C:\\Program Files\\nodejs\\node.exe",
+            "argv": [
+              "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+              "run",
+              "docs:check"
+            ]
+          },
+          "exitCode": 1,
+          "durationMs": 317
+        }
+      ]
+    },
+    {
+      "index": 22,
+      "command": "git diff --check",
+      "status": "excluded_hq",
+      "reason": "Work order forbids git and secrets; HQ completes this gate."
+    },
+    {
+      "index": 23,
+      "command": "npm run check:changed-file-secrets",
+      "status": "excluded_hq",
+      "reason": "Work order forbids git and secrets; HQ completes this gate."
+    }
+  ],
+  "supplements": [
+    {
+      "command": "node server/node_modules/typescript/bin/tsc -b shared",
+      "status": "passed",
+      "purpose": "Separate shared package build/typecheck, supplementary to the runtime chain.",
+      "startedAt": "2026-09-13T02:57:01.069Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/shared-build.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+          "-b",
+          "shared"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 465
+    },
+    {
+      "command": "docs-inventory-check",
+      "status": "failed_then_resolved",
+      "purpose": "Diagnose remaining docs:check children after an earlier short circuit; read/check only.",
+      "startedAt": "2026-09-13T02:57:01.536Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/docs-inventory-check.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "D:\\Coinsides\\v2.x\\Coincides\\scripts\\docs-inventory.mjs",
+          "--check"
+        ]
+      },
+      "exitCode": 1,
+      "durationMs": 66,
+      "resolvedBy": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/docs-check-recheck-1789268308461.log"
+    },
+    {
+      "command": "glossary-shape-check",
+      "status": "passed",
+      "purpose": "Diagnose remaining docs:check children after an earlier short circuit; read/check only.",
+      "startedAt": "2026-09-13T02:57:01.604Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/glossary-shape-check.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "check:glossary-shape-vs-capability"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 196
+    },
+    {
+      "command": "npm run docs:inventory",
+      "status": "passed",
+      "startedAt": "2026-09-13T02:58:28.264Z",
+      "log": "docs/audits/2026-09-13-floatcard-builder/runtime-logs/docs-inventory-recheck-1789268308264.log",
+      "executed": {
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "argv": [
+          "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+          "run",
+          "docs:inventory"
+        ]
+      },
+      "exitCode": 0,
+      "durationMs": 195
+    }
+  ],
+  "completedAt": "2026-09-13T02:59:59.125Z",
+  "coverage": {
+    "chainSteps": 23,
+    "executedAndPassedHere": 18,
+    "rootOwnedNotRepeated": 3,
+    "hqExcluded": 2,
+    "sharedSupplementPassed": true,
+    "registryTests": 5,
+    "manifestTests": 10,
+    "parityTests": 10,
+    "canvasModelGroups": 60,
+    "performanceScenarios": 5
+  },
+  "safetyReview": {
+    "scriptsReviewed": [
+      "package.json",
+      "server/package.json",
+      "client/package.json",
+      "server/src/toolFace/registry.test.ts",
+      "scripts/generate-tool-face-manifest.ts",
+      "scripts/generate-tool-face-manifest.test.ts",
+      "scripts/check-tool-face-parity.mjs",
+      "scripts/check-tool-face-parity.test.mjs",
+      "scripts/check-server-shared-runtime-import.mjs",
+      "client/scripts/*ContractCheck*",
+      "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "client/scripts/canvasEnginePerformanceSeed.ts",
+      "scripts/docs-index.mjs",
+      "scripts/docs-inventory.mjs"
+    ],
+    "notes": [
+      "No aggregate verify invocation; prohibited final git/secrets commands excluded.",
+      "Tests use schema/static/pure-model fixtures; no security test files executed.",
+      "Temporary roots are inside .tmp/floatcard-runtime-tmp; dotenv and Vite environment files are empty.",
+      "Only generated docs/generated/object-inventory.md changed during gate execution, with root authorization; no product source edited."
+    ]
+  }
+}

@@ -4,10 +4,13 @@ import { useAuthStore } from '@/stores/authStore';
 import type { SkinSelection } from '@shared/types';
 import type { Note } from '../runtimeDataTypes';
 import { useNoteSkin } from './useNoteSkin';
+import { useSkinSuiteStore } from '@/hooks/useSkinSuites';
+import { usePaletteStore } from '@/hooks/usePaletteColors';
+import { SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from '@/styles/skinPresets';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), save: vi.fn() }));
 vi.mock('@/services/api', () => ({
-  default: { get: (url: string) => url === '/palette-colors' ? Promise.resolve({ data: [] }) : mocks.get(url), put: mocks.put }, getToken: () => null, setToken: vi.fn(),
+  default: { get: (url: string) => (url === '/palette-colors' || url === '/skin-suites') ? Promise.resolve({ data: [] }) : mocks.get(url), put: mocks.put }, getToken: () => null, setToken: vi.fn(),
 }));
 
 function note(courseId = 'project-a', skin?: SkinSelection | null): Note {
@@ -37,9 +40,55 @@ describe('B1a note skin mounting', () => {
     mocks.get.mockReset();
     mocks.put.mockReset();
     mocks.save.mockResolvedValue(undefined);
+    useSkinSuiteStore.setState({ owner: undefined, loaded: false, loading: false, suites: [], values: {}, detached: {}, error: null });
+    usePaletteStore.setState({ owner: undefined, loaded: false, loading: false, colors: [], values: {}, detached: {}, error: null });
     setGlobal({ preset: 'quiet-ink', overrides: { accent: '#334455' } });
   });
   afterEach(() => useAuthStore.setState({ user: null }));
+
+  it.each(['global', 'project', 'local'])('freezes %s suite palette deviations at deletion despite later pool edits', async (mount) => {
+    const id = '14000000-0000-4000-8000-000000000023';
+    const colorId = '14000000-0000-4000-8000-000000000024';
+    const selection: SkinSelection = { preset: `suite:${id}`, overrides: { ink: `palette:${colorId}` } };
+    const snapshot = { tokens: SKIN_PRESETS['warm-paper'], components: SKIN_PRESET_COMPONENTS['warm-paper'] };
+    setGlobal(mount === 'global' ? selection : null);
+    mocks.get.mockResolvedValue(summary(mount === 'project' ? selection : null));
+    const { result } = renderHook(() => useNoteSkin(note('project-a', mount === 'local' ? selection : null), mocks.save));
+    await act(async () => {});
+    act(() => {
+      useSkinSuiteStore.setState({ values: { [id]: snapshot } });
+      usePaletteStore.setState({ values: { [colorId]: '#aBcDeF80' } });
+    });
+    expect(result.current.tokens.ink).toBe('#aBcDeF80');
+    act(() => {
+      useSkinSuiteStore.setState({ values: { [id]: snapshot }, detached: { [id]: { ...snapshot, palette: { [colorId]: '#aBcDeF80' } } } });
+      usePaletteStore.setState({ values: { [colorId]: '#000000' } });
+    });
+    expect(result.current.tokens.ink).toBe('#aBcDeF80');
+    expect(result.current.preset).toBe('default');
+    expect(mocks.save).not.toHaveBeenCalled();
+  });
+
+  it('previews the actual paper style without persisting or replacing the committed selection, and clears on route change', async () => {
+    mocks.get.mockResolvedValue(summary(null));
+    const { result, rerender } = renderHook(({ current }) => useNoteSkin(current, mocks.save), { initialProps: { current: note() } });
+    await act(async () => {});
+    const before = result.current.style;
+    act(() => result.current.preview({ preset: 'warm-paper' }));
+    expect(result.current.style['--sk-paper' as keyof typeof before]).toBe('#F7F3EA');
+    expect(result.current.tokens.paper).toBe('#17181C');
+    expect(result.current.selection).toBeNull();
+    expect(mocks.save).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+    act(() => result.current.preview(null));
+    expect(result.current.style).toEqual(before);
+    act(() => result.current.preview({ preset: 'warm-paper' }));
+    rerender({ current: note('project-b') });
+    expect(result.current.style).toEqual(before);
+    expect(result.current.renderedResolved).toBe(result.current.committedResolved);
+    await act(async () => { await result.current.save({ preset: 'workbench' }); });
+    expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ preset: 'workbench' });
+  });
 
   it('reads the existing project summary once and uses it above global settings', async () => {
     mocks.get.mockResolvedValue(summary({ preset: 'warm-paper', overrides: { ink: '#123456' } }));

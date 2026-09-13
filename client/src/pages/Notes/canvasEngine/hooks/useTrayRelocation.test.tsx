@@ -96,6 +96,7 @@ beforeEach(() => {
     static revokeObjectURL = vi.fn();
   });
   http.get.mockImplementation(async (path: string) => {
+    if (path === '/palette-colors' || path === '/skin-suites') return response([]);
     if (path === '/boards') return response({ boards: [board, { ...board, id: 'local-board', title: 'Local board', project_id: 'source-project' }] });
     if (path === `/boards/${board.id}`) return response(detail);
     if (path === `/boards/${board.id}/viewport-bookmarks`) return response({ bookmarks: [] });

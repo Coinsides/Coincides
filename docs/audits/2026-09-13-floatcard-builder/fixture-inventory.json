@@ -1,0 +1,1458 @@
+{
+  "recordedAt": "2026-09-13",
+  "scope": "Existing tests at task start; new SkinFloatCard/useSkinSuites tests belong to their implementation owners",
+  "total": 154,
+  "counts": {
+    "A": 14,
+    "B": 4,
+    "C": 3,
+    "D": 6,
+    "E": 26,
+    "F": 1,
+    "G": 100
+  },
+  "tests": [
+    {
+      "path": "client/src/components/ColorPicker/UnifiedColorPicker.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/components/ColorPicker/paletteUtils.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.test.tsx",
+      "group": "A",
+      "apiMockLine": 7,
+      "suiteGetLine": 11,
+      "paletteGetLine": 10,
+      "strictGuardLine": 12,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/components/Layout/AppLayout.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/components/ReferenceTag/ReferenceTag.test.tsx",
+      "group": "E",
+      "apiMockLine": 6,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.test.tsx",
+      "group": "C",
+      "apiMockLine": 5,
+      "suiteGetLine": 8,
+      "paletteGetLine": 8,
+      "strictGuardLine": 9,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.test.tsx",
+      "group": "C",
+      "apiMockLine": 6,
+      "suiteGetLine": 9,
+      "paletteGetLine": 9,
+      "strictGuardLine": 10,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/deadCodeRetirement.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/hooks/usePaletteColors.test.ts",
+      "group": "E",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/AgentMemories/AgentMemories.test.tsx",
+      "group": "E",
+      "apiMockLine": 8,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Boards/BoardDeleteDialog.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Boards/BoardList.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNewNoteDialog.test.tsx",
+      "group": "E",
+      "apiMockLine": 6,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx",
+      "group": "D",
+      "apiMockLine": 18,
+      "suiteGetLine": 115,
+      "paletteGetLine": 115,
+      "strictGuardLine": 129,
+      "subjectImportLine": 8
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "group": "A",
+      "apiMockLine": 11,
+      "suiteGetLine": 59,
+      "paletteGetLine": 59,
+      "strictGuardLine": 62,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "group": "A",
+      "apiMockLine": 10,
+      "suiteGetLine": 84,
+      "paletteGetLine": 84,
+      "strictGuardLine": 88,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "group": "A",
+      "apiMockLine": 10,
+      "suiteGetLine": 102,
+      "paletteGetLine": 102,
+      "strictGuardLine": 110,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.layers.test.tsx",
+      "group": "B",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+      "group": "A",
+      "apiMockLine": 10,
+      "suiteGetLine": 72,
+      "paletteGetLine": 72,
+      "strictGuardLine": 81,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.selection.test.tsx",
+      "group": "B",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+      "group": "A",
+      "apiMockLine": 23,
+      "suiteGetLine": 191,
+      "paletteGetLine": 191,
+      "strictGuardLine": 125,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.snapping.test.tsx",
+      "group": "B",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+      "group": "A",
+      "apiMockLine": 10,
+      "suiteGetLine": 58,
+      "paletteGetLine": 58,
+      "strictGuardLine": 68,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.tools.test.tsx",
+      "group": "B",
+      "apiMockLine": 8,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "group": "A",
+      "apiMockLine": 13,
+      "suiteGetLine": 121,
+      "paletteGetLine": 121,
+      "strictGuardLine": 29,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/BoardRelocatedVisual.test.tsx",
+      "group": "E",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Boards/BoardViewportBookmarks.test.tsx",
+      "group": "E",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/boardRepository.test.ts",
+      "group": "E",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": 181,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Boards/boardSkinStyles.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Boards/boardSnapping.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+      "group": "A",
+      "apiMockLine": 17,
+      "suiteGetLine": 106,
+      "paletteGetLine": 106,
+      "strictGuardLine": 110,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Boards/useBoard.history.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/useBoard.test.tsx",
+      "group": "E",
+      "apiMockLine": 12,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.test.tsx",
+      "group": "A",
+      "apiMockLine": 8,
+      "suiteGetLine": 9,
+      "paletteGetLine": 9,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Courses/CourseDetail.test.tsx",
+      "group": "E",
+      "apiMockLine": 11,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Courses/Courses.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/DailyBrief/DailyBrief.test.tsx",
+      "group": "E",
+      "apiMockLine": 10,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/GroupGallery/GroupGallery.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/GroupGallery/groupGalleryItemSummary.test.tsx",
+      "group": "E",
+      "apiMockLine": 12,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": 35,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx",
+      "group": "E",
+      "apiMockLine": 13,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": 31,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blockAffiliationOutlineService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.input.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.unitHandle.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/boardTextRangeEditSession.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/boundaryAccount.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.test.ts",
+      "group": "E",
+      "apiMockLine": 12,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx",
+      "group": "E",
+      "apiMockLine": 11,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts",
+      "group": "E",
+      "apiMockLine": 11,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": 34,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/documentTextFlowSelection.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/draftBlockLifecycleReducer.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/draftBlockPersistence.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/freehandService.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/genericPlacementContract.test.ts",
+      "group": "E",
+      "apiMockLine": 9,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/graphemeExcerpts.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/graphemes.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+      "group": "E",
+      "apiMockLine": 17,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "group": "D",
+      "apiMockLine": 13,
+      "suiteGetLine": 106,
+      "paletteGetLine": 106,
+      "strictGuardLine": 116,
+      "subjectImportLine": 7
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 8
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockSelectionController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockTextFlowEditController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useCanvasSurfacePointerController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useDraftBlockController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useLayoutInteractionController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "group": "D",
+      "apiMockLine": 12,
+      "suiteGetLine": 52,
+      "paletteGetLine": 52,
+      "strictGuardLine": 61,
+      "subjectImportLine": 7
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "group": "D",
+      "apiMockLine": 45,
+      "suiteGetLine": 48,
+      "paletteGetLine": 48,
+      "strictGuardLine": 382,
+      "subjectImportLine": 15
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.affiliationVisibility.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+      "group": "A",
+      "apiMockLine": 12,
+      "suiteGetLine": 15,
+      "paletteGetLine": 15,
+      "strictGuardLine": 16,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 7
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "group": "A",
+      "apiMockLine": 9,
+      "suiteGetLine": 10,
+      "paletteGetLine": 10,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageReadingViewportController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "group": "D",
+      "apiMockLine": 13,
+      "suiteGetLine": 63,
+      "paletteGetLine": 63,
+      "strictGuardLine": 70,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.pageReading.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSlashBlockRollbackController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 11
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSurfaceModeController.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 8
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.document.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.extraction.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.move.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.rangeRecovery.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx",
+      "group": "E",
+      "apiMockLine": 12,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+      "group": "A",
+      "apiMockLine": 20,
+      "suiteGetLine": 99,
+      "paletteGetLine": 99,
+      "strictGuardLine": 108,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inFlightWriteRegistry.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inlineLifecycle.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 22
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/DraftBlockEditorLayer.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 14
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "group": "C",
+      "apiMockLine": 35,
+      "suiteGetLine": 38,
+      "paletteGetLine": 38,
+      "strictGuardLine": null,
+      "subjectImportLine": 14
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 7
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 7
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 16
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx",
+      "group": "D",
+      "apiMockLine": 20,
+      "suiteGetLine": 63,
+      "paletteGetLine": 63,
+      "strictGuardLine": 65,
+      "subjectImportLine": 6
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTraySidebar.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx",
+      "group": "E",
+      "apiMockLine": 12,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "group": "E",
+      "apiMockLine": 29,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx",
+      "group": "E",
+      "apiMockLine": 17,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/meaningfulRenderableContent.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockLayout.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockPasteService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageCenteringContract.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 10
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFrameWallService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageReadingDomService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageReadingViewportService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageStackContentFlowService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageTextCoordinates.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/panels/ContentGroupPanel.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementAutoWidth.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementContractService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 35
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/purposeRetirement.test.ts",
+      "group": "E",
+      "apiMockLine": 7,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/routeRequestGeneration.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/selectionReceiptProjection.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 5
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/slashCommandReducer.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 20
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/surfaceAuthorityContract.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/surfacePersistenceContract.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowBlockNavigation.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowDocumentHistory.integration.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowEditSession.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowSelection.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFocusReceipt.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 9
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textUnitMoveService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/trayService.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/writingSurfaceClassName.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": null
+    },
+    {
+      "path": "client/src/pages/Settings/AgentMemoriesSection.test.tsx",
+      "group": "E",
+      "apiMockLine": 8,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Settings/ProvidersSection.test.tsx",
+      "group": "E",
+      "apiMockLine": 6,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.test.tsx",
+      "group": "A",
+      "apiMockLine": 10,
+      "suiteGetLine": 34,
+      "paletteGetLine": 34,
+      "strictGuardLine": 44,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+      "group": "E",
+      "apiMockLine": 16,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/pages/ToolReceipts/ToolReceipts.test.tsx",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 4
+    },
+    {
+      "path": "client/src/services/itemSummaryReader.test.ts",
+      "group": "E",
+      "apiMockLine": 6,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 3
+    },
+    {
+      "path": "client/src/styles/skinComponentStyles.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "group": "G",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    },
+    {
+      "path": "client/test/fixtures/canvasAssetFixture.test.ts",
+      "group": "F",
+      "apiMockLine": null,
+      "suiteGetLine": null,
+      "paletteGetLine": null,
+      "strictGuardLine": null,
+      "subjectImportLine": 2
+    }
+  ],
+  "adapters": [
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "suiteGetLine": 203,
+      "strictGuardLines": [
+        305
+      ]
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "suiteGetLine": 88,
+      "strictGuardLines": [
+        144
+      ]
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "suiteGetLine": 87,
+      "strictGuardLines": [
+        95,
+        107,
+        121,
+        157
+      ]
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "suiteGetLine": 44,
+      "strictGuardLines": [
+        48
+      ]
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "suiteGetLine": 100,
+      "strictGuardLines": [
+        112,
+        129
+      ]
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "suiteGetLine": 122,
+      "strictGuardLines": [
+        120,
+        134
+      ]
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "suiteGetLine": 43,
+      "strictGuardLines": [
+        49
+      ]
+    }
+  ]
+}

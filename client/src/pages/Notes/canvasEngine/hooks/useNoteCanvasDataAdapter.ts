@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
-import { saveSkinWithPalette } from '@/hooks/usePaletteColors';
+import { saveSkinWithSuites } from '@/hooks/useSkinSuites';
 import { createCoordinateContractSession } from '../coordinateContractSession';
 import { requiresFrameLocalWriteContext, type CoordinateContract } from '../placementContractService';
 import {
@@ -883,8 +883,8 @@ export function useNoteCanvasDataAdapter({
     publish(skin);
     const previous = skinSaveTails.current.get(current.id) || Promise.resolve();
     let persistedSkin = skin;
-    // Bind this intent to its note synchronously, then await palette detachment inside its queue.
-    const write = previous.then(() => saveSkinWithPalette(skin, async (normalized) => {
+    // Capture the note synchronously; await palette/suite detachment inside this note's queue.
+    const write = previous.then(() => saveSkinWithSuites(skin, async (normalized) => {
       persistedSkin = normalized;
       await writeRegistry.track(`note-skin:${current.id}`, () => api.put(`/notes/${current.id}`, { skin: normalized }));
     }));

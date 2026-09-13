@@ -1,0 +1,8 @@
+{
+  "command": "npm run build:client",
+  "startedAt": "2026-09-13T03:57:59.442Z",
+  "completedAt": "2026-09-13T03:59:32.219Z",
+  "exitCode": 0,
+  "reason": "Repeat after replacing test Array.at calls for the existing TypeScript target",
+  "log": "material-client-build-final.log"
+}

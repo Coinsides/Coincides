@@ -1,0 +1,634 @@
+{
+  "status": "partial-numstat-awaiting-HQ",
+  "generated_at": "2026-09-13T03:30:44.942Z",
+  "git_used": false,
+  "method": "New files use the known empty baseline; saved baselines use line LCS (not git diff). Existing files without baseline explicitly remain null. This is a source/test/script/generated-inventory manifest; audit receipts and handoff Result are separate.",
+  "file_count": 62,
+  "known_numstat_files": 41,
+  "unknown_numstat_files": 21,
+  "known_subset": {
+    "added": 1817,
+    "deleted": 55
+  },
+  "files": [
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "change": "modified",
+      "current_lines": 312,
+      "sha256": "8174b156cda09db4e9334516cc5bbc4933abef885b6bc5723e1910336fcf2266",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/boardOpenNoteSmoke/mockApi.ts"
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "change": "modified",
+      "current_lines": 148,
+      "sha256": "2184aefe23e3b79a55b5e5b5c73ff1cbfd67b50b6b83fb5ed14dc1dbd0d0d3e8",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/boardTextRangeSmoke/mockApi.ts"
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "change": "modified",
+      "current_lines": 162,
+      "sha256": "2ce2ac0fdfe2468d312b6dce68184cac601e3494eec2ac4c213b3be6a976a77a",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/boardToolsSmoke/mockApi.ts"
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "change": "modified",
+      "current_lines": 52,
+      "sha256": "c4f649aa454c6a1603ce18e9e1f77c37eac495ae07925f75c927325f7be0cde0",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/cFix1Smoke/mockApi.ts"
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "change": "modified",
+      "current_lines": 133,
+      "sha256": "c92f5c0336a23c534e1d83ed2e9f2269663a02ade275b64b249c7aca4f730676",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/pageFrameHealingSmoke/mockApi.ts"
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "change": "modified",
+      "current_lines": 138,
+      "sha256": "58fcadadd478f3fd4335c3c2c8d2008d128fdad8c7dcbc26ffd2d1e1d9b28c9e",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/pageReadingSmoke/mockApi.ts"
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "change": "modified",
+      "current_lines": 53,
+      "sha256": "fa6b61b251b7f3ede174a5833cf51f11d3bf1f603b3fa0c3b5580f27e081abb7",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/scripts/paperInkSmoke/inkMockApi.ts"
+    },
+    {
+      "path": "client/scripts/skinFloatCardSmoke/serve.mjs",
+      "change": "new",
+      "current_lines": 64,
+      "sha256": "894b9647e67706bdcc3f47b01dc96df73b3b6c8821a32f9e68b635875258ad71",
+      "numstat": {
+        "added": 64,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.test.tsx",
+      "change": "modified",
+      "current_lines": 161,
+      "sha256": "71c710169e0ba45a2c57a8e12b4a7e3ff4e9eb538bb91e6e3f5dd345a9d12f4d",
+      "numstat": {
+        "added": 1,
+        "deleted": 0
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/components/CourseModal/CourseModal.test.tsx"
+    },
+    {
+      "path": "client/src/components/CourseModal/CourseModal.tsx",
+      "change": "modified",
+      "current_lines": 159,
+      "sha256": "9f446b7df4dc1244e384753312769fbeffefe188ca15559f9ac1dccba02229c9",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.test.tsx",
+      "change": "modified",
+      "current_lines": 37,
+      "sha256": "f267c8c83af5dd14608169c9c4daf467741e26acc8c0b2f73f17c10dfd6634ba",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.tsx",
+      "change": "modified",
+      "current_lines": 68,
+      "sha256": "4f4356bcc59b1bf044d1433c478fa0aa0fbf4f0fae626f8da1f4a34173db822f",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.test.tsx",
+      "change": "modified",
+      "current_lines": 68,
+      "sha256": "ba3b1ac25ae052d23972bcdc9d87fcc3c7c9f4795801d7bcd26fd9dfe6ad7dfb",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.tsx",
+      "change": "modified",
+      "current_lines": 41,
+      "sha256": "fbee6c498a7bbc417ae753306cc386babf8b57e806fff9e3c0e5d54a7977d805",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/components/Skin/SkinFloatCard.module.css",
+      "change": "new",
+      "current_lines": 49,
+      "sha256": "99ee458b20c4a404cd92ab44162a5b0a5665c89c6c7f36fdcf70ad285b6e8f29",
+      "numstat": {
+        "added": 49,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/components/Skin/SkinFloatCard.test.tsx",
+      "change": "new",
+      "current_lines": 326,
+      "sha256": "4535f4438fa8736210bec695f8c37daa004a362a432deaa8ab796113dbc3adbf",
+      "numstat": {
+        "added": 326,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/components/Skin/SkinFloatCard.tsx",
+      "change": "new",
+      "current_lines": 394,
+      "sha256": "7eccc3971d132140fa7229b2f84f68f6481b5ed071e7092b5ee0dd720407b76d",
+      "numstat": {
+        "added": 394,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/components/Skin/skinFloatCardGeometry.ts",
+      "change": "new",
+      "current_lines": 28,
+      "sha256": "bcc5c81aacbc349b08abf1382db466eeff20b8396db54009ba16065d69532351",
+      "numstat": {
+        "added": 28,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/hooks/useSkinSuites.test.ts",
+      "change": "new",
+      "current_lines": 146,
+      "sha256": "4e605335d2bd3941082cd7ae4d9657d86f03628f82ae6a043790d6833346ea42",
+      "numstat": {
+        "added": 146,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/hooks/useSkinSuites.ts",
+      "change": "new",
+      "current_lines": 145,
+      "sha256": "95fbbd3e812bd97dde51b64eda71a2275e49d4f5098d70a926d69efb5483548f",
+      "numstat": {
+        "added": 145,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx",
+      "change": "modified",
+      "current_lines": 208,
+      "sha256": "76be58d2f765b12082fdb462722be909e6c3b1e9e093e0c075c0bd9b58b8f28b",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "change": "modified",
+      "current_lines": 165,
+      "sha256": "3b0811f8ec254bb6493f0de55249a4fc963993f4b76014ed33b78e1217216dfe",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.bookmarks.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "change": "modified",
+      "current_lines": 387,
+      "sha256": "d717697cbc7aa463a6b8452f75a70f1950f2ed9553059c12b63d93ab81a418f8",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.chalk.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "change": "modified",
+      "current_lines": 320,
+      "sha256": "9edd0f63b8dbedfa80b9b4f28e8549ed450a4a48d503386ebead34d188c47586",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.item.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+      "change": "modified",
+      "current_lines": 283,
+      "sha256": "3c5cdc89d4015ad5350ca3198eac0acc0bf8f5173fe8d96f0eb4588e317a6508",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.modal.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+      "change": "modified",
+      "current_lines": 803,
+      "sha256": "147375f4a9770916b6e6c41e348b0a6ea65cba2ae1453d75e95e6019e0b54534",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.smoke.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+      "change": "modified",
+      "current_lines": 219,
+      "sha256": "c7fbce9cce0d2c51b7ed8e141b999f93ef0d5a9ce6c3919be96e37c0a147da43",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.staging.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "change": "modified",
+      "current_lines": 304,
+      "sha256": "b7cf9a21ab855ec98a382d7b844c3e5466f6da4ad82162021614a672ea8a6c3f",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/BoardPage.unboxing.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+      "change": "modified",
+      "current_lines": 312,
+      "sha256": "7be927d181d40939d8f8bdca2bb05e6347d742efb0b9b77e0eacdc8bf6933e6c",
+      "numstat": {
+        "added": 1,
+        "deleted": 0
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/boardTextRangeClipboard.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.test.tsx",
+      "change": "modified",
+      "current_lines": 83,
+      "sha256": "96de1e560491b3552ec80e41634a78d8269d37ef8cf30c99c8c975d0753702c6",
+      "numstat": {
+        "added": 31,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Boards/useBoardSkin.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.ts",
+      "change": "modified",
+      "current_lines": 38,
+      "sha256": "185b974988de09060395253f4cf8ad24bbba0b743b8aadf65b602cef6f58c5c1",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "change": "modified",
+      "current_lines": 304,
+      "sha256": "821fd4d05946a2ce5b9ca5f9065ddbaae610b605d2091537f450314cd0037aae",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts",
+      "change": "modified",
+      "current_lines": 76,
+      "sha256": "ea7a35b5ffef4b473f6bfae95ca8fcf7907f826267b94ea097d8380dec9adae6",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "change": "modified",
+      "current_lines": 294,
+      "sha256": "05cdd6aa56a5042fcd52168727315f0491dc62792cc166cfe9bdc77ee18ea32a",
+      "numstat": {
+        "added": 37,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "change": "modified",
+      "current_lines": 4345,
+      "sha256": "018290c373debf656be29327dfd5a05cfdb02cc939d6d3b5397188892a2f27aa",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "change": "modified",
+      "current_lines": 2939,
+      "sha256": "e523c3db769e223ad83d14a62922f0ded97c96e81d5d3e192017cc815eaa1f8f",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+      "change": "modified",
+      "current_lines": 356,
+      "sha256": "6cbaaf4d364494313f17fb3d58d78931ead6d14dca054ae5ae17fce28eeb7ba5",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "change": "modified",
+      "current_lines": 635,
+      "sha256": "10e0b519ca3ad7c5763cea53169badc0d6bc473c91febedb109557e7f900c07c",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "change": "modified",
+      "current_lines": 179,
+      "sha256": "6a313d89d499841d2faac37609f3fbd357840fc6ec0cda4860e53afd7c1717a9",
+      "numstat": {
+        "added": 50,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "change": "modified",
+      "current_lines": 47,
+      "sha256": "45581b8672db23ca24e831cb01a6af016f61c842219b1236a299dedfbd464bbe",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "change": "modified",
+      "current_lines": 262,
+      "sha256": "7eb75c7a4af241feaa3d02da2713af8dd06fbd26653905bbbed56c011648b277",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+      "change": "modified",
+      "current_lines": 318,
+      "sha256": "9b7a5cef6b5ac4a72f14c030bcafcb7e56984cbe75cf4b655eec1a7f6c6c9ab2",
+      "numstat": {
+        "added": 1,
+        "deleted": 0
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "change": "modified",
+      "current_lines": 533,
+      "sha256": "b066731bfd8f981b455e075731f3f75c805637ee164eb4b360d9abdc5b569083",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+      "change": "modified",
+      "current_lines": 775,
+      "sha256": "fa8acf9a70f45a7253f5b755f1e0211483d4a954df94e18a463dea0dd0c15b0b",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx",
+      "change": "modified",
+      "current_lines": 233,
+      "sha256": "48e258081f44f1e8513cd81292e436645583a1436d47245f896a93162f2d7d32",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx",
+      "change": "new",
+      "current_lines": 64,
+      "sha256": "85404e3e5618c84f8901d135a51272ef13215883d07b1d015a20d73011eb3448",
+      "numstat": {
+        "added": 64,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "change": "modified",
+      "current_lines": 55,
+      "sha256": "abca412fd0a42d6b18097ee3fa75eca903882640171e6c7d5b0afbb66ef4d67b",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx",
+      "change": "modified",
+      "current_lines": 16,
+      "sha256": "c8798a2c3b6ee6f46530418fcc709bf8088ee9e8b76c793877e0255bf9609e1d",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.ts",
+      "change": "modified",
+      "current_lines": 166,
+      "sha256": "cad488b7315904cbb0476ddc53aa198bc67d40f512fa35faad227937e6bbafa2",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.test.tsx",
+      "change": "modified",
+      "current_lines": 80,
+      "sha256": "5651a3b41e72c0711923b4ddfd17f9ec6a6136aad83e755f820c30a04e74d41f",
+      "numstat": {
+        "added": 1,
+        "deleted": 1
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/client/src/pages/Settings/Settings.test.tsx"
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "change": "modified",
+      "current_lines": 130,
+      "sha256": "a81a029a252f72312304499a63cece77af953b812b2813275aeb6126c9ce6941",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "client/src/styles/skinPresets.ts",
+      "change": "modified",
+      "current_lines": 62,
+      "sha256": "c65215b2f57af73c59e8e921bbd40d3149112d5513b32dee0c3b7e1717a17353",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "change": "modified",
+      "current_lines": 273,
+      "sha256": "a3d2ae8897b2c35399825de47087fbd703ec089d7cc83259892f2211702d9c8e",
+      "numstat": {
+        "added": 33,
+        "deleted": 31
+      },
+      "evidence": "Saved pre-edit bytes: .tmp/floatcard-fixture-baseline/object-inventory-before-runtime.md"
+    },
+    {
+      "path": "server/package.json",
+      "change": "modified",
+      "current_lines": 75,
+      "sha256": "a133f56a3aba494afc386ea7e5c5c8facc9ffe43abe4f22922c9c71a4b378195",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "server/src/__tests__/v14SkinSuites.test.ts",
+      "change": "new",
+      "current_lines": 244,
+      "sha256": "68d0d5e6dfb522d327c3dc89f872c9efca3b9a8e5040afab6b34744d2508ed77",
+      "numstat": {
+        "added": 244,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "server/src/db/migrations/071_v14_skin_suites.ts",
+      "change": "new",
+      "current_lines": 19,
+      "sha256": "af2123ccd51dcfaa6b7b25c20d5f4c12f08ef4b8a2e346f6c75366e7f7da1920",
+      "numstat": {
+        "added": 19,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "server/src/index.ts",
+      "change": "modified",
+      "current_lines": 205,
+      "sha256": "e56d5e821d6b3dde39b495eaec878d9fb684319e216807a673c3980af60f36a4",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "server/src/routes/skinSuites.ts",
+      "change": "new",
+      "current_lines": 33,
+      "sha256": "4bcdaa3d062a61cff2037494f1835fd2fc1e7d1a77ca60b542dd8a2cb0746490",
+      "numstat": {
+        "added": 33,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "server/src/services/skinSuites.ts",
+      "change": "new",
+      "current_lines": 94,
+      "sha256": "073ecc7b62d8a3a37e1ee44fb894b2850cf9b229b9af2cce0f24899c5761c81e",
+      "numstat": {
+        "added": 94,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "server/src/validators/skin.ts",
+      "change": "modified",
+      "current_lines": 36,
+      "sha256": "b60c603d9ef9a1c02706804fa9d3db61c175a4d09a3de06aec834b8a0ce71d9a",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    },
+    {
+      "path": "server/src/validators/skinSuites.ts",
+      "change": "new",
+      "current_lines": 36,
+      "sha256": "df9d77be012ce00304d5c2c8b3be04414087f82b86b3cf0f08a215643c3b497c",
+      "numstat": {
+        "added": 36,
+        "deleted": 0
+      },
+      "evidence": "Known empty baseline: created in this order."
+    },
+    {
+      "path": "shared/types/skin.ts",
+      "change": "modified",
+      "current_lines": 63,
+      "sha256": "6a6248dabc938b3cbb78b16a8847593da962506d7b01ea1cc7aa9901ef9aec34",
+      "numstat": null,
+      "evidence": "No pre-order byte baseline retained. HQ must supply git numstat; current size is not a substitute."
+    }
+  ]
+}

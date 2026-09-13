@@ -25,7 +25,7 @@ export function FloatingOverlayLayer({
     <div
       className={[styles.floatingOverlayPortal, portalClassName].filter(Boolean).join(' ')}
       data-canvas-layer="floating-overlay"
-      data-note-skin-preset={skin?.preset}
+      data-note-skin-preset={skin?.materialPreset ?? skin?.preset}
       style={{ ...skin?.style, ...portalStyle }}
     >
       {placement === 'free' ? (

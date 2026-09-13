@@ -56,7 +56,7 @@ beforeEach(() => {
   boards = new Map([[BOARD_ID, detail]]);
   entries = new Map([[BOARD_ID, [bookmark('chapter', 'Chapter two')]]]);
   http.get.mockImplementation(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/courses' || url === '/items') return response([]);
     const match = /^\/boards\/([^/]+)(\/viewport-bookmarks)?$/.exec(url);
     if (!match) throw new Error(`Unexpected read: ${url}`);

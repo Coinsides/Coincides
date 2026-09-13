@@ -1,0 +1,23 @@
+{
+  "method": "Node isDeepStrictEqual over entire parsed DOM computed-style snapshots, including key sets",
+  "nodes": 22,
+  "valuesPerStage": 13200,
+  "stages": [
+    {
+      "stage": "after-save",
+      "equal": true
+    },
+    {
+      "stage": "after-return",
+      "equal": true
+    },
+    {
+      "stage": "after-delete",
+      "equal": true
+    },
+    {
+      "stage": "after-reload",
+      "equal": true
+    }
+  ]
+}

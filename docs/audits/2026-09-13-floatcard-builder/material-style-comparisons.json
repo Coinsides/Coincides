@@ -1,0 +1,22 @@
+{
+  "scope": "All computed properties on 22 paper/desk/header nodes and their before/after pseudo-elements",
+  "baseline": "before-save",
+  "comparisons": {
+    "after-save": {
+      "nodes": 22,
+      "differences": []
+    },
+    "after-return": {
+      "nodes": 22,
+      "differences": []
+    },
+    "after-delete": {
+      "nodes": 22,
+      "differences": []
+    },
+    "after-reload": {
+      "nodes": 22,
+      "differences": []
+    }
+  }
+}

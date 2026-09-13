@@ -200,7 +200,7 @@ const api = axios.create({ adapter: async (config) => {
     else if (method === 'GET' && note && url.endsWith('/blocks')) data = state.blocks.filter(({ note_id, status }) => note_id === note.id && status === 'active');
     else if (method === 'GET' && note) data = note;
     else if (method === 'PUT' && note) { Object.assign(note, input); data = note; }
-    else if (method === 'GET' && url === '/palette-colors') data = [];
+    else if (method === 'GET' && (url === '/palette-colors' || url === '/skin-suites')) data = [];
     else if (method === 'GET' && url === '/notes') data = state.notes;
     else if (method === 'GET' && url === '/courses') data = [{ id: 'open-smoke-project', name: 'Synthetic project' }];
     else if (method === 'GET' && url === '/courses/open-smoke-project/summary') data = { course: { id: 'open-smoke-project', name: 'Synthetic project', skin: null }, goals: [], decks: [], documents: [] };

@@ -35,7 +35,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/services/api', () => ({
   getToken: () => null, setToken: vi.fn(),
   default: {
-    get: (url: string, ...args: unknown[]) => url === '/palette-colors'
+    get: (url: string, ...args: unknown[]) => url === '/palette-colors' || url === '/skin-suites'
       ? Promise.resolve({ data: [] }) : mocks.get(url, ...args),
     delete: mocks.delete,
     post: mocks.post,
@@ -254,7 +254,36 @@ describe('NoteChromeLayer block restore door', () => {
 });
 
 describe('NoteChromeLayer appearance', () => {
-  it('opens the shared portal, selects complete presets, edits colors, and removes the old More entry', async () => {
+  it('retains a single float card across selections and paper identity changes, then applies to the current paper', async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    function Fixture({ noteId, selected }: { noteId: string; selected: string | null }) {
+      const overlay = useFloatingOverlayController({ setInteractionState: vi.fn() });
+      const props = noteChromeProps();
+      return <PaperSkinContext.Provider value={{ style: {}, preset: 'default', selection: { preset: 'default' },
+        save: async (value) => { await save(noteId, value); }, error: null, retry: vi.fn() }}>
+        <button type="button" onClick={overlay.closeOverlay}>纸面选区</button>
+        <NoteChromeLayer {...props} note={{ ...props.note, id: noteId }} selectedPageFrameId={selected}
+          showAppearancePanel={overlay.showAppearancePanel} showMoreActions={overlay.showMoreActions}
+          onToggleAppearancePanel={overlay.toggleAppearancePanel} onToggleMoreActions={overlay.toggleMoreActions}
+          onCloseOverlay={overlay.closeOverlay} />
+      </PaperSkinContext.Provider>;
+    }
+    const subject = render(<Fixture noteId="paper-a" selected={null} />);
+    fireEvent.click(screen.getByRole('button', { name: '笔记外观' }));
+    const panel = screen.getByRole('dialog', { name: '笔记外观浮卡' });
+    fireEvent.click(screen.getByRole('button', { name: '纸面选区' }));
+    subject.rerender(<Fixture noteId="paper-a" selected="page-b" />);
+    expect(screen.getByRole('dialog', { name: '笔记外观浮卡' })).toBe(panel);
+    subject.rerender(<Fixture noteId="paper-b" selected={null} />);
+    expect(screen.getAllByRole('dialog', { name: '笔记外观浮卡' })).toEqual([panel]);
+    expect(panel.querySelector('[data-skin-float-content]')?.getAttribute('data-skin-float-content')).toBe('paper-b');
+    fireEvent.click(within(panel).getByRole('button', { name: '暖纸' }));
+    await waitFor(() => expect(save).toHaveBeenCalledExactlyOnceWith('paper-b', { preset: 'warm-paper' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: '笔记外观浮卡' })).toBeNull();
+  });
+
+  it('opens one persistent float card, preserves deviations across presets, edits colors, and keeps More independent', async () => {
     const save = vi.fn();
     const setInteractionState = vi.fn();
     function AppearanceFixture() {
@@ -276,9 +305,9 @@ describe('NoteChromeLayer appearance', () => {
     }
     const { container } = render(<AppearanceFixture />);
     fireEvent.click(screen.getByRole('button', { name: '笔记外观' }));
-    const panel = document.querySelector<HTMLElement>('[data-note-overlay="appearance"]')!;
+    const panel = document.querySelector<HTMLElement>('[data-skin-float-card]')!;
     expect(container.contains(panel)).toBe(false);
-    expect(panel.closest('[data-canvas-layer="floating-overlay"]')?.parentElement).toBe(document.body);
+    expect(panel.parentElement).toBe(document.body);
     const presets = screen.getByRole('group', { name: '外观预设快选' });
     expect(within(presets).getAllByRole('button')).toHaveLength(4);
     expect(within(presets).getByRole('button', { name: '暖纸' }).getAttribute('aria-pressed')).toBe('true');
@@ -286,29 +315,27 @@ describe('NoteChromeLayer appearance', () => {
       const button = within(presets).getByRole('button', { name: SKIN_LABELS[preset] });
       const expected = document.createElement('button');
       expected.style.background = SKIN_PRESETS[preset].paper;
-      expected.style.borderColor = SKIN_PRESETS[preset].desk;
-      expect(button.style.background).toBe(expected.style.background);
-      expect(button.style.borderColor).toBe(expected.style.borderColor);
+      expect(button.querySelector<HTMLElement>('[data-skin-sample]')!.style.backgroundColor).toBe(expected.style.backgroundColor);
       fireEvent.click(button);
-      await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset }));
+      await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset, overrides: { paper: '#abcdef' } }));
       expect(button.getAttribute('aria-pressed')).toBe('true');
       expect(within(presets).getAllByRole('button', { pressed: true })).toHaveLength(1);
     }
-    fireEvent.click(screen.getByText('纸面外观'));
-    fireEvent.click(screen.getByText('高级颜色'));
+    fireEvent.click(screen.getByRole('button', { name: 'More note actions' }));
+    expect(document.querySelector('[data-note-overlay="more"]')).not.toBeNull();
+    expect(document.querySelector('[data-skin-float-card]')).toBe(panel);
     fireEvent.click(screen.getByRole('button', { name: '纸面' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Hex 颜色' }), { target: { value: '#123456' } });
     fireEvent.keyDown(screen.getByRole('dialog', { name: '纸面颜色' }), { key: 'Escape' });
     await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { paper: '#123456' } }));
     fireEvent.click(screen.getByRole('button', { name: '关闭外观' }));
-    expect(document.querySelector('[data-note-overlay="appearance"]')).toBeNull();
+    expect(document.querySelector('[data-skin-float-card]')).toBeNull();
     expect(screen.getByRole('button', { name: '笔记外观' }).getAttribute('aria-expanded')).toBe('false');
-    fireEvent.click(screen.getByRole('button', { name: 'More note actions' }));
     expect(document.querySelector('[data-note-overlay="more"]')).not.toBeNull();
     expect(document.querySelector('[data-paper-appearance]')).toBeNull();
   });
 
-  it('shares mutual exclusion and close semantics with every existing overlay', () => {
+  it('keeps appearance open across ordinary overlays and selection close requests', () => {
     const setInteractionState = vi.fn();
     const { result } = renderHook(() => useFloatingOverlayController({ setInteractionState }));
     const panels = [
@@ -318,23 +345,21 @@ describe('NoteChromeLayer appearance', () => {
       ['toggleExportPreview', 'showExportPreview'],
       ['toggleViewOptions', 'showViewOptions'],
     ] as const;
+    act(() => result.current.toggleAppearancePanel());
+    expect(setInteractionState).not.toHaveBeenCalled();
     for (const [open, shown] of panels) {
       act(() => result.current[open]());
-      act(() => result.current.toggleAppearancePanel());
+      expect(result.current.showAppearancePanel).toBe(true);
+      expect(result.current[shown]).toBe(true);
+      act(() => result.current.closeOverlay());
       expect(result.current.showAppearancePanel).toBe(true);
       expect(result.current[shown]).toBe(false);
-      expect(setInteractionState).toHaveBeenLastCalledWith(expect.objectContaining({ mode: 'openingMenu', panel: 'appearance' }));
-      act(() => result.current[open]());
-      expect(result.current[shown]).toBe(true);
-      expect(result.current.showAppearancePanel).toBe(false);
-      act(() => result.current.closeOverlay());
     }
-    act(() => result.current.toggleAppearancePanel());
     act(() => result.current.toggleAppearancePanel());
     expect(result.current.showAppearancePanel).toBe(false);
     act(() => result.current.toggleAppearancePanel());
     act(() => result.current.closeOverlay());
-    expect(result.current.showAppearancePanel).toBe(false);
+    expect(result.current.showAppearancePanel).toBe(true);
     expect(setInteractionState).toHaveBeenLastCalledWith({ mode: 'idle', target: 'surface' });
   });
 });

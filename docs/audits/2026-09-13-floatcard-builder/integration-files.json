@@ -1,0 +1,206 @@
+{
+    "status":  "builder-evidence",
+    "order":  "2026-09-13-v14-skin-float-card-order",
+    "agent":  "skin_integration",
+    "scope":  "Source and test files edited by this integration subtask; files also edited by fixture census are listed once without claiming sole ownership.",
+    "git_used":  false,
+    "modified_baseline_available":  false,
+    "file_count":  23,
+    "new_file_count":  3,
+    "modified_file_count":  20,
+    "files":  [
+                  {
+                      "path":  "client/src/components/CourseModal/CourseModal.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\components\\CourseModal\\CourseModal.tsx",
+                      "change":  "modified",
+                      "current_lines":  159,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/components/Skin/SkinControls.test.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\components\\Skin\\SkinControls.test.tsx",
+                      "change":  "modified",
+                      "current_lines":  37,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/components/Skin/SkinControls.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\components\\Skin\\SkinControls.tsx",
+                      "change":  "modified",
+                      "current_lines":  68,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/components/Skin/SkinEditor.test.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\components\\Skin\\SkinEditor.test.tsx",
+                      "change":  "modified",
+                      "current_lines":  68,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/components/Skin/SkinEditor.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\components\\Skin\\SkinEditor.tsx",
+                      "change":  "modified",
+                      "current_lines":  41,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/hooks/useSkinSuites.test.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\hooks\\useSkinSuites.test.ts",
+                      "change":  "new",
+                      "current_lines":  146,
+                      "numstat":  {
+                                      "added":  146,
+                                      "deleted":  0
+                                  },
+                      "evidence":  "Created by integration agent in this order; empty baseline is known."
+                  },
+                  {
+                      "path":  "client/src/hooks/useSkinSuites.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\hooks\\useSkinSuites.ts",
+                      "change":  "new",
+                      "current_lines":  145,
+                      "numstat":  {
+                                      "added":  145,
+                                      "deleted":  0
+                                  },
+                      "evidence":  "Created by integration agent in this order; empty baseline is known."
+                  },
+                  {
+                      "path":  "client/src/pages/Boards/useBoardSkin.test.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Boards\\useBoardSkin.test.tsx",
+                      "change":  "modified",
+                      "current_lines":  83,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Boards/useBoardSkin.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Boards\\useBoardSkin.ts",
+                      "change":  "modified",
+                      "current_lines":  38,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\hooks\\useFloatingOverlayController.ts",
+                      "change":  "modified",
+                      "current_lines":  76,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\hooks\\useNoteCanvasDataAdapter.skin.test.tsx",
+                      "change":  "modified",
+                      "current_lines":  294,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\hooks\\useNoteCanvasDataAdapter.ts",
+                      "change":  "modified",
+                      "current_lines":  2939,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\hooks\\useNoteCanvasRuntimeController.ts",
+                      "change":  "modified",
+                      "current_lines":  635,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\hooks\\useNoteSkin.test.ts",
+                      "change":  "modified",
+                      "current_lines":  179,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\hooks\\useNoteSkin.ts",
+                      "change":  "modified",
+                      "current_lines":  47,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\layers\\NoteChromeLayer.test.tsx",
+                      "change":  "modified",
+                      "current_lines":  533,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\layers\\NoteChromeLayer.tsx",
+                      "change":  "modified",
+                      "current_lines":  775,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\NoteCanvasRuntime.appearance.test.tsx",
+                      "change":  "new",
+                      "current_lines":  64,
+                      "numstat":  {
+                                      "added":  64,
+                                      "deleted":  0
+                                  },
+                      "evidence":  "Created by integration agent in this order; empty baseline is known."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\NoteCanvasRuntime.tsx",
+                      "change":  "modified",
+                      "current_lines":  55,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\PaperSkinContext.tsx",
+                      "change":  "modified",
+                      "current_lines":  16,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/pages/Notes/canvasEngine/paperSkinStyles.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\pages\\Notes\\canvasEngine\\paperSkinStyles.ts",
+                      "change":  "modified",
+                      "current_lines":  166,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/styles/skinPresets.test.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\styles\\skinPresets.test.ts",
+                      "change":  "modified",
+                      "current_lines":  130,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  },
+                  {
+                      "path":  "client/src/styles/skinPresets.ts",
+                      "absolute_path":  "D:\\Coinsides\\v2.x\\Coincides\\client\\src\\styles\\skinPresets.ts",
+                      "change":  "modified",
+                      "current_lines":  62,
+                      "numstat":  null,
+                      "evidence":  "No pre-order byte baseline retained by integration agent. HQ must supplement numstat; no inference from current file size."
+                  }
+              ]
+}

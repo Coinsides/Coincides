@@ -1,0 +1,44 @@
+{
+  "method": "line LCS against preserved pre-amendment bytes; CRLF normalized; no git",
+  "files": [
+    {
+      "path": "server/src/services/skinSuites.ts",
+      "added": 19,
+      "deleted": 9,
+      "baselineSha256": "073ecc7b62d8a3a37e1ee44fb894b2850cf9b229b9af2cce0f24899c5761c81e",
+      "resultSha256": "9048a2ed4c36d705b881acd4ad141311d1a59b58eb97748f41765baf46c5c795"
+    },
+    {
+      "path": "server/src/validators/skin.ts",
+      "added": 3,
+      "deleted": 1,
+      "baselineSha256": "b60c603d9ef9a1c02706804fa9d3db61c175a4d09a3de06aec834b8a0ce71d9a",
+      "resultSha256": "fd714e27384db7c9ffc03e8ad1e4115c06185b8badafdd0438b7ec2f487bd34d"
+    },
+    {
+      "path": "server/src/validators/skinSuites.ts",
+      "added": 3,
+      "deleted": 1,
+      "baselineSha256": "df9d77be012ce00304d5c2c8b3be04414087f82b86b3cf0f08a215643c3b497c",
+      "resultSha256": "87d51c5dfc9e68f03fe2cce2b5bbd9b6b74a68cfcf13fb1a1738e288f34ab2b3"
+    },
+    {
+      "path": "server/src/__tests__/v14SkinSuites.test.ts",
+      "added": 81,
+      "deleted": 26,
+      "baselineSha256": "68d0d5e6dfb522d327c3dc89f872c9efca3b9a8e5040afab6b34744d2508ed77",
+      "resultSha256": "4c76d7564b5c3c05a7cd6fe5db6297ed0d0ecff15335f4cd94068d471a3611fd"
+    },
+    {
+      "path": "server/src/db/migrations/072_v14_skin_suite_material.ts",
+      "added": 13,
+      "deleted": 0,
+      "baselineSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resultSha256": "9db4517661f9b04df309456c990b8096eb534e087945d87dbf343417da8593d1"
+    }
+  ],
+  "totals": {
+    "added": 119,
+    "deleted": 37
+  }
+}

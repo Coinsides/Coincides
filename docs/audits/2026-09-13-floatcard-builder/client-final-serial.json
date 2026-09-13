@@ -1,0 +1,16 @@
+{
+  "mode": "full",
+  "startedAt": "2026-09-13T03:11:35.364Z",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "cwd": "D:\\Coinsides\\v2.x\\Coincides\\client",
+  "argv": [
+    "D:\\Coinsides\\v2.x\\Coincides\\client\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--maxWorkers=1"
+  ],
+  "timeoutOverride": false,
+  "assertionsEdited": false,
+  "exitCode": 0,
+  "durationMs": 193213,
+  "log": "docs/audits/2026-09-13-floatcard-builder/client-final-serial.log"
+}

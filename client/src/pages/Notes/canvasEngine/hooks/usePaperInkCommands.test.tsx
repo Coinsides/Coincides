@@ -60,7 +60,7 @@ beforeEach(() => {
   layoutX = 0;
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   api.get.mockImplementation(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/canvas-objects/coordinate-contract') return { data: { coordinate_contract: 'v2' } };
     if (url === `/notes/${note.id}`) return { data: note };
     if (url === `/canvas-objects/by-note/${note.id}`) return { data: { coordinateContract: 'v2', pageFrameCollection: collection,

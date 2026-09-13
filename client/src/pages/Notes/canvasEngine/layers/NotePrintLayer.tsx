@@ -68,7 +68,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
 export function NotePrintLayer(input: NotePrintInput) {
   const skin = usePaperSkin();
   const latest = useRef(input);
-  latest.current = { ...input, skinStyle: skin?.style, skinPreset: skin?.preset };
+  latest.current = { ...input, skinStyle: skin?.style, skinPreset: skin?.materialPreset ?? skin?.preset };
   const snapshot = useRef<NotePrintInput | null>(null);
   const [printing, setPrinting] = useState<NotePrintInput | null>(null);
 

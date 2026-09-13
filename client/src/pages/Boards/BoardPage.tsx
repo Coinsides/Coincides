@@ -915,7 +915,7 @@ export default function BoardPage() {
     }, factor));
   }
 
-  return <><section className={styles.workspace} aria-label="Board workspace" style={skin.style} data-board-skin-preset={skin.preset} onPaste={pasteReference} onKeyDown={keyDown}
+  return <><section className={styles.workspace} aria-label="Board workspace" style={skin.style} data-board-skin-preset={skin.materialPreset ?? skin.preset} onPaste={pasteReference} onKeyDown={keyDown}
     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
     onKeyUp={(event) => {
       if (event.key === 'Shift' && gesture.current?.kind === 'move') {

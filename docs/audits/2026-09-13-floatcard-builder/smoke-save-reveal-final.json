@@ -1,0 +1,16 @@
+{
+  "card": {
+    "height": 648,
+    "width": 280,
+    "x": 8,
+    "y": 8
+  },
+  "selected": "true",
+  "suite": {
+    "height": 83.9375,
+    "width": 77.328125,
+    "x": 104.328125,
+    "y": 48.71875
+  },
+  "visibleInsideCard": true
+}

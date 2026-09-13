@@ -112,7 +112,7 @@ it('registers a range minted in the open modal and keeps it Live after same-sess
   const registration = deferred<{ data: { text_ranges: BoardTextRangeV1[] } }>();
   let rangeReads = 0;
   probe.get.mockImplementation(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === byNoteUrl) {
       calls.push('ranges GET');
       rangeReads += 1;

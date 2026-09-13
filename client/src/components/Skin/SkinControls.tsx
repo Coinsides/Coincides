@@ -3,7 +3,8 @@ import { SKIN_COMPONENT_OPTIONS, SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinCom
 import { SKIN_LABELS, resolveSkin } from '@/styles/skinPresets';
 import styles from './SkinControls.module.css';
 import { UnifiedColorPicker } from '@/components/ColorPicker/UnifiedColorPicker';
-import { detachSkinSelection, usePaletteColors } from '@/hooks/usePaletteColors';
+import { usePaletteColors } from '@/hooks/usePaletteColors';
+import { normalizeSkinSelection, useSkinSuites } from '@/hooks/useSkinSuites';
 
 const labels: Record<SkinTokenName, string> = { desk: '桌面', paper: '纸面', ink: '正文', 'ink-muted': '弱字', accent: '强调', annotation: '批注', hairline: '分隔线', danger: '危险操作', wall: '页边距墙', 'board-desk': '板台面', card: '板卡面', edge: '连线', chalk: '粉笔' };
 const componentLabels: Record<keyof SkinComponents, string> = { titleFont: '标题字', labelFont: '标签与刻度字', menuDensity: '菜单密度', handleStyle: '把手样式', headerRule: '表头分隔线' };
@@ -18,8 +19,9 @@ export function SkinControls({ value, onChange, inheritLabel, inheritedValue, ad
 }) {
   const id = useId();
   const palette = usePaletteColors();
-  const base = detachSkinSelection(value ?? inheritedValue, palette.detached) ?? { preset: 'default' as const };
-  const { tokens, components } = resolveSkin(base, null, null, palette.values);
+  const suites = useSkinSuites();
+  const base = normalizeSkinSelection(value ?? inheritedValue) ?? { preset: 'default' as const };
+  const { tokens, components } = resolveSkin(base, null, null, palette.values, suites.values);
   const presetLabel = customPresetLabel ?? (surface === 'board' ? '板面预设' : '纸面预设');
   const tokenNames = SKIN_TOKEN_NAMES.filter((key) => surface === 'all' || (surface === 'board'
     ? !['desk', 'paper', 'wall'].includes(key) : !['board-desk', 'card', 'edge', 'chalk'].includes(key)));
@@ -30,6 +32,7 @@ export function SkinControls({ value, onChange, inheritLabel, inheritedValue, ad
         onChange={(event) => onChange(event.target.value ? { preset: event.target.value as SkinSelection['preset'] } : null)}>
         {inheritLabel && <option value="">{inheritLabel}</option>}
         {SKIN_PRESET_IDS.map((preset) => <option key={preset} value={preset}>{SKIN_LABELS[preset]}</option>)}
+        {value?.preset.startsWith('suite:') && <option value={value.preset}>{suites.suites.find((suite) => `suite:${suite.id}` === value.preset)?.name ?? '自定义套装'}</option>}
       </select>
     </label>
     {inheritLabel && value && <button type="button" className={styles.clear} disabled={disabled} onClick={() => onChange(null)}>清除覆写</button>}

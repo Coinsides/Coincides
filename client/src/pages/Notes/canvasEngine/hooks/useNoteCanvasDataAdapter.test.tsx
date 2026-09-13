@@ -45,7 +45,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/services/api', () => ({
   getToken: () => null, setToken: vi.fn(),
   default: {
-    get: (url: string, ...args: unknown[]) => url === '/palette-colors'
+    get: (url: string, ...args: unknown[]) => (url === '/palette-colors' || url === '/skin-suites')
       ? Promise.resolve({ data: [] })
       : url.startsWith('/boards/text-ranges/by-note/')
       ? mocks.boardRangesGet(url, ...args)

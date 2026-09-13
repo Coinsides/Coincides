@@ -1,0 +1,18 @@
+{
+  "mode": "targeted",
+  "startedAt": "2026-09-13T03:11:19.765Z",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "cwd": "D:\\Coinsides\\v2.x\\Coincides\\client",
+  "argv": [
+    "D:\\Coinsides\\v2.x\\Coincides\\client\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--maxWorkers=1",
+    "src/pages/Boards/BoardPage.bookmarks.test.tsx",
+    "src/pages/Boards/BoardPage.layers.test.tsx"
+  ],
+  "timeoutOverride": false,
+  "assertionsEdited": false,
+  "exitCode": 0,
+  "durationMs": 8174,
+  "log": "docs/audits/2026-09-13-floatcard-builder/client-failures-serial.log"
+}

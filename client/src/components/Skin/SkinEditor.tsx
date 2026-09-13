@@ -3,7 +3,8 @@ import type { SkinSelection } from '@shared/types/skin';
 import { SkinControls } from './SkinControls';
 import { resolveSkin } from '@/styles/skinPresets';
 import styles from './SkinControls.module.css';
-import { detachSkinSelection, usePaletteColors, usePaletteStore } from '@/hooks/usePaletteColors';
+import { usePaletteColors } from '@/hooks/usePaletteColors';
+import { normalizeSkinSelection, useSkinSuites } from '@/hooks/useSkinSuites';
 
 /** Dispatch immediately so the owner can bind and track each intent before navigation. */
 export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced, preview = false, failed = false, surface = 'paper' }: {
@@ -14,19 +15,20 @@ export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced
 }) {
   const [draft, setDraft] = useState(value);
   const palette = usePaletteColors();
+  const suites = useSkinSuites();
   const [error, setError] = useState(false);
   const pending = useRef(0);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => { if (!pending.current && !error && !failed) setDraft(value); }, [value, error, failed]);
   const change = (next: SkinSelection | null) => {
-    const normalized = detachSkinSelection(next, usePaletteStore.getState().detached);
+    const normalized = normalizeSkinSelection(next);
     setDraft(normalized); setError(false); pending.current += 1;
     void save(normalized).then(() => {
       if (mounted.current) setError(false);
     }, () => { if (mounted.current) setError(true); }).finally(() => { pending.current -= 1; });
   };
-  const { tokens } = resolveSkin(draft ?? inheritedValue, null, null, palette.values);
+  const { tokens } = resolveSkin(draft ?? inheritedValue, null, null, palette.values, suites.values);
   return <>
     <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} inheritedValue={inheritedValue} advanced={advanced} surface={surface} />
     {preview && <div className={styles.preview} aria-label="纸面颜色预览" style={{ background: tokens.paper, color: tokens.ink }}>

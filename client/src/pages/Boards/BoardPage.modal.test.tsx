@@ -69,7 +69,7 @@ beforeEach(() => {
     edges: [], visuals: [],
   };
   http.get.mockImplementation(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/boards/board') return clone(detail);
     if (url === '/boards/board/viewport-bookmarks') return clone({ bookmarks: [] });
     if (url === '/courses') return clone([{ id: 'project', name: 'Fixture project' }]);

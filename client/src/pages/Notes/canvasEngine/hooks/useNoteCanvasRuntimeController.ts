@@ -621,6 +621,8 @@ export function useNoteCanvasRuntimeController() {
 
   return {
     skin,
+    showAppearancePanel,
+    toggleAppearancePanel,
     dismissTransientUI,
     flushPendingSaves,
     refreshBoardTextRanges,

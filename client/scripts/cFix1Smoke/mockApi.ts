@@ -41,7 +41,7 @@ const api = axios.create({
     }
     let data: unknown;
     if (method === 'GET' && url === '/templates') data = templates;
-    else if (method === 'GET' && url === '/palette-colors') data = [];
+    else if (method === 'GET' && (url === '/palette-colors' || url === '/skin-suites')) data = [];
     else if (method === 'GET' && url === '/courses/c-fix1-course/summary') data = { course: { id: 'c-fix1-course', name: 'Synthetic interaction course', skin: null }, goals: [], decks: [], documents: [] };
     else if (method === 'POST' && url === '/source-anchors/generate') data = {};
     else if (method === 'GET' && (emptyCatalogs.has(url) || url === `/purposes/by-note/${NOTE_ID}`)) data = [];

@@ -9,7 +9,7 @@ import {
   type RuntimeInteractionState,
 } from '../interactionController';
 
-export type FloatingOverlayPanel = 'layout' | 'appearance' | 'moreActions' | 'blockTrash' | 'preview' | 'viewOptions';
+export type FloatingOverlayPanel = 'layout' | 'moreActions' | 'blockTrash' | 'preview' | 'viewOptions';
 
 export interface UseFloatingOverlayControllerOptions {
   setInteractionState: (state: RuntimeInteractionState) => void;
@@ -19,6 +19,7 @@ export function useFloatingOverlayController({
   setInteractionState,
 }: UseFloatingOverlayControllerOptions) {
   const [activeOverlay, setActiveOverlay] = useState<FloatingOverlayPanel | null>(null);
+  const [showAppearancePanel, setShowAppearancePanel] = useState(false);
   const [showPreviewBlockTypes, setShowPreviewBlockTypes] = useState(false);
   const [showPreviewAIVisibility, setShowPreviewAIVisibility] = useState(false);
   const [showPreviewExportStatus, setShowPreviewExportStatus] = useState(false);
@@ -54,7 +55,7 @@ export function useFloatingOverlayController({
     showExportPreview: activeOverlay === 'preview',
     showBlockTrash: activeOverlay === 'blockTrash',
     showLayoutPanel: activeOverlay === 'layout',
-    showAppearancePanel: activeOverlay === 'appearance',
+    showAppearancePanel,
     showMoreActions: activeOverlay === 'moreActions',
     showViewOptions: activeOverlay === 'viewOptions',
     showPreviewAIVisibility,
@@ -64,7 +65,7 @@ export function useFloatingOverlayController({
     openLayoutPanel: () => setOverlay('layout'),
     openBlockTrash: () => setOverlay('blockTrash'),
     toggleExportPreview: () => toggleOverlay('preview'),
-    toggleAppearancePanel: () => toggleOverlay('appearance'),
+    toggleAppearancePanel: () => setShowAppearancePanel((open) => !open),
     toggleMoreActions: () => toggleOverlay('moreActions'),
     toggleViewOptions: () => toggleOverlay('viewOptions'),
     togglePreviewAIVisibility: () => setShowPreviewAIVisibility((value) => !value),

@@ -1,5 +1,5 @@
 import { SKIN_COMPONENT_OPTIONS, SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinComponents, type SkinPresetId, type SkinSelection, type SkinTokens } from '@shared/types';
-import { SKIN_COLOR_VALUE_PATTERN } from '@shared/types';
+import { SKIN_COLOR_VALUE_PATTERN, SKIN_SUITE_REFERENCE_PATTERN } from '@shared/types';
 
 /** Factory snapshots. The default column is the incumbent paper palette, not a redesign. */
 export const SKIN_PRESETS: Record<SkinPresetId, SkinTokens> = {
@@ -24,7 +24,8 @@ export const SKIN_LABELS: Record<SkinPresetId, string> = {
 export function readSkin(value: unknown): SkinSelection | null {
   if (!value || typeof value !== 'object') return null;
   const raw = value as Partial<SkinSelection>;
-  if (!SKIN_PRESET_IDS.includes(raw.preset as SkinPresetId)) return null;
+  if (!SKIN_PRESET_IDS.includes(raw.preset as SkinPresetId)
+    && !(typeof raw.preset === 'string' && SKIN_SUITE_REFERENCE_PATTERN.test(raw.preset))) return null;
   const overrides = Object.fromEntries(SKIN_TOKEN_NAMES.flatMap((key) => {
     const color = raw.overrides?.[key];
     return typeof color === 'string' && SKIN_COLOR_VALUE_PATTERN.test(color) ? [[key, color]] : [];
@@ -33,25 +34,32 @@ export function readSkin(value: unknown): SkinSelection | null {
     const option = raw.components?.[key as keyof SkinComponents];
     return option && (options as readonly string[]).includes(option) ? [[key, option]] : [];
   })) as Partial<SkinComponents>;
-  return { preset: raw.preset!, ...(Object.keys(overrides).length ? { overrides } : {}), ...(Object.keys(components).length ? { components } : {}) };
+  const materialPreset = SKIN_PRESET_IDS.includes(raw.materialPreset as SkinPresetId) ? raw.materialPreset : undefined;
+  return { preset: raw.preset!, ...(materialPreset ? { materialPreset } : {}), ...(Object.keys(overrides).length ? { overrides } : {}), ...(Object.keys(components).length ? { components } : {}) };
 }
 
 /** An absent mounting point inherits. A named snapshot replaces its parent's palette. */
-export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null, palette: Readonly<Record<string, string>> = {}) {
-  let preset: SkinPresetId = 'default';
+export type SkinSuiteSnapshot = { tokens: SkinTokens; components: SkinComponents; materialPreset?: SkinPresetId };
+
+export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null, palette: Readonly<Record<string, string>> = {}, suites: Readonly<Record<string, SkinSuiteSnapshot>> = {}) {
+  let preset: SkinSelection['preset'] = 'default';
+  let materialPreset: SkinPresetId = 'default';
   let tokens = { ...SKIN_PRESETS.default };
   let components = { ...SKIN_PRESET_COMPONENTS.default };
   for (const candidate of [global, project, local]) {
     const skin = readSkin(candidate);
     if (!skin) continue;
     preset = skin.preset;
-    tokens = { ...SKIN_PRESETS[preset] };
+    const suite = preset.startsWith('suite:') ? suites[preset.slice(6)] : undefined;
+    materialPreset = skin.materialPreset ?? suite?.materialPreset ?? (SKIN_PRESET_IDS.includes(preset as SkinPresetId) ? preset as SkinPresetId : 'default');
+    const baseTokens = suite?.tokens ?? SKIN_PRESETS[preset as SkinPresetId] ?? SKIN_PRESETS.default;
+    tokens = { ...baseTokens };
     for (const key of SKIN_TOKEN_NAMES) {
-      const stored = skin.overrides?.[key];
+      const stored = skin.overrides?.[key] ?? baseTokens[key];
       const value = stored?.startsWith('palette:') ? palette[stored.slice(8)] : stored;
       if (value && /^#[\da-f]{6}([\da-f]{2})?$/i.test(value)) tokens[key] = value;
     }
-    components = { ...SKIN_PRESET_COMPONENTS[preset], ...skin.components };
+    components = { ...(suite?.components ?? SKIN_PRESET_COMPONENTS[preset as SkinPresetId] ?? SKIN_PRESET_COMPONENTS.default), ...skin.components };
   }
-  return { preset, tokens, components };
+  return { preset, materialPreset, tokens, components };
 }

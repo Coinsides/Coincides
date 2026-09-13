@@ -31,7 +31,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.get.mockImplementation(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/settings/providers') {
       return { data: { providers: ['anthropic', 'openai', 'generic', 'deepseek', 'dashscope', 'voyage'].map((provider) => ({
         provider, has_key: true, has_local_key: true, masked_key: '****1111', source: 'local',

@@ -6,7 +6,8 @@ import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
 /** Rendering aliases are fixed, never persisted as additional user tokens.
  * An unchanged default role inherits the incumbent app theme (including light). */
 export function buildBoardSkinStyles(skin: ReturnType<typeof resolveSkin>): CSSProperties {
-  const { tokens, components, preset } = skin;
+  const { tokens, components } = skin;
+  const preset = skin.materialPreset ?? skin.preset;
   const changed = (name: SkinTokenName) => tokens[name].toLowerCase() !== SKIN_PRESETS.default[name].toLowerCase();
   const styles: Record<string, string> = Object.fromEntries(Object.entries(tokens).map(([name, value]) => [`--sk-${name}`, value]));
   const alias = (name: string, token: SkinTokenName, value = `var(--sk-${token})`) => {

@@ -1,0 +1,51 @@
+.card { --skin-float-layer: 1050; position: fixed; z-index: var(--skin-float-layer); width: min(280px, calc(100vw - 16px)); max-height: min(60vh, calc(100dvh - 16px)); display: flex; flex-direction: column; color: var(--text-primary); background: var(--bg-elevated, #1d1d1f); opacity: 1; border: 1px solid var(--border-default); border-radius: 8px; font-size: 12px; line-height: 1.45; isolation: isolate; }
+.header { display: flex; flex-shrink: 0; align-items: center; gap: 6px; min-height: 40px; padding: 4px 8px 4px 12px; cursor: grab; touch-action: none; user-select: none; border-bottom: 1px solid var(--border-default); }
+.header:active { cursor: grabbing; }
+.header strong { flex: 1; font-size: 14px; font-weight: 600; }
+.card[data-collapsed='true'] .header { border-bottom: 0; }
+.card button, .dialog button, .menu button { color: inherit; font: inherit; cursor: pointer; border-radius: 4px; min-height: 28px; padding: 4px 6px; }
+.card button:hover:not(:disabled), .dialog button:hover:not(:disabled), .menu button:hover:not(:disabled) { background-color: var(--bg-hover); }
+.card button:disabled, .dialog button:disabled { opacity: .5; cursor: default; }
+.card :is(button, input):focus-visible, .dialog :is(button, input):focus-visible, .menu button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.header button { display: flex; align-items: center; justify-content: center; width: 28px; padding: 0; }
+.body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 10px 12px 12px; }
+.binding { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px; margin-bottom: 10px; }
+.bindingName { flex-basis: 100%; overflow-wrap: anywhere; }
+.hint { color: var(--text-secondary); font-size: 11px; }
+.section { padding: 10px 0; border-top: 1px solid var(--border-default); }
+.section h3 { font-weight: 600; font-size: 12px; margin: 0 0 8px; }
+.presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.custom { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.card .preset { padding: 3px; text-align: left; min-width: 0; border: 1px solid transparent; border-radius: 5px; touch-action: pan-y; }
+.card .preset[aria-pressed='true'] { border-color: var(--border-focus); }
+.presetName { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; margin-top: 4px; }
+.sample { display: flex; flex-direction: column; gap: 4px; padding: 8px 6px; height: 56px; border-radius: 2px; overflow: hidden; }
+.sample[data-skin-sample-material='warm-paper'] { position: relative; background-image: var(--paper-material-fill); box-shadow: var(--paper-material-shadow); }
+.sample[data-skin-sample-material='warm-paper']::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--paper-material-binding); pointer-events: none; }
+.sampleTitle { width: 70%; height: 4px; flex-shrink: 0; }
+.sampleLine { height: 2px; flex-shrink: 0; }
+.sampleLine:last-child { width: 68%; }
+.token { padding: 7px 0; border-top: 1px solid var(--border-default); }
+.token:first-of-type { border-top: 0; }
+.token > [data-unified-color-picker] { flex-wrap: wrap; gap: 4px; }
+.tokenActions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-height: 20px; font-size: 11px; }
+.tokenActions:empty { display: none; }
+.deviation { color: var(--text-secondary); }
+.tokenActions button { padding: 0 2px; min-height: 22px; text-decoration: underline; text-underline-offset: 3px; }
+.component { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; padding: 5px 0; }
+.options { display: flex; border: 1px solid var(--border-default); border-radius: 4px; }
+.card .options button { font-size: 11px; padding: 3px 6px; }
+.card .options button[aria-pressed='true'] { background: var(--bg-active); text-decoration: underline; text-underline-offset: 3px; }
+.card .save { width: 100%; border: 1px solid var(--border-default); text-align: left; padding: 7px 8px; }
+.error { margin: 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.error button { text-decoration: underline; }
+.dialog { position: fixed; z-index: 1200; margin: auto; width: min(300px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 16px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); font-size: 13px; }
+.dialog::backdrop { background: #0006; }
+.dialog h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+.dialog label { display: flex; flex-direction: column; gap: 6px; }
+.dialog input { width: 100%; min-width: 0; border: 1px solid var(--border-default); border-radius: 4px; padding: 8px; background: var(--bg-surface); color: var(--text-primary); font: inherit; }
+.dialog .sample { width: 90px; height: 100px; margin: 12px auto; padding: 16px 12px; gap: 8px; }
+.dialogActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.dialogActions button[type='submit'] { border: 1px solid var(--border-focus); }
+.menu { position: fixed; z-index: 1150; display: flex; flex-direction: column; min-width: 190px; max-width: calc(100vw - 16px); padding: 4px; background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 6px; font-size: 12px; }
+.menu button { text-align: left; padding: 7px 8px; }

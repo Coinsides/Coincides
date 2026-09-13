@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { resolveSkin } from '@/styles/skinPresets';
+import { resolveSkin, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from '@/styles/skinPresets';
 import { buildBoardSkinStyles } from './boardSkinStyles';
 
 it('leaves the incumbent light/dark aliases inherited and keeps both sticky baselines separate', () => {
@@ -20,4 +20,10 @@ it('binds independent card/edge/chalk roles and the workbench components without
   expect(style['--sk-board-handle-radius']).toBe('50%');
   expect(style['--sk-board-menu-height']).toBe('28px');
   expect(style).not.toHaveProperty('--paper-annotation-blue-accent');
+});
+
+it.each(['default', 'quiet-ink', 'warm-paper', 'workbench'] as const)('板材质快照完整保留 %s', (materialPreset) => {
+  const factory = resolveSkin({ preset: materialPreset });
+  const detached = resolveSkin({ preset: 'default', materialPreset, overrides: SKIN_PRESETS[materialPreset], components: SKIN_PRESET_COMPONENTS[materialPreset] });
+  expect(buildBoardSkinStyles(detached)).toEqual(buildBoardSkinStyles(factory));
 });

@@ -60,7 +60,7 @@ let failOrder: boolean;
 beforeEach(() => {
   store = initialStore(); writes = []; failOrder = false;
   http.get.mockReset().mockImplementation(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/boards') return { data: { boards: [] } };
     throw new Error(`Unexpected synthetic GET ${url}`);
   });

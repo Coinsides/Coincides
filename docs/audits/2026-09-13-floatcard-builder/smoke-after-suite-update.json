@@ -1,0 +1,653 @@
+﻿{
+    "first":  {
+                  "id":  "4bc5a870-283c-4d2c-85da-19aade9e5f7d",
+                  "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                  "course_id":  "d21cb4e4-c16a-4495-9f1c-2a82986f6e70",
+                  "title":  "é\u0085è¯»æ­è®°",
+                  "description":  null,
+                  "status":  "active",
+                  "source_kind":  "manual",
+                  "page_format":  "screen_note",
+                  "metadata":  {
+                                   "skin":  {
+                                                "preset":  "suite:5233aa0f-a82a-4434-9abb-8892bf21f33c"
+                                            }
+                               },
+                  "operation_batch_id":  "994dd63a-6534-4b74-b1c7-8fbc9fc7e4aa",
+                  "created_at":  "2026-09-13T02:56:24.831Z",
+                  "updated_at":  "2026-09-13T03:04:51.704Z",
+                  "trashed_at":  null,
+                  "note_class":  "user"
+              },
+    "second":  {
+                   "id":  "5f8bf37b-b1bd-4038-a938-888904c08eef",
+                   "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                   "course_id":  "d21cb4e4-c16a-4495-9f1c-2a82986f6e70",
+                   "title":  "ç ç©¶æ­è®°",
+                   "description":  null,
+                   "status":  "active",
+                   "source_kind":  "manual",
+                   "page_format":  "screen_note",
+                   "metadata":  {
+                                    "skin":  {
+                                                 "preset":  "quiet-ink"
+                                             }
+                                },
+                   "operation_batch_id":  "1a88652a-36fe-42ec-bcdb-b1051b9d91f9",
+                   "created_at":  "2026-09-13T02:56:24.832Z",
+                   "updated_at":  "2026-09-13T02:56:24.832Z",
+                   "trashed_at":  null,
+                   "note_class":  "user"
+               },
+    "suites":  [
+                   {
+                       "id":  "5233aa0f-a82a-4434-9abb-8892bf21f33c",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "èå¢¨é\u0085è¯»",
+                       "created_at":  "2026-09-13T03:03:03.174Z",
+                       "tokens":  {
+                                      "desk":  "#101114",
+                                      "paper":  "#17181C",
+                                      "ink":  "#E7E8EB",
+                                      "ink-muted":  "#8B909A",
+                                      "accent":  "#7FA3D7",
+                                      "annotation":  "#B89B4C",
+                                      "hairline":  "#FFFFFF12",
+                                      "danger":  "#C4766B",
+                                      "wall":  "#FFFFFF14",
+                                      "board-desk":  "#0E0F12",
+                                      "card":  "#17181C",
+                                      "edge":  "#8B909A",
+                                      "chalk":  "#E7E8EB"
+                                  },
+                       "components":  {
+                                          "titleFont":  "sans",
+                                          "labelFont":  "system",
+                                          "menuDensity":  "comfortable",
+                                          "handleStyle":  "capsule",
+                                          "headerRule":  "visible"
+                                      }
+                   }
+               ],
+    "colors":  [
+                   {
+                       "id":  "6c8f8118-28a4-4b32-8c84-571c813e2863",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "æè°/æé»",
+                       "value":  "#E8B04B",
+                       "sort":  1000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "2dee8659-08a7-4456-a23f-09d46394ad80",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "é\u0085è¯»/è",
+                       "value":  "#315D83",
+                       "sort":  1000,
+                       "origin":  "user",
+                       "created_at":  "2026-09-13T02:56:24.834Z"
+                   },
+                   {
+                       "id":  "f86d8ab0-e2ad-49c6-a6ba-ddf1c0fa1f81",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "æè°/èµ­ç³",
+                       "value":  "#B8703F",
+                       "sort":  2000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "582c5ac7-80d9-443a-af48-e08927044624",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "æè°/ç»¯çº¢",
+                       "value":  "#C25B4E",
+                       "sort":  3000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "6492fb3a-e0ea-42ca-bd49-cbf5200cb46c",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "æè°/ç«ç°",
+                       "value":  "#C97B8E",
+                       "sort":  4000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "357d7113-6907-4cda-b1d0-ee91b288f5d4",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "æè°/ææ£",
+                       "value":  "#8A6248",
+                       "sort":  5000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "3f8d3e88-be25-466e-8ec1-662ffd27a1a4",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "æè°/å¥¶æ²¹",
+                       "value":  "#F2E3C6",
+                       "sort":  6000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "7e093d4b-883b-4503-b842-8701e641b507",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "å·è°/å¢¨è",
+                       "value":  "#4A6FA5",
+                       "sort":  7000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "1c5729af-1130-4852-98dc-55982087a6d8",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "å·è°/éç¢§",
+                       "value":  "#4E8D7C",
+                       "sort":  8000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "df16b550-f187-4e23-aef1-0371221cd806",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "å·è°/é»ç´«",
+                       "value":  "#6E5E8E",
+                       "sort":  9000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "6c39c1b7-2de0-4012-814c-5cabbb50b401",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "å·è°/æ¹è",
+                       "value":  "#5B9BB5",
+                       "sort":  10000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "5790b314-bc6f-4705-9be6-8494df045fd4",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "å·è°/æ¾ç»¿",
+                       "value":  "#4F7350",
+                       "sort":  11000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "f568a518-66c6-420e-8094-43896698e6fb",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "å·è°/éè",
+                       "value":  "#3D5273",
+                       "sort":  12000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "c61d497e-5517-48b3-b00d-e969a03a76c1",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ä¸­æ§/ç­é»",
+                       "value":  "#2B2B2E",
+                       "sort":  13000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "d2ad886d-1d36-4209-95ed-203369cd17fa",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ä¸­æ§/ç³å¢¨",
+                       "value":  "#55565C",
+                       "sort":  14000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "a3b01faf-ca48-411a-b6b1-a7692f03a887",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ä¸­æ§/æç°",
+                       "value":  "#8C8578",
+                       "sort":  15000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "3d597b46-b0d4-4b12-81dd-84b9c029f19a",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ä¸­æ§/å·ç°",
+                       "value":  "#7E8794",
+                       "sort":  16000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "78d53847-33e4-456e-a742-098a827b1387",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ä¸­æ§/ç±³ç½",
+                       "value":  "#EDE8DC",
+                       "sort":  17000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "dc3a14f0-34d2-4878-a977-cabaf0e718b8",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ä¸­æ§/çº¸ç½",
+                       "value":  "#F7F4EC",
+                       "sort":  18000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "8bbe92cf-cc5b-4ba3-bf57-02a1ac0b1a00",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ç¹ç¼/ç¥ç",
+                       "value":  "#E5A33C",
+                       "sort":  19000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "9211eec1-2a73-47d0-b0aa-d42824201c80",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ç¹ç¼/æ±ç ",
+                       "value":  "#D14B3A",
+                       "sort":  20000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "3fdca222-99cb-4943-8c99-a873a847f548",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ç¹ç¼/èç»¿",
+                       "value":  "#7C9A4E",
+                       "sort":  21000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "227ad16e-67a2-48d8-b645-41aec482f050",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ç¹ç¼/å¤©é",
+                       "value":  "#6BB3C9",
+                       "sort":  22000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "843299ae-3111-4329-acbc-734ca3a08558",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ç¹ç¼/èè·",
+                       "value":  "#B48EAD",
+                       "sort":  23000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   },
+                   {
+                       "id":  "5bbb3da9-2034-4c11-bccd-6399cd0070c3",
+                       "user_id":  "9b10f603-bd2d-49b9-9729-19f71b2e0b75",
+                       "name":  "ç¹ç¼/éé©¼",
+                       "value":  "#C9A15F",
+                       "sort":  24000,
+                       "origin":  "factory",
+                       "created_at":  "2026-09-13T02:56:24.816Z"
+                   }
+               ],
+    "requests":  [
+                     {
+                         "method":  "POST",
+                         "path":  "/api/auth/login"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/daily-brief"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/auth/me"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/courses"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/daily-brief"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/auth/me"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/courses"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/blocks"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/templates"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/palette-colors"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/skin-suites"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/blocks"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/content-groups"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/templates"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/content-groups"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/group-folders"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/coordinate-contract"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/annotation-truths/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/purposes"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/boards/text-ranges/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/group-folders"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/annotation-truths/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/purposes"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/boards/text-ranges/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/metadata"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/courses/d21cb4e4-c16a-4495-9f1c-2a82986f6e70/summary"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/metadata"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/blocks"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/templates"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/palette-colors"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/skin-suites"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/auth/me"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/courses"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/blocks"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/templates"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/auth/me"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/courses"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/content-groups"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/palette-colors"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/skin-suites"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/content-groups"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/group-folders"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/coordinate-contract"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/annotation-truths/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/purposes"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/boards/text-ranges/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/group-folders"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/annotation-truths/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/purposes"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/boards/text-ranges/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/by-note/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/metadata"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/courses/d21cb4e4-c16a-4495-9f1c-2a82986f6e70/summary"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d/metadata"
+                     },
+                     {
+                         "method":  "PUT",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "POST",
+                         "path":  "/api/skin-suites"
+                     },
+                     {
+                         "method":  "PUT",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "PUT",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "PUT",
+                         "path":  "/api/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/5f8bf37b-b1bd-4038-a938-888904c08eef"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/5f8bf37b-b1bd-4038-a938-888904c08eef/blocks"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/content-groups"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/group-folders"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/coordinate-contract"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/annotation-truths/by-note/5f8bf37b-b1bd-4038-a938-888904c08eef"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/purposes"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/boards/text-ranges/by-note/5f8bf37b-b1bd-4038-a938-888904c08eef"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/canvas-objects/by-note/5f8bf37b-b1bd-4038-a938-888904c08eef"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/5f8bf37b-b1bd-4038-a938-888904c08eef/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/5f8bf37b-b1bd-4038-a938-888904c08eef/metadata"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/5f8bf37b-b1bd-4038-a938-888904c08eef/tags"
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/notes/5f8bf37b-b1bd-4038-a938-888904c08eef/metadata"
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/skin-suites/5233aa0f-a82a-4434-9abb-8892bf21f33c"
+                     }
+                 ]
+}

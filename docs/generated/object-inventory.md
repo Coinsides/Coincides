@@ -22,12 +22,12 @@
 
 ---
 
-## 1. 数据表（活表 95 张）
+## 1. 数据表（活表 96 张）
 
 > **口径**：已核 `server/src/db/init.ts:33,156` —— **先应用 `schema.sql`，再跑 migrations**。
 > 故 **活表 = `schema.sql` 声明 ∪ migrations 建表 − migrations 落表**。
 > `schema.sql` 单独声明 67 张，**那不是活表数** ——
-> 部分晚期表被回填进 `schema.sql`（47 张），部分没有（28 张）。
+> 部分晚期表被回填进 `schema.sql`（47 张），部分没有（29 张）。
 > 这是回填不一致，不是缺陷；但它意味着**任何"数一下 schema.sql"得出的数字都是错的**。
 
 | # | 表 | 首次建于 | 在 `schema.sql` |
@@ -99,34 +99,35 @@
 | 65 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
 | 66 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
 | 67 | `relations` | 047_v2_item_relation_floor | ✅ |
-| 68 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
-| 69 | `source_anchors` | 020_v2_source_anchors | ✅ |
-| 70 | `source_board_nodes` | 022_v2_source_boards | ✅ |
-| 71 | `source_boards` | 022_v2_source_boards | ✅ |
-| 72 | `source_files` | 045_v2_source_identity_floor | — |
-| 73 | `source_fragments` | 016_v2_material_proposal | ✅ |
-| 74 | `source_imprints` | 049_v2_source_imprints | — |
-| 75 | `source_materializations` | 045_v2_source_identity_floor | — |
-| 76 | `source_materials` | 016_v2_material_proposal | ✅ |
-| 77 | `source_project_placements` | 045_v2_source_identity_floor | — |
-| 78 | `source_records` | 045_v2_source_identity_floor | — |
-| 79 | `source_reprojection_receipts` | 069_v13_source_reprojection_receipts | — |
-| 80 | `source_scopes` | 021_v2_source_scopes | ✅ |
-| 81 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
-| 82 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
-| 83 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
-| 84 | `study_activity_log` | `schema.sql`（基线） | ✅ |
-| 85 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
-| 86 | `tag_groups` | `schema.sql`（基线） | ✅ |
-| 87 | `tags` | `schema.sql`（基线） | ✅ |
-| 88 | `task_cards` | 011_task_cards | — |
-| 89 | `tasks` | `schema.sql`（基线） | ✅ |
-| 90 | `template_definitions` | 025_v2_template_definitions | ✅ |
-| 91 | `time_block_template_sets` | 012_time_block_templates | — |
-| 92 | `time_block_templates` | 012_time_block_templates | — |
-| 93 | `time_blocks` | 007_time_blocks | — |
-| 94 | `users` | `schema.sql`（基线） | ✅ |
-| 95 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
+| 68 | `skin_suites` | 071_v14_skin_suites | — |
+| 69 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
+| 70 | `source_anchors` | 020_v2_source_anchors | ✅ |
+| 71 | `source_board_nodes` | 022_v2_source_boards | ✅ |
+| 72 | `source_boards` | 022_v2_source_boards | ✅ |
+| 73 | `source_files` | 045_v2_source_identity_floor | — |
+| 74 | `source_fragments` | 016_v2_material_proposal | ✅ |
+| 75 | `source_imprints` | 049_v2_source_imprints | — |
+| 76 | `source_materializations` | 045_v2_source_identity_floor | — |
+| 77 | `source_materials` | 016_v2_material_proposal | ✅ |
+| 78 | `source_project_placements` | 045_v2_source_identity_floor | — |
+| 79 | `source_records` | 045_v2_source_identity_floor | — |
+| 80 | `source_reprojection_receipts` | 069_v13_source_reprojection_receipts | — |
+| 81 | `source_scopes` | 021_v2_source_scopes | ✅ |
+| 82 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
+| 83 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
+| 84 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
+| 85 | `study_activity_log` | `schema.sql`（基线） | ✅ |
+| 86 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
+| 87 | `tag_groups` | `schema.sql`（基线） | ✅ |
+| 88 | `tags` | `schema.sql`（基线） | ✅ |
+| 89 | `task_cards` | 011_task_cards | — |
+| 90 | `tasks` | `schema.sql`（基线） | ✅ |
+| 91 | `template_definitions` | 025_v2_template_definitions | ✅ |
+| 92 | `time_block_template_sets` | 012_time_block_templates | — |
+| 93 | `time_block_templates` | 012_time_block_templates | — |
+| 94 | `time_blocks` | 007_time_blocks | — |
+| 95 | `users` | `schema.sql`（基线） | ✅ |
+| 96 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
 
 ### 1.1 已由 migration 落表（26）
 
@@ -159,7 +160,7 @@
 
 ---
 
-## 2. HTTP 路由模块（46）
+## 2. HTTP 路由模块（47）
 
 | 模块 | 挂载路径 |
 |---|---|
@@ -195,6 +196,7 @@
 | `routes/review.ts` | `/api/review` |
 | `routes/sections.ts` | `/api/sections` |
 | `routes/settings.ts` | `/api/settings` |
+| `routes/skinSuites.ts` | `/api/skin-suites` |
 | `routes/sourceAnchors.ts` | `/api/source-anchors` |
 | `routes/sourceBoardNodes.ts` | `/api/source-board-nodes` |
 | `routes/sourceBoards.ts` | `/api/source-boards` |

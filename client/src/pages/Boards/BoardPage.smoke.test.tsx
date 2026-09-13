@@ -188,7 +188,7 @@ beforeEach(() => {
   Object.defineProperty(SVGElement.prototype, 'releasePointerCapture', { configurable: true, value: noOp });
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string; note_id?: string } }) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/boards') return response({ boards: boards.map(({ board }) => board) });
     if (url.startsWith('/boards/text-ranges/by-note/')) return response({ text_ranges: [] });
     if (/^\/boards\/[^/]+\/viewport-bookmarks$/.test(url)) {

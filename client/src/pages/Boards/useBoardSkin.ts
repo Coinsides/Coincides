@@ -5,10 +5,12 @@ import { readSkin, resolveSkin } from '@/styles/skinPresets';
 import type { Course, SkinSelection } from '@shared/types';
 import type { Board, PatchBoardInput } from './boardTypes';
 import { buildBoardSkinStyles } from './boardSkinStyles';
-import { saveSkinWithPalette, usePaletteColors } from '@/hooks/usePaletteColors';
+import { usePaletteColors } from '@/hooks/usePaletteColors';
+import { normalizeSkinSelection, saveSkinWithSuites, useSkinSuites } from '@/hooks/useSkinSuites';
 
 export function useBoardSkin(board: Board | null, update: (input: PatchBoardInput) => Promise<boolean>) {
   const palette = usePaletteColors();
+  const suites = useSkinSuites();
   const global = useAuthStore((state) => state.user?.settings.skin);
   const [project, setProject] = useState<{ id: string; skin: SkinSelection | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +25,13 @@ export function useBoardSkin(board: Board | null, update: (input: PatchBoardInpu
     }).catch(() => { if (active) setError('项目外观未加载，暂用全局外观。'); });
     return () => { active = false; };
   }, [projectId, attempt]);
-  const selection = useMemo(() => readSkin(board?.skin), [board?.skin]);
-  const inheritedSelection = (project && project.id === projectId ? project.skin : null) ?? readSkin(global);
-  const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === projectId ? project.skin : null, selection, palette.values),
-    [global, project, projectId, selection, palette.values]);
+  const selection = useMemo(() => normalizeSkinSelection(readSkin(board?.skin)), [board?.skin, suites.detached, palette.detached]);
+  const inheritedSelection = normalizeSkinSelection((project && project.id === projectId ? project.skin : null) ?? readSkin(global));
+  const resolved = useMemo(() => resolveSkin(normalizeSkinSelection(readSkin(global)), normalizeSkinSelection(project && project.id === projectId ? project.skin : null), selection, palette.values, suites.values),
+    [global, project, projectId, selection, palette.values, suites.values, suites.detached]);
   const style = useMemo(() => buildBoardSkinStyles(resolved), [resolved]);
   // useBoard owns intent identity, write ordering, error reporting and navigation.
-  const save = (skin: SkinSelection | null) => saveSkinWithPalette(skin, async (normalized) => {
+  const save = (skin: SkinSelection | null) => saveSkinWithSuites(skin, async (normalized) => {
     if (!await update({ skin: normalized })) throw new Error('Board appearance was not saved');
   });
   return { ...resolved, style, selection, inheritedSelection, save, error, retry: () => setAttempt((value) => value + 1) };

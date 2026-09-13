@@ -1,0 +1,16 @@
+{
+  "before": {
+    "--paper-material-fill": "linear-gradient(#F9F5ED 0%, #F7F3EA 34%, #F5F0E5 100%)",
+    "--paper-material-shadow": "0 22px 54px rgba(8,6,4,.55), 0 5px 16px rgba(8,6,4,.35), inset 0 1px 0 rgba(255,255,255,.55)",
+    "--sk-ink": "#315D83",
+    "--sk-paper": "#F7F3EA",
+    "--sk-wall-idle": "0.55"
+  },
+  "after": {
+    "--paper-material-fill": "",
+    "--paper-material-shadow": "",
+    "--sk-ink": "#315D83",
+    "--sk-paper": "#F7F3EA",
+    "--sk-wall-idle": "0"
+  }
+}

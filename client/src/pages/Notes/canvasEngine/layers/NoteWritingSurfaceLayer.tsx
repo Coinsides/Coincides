@@ -1452,7 +1452,7 @@ export function NoteWritingSurfaceLayer({
           height: (pageDisplayBounds.height + displayHeaderHeight) * pageReading.displayScale,
           // overflow-clip-margin rejects calc() in the supported browser.
           // Keep the incumbent literal length, extending only warm paper's shadow.
-          overflowClipMargin: `${(paperSkin?.preset === 'warm-paper' ? 80 : 32) * pageReading.displayScale}px`,
+        overflowClipMargin: `${((paperSkin?.materialPreset ?? paperSkin?.preset) === 'warm-paper' ? 80 : 32) * pageReading.displayScale}px`,
         } : { display: 'contents' }}
       >
       {surfaceMode === 'page' && paperHeader && <div className={styles.pageReadingHeaderBand}

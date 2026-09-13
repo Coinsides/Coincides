@@ -1,6 +1,44 @@
 import { describe, expect, it } from 'vitest';
 import { readSkin, resolveSkin, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from './skinPresets';
 
+describe('user suite resolution', () => {
+  const id = '14000000-0000-4000-8000-000000000021';
+  const selected = { preset: `suite:${id}` as const, overrides: { ink: '#aBcDeF80' }, components: { headerRule: 'hidden' as const } };
+  const suite = { tokens: SKIN_PRESETS['warm-paper'], components: SKIN_PRESET_COMPONENTS['warm-paper'], materialPreset: 'warm-paper' as const };
+  it('accepts UUID suite references and resolves the complete suite under local deviations', () => {
+    expect(readSkin(selected)).toEqual(selected);
+    expect(readSkin({ preset: 'suite:invalid' })).toBeNull();
+    expect(resolveSkin({ preset: 'workbench' }, null, selected, {}, { [id]: suite })).toEqual({
+      preset: selected.preset, materialPreset: 'warm-paper', tokens: { ...suite.tokens, ink: '#aBcDeF80' }, components: { ...suite.components, headerRule: 'hidden' },
+    });
+  });
+  it('renders a transaction-detached full snapshot without any loaded suite list', () => {
+    const detached = { preset: 'default' as const, materialPreset: suite.materialPreset, overrides: suite.tokens, components: suite.components };
+    expect(resolveSkin(detached).tokens).toEqual(suite.tokens);
+    expect(resolveSkin(detached).components).toEqual(suite.components);
+    expect(resolveSkin(detached).materialPreset).toBe('warm-paper');
+  });
+  it('材质仅接受四出厂枚举', () => {
+    for (const materialPreset of ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const) {
+      const skin = { preset: 'default' as const, materialPreset };
+      expect(readSkin(skin)).toEqual(skin);
+      expect(resolveSkin(skin).materialPreset).toBe(materialPreset);
+    }
+    expect(readSkin({ preset: 'default', materialPreset: 'fabric' })).toEqual({ preset: 'default' });
+  });
+  it('选区材质覆盖套装且不漏入下一挂点', () => {
+    const own = { ...selected, materialPreset: 'workbench' as const };
+    const suites = { [id]: suite };
+    expect(resolveSkin(own, null, null, {}, suites).materialPreset).toBe('workbench');
+    expect(resolveSkin(own, { preset: 'quiet-ink' }, null, {}, suites).materialPreset).toBe('quiet-ink');
+    expect(resolveSkin(own, selected, null, {}, suites).materialPreset).toBe('warm-paper');
+  });
+  it('旧套装无谱系沿用原默认材质', () => {
+    expect(resolveSkin(selected, null, null, {}, { [id]: { tokens: suite.tokens, components: suite.components } }).materialPreset).toBe('default');
+    expect(resolveSkin(selected).materialPreset).toBe('default');
+  });
+});
+
 describe('live palette overrides', () => {
   const id = '14000000-0000-4000-8000-000000000001';
   const selected = { preset: 'warm-paper' as const, overrides: { paper: `palette:${id}`, ink: '#AbCdEf80' } };
@@ -30,7 +68,7 @@ describe('B1a factory paper snapshots', () => {
   });
 
   it('rollout absence and cleared global selection both use the incumbent default snapshot', () => {
-    expect(resolveSkin()).toEqual({ preset: 'default', tokens: SKIN_PRESETS.default, components: SKIN_PRESET_COMPONENTS.default });
+    expect(resolveSkin()).toEqual({ preset: 'default', materialPreset: 'default', tokens: SKIN_PRESETS.default, components: SKIN_PRESET_COMPONENTS.default });
     expect(resolveSkin(null, null, null)).toEqual(resolveSkin());
   });
 
@@ -38,13 +76,13 @@ describe('B1a factory paper snapshots', () => {
     const global = { preset: 'quiet-ink' as const, overrides: { accent: '#123456' } };
     const project = { preset: 'workbench' as const, overrides: { paper: '#263340' } };
     const paper = { preset: 'warm-paper' as const, overrides: { 'ink-muted': '#876543' } };
-    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', components: SKIN_PRESET_COMPONENTS['warm-paper'], tokens: {
+    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', materialPreset: 'warm-paper', components: SKIN_PRESET_COMPONENTS['warm-paper'], tokens: {
       ...SKIN_PRESETS['warm-paper'], 'ink-muted': '#876543',
     } });
-    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', components: SKIN_PRESET_COMPONENTS.workbench, tokens: {
+    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', materialPreset: 'workbench', components: SKIN_PRESET_COMPONENTS.workbench, tokens: {
       ...SKIN_PRESETS.workbench, paper: '#263340',
     } });
-    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', components: SKIN_PRESET_COMPONENTS['quiet-ink'], tokens: {
+    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', materialPreset: 'quiet-ink', components: SKIN_PRESET_COMPONENTS['quiet-ink'], tokens: {
       ...SKIN_PRESETS['quiet-ink'], accent: '#123456',
     } });
   });

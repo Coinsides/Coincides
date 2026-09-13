@@ -1,0 +1,22 @@
+[
+  {
+    "committed": "warm-paper",
+    "hover": "default",
+    "paper": "#101114"
+  },
+  {
+    "committed": "warm-paper",
+    "hover": "quiet-ink",
+    "paper": "#17181C"
+  },
+  {
+    "committed": "warm-paper",
+    "hover": "warm-paper",
+    "paper": "#F7F3EA"
+  },
+  {
+    "committed": "warm-paper",
+    "hover": "workbench",
+    "paper": "#1A1E25"
+  }
+]

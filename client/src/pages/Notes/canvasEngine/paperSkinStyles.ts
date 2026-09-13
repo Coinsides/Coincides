@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { SkinPresetId, SkinTokenName, SkinTokens } from '@shared/types/skin';
+import type { SkinSelection, SkinTokenName, SkinTokens } from '@shared/types/skin';
 import { SKIN_PRESETS } from '@/styles/skinPresets';
 
 type DerivedColor = { token: SkinTokenName; baseline: string; themed: string };
@@ -129,7 +129,7 @@ export function buildPaperSkinStyles(tokens: SkinTokens): CSSProperties {
 
 /** Preset-owned materials; these aliases never enter the persisted token schema.
  * Keep default/quiet-ink paint untouched and let authored color overrides win. */
-export function buildPaperMaterialStyles(tokens: SkinTokens, preset: SkinPresetId): CSSProperties {
+export function buildPaperMaterialStyles(tokens: SkinTokens, preset: SkinSelection['preset']): CSSProperties {
   const styles: Record<string, string> = {
     '--sk-wall-idle': preset === 'warm-paper' ? '0.55' : preset === 'workbench' ? '1' : '0',
     // Even fully transparent generated paint can change Chromium text AA.

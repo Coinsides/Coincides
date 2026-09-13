@@ -1,0 +1,764 @@
+{
+  "status": "completed_with_failures",
+  "startedAt": "2026-09-13T03:45:11.260Z",
+  "verifyEntry": "verify:v2-bn8-runtime",
+  "executionMode": "Explicit allowed segments plus shared build and non-security server suite; aggregate not invoked.",
+  "isolation": {
+    "runRoot": ".tmp/floatcard-material-validation/run-bOYU1R",
+    "dotenv": ".tmp/floatcard-material-validation/run-bOYU1R/empty-env/validation.env",
+    "viteEnvDir": ".tmp/floatcard-material-validation/run-bOYU1R/empty-env",
+    "parentEnvironment": "System startup variables only; provider variables are not inherited.",
+    "npmExecPathConfigured": true,
+    "syntheticCredentialLength": 13
+  },
+  "runtimeCoverage": [
+    {
+      "command": "npm run check:test-wiring",
+      "status": "passed",
+      "step": "check:test-wiring",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-06-check-test-wiring.log"
+    },
+    {
+      "command": "npm run check:tech-debt-table",
+      "status": "passed",
+      "step": "check:tech-debt-table",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-07-check-tech-debt-table.log"
+    },
+    {
+      "command": "npm run test:unit",
+      "status": "failed",
+      "step": "client-full",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-04-client-full.log"
+    },
+    {
+      "command": "npm run test:tool-face-registry",
+      "status": "passed",
+      "step": "test:tool-face-registry",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-08-test-tool-face-registry.log"
+    },
+    {
+      "command": "npm run test:tool-face-manifest",
+      "status": "passed",
+      "step": "test:tool-face-manifest",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-09-test-tool-face-manifest.log"
+    },
+    {
+      "command": "npm run check:tool-face-manifest",
+      "status": "passed",
+      "step": "check:tool-face-manifest",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-10-check-tool-face-manifest.log"
+    },
+    {
+      "command": "npm run test:tool-face-parity",
+      "status": "passed",
+      "step": "test:tool-face-parity",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-11-test-tool-face-parity.log"
+    },
+    {
+      "command": "npm run check:tool-face-parity",
+      "status": "passed",
+      "step": "check:tool-face-parity",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-12-check-tool-face-parity.log"
+    },
+    {
+      "command": "npm run check:server-shared-runtime-import",
+      "status": "passed",
+      "step": "check:server-shared-runtime-import",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-13-check-server-shared-runtime-import.log"
+    },
+    {
+      "command": "npm run check:canvas-runtime-boundary",
+      "status": "passed",
+      "step": "check:canvas-runtime-boundary",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-14-check-canvas-runtime-boundary.log"
+    },
+    {
+      "command": "npm run check:group-gallery-shell",
+      "status": "passed",
+      "step": "check:group-gallery-shell",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-15-check-group-gallery-shell.log"
+    },
+    {
+      "command": "npm run check:groups-rail-shell",
+      "status": "passed",
+      "step": "check:groups-rail-shell",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-16-check-groups-rail-shell.log"
+    },
+    {
+      "command": "npm run check:single-editor-shell",
+      "status": "passed",
+      "step": "check:single-editor-shell",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-17-check-single-editor-shell.log"
+    },
+    {
+      "command": "npm run check:source-experience",
+      "status": "passed",
+      "step": "check:source-experience",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-18-check-source-experience.log"
+    },
+    {
+      "command": "npm run check:v2-bn11-legacy-shutdown",
+      "status": "passed",
+      "step": "check:v2-bn11-legacy-shutdown",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-19-check-v2-bn11-legacy-shutdown.log"
+    },
+    {
+      "command": "npm run check:v2-bn11-relation-freshness",
+      "status": "passed",
+      "step": "check:v2-bn11-relation-freshness",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-20-check-v2-bn11-relation-freshness.log"
+    },
+    {
+      "command": "npm run smoke:canvas-engine-model-contract",
+      "status": "passed",
+      "step": "smoke:canvas-engine-model-contract",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-21-smoke-canvas-engine-model-contract.log"
+    },
+    {
+      "command": "npm run build:client",
+      "status": "failed",
+      "step": "build:client",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-03-build-client.log"
+    },
+    {
+      "command": "npm run build",
+      "status": "passed",
+      "step": "build",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-02-build.log"
+    },
+    {
+      "command": "npm run smoke:canvas-engine-performance",
+      "status": "passed",
+      "step": "smoke:canvas-engine-performance",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-22-smoke-canvas-engine-performance.log"
+    },
+    {
+      "command": "npm run docs:check",
+      "status": "passed",
+      "step": "docs:check",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-23-docs-check.log"
+    },
+    {
+      "command": "git diff --check",
+      "status": "excluded_hq"
+    },
+    {
+      "command": "npm run check:changed-file-secrets",
+      "status": "excluded_hq"
+    }
+  ],
+  "serverInventory": {
+    "totalFiles": 59,
+    "allowedFiles": 56,
+    "files": [
+      "src/__tests__/v2NoteFoundation.test.ts",
+      "src/__tests__/v2NoteBlockLifecycle.test.ts",
+      "src/__tests__/v2MaterialLibrary.test.ts",
+      "src/__tests__/v2ContentGroups.test.ts",
+      "src/__tests__/v2GroupFolders.test.ts",
+      "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+      "src/__tests__/v2Purposes.test.ts",
+      "src/__tests__/v2SourceIdentityFloor.test.ts",
+      "src/__tests__/v2SourceFileIntake.test.ts",
+      "src/__tests__/v2SourceMaterialization.test.ts",
+      "src/__tests__/v2SourceLifecycleClosure.test.ts",
+      "src/__tests__/v2ItemRelationFloor.test.ts",
+      "src/__tests__/v2Items.test.ts",
+      "src/__tests__/v2Relations.test.ts",
+      "src/__tests__/v2RelationLifecycleClosure.test.ts",
+      "scripts/v2OperationBatchTimestampMigration.test.ts",
+      "src/__tests__/textFlowIdentityContract.test.ts",
+      "src/__tests__/v2TestV2ManifestHook.test.ts",
+      "src/__tests__/v2DocumentParserPdf.test.ts",
+      "src/__tests__/v2BlockRestoreDoor.test.ts",
+      "src/__tests__/v2SourceImprints.test.ts",
+      "src/__tests__/v2SourceNeverReject.test.ts",
+      "src/__tests__/v2SourceContainerIntake.test.ts",
+      "src/__tests__/v2SourceT0Alignment.test.ts",
+      "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+      "src/__tests__/v2SourceMineruWiring.test.ts",
+      "src/__tests__/v2SourceRegionCells.test.ts",
+      "src/__tests__/v2ImprintEmbedding.test.ts",
+      "src/__tests__/v2ImprintRetrieval.test.ts",
+      "src/__tests__/v2ImprintCitations.test.ts",
+      "src/__tests__/v2TemplateStudioDecommission.test.ts",
+      "src/__tests__/v13AgentMemories.test.ts",
+      "src/__tests__/v13AtomicTextSave.test.ts",
+      "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "src/__tests__/v13BoardChalk.test.ts",
+      "src/__tests__/v13BoardStaging.test.ts",
+      "src/__tests__/v13BoardTextRanges.test.ts",
+      "src/__tests__/v13BoardTrayRelocation.test.ts",
+      "src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "src/__tests__/v13CanvasRetirement.test.ts",
+      "src/__tests__/v13EventsLedger.test.ts",
+      "src/__tests__/v13GraphemeTextRanges.test.ts",
+      "src/__tests__/v13ItemRefBlocks.test.ts",
+      "src/__tests__/v13MediaBlocks.test.ts",
+      "src/__tests__/v13NoteMetadata.test.ts",
+      "src/__tests__/v13PagePresets.test.ts",
+      "src/__tests__/v13PaperInk.test.ts",
+      "src/__tests__/v13PaperSkin.test.ts",
+      "src/__tests__/v14PaletteColors.test.ts",
+      "src/__tests__/v14SkinSuites.test.ts",
+      "src/__tests__/v13ProjectDeletionReferences.test.ts",
+      "src/__tests__/v13SourceProjectionRepair.test.ts",
+      "src/__tests__/v13SourceReprojection.test.ts",
+      "src/__tests__/v13Tray.test.ts",
+      "src/__tests__/v13TrayOrder.test.ts",
+      "src/__tests__/v13WallCollectionBatch.test.ts"
+    ],
+    "exclusions": [
+      {
+        "file": "src/__tests__/providerCredentials.test.ts",
+        "status": "excluded_hq",
+        "reason": "Work order reserves the three security files for HQ."
+      },
+      {
+        "file": "src/__tests__/v2DevQuickLogin.test.ts",
+        "status": "excluded_hq",
+        "reason": "Work order reserves the three security files for HQ."
+      },
+      {
+        "file": "src/agent/providers/index.test.ts",
+        "status": "excluded_hq",
+        "reason": "Work order reserves the three security files for HQ."
+      }
+    ]
+  },
+  "knownEnvironmentIssues": [
+    {
+      "file": "src/__tests__/v2SourceMineruWiring.test.ts",
+      "priorFailure": "python.exe ENOENT",
+      "handling": "Run normally and report the actual outcome; no skip or assertion change."
+    },
+    {
+      "file": "src/__tests__/v2SourceRegionCells.test.ts",
+      "priorFailure": "MinerU Python launcher exit 101",
+      "handling": "Run normally and report the actual outcome; no skip or assertion change."
+    }
+  ],
+  "steps": [
+    {
+      "id": "shared-build",
+      "command": "node server/node_modules/typescript/bin/tsc -b shared",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:45:11.262Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+        "-b",
+        "shared"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-01-shared-build.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 232,
+      "completedAt": "2026-09-13T03:45:11.496Z"
+    },
+    {
+      "id": "build",
+      "command": "npm run build",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:45:11.496Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-02-build.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 39712,
+      "completedAt": "2026-09-13T03:45:51.208Z"
+    },
+    {
+      "id": "build:client",
+      "command": "npm run build:client",
+      "status": "failed",
+      "startedAt": "2026-09-13T03:45:51.211Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build:client"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-03-build-client.log",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 50516,
+      "completedAt": "2026-09-13T03:46:41.729Z"
+    },
+    {
+      "id": "client-full",
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=1",
+      "status": "failed",
+      "startedAt": "2026-09-13T03:46:41.731Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "D:\\Coinsides\\v2.x\\Coincides\\client\\node_modules\\vitest\\vitest.mjs",
+        "run",
+        "--maxWorkers=1"
+      ],
+      "cwd": "client",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-04-client-full.log",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 498216,
+      "completedAt": "2026-09-13T03:54:59.949Z",
+      "testSummary": [
+        " Test Files  1 failed | 156 passed (157)",
+        "      Tests  1 failed | 1643 passed (1644)",
+        "   Duration  497.28s (transform 16.65s, setup 46.98s, collect 51.25s, tests 166.49s, environment 179.39s, prepare 20.06s)"
+      ]
+    },
+    {
+      "id": "server-full-allowed",
+      "command": "node ../scripts/run-server-test-suite.mjs <allowed test:v2 inventory>",
+      "status": "failed",
+      "startedAt": "2026-09-13T03:54:59.953Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+        "src/__tests__/v2NoteFoundation.test.ts",
+        "src/__tests__/v2NoteBlockLifecycle.test.ts",
+        "src/__tests__/v2MaterialLibrary.test.ts",
+        "src/__tests__/v2ContentGroups.test.ts",
+        "src/__tests__/v2GroupFolders.test.ts",
+        "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+        "src/__tests__/v2Purposes.test.ts",
+        "src/__tests__/v2SourceIdentityFloor.test.ts",
+        "src/__tests__/v2SourceFileIntake.test.ts",
+        "src/__tests__/v2SourceMaterialization.test.ts",
+        "src/__tests__/v2SourceLifecycleClosure.test.ts",
+        "src/__tests__/v2ItemRelationFloor.test.ts",
+        "src/__tests__/v2Items.test.ts",
+        "src/__tests__/v2Relations.test.ts",
+        "src/__tests__/v2RelationLifecycleClosure.test.ts",
+        "scripts/v2OperationBatchTimestampMigration.test.ts",
+        "src/__tests__/textFlowIdentityContract.test.ts",
+        "src/__tests__/v2TestV2ManifestHook.test.ts",
+        "src/__tests__/v2DocumentParserPdf.test.ts",
+        "src/__tests__/v2BlockRestoreDoor.test.ts",
+        "src/__tests__/v2SourceImprints.test.ts",
+        "src/__tests__/v2SourceNeverReject.test.ts",
+        "src/__tests__/v2SourceContainerIntake.test.ts",
+        "src/__tests__/v2SourceT0Alignment.test.ts",
+        "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+        "src/__tests__/v2SourceMineruWiring.test.ts",
+        "src/__tests__/v2SourceRegionCells.test.ts",
+        "src/__tests__/v2ImprintEmbedding.test.ts",
+        "src/__tests__/v2ImprintRetrieval.test.ts",
+        "src/__tests__/v2ImprintCitations.test.ts",
+        "src/__tests__/v2TemplateStudioDecommission.test.ts",
+        "src/__tests__/v13AgentMemories.test.ts",
+        "src/__tests__/v13AtomicTextSave.test.ts",
+        "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+        "src/__tests__/v13BoardChalk.test.ts",
+        "src/__tests__/v13BoardStaging.test.ts",
+        "src/__tests__/v13BoardTextRanges.test.ts",
+        "src/__tests__/v13BoardTrayRelocation.test.ts",
+        "src/__tests__/v13BoardViewportBookmarks.test.ts",
+        "src/__tests__/v13CanvasRetirement.test.ts",
+        "src/__tests__/v13EventsLedger.test.ts",
+        "src/__tests__/v13GraphemeTextRanges.test.ts",
+        "src/__tests__/v13ItemRefBlocks.test.ts",
+        "src/__tests__/v13MediaBlocks.test.ts",
+        "src/__tests__/v13NoteMetadata.test.ts",
+        "src/__tests__/v13PagePresets.test.ts",
+        "src/__tests__/v13PaperInk.test.ts",
+        "src/__tests__/v13PaperSkin.test.ts",
+        "src/__tests__/v14PaletteColors.test.ts",
+        "src/__tests__/v14SkinSuites.test.ts",
+        "src/__tests__/v13ProjectDeletionReferences.test.ts",
+        "src/__tests__/v13SourceProjectionRepair.test.ts",
+        "src/__tests__/v13SourceReprojection.test.ts",
+        "src/__tests__/v13Tray.test.ts",
+        "src/__tests__/v13TrayOrder.test.ts",
+        "src/__tests__/v13WallCollectionBatch.test.ts"
+      ],
+      "cwd": "server",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-05-server-full-allowed.log",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 85276,
+      "completedAt": "2026-09-13T03:56:25.230Z",
+      "testSummary": [
+        "# tests 462",
+        "# pass 446",
+        "# fail 16",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 84735.8565"
+      ]
+    },
+    {
+      "id": "check:test-wiring",
+      "command": "npm run check:test-wiring",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:25.271Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:test-wiring"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-06-check-test-wiring.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 447,
+      "completedAt": "2026-09-13T03:56:25.720Z"
+    },
+    {
+      "id": "check:tech-debt-table",
+      "command": "npm run check:tech-debt-table",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:25.721Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:tech-debt-table"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-07-check-tech-debt-table.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 400,
+      "completedAt": "2026-09-13T03:56:26.123Z"
+    },
+    {
+      "id": "test:tool-face-registry",
+      "command": "npm run test:tool-face-registry",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:26.124Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test:tool-face-registry"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-08-test-tool-face-registry.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1316,
+      "completedAt": "2026-09-13T03:56:27.441Z",
+      "testSummary": [
+        "# tests 5",
+        "# pass 5",
+        "# fail 0",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 353.0128"
+      ]
+    },
+    {
+      "id": "test:tool-face-manifest",
+      "command": "npm run test:tool-face-manifest",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:27.444Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test:tool-face-manifest"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-09-test-tool-face-manifest.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 7393,
+      "completedAt": "2026-09-13T03:56:34.838Z",
+      "testSummary": [
+        "# tests 10",
+        "# pass 10",
+        "# fail 0",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 6359.5353"
+      ]
+    },
+    {
+      "id": "check:tool-face-manifest",
+      "command": "npm run check:tool-face-manifest",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:34.840Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-10-check-tool-face-manifest.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1171,
+      "completedAt": "2026-09-13T03:56:36.013Z"
+    },
+    {
+      "id": "test:tool-face-parity",
+      "command": "npm run test:tool-face-parity",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:36.015Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test:tool-face-parity"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-11-test-tool-face-parity.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 9744,
+      "completedAt": "2026-09-13T03:56:45.759Z",
+      "testSummary": [
+        "# tests 10",
+        "# pass 10",
+        "# fail 0",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 9311.0524"
+      ]
+    },
+    {
+      "id": "check:tool-face-parity",
+      "command": "npm run check:tool-face-parity",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:45.761Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:tool-face-parity"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-12-check-tool-face-parity.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 968,
+      "completedAt": "2026-09-13T03:56:46.730Z"
+    },
+    {
+      "id": "check:server-shared-runtime-import",
+      "command": "npm run check:server-shared-runtime-import",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:46.731Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:server-shared-runtime-import"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-13-check-server-shared-runtime-import.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1075,
+      "completedAt": "2026-09-13T03:56:47.808Z"
+    },
+    {
+      "id": "check:canvas-runtime-boundary",
+      "command": "npm run check:canvas-runtime-boundary",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:47.809Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:canvas-runtime-boundary"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-14-check-canvas-runtime-boundary.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1031,
+      "completedAt": "2026-09-13T03:56:48.841Z"
+    },
+    {
+      "id": "check:group-gallery-shell",
+      "command": "npm run check:group-gallery-shell",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:48.843Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:group-gallery-shell"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-15-check-group-gallery-shell.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 916,
+      "completedAt": "2026-09-13T03:56:49.760Z"
+    },
+    {
+      "id": "check:groups-rail-shell",
+      "command": "npm run check:groups-rail-shell",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:49.762Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:groups-rail-shell"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-16-check-groups-rail-shell.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 908,
+      "completedAt": "2026-09-13T03:56:50.671Z"
+    },
+    {
+      "id": "check:single-editor-shell",
+      "command": "npm run check:single-editor-shell",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:50.673Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:single-editor-shell"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-17-check-single-editor-shell.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 924,
+      "completedAt": "2026-09-13T03:56:51.598Z"
+    },
+    {
+      "id": "check:source-experience",
+      "command": "npm run check:source-experience",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:51.600Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:source-experience"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-18-check-source-experience.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1803,
+      "completedAt": "2026-09-13T03:56:53.404Z"
+    },
+    {
+      "id": "check:v2-bn11-legacy-shutdown",
+      "command": "npm run check:v2-bn11-legacy-shutdown",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:53.405Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:v2-bn11-legacy-shutdown"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-19-check-v2-bn11-legacy-shutdown.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 924,
+      "completedAt": "2026-09-13T03:56:54.331Z"
+    },
+    {
+      "id": "check:v2-bn11-relation-freshness",
+      "command": "npm run check:v2-bn11-relation-freshness",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:54.332Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:v2-bn11-relation-freshness"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-20-check-v2-bn11-relation-freshness.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 952,
+      "completedAt": "2026-09-13T03:56:55.286Z"
+    },
+    {
+      "id": "smoke:canvas-engine-model-contract",
+      "command": "npm run smoke:canvas-engine-model-contract",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:55.287Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "smoke:canvas-engine-model-contract"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-21-smoke-canvas-engine-model-contract.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 3468,
+      "completedAt": "2026-09-13T03:56:58.756Z"
+    },
+    {
+      "id": "smoke:canvas-engine-performance",
+      "command": "npm run smoke:canvas-engine-performance",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:56:58.758Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "smoke:canvas-engine-performance"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-22-smoke-canvas-engine-performance.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2177,
+      "completedAt": "2026-09-13T03:57:00.937Z"
+    },
+    {
+      "id": "docs:check",
+      "command": "npm run docs:check",
+      "status": "passed",
+      "startedAt": "2026-09-13T03:57:00.939Z",
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "cwd": ".",
+      "log": "docs/audits/2026-09-13-floatcard-builder/material-logs/run-bOYU1R-23-docs-check.log",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1306,
+      "completedAt": "2026-09-13T03:57:02.246Z"
+    }
+  ],
+  "completedAt": "2026-09-13T03:57:02.248Z",
+  "summary": {
+    "passedSteps": 20,
+    "failedSteps": 3,
+    "allowedRuntimeSegments": 21,
+    "excludedRuntimeSegments": 2,
+    "excludedSecurityFiles": 3,
+    "clientFullRuns": 1,
+    "serverFullRuns": 1,
+    "clientBuildRuns": 1,
+    "serverBuildRuns": 1
+  }
+}

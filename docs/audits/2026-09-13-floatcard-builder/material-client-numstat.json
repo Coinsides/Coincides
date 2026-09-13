@@ -1,0 +1,136 @@
+{
+  "method": "line LCS against preserved pre-amendment bytes; CRLF normalized; no git",
+  "files": [
+    {
+      "path": "client/src/components/Skin/SkinFloatCard.module.css",
+      "added": 2,
+      "deleted": 0,
+      "baselineSha256": "99ee458b20c4a404cd92ab44162a5b0a5665c89c6c7f36fdcf70ad285b6e8f29",
+      "resultSha256": "05350b8d7c2097786b68b9da34b1a7899a95d209506d2d4e2de0d2af346a71c5"
+    },
+    {
+      "path": "client/src/components/Skin/SkinFloatCard.test.tsx",
+      "added": 64,
+      "deleted": 4,
+      "baselineSha256": "4535f4438fa8736210bec695f8c37daa004a362a432deaa8ab796113dbc3adbf",
+      "resultSha256": "3acaad127984c4f6e56c8cdab5a187941c16e47fd16af0c446afee39178964dd"
+    },
+    {
+      "path": "client/src/components/Skin/SkinFloatCard.tsx",
+      "added": 18,
+      "deleted": 9,
+      "baselineSha256": "7eccc3971d132140fa7229b2f84f68f6481b5ed071e7092b5ee0dd720407b76d",
+      "resultSha256": "cfa566d5a0ae94c000346fc4891e78fa2c9b2461164fc8556a5d55f1b0633d4c"
+    },
+    {
+      "path": "client/src/hooks/useSkinSuites.test.ts",
+      "added": 21,
+      "deleted": 4,
+      "baselineSha256": "4e605335d2bd3941082cd7ae4d9657d86f03628f82ae6a043790d6833346ea42",
+      "resultSha256": "ff0268d256d41ee2490ae8bafdf29a0cc60ba2976ffe4b67817a342651f188c9"
+    },
+    {
+      "path": "client/src/hooks/useSkinSuites.ts",
+      "added": 3,
+      "deleted": 3,
+      "baselineSha256": "95fbbd3e812bd97dde51b64eda71a2275e49d4f5098d70a926d69efb5483548f",
+      "resultSha256": "dccaa55f34c612693a8bf58e88baa94e3c8114c07d6a0397403722f94f146a69"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.tsx",
+      "added": 1,
+      "deleted": 1,
+      "baselineSha256": "4b458c72079bc09858f4aa235adeeccb8024c2c43383ee74060f2267da0e495c",
+      "resultSha256": "51b84363b951b2f42a4d146295852dc3e9ac1353908435a822a7211cc3b36e52"
+    },
+    {
+      "path": "client/src/pages/Boards/boardSkinStyles.test.ts",
+      "added": 7,
+      "deleted": 1,
+      "baselineSha256": "b4b5e7514d644cdc8f58a1b08ff8077a94dc864d3ee6511608e6094783fc3ca5",
+      "resultSha256": "40e168274743457821a73c6982dcb914586ebb7a65d950198c55b865c4da534e"
+    },
+    {
+      "path": "client/src/pages/Boards/boardSkinStyles.ts",
+      "added": 2,
+      "deleted": 1,
+      "baselineSha256": "2ce6fddd3f350f4fd9cca94c283d2d4c0688e36b793464286e4763487b758883",
+      "resultSha256": "aab0b60c1a69dd345161056069cd573243b7071ac056b0ae757f4d8ee201599e"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts",
+      "added": 3,
+      "deleted": 3,
+      "baselineSha256": "45581b8672db23ca24e831cb01a6af016f61c842219b1236a299dedfbd464bbe",
+      "resultSha256": "d63f9d475923ae9308d39b49afd46439c88f5b7099c8ea7af87206c9ab5687c0"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx",
+      "added": 1,
+      "deleted": 1,
+      "baselineSha256": "779f7d1f83e0fca3d885befe93e5c99cf33f12cbb1f2bfbfe8c2417a5a159e64",
+      "resultSha256": "ea6f3deeb5325ad16729c52897aa6b9589918edb654ab73537fac22e4626aa18"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "added": 1,
+      "deleted": 1,
+      "baselineSha256": "b066731bfd8f981b455e075731f3f75c805637ee164eb4b360d9abdc5b569083",
+      "resultSha256": "2ff029b622339b4e674b008b5f6482ac8e649ceb14f1dcaf8a1e0a11bb098bcf"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx",
+      "added": 1,
+      "deleted": 1,
+      "baselineSha256": "f06e9f6259f1811e90f9c0b6ace3f646701be5b727255483f2c011b52c63c9f5",
+      "resultSha256": "6a8208f8dbef637a5a04380424623714b3fb1a8cc2658aa46d83a5b4a7bbf555"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "added": 1,
+      "deleted": 1,
+      "baselineSha256": "2feb19992bb4ea0a447de6a0364c7e9730dc81cc8e889011aad82352d49ad1a5",
+      "resultSha256": "9022653804ba9e210e421d4dc6b2922062e4712e5fc7ac22cd46a29169056bd7"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+      "added": 1,
+      "deleted": 1,
+      "baselineSha256": "abca412fd0a42d6b18097ee3fa75eca903882640171e6c7d5b0afbb66ef4d67b",
+      "resultSha256": "fd70ab69b58b3c96b8ffcba549b76b78bc2b8415207c581a3fc2c75162555289"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx",
+      "added": 3,
+      "deleted": 1,
+      "baselineSha256": "c8798a2c3b6ee6f46530418fcc709bf8088ee9e8b76c793877e0255bf9609e1d",
+      "resultSha256": "f33d5eea56d5f422cb00b877860a1535d1d494e1279d36731e78fc43c37bb68c"
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "added": 27,
+      "deleted": 7,
+      "baselineSha256": "a81a029a252f72312304499a63cece77af953b812b2813275aeb6126c9ce6941",
+      "resultSha256": "1bffd7390701c0f7aef54b51a61d4577256123fdf4bd331cec8c468968c3c9b8"
+    },
+    {
+      "path": "client/src/styles/skinPresets.ts",
+      "added": 6,
+      "deleted": 3,
+      "baselineSha256": "c65215b2f57af73c59e8e921bbd40d3149112d5513b32dee0c3b7e1717a17353",
+      "resultSha256": "47e69d5876b70b2e4cf00a74f37dbfae3288d755ee084a35e8c3d1109c29bf49"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "added": 2,
+      "deleted": 2,
+      "baselineSha256": "05cdd6aa56a5042fcd52168727315f0491dc62792cc166cfe9bdc77ee18ea32a",
+      "resultSha256": "dd166384c02cfebdb91861a2a1d9da0b4b36cbed1b95dbafdade1caef76f7b15"
+    }
+  ],
+  "totals": {
+    "files": 18,
+    "added": 164,
+    "deleted": 44
+  }
+}

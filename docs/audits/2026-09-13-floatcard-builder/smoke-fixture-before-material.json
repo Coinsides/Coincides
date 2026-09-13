@@ -1,0 +1,12 @@
+{
+  "run": ".tmp\\floatcard-smoke\\run-6bXmdh",
+  "appOrigin": "http://127.0.0.1:5196",
+  "login": "float@example.invalid",
+  "password": "FloatSmokePw42",
+  "firstId": "4bc5a870-283c-4d2c-85da-19aade9e5f7d",
+  "secondId": "5f8bf37b-b1bd-4038-a938-888904c08eef",
+  "colorId": "2dee8659-08a7-4456-a23f-09d46394ad80",
+  "firstUrl": "http://127.0.0.1:5196/#/notes/4bc5a870-283c-4d2c-85da-19aade9e5f7d",
+  "secondUrl": "http://127.0.0.1:5196/#/notes/5f8bf37b-b1bd-4038-a938-888904c08eef",
+  "isolation": "Fresh SQLite/assets/app-data; empty dotenv; no user database or provider keys"
+}

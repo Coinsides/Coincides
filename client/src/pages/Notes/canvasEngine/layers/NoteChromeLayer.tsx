@@ -16,7 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, RefObject } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note, NoteBlock } from '../runtimeDataTypes';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
@@ -35,11 +35,7 @@ import { ExportPreviewLayer } from './ExportPreviewLayer';
 import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 import { usePaperSkin } from '../PaperSkinContext';
-import { SkinEditor } from '@/components/Skin/SkinEditor';
-import skinStyles from '@/components/Skin/SkinControls.module.css';
-import { SKIN_PRESET_IDS } from '@shared/types';
-import { SKIN_LABELS, SKIN_PRESETS } from '@/styles/skinPresets';
-import appearanceStyles from './NoteAppearance.module.css';
+import { SkinFloatCard } from '@/components/Skin/SkinFloatCard';
 
 export interface SurfacePolicyView {
   label: string;
@@ -47,6 +43,8 @@ export interface SurfacePolicyView {
 }
 
 export interface NoteChromeLayerProps {
+  appearanceAnchorRef?: RefObject<HTMLButtonElement>;
+  mountAppearanceCard?: boolean;
   hostMode?: 'page' | 'modal';
   blockTrashLoadFailed: boolean;
   blockTrashLoading: boolean;
@@ -103,6 +101,8 @@ export interface NoteChromeLayerProps {
 }
 
 export function NoteChromeLayer({
+  appearanceAnchorRef,
+  mountAppearanceCard = true,
   hostMode = 'page',
   blockTrashLoadFailed,
   blockTrashLoading,
@@ -158,8 +158,10 @@ export function NoteChromeLayer({
   const skin = usePaperSkin();
   const continuousWeb = note.page_format === 'screen_note';
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const localAppearanceButtonRef = useRef<HTMLButtonElement>(null);
+  const appearanceButtonRef = appearanceAnchorRef ?? localAppearanceButtonRef;
   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
-  const overlayOpen = showLayoutPanel || showAppearancePanel || showMoreActions || showBlockTrash || showExportPreview;
+  const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
   useEffect(() => {
     if (!overlayOpen) return;
     const toolbar = toolbarRef.current?.closest('[data-page-reading-control="true"]') || toolbarRef.current;
@@ -422,6 +424,8 @@ export function NoteChromeLayer({
             <button
               type="button"
               className={`${styles.modePill} ${showAppearancePanel ? styles.modePillActive : ''}`}
+              ref={appearanceButtonRef}
+              onPointerDown={(event) => event.preventDefault()}
               onClick={onToggleAppearancePanel}
               title="笔记外观"
               aria-label="笔记外观"
@@ -442,37 +446,6 @@ export function NoteChromeLayer({
           <FloatingOverlayLayer open={overlayOpen} placement="free">
             <div className={styles.noteToolbarPopover} data-note-toolbar-popover="true"
               style={{ ...overlayAnchor, maxHeight: Math.max(80, window.innerHeight - overlayAnchor.bottom - 12) }}>
-            {showAppearancePanel && (
-              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="appearance">
-                <div className={styles.popoverHeader}>
-                  <strong>笔记外观</strong>
-                  <button type="button" className={styles.iconBtn} onClick={onCloseOverlay} title="关闭外观" aria-label="关闭外观">
-                    <X size={15} />
-                  </button>
-                </div>
-                {skin && <>
-                  <div className={appearanceStyles.presets} role="group" aria-label="外观预设快选">
-                    {SKIN_PRESET_IDS.map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        className={appearanceStyles.preset}
-                        style={{ background: SKIN_PRESETS[preset].paper, borderColor: SKIN_PRESETS[preset].desk, color: SKIN_PRESETS[preset].ink }}
-                        data-appearance-preset={preset}
-                        aria-pressed={skin.preset === preset}
-                        onClick={() => { void skin.save({ preset }).catch(() => undefined); }}
-                      >
-                        {SKIN_LABELS[preset]}
-                      </button>
-                    ))}
-                  </div>
-                  <details data-paper-appearance className={skinStyles.appearance}>
-                    <summary>纸面外观</summary>
-                    <SkinEditor key={note.id} value={skin.selection} inheritedValue={skin.inheritedSelection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" advanced />
-                  </details>
-                </>}
-              </div>
-            )}
             {showLayoutPanel && (
               <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="layout">
                 <div className={styles.popoverHeader}>
@@ -769,6 +742,8 @@ export function NoteChromeLayer({
             )}
             </div>
           </FloatingOverlayLayer>
+      {mountAppearanceCard && skin && <SkinFloatCard noteId={note.id} skin={skin} open={showAppearancePanel}
+        onClose={onToggleAppearancePanel} anchorRef={appearanceButtonRef} />}
       <dialog
         ref={deleteDialogRef}
         className={styles.noteDeleteDialog}

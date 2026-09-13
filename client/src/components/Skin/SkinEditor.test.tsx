@@ -6,7 +6,7 @@ import { SkinEditor } from './SkinEditor';
 vi.mock('@/services/api', () => ({
   getToken: () => null, setToken: vi.fn(),
   default: { get: vi.fn(async (url: string) => {
-    if (url === '/palette-colors') return { data: [] };
+    if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     throw new Error(`Unexpected synthetic GET: ${url}`);
   }) },
 }));

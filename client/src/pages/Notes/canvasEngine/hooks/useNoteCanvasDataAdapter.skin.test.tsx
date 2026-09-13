@@ -7,6 +7,8 @@ import type { Note } from '../runtimeDataTypes';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, writeTypographyProfileMetadata } from '../typographyProfileService';
 import { usePaletteColors, usePaletteStore } from '@/hooks/usePaletteColors';
+import { useSkinSuites, useSkinSuiteStore } from '@/hooks/useSkinSuites';
+import { SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from '@/styles/skinPresets';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn(), addToast: vi.fn() }));
 vi.mock('@/services/api', () => ({
@@ -43,13 +45,14 @@ describe('B1a adapter paper skin write intent', () => {
     vi.clearAllMocks();
     mocks.put.mockReset();
     usePaletteStore.setState({ owner: undefined, colors: [], values: {}, detached: {}, loaded: false, loading: false, error: null });
+    useSkinSuiteStore.setState({ owner: undefined, suites: [], values: {}, detached: {}, loaded: false, loading: false, error: null });
     sessionStorage.clear();
     storedNotes = Object.fromEntries(['paper-a', 'paper-b'].map((id) => [id, {
       id, course_id: '', title: id, description: null, status: 'active',
       metadata: { document_property: id, skin: { preset: 'default' } },
     }]));
     mocks.get.mockImplementation(async (url: string) => {
-      if (url === '/palette-colors') return { data: [] };
+      if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
       if (url === '/canvas-objects/coordinate-contract') return { data: { coordinate_contract: 'v1' } };
       const noteId = /^\/notes\/([^/]+)$/.exec(url)?.[1];
       if (noteId && storedNotes[noteId]) return { data: structuredClone(storedNotes[noteId]) };
@@ -118,6 +121,39 @@ describe('B1a adapter paper skin write intent', () => {
     await act(async () => { second.resolve({ data: storedNotes['paper-a'] }); await secondSave; await oldIdle; });
     expect(oldDrained).toBe(true);
     expect(subject.result.current.note?.metadata).toEqual(storedNotes['paper-b'].metadata);
+  });
+
+  it('keeps a pending suite-detach save bound to its original paper after navigation', async () => {
+    const id = '14000000-0000-4000-8000-000000000029';
+    const skin: SkinSelection = { preset: `suite:${id}`, overrides: { ink: '#112233' } };
+    const snapshot = { id, tokens: { ...SKIN_PRESETS['warm-paper'], paper: '#aBcDeF80' }, components: SKIN_PRESET_COMPONENTS['warm-paper'], materialPreset: 'warm-paper' as const, palette: {} };
+    const deletionResponse = deferred<{ data: typeof snapshot }>();
+    mocks.delete.mockReturnValueOnce(deletionResponse.promise);
+    const suites = renderHook(() => useSkinSuites());
+    await waitFor(() => expect(suites.result.current.loaded).toBe(true));
+    const subject = renderAdapter(); await loaded(subject);
+    const oldWhenIdle = subject.result.current.whenIdle;
+    let deletion!: Promise<unknown>; let saving!: Promise<void>;
+    act(() => {
+      deletion = suites.result.current.deleteSuite(id);
+      saving = subject.result.current.saveSkin(skin);
+    });
+    let drained = false;
+    const idle = oldWhenIdle().then(() => { drained = true; });
+    await waitFor(() => expect(mocks.delete).toHaveBeenCalledWith(`/skin-suites/${id}`));
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(drained).toBe(false);
+    subject.rerender({ noteId: 'paper-b' }); await loaded(subject, 'paper-b');
+    await act(async () => {
+      deletionResponse.resolve({ data: snapshot });
+      await Promise.all([deletion, saving, idle]);
+    });
+    expect(mocks.put).toHaveBeenCalledExactlyOnceWith('/notes/paper-a', {
+      skin: { preset: 'default', materialPreset: 'warm-paper', overrides: { ...snapshot.tokens, ink: '#112233' }, components: snapshot.components },
+    });
+    expect(drained).toBe(true);
+    expect(subject.result.current.note?.id).toBe('paper-b');
+    expect(subject.result.current.note?.metadata?.skin).toEqual({ preset: 'default' });
   });
 
   it('binds a skin intent before waiting for palette deletion so navigation cannot apply it to the next note', async () => {
