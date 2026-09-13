@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-12
+> **日期 (Updated)**: 2026-09-13
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 364 份文档。
+共 365 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -85,6 +85,7 @@
 | [analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md](analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md) | 编辑成熟度与 Agent 对称 —— 对谈分析档 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s0-recon.md](analysis/2026-09-09-v13-4-s0-recon.md) | V13.4 单 0 · 投影全谱与 item 化侦察 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s1-item-depth.md](analysis/2026-09-09-v13-4-s1-item-depth.md) | 13.4 单 1 · Item 三道深水题 | `active` | 2026-09-09 | — |
+| [analysis/2026-09-13-appearance-benchmark-survey.md](analysis/2026-09-13-appearance-benchmark-survey.md) | 外观族对标调研收敛报告 | `active` | 2026-09-13 | — |
 | [analysis/2026-09-13-deadcode-recheck.md](analysis/2026-09-13-deadcode-recheck.md) | Canvas 死代码清册 · 2026-09-13 现物复核 | `active` | — | — |
 | [analysis/2026-09-13-ownership-signature-ruling-draft.md](analysis/2026-09-13-ownership-signature-ruling-draft.md) | 权威 ownership 签名裁定稿(TD-15 设计步) | `active` | 2026-09-13 | — |
 | [analysis/2026-09-13-v13-6-adjudication.md](analysis/2026-09-13-v13-6-adjudication.md) | 13.6 裁决半场记录 | `active` | 2026-09-13 | — |
