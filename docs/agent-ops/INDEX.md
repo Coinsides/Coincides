@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 377 份文档。
+共 378 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -365,8 +365,9 @@
 | [handoffs/2026-09-14-v14-1-a1-agent-write-door-order.md](handoffs/2026-09-14-v14-1-a1-agent-write-door-order.md) | 14.1-A1 · Agent 写门公共机关 + create_goal 试点 | `done(builder BLOCKED 三红全判环境,HQ 本机全量 504/504 定案;收口见末尾)` | — | — |
 | [handoffs/2026-09-14-v14-1-a2-verb-transfer-order.md](handoffs/2026-09-14-v14-1-a2-verb-transfer-order.md) | 14.1-A2 · B 族批量过户 | `done(二轮;一轮停线=HQ 裁定⑨事实错误经补遗修正;HQ 本机全量 554/554 定案)` | — | — |
 | [handoffs/2026-09-14-v14-1-a2b-delete-ceremony-order.md](handoffs/2026-09-14-v14-1-a2b-delete-ceremony-order.md) | 14.1-A2b · 删除仪式机关 | `done(HQ 本机全量 570/570 定案;收口见末尾)` | — | — |
-| [handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md](handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md) | 14.1-A3a · 提案族服务端统一 | `done` | — | — |
+| [handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md](handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md) | 14.1-A3a · 提案族服务端统一 | `done(二轮;一轮停线=运行时 enum 违 shared 隔离门,裁类型单源+运行时本地;HQ 本机全量 583/583 定案)` | — | — |
 | [handoffs/2026-09-14-v14-1-executor-census-order.md](handoffs/2026-09-14-v14-1-executor-census-order.md) | 14.1-A0 · executor 动词普查(纯侦察,⛔改产品代码) | `done` | — | — |
+| [handoffs/2026-09-14-v14-2-b1-read-tools-order.md](handoffs/2026-09-14-v14-2-b1-read-tools-order.md) | 14.2-B1 · 知觉四读器 | `done` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

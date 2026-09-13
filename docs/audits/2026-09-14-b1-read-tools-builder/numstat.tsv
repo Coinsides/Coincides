@@ -1,0 +1,13 @@
+added	removed	path
+3	2	docs/agent-ops/INDEX.md
+58	1	docs/agent-ops/handoffs/2026-09-14-v14-2-b1-read-tools-order.md
+88	0	docs/audits/2026-09-14-b1-read-tools-builder/report.md
+1466	0	docs/audits/2026-09-14-b1-read-tools-builder/validation.json
+1235	0	docs/generated/tool-face-manifest.json
+1	1	server/package.json
+386	0	server/src/__tests__/v14ReadTools.test.ts
+3	3	server/src/agent/tools/definitions.ts
+16	0	server/src/agent/tools/executor.ts
+124	0	server/src/services/agentReadKnowledge.ts
+208	0	server/src/services/agentReadSurfaces.ts
+95	0	server/src/toolFace/registry.ts

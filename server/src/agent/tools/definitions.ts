@@ -1,5 +1,5 @@
 import type { ToolDefinition } from '../providers/types.js';
-import { AGENT_ACTION_TOOLS } from '../../toolFace/registry.js';
+import { AGENT_ACTION_TOOLS, AGENT_READ_TOOLS } from '../../toolFace/registry.js';
 import { loadToolFaceManifest } from '../../mcp/manifest.js';
 import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
 import { createOrganizedNoteProposalSchema } from '../../validators/index.js';
@@ -7,7 +7,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // The build projects the authoritative Zod registry into this runtime artifact.
 const manifest = loadToolFaceManifest();
-const actionDefinitions: ToolDefinition[] = AGENT_ACTION_TOOLS.map((tool) => {
+const registeredDefinitions: ToolDefinition[] = [...AGENT_ACTION_TOOLS, ...AGENT_READ_TOOLS].map((tool) => {
   const projection = manifest.find((entry) => entry.name === tool.name);
   if (!projection) throw new Error(tool.name + ' registry projection is missing');
   return { name: tool.name, description: tool.description, parameters: projection.input_schema };
@@ -38,7 +38,7 @@ export const toolDefinitions: ToolDefinition[] = [
       required: [],
     },
   },
-  ...actionDefinitions,
+  ...registeredDefinitions,
   {
     name: 'list_goals',
     description: "List the student's goals, optionally filtered by course. Use include_hierarchy=true to get full tree with children and tasks.",

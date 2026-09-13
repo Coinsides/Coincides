@@ -1,0 +1,127 @@
+{
+  "method": "Pre-edit byte snapshots; line LCS with CRLF/LF equivalent. No git. Index files were snapshotted before generator execution.",
+  "excludes": [
+    "changes.json and numstat.tsv omit themselves to avoid self-reference",
+    "ignored local validation helpers and build outputs"
+  ],
+  "implementationTotals": {
+    "files": 8,
+    "added": 2068,
+    "removed": 4
+  },
+  "allListedTotals": {
+    "files": 12,
+    "added": 3683,
+    "removed": 7
+  },
+  "files": [
+    {
+      "path": "docs/agent-ops/INDEX.md",
+      "added": 3,
+      "removed": 2,
+      "beforeBytes": 79007,
+      "afterBytes": 79282,
+      "beforeSha256": "586f7251b5303c66bbad89c8acf4160d11158f07f369300545cef44b1662de24",
+      "afterSha256": "d753b91f3d2bb9eb1090addc418dd603d04fae8b871b648ebaf86b45798aefd8"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-14-v14-2-b1-read-tools-order.md",
+      "added": 58,
+      "removed": 1,
+      "beforeBytes": 3858,
+      "afterBytes": 10462,
+      "beforeSha256": "557d63941bc6aa38ff7288c1b7b697a99576e415747c2e3517bede289e7e8aa9",
+      "afterSha256": "439c04f35c76723967a46f4e2eba14c00141ed377bc813d46c159b79691dab57"
+    },
+    {
+      "path": "docs/audits/2026-09-14-b1-read-tools-builder/report.md",
+      "added": 88,
+      "removed": 0,
+      "beforeBytes": 0,
+      "afterBytes": 8945,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "cb6770faec9420356fda6744b879d66c0983015734ef80ecc0a4aa5dce139c63"
+    },
+    {
+      "path": "docs/audits/2026-09-14-b1-read-tools-builder/validation.json",
+      "added": 1466,
+      "removed": 0,
+      "beforeBytes": 0,
+      "afterBytes": 58140,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "1da66866e2f11f608806759698280d8f53beabe53056d0f24dee6702ae961fc6"
+    },
+    {
+      "path": "docs/generated/tool-face-manifest.json",
+      "added": 1235,
+      "removed": 0,
+      "beforeBytes": 145206,
+      "afterBytes": 178266,
+      "beforeSha256": "1ce85c286cf22fb2f19020d4cdd3ed18ed2329b78df9a9c130bd933825f225c8",
+      "afterSha256": "b3484ba027f809e44b374ec4577e707a79f093d8eb22a779ea49c39c2855d1b6"
+    },
+    {
+      "path": "server/package.json",
+      "added": 1,
+      "removed": 1,
+      "beforeBytes": 6842,
+      "afterBytes": 6877,
+      "beforeSha256": "1b02232804158d1cb55594497830c9bbd052cecd924b46c546aa30600005da6e",
+      "afterSha256": "3becdf1a5c6584f18b2206b0d1462ca9ab62e7a7de219497d006ed8bf3658d27"
+    },
+    {
+      "path": "server/src/__tests__/v14ReadTools.test.ts",
+      "added": 386,
+      "removed": 0,
+      "beforeBytes": 0,
+      "afterBytes": 22767,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "5164009f3c9d14093459996ddfdd1793f8b1f502913d0644abbda9893de2646e"
+    },
+    {
+      "path": "server/src/agent/tools/definitions.ts",
+      "added": 3,
+      "removed": 3,
+      "beforeBytes": 15266,
+      "afterBytes": 15318,
+      "beforeSha256": "41c2562e3804ce3153eccf866918ee7314d9dc1486a170ce488d1f6b4a1071e2",
+      "afterSha256": "9cf23170994b10979d0bd4fd94aa75c8c0177006d8bacd499e72dcecd5e30ab5"
+    },
+    {
+      "path": "server/src/agent/tools/executor.ts",
+      "added": 16,
+      "removed": 0,
+      "beforeBytes": 43492,
+      "afterBytes": 44415,
+      "beforeSha256": "5a3c82498e5894ac2bb31dda755885981b4c040bd0b5632277369b9aca92596b",
+      "afterSha256": "aaee43d90eedd70ed46e8bf15f7aa87cb587d2740ac80596ebd070939671db99"
+    },
+    {
+      "path": "server/src/services/agentReadKnowledge.ts",
+      "added": 124,
+      "removed": 0,
+      "beforeBytes": 0,
+      "afterBytes": 6277,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "0fa0754e9b15e94193d72a0e5a5c5e94710db2b8afb24fd6fd8988c1b0123e69"
+    },
+    {
+      "path": "server/src/services/agentReadSurfaces.ts",
+      "added": 208,
+      "removed": 0,
+      "beforeBytes": 0,
+      "afterBytes": 9619,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "dded53455c0c53cba5902518f203ae91598546beea3fae367b7812c4a2671886"
+    },
+    {
+      "path": "server/src/toolFace/registry.ts",
+      "added": 95,
+      "removed": 0,
+      "beforeBytes": 35776,
+      "afterBytes": 43082,
+      "beforeSha256": "a159f50b5334c05431057cddbb5996ed914549cb6fe749ca580c012979bda7d6",
+      "afterSha256": "8edd6e764e9e6582ea9b06483914c75276dbc4dd4bf87cc5f06de56b4ce15ba7"
+    }
+  ]
+}

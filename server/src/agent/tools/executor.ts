@@ -16,12 +16,15 @@ import {
   CREATE_GOAL_TOOL, CREATE_SUB_GOAL_TOOL, CREATE_TASK_TOOL, CREATE_DECK_TOOL,
   CREATE_SECTION_TOOL, CREATE_TIME_BLOCKS_TOOL, UPDATE_TIME_BLOCK_TOOL,
   LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,
+  AGENT_READ_TOOLS,
 } from '../../toolFace/registry.js';
 import { goalReceiptHash } from '../../services/toolFaceReceiptRevert.js';
 import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
 import { createOrganizedNoteProposalSchema, proposalTypeSchema } from '../../validators/index.js';
 import { createProposal } from '../../services/proposals.js';
 import { createOrganizedNoteProposal } from '../../services/organizedNoteProposals.js';
+import { readNoteForAgent, readBoardForAgent } from '../../services/agentReadSurfaces.js';
+import { readContentGroupsForAgent, readAnnotationsRelationsForAgent } from '../../services/agentReadKnowledge.js';
 
 export async function executeTool(
   toolName: string,
@@ -31,6 +34,19 @@ export async function executeTool(
 ): Promise<string> {
   const db = getDb();
   const today = new Date().toISOString().split('T')[0];
+
+  const readTool = AGENT_READ_TOOLS.find((tool) => tool.name === toolName);
+  if (readTool) {
+    const input = readTool.input_schema.parse(args);
+    let result: unknown;
+    switch (toolName) {
+      case 'read_note': result = readNoteForAgent({ userId, noteId: input.note_id, pageIndex: input.page_index }); break;
+      case 'read_board': result = readBoardForAgent({ userId, boardId: input.board_id }); break;
+      case 'read_content_groups': result = readContentGroupsForAgent(db, userId, input); break;
+      case 'read_annotations_relations': result = readAnnotationsRelationsForAgent(db, userId, input); break;
+    }
+    return JSON.stringify(readTool.output_schema.parse(result));
+  }
 
   switch (toolName) {
     case 'list_courses': {

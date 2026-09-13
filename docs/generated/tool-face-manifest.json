@@ -5694,5 +5694,1240 @@
     "scopes": [
       "tasks:write"
     ]
+  },
+  {
+    "name": "read_note",
+    "description": "Read one page of an owned note in paper order. page_index defaults to 0; follow next_page_index for later pages. Inspect truncated for a per-page block cap.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page_index": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "note_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "course_id": {
+              "type": "string"
+            },
+            "page_format": {
+              "type": "string"
+            },
+            "page_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "course_id",
+            "page_format",
+            "page_count"
+          ],
+          "additionalProperties": false
+        },
+        "page_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "frame_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "placement_id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "role": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "text": {
+                "type": "string"
+              },
+              "text_units": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "role": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "role",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "media": {
+                "type": "object",
+                "properties": {
+                  "asset_id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "state": {
+                    "type": "string",
+                    "const": "missing"
+                  }
+                },
+                "required": [
+                  "asset_id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              "item_ref": {
+                "type": "object",
+                "properties": {
+                  "item_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "item_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "placement_id",
+              "kind",
+              "role",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_page_index": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "total_blocks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "omitted_blocks": {
+          "type": "object",
+          "properties": {
+            "outside_page": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "outside_page"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "note",
+        "page_index",
+        "frame_id",
+        "blocks",
+        "has_more",
+        "next_page_index",
+        "truncated",
+        "total_blocks",
+        "omitted_blocks"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "content",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/notes/:id/blocks",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchNote"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "notes:read"
+    ]
+  },
+  {
+    "name": "read_board",
+    "description": "Read an owned board viewport, member identities and positions, edges, and visual geometry. Inspect truncation flags for omitted rows.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "board_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "board": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "viewport": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "viewport"
+          ],
+          "additionalProperties": false
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "member_kind": {
+                "type": "string"
+              },
+              "member_id": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "scale": {
+                "type": "number"
+              },
+              "pinned": {
+                "type": "boolean"
+              },
+              "title_or_summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "placed": {
+                "type": "boolean"
+              },
+              "state": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "member_kind",
+              "member_id",
+              "x",
+              "y",
+              "scale",
+              "pinned",
+              "title_or_summary",
+              "placed",
+              "state"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "from_member": {
+                "type": "string"
+              },
+              "to_member": {
+                "type": "string"
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "from_member",
+              "to_member",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "visuals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "geometry": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "w": {
+                    "type": "number"
+                  },
+                  "h": {
+                    "type": "number"
+                  },
+                  "scale": {
+                    "type": "number"
+                  },
+                  "rotation": {
+                    "type": "number"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h",
+                  "scale",
+                  "rotation",
+                  "pinned"
+                ],
+                "additionalProperties": false
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "geometry"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "truncated": {
+          "type": "object",
+          "properties": {
+            "members": {
+              "type": "boolean"
+            },
+            "edges": {
+              "type": "boolean"
+            },
+            "visuals": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "members",
+            "edges",
+            "visuals"
+          ],
+          "additionalProperties": false
+        },
+        "total_counts": {
+          "type": "object",
+          "properties": {
+            "members": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "edges": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "visuals": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "members",
+            "edges",
+            "visuals"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board",
+        "members",
+        "edges",
+        "visuals",
+        "has_more",
+        "truncated",
+        "total_counts"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/boards/:id",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.get"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:read"
+    ]
+  },
+  {
+    "name": "read_content_groups",
+    "description": "Read groups scoped by course_id and/or note_id, with member identities and the first 200 characters of each text. Inspect has_more for omitted groups or members.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "course_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "course_id": {
+                "type": "string"
+              },
+              "note_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "hidden",
+                  "deleted"
+                ]
+              },
+              "members": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "content_range",
+                        "annotation",
+                        "block",
+                        "content_group",
+                        "page_slice",
+                        "canvas_object",
+                        "table_region",
+                        "image_region",
+                        "future_object",
+                        "item"
+                      ]
+                    },
+                    "target_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "item_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "plain_text": {
+                      "type": "string"
+                    },
+                    "text_truncated": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "target_id",
+                    "item_id",
+                    "plain_text",
+                    "text_truncated"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              },
+              "total_members": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "has_more": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "course_id",
+              "note_id",
+              "title",
+              "status",
+              "members",
+              "total_members",
+              "has_more"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        },
+        "total_groups": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_members": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "groups",
+        "total_groups",
+        "total_members",
+        "has_more",
+        "truncated"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "knowledge",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/content-groups",
+      "client_call_site": "client/src/pages/GroupGallery/groupGalleryData.ts#loadGroupGalleryRecords"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "content_groups:read"
+    ]
+  },
+  {
+    "name": "read_annotations_relations",
+    "description": "Read annotation truths for note_id and original judgment/receipt rows for item_id. With note_id alone, Relations follow placed Item refs and group memberships. With item_id alone, no annotation Note scope is implied. Judgment state and provenance are preserved; inspect truncation and relation_count_complete.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "annotations_note_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "note_id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "ranges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "target_kind": {
+                      "type": "string"
+                    },
+                    "block_id": {
+                      "type": "string"
+                    },
+                    "text_flow_id": {
+                      "type": "string"
+                    },
+                    "text_unit_id": {
+                      "type": "string"
+                    },
+                    "inline_structure_id": {
+                      "type": "string"
+                    },
+                    "canvas_object_id": {
+                      "type": "string"
+                    },
+                    "source_region_id": {
+                      "type": "string"
+                    },
+                    "start_offset": {
+                      "type": "number"
+                    },
+                    "end_offset": {
+                      "type": "number"
+                    },
+                    "range_text_cache": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "array",
+                            "items": {}
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "target_kind",
+                    "metadata"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              },
+              "total_ranges": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "has_more": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "string"
+              },
+              "created_by": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "array",
+                      "items": {}
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "note_id",
+              "text",
+              "ranges",
+              "total_ranges",
+              "has_more",
+              "status",
+              "created_by",
+              "created_at",
+              "updated_at",
+              "metadata"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "from_item_id": {
+                "type": "string"
+              },
+              "to_item_id": {
+                "type": "string"
+              },
+              "relation_type": {
+                "type": "string"
+              },
+              "directionality": {
+                "type": "string",
+                "enum": [
+                  "directed",
+                  "undirected"
+                ]
+              },
+              "from_snapshot_id": {
+                "type": "string"
+              },
+              "to_snapshot_id": {
+                "type": "string"
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_by": {
+                "type": "string"
+              },
+              "origin_purpose_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "revoked"
+                ]
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              },
+              "affirmed_at": {
+                "type": "string"
+              },
+              "freshness": {
+                "type": "string",
+                "enum": [
+                  "fresh",
+                  "from_changed",
+                  "to_changed",
+                  "both_changed"
+                ]
+              },
+              "from_changed": {
+                "type": "boolean"
+              },
+              "to_changed": {
+                "type": "boolean"
+              },
+              "inspection_checkpoint_at": {
+                "type": "string"
+              },
+              "latest_assessment": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "relation_id": {
+                        "type": "string"
+                      },
+                      "user_id": {
+                        "type": "string"
+                      },
+                      "verdict": {
+                        "type": "string",
+                        "enum": [
+                          "still_holds",
+                          "questionable"
+                        ]
+                      },
+                      "model_key": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "relation_id",
+                      "user_id",
+                      "verdict",
+                      "model_key",
+                      "created_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "from_snapshot": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "item_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "content_hash": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "user_id",
+                  "content",
+                  "content_hash",
+                  "created_at"
+                ],
+                "additionalProperties": false
+              },
+              "to_snapshot": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "item_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "content_hash": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "user_id",
+                  "content",
+                  "content_hash",
+                  "created_at"
+                ],
+                "additionalProperties": false
+              },
+              "from_item": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "plain_text": {
+                    "type": "string"
+                  },
+                  "item_type": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "topic": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "retired"
+                    ]
+                  },
+                  "retired_into_item_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "plain_text",
+                  "item_type",
+                  "topic",
+                  "status",
+                  "retired_into_item_id",
+                  "updated_at"
+                ],
+                "additionalProperties": false
+              },
+              "to_item": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "plain_text": {
+                    "type": "string"
+                  },
+                  "item_type": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "topic": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "retired"
+                    ]
+                  },
+                  "retired_into_item_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "plain_text",
+                  "item_type",
+                  "topic",
+                  "status",
+                  "retired_into_item_id",
+                  "updated_at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "user_id",
+              "from_item_id",
+              "to_item_id",
+              "relation_type",
+              "directionality",
+              "from_snapshot_id",
+              "to_snapshot_id",
+              "note",
+              "created_by",
+              "origin_purpose_id",
+              "status",
+              "created_at",
+              "updated_at",
+              "affirmed_at",
+              "freshness",
+              "from_changed",
+              "to_changed",
+              "inspection_checkpoint_at",
+              "latest_assessment",
+              "from_snapshot",
+              "to_snapshot",
+              "from_item",
+              "to_item"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "relation_scope": {
+          "type": "object",
+          "properties": {
+            "item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 200
+            },
+            "total_items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unavailable_item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 200
+            },
+            "has_more": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "item_ids",
+            "total_items",
+            "unavailable_item_ids",
+            "has_more"
+          ],
+          "additionalProperties": false
+        },
+        "total_annotations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_ranges": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_relations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "relation_count_complete": {
+          "type": "boolean"
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "annotations_note_id",
+        "annotations",
+        "relations",
+        "relation_scope",
+        "total_annotations",
+        "total_ranges",
+        "total_relations",
+        "relation_count_complete",
+        "has_more",
+        "truncated"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "semantic",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/relations",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelations"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "notes:read",
+      "relations:read"
+    ]
   }
 ]

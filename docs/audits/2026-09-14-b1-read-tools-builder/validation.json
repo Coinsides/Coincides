@@ -1,0 +1,1466 @@
+{
+  "schema": "coincides-b1-builder-validation.v1",
+  "workOrder": "V14 14.2-B1",
+  "generatedAt": "2026-09-13T09:45:51.505Z",
+  "scope": "Structured execution metadata only. No raw logs or build artifacts in this archive.",
+  "outcome": {
+    "registry": {
+      "total": 28,
+      "public": 14,
+      "internal": 14
+    },
+    "targeted": {
+      "tests": 11,
+      "suites": 0,
+      "pass": 11,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "client": {
+      "testFilesPassed": 167,
+      "testFilesFailed": 0,
+      "testFilesSkipped": 0,
+      "testFilesTotal": 167,
+      "testCasesPassed": 1722,
+      "testCasesFailed": 0,
+      "testCasesSkipped": 0,
+      "testCasesTotal": 1722
+    },
+    "serverFileCount": 83,
+    "server": {
+      "tests": 763,
+      "suites": 0,
+      "pass": 761,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "typecheck": [
+      {
+        "label": "shared-typecheck",
+        "exitCode": 0
+      },
+      {
+        "label": "shared-build",
+        "exitCode": 0
+      },
+      {
+        "label": "server-typecheck",
+        "exitCode": 0
+      },
+      {
+        "label": "client-typecheck",
+        "exitCode": 0
+      }
+    ],
+    "gate": {
+      "originalStages": 23,
+      "authorizedStages": 21,
+      "hqOnlyStages": 2,
+      "finalPassedStages": 21,
+      "sharedPrerequisite": 0,
+      "finalDocsCheckRunId": "docs-check-1789292750443-33164"
+    }
+  },
+  "corrections": [
+    {
+      "item": "Generated agent-ops INDEX drift",
+      "firstRunId": "gate-1789292369796-14148",
+      "repairRunId": "docs-generate-1789292749497-38884",
+      "verificationRunId": "docs-check-1789292750443-33164",
+      "status": "resolved"
+    }
+  ],
+  "remainingHq": [
+    {
+      "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "code": "python.exe ENOENT",
+      "status": "Module loading failed; its internal tests did not start and are not claimed as passed."
+    },
+    {
+      "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+      "code": "MinerU 101 / parser_failure",
+      "status": "Existing MinerU table-regions case failed because its Python interpreter could not start."
+    },
+    {
+      "command": "git diff --check",
+      "status": "Not executed; explicit zero-git instruction."
+    },
+    {
+      "command": "npm run check:changed-file-secrets",
+      "status": "Not executed; work-order HQ closure."
+    }
+  ],
+  "testExclusions": 0,
+  "newAdversarialTests": 0,
+  "zeroWriteEvidence": "Every executeTool call in v14ReadTools.test.ts compares serialized database bytes and observes zero transactions, zero db.exec, readonly prepared statements, and no receipt_id.",
+  "runs": [
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "prepare-1789292093904-44320",
+      "mode": "prepare",
+      "startedAt": "2026-09-13T09:34:53.906Z",
+      "completedAt": "2026-09-13T09:34:54.455Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\prepare-1789292093904-44320.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:34:53.910Z",
+          "durationMs": 360,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\logs\\01-docs_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "copy:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:34:54.271Z",
+          "durationMs": 183,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\logs\\02-copy_tool-face-manifest.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 2,
+      "passedStages": 2,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "prepare-1789292218176-25348",
+      "mode": "prepare",
+      "startedAt": "2026-09-13T09:36:58.179Z",
+      "completedAt": "2026-09-13T09:36:58.776Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\prepare-1789292218176-25348.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:36:58.181Z",
+          "durationMs": 413,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\logs\\01-docs_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "copy:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:36:58.595Z",
+          "durationMs": 180,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\logs\\02-copy_tool-face-manifest.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 2,
+      "passedStages": 2,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "typecheck-1789292229291-21656",
+      "mode": "typecheck",
+      "startedAt": "2026-09-13T09:37:09.293Z",
+      "completedAt": "2026-09-13T09:37:23.320Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\typecheck-1789292229291-21656.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "shared-typecheck",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "-p",
+            "D:\\Coinsides\\v2.x\\Coincides\\shared\\tsconfig.json",
+            "--noEmit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:37:09.295Z",
+          "durationMs": 274,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\01-shared-typecheck.log",
+          "exitCode": 0
+        },
+        {
+          "label": "shared-build",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "-b",
+            "D:\\Coinsides\\v2.x\\Coincides\\shared\\tsconfig.json"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:37:09.571Z",
+          "durationMs": 65,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\02-shared-build.log",
+          "exitCode": 0
+        },
+        {
+          "label": "server-typecheck",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "--noEmit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:37:09.637Z",
+          "durationMs": 5114,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\03-server-typecheck.log",
+          "exitCode": 0
+        },
+        {
+          "label": "client-typecheck",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\client\\node_modules\\typescript\\bin\\tsc",
+            "--noEmit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\client",
+          "startedAt": "2026-09-13T09:37:14.751Z",
+          "durationMs": 8568,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\04-client-typecheck.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 4,
+      "passedStages": 4,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "prepare-1789292324298-32912",
+      "mode": "prepare",
+      "startedAt": "2026-09-13T09:38:44.300Z",
+      "completedAt": "2026-09-13T09:38:44.918Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\prepare-1789292324298-32912.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:38:44.302Z",
+          "durationMs": 422,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\logs\\01-docs_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "copy:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:38:44.725Z",
+          "durationMs": 193,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\logs\\02-copy_tool-face-manifest.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 2,
+      "passedStages": 2,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "targeted-1789292328693-14704",
+      "mode": "targeted",
+      "startedAt": "2026-09-13T09:38:48.695Z",
+      "completedAt": "2026-09-13T09:38:51.347Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\targeted-1789292328693-14704.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": 1,
+      "testFiles": [
+        "src/__tests__/v14ReadTools.test.ts"
+      ],
+      "stages": [
+        {
+          "label": "check:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:38:48.701Z",
+          "durationMs": 363,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\logs\\01-check_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "copy:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:38:49.066Z",
+          "durationMs": 180,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\logs\\02-copy_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "targeted",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+            "src/__tests__/v14ReadTools.test.ts"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:38:49.247Z",
+          "durationMs": 2098,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\logs\\03-targeted.log",
+          "exitCode": 0,
+          "counts": {
+            "tests": 11,
+            "suites": 0,
+            "pass": 11,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        }
+      ],
+      "stageCount": 3,
+      "passedStages": 3,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "server-full-1789292362903-37380",
+      "mode": "server-full",
+      "startedAt": "2026-09-13T09:39:22.905Z",
+      "completedAt": "2026-09-13T09:41:28.115Z",
+      "exitCode": 1,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\server-full-1789292362903-37380.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": 83,
+      "testFiles": [
+        "scripts/v13WildernessExecute.test.ts",
+        "scripts/v13WildernessShadowRun.test.ts",
+        "scripts/v2Bn12LifecycleMigration.test.ts",
+        "scripts/v2OperationBatchTimestampMigration.test.ts",
+        "src/__tests__/providerCredentials.test.ts",
+        "src/__tests__/textFlowIdentityContract.test.ts",
+        "src/__tests__/v13AgentMemories.test.ts",
+        "src/__tests__/v13AtomicTextSave.test.ts",
+        "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+        "src/__tests__/v13BoardCeremonyNote.test.ts",
+        "src/__tests__/v13BoardChalk.test.ts",
+        "src/__tests__/v13BoardIdentity.test.ts",
+        "src/__tests__/v13BoardRoutes.test.ts",
+        "src/__tests__/v13BoardSchema.test.ts",
+        "src/__tests__/v13BoardServices.test.ts",
+        "src/__tests__/v13BoardStaging.test.ts",
+        "src/__tests__/v13BoardTextRanges.test.ts",
+        "src/__tests__/v13BoardTrayRelocation.test.ts",
+        "src/__tests__/v13BoardViewportBookmarks.test.ts",
+        "src/__tests__/v13BoardWave1.test.ts",
+        "src/__tests__/v13CanvasRetirement.test.ts",
+        "src/__tests__/v13CoordinateContract.test.ts",
+        "src/__tests__/v13EventsLedger.test.ts",
+        "src/__tests__/v13GraphemeTextRanges.test.ts",
+        "src/__tests__/v13ItemFloor.test.ts",
+        "src/__tests__/v13ItemRefBlocks.test.ts",
+        "src/__tests__/v13MediaBlocks.test.ts",
+        "src/__tests__/v13NoteMetadata.test.ts",
+        "src/__tests__/v13PagePresets.test.ts",
+        "src/__tests__/v13PaperInk.test.ts",
+        "src/__tests__/v13PaperSkin.test.ts",
+        "src/__tests__/v13ProjectDeletionReferences.test.ts",
+        "src/__tests__/v13RecordedAction.test.ts",
+        "src/__tests__/v13SourceProjectionRepair.test.ts",
+        "src/__tests__/v13SourceReprojection.test.ts",
+        "src/__tests__/v13Tray.test.ts",
+        "src/__tests__/v13TrayOrder.test.ts",
+        "src/__tests__/v13WallCollectionBatch.test.ts",
+        "src/__tests__/v14AgentVerbTransfer.test.ts",
+        "src/__tests__/v14AgentWriteDoor.test.ts",
+        "src/__tests__/v14CardCover.test.ts",
+        "src/__tests__/v14DeleteCeremony.test.ts",
+        "src/__tests__/v14PaletteColors.test.ts",
+        "src/__tests__/v14ProposalUnification.test.ts",
+        "src/__tests__/v14ReadTools.test.ts",
+        "src/__tests__/v14SkinSuites.test.ts",
+        "src/__tests__/v2BlockRestoreDoor.test.ts",
+        "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+        "src/__tests__/v2ContentGroups.test.ts",
+        "src/__tests__/v2DevQuickLogin.test.ts",
+        "src/__tests__/v2DocumentParserPdf.test.ts",
+        "src/__tests__/v2GroupFolders.test.ts",
+        "src/__tests__/v2ImprintCitations.test.ts",
+        "src/__tests__/v2ImprintEmbedding.test.ts",
+        "src/__tests__/v2ImprintRetrieval.test.ts",
+        "src/__tests__/v2ItemRelationFloor.test.ts",
+        "src/__tests__/v2Items.test.ts",
+        "src/__tests__/v2MaterialLibrary.test.ts",
+        "src/__tests__/v2McpArtifact.test.ts",
+        "src/__tests__/v2McpTransport.test.ts",
+        "src/__tests__/v2NoteBlockLifecycle.test.ts",
+        "src/__tests__/v2NoteFoundation.test.ts",
+        "src/__tests__/v2NotesLifecycle.test.ts",
+        "src/__tests__/v2NotesListService.test.ts",
+        "src/__tests__/v2Purposes.test.ts",
+        "src/__tests__/v2RelationLifecycleClosure.test.ts",
+        "src/__tests__/v2Relations.test.ts",
+        "src/__tests__/v2SourceContainerIntake.test.ts",
+        "src/__tests__/v2SourceFileIntake.test.ts",
+        "src/__tests__/v2SourceIdentityFloor.test.ts",
+        "src/__tests__/v2SourceImprints.test.ts",
+        "src/__tests__/v2SourceLifecycleClosure.test.ts",
+        "src/__tests__/v2SourceMaterialization.test.ts",
+        "src/__tests__/v2SourceMineruWiring.test.ts",
+        "src/__tests__/v2SourceNeverReject.test.ts",
+        "src/__tests__/v2SourceRegionCells.test.ts",
+        "src/__tests__/v2SourceT0Alignment.test.ts",
+        "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+        "src/__tests__/v2TemplateStudioDecommission.test.ts",
+        "src/__tests__/v2TestV2ManifestHook.test.ts",
+        "src/__tests__/v2TrashNotesTool.test.ts",
+        "src/agent/providers/index.test.ts",
+        "src/toolFace/registry.test.ts"
+      ],
+      "stages": [
+        {
+          "label": "check:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:39:22.911Z",
+          "durationMs": 346,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\logs\\01-check_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "copy:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "copy:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:39:23.259Z",
+          "durationMs": 190,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\logs\\02-copy_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "server-full",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+            "scripts/v13WildernessExecute.test.ts",
+            "scripts/v13WildernessShadowRun.test.ts",
+            "scripts/v2Bn12LifecycleMigration.test.ts",
+            "scripts/v2OperationBatchTimestampMigration.test.ts",
+            "src/__tests__/providerCredentials.test.ts",
+            "src/__tests__/textFlowIdentityContract.test.ts",
+            "src/__tests__/v13AgentMemories.test.ts",
+            "src/__tests__/v13AtomicTextSave.test.ts",
+            "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+            "src/__tests__/v13BoardCeremonyNote.test.ts",
+            "src/__tests__/v13BoardChalk.test.ts",
+            "src/__tests__/v13BoardIdentity.test.ts",
+            "src/__tests__/v13BoardRoutes.test.ts",
+            "src/__tests__/v13BoardSchema.test.ts",
+            "src/__tests__/v13BoardServices.test.ts",
+            "src/__tests__/v13BoardStaging.test.ts",
+            "src/__tests__/v13BoardTextRanges.test.ts",
+            "src/__tests__/v13BoardTrayRelocation.test.ts",
+            "src/__tests__/v13BoardViewportBookmarks.test.ts",
+            "src/__tests__/v13BoardWave1.test.ts",
+            "src/__tests__/v13CanvasRetirement.test.ts",
+            "src/__tests__/v13CoordinateContract.test.ts",
+            "src/__tests__/v13EventsLedger.test.ts",
+            "src/__tests__/v13GraphemeTextRanges.test.ts",
+            "src/__tests__/v13ItemFloor.test.ts",
+            "src/__tests__/v13ItemRefBlocks.test.ts",
+            "src/__tests__/v13MediaBlocks.test.ts",
+            "src/__tests__/v13NoteMetadata.test.ts",
+            "src/__tests__/v13PagePresets.test.ts",
+            "src/__tests__/v13PaperInk.test.ts",
+            "src/__tests__/v13PaperSkin.test.ts",
+            "src/__tests__/v13ProjectDeletionReferences.test.ts",
+            "src/__tests__/v13RecordedAction.test.ts",
+            "src/__tests__/v13SourceProjectionRepair.test.ts",
+            "src/__tests__/v13SourceReprojection.test.ts",
+            "src/__tests__/v13Tray.test.ts",
+            "src/__tests__/v13TrayOrder.test.ts",
+            "src/__tests__/v13WallCollectionBatch.test.ts",
+            "src/__tests__/v14AgentVerbTransfer.test.ts",
+            "src/__tests__/v14AgentWriteDoor.test.ts",
+            "src/__tests__/v14CardCover.test.ts",
+            "src/__tests__/v14DeleteCeremony.test.ts",
+            "src/__tests__/v14PaletteColors.test.ts",
+            "src/__tests__/v14ProposalUnification.test.ts",
+            "src/__tests__/v14ReadTools.test.ts",
+            "src/__tests__/v14SkinSuites.test.ts",
+            "src/__tests__/v2BlockRestoreDoor.test.ts",
+            "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+            "src/__tests__/v2ContentGroups.test.ts",
+            "src/__tests__/v2DevQuickLogin.test.ts",
+            "src/__tests__/v2DocumentParserPdf.test.ts",
+            "src/__tests__/v2GroupFolders.test.ts",
+            "src/__tests__/v2ImprintCitations.test.ts",
+            "src/__tests__/v2ImprintEmbedding.test.ts",
+            "src/__tests__/v2ImprintRetrieval.test.ts",
+            "src/__tests__/v2ItemRelationFloor.test.ts",
+            "src/__tests__/v2Items.test.ts",
+            "src/__tests__/v2MaterialLibrary.test.ts",
+            "src/__tests__/v2McpArtifact.test.ts",
+            "src/__tests__/v2McpTransport.test.ts",
+            "src/__tests__/v2NoteBlockLifecycle.test.ts",
+            "src/__tests__/v2NoteFoundation.test.ts",
+            "src/__tests__/v2NotesLifecycle.test.ts",
+            "src/__tests__/v2NotesListService.test.ts",
+            "src/__tests__/v2Purposes.test.ts",
+            "src/__tests__/v2RelationLifecycleClosure.test.ts",
+            "src/__tests__/v2Relations.test.ts",
+            "src/__tests__/v2SourceContainerIntake.test.ts",
+            "src/__tests__/v2SourceFileIntake.test.ts",
+            "src/__tests__/v2SourceIdentityFloor.test.ts",
+            "src/__tests__/v2SourceImprints.test.ts",
+            "src/__tests__/v2SourceLifecycleClosure.test.ts",
+            "src/__tests__/v2SourceMaterialization.test.ts",
+            "src/__tests__/v2SourceMineruWiring.test.ts",
+            "src/__tests__/v2SourceNeverReject.test.ts",
+            "src/__tests__/v2SourceRegionCells.test.ts",
+            "src/__tests__/v2SourceT0Alignment.test.ts",
+            "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+            "src/__tests__/v2TemplateStudioDecommission.test.ts",
+            "src/__tests__/v2TestV2ManifestHook.test.ts",
+            "src/__tests__/v2TrashNotesTool.test.ts",
+            "src/agent/providers/index.test.ts",
+            "src/toolFace/registry.test.ts"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
+          "startedAt": "2026-09-13T09:39:23.450Z",
+          "durationMs": 124614,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\logs\\03-server-full.log",
+          "exitCode": 1,
+          "counts": {
+            "tests": 763,
+            "suites": 0,
+            "pass": 761,
+            "fail": 2,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          },
+          "failedTests": [
+            "src\\\\__tests__\\\\v2SourceMineruWiring.test.ts",
+            "V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable"
+          ],
+          "environmentSignals": [
+            "python.exe ENOENT",
+            "MinerU startup/parser failure; inspect TEMP log"
+          ]
+        }
+      ],
+      "stageCount": 3,
+      "passedStages": 2,
+      "failedStages": 1
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "gate-1789292369796-14148",
+      "mode": "gate",
+      "startedAt": "2026-09-13T09:39:29.803Z",
+      "completedAt": "2026-09-13T09:40:50.996Z",
+      "exitCode": 1,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\gate-1789292369796-14148.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [
+        "git diff --check",
+        "npm run check:changed-file-secrets"
+      ],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "shared-build",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "D:\\Coinsides\\v2.x\\Coincides\\server\\node_modules\\typescript\\bin\\tsc",
+            "-b",
+            "D:\\Coinsides\\v2.x\\Coincides\\shared\\tsconfig.json"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:39:29.807Z",
+          "durationMs": 142,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\01-shared-build.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:test-wiring",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:test-wiring"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:39:29.951Z",
+          "durationMs": 532,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\02-check_test-wiring.log",
+          "exitCode": 0,
+          "counts": {
+            "testFilesTotal": 83,
+            "wired": 83,
+            "exempted": 0,
+            "unwired": 0
+          }
+        },
+        {
+          "label": "check:tech-debt-table",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tech-debt-table"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:39:30.486Z",
+          "durationMs": 476,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\03-check_tech-debt-table.log",
+          "exitCode": 0
+        },
+        {
+          "label": "test:unit",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:unit"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:39:30.964Z",
+          "durationMs": 37899,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\04-test_unit.log",
+          "exitCode": 0,
+          "counts": {
+            "testFilesPassed": 167,
+            "testFilesFailed": 0,
+            "testFilesSkipped": 0,
+            "testFilesTotal": 167,
+            "testCasesPassed": 1722,
+            "testCasesFailed": 0,
+            "testCasesSkipped": 0,
+            "testCasesTotal": 1722
+          }
+        },
+        {
+          "label": "test:tool-face-registry",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:tool-face-registry"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:08.866Z",
+          "durationMs": 981,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\05-test_tool-face-registry.log",
+          "exitCode": 0,
+          "counts": {
+            "tests": 5,
+            "suites": 0,
+            "pass": 5,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        },
+        {
+          "label": "test:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:09.850Z",
+          "durationMs": 4382,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\06-test_tool-face-manifest.log",
+          "exitCode": 0,
+          "counts": {
+            "tests": 10,
+            "suites": 0,
+            "pass": 10,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        },
+        {
+          "label": "check:tool-face-manifest",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-manifest"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:14.232Z",
+          "durationMs": 612,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\07-check_tool-face-manifest.log",
+          "exitCode": 0
+        },
+        {
+          "label": "test:tool-face-parity",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "test:tool-face-parity"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:14.845Z",
+          "durationMs": 5647,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\08-test_tool-face-parity.log",
+          "exitCode": 0,
+          "counts": {
+            "tests": 10,
+            "suites": 0,
+            "pass": 10,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          }
+        },
+        {
+          "label": "check:tool-face-parity",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:tool-face-parity"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:20.492Z",
+          "durationMs": 550,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\09-check_tool-face-parity.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:server-shared-runtime-import",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:server-shared-runtime-import"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:21.043Z",
+          "durationMs": 572,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\10-check_server-shared-runtime-import.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:canvas-runtime-boundary",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:canvas-runtime-boundary"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:21.615Z",
+          "durationMs": 481,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\11-check_canvas-runtime-boundary.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:group-gallery-shell",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:group-gallery-shell"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:22.097Z",
+          "durationMs": 460,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\12-check_group-gallery-shell.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:groups-rail-shell",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:groups-rail-shell"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:22.558Z",
+          "durationMs": 470,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\13-check_groups-rail-shell.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:single-editor-shell",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:single-editor-shell"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:23.029Z",
+          "durationMs": 529,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\14-check_single-editor-shell.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:source-experience",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:source-experience"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:23.559Z",
+          "durationMs": 987,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\15-check_source-experience.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:v2-bn11-legacy-shutdown",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:v2-bn11-legacy-shutdown"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:24.547Z",
+          "durationMs": 460,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\16-check_v2-bn11-legacy-shutdown.log",
+          "exitCode": 0
+        },
+        {
+          "label": "check:v2-bn11-relation-freshness",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "check:v2-bn11-relation-freshness"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:25.008Z",
+          "durationMs": 437,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\17-check_v2-bn11-relation-freshness.log",
+          "exitCode": 0
+        },
+        {
+          "label": "smoke:canvas-engine-model-contract",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "smoke:canvas-engine-model-contract"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:25.445Z",
+          "durationMs": 2105,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\18-smoke_canvas-engine-model-contract.log",
+          "exitCode": 0
+        },
+        {
+          "label": "build:client",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "build:client"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:27.550Z",
+          "durationMs": 14234,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\19-build_client.log",
+          "exitCode": 0
+        },
+        {
+          "label": "build",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "build"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:41.784Z",
+          "durationMs": 7654,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\20-build.log",
+          "exitCode": 0
+        },
+        {
+          "label": "smoke:canvas-engine-performance",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "smoke:canvas-engine-performance"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:49.438Z",
+          "durationMs": 1263,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\21-smoke_canvas-engine-performance.log",
+          "exitCode": 0
+        },
+        {
+          "label": "docs:check",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:check"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:40:50.701Z",
+          "durationMs": 294,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\22-docs_check.log",
+          "exitCode": 1
+        }
+      ],
+      "gate": {
+        "originalStages": 23,
+        "authorizedStages": 21,
+        "hqOnlyStages": 2
+      },
+      "stageCount": 22,
+      "passedStages": 21,
+      "failedStages": 1
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "docs-generate-1789292521602-22112",
+      "mode": "docs-generate",
+      "startedAt": "2026-09-13T09:42:01.604Z",
+      "completedAt": "2026-09-13T09:42:02.086Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-generate-1789292521602-22112.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:index",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:index"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:42:01.606Z",
+          "durationMs": 288,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\logs\\01-docs_index.log",
+          "exitCode": 0
+        },
+        {
+          "label": "docs:inventory",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:inventory"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:42:01.895Z",
+          "durationMs": 190,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\logs\\02-docs_inventory.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 2,
+      "passedStages": 2,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "docs-check-1789292547169-36032",
+      "mode": "docs-check",
+      "startedAt": "2026-09-13T09:42:27.172Z",
+      "completedAt": "2026-09-13T09:42:27.762Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-check-1789292547169-36032.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:check",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:check"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:42:27.176Z",
+          "durationMs": 585,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\logs\\01-docs_check.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 1,
+      "passedStages": 1,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "docs-generate-1789292749497-38884",
+      "mode": "docs-generate",
+      "startedAt": "2026-09-13T09:45:49.499Z",
+      "completedAt": "2026-09-13T09:45:49.967Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-generate-1789292749497-38884.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:index",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:index"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:45:49.501Z",
+          "durationMs": 269,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\logs\\01-docs_index.log",
+          "exitCode": 0
+        },
+        {
+          "label": "docs:inventory",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:inventory"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:45:49.771Z",
+          "durationMs": 195,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\logs\\02-docs_inventory.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 2,
+      "passedStages": 2,
+      "failedStages": 0
+    },
+    {
+      "schema": "coincides-validation-metadata.v1",
+      "workOrder": "V14 14.2-B1 perceptual read tools",
+      "runId": "docs-check-1789292750443-33164",
+      "mode": "docs-check",
+      "startedAt": "2026-09-13T09:45:50.444Z",
+      "completedAt": "2026-09-13T09:45:51.020Z",
+      "exitCode": 0,
+      "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-check-1789292750443-33164.json",
+      "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
+      "isolation": {
+        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8",
+        "database": ":memory: or existing test-owned disposable databases",
+        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\environment\\empty.env",
+        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\environment",
+        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\app-data",
+        "inheritedEnvironment": [
+          "PATH",
+          "Path",
+          "SystemRoot",
+          "SYSTEMROOT",
+          "WINDIR",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "APPDATA",
+          "LOCALAPPDATA",
+          "ComSpec",
+          "COMSPEC",
+          "PATHEXT",
+          "NUMBER_OF_PROCESSORS"
+        ],
+        "providerEnvironmentInherited": false,
+        "testExclusions": 0,
+        "gitCommandsExecuted": 0,
+        "secretScannerExecuted": false
+      },
+      "hqPending": [],
+      "testFileCount": null,
+      "testFiles": [],
+      "stages": [
+        {
+          "label": "docs:check",
+          "command": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+            "run",
+            "docs:check"
+          ],
+          "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+          "startedAt": "2026-09-13T09:45:50.446Z",
+          "durationMs": 573,
+          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\logs\\01-docs_check.log",
+          "exitCode": 0
+        }
+      ],
+      "stageCount": 1,
+      "passedStages": 1,
+      "failedStages": 0
+    }
+  ]
+}

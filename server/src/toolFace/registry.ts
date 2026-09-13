@@ -817,6 +817,100 @@ export const AGENT_ACTION_TOOLS = [
   LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,
 ];
 
+const readIdSchema = z.string().trim().min(1);
+const readCountSchema = z.number().int().nonnegative();
+export const readNoteInputSchema = z.object({
+  note_id: readIdSchema, page_index: readCountSchema.optional(),
+}).strict();
+export const readBoardInputSchema = z.object({ board_id: readIdSchema }).strict();
+export const readContentGroupsInputSchema = z.object({
+  course_id: readIdSchema.optional(), note_id: readIdSchema.optional(),
+}).strict().refine((input) => input.course_id || input.note_id, 'course_id or note_id is required');
+export const readAnnotationsRelationsInputSchema = z.object({
+  note_id: readIdSchema.optional(), item_id: readIdSchema.optional(),
+}).strict().refine((input) => input.note_id || input.item_id, 'note_id or item_id is required');
+
+const readNoteOutputSchema = z.object({
+  note: z.object({ id: z.string(), title: z.string(), course_id: z.string(),
+    page_format: z.string(), page_count: readCountSchema }).strict(),
+  page_index: readCountSchema, frame_id: z.string().nullable(),
+  blocks: z.array(z.object({
+    id: z.string(), placement_id: z.string(), kind: z.string(), role: z.string().nullable(), text: z.string(),
+    text_units: z.array(z.object({ id: z.string().nullable(), role: z.string().nullable(), text: z.string() }).strict()).optional(),
+    media: z.object({ asset_id: z.string(), type: z.string().nullable(), state: z.literal('missing').optional() }).strict().optional(),
+    item_ref: z.object({ item_id: z.string() }).strict().optional(),
+  }).strict()).max(200),
+  has_more: z.boolean(), next_page_index: readCountSchema.nullable(), truncated: z.boolean(),
+  total_blocks: readCountSchema, omitted_blocks: z.object({ outside_page: readCountSchema }).strict(),
+}).strict();
+
+const readBoardOutputSchema = z.object({
+  board: z.object({ id: z.string(), title: z.string(), viewport: jsonObjectSchema }).strict(),
+  members: z.array(z.object({ id: z.string(), member_kind: z.string(), member_id: z.string(),
+    x: z.number(), y: z.number(), scale: z.number(), pinned: z.boolean(), title_or_summary: z.string().nullable(),
+    placed: z.boolean(), state: z.string() }).strict()).max(200),
+  edges: z.array(z.object({ id: z.string(), from_member: z.string(), to_member: z.string(),
+    label: z.string().nullable() }).strict()).max(200),
+  visuals: z.array(z.object({ id: z.string(), type: z.string(),
+    geometry: z.object({ x: z.number(), y: z.number(), w: z.number(), h: z.number(),
+      scale: z.number(), rotation: z.number(), pinned: z.boolean() }).strict(), text: z.string().optional(),
+  }).strict()).max(200),
+  has_more: z.boolean(),
+  truncated: z.object({ members: z.boolean(), edges: z.boolean(), visuals: z.boolean() }).strict(),
+  total_counts: z.object({ members: readCountSchema, edges: readCountSchema, visuals: readCountSchema }).strict(),
+}).strict();
+
+const readContentGroupsOutputSchema = z.object({
+  groups: z.array(z.object({ id: z.string(), course_id: z.string(), note_id: z.string().nullable(),
+    title: z.string(), status: contentGroupStatusSchema,
+    members: z.array(z.object({ id: z.string(), kind: contentGroupMemberKindSchema,
+      target_id: z.string().nullable(), item_id: z.string().nullable(),
+      plain_text: z.string(), text_truncated: z.boolean() }).strict()).max(200),
+    total_members: readCountSchema, has_more: z.boolean(),
+  }).strict()).max(100),
+  total_groups: readCountSchema, total_members: readCountSchema, has_more: z.boolean(), truncated: z.boolean(),
+}).strict();
+
+const readAnnotationRangeSchema = z.object({
+  id: z.string(), target_kind: z.string(), block_id: z.string().optional(), text_flow_id: z.string().optional(),
+  text_unit_id: z.string().optional(), inline_structure_id: z.string().optional(),
+  canvas_object_id: z.string().optional(), source_region_id: z.string().optional(),
+  start_offset: z.number().optional(), end_offset: z.number().optional(),
+  range_text_cache: z.string().optional(), metadata: jsonObjectSchema,
+}).strict();
+const readAnnotationsRelationsOutputSchema = z.object({
+  annotations_note_id: z.string().nullable(),
+  annotations: z.array(z.object({ id: z.string(), note_id: z.string(), text: z.string(),
+    ranges: z.array(readAnnotationRangeSchema).max(200), total_ranges: readCountSchema, has_more: z.boolean(),
+    status: z.string(), created_by: z.string(), created_at: z.string(), updated_at: z.string(), metadata: jsonObjectSchema,
+  }).strict()).max(200),
+  relations: z.array(relationOutputSchema).max(200),
+  relation_scope: z.object({ item_ids: z.array(z.string()).max(200), total_items: readCountSchema,
+    unavailable_item_ids: z.array(z.string()).max(200), has_more: z.boolean() }).strict(),
+  total_annotations: readCountSchema, total_ranges: readCountSchema, total_relations: readCountSchema,
+  relation_count_complete: z.boolean(), has_more: z.boolean(), truncated: z.boolean(),
+}).strict();
+
+/** Plan 14.2: read-only chat projections; no write admission, receipt or revert. */
+export const AGENT_READ_TOOLS: ToolRegistryEntry[] = [
+  { name: 'read_note', description: 'Read one page of an owned note in paper order. page_index defaults to 0; follow next_page_index for later pages. Inspect truncated for a per-page block cap.',
+    input_schema: readNoteInputSchema, output_schema: readNoteOutputSchema,
+    truth: 'content', tier: 'immediate', exposure: 'internal', scopes: ['notes:read'],
+    human_entry: { route: 'GET /api/notes/:id/blocks', client_call_site: 'client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchNote' } },
+  { name: 'read_board', description: 'Read an owned board viewport, member identities and positions, edges, and visual geometry. Inspect truncation flags for omitted rows.',
+    input_schema: readBoardInputSchema, output_schema: readBoardOutputSchema,
+    truth: 'spatial', tier: 'immediate', exposure: 'internal', scopes: ['boards:read'],
+    human_entry: { route: 'GET /api/boards/:id', client_call_site: 'client/src/pages/Boards/boardRepository.ts#boardRepository.get' } },
+  { name: 'read_content_groups', description: 'Read groups scoped by course_id and/or note_id, with member identities and the first 200 characters of each text. Inspect has_more for omitted groups or members.',
+    input_schema: readContentGroupsInputSchema, output_schema: readContentGroupsOutputSchema,
+    truth: 'knowledge', tier: 'immediate', exposure: 'internal', scopes: ['content_groups:read'],
+    human_entry: { route: 'GET /api/content-groups', client_call_site: 'client/src/pages/GroupGallery/groupGalleryData.ts#loadGroupGalleryRecords' } },
+  { name: 'read_annotations_relations', description: 'Read annotation truths for note_id and original judgment/receipt rows for item_id. With note_id alone, Relations follow placed Item refs and group memberships. With item_id alone, no annotation Note scope is implied. Judgment state and provenance are preserved; inspect truncation and relation_count_complete.',
+    input_schema: readAnnotationsRelationsInputSchema, output_schema: readAnnotationsRelationsOutputSchema,
+    truth: 'semantic', tier: 'immediate', exposure: 'internal', scopes: ['notes:read', 'relations:read'],
+    human_entry: { route: 'GET /api/relations', client_call_site: 'client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelations' } },
+];
+
 /**
  * The only authoritative V2.BN.12 tool directory. JSON manifests are derived
  * from these runtime entries; legacy v1 toolDefinitions are intentionally not
@@ -1021,4 +1115,5 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     scopes: ['notes:write'],
   },
   ...AGENT_ACTION_TOOLS,
+  ...AGENT_READ_TOOLS,
 ];
