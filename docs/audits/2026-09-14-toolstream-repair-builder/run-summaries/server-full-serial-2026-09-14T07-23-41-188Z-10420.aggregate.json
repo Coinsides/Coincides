@@ -1,0 +1,44 @@
+{
+    "discoveredFiles":  84,
+    "executedFiles":  84,
+    "passedFiles":  82,
+    "failedFiles":  2,
+    "tests":  815,
+    "pass":  813,
+    "fail":  2,
+    "cancelled":  0,
+    "skipped":  0,
+    "todo":  0,
+    "failures":  [
+                     {
+                         "label":  "server/src/__tests__/v2SourceMineruWiring.test.ts",
+                         "exitCode":  1,
+                         "log":  "78-server_src___tests___v2SourceMineruWiring.test.ts.log",
+                         "counts":  {
+                                        "tests":  1,
+                                        "suites":  0,
+                                        "pass":  0,
+                                        "fail":  1,
+                                        "cancelled":  0,
+                                        "skipped":  0,
+                                        "todo":  0,
+                                        "duration_ms":  722.7276
+                                    }
+                     },
+                     {
+                         "label":  "server/src/__tests__/v2SourceRegionCells.test.ts",
+                         "exitCode":  1,
+                         "log":  "80-server_src___tests___v2SourceRegionCells.test.ts.log",
+                         "counts":  {
+                                        "tests":  1,
+                                        "suites":  0,
+                                        "pass":  0,
+                                        "fail":  1,
+                                        "cancelled":  0,
+                                        "skipped":  0,
+                                        "todo":  0,
+                                        "duration_ms":  2602.4716
+                                    }
+                     }
+                 ]
+}

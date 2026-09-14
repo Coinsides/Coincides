@@ -1,0 +1,480 @@
+{
+  "mode": "gates",
+  "runId": "2026-09-14T07-15-39-975Z-35160",
+  "startedAt": "2026-09-14T07:15:39.978Z",
+  "scope": "Full suite modes exclude no tests; targeted selection is recorded explicitly. No new security/adversarial cases.",
+  "isolation": "OS environment allowlist; in-memory default DB; fresh system-temp dotenv/Vite/appdata/assets/uploads; no inherited credentials or NODE_OPTIONS.",
+  "serverDiscoveredTestFiles": [
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/agent/providers/openai.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "selectedTestFiles": [],
+  "hqPending": [
+    {
+      "gate": "git diff --check",
+      "status": "not_run",
+      "reason": "Order reserves git/secrets closure for HQ; zero git commands."
+    },
+    {
+      "gate": "check:changed-file-secrets",
+      "status": "not_run",
+      "reason": "Order reserves git/secrets closure for HQ; scanner invokes git."
+    }
+  ],
+  "steps": [
+    {
+      "label": "shared-build",
+      "command": [
+        "node",
+        "server/node_modules/typescript/bin/tsc",
+        "-b",
+        "shared/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 78,
+      "log": "01-shared-build.log",
+      "counts": {}
+    },
+    {
+      "label": "check:test-wiring",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:test-wiring"
+      ],
+      "cwd": ".",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 204,
+      "log": "02-check_test-wiring.log",
+      "counts": {}
+    },
+    {
+      "label": "check:tech-debt-table",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tech-debt-table"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 195,
+      "log": "03-check_tech-debt-table.log",
+      "counts": {}
+    },
+    {
+      "label": "test:unit",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "cwd": "client",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 98332,
+      "log": "04-test_unit.log",
+      "counts": {
+        "vitest": [
+          " Test Files  171 passed (171)",
+          "      Tests  1746 passed (1746)",
+          "   Duration  97.76s (transform 3.36s, setup 18.84s, collect 19.06s, tests 61.74s, environment 68.34s, prepare 9.36s)"
+        ]
+      }
+    },
+    {
+      "label": "test:tool-face-registry",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:tool-face-registry"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 638,
+      "log": "05-test_tool-face-registry.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 189.3023
+      }
+    },
+    {
+      "label": "test:tool-face-manifest",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:tool-face-manifest"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 3690,
+      "log": "06-test_tool-face-manifest.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 3227.0927
+      }
+    },
+    {
+      "label": "check:tool-face-manifest",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 595,
+      "log": "07-check_tool-face-manifest.log",
+      "counts": {}
+    },
+    {
+      "label": "test:tool-face-parity",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:tool-face-parity"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 5408,
+      "log": "08-test_tool-face-parity.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 5202.441
+      }
+    },
+    {
+      "label": "check:tool-face-parity",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-parity"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 537,
+      "log": "09-check_tool-face-parity.log",
+      "counts": {}
+    },
+    {
+      "label": "check:server-shared-runtime-import",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:server-shared-runtime-import"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 570,
+      "log": "10-check_server-shared-runtime-import.log",
+      "counts": {}
+    },
+    {
+      "label": "check:canvas-runtime-boundary",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:canvas-runtime-boundary"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 462,
+      "log": "11-check_canvas-runtime-boundary.log",
+      "counts": {}
+    },
+    {
+      "label": "check:group-gallery-shell",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:group-gallery-shell"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 452,
+      "log": "12-check_group-gallery-shell.log",
+      "counts": {}
+    },
+    {
+      "label": "check:groups-rail-shell",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:groups-rail-shell"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 470,
+      "log": "13-check_groups-rail-shell.log",
+      "counts": {}
+    },
+    {
+      "label": "check:single-editor-shell",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:single-editor-shell"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 478,
+      "log": "14-check_single-editor-shell.log",
+      "counts": {}
+    },
+    {
+      "label": "check:source-experience",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:source-experience"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1001,
+      "log": "15-check_source-experience.log",
+      "counts": {}
+    },
+    {
+      "label": "check:v2-bn11-legacy-shutdown",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:v2-bn11-legacy-shutdown"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 479,
+      "log": "16-check_v2-bn11-legacy-shutdown.log",
+      "counts": {}
+    },
+    {
+      "label": "check:v2-bn11-relation-freshness",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:v2-bn11-relation-freshness"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 466,
+      "log": "17-check_v2-bn11-relation-freshness.log",
+      "counts": {}
+    },
+    {
+      "label": "smoke:canvas-engine-model-contract",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "smoke:canvas-engine-model-contract"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2015,
+      "log": "18-smoke_canvas-engine-model-contract.log",
+      "counts": {}
+    },
+    {
+      "label": "build:client",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build:client"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 13351,
+      "log": "19-build_client.log",
+      "counts": {}
+    },
+    {
+      "label": "build",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 7508,
+      "log": "20-build.log",
+      "counts": {}
+    },
+    {
+      "label": "smoke:canvas-engine-performance",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "smoke:canvas-engine-performance"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1219,
+      "log": "21-smoke_canvas-engine-performance.log",
+      "counts": {}
+    },
+    {
+      "label": "docs:check",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 608,
+      "log": "22-docs_check.log",
+      "counts": {}
+    }
+  ],
+  "finishedAt": "2026-09-14T07:17:58.740Z",
+  "failedSteps": [
+    "check:test-wiring"
+  ],
+  "executedStepsPassed": false,
+  "completeRuntimeGate": false
+}

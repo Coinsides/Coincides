@@ -255,6 +255,7 @@ test('A3a chat organized_note is listed and previewed by existing APIs, then hum
   }, userId, context));
   assert.equal(result.type, 'organized_note');
   assert.equal(result.status, 'pending');
+  assert.match(result.message, /Proposals inbox \(「提案」收件箱\) in the Agent panel/);
   assert.equal(result.course_id, courseId);
   assert.ok(result.blocks_count > 0);
   assert.equal(result.receipt_id, undefined);

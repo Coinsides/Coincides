@@ -6,6 +6,7 @@ import test, { afterEach, beforeEach, type TestContext } from 'node:test';
 import { AnthropicProvider } from './anthropic.js';
 import { createProvider, getProviderFromSettings, type AIProvider } from './index.js';
 import { OpenAIProvider } from './openai.js';
+import type { StreamChunk, ToolDefinition } from './types.js';
 import { saveProviderCredential } from '../../services/providerCredentials.js';
 
 // These tests run serially, isolate credential env vars, and never load .env.
@@ -141,4 +142,241 @@ test('anthropic remains the default provider with env fallback', () => {
   const { provider, providerName } = getProviderFromSettings({});
   assert.equal(providerName, 'anthropic');
   assert.ok(provider instanceof AnthropicProvider);
+});
+
+
+// Protocol fixtures only: fetch/SDK streams are local stubs and no .env or database is loaded.
+const noteTool: ToolDefinition = {
+  name: 'organized_note',
+  description: 'Prepare a note proposal',
+  parameters: { type: 'object', properties: { title: { type: 'string' } } },
+};
+
+function provider() {
+  return new OpenAIProvider({
+    apiKey: 'syn-stream',
+    model: 'stream-fixture',
+    baseUrl: 'https://provider.example',
+  });
+}
+
+function event(delta: Record<string, unknown>, finishReason?: string, separator = ' ') {
+  return `data:${separator}${JSON.stringify({
+    choices: [{ delta, ...(finishReason ? { finish_reason: finishReason } : {}) }],
+  })}\n\n`;
+}
+
+function toolDelta(index: number | undefined, args: string, id?: string, name?: string) {
+  return {
+    tool_calls: [{
+      ...(index === undefined ? {} : { index }),
+      ...(id ? { id } : {}),
+      function: { ...(name ? { name } : {}), arguments: args },
+    }],
+  };
+}
+
+function stubStream(t: TestContext, pieces: Array<string | Uint8Array>) {
+  const requests: Record<string, unknown>[] = [];
+  t.mock.method(globalThis, 'fetch', async (_url: unknown, init: RequestInit) => {
+    requests.push(JSON.parse(init.body as string));
+    const encoder = new TextEncoder();
+    return new Response(new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const piece of pieces) {
+          controller.enqueue(typeof piece === 'string' ? encoder.encode(piece) : piece);
+        }
+        controller.close();
+      },
+    }));
+  });
+  return requests;
+}
+
+async function collect(adapter: AIProvider = provider(), tools = [noteTool]) {
+  const chunks: StreamChunk[] = [];
+  for await (const chunk of adapter.chat([{ role: 'user', content: '整理笔记' }], tools, 'Protocol test')) {
+    chunks.push(chunk);
+  }
+  return chunks;
+}
+
+function ends(chunks: StreamChunk[]) {
+  return chunks.filter((chunk) => chunk.type === 'tool_call_end');
+}
+
+function assertSuccessfulCall(chunks: StreamChunk[], id: string, args: Record<string, unknown>) {
+  const callChunks = chunks.filter((chunk) => chunk.tool_call?.id === id);
+  const end = callChunks[callChunks.length - 1];
+  assert.equal(callChunks[0]?.type, 'tool_call_start');
+  assert.equal(end?.type, 'tool_call_end');
+  assert.ok(callChunks.every((chunk) => chunk.tool_call?.name === noteTool.name));
+  assert.deepEqual(end?.tool_call?.arguments, args);
+  assert.equal(end?.error, undefined);
+  assert.deepEqual(JSON.parse(callChunks.filter((chunk) => chunk.type === 'tool_call_delta')
+    .map((chunk) => chunk.text ?? '').join('')), args);
+}
+
+test('OpenAI requests explicitly set the output budget and parallel tool calls', async (t) => {
+  const requests = stubStream(t, ['data: [DONE]\n\n']);
+  await collect();
+  await collect(provider(), []);
+  assert.equal(requests[0].max_tokens, 16384);
+  assert.equal(requests[0].parallel_tool_calls, true);
+  assert.deepEqual(requests[0].tools, [{
+    type: 'function',
+    function: { name: noteTool.name, description: noteTool.description, parameters: noteTool.parameters },
+  }]);
+  assert.equal(requests[1].max_tokens, 16384);
+  assert.equal(requests[1].tools, undefined);
+});
+
+for (const ending of ['done', 'eof'] as const) {
+  for (const scenario of [
+    { name: 'empty arguments', raw: '', finishReason: 'tool_calls' },
+    { name: 'unfinished JSON', raw: '{"title":"Draft"', finishReason: 'tool_calls' },
+    { name: 'length-truncated arguments', raw: '{"title":"Draft"}', finishReason: 'length' },
+  ]) {
+    test(`OpenAI ${scenario.name} returns a readable tool error at ${ending}`, async (t) => {
+      // A finish-only chunk deliberately has no delta: length still has to be captured.
+      const finish = `data: ${JSON.stringify({ choices: [{ finish_reason: scenario.finishReason }] })}`;
+      stubStream(t, [
+        event(toolDelta(0, scenario.raw, 'call-one', noteTool.name)),
+        finish + (ending === 'done' ? '\n\ndata: [DONE]\n\n' : ''),
+      ]);
+      const chunks = await collect();
+      const [end] = ends(chunks);
+      assert.equal(ends(chunks).length, 1);
+      assert.equal(end.tool_call?.id, 'call-one');
+      assert.equal(end.tool_call?.name, noteTool.name);
+      assert.equal(end.tool_call?.arguments, undefined, 'invalid arguments must not become a successful empty object');
+      assert.ok(end.error);
+      assert.match(end.error, /organized_note/);
+      assert.match(end.error, /finish_reason/);
+      assert.ok(end.error.includes(scenario.finishReason));
+      assert.match(end.error, /raw_length/);
+      assert.ok(end.error.includes(String(scenario.raw.length)));
+      assert.match(end.error, /raw_prefix/);
+      if (scenario.finishReason === 'length') assert.match(end.error, /truncat|截断/i);
+      assert.equal(chunks[chunks.length - 1]?.type, 'done');
+    });
+  }
+}
+
+test('OpenAI keeps a deliberately empty JSON object valid', async (t) => {
+  stubStream(t, [event(toolDelta(0, '{}', 'call-empty', noteTool.name)), event({}, 'tool_calls'), 'data: [DONE]\n\n']);
+  assertSuccessfulCall(await collect(), 'call-empty', {});
+});
+
+test('OpenAI diagnostics report a bounded prefix for a long interrupted note', async (t) => {
+  const raw = `{"title":"Notes","content":"${'Long note text. '.repeat(60)}`;
+  stubStream(t, [event(toolDelta(0, raw, 'call-long', noteTool.name)), event({}, 'length'), 'data: [DONE]\n\n']);
+  const [end] = ends(await collect());
+  assert.ok(end.error);
+  assert.ok(end.error.includes(String(raw.length)));
+  assert.match(end.error, /raw_prefix/);
+  assert.ok(end.error.length < raw.length, 'diagnostics must not embed the full long argument payload');
+  assert.equal(end.tool_call?.arguments, undefined);
+});
+
+test('OpenAI interleaved calls with the same name retain separate IDs and arguments', async (t) => {
+  stubStream(t, [
+    event(toolDelta(0, '{"title":', 'call-first', noteTool.name)),
+    event(toolDelta(1, '{"title":', 'call-second', noteTool.name)),
+    event(toolDelta(0, '"First"}')),
+    event(toolDelta(1, '"Second"}')),
+    event({}, 'tool_calls'),
+    'data: [DONE]\n\n',
+  ]);
+  const chunks = await collect();
+  assert.equal(ends(chunks).length, 2);
+  assertSuccessfulCall(chunks, 'call-first', { title: 'First' });
+  assertSuccessfulCall(chunks, 'call-second', { title: 'Second' });
+});
+
+test('OpenAI missing continuation index uses the most recently registered call', async (t) => {
+  stubStream(t, [
+    event(toolDelta(3, '{"title":', 'call-first', noteTool.name)),
+    event(toolDelta(7, '{"title":', 'call-second', noteTool.name)),
+    event(toolDelta(3, '"First"}')),
+    event(toolDelta(undefined, '"Second"}')),
+    'data: [DONE]\n\n',
+  ]);
+  const chunks = await collect();
+  assert.equal(ends(chunks).length, 2, 'a missing index must not register a third call');
+  assertSuccessfulCall(chunks, 'call-first', { title: 'First' });
+  assertSuccessfulCall(chunks, 'call-second', { title: 'Second' });
+});
+
+test('OpenAI registers late name and ID before exposing buffered arguments', async (t) => {
+  stubStream(t, [
+    event(toolDelta(0, '{"title":')),
+    event(toolDelta(undefined, '"Late"', undefined, noteTool.name)),
+    event(toolDelta(0, '}', 'call-late')),
+    'data: [DONE]\n\n',
+  ]);
+  const chunks = await collect();
+  const toolChunks = chunks.filter((chunk) => chunk.tool_call);
+  assert.ok(toolChunks.every((chunk) => chunk.tool_call?.id === 'call-late'));
+  assertSuccessfulCall(chunks, 'call-late', { title: 'Late' });
+});
+
+test('OpenAI fallback IDs remain stable within a call and distinct across calls and turns', async (t) => {
+  stubStream(t, [
+    event(toolDelta(0, '{"title":"First"}', undefined, noteTool.name)),
+    event(toolDelta(1, '{"title":"Second"}', undefined, noteTool.name)),
+    'data: [DONE]\n\n',
+  ]);
+  const adapter = provider();
+  const first = await collect(adapter);
+  const second = await collect(adapter);
+  const ids = [...ends(first), ...ends(second)].map((chunk) => chunk.tool_call?.id);
+  assert.equal(ids.length, 4);
+  assert.ok(ids.every((id) => typeof id === 'string' && id.length > 0));
+  assert.equal(new Set(ids).size, 4);
+  for (const chunks of [first, second]) {
+    for (const end of ends(chunks)) {
+      assertSuccessfulCall(chunks, end.tool_call!.id!, end.tool_call!.arguments!);
+    }
+  }
+});
+
+test('OpenAI handles no-space SSE fields, split UTF-8, and an unterminated final line', async (t) => {
+  const text = event({ content: '整理' }, undefined, '')
+    + event(toolDelta(0, '{"title":"笔记"}', 'call-utf8', noteTool.name), undefined, '').trimEnd();
+  const bytes = new TextEncoder().encode(text);
+  const chineseByte = bytes.findIndex((byte) => byte > 127);
+  stubStream(t, [bytes.slice(0, chineseByte + 1), bytes.slice(chineseByte + 1, chineseByte + 2), bytes.slice(chineseByte + 2)]);
+  const chunks = await collect();
+  assert.equal(chunks.find((chunk) => chunk.type === 'text')?.text, '整理');
+  assertSuccessfulCall(chunks, 'call-utf8', { title: '笔记' });
+  assert.equal(chunks[chunks.length - 1]?.type, 'done');
+});
+
+test('Anthropic normal text and tool streams retain the existing protocol and token budget', async (t) => {
+  const adapter = new AnthropicProvider({ apiKey: 'syn-anthropic', model: 'stream-fixture' });
+  const sdk = (adapter as unknown as {
+    client: { messages: { stream: (params: Record<string, unknown>) => AsyncIterable<unknown> } };
+  }).client;
+  let request: Record<string, unknown> | undefined;
+  t.mock.method(sdk.messages, 'stream', (params: Record<string, unknown>) => {
+    request = params;
+    return (async function* () {
+      yield { type: 'content_block_start', content_block: { type: 'text', text: '' } };
+      yield { type: 'content_block_delta', delta: { type: 'text_delta', text: '整理中' } };
+      yield { type: 'content_block_stop' };
+      yield { type: 'content_block_start', content_block: { type: 'tool_use', id: 'anthropic-one', name: noteTool.name } };
+      yield { type: 'content_block_delta', delta: { type: 'input_json_delta', partial_json: '{"title":' } };
+      yield { type: 'content_block_delta', delta: { type: 'input_json_delta', partial_json: '"笔记"}' } };
+      yield { type: 'content_block_stop' };
+      yield { type: 'message_stop' };
+    })();
+  });
+  const chunks = await collect(adapter);
+  assert.equal(request?.max_tokens, 16384);
+  assert.deepEqual(request?.tools, [{ name: noteTool.name, description: noteTool.description, input_schema: noteTool.parameters }]);
+  assert.equal(chunks.find((chunk) => chunk.type === 'text')?.text, '整理中');
+  assertSuccessfulCall(chunks, 'anthropic-one', { title: '笔记' });
+  assert.equal(chunks.some((chunk) => chunk.type === 'error'), false);
+  assert.equal(chunks[chunks.length - 1]?.type, 'done');
 });

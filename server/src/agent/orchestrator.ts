@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { getDb } from '../db/init.js';
 import { getProviderFromSettings } from './providers/index.js';
 import type { ProviderMessage, StreamChunk, ToolCall, ToolResult, ContentBlock } from './providers/types.js';
+import { isArgumentObject, parseToolArguments, toolArgumentError } from './providers/tool-arguments.js';
 import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
@@ -141,9 +143,20 @@ export async function* runAgent(
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const currentToolCalls: ToolCall[] = [];
+    const toolErrors = new Map<string, string>();
     let textBuffer = '';
-    let currentToolCall: Partial<ToolCall> | null = null;
-    let toolInputJson = '';
+    const pendingToolCalls = new Map<string, { id: string; name: string; raw: string }>();
+    let activeToolCallId: string | undefined;
+    const pendingCall = (chunk: StreamChunk) => {
+      const id = chunk.tool_call?.id || activeToolCallId || `call_${randomUUID()}`;
+      let pending = pendingToolCalls.get(id);
+      if (!pending) {
+        pending = { id, name: '', raw: '' };
+        pendingToolCalls.set(id, pending);
+      }
+      if (chunk.tool_call?.name) pending.name = chunk.tool_call.name;
+      return pending;
+    };
 
     try {
       const ROUND_TIMEOUT_MS = 300_000;
@@ -161,24 +174,24 @@ export async function* runAgent(
             textBuffer += chunk.text || '';
             yield chunk;
           } else if (chunk.type === 'tool_call_start') {
-            currentToolCall = { id: chunk.tool_call?.id, name: chunk.tool_call?.name };
-            toolInputJson = '';
+            activeToolCallId = undefined;
+            activeToolCallId = pendingCall(chunk).id;
           } else if (chunk.type === 'tool_call_delta') {
-            toolInputJson += chunk.text || '';
+            pendingCall(chunk).raw += chunk.text || '';
           } else if (chunk.type === 'tool_call_end') {
-            if (chunk.tool_call?.arguments) {
-              currentToolCalls.push(chunk.tool_call as ToolCall);
-            } else if (currentToolCall?.name) {
-              let args: Record<string, unknown> = {};
-              try { args = toolInputJson ? JSON.parse(toolInputJson) : {}; } catch { /* ignore */ }
-              currentToolCalls.push({
-                id: currentToolCall.id || `call_${round}_${currentToolCalls.length}`,
-                name: currentToolCall.name,
-                arguments: args,
-              });
-            }
-            currentToolCall = null;
-            toolInputJson = '';
+            const pending = pendingCall(chunk);
+            const supplied = chunk.tool_call?.arguments;
+            const parsed = isArgumentObject(supplied) && Object.keys(supplied).length > 0
+              ? { arguments: supplied }
+              : parseToolArguments(pending.name, pending.raw);
+            const error = chunk.error || parsed.error
+              || (!pending.name ? toolArgumentError('', pending.raw, 'have no tool name') : undefined);
+            // An errored call still needs an assistant/tool-result pair in model
+            // history. Its placeholder arguments never reach the executor.
+            currentToolCalls.push({ id: pending.id, name: pending.name, arguments: error ? {} : parsed.arguments! });
+            if (error) toolErrors.set(pending.id, error);
+            pendingToolCalls.delete(pending.id);
+            if (activeToolCallId === pending.id) activeToolCallId = undefined;
           } else if (chunk.type === 'error') {
             yield chunk;
             clearTimeout(timeoutHandle);
@@ -220,10 +233,23 @@ export async function* runAgent(
     let preferenceFormData: unknown = null;
 
     const toolResultPromises = currentToolCalls.map(async (tc) => {
+      const inputError = toolErrors.get(tc.id);
+      if (inputError) {
+        return { tool_call_id: tc.id, content: JSON.stringify({ error: inputError }) } as ToolResult;
+      }
       try {
         const result = await executeTool(tc.name, tc.arguments, userId, {
           actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
         });
+
+        // Some existing executors return an error receipt instead of throwing.
+        // Reflect both forms in SSE while preserving the original model result.
+        try {
+          const receipt: unknown = JSON.parse(result);
+          if (isArgumentObject(receipt) && receipt.error) {
+            toolErrors.set(tc.id, typeof receipt.error === 'string' ? receipt.error : JSON.stringify(receipt.error));
+          }
+        } catch { /* Plain-text tool results are also valid. */ }
 
         // Detect preference_form from collect_preferences tool
         if (tc.name === 'collect_preferences') {
@@ -240,13 +266,16 @@ export async function* runAgent(
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : 'Tool execution error';
         console.error(`Tool execution failed [${tc.name}]:`, err);
-        return { tool_call_id: tc.id, content: JSON.stringify({ error: `Tool '${tc.name}' failed: ${errMsg}` }) } as ToolResult;
+        const error = `Tool '${tc.name}' failed: ${errMsg}`;
+        toolErrors.set(tc.id, error);
+        return { tool_call_id: tc.id, content: JSON.stringify({ error }) } as ToolResult;
       }
     });
 
     const toolResults = await Promise.all(toolResultPromises);
     for (const tc of currentToolCalls) {
-      yield { type: 'tool_call_end', tool_call: tc };
+      const error = toolErrors.get(tc.id);
+      yield { type: 'tool_call_end', tool_call: tc, ...(error ? { error } : {}) };
     }
 
     // If a preference form was generated, emit it as a special SSE event

@@ -1,0 +1,120 @@
+{
+  "startedAt": "2026-09-14T07:17:33.084Z",
+  "kind": "Local post-auth HTTP replay with synthetic OpenAI-compatible HTTP endpoint",
+  "isolation": "In-memory SQLite; fresh system-temp appdata/assets/uploads; allowlisted process environment; no .env or user database; loopback HTTP only.",
+  "liveModelCall": false,
+  "authenticatedBrowserJourney": false,
+  "scenarioCount": 2,
+  "ordinaryFixtureDocumentCount": 384,
+  "scenarios": [
+    {
+      "name": "long-success",
+      "rawArgumentCharacters": 15110,
+      "rawArgumentBytes": 15142,
+      "finishReason": "tool_calls",
+      "sseToolEvents": [
+        {
+          "event": "tool_start",
+          "data": {
+            "id": "replay-success",
+            "name": "create_proposal"
+          }
+        },
+        {
+          "event": "tool_end",
+          "data": {
+            "id": "replay-success",
+            "name": "create_proposal",
+            "ok": true
+          }
+        }
+      ],
+      "modelReceivedToolResult": true,
+      "modelReceivedReadableError": false,
+      "proposalDelta": 1,
+      "generationRequestDelta": 1,
+      "globalSseErrorCount": 0,
+      "doneEventCount": 1,
+      "emptyShot": false,
+      "receiptMessage": "Organized note proposal created. Review and apply it from the Proposals inbox (「提案」收件箱) in the Agent panel.",
+      "persistedProposal": {
+        "type": "organized_note",
+        "status": "pending",
+        "conversationMatches": true,
+        "generationMode": "ai",
+        "sourceMaterialCount": 384,
+        "blockCount": 1
+      },
+      "visibleInPendingInboxApi": true
+    },
+    {
+      "name": "long-truncated",
+      "rawArgumentCharacters": 15091,
+      "rawArgumentBytes": 15091,
+      "finishReason": "length",
+      "sseToolEvents": [
+        {
+          "event": "tool_start",
+          "data": {
+            "id": "replay-truncated",
+            "name": "create_proposal"
+          }
+        },
+        {
+          "event": "tool_end",
+          "data": {
+            "id": "replay-truncated",
+            "name": "create_proposal",
+            "ok": false
+          }
+        }
+      ],
+      "modelReceivedToolResult": true,
+      "modelReceivedReadableError": true,
+      "proposalDelta": 0,
+      "generationRequestDelta": 0,
+      "globalSseErrorCount": 0,
+      "doneEventCount": 1,
+      "emptyShot": false,
+      "modelError": "Tool 'create_proposal' arguments were truncated by the output token limit; finish_reason=length; raw_length=15091; raw_prefix=\"{\\\"type\\\":\\\"organized_note\\\",\\\"data\\\":\"…. The tool was not executed. Retry with a complete JSON object.",
+      "sseTextMakesFailureVisible": true
+    }
+  ],
+  "outboundProviderRequests": [
+    {
+      "scenario": "long-success",
+      "kind": "tool-request",
+      "max_tokens": 16384,
+      "parallel_tool_calls": true
+    },
+    {
+      "scenario": "long-success",
+      "kind": "organized-note-blocks",
+      "max_tokens": 16384
+    },
+    {
+      "scenario": "long-success",
+      "kind": "tool-feedback",
+      "max_tokens": 16384,
+      "parallel_tool_calls": true
+    },
+    {
+      "scenario": "long-truncated",
+      "kind": "tool-request",
+      "max_tokens": 16384,
+      "parallel_tool_calls": true
+    },
+    {
+      "scenario": "long-truncated",
+      "kind": "tool-feedback",
+      "max_tokens": 16384,
+      "parallel_tool_calls": true
+    }
+  ],
+  "complete": true,
+  "emptyShots": 0,
+  "emptyShotDenominator": 2,
+  "emptyShotRate": 0,
+  "proposalIssuedEventCount": 1,
+  "finishedAt": "2026-09-14T07:17:33.876Z"
+}

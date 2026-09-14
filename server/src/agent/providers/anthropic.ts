@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { AIProvider, ProviderConfig, ProviderMessage, ToolDefinition, StreamChunk } from './types.js';
+import { isArgumentObject } from './tool-arguments.js';
 
 export class AnthropicProvider implements AIProvider {
   private client: Anthropic;
@@ -119,6 +120,8 @@ export class AnthropicProvider implements AIProvider {
       let currentToolCallId = '';
       let currentToolCallName = '';
       let currentToolInputJson = '';
+      let initialToolInput: Record<string, unknown> | undefined;
+      let sawToolInputDelta = false;
 
       for await (const event of stream) {
         if (event.type === 'content_block_start') {
@@ -129,6 +132,8 @@ export class AnthropicProvider implements AIProvider {
             currentToolCallId = block.id;
             currentToolCallName = block.name;
             currentToolInputJson = '';
+            initialToolInput = isArgumentObject(block.input) ? block.input : undefined;
+            sawToolInputDelta = false;
             yield {
               type: 'tool_call_start',
               tool_call: { id: block.id, name: block.name },
@@ -139,6 +144,7 @@ export class AnthropicProvider implements AIProvider {
           if (delta.type === 'text_delta') {
             yield { type: 'text', text: delta.text };
           } else if (delta.type === 'input_json_delta') {
+            sawToolInputDelta = true;
             currentToolInputJson += delta.partial_json;
             yield {
               type: 'tool_call_delta',
@@ -148,6 +154,17 @@ export class AnthropicProvider implements AIProvider {
           }
         } else if (event.type === 'content_block_stop') {
           if (currentToolCallName) {
+            // A no-argument tool can carry its complete input in the start
+            // block alone. Expose that input to the shared JSON accumulator;
+            // any received delta, even an empty or malformed one, wins.
+            if (!sawToolInputDelta && initialToolInput !== undefined) {
+              currentToolInputJson = JSON.stringify(initialToolInput);
+              yield {
+                type: 'tool_call_delta',
+                tool_call: { id: currentToolCallId, name: currentToolCallName },
+                text: currentToolInputJson,
+              };
+            }
             let args: Record<string, unknown> = {};
             try {
               args = currentToolInputJson ? JSON.parse(currentToolInputJson) : {};
@@ -162,6 +179,8 @@ export class AnthropicProvider implements AIProvider {
             currentToolCallId = '';
             currentToolCallName = '';
             currentToolInputJson = '';
+            initialToolInput = undefined;
+            sawToolInputDelta = false;
           }
         } else if (event.type === 'message_stop') {
           yield { type: 'done' };

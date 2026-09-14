@@ -5,6 +5,7 @@ import type { Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test, { type TestContext } from 'node:test';
+import Anthropic from '@anthropic-ai/sdk';
 import express from 'express';
 import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
 import { OpenAIProvider } from '../agent/providers/openai.js';
@@ -400,4 +401,288 @@ test('Source Library question receives the truthful boundary through the isolate
   assert.match(reply.content, /不能检索或读取 Source Library/u);
   assert.match(reply.content, /材料库.*请经材料库上传/u);
   assert.ok(response.body.includes(reply.content), 'the streamed reply is the reply saved in the isolated conversation');
+});
+
+// Tool-stream regressions share this already-wired agent route suite. All new
+// cases are ordinary protocol/functionality fixtures with no live provider or DB.
+const STREAM_USER = 'stream-user';
+const STREAM_COURSE = '11111111-1111-4111-8111-111111111111';
+const STREAM_CONVERSATION = 'stream-conversation';
+const STREAM_DECK = { name: 'Reading notes', course_id: STREAM_COURSE };
+type WireMessage = { role: string; content: string; tool_call_id?: string };
+type WireRequest = { messages: WireMessage[]; max_tokens: number; parallel_tool_calls?: boolean };
+type RouteEvent = { type: string; data: { id?: string; name?: string; ok?: boolean; content?: string } };
+type StreamDb = Awaited<ReturnType<typeof initDb>>;
+
+function providerEvent(delta: Record<string, unknown>, finishReason?: string) {
+  return `data:${JSON.stringify({ choices: [{ delta, ...(finishReason ? { finish_reason: finishReason } : {}) }] })}\n\n`;
+}
+
+function callEvent(index: number, id: string, name: string, raw: string) {
+  return providerEvent({ tool_calls: [{ index, id, function: { name, arguments: raw } }] });
+}
+
+function callRound(id: string, name: string, raw: string, finishReason = 'tool_calls') {
+  return callEvent(0, id, name, raw) + providerEvent({}, finishReason) + 'data:[DONE]\n\n';
+}
+
+const finalStreamRound = providerEvent({ content: '工具结果已收到。' }, 'stop') + 'data:[DONE]\n\n';
+
+async function streamFixture(t: TestContext, activeProvider = 'openai') {
+  const credentialDirectory = mkdtempSync(join(tmpdir(), 'coincides-toolstream-http-'));
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv, COINCIDES_APP_DATA_DIR: credentialDirectory,
+    OPENAI_API_KEY: 'syn-stream', ANTHROPIC_API_KEY: 'syn-anthropic', ANTHROPIC_AUTH_TOKEN: '',
+  };
+  t.after(() => { process.env = originalEnv; rmdirSync(credentialDirectory); });
+  const db = await initDb(':memory:');
+  t.after(() => closeDb());
+  db.prepare('INSERT INTO users(id,email,password_hash,name,settings) VALUES(?,?,?,?,?)').run(
+    STREAM_USER, 'stream@example.invalid', 'synthetic', 'Stream Reader', JSON.stringify({
+      active_provider: activeProvider,
+      ai_providers: { openai: { base_url: 'https://provider.example', default_model: 'stream-fixture' } },
+    }),
+  );
+  db.prepare('INSERT INTO courses(id,user_id,name) VALUES(?,?,?)').run(STREAM_COURSE, STREAM_USER, 'Reading');
+  db.prepare('INSERT INTO agent_conversations(id,user_id,title) VALUES(?,?,?)')
+    .run(STREAM_CONVERSATION, STREAM_USER, 'Protocol conversation');
+  const app = express();
+  app.use(express.json());
+  app.use((req: AuthRequest, _res, next) => { req.userId = STREAM_USER; next(); });
+  app.use('/api/agent', agentRouter);
+  const server = await new Promise<Server>(resolve => {
+    const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
+  });
+  t.after(() => new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve())));
+  const address = server.address();
+  assert.ok(address && typeof address === 'object');
+  const appOrigin = `http://127.0.0.1:${address.port}`;
+  const originalFetch = globalThis.fetch.bind(globalThis);
+  const rounds: string[] = [];
+  const requests: WireRequest[] = [];
+  t.mock.method(globalThis, 'fetch', async (input: string | URL | Request, init?: RequestInit) => {
+    const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
+    if (url.origin === appOrigin) return originalFetch(input, init);
+    assert.equal(url.origin, 'https://provider.example', 'only the synthetic provider may be intercepted');
+    assert.equal(url.pathname, '/v1/chat/completions');
+    requests.push(JSON.parse(init?.body as string));
+    const response = rounds.shift();
+    assert.notEqual(response, undefined, 'every expected provider round has a fixture');
+    return new Response(response);
+  });
+  async function request() {
+    const response = await fetch(`${appOrigin}/api/agent/conversations/${STREAM_CONVERSATION}/messages`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '请处理这次工具调用，并根据工具结果回复。' }),
+    });
+    assert.equal(response.status, 200);
+    const body = await response.text();
+    const events: RouteEvent[] = body.trim().split(/\r?\n\r?\n/).map(block => {
+      const lines = block.split(/\r?\n/);
+      return { type: lines[0].replace(/^event: /, ''), data: JSON.parse(lines[1].replace(/^data: /, '')) };
+    });
+    assert.equal(events.filter(event => event.type === 'error').length, 0, body);
+    assert.equal(events[events.length - 1]?.type, 'done');
+    return events;
+  }
+  return { db, rounds, requests, request };
+}
+
+function assertToolEvents(events: RouteEvent[], id: string, name: string, ok: boolean) {
+  assert.deepEqual(events.filter(event => event.type === 'tool_start' && event.data.id === id), [
+    { type: 'tool_start', data: { id, name } },
+  ]);
+  assert.deepEqual(events.filter(event => event.type === 'tool_end' && event.data.id === id), [
+    { type: 'tool_end', data: { id, name, ok } },
+  ]);
+}
+
+function assertNoDeckWrites(db: StreamDb) {
+  for (const table of ['card_decks', 'events', 'operation_batches']) {
+    assert.equal((db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number }).n, 0,
+      `${table} remains empty for a failed stream`);
+  }
+}
+
+function nextWireResult(requests: WireRequest[], id: string, round = 1) {
+  const message = requests[round]?.messages.find(message => message.role === 'tool' && message.tool_call_id === id);
+  assert.ok(message, 'the next provider request includes the matched tool result');
+  return JSON.parse(message.content) as Record<string, unknown>;
+}
+
+for (const scenario of [
+  { name: 'empty arguments', raw: '', finishReason: 'tool_calls' },
+  { name: 'unfinished JSON', raw: '{"name":"Reading notes"', finishReason: 'tool_calls' },
+  { name: 'length truncation despite valid JSON', raw: JSON.stringify(STREAM_DECK), finishReason: 'length' },
+]) {
+  test(`HTTP tool stream: ${scenario.name} reaches the model as an error and creates no deck`, async t => {
+    const { db, rounds, requests, request } = await streamFixture(t);
+    rounds.push(callRound('call-failed', 'create_deck', scenario.raw, scenario.finishReason), finalStreamRound);
+    assertToolEvents(await request(), 'call-failed', 'create_deck', false);
+    assert.equal(requests.length, 2);
+    const result = nextWireResult(requests, 'call-failed');
+    assert.equal(typeof result.error, 'string');
+    assert.match(result.error as string, /create_deck/);
+    assert.ok((result.error as string).includes(scenario.finishReason));
+    assert.match(result.error as string, /raw_length/);
+    assert.match(result.error as string, /raw_prefix/);
+    assertNoDeckWrites(db);
+    const stored = db.prepare('SELECT tool_results FROM agent_messages WHERE tool_results IS NOT NULL')
+      .get() as { tool_results: string };
+    assert.deepEqual(JSON.parse(JSON.parse(stored.tool_results)[0].content), result);
+  });
+}
+
+test('HTTP tool stream: a subsequent corrected call succeeds after a readable argument error', async t => {
+  const { db, rounds, requests, request } = await streamFixture(t);
+  rounds.push(callRound('call-bad', 'create_deck', ''),
+    callRound('call-fixed', 'create_deck', JSON.stringify(STREAM_DECK)), finalStreamRound);
+  const events = await request();
+  assertToolEvents(events, 'call-bad', 'create_deck', false);
+  assertToolEvents(events, 'call-fixed', 'create_deck', true);
+  assert.match(nextWireResult(requests, 'call-bad').error as string, /create_deck/);
+  const result = nextWireResult(requests, 'call-fixed', 2);
+  assert.equal(result.name, STREAM_DECK.name);
+  assert.equal(typeof result.receipt_id, 'string');
+  assert.deepEqual(db.prepare('SELECT name,course_id FROM card_decks').all(), [STREAM_DECK]);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM operation_batches').get() as { n: number }).n, 1);
+});
+
+test('HTTP tool stream: parallel same-name calls retain distinct IDs and matching successful results', async t => {
+  const { db, rounds, requests, request } = await streamFixture(t);
+  rounds.push(callEvent(0, 'call-first', 'create_deck', JSON.stringify({ ...STREAM_DECK, name: 'First deck' }))
+    + callEvent(1, 'call-second', 'create_deck', JSON.stringify({ ...STREAM_DECK, name: 'Second deck' }))
+    + providerEvent({}, 'tool_calls') + 'data:[DONE]\n\n', finalStreamRound);
+  const events = await request();
+  for (const [id, name] of [['call-first', 'First deck'], ['call-second', 'Second deck']]) {
+    assertToolEvents(events, id, 'create_deck', true);
+    const result = nextWireResult(requests, id);
+    assert.equal(result.name, name);
+    assert.equal(typeof result.receipt_id, 'string');
+    assert.deepEqual(db.prepare('SELECT name FROM card_decks WHERE id=?').get(result.id), { name });
+  }
+  assert.equal(requests[0].parallel_tool_calls, true);
+  assert.equal(requests[0].max_tokens, 16384);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM operation_batches').get() as { n: number }).n, 2);
+});
+
+for (const scenario of [
+  { name: 'valid accumulated JSON', raw: JSON.stringify(STREAM_DECK), ok: true },
+  { name: 'empty accumulation', raw: '', ok: false },
+  { name: 'unfinished accumulated JSON', raw: '{"name":"Draft"', ok: false },
+]) {
+  test(`HTTP orchestrator: empty end arguments use ${scenario.name} semantically`, async t => {
+    const { db, request } = await streamFixture(t);
+    const received: ProviderMessage[][] = [];
+    t.mock.method(OpenAIProvider.prototype, 'chat', async function* (messages: ProviderMessage[]): AsyncGenerator<StreamChunk> {
+      received.push(structuredClone(messages));
+      if (received.length === 1) {
+        yield { type: 'tool_call_start', tool_call: { id: 'call-buffered', name: 'create_deck' } };
+        yield { type: 'tool_call_delta', tool_call: { id: 'call-buffered', name: 'create_deck' }, text: scenario.raw };
+        yield { type: 'tool_call_end', tool_call: { id: 'call-buffered', name: 'create_deck', arguments: {} } };
+      } else {
+        yield { type: 'text', text: '工具结果已收到。' };
+      }
+      yield { type: 'done' };
+    });
+    assertToolEvents(await request(), 'call-buffered', 'create_deck', scenario.ok);
+    assert.equal(received.length, 2);
+    const resultMessage = received[1].find(message => message.tool_results);
+    const result = JSON.parse(resultMessage!.tool_results![0].content);
+    if (scenario.ok) {
+      assert.equal(result.name, STREAM_DECK.name);
+      assert.deepEqual(db.prepare('SELECT name,course_id FROM card_decks').all(), [STREAM_DECK]);
+    } else {
+      assert.match(result.error, /create_deck/);
+      assert.match(result.error, /raw_length/);
+      assertNoDeckWrites(db);
+    }
+  });
+}
+
+test('HTTP tool stream: explicit empty JSON remains valid for the zero-argument list_courses tool', async t => {
+  const { db, rounds, requests, request } = await streamFixture(t);
+  rounds.push(callRound('call-courses', 'list_courses', '{}'), finalStreamRound);
+  assertToolEvents(await request(), 'call-courses', 'list_courses', true);
+  assert.deepEqual(nextWireResult(requests, 'call-courses'),
+    db.prepare('SELECT id,name,code,color,weight FROM courses WHERE user_id=? ORDER BY name').all(STREAM_USER));
+  assertNoDeckWrites(db);
+});
+
+for (const tool of [
+  { name: 'get_document_content', arguments: { document_id: 'missing-document' }, error: /Document not found/ },
+  { name: 'read_note', arguments: { note_id: '22222222-2222-4222-8222-222222222222' }, error: /Note not found/i },
+]) {
+  test(`HTTP tool stream: ${tool.name} execution failure reports ok false with the matched ID`, async t => {
+    const { db, rounds, requests, request } = await streamFixture(t);
+    rounds.push(callRound('call-unavailable', tool.name, JSON.stringify(tool.arguments)), finalStreamRound);
+    assertToolEvents(await request(), 'call-unavailable', tool.name, false);
+    assert.match(nextWireResult(requests, 'call-unavailable').error as string, tool.error);
+    assertNoDeckWrites(db);
+  });
+}
+
+test('HTTP Anthropic stream: a normal nonempty tool call executes and returns its result to the SDK', async t => {
+  const { db, request } = await streamFixture(t, 'anthropic');
+  const received: Array<{ messages: Array<{ role: string; content: unknown }>; max_tokens: number }> = [];
+  const messagesPrototype = Anthropic.Messages.prototype as unknown as {
+    stream(params: Record<string, unknown>): AsyncIterable<unknown>;
+  };
+  t.mock.method(messagesPrototype, 'stream', (params: Record<string, unknown>) => {
+    received.push(structuredClone(params) as typeof received[number]);
+    return (async function* () {
+      if (received.length === 1) {
+        yield { type: 'content_block_start', content_block: { type: 'tool_use', id: 'call-anthropic', name: 'create_deck' } };
+        yield { type: 'content_block_delta', delta: { type: 'input_json_delta', partial_json: '{"name":"Reading notes",' } };
+        yield { type: 'content_block_delta', delta: { type: 'input_json_delta', partial_json: `"course_id":"${STREAM_COURSE}"}` } };
+        yield { type: 'content_block_stop' };
+      } else {
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: '工具结果已收到。' } };
+      }
+      yield { type: 'message_stop' };
+    })();
+  });
+  assertToolEvents(await request(), 'call-anthropic', 'create_deck', true);
+  assert.equal(received.length, 2);
+  assert.equal(received[0].max_tokens, 16384);
+  const resultMessage = received[1].messages.find(message => message.role === 'user' && Array.isArray(message.content));
+  assert.ok(resultMessage);
+  const [block] = resultMessage.content as Array<{ type: string; tool_use_id: string; content: string }>;
+  assert.equal(block.type, 'tool_result');
+  assert.equal(block.tool_use_id, 'call-anthropic');
+  assert.equal(JSON.parse(block.content).name, STREAM_DECK.name);
+  assert.deepEqual(db.prepare('SELECT name,course_id FROM card_decks').all(), [STREAM_DECK]);
+});
+
+test('HTTP Anthropic stream: initial empty input with no JSON deltas supports a zero-argument tool', async t => {
+  const { db, request } = await streamFixture(t, 'anthropic');
+  const received: Array<{ messages: Array<{ role: string; content: unknown }> }> = [];
+  const messagesPrototype = Anthropic.Messages.prototype as unknown as {
+    stream(params: Record<string, unknown>): AsyncIterable<unknown>;
+  };
+  t.mock.method(messagesPrototype, 'stream', (params: Record<string, unknown>) => {
+    received.push(structuredClone(params) as typeof received[number]);
+    return (async function* () {
+      if (received.length === 1) {
+        yield { type: 'content_block_start', content_block: {
+          type: 'tool_use', id: 'call-anthropic-zero', name: 'list_courses', input: {},
+        } };
+        yield { type: 'content_block_stop' };
+      } else {
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: '工具结果已收到。' } };
+      }
+      yield { type: 'message_stop' };
+    })();
+  });
+  assertToolEvents(await request(), 'call-anthropic-zero', 'list_courses', true);
+  assert.equal(received.length, 2);
+  const resultMessage = received[1].messages.find(message => message.role === 'user' && Array.isArray(message.content));
+  assert.ok(resultMessage);
+  const [block] = resultMessage.content as Array<{ type: string; tool_use_id: string; content: string }>;
+  assert.equal(block.type, 'tool_result');
+  assert.equal(block.tool_use_id, 'call-anthropic-zero');
+  assert.deepEqual(JSON.parse(block.content),
+    db.prepare('SELECT id,name,code,color,weight FROM courses WHERE user_id=? ORDER BY name').all(STREAM_USER));
+  assertNoDeckWrites(db);
 });

@@ -282,7 +282,7 @@ export async function executeTool(
         return JSON.stringify({
           id: proposal.id, type: proposal.type, status: proposal.status,
           course_id: proposal.data.course_id, blocks_count: proposal.data.blocks.length,
-          message: 'Organized note proposal created. Review and apply it from the project materials.',
+          message: 'Organized note proposal created. Review and apply it from the Proposals inbox (「提案」收件箱) in the Agent panel.',
         });
       }
       const data = args.data as Record<string, unknown>;

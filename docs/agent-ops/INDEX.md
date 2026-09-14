@@ -378,7 +378,7 @@
 | [handoffs/2026-09-14-v14-prompt-cache-order.md](handoffs/2026-09-14-v14-prompt-cache-order.md) | prompt 缓存单 | `ready(队列位 4)` | — | — |
 | [handoffs/2026-09-14-v14-prompt-repair-order.md](handoffs/2026-09-14-v14-prompt-repair-order.md) | prompt 修缮单 | `done` | — | — |
 | [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `done` | — | — |
-| [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `ready(队列位 3)` | — | — |
+| [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `done` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

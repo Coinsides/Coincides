@@ -107,9 +107,9 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
         if (chunk.type === 'text' && chunk.text) {
           res.write(`event: text\ndata: ${JSON.stringify({ content: chunk.text })}\n\n`);
         } else if (chunk.type === 'tool_call_start') {
-          res.write(`event: tool_start\ndata: ${JSON.stringify({ name: chunk.tool_call?.name })}\n\n`);
+          res.write(`event: tool_start\ndata: ${JSON.stringify({ id: chunk.tool_call?.id, name: chunk.tool_call?.name })}\n\n`);
         } else if (chunk.type === 'tool_call_end') {
-          res.write(`event: tool_end\ndata: ${JSON.stringify({ name: chunk.tool_call?.name })}\n\n`);
+          res.write(`event: tool_end\ndata: ${JSON.stringify({ id: chunk.tool_call?.id, name: chunk.tool_call?.name, ok: !chunk.error })}\n\n`);
         } else if (chunk.type === 'preference_form') {
           res.write(`event: preference_form\ndata: ${JSON.stringify({ questions: chunk.data })}\n\n`);
         } else if (chunk.type === 'done') {

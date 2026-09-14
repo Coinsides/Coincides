@@ -1,0 +1,38 @@
+[
+    {
+        "path":  "docs/INDEX.md",
+        "sha256":  "BFC27C168D53205C3CD694A0FDE851C33FBF45E22AA8A12E4791ED86638D5B96"
+    },
+    {
+        "path":  "docs/agent-ops/INDEX.md",
+        "sha256":  "AB70CD7509280D1FAC0D02FFAB6F5707E52A5D48ABAF5750E46AFC7606F9E2CB"
+    },
+    {
+        "path":  "docs/agent-ops/decisions/INDEX.md",
+        "sha256":  "69493F023D31C34417C893D631AA1D00EA3E5857924F7068B54A12647ACB53D6"
+    },
+    {
+        "path":  "docs/agent-ops/current-state/INDEX.md",
+        "sha256":  "89EEABF4F104F75E5ED485FAD802441736BD87A6867CAC66C75A469E62AD17E5"
+    },
+    {
+        "path":  "docs/contracts/INDEX.md",
+        "sha256":  "31A8127754EFC53DCE14B34DBBCC0C8F271EB8876082E02A616546CCFA4D5EC4"
+    },
+    {
+        "path":  "docs/brainstorm/INDEX.md",
+        "sha256":  "D41866042FC1BA7FE0A909B4EC4D992C8431D5D0992CC1831F3EE03F76732F97"
+    },
+    {
+        "path":  "docs/internal/INDEX.md",
+        "sha256":  "221C72CB194B4F5137F806786F74CDE027909F8F56DB9F10321A0F3DBAD7C3D1"
+    },
+    {
+        "path":  "docs/workflow/INDEX.md",
+        "sha256":  "B6ABBB098BA116D4A9774252DA53D104AA2BA38D7A72EE5DF7C6854C8451CBFC"
+    },
+    {
+        "path":  "docs/continuity/INDEX.md",
+        "sha256":  "683D402EFA53EAB14AE0BCC96F081179AF1EAF6DD6FE2F1A7E0232747E39C435"
+    }
+]

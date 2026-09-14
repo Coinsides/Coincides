@@ -268,6 +268,16 @@ for (const spec of cases) {
     const chat = await request(`/agent/conversations/${conversationId}/messages`, { message });
     assert.equal(chat.status, 200);
     assert.equal(chat.body.includes('event: error'), false, chat.body);
+    const toolEvents = (chat.body as string).split('\n\n')
+      .filter(event => event.startsWith('event: tool_'))
+      .map(event => {
+        const [eventLine, dataLine] = event.split('\n');
+        return { event: eventLine.slice('event: '.length), data: JSON.parse(dataLine.slice('data: '.length)) };
+      });
+    assert.deepEqual(toolEvents, [
+      { event: 'tool_start', data: { id: context.callId, name: spec.name } },
+      { event: 'tool_end', data: { id: context.callId, name: spec.name, ok: true } },
+    ]);
     assert.equal(rounds, 2);
     const messages = await request(`/agent/conversations/${conversationId}/messages`);
     assert.equal(messages.status, 200);
