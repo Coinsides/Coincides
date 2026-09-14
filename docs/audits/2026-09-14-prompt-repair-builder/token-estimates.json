@@ -1,0 +1,58 @@
+{
+  "method": "Static-body proxy: rendered prompt with empty names/date/lists, default language, L1 off. Han 1–2 tokens each; all other Unicode code points / 4 rounded up. Estimate only, not provider token usage.",
+  "before": {
+    "characters": 23745,
+    "han": 826,
+    "other": 22919,
+    "lower": 6556,
+    "upper": 7382
+  },
+  "after": {
+    "characters": 16949,
+    "han": 935,
+    "other": 16014,
+    "lower": 4939,
+    "upper": 5874
+  },
+  "netReduction": {
+    "lower": 1617,
+    "upper": 1508,
+    "lowerPercent": 24.66,
+    "upperPercent": 20.43
+  },
+  "workflowRegion": {
+    "note": "Key Rules through Card Generation, plus the former duplicate document Q&A paragraph. Includes authorized semantic repairs; net reduction is not an isolated causal estimate for item 11.",
+    "before": {
+      "characters": 20572,
+      "han": 198,
+      "other": 20374,
+      "lower": 5292,
+      "upper": 5490
+    },
+    "after": {
+      "characters": 13018,
+      "han": 166,
+      "other": 12852,
+      "lower": 3379,
+      "upper": 3545
+    }
+  },
+  "perception": {
+    "characters": 554,
+    "han": 4,
+    "other": 550,
+    "lower": 142,
+    "upper": 146
+  },
+  "productManual": {
+    "characters": 1717,
+    "han": 655,
+    "other": 1062,
+    "lower": 921,
+    "upper": 1576
+  },
+  "sourceSha256": {
+    "before": "6faba3e3aba66b0dbe59be8e9a9ad6381a9030926058a0d831e11c7a0035bd7a",
+    "after": "e5577175a95cfa89fabbc45be98813da7eff5b8c0409cc44299db24972ef837b"
+  }
+}

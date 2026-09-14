@@ -1,0 +1,2334 @@
+{
+  "mode": "server-full-serial",
+  "runId": "2026-09-14T07-00-56-594Z-6892",
+  "startedAt": "2026-09-14T07:00:56.600Z",
+  "scope": "Full suite modes exclude no tests; targeted selection is recorded explicitly. No new security/adversarial cases.",
+  "isolation": "OS environment allowlist; in-memory default DB; fresh system-temp dotenv/Vite/appdata/assets/uploads; no inherited credentials or NODE_OPTIONS.",
+  "serverDiscoveredTestFiles": [
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "selectedTestFiles": [
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "hqPending": [],
+  "steps": [
+    {
+      "label": "shared-build",
+      "command": [
+        "node",
+        "server/node_modules/typescript/bin/tsc",
+        "-b",
+        "shared/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 86,
+      "log": "01-shared-build.log",
+      "counts": {}
+    },
+    {
+      "label": "server-check-tool-face-manifest",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 355,
+      "log": "02-server-check-tool-face-manifest.log",
+      "counts": {}
+    },
+    {
+      "label": "server-copy-tool-face-manifest",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "copy:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 207,
+      "log": "03-server-copy-tool-face-manifest.log",
+      "counts": {}
+    },
+    {
+      "label": "server/scripts/v13WildernessExecute.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "scripts/v13WildernessExecute.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 96753,
+      "log": "04-server_scripts_v13WildernessExecute.test.ts.log",
+      "counts": {
+        "tests": 27,
+        "suites": 0,
+        "pass": 27,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 96668.7743
+      }
+    },
+    {
+      "label": "server/scripts/v13WildernessShadowRun.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "scripts/v13WildernessShadowRun.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1934,
+      "log": "05-server_scripts_v13WildernessShadowRun.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1848.5421
+      }
+    },
+    {
+      "label": "server/scripts/v2Bn12LifecycleMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "scripts/v2Bn12LifecycleMigration.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 280,
+      "log": "06-server_scripts_v2Bn12LifecycleMigration.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 189.3261
+      }
+    },
+    {
+      "label": "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "scripts/v2OperationBatchTimestampMigration.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 490,
+      "log": "07-server_scripts_v2OperationBatchTimestampMigration.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 404.1955
+      }
+    },
+    {
+      "label": "server/src/__tests__/providerCredentials.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/providerCredentials.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 554,
+      "log": "08-server_src___tests___providerCredentials.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 469.3805
+      }
+    },
+    {
+      "label": "server/src/__tests__/textFlowIdentityContract.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/textFlowIdentityContract.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2315,
+      "log": "09-server_src___tests___textFlowIdentityContract.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2223.7624
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AgentMemories.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13AgentMemories.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 630,
+      "log": "10-server_src___tests___v13AgentMemories.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 545.4547
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AtomicTextSave.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13AtomicTextSave.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 3531,
+      "log": "11-server_src___tests___v13AtomicTextSave.test.ts.log",
+      "counts": {
+        "tests": 23,
+        "suites": 0,
+        "pass": 23,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 3447.3374
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13AtomicTextSaveMigration.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1104,
+      "log": "12-server_src___tests___v13AtomicTextSaveMigration.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1022.1487
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardCeremonyNote.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 900,
+      "log": "13-server_src___tests___v13BoardCeremonyNote.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 815.0072
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardChalk.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardChalk.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 980,
+      "log": "14-server_src___tests___v13BoardChalk.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 893.8366
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardIdentity.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardIdentity.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1774,
+      "log": "15-server_src___tests___v13BoardIdentity.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1687.7852
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardRoutes.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardRoutes.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 781,
+      "log": "16-server_src___tests___v13BoardRoutes.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 694.019
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardSchema.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardSchema.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 836,
+      "log": "17-server_src___tests___v13BoardSchema.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 749.1888
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardServices.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardServices.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 836,
+      "log": "18-server_src___tests___v13BoardServices.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 744.8874
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardStaging.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardStaging.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 848,
+      "log": "19-server_src___tests___v13BoardStaging.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 761.6205
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardTextRanges.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardTextRanges.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1321,
+      "log": "20-server_src___tests___v13BoardTextRanges.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1236.9512
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardTrayRelocation.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1585,
+      "log": "21-server_src___tests___v13BoardTrayRelocation.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1497.7983
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardViewportBookmarks.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1358,
+      "log": "22-server_src___tests___v13BoardViewportBookmarks.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1273.9216
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardWave1.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13BoardWave1.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 664,
+      "log": "23-server_src___tests___v13BoardWave1.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 579.5269
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13CanvasRetirement.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13CanvasRetirement.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 625,
+      "log": "24-server_src___tests___v13CanvasRetirement.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 538.8229
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13CoordinateContract.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13CoordinateContract.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1290,
+      "log": "25-server_src___tests___v13CoordinateContract.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1194.9611
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13EventsLedger.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13EventsLedger.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 750,
+      "log": "26-server_src___tests___v13EventsLedger.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 664.0903
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13GraphemeTextRanges.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 489,
+      "log": "27-server_src___tests___v13GraphemeTextRanges.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 395.8396
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13ItemFloor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13ItemFloor.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 643,
+      "log": "28-server_src___tests___v13ItemFloor.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 560.8188
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13ItemRefBlocks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13ItemRefBlocks.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 669,
+      "log": "29-server_src___tests___v13ItemRefBlocks.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 582.2056
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13MediaBlocks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13MediaBlocks.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1689,
+      "log": "30-server_src___tests___v13MediaBlocks.test.ts.log",
+      "counts": {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1594.5501
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13NoteMetadata.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13NoteMetadata.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1327,
+      "log": "31-server_src___tests___v13NoteMetadata.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1242.6017
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13PagePresets.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13PagePresets.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 903,
+      "log": "32-server_src___tests___v13PagePresets.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 813.54
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13PaperInk.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13PaperInk.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 785,
+      "log": "33-server_src___tests___v13PaperInk.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 694.9817
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13PaperSkin.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13PaperSkin.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1955,
+      "log": "34-server_src___tests___v13PaperSkin.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1865.5741
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13ProjectDeletionReferences.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 893,
+      "log": "35-server_src___tests___v13ProjectDeletionReferences.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 808.6195
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13RecordedAction.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13RecordedAction.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 265,
+      "log": "36-server_src___tests___v13RecordedAction.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 182.9056
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13SourceProjectionRepair.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1331,
+      "log": "37-server_src___tests___v13SourceProjectionRepair.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1245.2731
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13SourceReprojection.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1812,
+      "log": "38-server_src___tests___v13SourceReprojection.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1726.5069
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13Tray.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13Tray.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 702,
+      "log": "39-server_src___tests___v13Tray.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 614.7433
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13TrayOrder.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13TrayOrder.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 826,
+      "log": "40-server_src___tests___v13TrayOrder.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 736.207
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13WallCollectionBatch.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v13WallCollectionBatch.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 300,
+      "log": "41-server_src___tests___v13WallCollectionBatch.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 206.5383
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14AgentVerbTransfer.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 6162,
+      "log": "42-server_src___tests___v14AgentVerbTransfer.test.ts.log",
+      "counts": {
+        "tests": 50,
+        "suites": 0,
+        "pass": 50,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 6077.8127
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentWriteDoor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14AgentWriteDoor.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1182,
+      "log": "43-server_src___tests___v14AgentWriteDoor.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1096.5333
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14CardCover.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14CardCover.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1154,
+      "log": "44-server_src___tests___v14CardCover.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1069.5801
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ContextHint.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14ContextHint.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1168,
+      "log": "45-server_src___tests___v14ContextHint.test.ts.log",
+      "counts": {
+        "tests": 21,
+        "suites": 0,
+        "pass": 21,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1081.2554
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14DeleteCeremony.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14DeleteCeremony.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2265,
+      "log": "46-server_src___tests___v14DeleteCeremony.test.ts.log",
+      "counts": {
+        "tests": 16,
+        "suites": 0,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2174.2259
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14PaletteColors.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14PaletteColors.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 705,
+      "log": "47-server_src___tests___v14PaletteColors.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 618.3999
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ProposalUnification.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14ProposalUnification.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2366,
+      "log": "48-server_src___tests___v14ProposalUnification.test.ts.log",
+      "counts": {
+        "tests": 16,
+        "suites": 0,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2280.2454
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ReadTools.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14ReadTools.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2071,
+      "log": "49-server_src___tests___v14ReadTools.test.ts.log",
+      "counts": {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1987.5411
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14SkinSuites.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v14SkinSuites.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 714,
+      "log": "50-server_src___tests___v14SkinSuites.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 625.7769
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2BlockRestoreDoor.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 965,
+      "log": "51-server_src___tests___v2BlockRestoreDoor.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 879.8407
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2CanvasPersistenceCutover.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 5989,
+      "log": "52-server_src___tests___v2CanvasPersistenceCutover.test.ts.log",
+      "counts": {
+        "tests": 49,
+        "suites": 0,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 5907.0507
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ContentGroups.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2ContentGroups.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2035,
+      "log": "53-server_src___tests___v2ContentGroups.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1943.238
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2DevQuickLogin.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2DevQuickLogin.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 19517,
+      "log": "54-server_src___tests___v2DevQuickLogin.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 19433.7282
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2DocumentParserPdf.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2DocumentParserPdf.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1605,
+      "log": "55-server_src___tests___v2DocumentParserPdf.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1518.211
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2GroupFolders.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2GroupFolders.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1425,
+      "log": "56-server_src___tests___v2GroupFolders.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1341.9525
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ImprintCitations.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2ImprintCitations.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 535,
+      "log": "57-server_src___tests___v2ImprintCitations.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 447.1113
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ImprintEmbedding.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2ImprintEmbedding.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 307,
+      "log": "58-server_src___tests___v2ImprintEmbedding.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 217.0607
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ImprintRetrieval.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2ImprintRetrieval.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 560,
+      "log": "59-server_src___tests___v2ImprintRetrieval.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 476.4362
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ItemRelationFloor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2ItemRelationFloor.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1788,
+      "log": "60-server_src___tests___v2ItemRelationFloor.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1700.6536
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2Items.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2Items.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1500,
+      "log": "61-server_src___tests___v2Items.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1414.4837
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2MaterialLibrary.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2MaterialLibrary.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 9476,
+      "log": "62-server_src___tests___v2MaterialLibrary.test.ts.log",
+      "counts": {
+        "tests": 59,
+        "suites": 0,
+        "pass": 59,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 9390.8312
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2McpArtifact.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2McpArtifact.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 14921,
+      "log": "63-server_src___tests___v2McpArtifact.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 14831.9759
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2McpTransport.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2McpTransport.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 9721,
+      "log": "64-server_src___tests___v2McpTransport.test.ts.log",
+      "counts": {
+        "tests": 49,
+        "suites": 0,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 9630.901
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2NoteBlockLifecycle.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 3405,
+      "log": "65-server_src___tests___v2NoteBlockLifecycle.test.ts.log",
+      "counts": {
+        "tests": 25,
+        "suites": 0,
+        "pass": 25,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 3318.1731
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NoteFoundation.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2NoteFoundation.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 671,
+      "log": "66-server_src___tests___v2NoteFoundation.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 588.335
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NotesLifecycle.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2NotesLifecycle.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1622,
+      "log": "67-server_src___tests___v2NotesLifecycle.test.ts.log",
+      "counts": {
+        "tests": 13,
+        "suites": 0,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1537.1813
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NotesListService.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2NotesListService.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 6115,
+      "log": "68-server_src___tests___v2NotesListService.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 6026.828
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2Purposes.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2Purposes.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 360,
+      "log": "69-server_src___tests___v2Purposes.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 272.3331
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2RelationLifecycleClosure.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 826,
+      "log": "70-server_src___tests___v2RelationLifecycleClosure.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 738.1219
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2Relations.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2Relations.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1229,
+      "log": "71-server_src___tests___v2Relations.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1136.9814
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceContainerIntake.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceContainerIntake.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2045,
+      "log": "72-server_src___tests___v2SourceContainerIntake.test.ts.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1961.3914
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceFileIntake.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceFileIntake.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2804,
+      "log": "73-server_src___tests___v2SourceFileIntake.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2719.5666
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceIdentityFloor.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1426,
+      "log": "74-server_src___tests___v2SourceIdentityFloor.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1343.0324
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceImprints.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceImprints.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 4168,
+      "log": "75-server_src___tests___v2SourceImprints.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 4076.1304
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceLifecycleClosure.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1676,
+      "log": "76-server_src___tests___v2SourceLifecycleClosure.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1588.8287
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceMaterialization.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceMaterialization.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2877,
+      "log": "77-server_src___tests___v2SourceMaterialization.test.ts.log",
+      "counts": {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2792.7252
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceMineruWiring.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 809,
+      "log": "78-server_src___tests___v2SourceMineruWiring.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 720.839
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceNeverReject.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceNeverReject.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2247,
+      "log": "79-server_src___tests___v2SourceNeverReject.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2161.9998
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceRegionCells.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceRegionCells.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 2675,
+      "log": "80-server_src___tests___v2SourceRegionCells.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2588.1701
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceT0Alignment.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceT0Alignment.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 2008,
+      "log": "81-server_src___tests___v2SourceT0Alignment.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1922.4366
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2SourceTranscriberFingerprint.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1493,
+      "log": "82-server_src___tests___v2SourceTranscriberFingerprint.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1404.6844
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2TemplateStudioDecommission.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 585,
+      "log": "83-server_src___tests___v2TemplateStudioDecommission.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 499.0604
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2TestV2ManifestHook.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 453,
+      "log": "84-server_src___tests___v2TestV2ManifestHook.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 365.8529
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2TrashNotesTool.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/__tests__/v2TrashNotesTool.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 5204,
+      "log": "85-server_src___tests___v2TrashNotesTool.test.ts.log",
+      "counts": {
+        "tests": 23,
+        "suites": 0,
+        "pass": 23,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 5119.7359
+      }
+    },
+    {
+      "label": "server/src/agent/providers/index.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/agent/providers/index.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 307,
+      "log": "86-server_src_agent_providers_index.test.ts.log",
+      "counts": {
+        "tests": 13,
+        "suites": 0,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 223.6362
+      }
+    },
+    {
+      "label": "server/src/toolFace/registry.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "src/toolFace/registry.test.ts"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 278,
+      "log": "87-server_src_toolFace_registry.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 190.0231
+      }
+    }
+  ],
+  "finishedAt": "2026-09-14T07:05:27.427Z",
+  "failedSteps": [
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts"
+  ],
+  "executedStepsPassed": false,
+  "completeRuntimeGate": false
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "orchestrator": "Byte comparison against the pre-edit snapshot matches exactly: EnergyRow + unused SELECT + energyLevel argument removed; no loop or tool machinery changes.",
+  "prompt": "Required dates, readers and pagination/truncation terms present; ordered obsolete terms absent. Behavioral wording assertions live in v14ContextHint.test.ts.",
+  "sha256": {
+    "server/src/agent/system-prompt.ts": "e5577175a95cfa89fabbc45be98813da7eff5b8c0409cc44299db24972ef837b",
+    "server/src/agent/orchestrator.ts": "a031933aca6937c15c07edb456c576838944febd10750b467ec71701dcb31aec",
+    "server/src/__tests__/v14ContextHint.test.ts": "a46d6ef6ecf1acc418ef53e23c3dd77e1cde2561a17af89da55a7c44d8d38c7b"
+  }
+}

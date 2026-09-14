@@ -176,6 +176,16 @@ function productManual(prompt = buildSystemPrompt('Manual Agent', emptyContext))
   return sections![0];
 }
 
+function promptSection(heading: string, prompt = buildSystemPrompt('Manual Agent', emptyContext)): string {
+  const lines = prompt.split('\n');
+  const starts = lines.flatMap((line, index) => line === heading ? [index] : []);
+  assert.equal(starts.length, 1, `one authoritative ${heading} section`);
+  const level = heading.match(/^#+/)![0].length;
+  const end = lines.findIndex((line, index) => index > starts[0]
+    && new RegExp(`^#{1,${level}} `).test(line));
+  return lines.slice(starts[0], end === -1 ? undefined : end).join('\n');
+}
+
 test('product manual explains notes, projection boards, proposal-only cards and the two libraries', () => {
   const manual = productManual();
   for (const statement of [
@@ -199,7 +209,8 @@ test('product manual describes actual proposal visibility and keeps registration
     /不可用型会显示“此类提案暂不支持一键采纳”/u,
     /material_reconciliation 仅可“标记已复核”，不代表执行调和动作/u,
     /仅在提案工具成功返回后，才说“提案已登记”/u,
-    /material_map \/ organized_note \/ material_reconciliation 仍可在项目页处理/u,
+    /按提交门分域：经材料库门提交的 material_map \/ organized_note \/ material_reconciliation 可在项目页处理/u,
+    /经 chat 门提交的提案（含 organized_note）在 Agent 面板收件箱处理，不指向项目页/u,
     /用户在 chat 答复确认不等于提案已应用；apply 仍须人门/u,
   ]) assert.match(manual, statement);
   assert.doesNotMatch(prompt, /目前没有可见的提案界面|该面板不存在|需等待产品的提案面上线/u);
@@ -211,6 +222,25 @@ test('product manual requires successful tool receipts for completion claims and
   assert.match(manual, /我已保存／已创建／已发送[\s\S]*必须确认对应工具调用成功返回，以收据和工具事件为准/u);
   assert.match(manual, /工具报错时，如实说明失败与原因；不得宣称成功，不得静默吞错/u);
   assert.match(manual, /记忆保存必须调用 save_memory 并成功返回；在对话里记住不等于已保存/u);
+});
+
+test('product manual maps the four readers to their scope and discloses partial reads', () => {
+  const perception = promptSection('### 感知能力');
+  assert.match(perception, /read_note[^\n]*one page at a time[^\n]*next_page_index/);
+  assert.match(perception, /read_board[^\n]*members, links and geometry[^\n]*without screenshots/);
+  assert.match(perception, /read_content_groups[^\n]*group membership and text previews[^\n]*course or note/);
+  assert.match(perception, /read_annotations_relations[^\n]*annotations and Item Relation judgments\/receipts/);
+  assert.match(perception, /Check truncated\/has_more on every result/);
+  assert.match(perception, /Only read_note offers paging/);
+  assert.match(perception, /disclose any remaining truncation[^\n]*instead of claiming a complete read[^\n]*even when next_page_index is null/);
+});
+
+test('ordinary tool errors get one bounded correction while ceremony errors follow confirmation', () => {
+  const claims = promptSection('### 宣称纪律');
+  assert.match(claims, /先读结构化错误、修正参数，再在本轮工具预算内重试一次/u);
+  assert.match(claims, /同一调用连续两次失败就停止重试，并如实报告失败与原因/u);
+  assert.match(claims, /仪式类 400\/409 走确认流程，不当作故障重试/u);
+  assert.match(claims, /若对象或清单漂移，重新复述并等待用户确认/u);
 });
 
 test('product manual explains task completion and time block deletion ceremonies in advance', () => {
@@ -227,27 +257,114 @@ test('product manual closes with the current note, card, judgment and irreversib
   assert.match(manual, /不能直接创建卡片，不能碰人类判断记录，不能无仪式做不可逆删除/u);
 });
 
-test('existing prompt bytes including courses, decks, context and L1 remain unchanged except three panel corrections', () => {
-  // SHA-256 of rendered prompts captured BEFORE this order's production edit.
-  // Strip only the new section and restore the three explicitly corrected UI sentences.
-  const cases: Array<[PromptContext, string]> = [
-    [emptyContext, 'b17e4e450538ee2355164ccb383c8539b7b5851691047bd684b9bc5ca15d8533'],
-    [{ ...emptyContext, language: 'en', decks: [], isNewUser: false }, '384f625cf67e3e1904360269e4505129a9583dc676f2aee40b3537ec6878f5ce'],
-    [{ ...emptyContext, language: 'zh', isNewUser: true }, 'e1f7a5141144d4f5c327fbadc88e74a8cb9cd75e50796adaddb629d870d59b1c'],
-    [populatedContext, '9b0bb18a5b3766bde8e2aaefea608c7ce1877646a446d6b46d6ee733f9c597e8'],
-    [{ ...populatedContext, language: 'en', energyLevel: 'low' }, '5039dedeeccfae4845b09d43e6a4f7d8c0efa02ae23477dc5014f45ded05e353'],
-    [{ ...populatedContext, language: 'zh', isNewUser: true }, '1c6c018ab06fe202f059685a71e30ffdf0ce2e210b0a2475fbe26f211799289b'],
+test('planning uses real date parameters and collects special constraints in chat', () => {
+  const prompt = buildSystemPrompt('Manual Agent', emptyContext);
+  assert.doesNotMatch(prompt, /week_of|extra_notes|energyLevel/);
+  assert.match(prompt, /get_time_blocks[^\n]*from_date[^\n]*to_date/);
+  assert.match(prompt, /(?:chat[^\n]*special constraints|special constraints[^\n]*chat)/i);
+  for (const question of ['scheduling_mode', 'study_dates', 'documents', 'daily_task_limit', 'granularity']) {
+    assert.ok(prompt.includes(`| ${question} |`), `preserve the ${question} preference question`);
+  }
+  assert.doesNotMatch(prompt, /number_input[^\n]*(?:open text|special constraints|补充要求)/iu);
+});
+
+test('generated work uses proposal rules while explicit individual actions have a direct route', () => {
+  const rules = promptSection('## Key Rules');
+  assert.match(rules, /生成批走提案优先 \(Proposal-first generation\)/u);
+  for (const proposalType of ['batch_cards', 'study_plan', 'goal_breakdown', 'schedule_adjustment', 'time_block_setup']) {
+    assert.ok(rules.includes(proposalType), `preserve ${proposalType} proposal routing`);
+  }
+  assert.match(rules, /Cards, including a single card[^\n]*batch_cards/);
+  assert.match(rules, /study_plan[^\n]*never build a generated plan with create_task/);
+  assert.match(rules, /Direct-action rules[^\n]*individual task explicitly requested by the student may use create_task/);
+  for (const action of ['create_deck', 'create_section', 'create_goal', 'create_sub_goal', 'create_time_blocks', 'update_time_block', 'link_task_cards']) {
+    assert.ok(rules.includes(action), `preserve the ${action} direct action rule`);
+  }
+  assert.match(rules, /confirm or reject in chat[^\n]*visibility\/application limits[^\n]*chat confirmation does not apply a proposal/);
+});
+
+test('organized notes require a course and real source selectors without authored blocks', () => {
+  const rules = promptSection('## Key Rules');
+  const row = rules.split('\n').find(line => line.includes('| Organized notes |'));
+  assert.ok(row);
+  assert.match(row, /organized_note with course_id and source selection/);
+  for (const selector of ['document_ids', 'source_material_ids', 'segment_ids', 'source_scope_ids', 'source_board_id']) {
+    assert.ok(row.includes(selector), `preserve the ${selector} source selector`);
+  }
+  assert.match(row, /optional note_title, never author blocks/);
+  assert.doesNotMatch(row, /source_document_ids/);
+});
+
+test('minute locks are scoped to Time Block mode and selected Calendar Event times remain adjustable', () => {
+  const prompt = buildSystemPrompt('Manual Agent', emptyContext);
+  const constitution = promptSection('## Design Constitution — HARD RULES (不可违反)', prompt);
+  assert.match(constitution, /Time Block 模式不锁任务到分钟；Calendar Event 模式由学生显式选择时刻并可调整/u);
+  const prohibitions = promptSection('## Things You Must NEVER Do', prompt);
+  assert.match(prohibitions, /In Time Block mode, lock tasks to specific minutes[^\n]*Calendar Event mode is an explicit student choice with adjustable start\/end times/);
+  const scheduling = promptSection('### Scheduling rules and dual modes', prompt);
+  assert.match(scheduling, /Time Block mode:[^\n]*scheduled_date[^\n]*time_block_id[^\n]*no start_time\/end_time and NEVER lock tasks to specific minutes/);
+  assert.match(scheduling, /Calendar Event mode:[^\n]*student explicitly selects this mode[^\n]*suggested start_time\/end_time[^\n]*adjustable/);
+  assert.match(scheduling, /Only dates whose proposed gap setup was rejected may omit time_block_id/);
+  assert.doesNotMatch(prompt, /Never lock schedules|^- Lock schedules to specific minutes/gm);
+});
+
+test('cards, study planning and document questions each have one authoritative flow with a compact table', () => {
+  const prompt = buildSystemPrompt('Manual Agent', emptyContext);
+  const cards = promptSection('## Card Generation（卡片生成）', prompt);
+  const planning = promptSection('## Study Planning（学习规划）', prompt);
+  const documents = promptSection('## Document Questions（文档问答）', prompt);
+  for (const flow of [cards, planning, documents]) assert.match(flow, /^\|---/m);
+  assert.match(cards, /Every item MUST include deck_id AND section_id/);
+  assert.match(cards, /definition[^\n]*example\?: string/);
+  assert.match(cards, /theorem[^\n]*proof_sketch\?: string/);
+  assert.match(cards, /formula[^\n]*variables\?: Record<string,string>/);
+  assert.match(cards, /general[^\n]*body: string/);
+  assert.match(planning, /Goal → Sub-goals \(stages\/phases\) → Tasks/);
+  assert.match(planning, /Never read more than 100 total pages per session/);
+  assert.match(planning, /MUST use collect_preferences before generating a study_plan or goal_breakdown/);
+  assert.match(documents, /relevant_chunks[^\n]*if sufficient, answer immediately without get_document_content/);
+  assert.match(documents, /otherwise use get_document_content under the detailed-reading rule/);
+  assert.match(documents, /≤50 pages: full read; >50 pages: semantic search \+ first 5 chunks/u);
+  assert.doesNotMatch(prompt, /^## (?:MWF Study Plan Creation Flow|Document-Based Card Generation|Document Search & RAG|Planning Protocol|Scheduling Protocol|Pre-Planning Preference Collection|Dual Scheduling Mode)/m);
+  assert.doesNotMatch(prompt, /^### Playbook — (?:Card Generation|Study Plan Creation|Simple Question)/m);
+});
+
+test('prompt states current behavior without obsolete version comparisons', () => {
+  const prompt = buildSystemPrompt('Manual Agent', emptyContext);
+  assert.doesNotMatch(prompt, /v1\.7\.3|now enhanced|now uses semantic|are now DATE-BASED|old manual Q&A|replaced by the structured form/i);
+  assert.doesNotMatch(prompt, /MANDATORY — no exceptions|Submit[^\n]*for student review|student reviews and approves/i);
+});
+
+test('identity and dynamic context bytes remain unchanged across the six existing prompt cases', () => {
+  // SHA-256 of unchanged sections captured BEFORE the prompt repair production edit.
+  // Preserve all six former whole-prompt cases while allowing the ordered body repairs.
+  const cases: Array<[PromptContext, string, string]> = [
+    [emptyContext,
+      'fc55691a922334004acffb54babc7af5020922ee28ca82aa0a9429367cbc78d6',
+      'd12151750484303fc65d6d7a18d27303f12928014c5a7b33a43f5e95002ce6d9'],
+    [{ ...emptyContext, language: 'en', decks: [], isNewUser: false },
+      'f103dc1ad73b20993922fd914e7c407d8a88a356e56e97feaf181d3345fa41ee',
+      'd12151750484303fc65d6d7a18d27303f12928014c5a7b33a43f5e95002ce6d9'],
+    [{ ...emptyContext, language: 'zh', isNewUser: true },
+      'e669e3cb04bb252554612460cc7a7686e48f745818b6ae5c451b35c30f57c0f0',
+      'd12151750484303fc65d6d7a18d27303f12928014c5a7b33a43f5e95002ce6d9'],
+    [populatedContext,
+      'fc55691a922334004acffb54babc7af5020922ee28ca82aa0a9429367cbc78d6',
+      '6c1fc6e13b48ce8913d6a874132e988d61fc2748f4dc8dd097922d9c00b6e539'],
+    [{ ...populatedContext, language: 'en' },
+      'f103dc1ad73b20993922fd914e7c407d8a88a356e56e97feaf181d3345fa41ee',
+      '6c1fc6e13b48ce8913d6a874132e988d61fc2748f4dc8dd097922d9c00b6e539'],
+    [{ ...populatedContext, language: 'zh', isNewUser: true },
+      'e669e3cb04bb252554612460cc7a7686e48f745818b6ae5c451b35c30f57c0f0',
+      '6c1fc6e13b48ce8913d6a874132e988d61fc2748f4dc8dd097922d9c00b6e539'],
   ];
-  for (const [context, expectedHash] of cases) {
+  for (const [context, expectedIdentityHash, expectedContextHash] of cases) {
     const prompt = buildSystemPrompt('Manual Agent', context);
-    const legacy = prompt.replace(productManual(prompt), '')
-      .replace('3. **Let user decide**: Ask the student to confirm or reject in chat; explain the current proposal visibility and application limits in 产品说明.',
-        '3. **Let user decide**: The student reviews, edits, approves, or rejects in the Proposal panel.')
-      .replace('- Ask the student for any time adjustments in chat; explain the current proposal visibility and application limits in 产品说明.',
-        '- Student can adjust times in the Proposal panel before applying.')
-      .replace('   - Ask the student to confirm or reject in chat; explain the current proposal visibility and application limits in 产品说明.',
-        '   - The student reviews and approves via the Proposal panel');
-    assert.equal(createHash('sha256').update(legacy).digest('hex'), expectedHash);
+    const identity = prompt.slice(0, prompt.indexOf('## Design Constitution'));
+    const dynamicContext = prompt.slice(prompt.indexOf('## Current Context'), prompt.indexOf('## Key Rules'));
+    assert.equal(createHash('sha256').update(identity).digest('hex'), expectedIdentityHash);
+    assert.equal(createHash('sha256').update(dynamicContext).digest('hex'), expectedContextHash);
+    assert.equal(prompt.includes('## L1 Protocol'), Boolean(context.isNewUser));
   }
 });
 

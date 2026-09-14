@@ -21,6 +21,10 @@ interface CourseRow {
   code: string;
 }
 
+interface EnergyRow {
+  energy_level: string;
+}
+
 export async function* runAgent(
   userId: string,
   conversationId: string,
@@ -63,6 +67,9 @@ export async function* runAgent(
   const memories = memory.retrieveMemories(userMessage);
   const docSummaries = memory.getDocumentSummaries();
   const today = new Date().toISOString().split('T')[0];
+  const energyStatus = db.prepare(
+    'SELECT energy_level FROM daily_statuses WHERE user_id = ? AND date = ?',
+  ).get(userId, today) as EnergyRow | undefined;
 
   // Pre-load decks with their sections to reduce tool call rounds
   const decks = db.prepare(
@@ -96,6 +103,7 @@ export async function* runAgent(
       sections: deckSections.get(d.id) || [],
     })),
     currentDate: today,
+    energyLevel: energyStatus?.energy_level,
     language: parsedSettings.language,
     isNewUser,
   });

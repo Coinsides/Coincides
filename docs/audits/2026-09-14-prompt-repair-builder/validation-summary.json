@@ -1,0 +1,118 @@
+{
+  "finalPrompt": {
+    "summary": "targeted-2026-09-14T06-55-48-560Z-18744/summary.json",
+    "tests": 21,
+    "suites": 0,
+    "pass": 21,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 1258.8136,
+    "exitCode": 0
+  },
+  "typechecks": {
+    "summary": "typechecks-2026-09-14T06-52-06-471Z-41244/summary.json",
+    "passed": 6,
+    "total": 6
+  },
+  "runtimeGates": {
+    "summary": "gates-2026-09-14T06-52-36-097Z-43552/summary.json",
+    "passed": 21,
+    "total": 21,
+    "extra": "shared build also passed",
+    "hqPending": [
+      {
+        "gate": "git diff --check",
+        "status": "not_run",
+        "reason": "Order reserves git/secrets closure for HQ; zero git commands."
+      },
+      {
+        "gate": "check:changed-file-secrets",
+        "status": "not_run",
+        "reason": "Order reserves git/secrets closure for HQ; scanner invokes git."
+      }
+    ]
+  },
+  "client": {
+    "vitest": [
+      " Test Files  171 passed (171)",
+      "      Tests  1746 passed (1746)",
+      "   Duration  101.73s (transform 3.54s, setup 19.69s, collect 19.91s, tests 62.35s, environment 72.50s, prepare 9.87s)"
+    ]
+  },
+  "finalServer": {
+    "summary": "server-full-serial-2026-09-14T07-00-56-594Z-6892/summary.json",
+    "completeFileCoverage": true,
+    "discoveredFiles": 84,
+    "executedFiles": 84,
+    "passingFiles": 82,
+    "counts": {
+      "tests": 787,
+      "pass": 785,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "failedFiles": [
+      {
+        "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+        "log": "78-server_src___tests___v2SourceMineruWiring.test.ts.log",
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 0,
+          "fail": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 720.839
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+        "log": "80-server_src___tests___v2SourceRegionCells.test.ts.log",
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 0,
+          "fail": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 2588.1701
+        }
+      }
+    ],
+    "note": "Counts are observed TAP results; a module-load failure does not enumerate that file's child tests. No tests excluded. Root scripts/generate-tool-face-manifest.test.ts ran separately in runtime gates (10/10)."
+  },
+  "priorAggregateFailures": [
+    {
+      "summary": "server-full-2026-09-14T06-53-44-019Z-36724/summary.json",
+      "tests": 765,
+      "suites": 0,
+      "pass": 762,
+      "fail": 3,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 143806.4864
+    },
+    {
+      "summary": "server-full-2026-09-14T06-57-42-186Z-4032/summary.json",
+      "tests": 778,
+      "suites": 0,
+      "pass": 775,
+      "fail": 3,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 143541.9087
+    }
+  ],
+  "finalCloseout": {
+    "summary": "closeout-2026-09-14T07-06-32-876Z-25328/summary.json",
+    "passed": true
+  }
+}
