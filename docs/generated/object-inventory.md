@@ -257,6 +257,8 @@
 - ✅ `smoke:canvas-engine-performance`
 - ✅ `check:test-wiring`
 - ✅ `check:tech-debt-table`
+- ✅ `check:agent-knowledge`
+- ✅ `test:agent-knowledge`
 
 **存在但不在该门内的 check / smoke / test 脚本（1）**：
 
