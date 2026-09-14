@@ -9,6 +9,9 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "eval:agent": "cd server && node --import tsx scripts/agent-eval/runner.ts",
+    "test:agent-eval": "cd server && node --import tsx --test scripts/agent-eval/harness.test.ts",
+    "typecheck:agent-eval": "cd server && node node_modules/typescript/bin/tsc --project scripts/agent-eval/tsconfig.json",
     "dev": "npm run dev:server",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
