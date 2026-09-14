@@ -1,0 +1,172 @@
+{
+  "status": "blocked",
+  "handoffStatus": "ready",
+  "node": "v22.22.1",
+  "implementation": {
+    "file": "scripts/run-server-test-suite.mjs",
+    "sha256": "0f2df50e7dc9874e85f44982e0a74c0b8cc129d159db955cd73120aed5e08bd3"
+  },
+  "controls": {
+    "passed": 9,
+    "total": 9,
+    "cases": [
+      {
+        "name": "ipc-recovers",
+        "exit": 0,
+        "retries": 1,
+        "attempts": 2,
+        "tests": [
+          1,
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "assertion-stays-red",
+        "exit": 1,
+        "retries": 0,
+        "attempts": 1,
+        "tests": [
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "retry-stays-red",
+        "exit": 1,
+        "retries": 1,
+        "attempts": 2,
+        "tests": [
+          1,
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "near-signature-rejected",
+        "exit": 1,
+        "retries": 0,
+        "attempts": 1,
+        "tests": [
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "test-level-rejected",
+        "exit": 1,
+        "retries": 0,
+        "attempts": 1,
+        "tests": [
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "mixed-assertion-stays-red",
+        "exit": 1,
+        "retries": 1,
+        "attempts": 3,
+        "tests": [
+          2,
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "normal-pass",
+        "exit": 0,
+        "retries": 0,
+        "attempts": 1,
+        "tests": [
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "no-summary-green-preserved",
+        "exit": 0,
+        "retries": 0,
+        "attempts": 1,
+        "tests": [
+          1
+        ],
+        "result": "PASS"
+      },
+      {
+        "name": "no-summary-red-preserved",
+        "exit": 1,
+        "retries": 0,
+        "attempts": 1,
+        "tests": [
+          1
+        ],
+        "result": "PASS"
+      }
+    ]
+  },
+  "fullRuns": [
+    {
+      "entry": "direct runner with package test:v2 file list",
+      "files": 72,
+      "tests": 706,
+      "pass": 701,
+      "fail": 5,
+      "retries": 2,
+      "retryTests": [
+        49,
+        59
+      ],
+      "retryPass": [
+        49,
+        59
+      ],
+      "code": 1,
+      "limitation": "Direct invocation lacked npm_execpath; manifest hook assertion failed. Raw evidence retained."
+    },
+    {
+      "entry": "npm run test:v2 in server (including pretest)",
+      "files": 72,
+      "tests": 740,
+      "pass": 738,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "retries": 0,
+      "code": 1,
+      "limitation": "Executed before the final missing-summary compatibility patch; final patch verified by syntax check and 9 targeted controls."
+    }
+  ],
+  "blockers": [
+    "v2SourceMineruWiring.test.ts:60: spawnSync python.exe ENOENT",
+    "v2SourceRegionCells.test.ts:203: MinerU interpreter launch failure, code 101"
+  ],
+  "unfulfilledAcceptance": "A fully green normal HQ regression run",
+  "gitCommandsRun": 0,
+  "syntheticCredentialsCreated": 0,
+  "dependenciesAdded": 0,
+  "rawEvidenceRoot": ".codex-tmp/2026-09-14-flaky-runner-builder/",
+  "sha256": {
+    "controls.mjs": "e378de2c0ec9a84517782ccdbb5993c572e277b7186fb8e4d6ded442bc25f6df",
+    "control-preload.mjs": "7dbacbb1f470126e94fa8b71c38966b06aa71d2287aacf287aa48aec85d9a578",
+    "controls-compat-final.log": "b670f26ad254b80ba6dbef8061b2fbd13bad5f5f5a34d51e9338b62827935042",
+    "controls-results.json": "53f93dc188baecafc20973c64dccaa226df687cdfbe00a7a2c5226cc0eed7f3c",
+    "ipc-recovers.stdout.log": "32c60b66127d9422bbb28690a9ec8093b2fc1fffc04e58fea758b0918df41562",
+    "ipc-recovers.stderr.log": "a2a0f99a037ae10d19c3f739db8cc455e85a3f0d44a4ba1bcb2618557c9a26b0",
+    "ipc-recovers.invocations.jsonl": "88f15d77c2d292fb7aca8f9977fea45251c7079cec185b736cdb1fc1eec46fb6",
+    "assertion-stays-red.stdout.log": "0662cbc77b63240b43472469699af267c8787b2421a87a1ed13d206e2c3e6bdd",
+    "assertion-stays-red.invocations.jsonl": "37cac3c5efcb6232e1eaec69524cbb42b88a219a33665b96ed63d0fd9f508f88",
+    "retry-stays-red.stdout.log": "b4df63d140726157adfd182953e39a842043411d3a35f60b540281d4b6720a47",
+    "retry-stays-red.stderr.log": "07be2578e1b871e63524d64d39ad96c2766dc24c42b26ba94675093d4aa0b220",
+    "retry-stays-red.invocations.jsonl": "abea8cc61b910a2dbe588582746fdf2082d837ed0fb90e4a3678750980076194",
+    "hq-full.stdout.log": "966101fca97e7cc3fd74fabdb87ff4246f3cdf1ceef382b0272be8a89f4f0fde",
+    "hq-full.stderr.log": "aaf5865533e15e0537fb8d94debd2d02f94df79529cfea0aa0f5da5165232fac",
+    "hq-full-result.json": "d6149b22627f9876b3624b8708def7730cf189ad13fc742bb99999917a07eba0",
+    "hq-npm-full.stdout.log": "8f3f732416aa00f599c86c3ad6c39a7c5cd77e3ce37916e0cf7ad478442d570e",
+    "hq-npm-full.stderr.log": "b54c02b3c3fe1dfef76f3de120f16792bf39acd3f82ae9a16e53b7e37efdbbc1",
+    "hq-npm-full-result.json": "ad226696ceecd9d4e8f7e8d33f35cb15bfc1290ea2a6510f82e3bd7fdf724c09",
+    "runner-before.mjs": "a89e91fc9e31979c6e90b501f3b11bf9f2a753ccc2f99e41d3f15551a62f52a3",
+    "runner-final.mjs": "0f2df50e7dc9874e85f44982e0a74c0b8cc129d159db955cd73120aed5e08bd3"
+  }
+}
