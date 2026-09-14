@@ -194,14 +194,16 @@ test('product manual describes actual proposal visibility and keeps registration
   const prompt = buildSystemPrompt('Manual Agent', emptyContext);
   const manual = productManual(prompt);
   for (const statement of [
-    /chat 里发出的提案目前没有可见的提案界面/u,
-    /不要告诉用户“去 Proposal 面板查看”，该面板不存在/u,
+    /chat 里发出的待处理提案可在 Agent 面板头部的“提案”收件箱查看/u,
+    /用户可逐条采纳或丢弃/u,
+    /不可用型会显示“此类提案暂不支持一键采纳”/u,
+    /material_reconciliation 仅可“标记已复核”，不代表执行调和动作/u,
     /仅在提案工具成功返回后，才说“提案已登记”/u,
-    /material_map \/ organized_note \/ material_reconciliation 可在项目页处理/u,
-    /其余需等待产品的提案面上线，也可请用户直接答复你确认与否/u,
+    /material_map \/ organized_note \/ material_reconciliation 仍可在项目页处理/u,
     /用户在 chat 答复确认不等于提案已应用；apply 仍须人门/u,
   ]) assert.match(manual, statement);
-  assert.doesNotMatch(prompt, /(?:in|via) the Proposal panel/, 'old workflow prose must not send users to the absent panel');
+  assert.doesNotMatch(prompt, /目前没有可见的提案界面|该面板不存在|需等待产品的提案面上线/u);
+  assert.doesNotMatch(prompt, /(?:in|via) the Proposal panel/, 'workflow prose must use the current Agent inbox location');
 });
 
 test('product manual requires successful tool receipts for completion claims and saved memory', () => {

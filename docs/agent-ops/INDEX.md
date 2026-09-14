@@ -377,7 +377,7 @@
 | [handoffs/2026-09-14-v14-memory-quickwins-order.md](handoffs/2026-09-14-v14-memory-quickwins-order.md) | 记忆速赢批 | `ready(队列位 6)` | — | — |
 | [handoffs/2026-09-14-v14-prompt-cache-order.md](handoffs/2026-09-14-v14-prompt-cache-order.md) | prompt 缓存单 | `ready(队列位 4)` | — | — |
 | [handoffs/2026-09-14-v14-prompt-repair-order.md](handoffs/2026-09-14-v14-prompt-repair-order.md) | prompt 修缮单 | `ready(候说明书接线单收口后派——同文件串行)` | — | — |
-| [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `ready(候说明书接线单收口后派发——单 builder 纪律)` | — | — |
+| [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `done` | — | — |
 | [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `ready(队列位 3)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |

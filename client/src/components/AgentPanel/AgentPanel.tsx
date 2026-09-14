@@ -6,6 +6,8 @@ import { describeAgentContextHint } from '@/lib/agentContextHint';
 import { useAuthStore } from '@/stores/authStore';
 import MessageBubble, { StreamingBubble } from './MessageBubble';
 import PreferenceForm from './PreferenceForm';
+import ProposalInbox from './ProposalInbox';
+import { useProposalInbox } from './useProposalInbox';
 import styles from './AgentPanel.module.css';
 
 export default function AgentPanel() {
@@ -33,12 +35,19 @@ export default function AgentPanel() {
 
   const [input, setInput] = useState('');
   const [showConvDropdown, setShowConvDropdown] = useState(false);
+  const [showProposals, setShowProposals] = useState(false);
+  const inbox = useProposalInbox(agentPanelOpen, streaming);
+  const proposalButtonRef = useRef<HTMLButtonElement>(null);
   const [pendingImage, setPendingImage] = useState<{ media_type: string; data: string; preview: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const agentName = user?.settings?.agent_name || 'Mr. Zero';
+
+  useEffect(() => {
+    if (!agentPanelOpen) setShowProposals(false);
+  }, [agentPanelOpen]);
 
   useEffect(() => {
     if (agentPanelOpen) {
@@ -105,6 +114,12 @@ export default function AgentPanel() {
     await selectConversation(id);
   };
 
+  const handleCloseProposals = () => {
+    setShowProposals(false);
+    if (inbox.proposals.length > 0 || inbox.error) proposalButtonRef.current?.focus();
+    else inputRef.current?.focus();
+  };
+
   if (!agentPanelOpen) return null;
 
   return (
@@ -159,6 +174,18 @@ export default function AgentPanel() {
             </div>
           </div>
           <div className={styles.headerRight}>
+            {(inbox.proposals.length > 0 || inbox.error || showProposals) && (
+              <button ref={proposalButtonRef} type="button" className={styles.proposalButton}
+                aria-label={`提案，${inbox.proposals.length} 条待处理`}
+                aria-expanded={showProposals} aria-controls={showProposals ? 'agent-proposal-inbox' : undefined}
+                onClick={() => {
+                  if (showProposals) handleCloseProposals();
+                  else { setShowProposals(true); setShowConvDropdown(false); void inbox.refresh(); }
+                }}>
+                提案{inbox.proposals.length > 0 && <span className={styles.proposalCount}>{inbox.proposals.length}</span>}
+                {inbox.error && <span aria-label="加载失败">!</span>}
+              </button>
+            )}
             <button className={styles.iconBtn} onClick={handleNewConversation} title="New conversation">
               <Plus size={16} />
             </button>
@@ -167,6 +194,8 @@ export default function AgentPanel() {
             </button>
           </div>
         </div>
+
+        {showProposals && <ProposalInbox {...inbox} onClose={handleCloseProposals} />}
 
         <>
             {/* Messages */}

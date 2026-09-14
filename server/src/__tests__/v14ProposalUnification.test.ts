@@ -297,3 +297,86 @@ test('A3a chat organized_note is listed and previewed by existing APIs, then hum
   assert.deepEqual((await request('?status=pending')).body, []);
   t.diagnostic('A3a API smoke PASS: chat organized_note -> pending + agent event -> list/detail -> human apply -> note/blocks/sources');
 });
+
+const inboxCardProposal = {
+  type: 'batch_cards',
+  data: { ...legacyCases[1].data, items: [
+    ...legacyCases[1].data.items,
+    { title: 'Continuity', template_type: 'definition', content: { definition: 'Nearby inputs keep outputs nearby.' } },
+  ] },
+};
+
+test('proposal inbox API: chat organized_note and batch_cards apply one by one and leave an empty pending list', async t => {
+  const { db, request } = await fixture(t);
+  const noteProposal = JSON.parse(await executeTool('create_proposal', {
+    type: 'organized_note',
+    data: { course_id: courseId, document_ids: [documentId], note_title: 'Limits notes' },
+  }, userId, context)) as Row;
+  const cardProposal = JSON.parse(await executeTool('create_proposal', inboxCardProposal, userId, context)) as Row;
+  const pending = await request('?status=pending');
+  assert.equal(pending.status, 200);
+  assert.deepEqual(pending.body.map((row: Row) => row.id).sort(), [noteProposal.id, cardProposal.id].sort());
+  assert.ok(pending.body.every((row: Row) => row.conversation_id === conversationId && row.created_at));
+  assert.equal(count(db, 'notes'), 0);
+  assert.equal(count(db, 'cards'), 0);
+
+  const noteResult = await request(`/${noteProposal.id}/apply`, {});
+  assert.equal(noteResult.status, 200, JSON.stringify(noteResult.body));
+  assert.ok(noteResult.body.blocks_count > 0);
+  const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(noteResult.body.note_id) as Row;
+  assert.equal(note.title, 'Limits notes');
+  assert.equal(note.course_id, courseId);
+  assert.equal(count(db, 'note_blocks'), noteResult.body.blocks_count);
+  assert.equal(count(db, 'note_block_placements'), noteResult.body.blocks_count);
+  assert.ok(count(db, 'note_block_sources') > 0);
+  assert.ok((db.prepare('SELECT plain_text FROM note_blocks').all() as Row[])
+    .some(row => row.plain_text.includes('Limits describe')));
+  assert.equal(proposalRow(db, noteProposal.id).status, 'applied');
+  assert.ok(proposalRow(db, noteProposal.id).resolved_at);
+  assert.deepEqual((await request('?status=pending')).body.map((row: Row) => row.id), [cardProposal.id]);
+
+  const cardResult = await request(`/${cardProposal.id}/apply`, {});
+  assert.equal(cardResult.status, 200, JSON.stringify(cardResult.body));
+  assert.equal(cardResult.body.items_count, 2);
+  const cards = db.prepare('SELECT * FROM cards ORDER BY title').all() as Row[];
+  assert.equal(cards.length, 2);
+  assert.ok(cards.every(card => card.deck_id === deckId));
+  assert.deepEqual(JSON.parse(cards[0].content), { definition: 'Nearby inputs keep outputs nearby.' });
+  assert.deepEqual(JSON.parse(cards[1].content), { body: 'A limiting value.' });
+  assert.equal((db.prepare('SELECT card_count FROM card_decks WHERE id = ?').get(deckId) as Row).card_count, 2);
+  assert.equal(proposalRow(db, cardProposal.id).status, 'applied');
+  assert.ok(proposalRow(db, cardProposal.id).resolved_at);
+  assert.deepEqual((await request('?status=pending')).body, []);
+});
+
+test('proposal inbox API: discard resolves the selected chat proposal without creating its cards', async t => {
+  const { db, request } = await fixture(t);
+  const proposal = JSON.parse(await executeTool('create_proposal', inboxCardProposal, userId, context)) as Row;
+  assert.equal((await request('?status=pending')).body.length, 1);
+  const discarded = await request(`/${proposal.id}/discard`, {});
+  assert.equal(discarded.status, 200);
+  assert.equal(proposalRow(db, proposal.id).status, 'discarded');
+  assert.ok(proposalRow(db, proposal.id).resolved_at);
+  assert.equal(count(db, 'cards'), 0);
+  assert.deepEqual((await request('?status=pending')).body, []);
+});
+
+test('proposal inbox API: material reconciliation empty-body apply records only the existing review shell', async t => {
+  const { db, request } = await fixture(t);
+  const issued = await request('/material-reconciliation', { course_id: courseId });
+  assert.equal(issued.status, 201, JSON.stringify(issued.body));
+  assert.ok(issued.body.data.candidate_groups.length > 0);
+  const pending = (await request('?status=pending')).body;
+  assert.equal(pending.length, 1);
+  assert.equal(pending[0].conversation_id, null);
+  assert.equal(pending[0].data.apply_behavior, 'review_shell_only');
+  const applied = await request(`/${issued.body.id}/apply`, {});
+  assert.equal(applied.status, 200, JSON.stringify(applied.body));
+  assert.equal(applied.body.review_shell_only, true);
+  assert.equal(applied.body.decisions_count, 0);
+  assert.equal(count(db, 'evidence_sets'), 0);
+  assert.equal(count(db, 'evidence_items'), 0);
+  assert.equal(count(db, 'operation_batches'), 1);
+  assert.equal(proposalRow(db, issued.body.id).status, 'applied');
+  assert.deepEqual((await request('?status=pending')).body, []);
+});

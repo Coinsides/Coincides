@@ -56,7 +56,11 @@ describe('B2 visible, passive context on the real panel and message transport', 
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Reading surface' }));
     expect(fetch).not.toHaveBeenCalled();
     expect(http.post).not.toHaveBeenCalled();
-    expect(http.get).toHaveBeenCalledExactlyOnceWith('/agent/conversations');
+    expect(http.get).toHaveBeenCalledTimes(2);
+    expect(http.get.mock.calls.filter(([url]) => url === '/agent/conversations')).toEqual([['/agent/conversations']]);
+    expect(http.get.mock.calls.filter(([url]) => url === '/proposals')).toEqual([
+      ['/proposals', { params: { status: 'pending' } }],
+    ]);
     view.rerender(<AgentPanel />);
     expect(effective()).toBeNull();
     expect(screen.queryByText(/Viewing:/)).toBeNull();
