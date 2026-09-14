@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../../db/init.js';
 import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
+import { saveMemory, searchMemories } from '../memory/service.js';
 import { normalizeCardContent } from './normalizeContent.js';
 import { createGoal } from '../../services/goals.js';
 import { createTask, completeTask, linkTaskCard } from '../../services/tasks.js';
@@ -473,89 +474,12 @@ export async function executeTool(
 
     case 'search_memories': {
       const { query, category } = args as { query: string; category?: string };
-      const store = new VectorStore();
-
-      // --- Path 1: LIKE keyword search (always runs as baseline) ---
-      let keywordSql = 'SELECT id, category, content, created_at FROM agent_memories WHERE user_id = ? AND content LIKE ?';
-      const keywordParams: unknown[] = [userId, `%${query}%`];
-      if (category) { keywordSql += ' AND category = ?'; keywordParams.push(category); }
-      keywordSql += ' ORDER BY relevance_score DESC, created_at DESC LIMIT 10';
-      const keywordMemories = db.prepare(keywordSql).all(...keywordParams) as Array<{
-        id: string; category: string; content: string; created_at: string;
-      }>;
-
-      // --- Path 2: FTS5 full-text search ---
-      const ftsResults = store.ftsSearchMemories(query, 10, userId);
-
-      // --- Path 3: Semantic vector search (if provider available) ---
-      let semanticMapped: Array<{ id: string; category: string; content: string; created_at: string; similarity_score: number }> = [];
-      try {
-        const provider = getEmbeddingProvider(userId);
-        if (provider) {
-          const queryEmbeddings = await provider.embed([query], 'query');
-          if (queryEmbeddings.length > 0) {
-            const semanticResults = store.searchMemoriesWithContent(queryEmbeddings[0], 10, userId);
-            semanticMapped = semanticResults.map((r) => ({
-              id: r.memory_id,
-              category: r.category,
-              content: r.content,
-              created_at: r.created_at,
-              similarity_score: Math.round((1 - r.distance) * 100) / 100,
-            }));
-          }
-        }
-      } catch (err) {
-        console.warn('Semantic memory search failed:', err);
-      }
-
-      // --- Three-way merge: semantic > FTS5 > LIKE, deduplicate ---
-      let results: Array<{ id: string; category: string; content: string; created_at: string; similarity_score?: number }> = [];
-      const seenIds = new Set<string>();
-      for (const m of semanticMapped) { if (!seenIds.has(m.id)) { seenIds.add(m.id); results.push(m); } }
-      for (const r of ftsResults) {
-        if (!seenIds.has(r.memory_id)) {
-          seenIds.add(r.memory_id);
-          results.push({ id: r.memory_id, category: r.category, content: r.content, created_at: r.created_at });
-        }
-      }
-      for (const m of keywordMemories) {
-        if (!seenIds.has(m.id)) { seenIds.add(m.id); results.push(m); }
-      }
-
-      results = results.slice(0, 10);
-
-      // Update last_accessed
-      const now = new Date().toISOString();
-      for (const m of results) {
-        db.prepare('UPDATE agent_memories SET last_accessed = ? WHERE id = ?').run(now, m.id);
-      }
-
-      return JSON.stringify(results);
+      return JSON.stringify(await searchMemories(userId, query, { category }));
     }
 
     case 'save_memory': {
       const { category, content } = args as { category: string; content: string };
-      const id = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO agent_memories (id, user_id, category, content, relevance_score, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, category, content, 1.0, now);
-
-      // Generate embedding asynchronously (don't block tool response)
-      (async () => {
-        try {
-          const provider = getEmbeddingProvider(userId);
-          if (!provider) return;
-          const embeddings = await provider.embed([content], 'document');
-          if (embeddings.length > 0) {
-            const store = new VectorStore();
-            store.upsertMemoryEmbedding(id, embeddings[0]);
-          }
-        } catch (err) {
-          console.warn('Failed to generate memory embedding:', err);
-        }
-      })();
-
+      const id = saveMemory(userId, category, content);
       return JSON.stringify({ id, message: 'Memory saved successfully' });
     }
 

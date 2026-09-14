@@ -27,8 +27,8 @@ test('human memory list, verbatim edit, reopen and hard delete share the existin
     db.prepare('INSERT INTO agent_conversations (id,user_id,title) VALUES (?,?,?)')
       .run(conversationId, userId, 'Synthetic memory conversation');
     const manager = new MemoryManager(userId);
-    manager.extractMemories(conversationId, 'I prefer morning study.', 'Synthetic reply');
-    manager.extractMemories(conversationId, 'My exam is next Friday.', 'Synthetic reply');
+    manager.extractMemories(conversationId, 'I prefer morning study.');
+    manager.extractMemories(conversationId, 'My exam is next Friday.');
     db.prepare('INSERT INTO agent_memories (id,user_id,category,content,created_at) VALUES (?,?,?,?,?)')
       .run('memory-without-source', userId, 'general', '  First line\nSecond line  ', '2026-09-09 10:00:00');
 
@@ -68,7 +68,7 @@ test('human memory list, verbatim edit, reopen and hard delete share the existin
     assert.equal(saved.status, 200);
     assert.deepEqual(await saved.json(), { ...preference, content });
     assert.equal((await list()).find((row) => row.id === preference.id)?.content, content);
-    assert.ok(manager.retrieveMemories('evening').some((row) => row.id === preference.id && row.content === content));
+    assert.ok((await manager.retrieveMemories('evening')).some((row) => row.id === preference.id && row.content === content));
     assert.equal(count(db.prepare("SELECT COUNT(*) AS count FROM agent_memories_fts WHERE agent_memories_fts MATCH 'evening'")), 1);
     if (hasVectors) {
       assert.equal(count(db.prepare('SELECT COUNT(*) AS count FROM agent_memory_vec WHERE memory_id = ?'), preference.id), 0);
@@ -78,7 +78,7 @@ test('human memory list, verbatim edit, reopen and hard delete share the existin
     const removed = await fetch(`${base}/${preference.id}`, { method: 'DELETE' });
     assert.equal(removed.status, 204);
     assert.equal((await list()).length, 2);
-    assert.ok(!manager.retrieveMemories('evening').some((row) => row.id === preference.id));
+    assert.ok(!(await manager.retrieveMemories('evening')).some((row) => row.id === preference.id));
     assert.equal(count(db.prepare("SELECT COUNT(*) AS count FROM agent_memories_fts WHERE agent_memories_fts MATCH 'evening'")), 0);
     if (hasVectors) assert.equal(count(db.prepare('SELECT COUNT(*) AS count FROM agent_memory_vec WHERE memory_id = ?'), preference.id), 0);
 
@@ -86,7 +86,7 @@ test('human memory list, verbatim edit, reopen and hard delete share the existin
       assert.equal((await fetch(`${base}/${memory.id}`, { method: 'DELETE' })).status, 204);
     }
     assert.deepEqual(await list(), []);
-    assert.deepEqual(manager.retrieveMemories('', 10), []);
+    assert.deepEqual(await manager.retrieveMemories('', 10), []);
   } finally {
     if (server) await new Promise<void>((resolve, reject) => server!.close((error) => error ? reject(error) : resolve()));
     closeDb();

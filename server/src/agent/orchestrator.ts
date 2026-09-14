@@ -68,7 +68,16 @@ export async function* runAgent(
 
   // 2. Build context
   const courses = db.prepare('SELECT id, name, code FROM courses WHERE user_id = ?').all(userId) as CourseRow[];
-  const memories = memory.retrieveMemories(userMessage);
+  const contextBudget = createStreamBudget(deadline, options.signal);
+  let memories: Awaited<ReturnType<MemoryManager['retrieveMemories']>>;
+  try {
+    memories = await contextBudget.next(() => memory.retrieveMemories(userMessage));
+  } catch (err) {
+    yield { type: 'error', error: err instanceof Error ? err.message : 'Memory retrieval failed' };
+    return;
+  } finally {
+    contextBudget.dispose();
+  }
   const docSummaries = memory.getDocumentSummaries();
   const today = new Date().toISOString().split('T')[0];
 
@@ -143,8 +152,6 @@ export async function* runAgent(
   ];
 
   // 8. Agent loop (handle tool calls)
-  let fullResponse = '';
-
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const stopped = agentStopError(deadline, options.signal);
     if (stopped) {
@@ -218,8 +225,6 @@ export async function* runAgent(
       yield { type: 'error', error: message };
       return;
     }
-
-    fullResponse += textBuffer;
 
     // If no tool calls, we're done
     if (currentToolCalls.length === 0) {
@@ -328,7 +333,7 @@ export async function* runAgent(
   }
 
   // 10. Extract memories from this exchange
-  memory.extractMemories(conversationId, userMessage, fullResponse);
+  memory.extractMemories(conversationId, userMessage);
 
   yield { type: 'done' };
 }

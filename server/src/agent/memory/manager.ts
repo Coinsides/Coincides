@@ -1,14 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../../db/init.js';
 import type { ProviderMessage } from '../providers/types.js';
-
-interface AgentMemory {
-  id: string;
-  category: string;
-  content: string;
-  created_at: string;
-  last_accessed: string | null;
-}
+import { generateMemoryEmbedding, searchMemories, type MemoryMatch } from './service.js';
 
 interface DbMessage {
   id: string;
@@ -115,33 +108,11 @@ export class MemoryManager {
     db.prepare('UPDATE agent_conversations SET updated_at = ? WHERE id = ?').run(now, conversationId);
   }
 
-  retrieveMemories(query: string, limit: number = 5): AgentMemory[] {
-    const db = getDb();
-    // Simple keyword search — split query into words and match any
-    const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
-    if (words.length === 0) {
-      return db.prepare(
-        'SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = ? ORDER BY relevance_score DESC, created_at DESC LIMIT ?',
-      ).all(this.userId, limit) as AgentMemory[];
-    }
-
-    const conditions = words.map(() => 'LOWER(content) LIKE ?').join(' OR ');
-    const params: unknown[] = [this.userId, ...words.map((w) => `%${w}%`), limit];
-
-    const memories = db.prepare(
-      `SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = ? AND (${conditions}) ORDER BY relevance_score DESC, created_at DESC LIMIT ?`,
-    ).all(...params) as AgentMemory[];
-
-    // Update last_accessed
-    const now = new Date().toISOString();
-    for (const m of memories) {
-      db.prepare('UPDATE agent_memories SET last_accessed = ? WHERE id = ?').run(now, m.id);
-    }
-
-    return memories;
+  retrieveMemories(query: string, limit: number = 5): Promise<MemoryMatch[]> {
+    return searchMemories(this.userId, query, { limit });
   }
 
-  extractMemories(conversationId: string, userMessage: string, assistantResponse: string): void {
+  extractMemories(conversationId: string, userMessage: string): void {
     // Simple pattern matching for memory extraction from user messages
     const patterns = [
       /I prefer\s+(.+?)(?:\.|$)/i,
@@ -167,10 +138,12 @@ export class MemoryManager {
           'SELECT id FROM agent_memories WHERE user_id = ? AND content = ?',
         ).get(this.userId, content);
         if (!existing) {
+          const id = uuidv4();
           const category = this.categorizeMemory(content);
           db.prepare(
             'INSERT INTO agent_memories (id, user_id, category, content, source_conversation_id, relevance_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          ).run(uuidv4(), this.userId, category, content, conversationId, 1.0, now);
+          ).run(id, this.userId, category, content, conversationId, 1.0, now);
+          generateMemoryEmbedding(this.userId, id, content);
         }
       }
     }
@@ -198,32 +171,8 @@ export class MemoryManager {
       query += ' AND course_id = ?';
       params.push(courseId);
     }
-    query += ' LIMIT 10';
+    query += ' ORDER BY created_at DESC LIMIT 10';
     return db.prepare(query).all(...params) as { id: string; filename: string; summary: string }[];
   }
 
-  summarizeOldMessages(conversationId: string, keepRecent: number = 10): string | null {
-    const db = getDb();
-    const totalCount = db.prepare(
-      'SELECT COUNT(*) as count FROM agent_messages WHERE conversation_id = ?',
-    ).get(conversationId) as { count: number };
-
-    if (totalCount.count <= keepRecent) return null;
-
-    const oldMessages = db.prepare(
-      'SELECT role, content FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ?',
-    ).all(conversationId, totalCount.count - keepRecent) as Array<{ role: string; content: string }>;
-
-    // Build a simple summary
-    const parts: string[] = [];
-    for (const msg of oldMessages) {
-      if (msg.content && msg.content.length > 0) {
-        const prefix = msg.role === 'user' ? 'Student' : 'Assistant';
-        const truncated = msg.content.length > 200 ? msg.content.slice(0, 200) + '...' : msg.content;
-        parts.push(`${prefix}: ${truncated}`);
-      }
-    }
-
-    return parts.length > 0 ? `[Earlier conversation summary]\n${parts.join('\n')}` : null;
-  }
 }

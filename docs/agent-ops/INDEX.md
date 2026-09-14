@@ -374,7 +374,7 @@
 | [handoffs/2026-09-14-v14-2-b2-context-hint-order.md](handoffs/2026-09-14-v14-2-b2-context-hint-order.md) | 14.2-B2 · 语境线 | `done(HQ 本机全量复跑 599/599 定案;收口见末尾)` | — | — |
 | [handoffs/2026-09-14-v14-agent-manual-order.md](handoffs/2026-09-14-v14-agent-manual-order.md) | 说明书接线单 · Agent 的产品说明 | `done` | — | — |
 | [handoffs/2026-09-14-v14-loop-robustness-order.md](handoffs/2026-09-14-v14-loop-robustness-order.md) | 循环健壮性批 | `done(施工与证据回填完成；server 两处环境红项及 git/secrets 留 HQ)` | — | — |
-| [handoffs/2026-09-14-v14-memory-quickwins-order.md](handoffs/2026-09-14-v14-memory-quickwins-order.md) | 记忆速赢批 | `ready(队列位 6)` | — | — |
+| [handoffs/2026-09-14-v14-memory-quickwins-order.md](handoffs/2026-09-14-v14-memory-quickwins-order.md) | 记忆速赢批 | `done(七项处理与验收回填完成；两项 server 环境失败及 git/secrets 留 HQ)` | — | — |
 | [handoffs/2026-09-14-v14-prompt-cache-order.md](handoffs/2026-09-14-v14-prompt-cache-order.md) | prompt 缓存单 | `done(施工与证据回填完成；真机命中与环境红项留 HQ)` | — | — |
 | [handoffs/2026-09-14-v14-prompt-repair-order.md](handoffs/2026-09-14-v14-prompt-repair-order.md) | prompt 修缮单 | `done` | — | — |
 | [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `done` | — | — |

@@ -1,0 +1,107 @@
+{
+  "schema": "memory-quickwins-builder-summary.v1",
+  "date": "2026-09-14",
+  "engineeringResult": "Seven order items handled; item 7 verified without reimplementation; server environmental failures remain for HQ.",
+  "directed": {
+    "newMemoryQuickwins": {
+      "files": 1,
+      "tests": 17,
+      "suites": 0,
+      "pass": 17,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0,
+      "log": ".codex-tmp/2026-09-14-memory-quickwins-builder/directed-initial/01-memory-quickwins.log"
+    },
+    "existingRowidPairing": {
+      "files": 2,
+      "tests": 3,
+      "suites": 0,
+      "pass": 3,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0,
+      "log": ".codex-tmp/2026-09-14-memory-quickwins-builder/directed-initial/02-existing-rowid-pairing.log"
+    }
+  },
+  "agentFamily": {
+    "files": 12,
+    "tests": 229,
+    "suites": 0,
+    "pass": 229,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "exitCode": 0,
+    "log": ".codex-tmp/2026-09-14-memory-quickwins-builder/regression-initial/01-agent-family.log"
+  },
+  "serverAll": {
+    "files": 87,
+    "tests": 877,
+    "suites": 0,
+    "pass": 875,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "exitCode": 1,
+    "log": ".codex-tmp/2026-09-14-memory-quickwins-builder/regression-initial/04-server-all-discovered-tests.log",
+    "filesPassing": 85,
+    "filesFailing": 2,
+    "failedFiles": [
+      "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "server/src/__tests__/v2SourceRegionCells.test.ts"
+    ],
+    "countBoundary": "Node counts the MinerU wiring file startup failure as one test; its internal cases did not expand."
+  },
+  "clientAll": {
+    "files_passed": 171,
+    "files_total": 171,
+    "tests_passed": 1746,
+    "tests_total": 1746,
+    "exitCode": 0,
+    "log": ".codex-tmp/2026-09-14-memory-quickwins-builder/regression-initial/07-runtime-test-unit.log"
+  },
+  "runtime": {
+    "authorizedComponents": 21,
+    "passed": 21,
+    "failed": 0,
+    "wholeAggregateExecuted": false,
+    "deferredToHQ": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ]
+  },
+  "testWiring": {
+    "files": 87,
+    "wired": 87,
+    "exempted": 0,
+    "unwired": 0
+  },
+  "sourceScopeCheck": {
+    "historyAndSaveMessageUnchanged": true,
+    "englishPatternsUnchanged": true,
+    "categorizationUnchanged": true,
+    "executorOutsideMemoryCasesUnchanged": true,
+    "orchestratorOnlyApprovedChanges": true,
+    "runtimeBudgetBytesUnchanged": true
+  },
+  "credentials": {
+    "newFixtureMaximumLength": 10,
+    "liveModelCalls": 0,
+    "existingRegressionFixtures": "unchanged"
+  },
+  "finalDocumentationCheck": {
+    "indexExitCode": 0,
+    "docsCheckExitCode": 0,
+    "changedGeneratedIndexes": [
+      "docs/agent-ops/INDEX.md"
+    ],
+    "rawSummary": ".codex-tmp/2026-09-14-memory-quickwins-builder/closeout-summary.json"
+  }
+}
