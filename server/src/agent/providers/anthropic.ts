@@ -107,12 +107,21 @@ export class AnthropicProvider implements AIProvider {
       description: t.description,
       input_schema: t.parameters as Anthropic.Tool.InputSchema,
     }));
+    // One breakpoint covers the entire tools prefix, regardless of tool count.
+    if (anthropicTools.length > 0) {
+      anthropicTools[anthropicTools.length - 1].cache_control = { type: 'ephemeral' };
+    }
 
     try {
       const stream = this.client.messages.stream({
         model: this.model,
         max_tokens: 16384,
-        system: systemPrompt,
+        system: systemPrompt
+          ? [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }]
+          : systemPrompt,
+        // SDK 0.79 supports automatic caching of the last cacheable block;
+        // this third breakpoint advances with the validated conversation.
+        cache_control: { type: 'ephemeral' },
         messages: validatedMessages,
         tools: anthropicTools.length > 0 ? anthropicTools : undefined,
       });

@@ -6,7 +6,7 @@ import test, { afterEach, beforeEach, type TestContext } from 'node:test';
 import { AnthropicProvider } from './anthropic.js';
 import { createProvider, getProviderFromSettings, type AIProvider } from './index.js';
 import { OpenAIProvider } from './openai.js';
-import type { StreamChunk, ToolDefinition } from './types.js';
+import type { ProviderMessage, StreamChunk, ToolDefinition } from './types.js';
 import { saveProviderCredential } from '../../services/providerCredentials.js';
 
 // These tests run serially, isolate credential env vars, and never load .env.
@@ -193,9 +193,14 @@ function stubStream(t: TestContext, pieces: Array<string | Uint8Array>) {
   return requests;
 }
 
-async function collect(adapter: AIProvider = provider(), tools = [noteTool]) {
+async function collect(
+  adapter: AIProvider = provider(),
+  tools = [noteTool],
+  messages: ProviderMessage[] = [{ role: 'user', content: '整理笔记' }],
+  systemPrompt = 'Protocol test',
+) {
   const chunks: StreamChunk[] = [];
-  for await (const chunk of adapter.chat([{ role: 'user', content: '整理笔记' }], tools, 'Protocol test')) {
+  for await (const chunk of adapter.chat(messages, tools, systemPrompt)) {
     chunks.push(chunk);
   }
   return chunks;
@@ -374,9 +379,137 @@ test('Anthropic normal text and tool streams retain the existing protocol and to
   });
   const chunks = await collect(adapter);
   assert.equal(request?.max_tokens, 16384);
-  assert.deepEqual(request?.tools, [{ name: noteTool.name, description: noteTool.description, input_schema: noteTool.parameters }]);
+  assert.deepEqual(request?.tools, [{
+    name: noteTool.name,
+    description: noteTool.description,
+    input_schema: noteTool.parameters,
+    cache_control: { type: 'ephemeral' },
+  }]);
   assert.equal(chunks.find((chunk) => chunk.type === 'text')?.text, '整理中');
   assertSuccessfulCall(chunks, 'anthropic-one', { title: '笔记' });
   assert.equal(chunks.some((chunk) => chunk.type === 'error'), false);
   assert.equal(chunks[chunks.length - 1]?.type, 'done');
+});
+
+function anthropicEvent(type: string, fields: Record<string, unknown> = {}) {
+  return `event: ${type}\ndata: ${JSON.stringify({ type, ...fields })}\n\n`;
+}
+
+// The real SDK consumes these SSE fixtures, so assertions below inspect the
+// serialized HTTP body rather than just the arguments passed to messages.stream.
+function anthropicResponse() {
+  return [
+    anthropicEvent('message_start', { message: {
+      id: 'msg-fixture', type: 'message', role: 'assistant', model: 'stream-fixture',
+      content: [], stop_reason: null, stop_sequence: null,
+      usage: { input_tokens: 12, output_tokens: 0 },
+    } }),
+    anthropicEvent('content_block_start', { index: 0, content_block: { type: 'text', text: '' } }),
+    anthropicEvent('content_block_delta', { index: 0, delta: { type: 'text_delta', text: '整理中' } }),
+    anthropicEvent('content_block_stop', { index: 0 }),
+    anthropicEvent('content_block_start', {
+      index: 1, content_block: { type: 'tool_use', id: 'call-sdk', name: noteTool.name, input: {} },
+    }),
+    anthropicEvent('content_block_delta', {
+      index: 1, delta: { type: 'input_json_delta', partial_json: '{"title":' },
+    }),
+    anthropicEvent('content_block_delta', {
+      index: 1, delta: { type: 'input_json_delta', partial_json: '"笔记"}' },
+    }),
+    anthropicEvent('content_block_stop', { index: 1 }),
+    anthropicEvent('message_delta', {
+      delta: { stop_reason: 'tool_use', stop_sequence: null }, usage: { output_tokens: 8 },
+    }),
+    anthropicEvent('message_stop'),
+  ];
+}
+
+test('Anthropic HTTP payload caches system, the final tool, and the rolling conversation prefix', async (t) => {
+  const requests = stubStream(t, anthropicResponse());
+  const adapter = new AnthropicProvider({ apiKey: 'syn-cache', model: 'stream-fixture' });
+  // More than four tools catches mistakenly allocating one breakpoint per tool.
+  const tools = Array.from({ length: 6 }, (_, index) => ({
+    ...noteTool, name: index === 5 ? noteTool.name : `note_${index}`,
+  }));
+  const originalTools = structuredClone(tools);
+  const systemPrompt = 'Static instructions\n中文与空格保持原样。';
+  const chunks = await collect(adapter, tools, undefined, systemPrompt);
+  assert.equal(requests.length, 1);
+  assert.deepEqual(requests[0], {
+    model: 'stream-fixture', max_tokens: 16384, stream: true,
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+    tools: tools.map((tool, index) => ({
+      name: tool.name, description: tool.description, input_schema: tool.parameters,
+      ...(index === tools.length - 1 ? { cache_control: { type: 'ephemeral' } } : {}),
+    })),
+    messages: [{ role: 'user', content: '整理笔记' }],
+    cache_control: { type: 'ephemeral' },
+  });
+  assert.deepEqual(tools, originalTools, 'cache metadata must not mutate the shared tool definitions');
+  assert.deepEqual(chunks.map((chunk) => chunk.type), [
+    'text', 'tool_call_start', 'tool_call_delta', 'tool_call_delta', 'tool_call_end', 'done', 'done',
+  ], 'retain the existing text, tool, and completion events');
+  assert.equal(chunks[0].text, '整理中');
+  assertSuccessfulCall(chunks, 'call-sdk', { title: '笔记' });
+});
+
+test('Anthropic HTTP payload leaves empty system and tools valid without empty cache blocks', async (t) => {
+  const requests = stubStream(t, anthropicResponse());
+  const adapter = new AnthropicProvider({ apiKey: 'syn-cache', model: 'stream-fixture' });
+  await collect(adapter, [], undefined, '');
+  await collect(adapter, [], undefined, 'Static instructions');
+  assert.equal(requests[0].system, '', 'preserve the existing empty-string representation');
+  assert.equal(requests[0].tools, undefined);
+  assert.deepEqual(requests[0].cache_control, { type: 'ephemeral' });
+  assert.deepEqual(requests[1].system, [{
+    type: 'text', text: 'Static instructions', cache_control: { type: 'ephemeral' },
+  }]);
+  assert.equal(requests[1].tools, undefined);
+  assert.deepEqual(requests[1].cache_control, { type: 'ephemeral' });
+});
+
+test('Anthropic caching preserves growing text and tool history, input objects, and safety filtering', async (t) => {
+  const requests = stubStream(t, anthropicResponse());
+  const adapter = new AnthropicProvider({ apiKey: 'syn-cache', model: 'stream-fixture' });
+  const history: ProviderMessage[] = [{ role: 'user', content: '整理笔记' }];
+  const expectedMessages: Record<string, unknown>[] = [{ role: 'user', content: '整理笔记' }];
+  for (let turn = 0; turn < 8; turn++) {
+    const originalHistory = structuredClone(history);
+    await collect(adapter, [noteTool], history);
+    const request = requests[turn];
+    assert.deepEqual(request.messages, expectedMessages, 'history content and order must stay unchanged');
+    assert.deepEqual(request.cache_control, { type: 'ephemeral' });
+    assert.equal(JSON.stringify(request).match(/"cache_control"/g)?.length, 3,
+      'growing history must not accumulate explicit per-message breakpoints');
+    assert.deepEqual(history, originalHistory, 'request construction must not annotate or rewrite caller history');
+    const id = `call-${turn}`;
+    const content = `工具回执 ${turn}`;
+    history.push(
+      { role: 'assistant', content: `步骤 ${turn}`, tool_calls: [{ id, name: noteTool.name, arguments: { turn } }] },
+      { role: 'user', content: '', tool_results: [{ tool_call_id: id, content }] },
+      { role: 'assistant', content: `完成 ${turn}` },
+      { role: 'user', content: [{ type: 'text', text: `继续 ${turn}` }] },
+    );
+    expectedMessages.push(
+      { role: 'assistant', content: [
+        { type: 'text', text: `步骤 ${turn}` },
+        { type: 'tool_use', id, name: noteTool.name, input: { turn } },
+      ] },
+      { role: 'user', content: [{ type: 'tool_result', tool_use_id: id, content }] },
+      { role: 'assistant', content: `完成 ${turn}` },
+      { role: 'user', content: [{ type: 'text', text: `继续 ${turn}` }] },
+    );
+  }
+  history.push(
+    { role: 'assistant', content: '', tool_calls: [{ id: 'missing-result', name: noteTool.name, arguments: {} }] },
+    { role: 'user', content: '', tool_results: [{ tool_call_id: 'wrong-id', content: 'discard' }] },
+    { role: 'assistant', content: '', tool_calls: [{ id: 'orphan', name: noteTool.name, arguments: {} }] },
+    { role: 'user', content: '保留最后的问题' },
+  );
+  const originalHistory = structuredClone(history);
+  await collect(adapter, [noteTool], history);
+  assert.deepEqual(requests[8].messages, [
+    ...expectedMessages, { role: 'user', content: '保留最后的问题' },
+  ], 'the existing pass still drops mismatched tool pairs and orphan tool calls');
+  assert.deepEqual(history, originalHistory);
 });

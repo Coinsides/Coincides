@@ -1,0 +1,9 @@
+{
+  "executedAt": "2026-09-14T07:42:53.266Z",
+  "status": "not_run_missing_anthropic_key",
+  "apiRequests": 0,
+  "credentialScope": "Inherited environment, server/.env (normal app dotenv path), and normal provider credential resolver; no other credential files searched.",
+  "hasAnthropicKey": false,
+  "rounds": [],
+  "rawDirectory": "D:/Coinsides/v2.x/Coincides/.codex-tmp/2026-09-14-prompt-cache-builder/live-2026-09-14T07-42-53-262Z"
+}
