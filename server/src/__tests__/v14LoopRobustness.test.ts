@@ -56,6 +56,11 @@ async function collect(stream: AsyncGenerator<StreamChunk>, events: StreamChunk[
   return events;
 }
 
+function assertEmptyTurnReceipt(event: StreamChunk) {
+  assert.equal(event.type, 'turn_receipt');
+  assert.deepEqual(event.data, { write_calls: [], read_calls: [], write_ok_count: 0, write_fail_count: 0 });
+}
+
 function tool(id: string, name = 'list_courses', args: Record<string, unknown> = {}): StreamChunk[] {
   const tool_call = { id, name, arguments: args };
   return [
@@ -113,8 +118,10 @@ test('a permanently hung iterator times out at 300s even when iterator return ne
   assert.equal(resolved, false, 'full declared budget remains available before the boundary');
   t.mock.timers.tick(1);
   const result = await pending;
-  assert.equal(result.value.type, 'error');
-  assert.match(result.value.error, /tim(?:ed?\s*out|eout)/i);
+  assertEmptyTurnReceipt(result.value);
+  const failure = (await stream.next()).value;
+  assert.equal(failure.type, 'error');
+  assert.match(failure.error, /tim(?:ed?\s*out|eout)/i);
   assert.ok(signal?.aborted, 'the provider is aborted without relying on another stream chunk');
   assert.equal((await stream.next()).done, true);
   assert.deepEqual(saved(db).filter(row => row.role === 'assistant'), [
@@ -137,9 +144,10 @@ test('request abort wakes a provider that ignores its signal and saves visible t
   await nextTurn();
   controller.abort(new Error('Synthetic disconnect'));
   const result = await pending;
-  assert.equal(result.value.type, 'error');
+  assertEmptyTurnReceipt(result.value);
   assert.ok(providerSignal?.aborted);
   assert.equal(saved(db).at(-1)?.content, 'Already visible.\n\n[interrupted]');
+  assert.equal((await stream.next()).value.type, 'error');
   assert.equal((await stream.next()).done, true);
 });
 
@@ -154,6 +162,7 @@ for (const failure of ['error chunk', 'thrown exception'] as const) {
     });
     const stream = runAgent(USER, CONVERSATION, 'Continue.');
     assert.equal((await stream.next()).value.type, 'text');
+    assertEmptyTurnReceipt((await stream.next()).value);
     assert.equal((await stream.next()).value.type, 'error');
     const assistant = saved(db).filter(row => row.role === 'assistant');
     assert.deepEqual(assistant, [
@@ -173,7 +182,9 @@ test('a provider failure before text does not manufacture an interrupted assista
   t.mock.method(OpenAIProvider.prototype, 'chat', async function* (): AsyncGenerator<StreamChunk> {
     yield { type: 'error', error: 'Synthetic early failure' };
   });
-  assert.deepEqual((await collect(runAgent(USER, CONVERSATION, 'Continue.'))).map(event => event.type), ['error']);
+  const events = await collect(runAgent(USER, CONVERSATION, 'Continue.'));
+  assert.deepEqual(events.map(event => event.type), ['turn_receipt', 'error']);
+  assertEmptyTurnReceipt(events[0]);
   assert.equal(saved(db).filter(row => row.role === 'assistant').length, 0);
 });
 
@@ -187,7 +198,12 @@ test('eight completed tool rounds emit one round_limit before done and retain ei
   });
   const events = await collect(runAgent(USER, CONVERSATION, 'Continue.'));
   assert.equal(rounds, 8);
-  assert.deepEqual(events.slice(-2).map(event => event.type), ['round_limit', 'done']);
+  assert.deepEqual(events.slice(-3).map(event => event.type), ['round_limit', 'turn_receipt', 'done']);
+  assert.equal(events.filter(event => event.type === 'turn_receipt').length, 1);
+  assert.deepEqual(events.at(-2)?.data, {
+    write_calls: [], read_calls: Array.from({ length: 8 }, () => ({ name: 'list_courses', ok: true })),
+    write_ok_count: 0, write_fail_count: 0,
+  });
   assert.equal(events.filter(event => event.type === 'round_limit').length, 1);
   assert.equal((events.find(event => event.type === 'round_limit')!.data as { max_rounds: number }).max_rounds, 8);
   assert.equal(events.filter(event => event.type === 'tool_call_end' && !event.error).length, 8);
@@ -232,7 +248,7 @@ test('an expired request deadline prevents the first provider call', async t => 
   t.mock.method(OpenAIProvider.prototype, 'chat', async function* (): AsyncGenerator<StreamChunk> { calls++; yield { type: 'done' }; });
   const events = await collect(runAgent(USER, CONVERSATION, 'Continue.', undefined, undefined, { deadline: Date.now() - 1 }));
   assert.equal(calls, 0);
-  assert.equal(events.at(-1)?.type, 'error');
+  assert.deepEqual(events.map(event => event.type), ['error'], 'context failure before a saved user turn has no receipt');
 });
 
 test('request deadline is checked between tool rounds without duplicating committed text', async t => {
@@ -274,7 +290,12 @@ test('the second hanging round uses only the remainder of the default 300s reque
   await nextTurn();
   assert.equal(settled, false);
   t.mock.timers.tick(1);
-  assert.equal((await pending).value.type, 'error');
+  const receipt = (await pending).value;
+  assert.equal(receipt.type, 'turn_receipt');
+  assert.deepEqual(receipt.data, {
+    write_calls: [], read_calls: [{ name: 'list_courses', ok: true }], write_ok_count: 0, write_fail_count: 0,
+  });
+  assert.equal((await stream.next()).value.type, 'error');
   assert.equal(rounds, 2);
   assert.equal(saved(db).at(-1)?.content, 'Second round.\n\n[interrupted]');
   await stream.next();

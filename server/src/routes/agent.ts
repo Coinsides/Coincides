@@ -7,6 +7,7 @@ import { sendMessageSchema, createConversationSchema } from '../validators/index
 import { ZodError } from 'zod';
 import { runAgent } from '../agent/orchestrator.js';
 import { AGENT_REQUEST_TIMEOUT_MS } from '../agent/runtime-budget.js';
+import { projectMessageReceipts, type PersistedAgentMessage } from '../agent/turnReceipt.js';
 
 const router = Router();
 
@@ -48,9 +49,9 @@ router.get('/conversations/:id/messages', (req: AuthRequest, res: Response) => {
   if (!conv) throw new AppError(404, 'Conversation not found');
 
   const messages = db.prepare(
-    'SELECT id, role, content, tool_calls, tool_results, created_at FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC',
-  ).all(req.params.id);
-  res.json(messages);
+    'SELECT id, role, content, tool_calls, tool_results, created_at, turn_id FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC, rowid ASC',
+  ).all(req.params.id) as PersistedAgentMessage[];
+  res.json(projectMessageReceipts(messages));
 });
 
 // DELETE /api/agent/conversations/:id — delete conversation
@@ -157,6 +158,8 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
           sendEvent('tool_end', { id: chunk.tool_call?.id, name: chunk.tool_call?.name, ok: !chunk.error });
         } else if (chunk.type === 'preference_form') {
           sendEvent('preference_form', { questions: chunk.data });
+        } else if (chunk.type === 'turn_receipt') {
+          sendEvent('turn_receipt', chunk.data);
         } else if (chunk.type === 'round_limit') {
           const message = chunk.error || 'Tool round limit reached. Send another message to continue.';
           sendEvent('round_limit', { message, details: chunk.data });

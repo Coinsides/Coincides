@@ -116,7 +116,10 @@ test('SSE lifecycle: a completely read request body close does not cancel a heal
   assert.equal(signal.aborted, false);
   proceed.resolve();
   await running;
-  assert.deepEqual(res.events().map(event => event.type), ['text', 'done']);
+  assert.deepEqual(res.events().map(event => event.type), ['text', 'turn_receipt', 'done']);
+  assert.deepEqual(res.events()[1].data, {
+    write_calls: [], read_calls: [], write_ok_count: 0, write_fail_count: 0,
+  });
   assert.equal(res.endCount, 1);
   assertCleaned();
 });
@@ -167,13 +170,16 @@ test('SSE lifecycle: the 300s deadline aborts a hung provider and emits error/do
   assertCleaned();
 });
 
-test('SSE lifecycle: an orchestration exception sends one error/done and cleans up its timer', async t => {
+test('SSE lifecycle: an orchestration exception sends a factual receipt then one error/done and cleans up its timer', async t => {
   const { res, run, assertCleaned } = await fixture(t);
   t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-09-14T12:00:00Z') });
   t.mock.method(MemoryManager.prototype, 'saveMessage', () => { throw new Error('Synthetic history failure'); });
   await run();
-  assert.deepEqual(res.events().map(event => event.type), ['error', 'done']);
-  assert.equal(res.events()[0].data.message, 'Synthetic history failure');
+  assert.deepEqual(res.events().map(event => event.type), ['turn_receipt', 'error', 'done']);
+  assert.deepEqual(res.events()[0].data, { write_calls: [], read_calls: [], write_ok_count: 0, write_fail_count: 0 });
+  const legacyEvents = res.events().filter(event => event.type !== 'turn_receipt');
+  assert.deepEqual(legacyEvents.map(event => event.type), ['error', 'done']);
+  assert.equal(legacyEvents[0].data.message, 'Synthetic history failure');
   assert.equal(res.endCount, 1);
   const writes = [...res.writes];
   t.mock.timers.tick(AGENT_REQUEST_TIMEOUT_MS);
@@ -234,7 +240,14 @@ test('SSE lifecycle: eight tool rounds emit a distinct round_limit and a visible
   assert.equal(providerCalls, 8);
   const events = res.events();
   assert.equal(events.filter(event => event.type === 'tool_end').length, 8);
-  assert.deepEqual(events.slice(-3).map(event => event.type), ['round_limit', 'error', 'done']);
+  assert.deepEqual(events.slice(-4).map(event => event.type), ['round_limit', 'error', 'turn_receipt', 'done']);
+  assert.equal(events.filter(event => event.type === 'turn_receipt').length, 1);
+  assert.deepEqual(events.find(event => event.type === 'turn_receipt')!.data, {
+    // This existing fixture has no argument delta: its empty raw arguments are
+    // recorded failures while the eight-round lifecycle still reaches the limit.
+    write_calls: [], read_calls: Array.from({ length: 8 }, () => ({ name: 'list_courses', ok: false })),
+    write_ok_count: 0, write_fail_count: 0,
+  });
   assert.equal(events.filter(event => event.type === 'error').length, 1);
   assert.equal(events.filter(event => event.type === 'done').length, 1);
   assert.equal(events.find(event => event.type === 'error')!.data.code, 'round_limit');

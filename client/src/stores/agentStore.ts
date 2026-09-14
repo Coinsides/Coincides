@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api, { getToken, API_BASE } from '@/services/api';
-import type { AgentContextHint, AgentConversation, AgentMessage } from '@shared/types';
+import type { AgentContextHint, AgentConversation, AgentMessage, AgentTurnReceipt } from '@shared/types';
 
 export interface PreferenceQuestion {
   id: string;
@@ -30,6 +30,7 @@ interface AgentState {
   preferenceForms: PreferenceFormMessage[];
   streaming: boolean;
   streamingText: string;
+  streamingReceipt: AgentTurnReceipt | null;
   activeToolName: string | null;
   loading: boolean;
 
@@ -64,6 +65,17 @@ function parseSSEEvents(text: string): Array<{ event: string; data: string }> {
   return events;
 }
 
+function isTurnReceipt(value: unknown): value is AgentTurnReceipt {
+  if (!value || typeof value !== 'object') return false;
+  const receipt = value as Record<string, unknown>;
+  const isCallList = (calls: unknown) => Array.isArray(calls) && calls.every((call) =>
+    call && typeof call.name === 'string' && typeof call.ok === 'boolean');
+  return isCallList(receipt.write_calls) && isCallList(receipt.read_calls)
+    && (receipt.unclassified_calls === undefined || isCallList(receipt.unclassified_calls))
+    && Number.isInteger(receipt.write_ok_count) && (receipt.write_ok_count as number) >= 0
+    && Number.isInteger(receipt.write_fail_count) && (receipt.write_fail_count as number) >= 0;
+}
+
 export const useAgentStore = create<AgentState>((set, get) => ({
   conversations: [],
   activeConversationId: null,
@@ -71,6 +83,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   preferenceForms: [],
   streaming: false,
   streamingText: '',
+  streamingReceipt: null,
   activeToolName: null,
   loading: false,
 
@@ -137,7 +150,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       created_at: new Date().toISOString(),
       ...(image ? { image_preview: `data:${image.media_type};base64,${image.data}` } : {}),
     };
-    set({ messages: [...get().messages, userMsg], streaming: true, streamingText: '', activeToolName: null });
+    set({ messages: [...get().messages, userMsg], streaming: true, streamingText: '', streamingReceipt: null, activeToolName: null });
+    let turnReceipt: AgentTurnReceipt | undefined;
 
     try {
       const token = getToken();
@@ -207,6 +221,16 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 } catch { /* ignore */ }
                 break;
               }
+              case 'turn_receipt': {
+                try {
+                  const parsed: unknown = JSON.parse(evt.data);
+                  if (isTurnReceipt(parsed)) {
+                    turnReceipt = parsed;
+                    set({ streamingReceipt: turnReceipt });
+                  }
+                } catch { /* A missing/invalid receipt stays unknown. */ }
+                break;
+              }
               case 'done': {
                 // Add assistant message to messages
                 const assistantMsg: AgentMessage = {
@@ -214,6 +238,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                   conversation_id: convId!,
                   role: 'assistant' as AgentMessage['role'],
                   content: accumulated,
+                  ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
                   tool_calls: null,
                   tool_results: null,
                   token_count: null,
@@ -222,6 +247,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 set({
                   streaming: false,
                   streamingText: '',
+                  streamingReceipt: null,
                   activeToolName: null,
                   messages: [...get().messages, assistantMsg],
                 });
@@ -238,6 +264,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                   conversation_id: convId!,
                   role: 'assistant' as AgentMessage['role'],
                   content: `⚠️ ${errorMessage}`,
+                  ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
                   tool_calls: null,
                   tool_results: null,
                   token_count: null,
@@ -246,9 +273,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 set({
                   streaming: false,
                   streamingText: '',
+                  streamingReceipt: null,
                   activeToolName: null,
                   messages: [...get().messages, errorMsg],
                 });
+                // The route still sends done after error. This message already
+                // owns the receipt; done preserves model text without copying it.
+                turnReceipt = undefined;
                 break;
               }
             }
@@ -257,12 +288,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       }
 
       // If stream ended without explicit 'done', finalize
-      if (get().streaming && accumulated) {
+      if (get().streaming && (accumulated || turnReceipt)) {
         const assistantMsg: AgentMessage = {
           id: `resp-${Date.now()}`,
           conversation_id: convId!,
           role: 'assistant' as AgentMessage['role'],
           content: accumulated,
+          ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
           tool_calls: null,
           tool_results: null,
           token_count: null,
@@ -271,10 +303,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         set({
           streaming: false,
           streamingText: '',
+          streamingReceipt: null,
           activeToolName: null,
           messages: [...get().messages, assistantMsg],
         });
       }
+      if (get().streaming) set({ streaming: false, streamingText: '', streamingReceipt: null, activeToolName: null });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Connection failed. Please try again.';
       const errorMsg: AgentMessage = {
@@ -282,6 +316,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         conversation_id: convId!,
         role: 'assistant' as AgentMessage['role'],
         content: `⚠️ ${errorMessage}`,
+        ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
         tool_calls: null,
         tool_results: null,
         token_count: null,
@@ -290,6 +325,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       set({
         streaming: false,
         streamingText: '',
+        streamingReceipt: null,
         activeToolName: null,
         messages: [...get().messages, errorMsg],
       });

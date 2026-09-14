@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 389 份文档。
+共 390 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -373,6 +373,7 @@
 | [handoffs/2026-09-14-v14-2-b1-read-tools-order.md](handoffs/2026-09-14-v14-2-b1-read-tools-order.md) | 14.2-B1 · 知觉四读器 | `done(HQ 本机全量 594/594 定案;收口见末尾)` | — | — |
 | [handoffs/2026-09-14-v14-2-b2-context-hint-order.md](handoffs/2026-09-14-v14-2-b2-context-hint-order.md) | 14.2-B2 · 语境线 | `done(HQ 本机全量复跑 599/599 定案;收口见末尾)` | — | — |
 | [handoffs/2026-09-14-v14-agent-manual-order.md](handoffs/2026-09-14-v14-agent-manual-order.md) | 说明书接线单 · Agent 的产品说明 | `done` | — | — |
+| [handoffs/2026-09-14-v14-claim-receipt-order.md](handoffs/2026-09-14-v14-claim-receipt-order.md) | 针三 · 宣称-收据对账器 | `done` | — | — |
 | [handoffs/2026-09-14-v14-loop-robustness-order.md](handoffs/2026-09-14-v14-loop-robustness-order.md) | 循环健壮性批 | `done(施工与证据回填完成；server 两处环境红项及 git/secrets 留 HQ)` | — | — |
 | [handoffs/2026-09-14-v14-memory-quickwins-order.md](handoffs/2026-09-14-v14-memory-quickwins-order.md) | 记忆速赢批 | `done(七项处理与验收回填完成；两项 server 环境失败及 git/secrets 留 HQ)` | — | — |
 | [handoffs/2026-09-14-v14-prompt-cache-order.md](handoffs/2026-09-14-v14-prompt-cache-order.md) | prompt 缓存单 | `done(施工与证据回填完成；真机命中与环境红项留 HQ)` | — | — |

@@ -1,4 +1,4 @@
-import type { AgentMessage } from '@shared/types';
+import type { AgentMessage, AgentTurnReceipt } from '@shared/types';
 import styles from './MessageBubble.module.css';
 
 function renderMarkdown(text: string): React.ReactNode[] {
@@ -104,6 +104,26 @@ interface MessageBubbleProps {
   message: AgentMessage & { image_preview?: string };
 }
 
+function TurnReceipt({ receipt, text }: { receipt?: AgentTurnReceipt | null; text: string }) {
+  // A missing projection is unknown, never evidence that no write happened.
+  if (!receipt) return null;
+  const unclassified = receipt.unclassified_calls ?? [];
+  const label = text.trim() ? '本轮无写动作' : receipt.read_calls.length ? '仅查阅' : null;
+  if (!receipt.write_calls.length && !unclassified.length && !label) return null;
+
+  return (
+    <div className={styles.turnReceipt} role="note" aria-label="本轮工具收据">
+      {receipt.write_calls.map((call, index) => (
+        <span key={index} aria-label={`${call.ok ? '成功' : '失败'} ${call.name}`}>
+          {call.ok ? '✓' : '✗'} {call.name}
+        </span>
+      ))}
+      {unclassified.map((call, index) => <span key={`unknown-${index}`}>未分类工具：{call.name}</span>)}
+      {!receipt.write_calls.length && !unclassified.length && label}
+    </div>
+  );
+}
+
 export default function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === 'user';
 
@@ -114,9 +134,10 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       )}
       {isUser ? (
         <div className={styles.content}>{message.content}</div>
-      ) : (
+      ) : message.content.trim() ? (
         <div className={styles.content}>{renderMarkdown(message.content)}</div>
-      )}
+      ) : null}
+      {message.role === 'assistant' && <TurnReceipt receipt={message.turn_receipt} text={message.content} />}
     </div>
   );
 }
@@ -124,9 +145,10 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
 interface StreamingBubbleProps {
   text: string;
   toolName: string | null;
+  receipt?: AgentTurnReceipt | null;
 }
 
-export function StreamingBubble({ text, toolName }: StreamingBubbleProps) {
+export function StreamingBubble({ text, toolName, receipt }: StreamingBubbleProps) {
   return (
     <div className={`${styles.bubble} ${styles.assistant}`}>
       {toolName && (
@@ -137,6 +159,7 @@ export function StreamingBubble({ text, toolName }: StreamingBubbleProps) {
       )}
       {text && <div className={styles.content}>{renderMarkdown(text)}</div>}
       <span className={styles.cursor}>▊</span>
+      <TurnReceipt receipt={receipt} text={text} />
     </div>
   );
 }

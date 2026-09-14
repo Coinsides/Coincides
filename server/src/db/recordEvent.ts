@@ -26,6 +26,7 @@ export const EVENT_VERBS = [
   'proposal_approved',
   'proposal_rejected',
   'published',
+  'claim_without_receipt',
 ] as const;
 
 export type EventVerb = typeof EVENT_VERBS[number];

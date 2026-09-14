@@ -375,6 +375,8 @@ export interface AgentConversation {
   updated_at: string;
 }
 
+export type { AgentTurnReceipt, AgentReceiptCall } from './agentTurnReceipt.js';
+
 export interface AgentMessage {
   id: string;
   conversation_id: string;
@@ -383,6 +385,8 @@ export interface AgentMessage {
   tool_calls: unknown | null;
   tool_results: unknown | null;
   token_count: number | null;
+  turn_id?: string | null;
+  turn_receipt?: import('./agentTurnReceipt.js').AgentTurnReceipt;
   created_at: string;
 }
 

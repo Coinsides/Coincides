@@ -25,6 +25,7 @@ export default function AgentPanel() {
     preferenceForms,
     streaming,
     streamingText,
+    streamingReceipt,
     activeToolName,
     fetchConversations,
     createConversation,
@@ -60,7 +61,7 @@ export default function AgentPanel() {
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingText]);
+  }, [messages, streamingText, streamingReceipt]);
 
   // Handle context hint
   useEffect(() => {
@@ -216,7 +217,7 @@ export default function AgentPanel() {
                 <PreferenceForm key={form.id} form={form} />
               ))}
               {streaming && (
-                <StreamingBubble text={streamingText} toolName={activeToolName} />
+                <StreamingBubble text={streamingText} toolName={activeToolName} receipt={streamingReceipt} />
               )}
               <div ref={messagesEndRef} />
             </div>

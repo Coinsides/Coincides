@@ -96,16 +96,18 @@ export class MemoryManager {
     content: string,
     toolCalls?: string | null,
     toolResults?: string | null,
-  ): void {
+    turnId?: string | null,
+  ): string {
     const db = getDb();
     const id = uuidv4();
     const now = new Date().toISOString();
     db.prepare(
-      'INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    ).run(id, conversationId, role, content, toolCalls || null, toolResults || null, now);
+      'INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at, turn_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    ).run(id, conversationId, role, content, toolCalls || null, toolResults || null, now, turnId ?? null);
 
     // Update conversation updated_at
     db.prepare('UPDATE agent_conversations SET updated_at = ? WHERE id = ?').run(now, conversationId);
+    return id;
   }
 
   retrieveMemories(query: string, limit: number = 5): Promise<MemoryMatch[]> {

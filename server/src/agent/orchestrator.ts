@@ -7,6 +7,8 @@ import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
 import { buildSystemPrompt } from './system-prompt.js';
+import { projectTurnReceipt, type PersistedAgentMessage } from './turnReceipt.js';
+import { observeClaimWithoutReceipt } from './claimObservation.js';
 import {
   AGENT_REQUEST_TIMEOUT_MS, AGENT_ROUND_TIMEOUT_MS, agentStopError,
   createStreamBudget, runToolWithinBudget, type AgentRunOptions,
@@ -35,6 +37,7 @@ export async function* runAgent(
   image?: { media_type: string; data: string },
   options: AgentRunOptions = {},
 ): AsyncGenerator<StreamChunk> {
+  const turnId = randomUUID();
   const deadline = options.deadline ?? Date.now() + AGENT_REQUEST_TIMEOUT_MS;
   const db = getDb();
   const memory = new MemoryManager(userId);
@@ -135,205 +138,227 @@ export async function* runAgent(
   }
 
   // 6. Save user message
-  memory.saveMessage(conversationId, 'user', augmentedMessage);
+  const saveTurnMessage = (role: string, content: string, toolCalls?: string | null, toolResults?: string | null) => {
+    memory.saveMessage(conversationId, role, content, toolCalls, toolResults, turnId);
+  };
+  const finishTurn = (): StreamChunk => {
+    // Read committed evidence by birth identity, including rows saved before a
+    // later bookkeeping failure. Concurrent runs can never lend this run a receipt.
+    const rows = db.prepare(`SELECT id, role, content, tool_calls, tool_results, turn_id FROM agent_messages
+      WHERE conversation_id = ? AND turn_id = ?
+      ORDER BY created_at ASC, rowid ASC`).all(conversationId, turnId) as PersistedAgentMessage[];
+    const receipt = projectTurnReceipt(rows);
+    observeClaimWithoutReceipt(db, userId, conversationId, rows, receipt);
+    return { type: 'turn_receipt', data: receipt };
+  };
 
-  // 7. Build messages array
-  let userContent: string | ContentBlock[] = augmentedMessage;
-  if (image) {
-    userContent = [
-      { type: 'text', text: augmentedMessage },
-      { type: 'image', source: { type: 'base64', media_type: image.media_type, data: image.data } },
+  let turnError: string | undefined;
+  try {
+    saveTurnMessage('user', augmentedMessage);
+
+    // 7. Build messages array
+    let userContent: string | ContentBlock[] = augmentedMessage;
+    if (image) {
+      userContent = [
+        { type: 'text', text: augmentedMessage },
+        { type: 'image', source: { type: 'base64', media_type: image.media_type, data: image.data } },
+      ];
+    }
+
+    const messages: ProviderMessage[] = [
+      ...history,
+      { role: 'user', content: userContent },
     ];
-  }
 
-  const messages: ProviderMessage[] = [
-    ...history,
-    { role: 'user', content: userContent },
-  ];
-
-  // 8. Agent loop (handle tool calls)
-  for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-    const stopped = agentStopError(deadline, options.signal);
-    if (stopped) {
-      yield { type: 'error', error: stopped.message };
-      return;
-    }
-    const currentToolCalls: ToolCall[] = [];
-    const toolErrors = new Map<string, string>();
-    let textBuffer = '';
-    const pendingToolCalls = new Map<string, { id: string; name: string; raw: string }>();
-    let activeToolCallId: string | undefined;
-    const pendingCall = (chunk: StreamChunk) => {
-      const id = chunk.tool_call?.id || activeToolCallId || `call_${randomUUID()}`;
-      let pending = pendingToolCalls.get(id);
-      if (!pending) {
-        pending = { id, name: '', raw: '' };
-        pendingToolCalls.set(id, pending);
+    // 8. Agent loop (handle tool calls)
+    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      const stopped = agentStopError(deadline, options.signal);
+      if (stopped) {
+        throw stopped;
       }
-      if (chunk.tool_call?.name) pending.name = chunk.tool_call.name;
-      return pending;
-    };
-
-    try {
-      const budget = createStreamBudget(Math.min(deadline, Date.now() + AGENT_ROUND_TIMEOUT_MS), options.signal);
-      let stream: AsyncGenerator<StreamChunk> | undefined;
-      try {
-        stream = provider.chat(messages, toolDefinitions, systemPrompt, { signal: budget.signal });
-        while (true) {
-          const next = await budget.next(() => stream!.next());
-          if (next.done) break;
-          const chunk = next.value;
-          if (chunk.type === 'text') {
-            textBuffer += chunk.text || '';
-            yield chunk;
-          } else if (chunk.type === 'tool_call_start') {
-            activeToolCallId = undefined;
-            activeToolCallId = pendingCall(chunk).id;
-          } else if (chunk.type === 'tool_call_delta') {
-            pendingCall(chunk).raw += chunk.text || '';
-          } else if (chunk.type === 'tool_call_end') {
-            const pending = pendingCall(chunk);
-            const supplied = chunk.tool_call?.arguments;
-            const parsed = isArgumentObject(supplied) && Object.keys(supplied).length > 0
-              ? { arguments: supplied }
-              : parseToolArguments(pending.name, pending.raw);
-            const error = chunk.error || parsed.error
-              || (!pending.name ? toolArgumentError('', pending.raw, 'have no tool name') : undefined);
-            // An errored call still needs an assistant/tool-result pair in model
-            // history. Its placeholder arguments never reach the executor.
-            currentToolCalls.push({ id: pending.id, name: pending.name, arguments: error ? {} : parsed.arguments! });
-            if (error) toolErrors.set(pending.id, error);
-            pendingToolCalls.delete(pending.id);
-            if (activeToolCallId === pending.id) activeToolCallId = undefined;
-          } else if (chunk.type === 'error') {
-            throw new Error(chunk.error || 'Provider error');
-          } else if (chunk.type === 'done') {
-            break;
-          }
+      const currentToolCalls: ToolCall[] = [];
+      const toolErrors = new Map<string, string>();
+      let textBuffer = '';
+      const pendingToolCalls = new Map<string, { id: string; name: string; raw: string }>();
+      let activeToolCallId: string | undefined;
+      const pendingCall = (chunk: StreamChunk) => {
+        const id = chunk.tool_call?.id || activeToolCallId || `call_${randomUUID()}`;
+        let pending = pendingToolCalls.get(id);
+        if (!pending) {
+          pending = { id, name: '', raw: '' };
+          pendingToolCalls.set(id, pending);
         }
-      } finally {
-        budget.dispose();
-        // AsyncGenerator.return() queues behind a pending next(). An uncooperative
-        // provider must not turn cleanup into another unbounded wait.
-        void stream?.return(undefined).catch(() => {});
-      }
-    } catch (err: unknown) {
-      // Only text was exposed to the user. Calls assembled from a failed stream
-      // have not executed, so do not persist orphan tool_use blocks with it.
-      if (textBuffer) memory.saveMessage(conversationId, 'assistant', `${textBuffer}\n\n[interrupted]`);
-      const message = err instanceof Error ? err.message : 'Provider error';
-      yield { type: 'error', error: message };
-      return;
-    }
+        if (chunk.tool_call?.name) pending.name = chunk.tool_call.name;
+        return pending;
+      };
 
-    // If no tool calls, we're done
-    if (currentToolCalls.length === 0) {
-      if (textBuffer) memory.saveMessage(conversationId, 'assistant', textBuffer);
-      break;
-    }
-
-    // Surface tool activity to the SSE consumer at execution time — the
-    // provider-stream tool_call_start/end chunks above are consumed for
-    // argument assembly and never forwarded, so without these yields the
-    // route's tool_start/tool_end events can never fire.
-    for (const tc of currentToolCalls) {
-      yield { type: 'tool_call_start', tool_call: tc };
-    }
-
-    // Execute tool calls in parallel for maximum efficiency
-    // All tool calls in a single round are independent (Claude decides to call them together)
-    let hasPreferenceForm = false;
-    let preferenceFormData: unknown = null;
-
-    const toolResultPromises = currentToolCalls.map(async (tc) => {
-      const inputError = toolErrors.get(tc.id);
-      if (inputError) {
-        return { tool_call_id: tc.id, content: JSON.stringify({ error: inputError }) } as ToolResult;
-      }
       try {
-        const result = await runToolWithinBudget(() => executeTool(tc.name, tc.arguments, userId, {
-          actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
-        }), deadline);
-
-        // Some existing executors return an error receipt instead of throwing.
-        // Reflect both forms in SSE while preserving the original model result.
+        const budget = createStreamBudget(Math.min(deadline, Date.now() + AGENT_ROUND_TIMEOUT_MS), options.signal);
+        let stream: AsyncGenerator<StreamChunk> | undefined;
         try {
-          const receipt: unknown = JSON.parse(result);
-          if (isArgumentObject(receipt) && receipt.error) {
-            toolErrors.set(tc.id, typeof receipt.error === 'string' ? receipt.error : JSON.stringify(receipt.error));
-          }
-        } catch { /* Plain-text tool results are also valid. */ }
-
-        // Detect preference_form from collect_preferences tool
-        if (tc.name === 'collect_preferences') {
-          try {
-            const parsed = JSON.parse(result);
-            if (parsed.__type === 'preference_form') {
-              hasPreferenceForm = true;
-              preferenceFormData = parsed.questions;
+          stream = provider.chat(messages, toolDefinitions, systemPrompt, { signal: budget.signal });
+          while (true) {
+            const next = await budget.next(() => stream!.next());
+            if (next.done) break;
+            const chunk = next.value;
+            if (chunk.type === 'text') {
+              textBuffer += chunk.text || '';
+              yield chunk;
+            } else if (chunk.type === 'tool_call_start') {
+              activeToolCallId = undefined;
+              activeToolCallId = pendingCall(chunk).id;
+            } else if (chunk.type === 'tool_call_delta') {
+              pendingCall(chunk).raw += chunk.text || '';
+            } else if (chunk.type === 'tool_call_end') {
+              const pending = pendingCall(chunk);
+              const supplied = chunk.tool_call?.arguments;
+              const parsed = isArgumentObject(supplied) && Object.keys(supplied).length > 0
+                ? { arguments: supplied }
+                : parseToolArguments(pending.name, pending.raw);
+              const error = chunk.error || parsed.error
+                || (!pending.name ? toolArgumentError('', pending.raw, 'have no tool name') : undefined);
+              // An errored call still needs an assistant/tool-result pair in model
+              // history. Its placeholder arguments never reach the executor.
+              currentToolCalls.push({ id: pending.id, name: pending.name, arguments: error ? {} : parsed.arguments! });
+              if (error) toolErrors.set(pending.id, error);
+              pendingToolCalls.delete(pending.id);
+              if (activeToolCallId === pending.id) activeToolCallId = undefined;
+            } else if (chunk.type === 'error') {
+              throw new Error(chunk.error || 'Provider error');
+            } else if (chunk.type === 'done') {
+              break;
             }
-          } catch { /* ignore parse errors */ }
+          }
+        } finally {
+          budget.dispose();
+          // AsyncGenerator.return() queues behind a pending next(). An uncooperative
+          // provider must not turn cleanup into another unbounded wait.
+          void stream?.return(undefined).catch(() => {});
         }
-
-        return { tool_call_id: tc.id, content: result } as ToolResult;
       } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : 'Tool execution error';
-        console.error(`Tool execution failed [${tc.name}]:`, err);
-        const error = `Tool '${tc.name}' failed: ${errMsg}`;
-        toolErrors.set(tc.id, error);
-        return { tool_call_id: tc.id, content: JSON.stringify({ error }) } as ToolResult;
+        // Only text was exposed to the user. Calls assembled from a failed stream
+        // have not executed, so do not persist orphan tool_use blocks with it.
+        if (textBuffer) saveTurnMessage('assistant', `${textBuffer}\n\n[interrupted]`);
+        throw err instanceof Error ? err : new Error('Provider error');
       }
-    });
 
-    const toolResults = await Promise.all(toolResultPromises);
+      // If no tool calls, we're done
+      if (currentToolCalls.length === 0) {
+        if (textBuffer) saveTurnMessage('assistant', textBuffer);
+        break;
+      }
 
-    // Add assistant message with tool calls + tool results to messages
-    messages.push({
-      role: 'assistant',
-      content: textBuffer,
-      tool_calls: currentToolCalls,
-    });
-    messages.push({
-      role: 'user',
-      content: '',
-      tool_results: toolResults,
-    });
+      // Surface tool activity to the SSE consumer at execution time — the
+      // provider-stream tool_call_start/end chunks above are consumed for
+      // argument assembly and never forwarded, so without these yields the
+      // route's tool_start/tool_end events can never fire.
+      for (const tc of currentToolCalls) {
+        yield { type: 'tool_call_start', tool_call: tc };
+      }
 
-    // Persist intermediate tool round to DB so history stays complete
-    // (each tool_use must have a matching tool_result in conversation history)
-    const interrupted = agentStopError(deadline, options.signal);
-    db.transaction(() => {
-      memory.saveMessage(
-        conversationId, 'assistant',
-        interrupted && textBuffer ? `${textBuffer}\n\n[interrupted]` : textBuffer,
-        JSON.stringify(currentToolCalls),
-      );
-      memory.saveMessage(conversationId, 'user', '', null, JSON.stringify(toolResults));
-    })();
+      // Execute tool calls in parallel for maximum efficiency
+      // All tool calls in a single round are independent (Claude decides to call them together)
+      let hasPreferenceForm = false;
+      let preferenceFormData: unknown = null;
 
-    // Persist before yielding: disconnects must not strand half a tool pair.
-    for (const tc of currentToolCalls) {
-      const error = toolErrors.get(tc.id);
-      yield { type: 'tool_call_end', tool_call: tc, ...(error ? { error } : {}) };
+      const toolResultPromises = currentToolCalls.map(async (tc) => {
+        const inputError = toolErrors.get(tc.id);
+        if (inputError) {
+          return { tool_call_id: tc.id, content: JSON.stringify({ error: inputError }) } as ToolResult;
+        }
+        try {
+          const result = await runToolWithinBudget(() => executeTool(tc.name, tc.arguments, userId, {
+            actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
+          }), deadline);
+
+          // Some existing executors return an error receipt instead of throwing.
+          // Reflect both forms in SSE while preserving the original model result.
+          try {
+            const receipt: unknown = JSON.parse(result);
+            if (isArgumentObject(receipt) && receipt.error) {
+              toolErrors.set(tc.id, typeof receipt.error === 'string' ? receipt.error : JSON.stringify(receipt.error));
+            }
+          } catch { /* Plain-text tool results are also valid. */ }
+
+          // Detect preference_form from collect_preferences tool
+          if (tc.name === 'collect_preferences') {
+            try {
+              const parsed = JSON.parse(result);
+              if (parsed.__type === 'preference_form') {
+                hasPreferenceForm = true;
+                preferenceFormData = parsed.questions;
+              }
+            } catch { /* ignore parse errors */ }
+          }
+
+          return { tool_call_id: tc.id, content: result } as ToolResult;
+        } catch (err: unknown) {
+          const errMsg = err instanceof Error ? err.message : 'Tool execution error';
+          console.error(`Tool execution failed [${tc.name}]:`, err);
+          const error = `Tool '${tc.name}' failed: ${errMsg}`;
+          toolErrors.set(tc.id, error);
+          return { tool_call_id: tc.id, content: JSON.stringify({ error }) } as ToolResult;
+        }
+      });
+
+      const toolResults = await Promise.all(toolResultPromises);
+
+      // Add assistant message with tool calls + tool results to messages
+      messages.push({
+        role: 'assistant',
+        content: textBuffer,
+        tool_calls: currentToolCalls,
+      });
+      messages.push({
+        role: 'user',
+        content: '',
+        tool_results: toolResults,
+      });
+
+      // Persist intermediate tool round to DB so history stays complete
+      // (each tool_use must have a matching tool_result in conversation history)
+      const interrupted = agentStopError(deadline, options.signal);
+      db.transaction(() => {
+        saveTurnMessage(
+          'assistant',
+          interrupted && textBuffer ? `${textBuffer}\n\n[interrupted]` : textBuffer,
+          JSON.stringify(currentToolCalls),
+        );
+        saveTurnMessage('user', '', null, JSON.stringify(toolResults));
+      })();
+
+      // Persist before yielding: disconnects must not strand half a tool pair.
+      for (const tc of currentToolCalls) {
+        const error = toolErrors.get(tc.id);
+        yield { type: 'tool_call_end', tool_call: tc, ...(error ? { error } : {}) };
+      }
+      if (hasPreferenceForm && preferenceFormData) {
+        yield { type: 'preference_form', data: preferenceFormData };
+      }
+      const stoppedAfterTools = agentStopError(deadline, options.signal);
+      if (stoppedAfterTools) {
+        throw stoppedAfterTools;
+      }
+      if (round === MAX_TOOL_ROUNDS - 1) {
+        yield { type: 'round_limit', data: {
+          max_rounds: MAX_TOOL_ROUNDS,
+          message: 'Reached the 8-round tool limit. The last tool results were saved; ask to continue.',
+        } };
+      }
     }
-    if (hasPreferenceForm && preferenceFormData) {
-      yield { type: 'preference_form', data: preferenceFormData };
-    }
-    const stoppedAfterTools = agentStopError(deadline, options.signal);
-    if (stoppedAfterTools) {
-      yield { type: 'error', error: stoppedAfterTools.message };
-      return;
-    }
-    if (round === MAX_TOOL_ROUNDS - 1) {
-      yield { type: 'round_limit', data: {
-        max_rounds: MAX_TOOL_ROUNDS,
-        message: 'Reached the 8-round tool limit. The last tool results were saved; ask to continue.',
-      } };
-    }
+
+    // 10. Extract memories from this exchange
+    memory.extractMemories(conversationId, userMessage);
+  } catch (err: unknown) {
+    // Message persistence (including pair rollback) and memory extraction can
+    // fail after earlier writes committed. They still need the same factual tail.
+    turnError = err instanceof Error ? err.message : 'Agent turn failed';
   }
 
-  // 10. Extract memories from this exchange
-  memory.extractMemories(conversationId, userMessage);
-
+  yield finishTurn();
+  if (turnError !== undefined) {
+    yield { type: 'error', error: turnError };
+    return;
+  }
   yield { type: 'done' };
 }
