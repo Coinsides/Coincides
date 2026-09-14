@@ -25,10 +25,10 @@ export class MemoryManager {
   getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
     const db = getDb();
     const rows = db.prepare(
-      'SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT ?',
+      'SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = ? ORDER BY created_at DESC, rowid DESC LIMIT ?',
     ).all(conversationId, limit) as DbMessage[];
 
-    // Reverse to get chronological order
+    // rowid breaks same-millisecond ties so tool_use/result pairs survive reversal.
     rows.reverse();
 
     const messages: ProviderMessage[] = rows.map((row) => {

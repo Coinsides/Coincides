@@ -56,4 +56,4 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   };
 }
 
-export type { AIProvider, ProviderConfig, ProviderMessage, ToolCall, ToolResult, ToolDefinition, StreamChunk } from './types.js';
+export type { AIProvider, ProviderConfig, ProviderMessage, ProviderChatOptions, ToolCall, ToolResult, ToolDefinition, StreamChunk } from './types.js';

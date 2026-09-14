@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { AIProvider, ProviderConfig, ProviderMessage, ToolDefinition, StreamChunk } from './types.js';
+import type { AIProvider, ProviderChatOptions, ProviderConfig, ProviderMessage, ToolDefinition, StreamChunk } from './types.js';
 import { isArgumentObject } from './tool-arguments.js';
 
 export class AnthropicProvider implements AIProvider {
@@ -15,6 +15,7 @@ export class AnthropicProvider implements AIProvider {
     messages: ProviderMessage[],
     tools: ToolDefinition[],
     systemPrompt: string,
+    options?: ProviderChatOptions,
   ): AsyncGenerator<StreamChunk> {
     // Map messages to Anthropic format
     const anthropicMessages: Anthropic.MessageParam[] = messages.map((m) => {
@@ -113,6 +114,7 @@ export class AnthropicProvider implements AIProvider {
     }
 
     try {
+      options?.signal?.throwIfAborted();
       const stream = this.client.messages.stream({
         model: this.model,
         max_tokens: 16384,
@@ -124,7 +126,7 @@ export class AnthropicProvider implements AIProvider {
         cache_control: { type: 'ephemeral' },
         messages: validatedMessages,
         tools: anthropicTools.length > 0 ? anthropicTools : undefined,
-      });
+      }, { signal: options?.signal });
 
       let currentToolCallId = '';
       let currentToolCallName = '';

@@ -7,6 +7,10 @@ import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
 import { buildSystemPrompt } from './system-prompt.js';
+import {
+  AGENT_REQUEST_TIMEOUT_MS, AGENT_ROUND_TIMEOUT_MS, agentStopError,
+  createStreamBudget, runToolWithinBudget, type AgentRunOptions,
+} from './runtime-budget.js';
 import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
 
 const MAX_TOOL_ROUNDS = 8;
@@ -29,7 +33,9 @@ export async function* runAgent(
   userMessage: string,
   contextHint?: AgentContextHint,
   image?: { media_type: string; data: string },
+  options: AgentRunOptions = {},
 ): AsyncGenerator<StreamChunk> {
+  const deadline = options.deadline ?? Date.now() + AGENT_REQUEST_TIMEOUT_MS;
   const db = getDb();
   const memory = new MemoryManager(userId);
 
@@ -138,10 +144,13 @@ export async function* runAgent(
 
   // 8. Agent loop (handle tool calls)
   let fullResponse = '';
-  let lastRoundText = '';
-  let lastRoundHadTools = false;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+    const stopped = agentStopError(deadline, options.signal);
+    if (stopped) {
+      yield { type: 'error', error: stopped.message };
+      return;
+    }
     const currentToolCalls: ToolCall[] = [];
     const toolErrors = new Map<string, string>();
     let textBuffer = '';
@@ -159,17 +168,14 @@ export async function* runAgent(
     };
 
     try {
-      const ROUND_TIMEOUT_MS = 300_000;
-      let roundTimedOut = false;
-      const timeoutHandle = setTimeout(() => { roundTimedOut = true; }, ROUND_TIMEOUT_MS);
-
+      const budget = createStreamBudget(Math.min(deadline, Date.now() + AGENT_ROUND_TIMEOUT_MS), options.signal);
+      let stream: AsyncGenerator<StreamChunk> | undefined;
       try {
-        for await (const chunk of provider.chat(messages, toolDefinitions, systemPrompt)) {
-          if (roundTimedOut) {
-            yield { type: 'error', error: 'Request timed out after 300s' };
-            clearTimeout(timeoutHandle);
-            return;
-          }
+        stream = provider.chat(messages, toolDefinitions, systemPrompt, { signal: budget.signal });
+        while (true) {
+          const next = await budget.next(() => stream!.next());
+          if (next.done) break;
+          const chunk = next.value;
           if (chunk.type === 'text') {
             textBuffer += chunk.text || '';
             yield chunk;
@@ -193,31 +199,33 @@ export async function* runAgent(
             pendingToolCalls.delete(pending.id);
             if (activeToolCallId === pending.id) activeToolCallId = undefined;
           } else if (chunk.type === 'error') {
-            yield chunk;
-            clearTimeout(timeoutHandle);
-            return;
+            throw new Error(chunk.error || 'Provider error');
           } else if (chunk.type === 'done') {
             break;
           }
         }
       } finally {
-        clearTimeout(timeoutHandle);
+        budget.dispose();
+        // AsyncGenerator.return() queues behind a pending next(). An uncooperative
+        // provider must not turn cleanup into another unbounded wait.
+        void stream?.return(undefined).catch(() => {});
       }
     } catch (err: unknown) {
+      // Only text was exposed to the user. Calls assembled from a failed stream
+      // have not executed, so do not persist orphan tool_use blocks with it.
+      if (textBuffer) memory.saveMessage(conversationId, 'assistant', `${textBuffer}\n\n[interrupted]`);
       const message = err instanceof Error ? err.message : 'Provider error';
       yield { type: 'error', error: message };
       return;
     }
 
     fullResponse += textBuffer;
-    lastRoundText = textBuffer;
 
     // If no tool calls, we're done
     if (currentToolCalls.length === 0) {
-      lastRoundHadTools = false;
+      if (textBuffer) memory.saveMessage(conversationId, 'assistant', textBuffer);
       break;
     }
-    lastRoundHadTools = true;
 
     // Surface tool activity to the SSE consumer at execution time — the
     // provider-stream tool_call_start/end chunks above are consumed for
@@ -238,9 +246,9 @@ export async function* runAgent(
         return { tool_call_id: tc.id, content: JSON.stringify({ error: inputError }) } as ToolResult;
       }
       try {
-        const result = await executeTool(tc.name, tc.arguments, userId, {
+        const result = await runToolWithinBudget(() => executeTool(tc.name, tc.arguments, userId, {
           actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
-        });
+        }), deadline);
 
         // Some existing executors return an error receipt instead of throwing.
         // Reflect both forms in SSE while preserving the original model result.
@@ -273,15 +281,6 @@ export async function* runAgent(
     });
 
     const toolResults = await Promise.all(toolResultPromises);
-    for (const tc of currentToolCalls) {
-      const error = toolErrors.get(tc.id);
-      yield { type: 'tool_call_end', tool_call: tc, ...(error ? { error } : {}) };
-    }
-
-    // If a preference form was generated, emit it as a special SSE event
-    if (hasPreferenceForm && preferenceFormData) {
-      yield { type: 'preference_form', data: preferenceFormData };
-    }
 
     // Add assistant message with tool calls + tool results to messages
     messages.push({
@@ -297,29 +296,35 @@ export async function* runAgent(
 
     // Persist intermediate tool round to DB so history stays complete
     // (each tool_use must have a matching tool_result in conversation history)
-    memory.saveMessage(
-      conversationId,
-      'assistant',
-      textBuffer,
-      JSON.stringify(currentToolCalls),
-    );
-    memory.saveMessage(
-      conversationId,
-      'user',
-      '',
-      null,
-      JSON.stringify(toolResults),
-    );
-  }
+    const interrupted = agentStopError(deadline, options.signal);
+    db.transaction(() => {
+      memory.saveMessage(
+        conversationId, 'assistant',
+        interrupted && textBuffer ? `${textBuffer}\n\n[interrupted]` : textBuffer,
+        JSON.stringify(currentToolCalls),
+      );
+      memory.saveMessage(conversationId, 'user', '', null, JSON.stringify(toolResults));
+    })();
 
-  // 9. Save final assistant text response
-  // Only save if the last round had NO tool calls (otherwise it was already saved in the loop)
-  if (lastRoundText && !lastRoundHadTools) {
-    memory.saveMessage(
-      conversationId,
-      'assistant',
-      lastRoundText,
-    );
+    // Persist before yielding: disconnects must not strand half a tool pair.
+    for (const tc of currentToolCalls) {
+      const error = toolErrors.get(tc.id);
+      yield { type: 'tool_call_end', tool_call: tc, ...(error ? { error } : {}) };
+    }
+    if (hasPreferenceForm && preferenceFormData) {
+      yield { type: 'preference_form', data: preferenceFormData };
+    }
+    const stoppedAfterTools = agentStopError(deadline, options.signal);
+    if (stoppedAfterTools) {
+      yield { type: 'error', error: stoppedAfterTools.message };
+      return;
+    }
+    if (round === MAX_TOOL_ROUNDS - 1) {
+      yield { type: 'round_limit', data: {
+        max_rounds: MAX_TOOL_ROUNDS,
+        message: 'Reached the 8-round tool limit. The last tool results were saved; ask to continue.',
+      } };
+    }
   }
 
   // 10. Extract memories from this exchange

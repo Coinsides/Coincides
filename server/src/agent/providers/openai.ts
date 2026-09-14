@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { AIProvider, ProviderConfig, ProviderMessage, ToolDefinition, StreamChunk } from './types.js';
+import type { AIProvider, ProviderChatOptions, ProviderConfig, ProviderMessage, ToolDefinition, StreamChunk } from './types.js';
 import { parseToolArguments } from './tool-arguments.js';
 
 export class OpenAIProvider implements AIProvider {
@@ -17,6 +17,7 @@ export class OpenAIProvider implements AIProvider {
     messages: ProviderMessage[],
     tools: ToolDefinition[],
     systemPrompt: string,
+    options?: ProviderChatOptions,
   ): AsyncGenerator<StreamChunk> {
     // Map messages to OpenAI format
     const openaiMessages: Record<string, unknown>[] = [
@@ -80,7 +81,15 @@ export class OpenAIProvider implements AIProvider {
       body.parallel_tool_calls = true;
     }
 
+    // A local controller also closes the request when the caller stops consuming.
+    const controller = new AbortController();
+    const signal = options?.signal;
+    const abortRequest = () => controller.abort(signal?.reason);
+    if (signal?.aborted) abortRequest();
+    else signal?.addEventListener('abort', abortRequest, { once: true });
+
     try {
+      controller.signal.throwIfAborted();
       const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
         method: 'POST',
         headers: {
@@ -88,6 +97,7 @@ export class OpenAIProvider implements AIProvider {
           Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -173,6 +183,9 @@ export class OpenAIProvider implements AIProvider {
           if (done) break;
         }
       } finally {
+        // Some compatible servers never close after [DONE]. Do not await a
+        // cancellation handshake: a stalled peer must not stall iterator.return().
+        void reader.cancel().catch(() => {});
         reader.releaseLock();
       }
 
@@ -195,6 +208,9 @@ export class OpenAIProvider implements AIProvider {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'OpenAI API error';
       yield { type: 'error', error: message };
+    } finally {
+      signal?.removeEventListener('abort', abortRequest);
+      controller.abort();
     }
   }
 }

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { getEventListeners } from 'node:events';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,7 +7,7 @@ import test, { afterEach, beforeEach, type TestContext } from 'node:test';
 import { AnthropicProvider } from './anthropic.js';
 import { createProvider, getProviderFromSettings, type AIProvider } from './index.js';
 import { OpenAIProvider } from './openai.js';
-import type { ProviderMessage, StreamChunk, ToolDefinition } from './types.js';
+import type { ProviderChatOptions, ProviderMessage, StreamChunk, ToolDefinition } from './types.js';
 import { saveProviderCredential } from '../../services/providerCredentials.js';
 
 // These tests run serially, isolate credential env vars, and never load .env.
@@ -198,9 +199,10 @@ async function collect(
   tools = [noteTool],
   messages: ProviderMessage[] = [{ role: 'user', content: '整理笔记' }],
   systemPrompt = 'Protocol test',
+  options?: ProviderChatOptions,
 ) {
   const chunks: StreamChunk[] = [];
-  for await (const chunk of adapter.chat(messages, tools, systemPrompt)) {
+  for await (const chunk of adapter.chat(messages, tools, systemPrompt, options)) {
     chunks.push(chunk);
   }
   return chunks;
@@ -512,4 +514,132 @@ test('Anthropic caching preserves growing text and tool history, input objects, 
     ...expectedMessages, { role: 'user', content: '保留最后的问题' },
   ], 'the existing pass still drops mismatched tool pairs and orphan tool calls');
   assert.deepEqual(history, originalHistory);
+});
+
+// The same public cancellation contract applies to every provider name. The
+// Anthropic rows exercise the installed SDK, including its actual fetch signal.
+const abortProviders = ['openai', 'generic', 'deepseek', 'dashscope', 'anthropic'];
+function abortProvider(name: string) {
+  return createProvider(name, { apiKey: 'syn-abort', model: 'stream-fixture' });
+}
+
+for (const name of abortProviders) {
+  test(`${name}: a pre-aborted chat makes no network request`, async (t) => {
+    const fetchMock = t.mock.method(globalThis, 'fetch', async () => {
+      assert.fail('pre-aborted chat must not call fetch');
+    });
+    const controller = new AbortController();
+    controller.abort(new Error('Request cancelled'));
+    const chunks = await collect(abortProvider(name), [], [], '', { signal: controller.signal });
+    assert.deepEqual(chunks, [{ type: 'error', error: 'Request cancelled' }]);
+    assert.equal(fetchMock.mock.callCount(), 0);
+    assert.equal(getEventListeners(controller.signal, 'abort').length, 0);
+  });
+
+  test(`${name}: abort reaches an in-flight fetch and releases the chat`, { timeout: 2000 }, async (t) => {
+    let transportSignal: AbortSignal | undefined;
+    let started!: () => void;
+    const requestStarted = new Promise<void>((resolve) => { started = resolve; });
+    t.mock.method(globalThis, 'fetch', (_url: unknown, init: RequestInit) => {
+      transportSignal = init.signal!;
+      return new Promise<Response>((_resolve, reject) => {
+        transportSignal!.addEventListener('abort', () => reject(transportSignal!.reason), { once: true });
+        started();
+      });
+    });
+    const controller = new AbortController();
+    const pending = collect(abortProvider(name), [], [], '', { signal: controller.signal });
+    await requestStarted;
+    controller.abort();
+    const chunks = await pending;
+    assert.equal(transportSignal?.aborted, true);
+    assert.deepEqual(chunks.map((chunk) => chunk.type), ['error']);
+    assert.equal(getEventListeners(controller.signal, 'abort').length, 0);
+  });
+
+  test(`${name}: abort interrupts a response body stalled after visible text`, { timeout: 2000 }, async (t) => {
+    let transportSignal: AbortSignal | undefined;
+    const prefix = name === 'anthropic'
+      ? anthropicResponse().slice(0, 3).join('')
+      : event({ content: '整理中' });
+    let body: ReadableStream<Uint8Array> | undefined;
+    t.mock.method(globalThis, 'fetch', async (_url: unknown, init: RequestInit) => {
+      transportSignal = init.signal!;
+      body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(prefix));
+          transportSignal!.addEventListener('abort', () => controller.error(transportSignal!.reason), { once: true });
+        },
+      });
+      return new Response(body);
+    });
+    const controller = new AbortController();
+    const iterator = abortProvider(name).chat([], [], '', { signal: controller.signal });
+    assert.deepEqual((await iterator.next()).value, { type: 'text', text: '整理中' });
+    const pending = iterator.next();
+    controller.abort();
+    const result = await pending;
+    assert.equal(result.value?.type, 'error');
+    assert.equal((await iterator.next()).done, true);
+    assert.equal(transportSignal?.aborted, true);
+    assert.equal(body?.locked, false);
+    assert.equal(getEventListeners(controller.signal, 'abort').length, 0);
+  });
+}
+
+test('OpenAI early return cancels the body without awaiting a stalled cancellation handshake', { timeout: 2000 }, async (t) => {
+  let transportSignal: AbortSignal | undefined;
+  let cancelled = false;
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) { controller.enqueue(new TextEncoder().encode(event({ content: 'visible' }))); },
+    cancel() {
+      cancelled = true;
+      return new Promise<void>(() => {});
+    },
+  });
+  t.mock.method(globalThis, 'fetch', async (_url: unknown, init: RequestInit) => {
+    transportSignal = init.signal!;
+    return new Response(body);
+  });
+  const controller = new AbortController();
+  const iterator = provider().chat([], [], '', { signal: controller.signal });
+  assert.equal((await iterator.next()).value?.type, 'text');
+  assert.equal((await iterator.return(undefined)).done, true);
+  assert.equal(cancelled, true);
+  assert.equal(transportSignal?.aborted, true);
+  assert.equal(body.locked, false);
+  assert.equal(getEventListeners(controller.signal, 'abort').length, 0);
+});
+
+test('OpenAI protocol completion closes a peer that keeps its response body open', { timeout: 2000 }, async (t) => {
+  let cancelled = false;
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) { controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n')); },
+    cancel() { cancelled = true; return new Promise<void>(() => {}); },
+  });
+  t.mock.method(globalThis, 'fetch', async () => new Response(body));
+  assert.deepEqual(await collect(provider(), []), [{ type: 'done' }]);
+  assert.equal(cancelled, true);
+  assert.equal(body.locked, false);
+});
+
+test('Anthropic early return aborts the real SDK transport without waiting for more events', { timeout: 2000 }, async (t) => {
+  let transportSignal: AbortSignal | undefined;
+  t.mock.method(globalThis, 'fetch', async (_url: unknown, init: RequestInit) => {
+    transportSignal = init.signal!;
+    return new Response(new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(anthropicResponse().slice(0, 3).join('')));
+        transportSignal!.addEventListener('abort', () => controller.error(transportSignal!.reason), { once: true });
+      },
+    }));
+  });
+  const controller = new AbortController();
+  const iterator = abortProvider('anthropic').chat([], [], '', { signal: controller.signal });
+  assert.equal((await iterator.next()).value?.type, 'text');
+  assert.equal((await iterator.return(undefined)).done, true);
+  assert.equal(transportSignal?.aborted, true);
+  // SDK completion runs in its background pump after iterator.return() aborts.
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(getEventListeners(controller.signal, 'abort').length, 0);
 });

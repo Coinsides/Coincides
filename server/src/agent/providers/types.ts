@@ -39,7 +39,7 @@ export interface ToolDefinition {
 }
 
 export interface StreamChunk {
-  type: 'text' | 'tool_call_start' | 'tool_call_delta' | 'tool_call_end' | 'done' | 'error' | 'preference_form';
+  type: 'text' | 'tool_call_start' | 'tool_call_delta' | 'tool_call_end' | 'done' | 'error' | 'preference_form' | 'round_limit';
   text?: string;
   tool_call?: Partial<ToolCall>;
   error?: string;
@@ -53,5 +53,9 @@ export interface ProviderConfig {
 }
 
 export interface AIProvider {
-  chat(messages: ProviderMessage[], tools: ToolDefinition[], systemPrompt: string): AsyncGenerator<StreamChunk>;
+  chat(messages: ProviderMessage[], tools: ToolDefinition[], systemPrompt: string, options?: ProviderChatOptions): AsyncGenerator<StreamChunk>;
+}
+
+export interface ProviderChatOptions {
+  signal?: AbortSignal;
 }

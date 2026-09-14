@@ -1,0 +1,83 @@
+{
+    "updatedAt":  "2026-09-14T08:18:36.1766124Z",
+    "agentFamily":  {
+                        "files":  10,
+                        "tests":  207,
+                        "pass":  207,
+                        "fail":  0,
+                        "source":  "server-full-serial-summary.json",
+                        "testFiles":  [
+                                          "server/src/__tests__/v13AgentMemories.test.ts",
+                                          "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+                                          "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+                                          "server/src/__tests__/v14AgentWriteDoor.test.ts",
+                                          "server/src/__tests__/v14ContextHint.test.ts",
+                                          "server/src/__tests__/v14DeleteCeremony.test.ts",
+                                          "server/src/__tests__/v14LoopRobustness.test.ts",
+                                          "server/src/__tests__/v14ProposalUnification.test.ts",
+                                          "server/src/__tests__/v14ReadTools.test.ts",
+                                          "server/src/agent/providers/index.test.ts"
+                                      ]
+                    },
+    "directedFinal":  {
+                          "providers":  49,
+                          "loop":  14,
+                          "source":  "server-full-serial-summary.json",
+                          "addedCases":  42,
+                          "route":  10
+                      },
+    "serverFull":  {
+                       "selectedFiles":  86,
+                       "executedFiles":  86,
+                       "filesWithTapCounts":  86,
+                       "tests":  860,
+                       "suites":  0,
+                       "pass":  858,
+                       "fail":  2,
+                       "cancelled":  0,
+                       "skipped":  0,
+                       "todo":  0
+                   },
+    "serverFailedFiles":  [
+                              "server/src/__tests__/v2SourceMineruWiring.test.ts",
+                              "server/src/__tests__/v2SourceRegionCells.test.ts"
+                          ],
+    "clientFull":  {
+                       "vitestFiles":  {
+                                           "passed":  171,
+                                           "total":  171
+                                       },
+                       "vitestTests":  {
+                                           "passed":  1746,
+                                           "total":  1746
+                                       }
+                   },
+    "runtimeNonGitSecrets":  {
+                                 "source":  "gates-summary.json",
+                                 "total":  21,
+                                 "passed":  21
+                             },
+    "hqPending":  [
+                      {
+                          "gate":  "git diff --check",
+                          "status":  "not_run",
+                          "reason":  "User reserves git closure for HQ."
+                      },
+                      {
+                          "gate":  "check:changed-file-secrets",
+                          "status":  "not_run",
+                          "reason":  "User reserves secrets closure for HQ; scanner invokes git."
+                      }
+                  ],
+    "liveModelCalls":  0,
+    "completeRuntimeGate":  false,
+    "rawRoot":  ".codex-tmp/2026-09-14-loop-robustness-builder/",
+    "finalCloseout":  {
+                          "generatedFile":  "docs/agent-ops/INDEX.md",
+                          "serverBuild":  "passed",
+                          "firstDocsCheck":  "stale handoff INDEX after ready-to-done; retained in closeout-summary.json",
+                          "testWiring":  "86/86",
+                          "resolvedBy":  "docs-final-summary.json",
+                          "docsCheck":  "passed"
+                      }
+}

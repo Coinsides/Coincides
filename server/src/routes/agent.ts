@@ -6,6 +6,7 @@ import { AppError } from '../middleware/errorHandler.js';
 import { sendMessageSchema, createConversationSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 import { runAgent } from '../agent/orchestrator.js';
+import { AGENT_REQUEST_TIMEOUT_MS } from '../agent/runtime-budget.js';
 
 const router = Router();
 
@@ -85,16 +86,55 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
-    // 300s request-level timeout (aligned with orchestrator ROUND_TIMEOUT_MS)
-    const REQUEST_TIMEOUT_MS = 300_000;
-    const requestTimer = setTimeout(() => {
-      res.write(`event: error\ndata: ${JSON.stringify({ message: 'Request timed out after 300s' })}\n\n`);
-      res.write(`event: done\ndata: {}\n\n`);
-      res.end();
-    }, REQUEST_TIMEOUT_MS);
-
+    const controller = new AbortController();
+    const deadline = Date.now() + AGENT_REQUEST_TIMEOUT_MS;
     const conversationId = req.params.id as string;
     let doneSent = false;
+    let errorSent = false;
+    let responseClosed = false;
+    const canWrite = () => !responseClosed && !res.writableEnded && !res.destroyed;
+    const sendEvent = (event: string, data: unknown) => {
+      if (canWrite() && !doneSent) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
+    };
+    const sendError = (message: string, code?: string) => {
+      if (errorSent) return;
+      sendEvent('error', { message, ...(code ? { code } : {}) });
+      errorSent = true;
+    };
+    const sendDone = () => {
+      sendEvent('done', {});
+      doneSent = true;
+    };
+    const closeResponse = () => {
+      sendDone();
+      if (canWrite()) res.end();
+    };
+    const abortDisconnected = () => {
+      responseClosed = true;
+      controller.abort(new Error('Client disconnected'));
+    };
+    const onRequestClose = () => {
+      // IncomingMessage also closes after an ordinary, completely read POST body.
+      if (req.aborted || !req.complete) abortDisconnected();
+    };
+    const onResponseClose = () => {
+      responseClosed = true;
+      if (!doneSent) controller.abort(new Error('Client disconnected'));
+    };
+    req.on('aborted', abortDisconnected);
+    req.on('close', onRequestClose);
+    res.on('close', onResponseClose);
+    if (req.aborted || res.destroyed) abortDisconnected();
+
+    const requestTimer = setTimeout(() => {
+      const message = `Request timed out after ${AGENT_REQUEST_TIMEOUT_MS / 1000}s`;
+      controller.abort(new Error(message));
+      sendError(message);
+      closeResponse();
+    }, Math.max(0, deadline - Date.now()));
+
     try {
       for await (const chunk of runAgent(
         req.userId!,
@@ -102,39 +142,42 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
         data.message,
         data.context_hint,
         data.image,
+        { signal: controller.signal, deadline },
       )) {
-        if (res.writableEnded) break;
+        if (!canWrite()) {
+          if (!controller.signal.aborted) controller.abort(new Error('Client disconnected'));
+          // Drain the generator so already-started writes and paired tool history settle.
+          continue;
+        }
         if (chunk.type === 'text' && chunk.text) {
-          res.write(`event: text\ndata: ${JSON.stringify({ content: chunk.text })}\n\n`);
+          sendEvent('text', { content: chunk.text });
         } else if (chunk.type === 'tool_call_start') {
-          res.write(`event: tool_start\ndata: ${JSON.stringify({ id: chunk.tool_call?.id, name: chunk.tool_call?.name })}\n\n`);
+          sendEvent('tool_start', { id: chunk.tool_call?.id, name: chunk.tool_call?.name });
         } else if (chunk.type === 'tool_call_end') {
-          res.write(`event: tool_end\ndata: ${JSON.stringify({ id: chunk.tool_call?.id, name: chunk.tool_call?.name, ok: !chunk.error })}\n\n`);
+          sendEvent('tool_end', { id: chunk.tool_call?.id, name: chunk.tool_call?.name, ok: !chunk.error });
         } else if (chunk.type === 'preference_form') {
-          res.write(`event: preference_form\ndata: ${JSON.stringify({ questions: chunk.data })}\n\n`);
+          sendEvent('preference_form', { questions: chunk.data });
+        } else if (chunk.type === 'round_limit') {
+          const message = chunk.error || 'Tool round limit reached. Send another message to continue.';
+          sendEvent('round_limit', { message, details: chunk.data });
+          // Existing clients display the error channel; the distinct event is also available.
+          sendError(message, 'round_limit');
         } else if (chunk.type === 'done') {
-          res.write(`event: done\ndata: {}\n\n`);
-          doneSent = true;
+          sendDone();
         } else if (chunk.type === 'error') {
-          res.write(`event: error\ndata: ${JSON.stringify({ message: chunk.error })}\n\n`);
+          sendError(chunk.error || 'An unexpected error occurred. Please try again.');
         }
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
       console.error('Agent SSE stream error:', err);
-      if (!res.writableEnded) {
-        res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
-        res.write(`event: done\ndata: {}\n\n`);
-      }
-    }
-
-    clearTimeout(requestTimer);
-    // Ensure stream ends with done event (only if not already sent)
-    if (!res.writableEnded) {
-      if (!doneSent) {
-        res.write(`event: done\ndata: {}\n\n`);
-      }
-      res.end();
+      sendError(message);
+    } finally {
+      clearTimeout(requestTimer);
+      req.removeListener('aborted', abortDisconnected);
+      req.removeListener('close', onRequestClose);
+      res.removeListener('close', onResponseClose);
+      closeResponse();
     }
   } catch (err) {
     if (err instanceof ZodError) {
