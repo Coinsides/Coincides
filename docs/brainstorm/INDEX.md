@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-12
+> **日期 (Updated)**: 2026-09-14
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 167 份文档。
+共 168 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -178,4 +178,5 @@
 | [产品完善/会议记录/2026-09-04-Coincides-Cognitive-Workbench-And-Reasoning-Traces-Meeting-Notes.md](产品完善/会议记录/2026-09-04-Coincides-Cognitive-Workbench-And-Reasoning-Traces-Meeting-Notes.md) | 2026-09-04 Coincides：认知工作台、统一文档与思考痕迹 | `draft` | 2026-09-04 | — |
 | [产品完善/会议记录/2026-09-11-Note-Page-Design-Day-Meeting-Notes.md](产品完善/会议记录/2026-09-11-Note-Page-Design-Day-Meeting-Notes.md) | 2026-09-11 Coincides:笔记页设计日——样式方向、封面页与检索、Agent 改皮、组件交付 | `draft` | 2026-09-11 | — |
 | [产品完善/会议记录/2026-09-12-Design-Planning-Rounds-Meeting-Notes.md](产品完善/会议记录/2026-09-12-Design-Planning-Rounds-Meeting-Notes.md) | 2026-09-12 Coincides:设计规划场——外观体系下半场、纸型自由化、导航窗格 | `draft` | 2026-09-12 | — |
+| [产品完善/会议记录/2026-09-14-Card-Item-Genealogy-And-Forgetting-Meeting-Notes.md](产品完善/会议记录/2026-09-14-Card-Item-Genealogy-And-Forgetting-Meeting-Notes.md) | 2026-09-14 Coincides:卡片五波谈——降采样、平级衍生、item 家谱与系统遗忘 | `(缺状态头)` | — | — |
 | [产品完善/工程日记/2026-09-04-Expression-Family-And-Continuous-Distillation-Engineering-Diary.md](产品完善/工程日记/2026-09-04-Expression-Family-And-Continuous-Distillation-Engineering-Diary.md) | 2026-09-04 工程日记 · 表达族与持续蒸馏(Henry × Fable 灵感爆发日) | `active` | 2026-09-04 | — |

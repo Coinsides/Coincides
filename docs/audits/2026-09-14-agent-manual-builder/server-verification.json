@@ -1,0 +1,41 @@
+{
+  "scope": "All 85 listed test files attempted; wiring file import failure prevents enumeration of its inner tests.",
+  "inventory": "server-test-files.json",
+  "file_count": 85,
+  "command": "C:\\Program Files\\nodejs\\node.exe --import tsx --test --test-reporter=tap --test-concurrency=4 ../scripts/generate-tool-face-manifest.test.ts scripts/v13WildernessExecute.test.ts scripts/v13WildernessShadowRun.test.ts scripts/v2Bn12LifecycleMigration.test.ts scripts/v2OperationBatchTimestampMigration.test.ts src/__tests__/providerCredentials.test.ts src/__tests__/textFlowIdentityContract.test.ts src/__tests__/v13AgentMemories.test.ts src/__tests__/v13AtomicTextSave.test.ts src/__tests__/v13AtomicTextSaveMigration.test.ts src/__tests__/v13BoardCeremonyNote.test.ts src/__tests__/v13BoardChalk.test.ts src/__tests__/v13BoardIdentity.test.ts src/__tests__/v13BoardRoutes.test.ts src/__tests__/v13BoardSchema.test.ts src/__tests__/v13BoardServices.test.ts src/__tests__/v13BoardStaging.test.ts src/__tests__/v13BoardTextRanges.test.ts src/__tests__/v13BoardTrayRelocation.test.ts src/__tests__/v13BoardViewportBookmarks.test.ts src/__tests__/v13BoardWave1.test.ts src/__tests__/v13CanvasRetirement.test.ts src/__tests__/v13CoordinateContract.test.ts src/__tests__/v13EventsLedger.test.ts src/__tests__/v13GraphemeTextRanges.test.ts src/__tests__/v13ItemFloor.test.ts src/__tests__/v13ItemRefBlocks.test.ts src/__tests__/v13MediaBlocks.test.ts src/__tests__/v13NoteMetadata.test.ts src/__tests__/v13PagePresets.test.ts src/__tests__/v13PaperInk.test.ts src/__tests__/v13PaperSkin.test.ts src/__tests__/v13ProjectDeletionReferences.test.ts src/__tests__/v13RecordedAction.test.ts src/__tests__/v13SourceProjectionRepair.test.ts src/__tests__/v13SourceReprojection.test.ts src/__tests__/v13Tray.test.ts src/__tests__/v13TrayOrder.test.ts src/__tests__/v13WallCollectionBatch.test.ts src/__tests__/v14AgentVerbTransfer.test.ts src/__tests__/v14AgentWriteDoor.test.ts src/__tests__/v14CardCover.test.ts src/__tests__/v14ContextHint.test.ts src/__tests__/v14DeleteCeremony.test.ts src/__tests__/v14PaletteColors.test.ts src/__tests__/v14ProposalUnification.test.ts src/__tests__/v14ReadTools.test.ts src/__tests__/v14SkinSuites.test.ts src/__tests__/v2BlockRestoreDoor.test.ts src/__tests__/v2CanvasPersistenceCutover.test.ts src/__tests__/v2ContentGroups.test.ts src/__tests__/v2DevQuickLogin.test.ts src/__tests__/v2DocumentParserPdf.test.ts src/__tests__/v2GroupFolders.test.ts src/__tests__/v2ImprintCitations.test.ts src/__tests__/v2ImprintEmbedding.test.ts src/__tests__/v2ImprintRetrieval.test.ts src/__tests__/v2ItemRelationFloor.test.ts src/__tests__/v2Items.test.ts src/__tests__/v2MaterialLibrary.test.ts src/__tests__/v2McpArtifact.test.ts src/__tests__/v2McpTransport.test.ts src/__tests__/v2NoteBlockLifecycle.test.ts src/__tests__/v2NoteFoundation.test.ts src/__tests__/v2NotesLifecycle.test.ts src/__tests__/v2NotesListService.test.ts src/__tests__/v2Purposes.test.ts src/__tests__/v2RelationLifecycleClosure.test.ts src/__tests__/v2Relations.test.ts src/__tests__/v2SourceContainerIntake.test.ts src/__tests__/v2SourceFileIntake.test.ts src/__tests__/v2SourceIdentityFloor.test.ts src/__tests__/v2SourceImprints.test.ts src/__tests__/v2SourceLifecycleClosure.test.ts src/__tests__/v2SourceMaterialization.test.ts src/__tests__/v2SourceMineruWiring.test.ts src/__tests__/v2SourceNeverReject.test.ts src/__tests__/v2SourceRegionCells.test.ts src/__tests__/v2SourceT0Alignment.test.ts src/__tests__/v2SourceTranscriberFingerprint.test.ts src/__tests__/v2TemplateStudioDecommission.test.ts src/__tests__/v2TestV2ManifestHook.test.ts src/__tests__/v2TrashNotesTool.test.ts src/agent/providers/index.test.ts src/toolFace/registry.test.ts",
+  "started_at": "2026-09-14T06:18:27.379Z",
+  "ended_at": "2026-09-14T06:20:13.366Z",
+  "exit_code": 1,
+  "signal": null,
+  "exit_event": {
+    "code": 1,
+    "signal": null,
+    "at": "2026-09-14T06:20:13.354Z"
+  },
+  "statistics": {
+    "tests": 786,
+    "suites": 0,
+    "pass": 784,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 105630.8037
+  },
+  "failures": [
+    "not ok 76 - src\\\\__tests__\\\\v2SourceMineruWiring.test.ts",
+    "not ok 710 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable"
+  ],
+  "first_run": {
+    "tests": 786,
+    "pass": 784,
+    "fail": 2,
+    "skipped": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "duration_ms": 108443.0744,
+    "test_process_exit_code": null,
+    "wrapper_interrupted_session_code": 1,
+    "note": "Complete TAP summary observed, but PowerShell wrapper did not return. Only that owned session was interrupted; unchanged full suite rerun to confirm actual exit."
+  }
+}

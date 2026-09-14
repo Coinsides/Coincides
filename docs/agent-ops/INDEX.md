@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-13
+> **日期 (Updated)**: 2026-09-14
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 379 份文档。
+共 389 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -89,6 +89,7 @@
 | [analysis/2026-09-13-deadcode-recheck.md](analysis/2026-09-13-deadcode-recheck.md) | Canvas 死代码清册 · 2026-09-13 现物复核 | `active` | — | — |
 | [analysis/2026-09-13-ownership-signature-ruling-draft.md](analysis/2026-09-13-ownership-signature-ruling-draft.md) | 权威 ownership 签名裁定稿(TD-15 设计步) | `active` | 2026-09-13 | — |
 | [analysis/2026-09-13-v13-6-adjudication.md](analysis/2026-09-13-v13-6-adjudication.md) | 13.6 裁决半场记录 | `active` | 2026-09-13 | — |
+| [analysis/2026-09-14-mr-zero-anatomy-and-redesign.md](analysis/2026-09-14-mr-zero-anatomy-and-redesign.md) | Mr Zero:现状解剖与成品级整改案 | `active` | — | — |
 | [analysis/2026-09-14-v14-1-census-adjudication.md](analysis/2026-09-14-v14-1-census-adjudication.md) | 14.1 普查候裁十项 · HQ 裁定书 | `active` | — | — |
 | [analysis/2026-09-14-v14-1-executor-census.md](analysis/2026-09-14-v14-1-executor-census.md) | V14 · 14.1 executor 动词→人门映射普查 | `active` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
@@ -137,6 +138,7 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v1 | `active` | — | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
@@ -144,6 +146,7 @@
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
+| [design/item-genealogy-draft.md](design/item-genealogy-draft.md) | item 家谱学 + 睡眠学(实验草案 v0) | `draft` | 2026-09-14 | — |
 | [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
 | [handoffs/2026-06-27-retire-stale-pi.md](handoffs/2026-06-27-retire-stale-pi.md) | Spec：给 7 条过时 PI 标 superseded / 重锚到 TextFlow-first | `(缺状态头)` | — | — |
@@ -368,7 +371,14 @@
 | [handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md](handoffs/2026-09-14-v14-1-a3a-proposal-unification-order.md) | 14.1-A3a · 提案族服务端统一 | `done(二轮;一轮停线=运行时 enum 违 shared 隔离门,裁类型单源+运行时本地;HQ 本机全量 583/583 定案)` | — | — |
 | [handoffs/2026-09-14-v14-1-executor-census-order.md](handoffs/2026-09-14-v14-1-executor-census-order.md) | 14.1-A0 · executor 动词普查(纯侦察,⛔改产品代码) | `done` | — | — |
 | [handoffs/2026-09-14-v14-2-b1-read-tools-order.md](handoffs/2026-09-14-v14-2-b1-read-tools-order.md) | 14.2-B1 · 知觉四读器 | `done(HQ 本机全量 594/594 定案;收口见末尾)` | — | — |
-| [handoffs/2026-09-14-v14-2-b2-context-hint-order.md](handoffs/2026-09-14-v14-2-b2-context-hint-order.md) | 14.2-B2 · 语境线 | `done` | — | — |
+| [handoffs/2026-09-14-v14-2-b2-context-hint-order.md](handoffs/2026-09-14-v14-2-b2-context-hint-order.md) | 14.2-B2 · 语境线 | `done(HQ 本机全量复跑 599/599 定案;收口见末尾)` | — | — |
+| [handoffs/2026-09-14-v14-agent-manual-order.md](handoffs/2026-09-14-v14-agent-manual-order.md) | 说明书接线单 · Agent 的产品说明 | `done` | — | — |
+| [handoffs/2026-09-14-v14-loop-robustness-order.md](handoffs/2026-09-14-v14-loop-robustness-order.md) | 循环健壮性批 | `ready(队列位 5)` | — | — |
+| [handoffs/2026-09-14-v14-memory-quickwins-order.md](handoffs/2026-09-14-v14-memory-quickwins-order.md) | 记忆速赢批 | `ready(队列位 6)` | — | — |
+| [handoffs/2026-09-14-v14-prompt-cache-order.md](handoffs/2026-09-14-v14-prompt-cache-order.md) | prompt 缓存单 | `ready(队列位 4)` | — | — |
+| [handoffs/2026-09-14-v14-prompt-repair-order.md](handoffs/2026-09-14-v14-prompt-repair-order.md) | prompt 修缮单 | `ready(候说明书接线单收口后派——同文件串行)` | — | — |
+| [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `ready(候说明书接线单收口后派发——单 builder 纪律)` | — | — |
+| [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `ready(队列位 3)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
