@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-14
+> **日期 (Updated)**: 2026-09-16
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 393 份文档。
+共 396 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -92,6 +92,7 @@
 | [analysis/2026-09-14-mr-zero-anatomy-and-redesign.md](analysis/2026-09-14-mr-zero-anatomy-and-redesign.md) | Mr Zero:现状解剖与成品级整改案 | `active` | — | — |
 | [analysis/2026-09-14-v14-1-census-adjudication.md](analysis/2026-09-14-v14-1-census-adjudication.md) | 14.1 普查候裁十项 · HQ 裁定书 | `active` | — | — |
 | [analysis/2026-09-14-v14-1-executor-census.md](analysis/2026-09-14-v14-1-executor-census.md) | V14 · 14.1 executor 动词→人门映射普查 | `active` | — | — |
+| [analysis/2026-09-16-board-visual-grammar-benchmark.md](analysis/2026-09-16-board-visual-grammar-benchmark.md) | Coincides 板视觉语法 · 对标调研稿 | `active` | 2026-09-16 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -148,6 +149,8 @@
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
 | [design/item-genealogy-draft.md](design/item-genealogy-draft.md) | item 家谱学 + 睡眠学(实验草案 v0) | `draft` | 2026-09-14 | — |
 | [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
+| [field-notes/2026-09-16-specimen-001-empty-note-nodes.md](field-notes/2026-09-16-specimen-001-empty-note-nodes.md) | 标本 #001 · 空白笔记当图节点 | `active` | — | — |
+| [field-notes/README.md](field-notes/README.md) | 实操标本册(field-notes) | `active` | — | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
 | [handoffs/2026-06-27-retire-stale-pi.md](handoffs/2026-06-27-retire-stale-pi.md) | Spec：给 7 条过时 PI 标 superseded / 重锚到 TextFlow-first | `(缺状态头)` | — | — |
 | [handoffs/2026-06-28-canvas-object-kind-general-pipeline.md](handoffs/2026-06-28-canvas-object-kind-general-pipeline.md) | 8.11.2 — Kind-General CanvasObject Pipeline | `(缺状态头)` | — | — |
