@@ -72,15 +72,62 @@ export const mountBoardMemberSchema = z.object({
 export const updateBoardMemberSchema = z.object({ ...memberGeometry, placed: z.boolean().optional() }).strict()
   .refine((value) => Object.keys(value).length > 0, 'No member placement changes provided');
 
-export const createBoardEdgeSchema = z.object({
-  from_member_id: idSchema,
-  to_member_id: idSchema,
+export const boardAnchorSchema = z.enum(['auto', 'n', 'e', 's', 'w']);
+export const boardEdgeEndpointSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('member'), id: idSchema, anchor: boardAnchorSchema.default('auto') }).strict(),
+  z.object({ kind: z.literal('sticky'), id: idSchema, anchor: boardAnchorSchema.default('auto') }).strict(),
+  z.object({ kind: z.literal('point'), x: finiteNumber, y: finiteNumber }).strict(),
+]);
+const weightSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+const colorIndexSchema = z.literal(1).nullable();
+const edgeFields = z.object({
+  from_member_id: idSchema.optional(),
+  to_member_id: idSchema.optional(),
+  from: boardEdgeEndpointSchema.optional(),
+  to: boardEdgeEndpointSchema.optional(),
+  bend: finiteNumber.optional(),
+  dash: z.enum(['solid', 'dashed']).optional(),
+  weight: weightSchema.optional(),
+  cap_start: z.enum(['none', 'arrow', 'dot']).optional(),
+  cap_end: z.enum(['none', 'arrow', 'dot']).optional(),
+  color_index: colorIndexSchema.optional(),
+  label_position: finiteNumber.min(0).max(1).optional(),
+  visual_version: z.union([z.literal(0), z.literal(1)]).optional(),
   style: objectSchema.optional(),
   label: z.string().max(4000).nullable().optional(),
 }).strict();
 
-export const updateBoardEdgeSchema = createBoardEdgeSchema.partial()
+function unambiguousEndpoints(value: z.infer<typeof edgeFields>, ctx: z.RefinementCtx): void {
+  for (const end of ['from', 'to'] as const) {
+    if (value[end] !== undefined && value[`${end}_member_id`] !== undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Provide only one ${end} endpoint representation` });
+    }
+  }
+}
+export const createBoardEdgeSchema = edgeFields.superRefine((value, ctx) => {
+  unambiguousEndpoints(value, ctx);
+  for (const end of ['from', 'to'] as const) {
+    if (value[end] === undefined && value[`${end}_member_id`] === undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Missing ${end} endpoint` });
+    }
+  }
+});
+export const updateBoardEdgeSchema = edgeFields.superRefine(unambiguousEndpoints)
   .refine((value) => Object.keys(value).length > 0, 'No edge changes provided');
+
+const stickyFields = {
+  text: z.string().max(12000).optional(),
+  x: finiteNumber.optional(), y: finiteNumber.optional(),
+  w: z.union([z.literal(240), z.literal(416)]).optional(),
+  h: finiteNumber.min(120).optional(),
+  color_index: colorIndexSchema.optional(), weight: weightSchema.optional(),
+  layer_id: idSchema.nullable().optional(),
+  z_index: finiteNumber.int().optional(), pinned: z.boolean().optional(),
+};
+export const createBoardStickySchema = z.object(stickyFields).strict();
+export const updateBoardStickySchema = z.object(stickyFields).strict()
+  .refine((value) => Object.keys(value).length > 0, 'No sticky changes provided');
+export type BoardEdgeEndpoint = z.infer<typeof boardEdgeEndpointSchema>;
 
 export const boardVisualKindSchema = z.enum(['freehand', 'shape', 'image', 'table', 'connector', 'sticky']);
 // Mirrored in shared/types/boardSticky.ts; the cross-end test locks equality.

@@ -1,4 +1,6 @@
-import type { BoardDetail, BoardEdge, BoardLayer, BoardMember, BoardVisual } from '../../src/pages/Boards/boardTypes';
+import type { BoardDetail, BoardEdge, BoardLayer, BoardMember, BoardVisual, BoardSticky, BoardEdgeEndpoint, CreateBoardEdgeInput } from '../../src/pages/Boards/boardTypes';
+import { boardEdgeGeometry } from '../../src/pages/Boards/boardEdgeGeometry';
+import { routeBoardEdge } from '../../../shared/boardVisualGeometry';
 import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 
 // Shared synthetic transport for the six UI workflows and the local browser fixture.
@@ -18,6 +20,13 @@ export let events: { event_type: string; member_id: string }[];
 let sequence = 0;
 function changed() { if (typeof window !== 'undefined') window.dispatchEvent(new Event(STATE_EVENT)); }
 function response<T>(data: T) { changed(); return { data: copy(data) }; }
+
+// Match the server's plain-text fallback when the client omits measured height.
+function stickyTextHeight(text: string, width: number) {
+  const columns = Math.max(1, Math.floor((width - 34) / 16));
+  const lines = text.split('\n').reduce((total, line) => total + Math.max(1, Math.ceil(Array.from(line).length / columns)), 0);
+  return Math.max(width === 240 ? 240 : 120, lines * 24 + 34);
+}
 
 export function resetSample(sample: 'empty' | 'group' | 'mixed' | 'alignment' = 'empty') {
   sequence = 0; writes = []; events = [];
@@ -67,11 +76,40 @@ export function seedVisual(input: Partial<BoardVisual> = {}) {
   detail.visuals.push(visual);
   return visual;
 }
+export function seedSticky(input: Partial<BoardSticky> = {}) {
+  const sticky: BoardSticky = { ...geometry, id: `sticky-${++sequence}`, board_id: BOARD_ID, text: 'A concept',
+    w: 240, h: 120, scale: 1, color_index: null, weight: 1, layer_id: null,
+    created_at: date, updated_at: date, ...copy(input) };
+  (detail.stickies ??= []).push(sticky);
+  return sticky;
+}
 export function seedEdge(from: BoardMember, to: BoardMember, input: Partial<BoardEdge> = {}) {
   const edge: BoardEdge = { id: `edge-${++sequence}`, board_id: BOARD_ID, from_member_id: from.id, to_member_id: to.id,
     style: {}, label: null, created_at: date, ...copy(input) };
   detail.edges.push(edge);
   return edge;
+}
+export function seedVisualEdge(input: CreateBoardEdgeInput) {
+  const from: BoardEdgeEndpoint | undefined = input.from ?? (input.from_member_id ? { kind: 'member', id: input.from_member_id, anchor: 'auto' } : undefined);
+  const to: BoardEdgeEndpoint | undefined = input.to ?? (input.to_member_id ? { kind: 'member', id: input.to_member_id, anchor: 'auto' } : undefined);
+  if (!from || !to) return missing(`${BOARD_PATH}/edges`);
+  const edge: BoardEdge = { id: `edge-${++sequence}`, board_id: BOARD_ID, from, to,
+    from_member_id: from.kind === 'member' ? from.id : null, to_member_id: to.kind === 'member' ? to.id : null,
+    style: {}, label: null, bend: 0, dash: 'solid', weight: 1, cap_start: 'none', cap_end: 'none', color_index: null,
+    label_position: 0.5, visual_version: 1, created_at: date, ...copy(input) };
+  if (input.bend === undefined && edge.visual_version === 1) edge.bend = routedBend(edge);
+  detail.edges.push(edge);
+  return edge;
+}
+function routedBend(edge: BoardEdge) {
+  const projected = boardEdgeGeometry(edge, detail);
+  if (!projected) return 0;
+  const endpoints = [edge.from, edge.to];
+  const obstacles = [...detail.members.filter((member) => member.placed !== false), ...detail.stickies ?? []]
+    .filter((card) => !endpoints.some((end) => end && end.kind !== 'point' && end.id === card.id
+      && end.kind === ('member_kind' in card ? 'member' : 'sticky')))
+    .map((card) => ({ x: card.x, y: card.y, w: card.w * card.scale, h: card.h * card.scale }));
+  return routeBoardEdge(projected.start, projected.end, obstacles);
 }
 export function seedLayer(name: string, input: Partial<BoardLayer> = {}) {
   const layers = detail.layers ??= [];
@@ -98,11 +136,18 @@ const api = {
     record('POST', url, input);
     if (url === `${BOARD_PATH}/layers`) return response({ layer: seedLayer(String(input.name)) });
     if (url === `${BOARD_PATH}/visuals`) return response({ visual: seedVisual(input) });
-    if (url === `${BOARD_PATH}/edges`) {
-      const from = detail.members.find(({ id }) => id === input.from_member_id);
-      const to = detail.members.find(({ id }) => id === input.to_member_id);
-      if (!from || !to) return missing(url);
-      return response({ edge: seedEdge(from, to, input) });
+    if (url === `${BOARD_PATH}/stickies`) return response({ sticky: seedSticky({ ...input,
+      h: typeof input.h === 'number' ? input.h : stickyTextHeight(String(input.text ?? ''), Number(input.w ?? 240)) }) });
+    if (url === `${BOARD_PATH}/edges`) return response({ edge: seedVisualEdge(input) });
+    const reroute = detail.edges.find(({ id }) => url === `${BOARD_PATH}/edges/${id}/reroute`);
+    if (reroute) {
+      if (reroute.visual_version !== 1) {
+        reroute.cap_start = reroute.style.direction === 'both' ? 'arrow' : 'none';
+        reroute.cap_end = ['forward', 'both'].includes(String(reroute.style.direction)) ? 'arrow' : 'none';
+      }
+      reroute.visual_version = 1;
+      reroute.bend = routedBend(reroute);
+      return response({ edge: reroute });
     }
     throw new Error(`Unexpected synthetic POST: ${url}`);
   },
@@ -111,11 +156,23 @@ const api = {
     if (url === BOARD_PATH) { Object.assign(detail.board, copy(input)); return response({ board: detail.board }); }
     const layer = detail.layers?.find(({ id }) => url === `${BOARD_PATH}/layers/${id}`);
     if (layer) { Object.assign(layer, copy(input)); return response({ layer }); }
-    for (const [kind, objects] of [['member', detail.members], ['visual', detail.visuals], ['edge', detail.edges]] as const) {
-      if (!url.startsWith(`${BOARD_PATH}/${kind}s/`)) continue;
-      const object = objects.find(({ id }) => url === `${BOARD_PATH}/${kind}s/${id}`);
+    for (const [kind, objects] of [['member', detail.members], ['visual', detail.visuals], ['edge', detail.edges], ['sticky', detail.stickies ?? []]] as const) {
+      const family = kind === 'sticky' ? 'stickies' : `${kind}s`;
+      if (!url.startsWith(`${BOARD_PATH}/${family}/`)) continue;
+      const object = objects.find(({ id }) => url === `${BOARD_PATH}/${family}/${id}`);
       if (!object) return missing(url);
       Object.assign(object, copy(input));
+      if (kind === 'sticky' && input.h === undefined && (input.w !== undefined || input.text !== undefined)) {
+        const sticky = object as BoardSticky;
+        sticky.h = stickyTextHeight(sticky.text, sticky.w);
+      }
+      if (kind === 'edge') {
+        const edge = object as BoardEdge;
+        for (const side of ['from', 'to'] as const) {
+          const endpoint = edge[side];
+          if (endpoint) edge[`${side}_member_id`] = endpoint.kind === 'member' ? endpoint.id : null;
+        }
+      }
       return response({ [kind]: object });
     }
     throw new Error(`Unexpected synthetic PATCH: ${url}`);
@@ -124,7 +181,7 @@ const api = {
     record('DELETE', url);
     const layer = detail.layers?.find(({ id }) => url === `${BOARD_PATH}/layers/${id}`);
     if (layer) {
-      const objects = [...detail.members, ...detail.visuals].filter((object) => object.layer_id === layer.id);
+      const objects = [...detail.members, ...detail.visuals, ...detail.stickies ?? []].filter((object) => object.layer_id === layer.id);
       objects.forEach((object) => { object.layer_id = null; });
       detail.layers = detail.layers!.filter(({ id }) => id !== layer.id);
       detail.layers.forEach((entry, index) => { entry.order_index = index + 1; });
@@ -139,6 +196,12 @@ const api = {
     }
     const visual = detail.visuals.find(({ id }) => url === `${BOARD_PATH}/visuals/${id}`);
     if (visual) { detail.visuals = detail.visuals.filter(({ id }) => id !== visual.id); return response({}); }
+    const sticky = detail.stickies?.find(({ id }) => url === `${BOARD_PATH}/stickies/${id}`);
+    if (sticky) {
+      detail.stickies = detail.stickies!.filter(({ id }) => id !== sticky.id);
+      detail.edges = detail.edges.filter((edge) => ![edge.from, edge.to].some((end) => end?.kind === 'sticky' && end.id === sticky.id));
+      return response({});
+    }
     const edge = detail.edges.find(({ id }) => url === `${BOARD_PATH}/edges/${id}`);
     if (edge) { detail.edges = detail.edges.filter(({ id }) => id !== edge.id); return response({}); }
     return missing(url);
@@ -157,6 +220,6 @@ const api = {
     throw new Error(`Unexpected synthetic PUT: ${url}`);
   },
 };
-export function diagnostic() { return copy({ board: detail.board, layers: detail.layers || [], members: detail.members, edges: detail.edges, visuals: detail.visuals, events, writes }); }
+export function diagnostic() { return copy({ board: detail.board, layers: detail.layers || [], members: detail.members, edges: detail.edges, visuals: detail.visuals, stickies: detail.stickies ?? [], events, writes }); }
 resetSample();
 export default api;

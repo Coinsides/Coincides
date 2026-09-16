@@ -9,6 +9,8 @@ import {
   mountBoardMember, updateBoardMember, unmountBoardMember,
   mountBoardTextRange,
   createBoardEdge, updateBoardEdge, deleteBoardEdge,
+  rerouteBoardEdge,
+  createBoardSticky, updateBoardSticky, deleteBoardSticky,
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
   listBoardLayers, createBoardLayer, updateBoardLayer, reorderBoardLayers, deleteBoardLayer,
   castBoardSticky,
@@ -24,6 +26,7 @@ import {
   createBoardSchema, updateBoardSchema,
   mountBoardMemberSchema, updateBoardMemberSchema,
   createBoardEdgeSchema, updateBoardEdgeSchema,
+  createBoardStickySchema, updateBoardStickySchema,
   createBoardVisualSchema, updateBoardVisualSchema,
   createBoardLayerSchema, updateBoardLayerSchema, reorderBoardLayersSchema,
   relocateTraySchema,
@@ -176,14 +179,14 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
     const boardId = String(req.params.boardId);
     const result = runRecordedAction(database(), req, 'DELETE /api/boards/:boardId', (db, userId) => {
       const value = deleteBoard(db, userId, boardId);
-      const { board, member_count, edge_count, visual_count } = value;
+      const { board, member_count, edge_count, visual_count, sticky_count } = value;
       return {
         value,
         events: [{
           verb: 'board_deleted',
           objects: [{ kind: 'board', id: board.id }],
-          summary: `Board "${board.title}" deleted: ${member_count} members, ${edge_count} edges, ${visual_count} visuals`,
-          meta: { title: board.title, member_count, edge_count, visual_count },
+          summary: `Board "${board.title}" deleted: ${member_count} members, ${edge_count} edges, ${visual_count} visuals, ${sticky_count} stickies`,
+          meta: { title: board.title, member_count, edge_count, visual_count, sticky_count },
         }],
       };
     });
@@ -296,6 +299,15 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
     res.status(201).json({ edge });
   }));
 
+  router.post('/:boardId/edges/:edgeId/reroute', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const db = database();
+    const edge = db.transaction(() => rerouteBoardEdge(
+      db, req.userId!, String(req.params.boardId), String(req.params.edgeId),
+    ))();
+    res.json({ edge });
+  }));
+
   router.patch('/:boardId/edges/:edgeId', handle((req, res) => {
     const db = database();
     const input = updateBoardEdgeSchema.parse(req.body);
@@ -309,6 +321,31 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
     const db = database();
     const removed = db.transaction(() => deleteBoardEdge(
       db, req.userId!, String(req.params.boardId), String(req.params.edgeId),
+    ))();
+    res.json({ removed });
+  }));
+
+  router.post('/:boardId/stickies', handle((req, res) => {
+    const db = database();
+    const input = createBoardStickySchema.parse(req.body);
+    const sticky = db.transaction(() => createBoardSticky(db, req.userId!, String(req.params.boardId), input))();
+    res.status(201).json({ sticky });
+  }));
+
+  router.patch('/:boardId/stickies/:stickyId', handle((req, res) => {
+    const db = database();
+    const input = updateBoardStickySchema.parse(req.body);
+    const sticky = db.transaction(() => updateBoardSticky(
+      db, req.userId!, String(req.params.boardId), String(req.params.stickyId), input,
+    ))();
+    res.json({ sticky });
+  }));
+
+  router.delete('/:boardId/stickies/:stickyId', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const db = database();
+    const removed = db.transaction(() => deleteBoardSticky(
+      db, req.userId!, String(req.params.boardId), String(req.params.stickyId),
     ))();
     res.json({ removed });
   }));

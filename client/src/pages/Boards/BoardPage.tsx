@@ -3,7 +3,7 @@ import { useAmbientAgentContextHint } from '@/hooks/useAmbientAgentContextHint';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers, List } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
-import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
+import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual, BoardSticky, BoardEdgeAnchor, BoardEdgeEndpoint, PatchBoardEdgeInput } from './boardTypes';
 import { animateBoardViewport, pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
 import { useBoard } from './useBoard';
 import { useBoardSkin } from './useBoardSkin';
@@ -12,6 +12,10 @@ import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
 import { BoardNewNoteDialog } from './BoardNewNoteDialog';
 import { BoardChalkEditor, chalkGeometry, type ChalkDraft } from './BoardChalk';
+import { BoardStickyCard, measureStickyWidth } from './BoardStickyCard';
+import { BoardVisualEdge, type EdgeDragPart } from './BoardVisualEdge';
+import { boardEdgeArc, cardEndpoint, edgeEndpoint, endpointCard, pickBoardEndpoint, type BoardCard } from './boardEdgeView';
+import { bendFromBoardPoint, nearestBoardArcPosition } from '../../../../shared/boardVisualGeometry';
 import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
 import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
 import { BoardSelectionSidebar } from './BoardSelectionSidebar';
@@ -22,19 +26,21 @@ import { getActiveBoardLayer, setActiveBoardLayer } from './boardActiveLayer';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import { BoardReferenceTag } from './BoardReferenceTag';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
-import { connectionPoint, deletionScope, marqueeSelection, selectionFromKeys, selectionKey, selectionRect, visualBounds, type BoardSelection, type BoardRect } from './boardSelection';
+import { deletionScope, marqueeSelection, selectionFromKeys, selectionKey, selectionRect, visualBounds, type BoardSelection, type BoardRect } from './boardSelection';
 import { snapBoardTranslation, type BoardAlignmentGuide } from './boardSnapping';
 import styles from './Boards.module.css';
 
 type Tool = 'select' | 'pan' | 'connect' | 'pen' | 'eraser';
 type Selection = BoardSelection | null;
-type MoveObject = BoardMember | BoardVisual;
+type MoveObject = BoardMember | BoardVisual | BoardSticky;
 type Gesture =
   | { kind: 'pan'; start: BoardPoint; viewport: BoardViewport }
-  | { kind: 'resize'; start: BoardPoint; object: MoveObject }
+  | { kind: 'resize'; start: BoardPoint; object: BoardMember | BoardVisual }
   | { kind: 'move'; start: BoardPoint; point: BoardPoint; objects: MoveObject[]; primary: BoardRect; targets: BoardRect[]; moved: boolean }
   | { kind: 'marquee'; start: BoardPoint; base: Set<string>; mode: 'replace' | 'add' | 'subtract' }
   | { kind: 'eraser'; ids: Set<string>; previous?: BoardPoint }
+  | { kind: 'edge'; edge: BoardEdge; part: EdgeDragPart; patch: PatchBoardEdgeInput; start: BoardPoint; moved: boolean }
+  | { kind: 'link'; from: BoardEdgeEndpoint; to: BoardEdgeEndpoint; start: BoardPoint; moved: boolean }
   | { kind: 'pen'; points: BoardPoint[]; layer_id: string | null };
 
 function strokePath(visual: BoardVisual): string {
@@ -130,7 +136,18 @@ export default function BoardPage() {
   const [search, setSearch] = useState('');
   const [viewport, setViewport] = useState<BoardViewport | null>(null);
   const [viewportDirty, setViewportDirty] = useState(false);
-  const [objectDraft, setObjectDraft] = useState<BoardMember | BoardVisual | null>(null);
+  const [objectDraft, setObjectDraft] = useState<MoveObject | null>(null);
+  const [stickyEditor, setStickyEditor] = useState<string | null>(null);
+  const [stickyMeasurements, setStickyMeasurements] = useState<Record<string, { w: number; text: string; h: number }>>({});
+  const measureSticky = useCallback((sticky: BoardSticky, h: number) => {
+    setStickyMeasurements((current) => {
+      const previous = current[sticky.id];
+      return previous?.w === sticky.w && previous.text === sticky.text && previous.h === h ? current
+        : { ...current, [sticky.id]: { w: sticky.w, text: sticky.text, h } };
+    });
+  }, []);
+  const [edgeDraft, setEdgeDraft] = useState<BoardEdge | null>(null);
+  const [bindingPreview, setBindingPreview] = useState<BoardEdgeEndpoint | null>(null);
   const [ink, setInk] = useState<BoardPoint[]>([]);
   const surface = useRef<HTMLDivElement>(null);
   const gesture = useRef<Gesture | null>(null);
@@ -139,7 +156,7 @@ export default function BoardPage() {
   const visitRevision = useRef(0);
   const routeId = useRef(boardId);
   routeId.current = boardId;
-  const objectDraftRef = useRef<BoardMember | BoardVisual | null>(null);
+  const objectDraftRef = useRef<MoveObject | null>(null);
   const viewportRef = useRef<BoardViewport | null>(null);
   const viewportTimer = useRef<ReturnType<typeof setTimeout>>();
   const cancelViewportAnimation = useRef<(() => void) | null>(null);
@@ -194,6 +211,10 @@ export default function BoardPage() {
     setConnectFrom(null);
     gesture.current = null;
     setObjectDraft(null);
+    setStickyEditor(null);
+    setStickyMeasurements({});
+    setEdgeDraft(null);
+    setBindingPreview(null);
     objectDraftRef.current = null;
     setTitleDraft(null);
     setLabelDraft(null);
@@ -369,15 +390,23 @@ export default function BoardPage() {
   const stagedMembers = (detail?.members || []).filter((member) => member.placed === false);
   const scene = boardLayerScene(detail,
     (detail?.members || []).map((member) => (groupDrafts.get(member.id) as BoardMember | undefined) || (objectDraft?.id === member.id && 'member_kind' in objectDraft ? objectDraft : member)),
-    (detail?.visuals || []).map((visual) => (groupDrafts.get(visual.id) as BoardVisual | undefined) || (objectDraft?.id === visual.id && 'visual_kind' in objectDraft ? objectDraft : visual)));
+    (detail?.visuals || []).map((visual) => (groupDrafts.get(visual.id) as BoardVisual | undefined) || (objectDraft?.id === visual.id && 'visual_kind' in objectDraft ? objectDraft : visual)),
+    (detail?.stickies || []).map((sticky) => {
+      const card = (groupDrafts.get(sticky.id) as BoardSticky | undefined) || sticky;
+      const measured = stickyMeasurements[sticky.id];
+      return measured?.w === card.w && measured.text === card.text ? { ...card, h: measured.h } : card;
+    }));
   const visibleMembers = scene.members;
   const visibleVisuals = scene.visuals;
   const visibleEdges = scene.edges;
-  const visibleDetail = { members: visibleMembers, visuals: visibleVisuals, edges: visibleEdges };
+  const visibleStickies = scene.stickies;
+  const visibleCards: BoardCard[] = [...visibleMembers, ...visibleStickies];
+  const visibleDetail = { members: visibleMembers, visuals: visibleVisuals, edges: visibleEdges, stickies: visibleStickies };
   const activeLayerVisible = scene.layers.some((layer) => layer.id === activeLayerId && layer.visible);
   const selectedMember = selection?.kind === 'member' ? visibleMembers.find(({ id }) => id === selection.id) : undefined;
   const selectedVisual = selection?.kind === 'visual' ? visibleVisuals.find(({ id }) => id === selection.id) : undefined;
   const selectedEdge = selection?.kind === 'edge' ? visibleEdges.find(({ id }) => id === selection.id) : undefined;
+  const selectedSticky = selection?.kind === 'sticky' ? visibleStickies.find(({ id }) => id === selection.id) : undefined;
 
   useEffect(() => {
     if (!flash) return;
@@ -412,15 +441,15 @@ export default function BoardPage() {
   function locateSelection(target: BoardSelection) {
     if (!selectedKeys.has(selectionKey(target)) || !surface.current || gesture.current) return;
     const object = target.kind === 'member' ? visibleMembers.find(({ id }) => id === target.id)
-      : target.kind === 'visual' ? visibleVisuals.find(({ id }) => id === target.id) : undefined;
+      : target.kind === 'visual' ? visibleVisuals.find(({ id }) => id === target.id)
+      : target.kind === 'sticky' ? visibleStickies.find(({ id }) => id === target.id) : undefined;
     let bounds: BoardRect | undefined;
     if (object) bounds = 'visual_kind' in object ? visualBounds(object)
       : { x: object.x, y: object.y, w: object.w * object.scale, h: object.h * object.scale };
     else {
       const edge = visibleEdges.find(({ id }) => id === target.id);
-      const from = visibleMembers.find(({ id }) => id === edge?.from_member_id);
-      const to = visibleMembers.find(({ id }) => id === edge?.to_member_id);
-      if (from && to) bounds = selectionRect(connectionPoint(from, to), connectionPoint(to, from));
+      const arc = edge && boardEdgeArc(edge, visibleCards);
+      if (arc) bounds = selectionRect(arc.start, arc.end);
     }
     if (!bounds) return;
     const current = viewportRef.current || detail!.board.viewport;
@@ -441,6 +470,7 @@ export default function BoardPage() {
       ...visibleMembers.map(({ id }) => selectionKey({ kind: 'member', id })),
       ...visibleEdges.map(({ id }) => selectionKey({ kind: 'edge', id })),
       ...visibleVisuals.map(({ id }) => selectionKey({ kind: 'visual', id })),
+      ...visibleStickies.map(({ id }) => selectionKey({ kind: 'sticky', id })),
     ]);
     setSelectionState((current) => {
       const keys = new Set([...current.keys].filter((key) => liveKeys.has(key)));
@@ -452,7 +482,8 @@ export default function BoardPage() {
   useEffect(() => {
     if (!detail) return;
     if (activeLayerId && !detail.layers?.some((layer) => layer.id === activeLayerId)) chooseLayer(null);
-    if (connectFrom && !visibleMembers.some((member) => member.id === connectFrom)) setConnectFrom(null);
+    if (connectFrom && !visibleCards.some((member) => member.id === connectFrom)) setConnectFrom(null);
+    if (stickyEditor && !visibleStickies.some((sticky) => sticky.id === stickyEditor)) setStickyEditor(null);
     if (labelDraft && !visibleEdges.some((edge) => edge.id === labelDraft.id)) setLabelDraft(null);
     if (chalkDraft && !scene.layers.some((layer) => layer.id === layerIdOf(chalkDraft) && layer.visible)) {
       setChalkDraft(null);
@@ -538,7 +569,7 @@ export default function BoardPage() {
   }
 
   function draftChalk(event: React.MouseEvent<HTMLDivElement>) {
-    if (tool !== 'select' || spaceDown.current || !detail || chalkDraft) return;
+    if (tool !== 'select' || spaceDown.current || !detail || chalkDraft || stickyEditor) return;
     // Disabled note/item projections and drawing controls are still occupied space.
     if ((event.target as Element).closest('article, [data-visual-kind], [data-testid^="board-visual-"], button, input, textarea, [role="button"]')) return;
     if (!activeLayerVisible) { setSelectionNotice('Show the active layer to write chalk.'); return; }
@@ -549,7 +580,7 @@ export default function BoardPage() {
   }
 
   function editChalk(visual: BoardVisual) {
-    if (tool !== 'select' || chalkDraft || board.pending) return;
+    if (tool !== 'select' || chalkDraft || stickyEditor || board.pending) return;
     setSelection({ kind: 'visual', id: visual.id });
     setChalkDraft({ ...visual, text: typeof visual.data.text === 'string' ? visual.data.text : '' });
   }
@@ -609,12 +640,98 @@ export default function BoardPage() {
     catch { /* The hook presents the save failure. */ }
   }
 
-  async function connect(member: BoardMember) {
+  async function connect(member: BoardCard) {
     if (board.pending) return;
-    if (!visibleMembers.some((current) => current.id === member.id)) return;
-    if (!connectFrom || !visibleMembers.some((current) => current.id === connectFrom)) { setConnectFrom(member.id); return; }
+    if (!visibleCards.some((current) => current.id === member.id)) return;
+    const from = visibleCards.find((current) => current.id === connectFrom);
+    if (!from) { setConnectFrom(member.id); return; }
     if (connectFrom === member.id) { setConnectFrom(null); return; }
-    if (await board.addEdge({ from_member_id: connectFrom, to_member_id: member.id })) setConnectFrom(null);
+    // Retain member aliases for old callers; server gives new edges v1 defaults.
+    const input = 'member_kind' in from && 'member_kind' in member
+      ? { from_member_id: from.id, to_member_id: member.id }
+      : { from: cardEndpoint(from), to: cardEndpoint(member) };
+    if (await board.addEdge(input)) setConnectFrom(null);
+  }
+
+  async function createSticky() {
+    if (!surface.current || board.pending) return;
+    const visit = visitRevision.current;
+    const current = viewportRef.current || detail!.board.viewport;
+    const point = toBoardPoint({ x: surface.current.clientWidth / 2, y: surface.current.clientHeight / 2 }, current);
+    const sticky = await board.addSticky({ text: '', x: point.x - 120, y: point.y - 120, w: 240, h: 240,
+      layer_id: activeLayerId, z_index: Math.max(0, ...visibleCards.map((card) => card.z_index)) + 1 });
+    if (sticky && visit === visitRevision.current) {
+      setTool('select'); setSelection({ kind: 'sticky', id: sticky.id }); setStickyEditor(sticky.id);
+    }
+  }
+
+  function upgradeEdge(edge: BoardEdge): PatchBoardEdgeInput {
+    return edge.visual_version === 1 ? {} : { visual_version: 1,
+      cap_start: edge.style.direction === 'both' ? 'arrow' : 'none',
+      cap_end: ['forward', 'both'].includes(String(edge.style.direction)) ? 'arrow' : 'none' };
+  }
+
+  function beginEdge(event: React.PointerEvent, edge: BoardEdge, part: EdgeDragPart) {
+    if (event.button !== 0 || board.pending || !viewportRef.current || stickyEditor || labelDraft) return;
+    event.preventDefault(); event.stopPropagation(); surface.current?.focus();
+    setSelection({ kind: 'edge', id: edge.id });
+    gestureRevision.current += 1;
+    gesture.current = { kind: 'edge', edge, part, patch: {}, start: localPoint(event), moved: false };
+    capturedPointer.current = event.currentTarget;
+    capturedPointer.current.setPointerCapture(event.pointerId);
+  }
+
+  function beginLink(event: React.PointerEvent, card: BoardCard, anchor: Exclude<BoardEdgeAnchor, 'auto'>) {
+    if (event.button !== 0 || board.pending || !viewportRef.current || stickyEditor || chalkDraft) return;
+    event.preventDefault(); event.stopPropagation(); surface.current?.focus();
+    const from = cardEndpoint(card, anchor);
+    const point = toBoardPoint(localPoint(event), viewportRef.current);
+    gestureRevision.current += 1;
+    gesture.current = { kind: 'link', from, to: { kind: 'point', ...point }, start: point, moved: false };
+    capturedPointer.current = event.currentTarget;
+    capturedPointer.current.setPointerCapture(event.pointerId);
+  }
+
+  function updateEdgeGesture(current: Extract<Gesture, { kind: 'edge' | 'link' }>, event: React.PointerEvent) {
+    if (!viewportRef.current) return;
+    const point = toBoardPoint(localPoint(event), viewportRef.current);
+    if (current.kind === 'link') {
+      current.to = pickBoardEndpoint(point, visibleCards, viewportRef.current.zoom, event.altKey);
+      current.moved ||= Math.hypot(point.x - current.start.x, point.y - current.start.y) * viewportRef.current.zoom > 4;
+      setBindingPreview(current.to);
+      setEdgeDraft({ id: 'draft', board_id: boardId!, from_member_id: null, to_member_id: null,
+        from: current.from, to: current.to, visual_version: 1, bend: 16, style: {}, label: null, created_at: '' });
+      return;
+    }
+    const arc = boardEdgeArc(current.edge, visibleCards);
+    if (!arc) return;
+    const local = localPoint(event);
+    current.moved ||= Math.hypot(local.x - current.start.x, local.y - current.start.y) > 4;
+    if (!current.moved) return;
+    const patch: PatchBoardEdgeInput = { ...upgradeEdge(current.edge) };
+    if (current.part === 'bend') patch.bend = bendFromBoardPoint(arc.start, arc.end, point);
+    else if (current.part === 'label') patch.label_position = nearestBoardArcPosition(arc, point, { snapToMiddle: true, snapDistance: 10 / viewportRef.current.zoom });
+    else {
+      patch[current.part] = pickBoardEndpoint(point, visibleCards, viewportRef.current.zoom, event.altKey);
+      setBindingPreview(patch[current.part]!);
+    }
+    current.patch = patch;
+    setEdgeDraft({ ...current.edge, ...patch });
+  }
+
+  function cardAnchors(card: BoardCard) {
+    if (tool !== 'select' && tool !== 'connect') return null;
+    return (['n', 'e', 's', 'w'] as const).map((anchor) => <button key={anchor} type="button"
+      className={styles.cardAnchor} data-anchor={anchor}
+      data-binding-anchor={bindingPreview?.kind !== 'point' && bindingPreview?.id === card.id && bindingPreview?.anchor === anchor || undefined}
+      aria-label={`Connect from ${anchor} anchor`} title={`Connect from ${anchor} anchor`}
+      onPointerDown={(event) => beginLink(event, card, anchor)} onDoubleClick={(event) => event.stopPropagation()} />);
+  }
+
+  async function unbindEdge(edge: BoardEdge, side: 'from' | 'to') {
+    const arc = boardEdgeArc(edge, visibleCards);
+    if (!arc) return;
+    await board.updateEdge(edge.id, { ...upgradeEdge(edge), [side]: { kind: 'point', ...(side === 'from' ? arc.start : arc.end) } });
   }
 
   function eraseAt(event: { clientX: number; clientY: number; target: EventTarget | null }) {
@@ -647,7 +764,7 @@ export default function BoardPage() {
 
   function begin(event: React.PointerEvent, object?: MoveObject | BoardEdge, resize = false) {
     if (event.button !== 0 && event.button !== 1) return;
-    if (!detail || !viewportRef.current || chalkDraft || deleteKeys) return;
+    if (!detail || !viewportRef.current || chalkDraft || stickyEditor || deleteKeys) return;
     if (cancelViewportAnimation.current) {
       cancelViewportAnimation.current();
       cancelViewportAnimation.current = null;
@@ -673,21 +790,21 @@ export default function BoardPage() {
       setSelection(null);
       eraseAt(event);
     } else if (object) {
-      const kind = 'visual_kind' in object ? 'visual' : 'member_kind' in object ? 'member' : 'edge';
+      const kind = 'visual_kind' in object ? 'visual' : 'member_kind' in object ? 'member' : 'text' in object ? 'sticky' : 'edge';
       const target: BoardSelection = { kind, id: object.id };
-      if (tool === 'connect') { if ('member_kind' in object) void connect(object); return; }
+      if (tool === 'connect') { if ('member_kind' in object || 'text' in object) void connect(object); return; }
       if ((event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) && !resize) { selectWithModifiers(target, event); return; }
       const keepSelection = selectedKeys.has(selectionKey(target)) && !resize;
       selectObject(target, false, keepSelection);
-      if (resize && 'pinned' in object) {
+      if (resize && 'pinned' in object && !('text' in object)) {
         if (object.pinned || ('visual_kind' in object && (object.visual_kind === 'freehand' || object.visual_kind === 'connector'))) return;
         gesture.current = { kind: 'resize', start, object };
         objectDraftRef.current = object;
         setObjectDraft(object);
       } else {
         const keys = keepSelection ? selectedKeys : new Set([selectionKey(target)]);
-        const objects = [...visibleMembers, ...visibleVisuals].filter((entry) => keys.has(selectionKey({
-          kind: 'member_kind' in entry ? 'member' : 'visual', id: entry.id,
+        const objects = [...visibleMembers, ...visibleVisuals, ...visibleStickies].filter((entry) => keys.has(selectionKey({
+          kind: 'member_kind' in entry ? 'member' : 'visual_kind' in entry ? 'visual' : 'sticky', id: entry.id,
         })));
         const pinnedCount = objects.filter((entry) => entry.pinned).length;
         setSelectionNotice(pinnedCount ? `Skipped ${pinnedCount} pinned ${pinnedCount === 1 ? 'object' : 'objects'}.` : null);
@@ -699,7 +816,7 @@ export default function BoardPage() {
         // Use the grabbed object, even when scene order differs from selection order.
         const primary = movable.find((entry) => entry.id === object.id) || movable[0];
         gesture.current = { kind: 'move', start, point: start, objects: movable, primary: bounds(primary), moved: false,
-          targets: [...visibleMembers, ...visibleVisuals].filter((entry) => !movingIds.has(entry.id)).map(bounds) };
+          targets: [...visibleMembers, ...visibleVisuals, ...visibleStickies].filter((entry) => !movingIds.has(entry.id)).map(bounds) };
         groupDraftsRef.current = new Map(movable.map((entry) => [entry.id, entry]));
         setGroupDrafts(new Map(groupDraftsRef.current));
       }
@@ -735,7 +852,9 @@ export default function BoardPage() {
     const current = gesture.current;
     if (!current || !viewportRef.current) return;
     const point = localPoint(event);
-    if (current.kind === 'pan') {
+    if (current.kind === 'edge' || current.kind === 'link') {
+      updateEdgeGesture(current, event);
+    } else if (current.kind === 'pan') {
       changeViewport({ ...current.viewport, x: current.viewport.x + point.x - current.start.x,
         y: current.viewport.y + point.y - current.start.y }, false);
     } else if (current.kind === 'eraser') {
@@ -743,7 +862,7 @@ export default function BoardPage() {
     } else if (current.kind === 'marquee') {
       const rect = selectionRect(current.start, toBoardPoint(point, viewportRef.current));
       setMarquee(rect);
-      const hits = marqueeSelection(rect, { members: visibleMembers, visuals: visibleVisuals, edges: visibleEdges });
+      const hits = marqueeSelection(rect, visibleDetail);
       const keys = current.mode === 'replace' ? new Set<string>() : new Set(current.base);
       hits.forEach((hit) => current.mode === 'subtract' ? keys.delete(selectionKey(hit)) : keys.add(selectionKey(hit)));
       setSelectionState(selectionFromKeys(keys));
@@ -769,6 +888,7 @@ export default function BoardPage() {
   async function end(event: React.PointerEvent, cancel = false) {
     const current = gesture.current;
     const revision = gestureRevision.current;
+    if ((current?.kind === 'edge' || current?.kind === 'link') && !cancel) updateEdgeGesture(current, event);
     // Include the release position/modifier, then remove guides before awaiting a save.
     // An older save completion must never clear a newer gesture's guides.
     if (current?.kind === 'move' && !cancel) updateMoveDraft(current, localPoint(event), event.shiftKey);
@@ -778,7 +898,15 @@ export default function BoardPage() {
     if (capturedPointer.current?.hasPointerCapture(event.pointerId)) capturedPointer.current.releasePointerCapture(event.pointerId);
     capturedPointer.current = null;
     if (!current) return;
-    if (current.kind === 'pan') {
+    if (current.kind === 'edge' || current.kind === 'link') {
+      setBindingPreview(null);
+      if (!cancel) {
+        if (current.kind === 'edge' && current.moved) await board.updateEdge(current.edge.id, current.patch);
+        else if (current.kind === 'link' && current.moved && !(current.from.kind !== 'point' && current.to.kind !== 'point'
+          && current.from.kind === current.to.kind && current.from.id === current.to.id)) await board.addEdge({ from: current.from, to: current.to });
+      }
+      if (revision === gestureRevision.current) setEdgeDraft(null);
+    } else if (current.kind === 'pan') {
       if (cancel) changeViewport(current.viewport, false);
       await commitViewport();
     } else if (current.kind === 'marquee') {
@@ -806,7 +934,7 @@ export default function BoardPage() {
       const changes = current.objects.flatMap((object) => {
         const next = groupDraftsRef.current.get(object.id);
         return next && (next.x !== object.x || next.y !== object.y) ? [{
-          kind: ('member_kind' in object ? 'member' : 'visual') as 'member' | 'visual', id: object.id, input: { x: next.x, y: next.y },
+          kind: ('member_kind' in object ? 'member' : 'visual_kind' in object ? 'visual' : 'sticky') as 'member' | 'visual' | 'sticky', id: object.id, input: { x: next.x, y: next.y },
         }] : [];
       });
       if (!cancel && changes.length) await board.updateGeometryBatch(changes);
@@ -816,7 +944,7 @@ export default function BoardPage() {
       if (!cancel && next && (next.w !== current.object.w || next.h !== current.object.h)) {
         const patch = { w: next.w, h: next.h };
         if ('visual_kind' in next) await board.updateVisual(next.id, patch);
-        else await board.updateMember(next.id, patch);
+        else if ('member_kind' in next) await board.updateMember(next.id, patch);
       }
       if (revision === gestureRevision.current) { objectDraftRef.current = null; setObjectDraft(null); }
     }
@@ -834,14 +962,14 @@ export default function BoardPage() {
   }
 
   async function removeSelection() {
-    if (!selectedKeys.size || !detail || chalkDraft || board.pending) return;
+    if (!selectedKeys.size || !detail || chalkDraft || stickyEditor || board.pending) return;
     const scope = deletionScope(selectedKeys, visibleDetail, detail.edges);
     if (scope.memberIds.length) setDeleteKeys(new Set(selectedKeys));
     else await executeDeletion(new Set(selectedKeys));
   }
 
   function keyDown(event: React.KeyboardEvent<HTMLElement>) {
-    if (boardPaused.current || deleteKeys || deleting || chalkDraft || labelDraft) return;
+    if (boardPaused.current || deleteKeys || deleting || chalkDraft || stickyEditor || labelDraft) return;
     if ((event.target as HTMLElement).closest('input, select, textarea, [contenteditable="true"], [role="dialog"], dialog')) return;
     const key = event.key.toLowerCase();
     if (event.key === 'Shift' && gesture.current?.kind === 'move') {
@@ -860,6 +988,7 @@ export default function BoardPage() {
       // End an in-progress selection gesture so its next pointermove cannot
       // recreate the selection that Escape just cleared.
       if (gesture.current?.kind === 'marquee') { gesture.current = null; setMarquee(null); }
+      if (gesture.current?.kind === 'edge' || gesture.current?.kind === 'link') { gesture.current = null; setEdgeDraft(null); setBindingPreview(null); }
       setSelection(null); setListHoverKey(null); setBoardHoverKey(null); setFlash(null);
       setConnectFrom(null); setLabelDraft(null); setTool('select');
       return;
@@ -871,6 +1000,7 @@ export default function BoardPage() {
       if (tool === 'connect') void connect(selectedMember); else void openMember(selectedMember);
     }
     if (event.key === 'Enter' && selectedVisual?.visual_kind === 'sticky') { event.preventDefault(); editChalk(selectedVisual); }
+    if (event.key === 'Enter' && selectedSticky) { event.preventDefault(); if (tool === 'connect') void connect(selectedSticky); else setStickyEditor(selectedSticky.id); }
     if ((event.key === 'Delete' || event.key === 'Backspace') && selectedKeys.size) { event.preventDefault(); void removeSelection(); }
     if (selectedMember && !selectedMember.pinned && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
       event.preventDefault();
@@ -947,7 +1077,7 @@ export default function BoardPage() {
         <button className={styles.button} type="button" disabled={board.pending} onClick={() => setTitleDraft(null)}>Cancel</button>
       </form>}
       <span className={styles.saveStatus} role="status">{board.error ? 'Changes need attention' : board.pending || viewportDirty ? 'Saving…' : 'Saved'}</span>
-      <button ref={newNoteToggle} className={styles.button} disabled={board.pending || Boolean(chalkDraft) || Boolean(openNoteId)}
+      <button ref={newNoteToggle} className={styles.button} disabled={board.pending || Boolean(chalkDraft || stickyEditor) || Boolean(openNoteId)}
         onClick={() => { spaceDown.current = false; setPickerOpen(false); setConnectFrom(null); setNewNoteOpen(true); }}>
         <Plus size={16} />New note
       </button>
@@ -958,7 +1088,7 @@ export default function BoardPage() {
         <Inbox size={16} />Staging ({stagedMembers.length})
       </button>
       <button ref={layersToggle} className={styles.button} aria-expanded={layersOpen} aria-controls="board-layers"
-        disabled={Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => layersOpen ? closeLayers() : setLayersOpen(true)}>
+        disabled={Boolean(chalkDraft || stickyEditor) || Boolean(deleteKeys)} onClick={() => layersOpen ? closeLayers() : setLayersOpen(true)}>
         <Layers size={16} />Layers
       </button>
       <details className={styles.boardMenu}>
@@ -999,8 +1129,9 @@ export default function BoardPage() {
         { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) =>
         <button key={key} className={styles.button} aria-pressed={tool === key}
           onClick={() => { setTool(key); setConnectFrom(null); }}><Icon size={16} />{label}</button>)}
-      <button className={styles.button} aria-label="Undo board action" disabled={!board.canUndo || Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.undo(); }}><Undo2 size={16} />Undo</button>
-      <button className={styles.button} aria-label="Redo board action" disabled={!board.canRedo || Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.redo(); }}><Redo2 size={16} />Redo</button>
+      <button className={styles.button} disabled={board.pending || Boolean(chalkDraft || stickyEditor)} onClick={() => { void createSticky(); }}><Plus size={16} />Add sticky</button>
+      <button className={styles.button} aria-label="Undo board action" disabled={!board.canUndo || Boolean(chalkDraft || stickyEditor) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.undo(); }}><Undo2 size={16} />Undo</button>
+      <button className={styles.button} aria-label="Redo board action" disabled={!board.canRedo || Boolean(chalkDraft || stickyEditor) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.redo(); }}><Redo2 size={16} />Redo</button>
       <span className={styles.toolHint}>{tool === 'connect' ? (connectFrom ? 'Choose the next card' : 'Choose two cards to connect')
         : tool === 'pen' ? 'Draw on the board' : tool === 'eraser' ? 'Sweep to erase whole pen strokes'
           : 'Drag blank space to select · Ctrl-drag to add · Alt-drag to subtract · Ctrl/Shift-click to toggle · Hold Shift after starting an object drag to ignore snapping · Esc to clear · Space-drag to pan'}</span>
@@ -1012,9 +1143,9 @@ export default function BoardPage() {
       </div>
     </div>
     <div className={styles.boardBody}>
-      {layersOpen && <BoardLayers layers={detail.layers || []} members={detail.members} visuals={detail.visuals}
+      {layersOpen && <BoardLayers layers={detail.layers || []} members={detail.members} visuals={detail.visuals} stickies={detail.stickies}
         activeLayerId={activeLayerId} baseVisible={detail.board.base_layer_visible !== false}
-        pending={board.pending || Boolean(chalkDraft)} onSelectLayer={chooseLayer}
+        pending={board.pending || Boolean(chalkDraft || stickyEditor)} onSelectLayer={chooseLayer}
         onBaseVisibleChange={(visible) => board.updateBoard({ base_layer_visible: visible })}
         onCreateLayer={async (name) => {
           const visit = visitRevision.current;
@@ -1063,7 +1194,7 @@ export default function BoardPage() {
         onBlur={() => { spaceDown.current = false; }}
         onDoubleClick={draftChalk}
         onDragOver={(event) => {
-          if (!event.dataTransfer.types.includes(BOARD_STAGING_MIME) || board.pending || chalkDraft) return;
+          if (!event.dataTransfer.types.includes(BOARD_STAGING_MIME) || board.pending || chalkDraft || stickyEditor) return;
           event.preventDefault();
           event.dataTransfer.dropEffect = 'move';
         }}
@@ -1076,42 +1207,21 @@ export default function BoardPage() {
           {scene.containers.map((layer) => <div key={layer.id || 'base'} className={styles.layer}
             data-board-layer={layer.id || 'base'} aria-label={`Layer ${layer.name}`} style={{ zIndex: layer.rank }}>
           <svg className={styles.connections} aria-label="Board connections and ink"
-            style={labelDraft ? { zIndex: Math.max(0, ...layer.members.map((member) => member.z_index), ...layer.visuals.map((visual) => visual.z_index)) + 1 } : undefined}>
+            style={labelDraft || selectedEdge || edgeDraft ? { zIndex: Math.max(0, ...layer.members.map((member) => member.z_index), ...layer.stickies.map((sticky) => sticky.z_index), ...layer.visuals.map((visual) => visual.z_index)) + 1 } : undefined}>
             <defs><marker id={layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'} viewBox="0 0 10 10" refX="9" refY="5"
               markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--board-edge, var(--text-secondary))" />
             </marker></defs>
-            {layer.edges.map((edge) => {
-              const from = visibleMembers.find((member) => member.id === edge.from_member_id);
-              const to = visibleMembers.find((member) => member.id === edge.to_member_id);
-              if (!from || !to) return null;
-              const start = connectionPoint(from, to);
-              const finish = connectionPoint(to, from);
-              const path = `M ${start.x} ${start.y} L ${finish.x} ${finish.y}`;
-              return <g key={edge.id} {...selectionEmphasis('edge', edge.id)}>
-                <path d={path} data-testid={`board-edge-${edge.id}`}
-                  markerStart={edge.style.direction === 'both' ? `url(#${layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'})` : undefined}
-                  markerEnd={edge.style.direction === 'forward' || edge.style.direction === 'both' ? `url(#${layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'})` : undefined}
-                  className={isSelected('edge', edge.id) ? styles.selectedLine : styles.edgeLine} />
-                {tool === 'select' && <path d={path} className={styles.lineHit} role="button" tabIndex={0}
-                  aria-label={`Connection ${from.reference.title || 'note'} to ${to.reference.title || 'note'}`}
-                  onFocus={() => focusSelection({ kind: 'edge', id: edge.id })}
-                  onPointerDown={(event) => begin(event, edge)}
-                  onDoubleClick={(event) => { event.stopPropagation(); editLabel(edge); }}
-                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectWithModifiers({ kind: 'edge', id: edge.id }, event); } }} />}
-                {labelDraft?.id === edge.id ? <foreignObject x={(start.x + finish.x) / 2 - 140}
-                  y={(start.y + finish.y) / 2 - 30} width="280" height="80" className={styles.edgeEditor}
-                  onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()}>
-                  <form onSubmit={(event) => { event.preventDefault(); void saveLabel(); }}>
-                    <input aria-label="Connection label" autoFocus maxLength={4000} value={labelDraft.value} disabled={board.pending}
-                      onChange={(event) => setLabelDraft({ id: edge.id, value: event.currentTarget.value })}
-                      onKeyDown={(event) => { event.stopPropagation(); if (event.key === 'Escape') setLabelDraft(null); }} />
-                    <button className={styles.button} disabled={board.pending} type="submit">Save label</button>
-                    <button className={styles.button} type="button" disabled={board.pending} onClick={() => setLabelDraft(null)}>Cancel</button>
-                  </form>
-                </foreignObject> : edge.label && <text x={(start.x + finish.x) / 2} y={(start.y + finish.y) / 2 - 8} className={styles.edgeLabel}>{edge.label}</text>}
-              </g>;
-            })}
+            {layer.edges.map((edge) => <BoardVisualEdge key={edge.id} edge={edgeDraft?.id === edge.id ? edgeDraft : edge}
+              cards={visibleCards} selected={isSelected('edge', edge.id)} selectable={tool === 'select'} zoom={activeViewport.zoom}
+              legacyMarker={layer.id ? 'board-edge-arrow-' + layer.id : 'board-edge-arrow'} emphasis={selectionEmphasis('edge', edge.id)}
+              draft={labelDraft?.id === edge.id ? labelDraft.value : undefined} pending={board.pending}
+              onSelect={(event) => event.type === 'keydown' ? selectWithModifiers({ kind: 'edge', id: edge.id }, event) : begin(event as React.PointerEvent, edge)}
+              onFocus={() => focusSelection({ kind: 'edge', id: edge.id })} onEdit={() => editLabel(edge)}
+              onDrag={(event, part) => beginEdge(event, edge, part)} onDraft={(value) => setLabelDraft({ id: edge.id, value })}
+              onSave={() => { void saveLabel(); }} onCancel={() => setLabelDraft(null)} />)}
+            {edgeDraft?.id === 'draft' && layer.id === (endpointCard(edgeDraft.from, visibleCards)?.layer_id ?? null) &&
+              <path d={boardEdgeArc(edgeDraft, visibleCards)?.path} className={styles.arcLine} style={{ stroke: 'var(--board-line-2)', strokeWidth: 'var(--board-line-width-1)' }} />}
             {layer.visuals.filter((visual) => visual.visual_kind === 'freehand').map((visual) => <g key={visual.id} data-testid={`board-visual-${visual.id}`}
               {...selectionEmphasis('visual', visual.id)}
               style={erasedIds.has(visual.id) ? { opacity: 0.2 } : undefined}
@@ -1142,6 +1252,18 @@ export default function BoardPage() {
             </div>)}
           {chalkDraft && layerIdOf(chalkDraft) === layer.id && <BoardChalkEditor key={chalkDraft.id || 'new'} draft={chalkDraft}
             onSave={saveChalk} onCancel={() => setChalkDraft(null)} />}
+          {layer.stickies.map((sticky) => <BoardStickyCard key={sticky.id} sticky={sticky}
+            onMeasure={measureSticky}
+            selected={isSelected('sticky', sticky.id) || connectFrom === sticky.id} editing={stickyEditor === sticky.id} pending={board.pending}
+            binding={bindingPreview?.kind === 'sticky' && bindingPreview.id === sticky.id}
+            emphasis={selectionEmphasis('sticky', sticky.id)} onSelect={() => focusSelection({ kind: 'sticky', id: sticky.id })}
+            onPointerDown={(event) => begin(event, sticky)} onEdit={() => { if (tool === 'select' && !board.pending && !chalkDraft && !stickyEditor) setStickyEditor(sticky.id); }}
+            onCancel={() => setStickyEditor(null)} onSave={async (text, height) => {
+              const visit = visitRevision.current;
+              const saved = await board.updateSticky(sticky.id, { text, h: height });
+              if (saved && visit === visitRevision.current) setStickyEditor(null);
+              return saved;
+            }}>{cardAnchors(sticky)}</BoardStickyCard>)}
           {layer.members.map((member) => {
             const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
             const isItem = member.member_kind === 'item';
@@ -1156,6 +1278,7 @@ export default function BoardPage() {
               data-board-note-switch={member.member_kind === 'note' && canOpen ? 'true' : undefined}
               aria-label={title}
               aria-disabled={!canOpen}
+              data-binding-preview={bindingPreview?.kind === 'member' && bindingPreview.id === member.id || undefined}
               title={openHint}
               className={`${styles.member} ${isItem || isTextRange ? styles.referenceMember : ''} ${isSelected('member', member.id) || connectFrom === member.id ? styles.selected : ''} ${selectionEmphasis('member', member.id).className}`}
               style={{ left: member.x, top: member.y, width: member.w, height: member.h,
@@ -1185,6 +1308,7 @@ export default function BoardPage() {
                   : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
               {!member.reference.note_id && <small>No linked note to open</small>}
               </>}
+              {cardAnchors(member)}
               {!member.pinned && tool === 'select' && <button type="button" className={`${styles.resizeHandle} ${styles.memberResizeHandle}`}
                 aria-label={`Resize ${member.reference.title || 'projection'}`} title="Resize card"
                 onDoubleClick={(event) => event.stopPropagation()}
@@ -1206,13 +1330,13 @@ export default function BoardPage() {
         <BoardViewportBookmarks key={detail.board.id} boardId={detail.board.id}
           getViewport={() => viewportRef.current || activeViewport} onJump={jumpViewport}
           disabled={Boolean(chalkDraft || deleteKeys || openNoteId || newNoteOpen)} />
-        {detail.members.every((member) => member.placed === false) && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
+        {detail.members.every((member) => member.placed === false) && detail.visuals.length === 0 && !detail.stickies?.length && !chalkDraft && <div className={styles.canvasEmpty}>
           <h2>Give this thought some room.</h2><p>Double-click blank space to write chalk, add a note, or pick up the pen.</p>
           <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>
         </div>}
       </div>
       {stagingOpen && <BoardStaging boardId={detail.board.id} members={stagedMembers} candidates={candidates}
-        busy={board.pending || Boolean(chalkDraft)} onClose={closeStaging}
+        busy={board.pending || Boolean(chalkDraft || stickyEditor)} onClose={closeStaging}
         onPlace={(member) => { void placeMember(member); }}
         onRemove={(member) => { void board.unmount(member.id); }} />}
       {selectionListOpen && <BoardSelectionSidebar detail={visibleDetail} selectedKeys={selectedKeys}
@@ -1231,12 +1355,13 @@ export default function BoardPage() {
           if (selectionListOpen) closeSelectionList();
           else { setStagingOpen(false); setSelectionListOpen(true); }
         }}><List size={16} />Selection list</button>
-      {(visibleMembers.some((member) => isSelected('member', member.id)) || visibleVisuals.some((visual) => isSelected('visual', visual.id))) &&
+      {(visibleMembers.some((member) => isSelected('member', member.id)) || visibleVisuals.some((visual) => isSelected('visual', visual.id)) || visibleStickies.some((sticky) => isSelected('sticky', sticky.id))) &&
         <label className={styles.layerDestination}>Move to layer
-          <select aria-label="Move to layer" value="" disabled={board.pending || Boolean(chalkDraft)} onChange={(event) => {
+          <select aria-label="Move to layer" value="" disabled={board.pending || Boolean(chalkDraft || stickyEditor)} onChange={(event) => {
             const layerId = event.currentTarget.value === 'base' ? null : event.currentTarget.value;
             void board.moveSelectionToLayer({ memberIds: visibleMembers.filter((member) => isSelected('member', member.id)).map(({ id }) => id),
-              visualIds: visibleVisuals.filter((visual) => isSelected('visual', visual.id)).map(({ id }) => id) }, layerId)
+              visualIds: visibleVisuals.filter((visual) => isSelected('visual', visual.id)).map(({ id }) => id),
+              stickyIds: visibleStickies.filter((sticky) => isSelected('sticky', sticky.id)).map(({ id }) => id) }, layerId)
               .then(() => surface.current?.focus());
           }}>
             <option value="" disabled>Choose layer</option>
@@ -1244,18 +1369,52 @@ export default function BoardPage() {
           </select>
         </label>}
       {selectedKeys.size > 1 && <button className={styles.button} onClick={() => { setSelection(null); surface.current?.focus(); }}>Clear selection</button>}
-      {selectedVisual?.visual_kind === 'sticky' && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)}
+      {selectedVisual?.visual_kind === 'sticky' && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft || stickyEditor)}
         onClick={() => { void castChalk(selectedVisual); }}>Cast to item</button>}
-      {selectedVisual && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} aria-pressed={selectedVisual.pinned}
+      {selectedVisual && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft || stickyEditor)} aria-pressed={selectedVisual.pinned}
         onClick={() => { void board.updateVisual(selectedVisual.id, { pinned: !selectedVisual.pinned }); }}>
         <Pin size={15} />{selectedVisual.pinned ? 'Unpin' : 'Pin'}
       </button>}
+      {selectedSticky && <>
+        <label className={styles.edgeStyleControl}>Width<select aria-label="Sticky width" value={selectedSticky.w} disabled={board.pending || Boolean(stickyEditor)}
+          onChange={(event) => {
+            const w = Number(event.target.value) as 240 | 416;
+            const card = surface.current?.querySelector<HTMLElement>(`[data-testid="board-sticky-${selectedSticky.id}"]`) ?? null;
+            const h = measureStickyWidth(card, w);
+            void board.updateSticky(selectedSticky.id, { w, ...(h ? { h } : {}) });
+          }}>
+          <option value={240}>Square</option><option value={416}>Wide</option></select></label>
+        <label className={styles.edgeStyleControl}>Weight<select aria-label="Sticky weight" value={selectedSticky.weight} disabled={board.pending || Boolean(stickyEditor)}
+          onChange={(event) => { void board.updateSticky(selectedSticky.id, { weight: Number(event.target.value) as 1 | 2 | 3 }); }}>
+          <option value={1}>Light</option><option value={2}>Medium</option><option value={3}>Heavy</option></select></label>
+        <label className={styles.edgeStyleControl}>Color<select aria-label="Sticky color" value={selectedSticky.color_index ?? 'neutral'} disabled={board.pending || Boolean(stickyEditor)}
+          onChange={(event) => { void board.updateSticky(selectedSticky.id, { color_index: event.target.value === 'neutral' ? null : 1 }); }}>
+          <option value="neutral">Neutral</option><option value={1}>Primary accent</option></select></label>
+        <button className={styles.button} disabled={board.pending || Boolean(stickyEditor)} onClick={() => setStickyEditor(selectedSticky.id)}>Edit sticky</button>
+        <button className={styles.button} disabled={board.pending || Boolean(stickyEditor)} aria-pressed={selectedSticky.pinned}
+          onClick={() => { void board.updateSticky(selectedSticky.id, { pinned: !selectedSticky.pinned }); }}><Pin size={15} />{selectedSticky.pinned ? 'Unpin' : 'Pin'}</button>
+      </>}
       {selectedEdge && <>
         <button className={styles.button} disabled={board.pending} onClick={() => editLabel(selectedEdge)}>Edit label</button>
-        {([{ value: 'none', label: 'No arrows' }, { value: 'forward', label: 'One-way' }, { value: 'both', label: 'Two-way' }] as const).map(({ value, label }) =>
+        {selectedEdge.visual_version !== 1 && ([{ value: 'none', label: 'No arrows' }, { value: 'forward', label: 'One-way' }, { value: 'both', label: 'Two-way' }] as const).map(({ value, label }) =>
           <button key={value} className={styles.button} disabled={board.pending}
             aria-pressed={(selectedEdge.style.direction || 'none') === value}
             onClick={() => { void board.updateEdge(selectedEdge.id, { style: { ...selectedEdge.style, direction: value } }); }}>{label}</button>)}
+        <label className={styles.edgeStyleControl}>Line weight<select aria-label="Line weight" value={selectedEdge.weight || 1} disabled={board.pending}
+          onChange={(event) => { void board.updateEdge(selectedEdge.id, { ...upgradeEdge(selectedEdge), weight: Number(event.target.value) as 1 | 2 | 3 }); }}>
+          <option value={1}>Light</option><option value={2}>Medium</option><option value={3}>Heavy</option></select></label>
+        <label className={styles.edgeStyleControl}>Line dash<select aria-label="Line dash" value={selectedEdge.dash || 'solid'} disabled={board.pending}
+          onChange={(event) => { void board.updateEdge(selectedEdge.id, { ...upgradeEdge(selectedEdge), dash: event.target.value as 'solid' | 'dashed' }); }}>
+          <option value="solid">Solid</option><option value="dashed">Dashed</option></select></label>
+        {(['start', 'end'] as const).map((side) => <label key={side} className={styles.edgeStyleControl}>{side === 'start' ? 'Start cap' : 'End cap'}
+          <select aria-label={side === 'start' ? 'Start cap' : 'End cap'} disabled={board.pending}
+            value={selectedEdge.visual_version === 1 ? selectedEdge[`cap_${side}`] || 'none' : (upgradeEdge(selectedEdge)[`cap_${side}`] || 'none')}
+            onChange={(event) => { void board.updateEdge(selectedEdge.id, { ...upgradeEdge(selectedEdge), [`cap_${side}`]: event.target.value }); }}>
+            <option value="none">None</option><option value="arrow">Arrow</option><option value="dot">Dot</option>
+          </select></label>)}
+        <button className={styles.button} disabled={board.pending || edgeEndpoint(selectedEdge, 'from')?.kind === 'point'} onClick={() => { void unbindEdge(selectedEdge, 'from'); }}>Unbind start</button>
+        <button className={styles.button} disabled={board.pending || edgeEndpoint(selectedEdge, 'to')?.kind === 'point'} onClick={() => { void unbindEdge(selectedEdge, 'to'); }}>Unbind end</button>
+        <button className={styles.button} disabled={board.pending} onClick={() => { void board.rerouteEdge(selectedEdge.id); }}>Reroute</button>
       </>}
       {selectedMember && <>
         <button className={styles.button} disabled={!selectedMember.reference.note_id || (selectedMember.member_kind !== 'text_range' && selectedMember.reference.state !== 'available')} onClick={() => { void openMember(selectedMember); }}><ExternalLink size={15} />Enter note</button>
@@ -1266,7 +1425,7 @@ export default function BoardPage() {
         <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.max(...visibleMembers.map((member) => member.z_index)) + 1 }); }}>Bring forward</button>
         <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.min(...visibleMembers.map((member) => member.z_index)) - 1 }); }}>Send back</button>
       </>}
-      <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selectedKeys.size > 1 ? 'Delete selected' : selection?.kind === 'member' ? 'Remove from board' : selection?.kind === 'edge' ? 'Delete connection' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
+      <button className={styles.button} disabled={board.pending || Boolean(chalkDraft || stickyEditor) || Boolean(stickyEditor)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selectedKeys.size > 1 ? 'Delete selected' : selection?.kind === 'member' ? 'Remove from board' : selection?.kind === 'edge' ? 'Delete connection' : selectedSticky ? 'Delete sticky' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
     </div>}
     {deleteKeys && (() => {
       const scope = deletionScope(deleteKeys, visibleDetail, detail.edges);

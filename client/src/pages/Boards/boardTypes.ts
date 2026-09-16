@@ -80,14 +80,51 @@ export interface BoardMember extends BoardGeometry {
   updated_at: string;
 }
 
-export interface BoardEdge {
+export type BoardEdgeAnchor = 'auto' | 'n' | 'e' | 's' | 'w';
+export type BoardEdgeEndpoint =
+  | { kind: 'member' | 'sticky'; id: string; anchor: BoardEdgeAnchor }
+  | { kind: 'point'; x: number; y: number };
+export type BoardLineWeight = 1 | 2 | 3;
+export type BoardEdgeCap = 'none' | 'arrow' | 'dot';
+
+/** Visual properties belong only to the board projection. */
+export interface BoardEdgeVisualProperties {
+  bend?: number;
+  dash?: 'solid' | 'dashed';
+  weight?: BoardLineWeight;
+  cap_start?: BoardEdgeCap;
+  cap_end?: BoardEdgeCap;
+  color_index?: 1 | null;
+  label_position?: number;
+}
+
+export interface BoardEdge extends BoardEdgeVisualProperties {
   id: string;
   board_id: string;
-  from_member_id: string;
-  to_member_id: string;
+  /** Legacy aliases, retained for older board snapshots and callers. */
+  from_member_id: string | null;
+  to_member_id: string | null;
+  from?: BoardEdgeEndpoint;
+  to?: BoardEdgeEndpoint;
+  /** Missing/0 retains the original straight-line rendering and style JSON. */
+  visual_version?: 0 | 1;
   style: BoardJsonObject;
   label: string | null;
   created_at: string;
+}
+
+/** Board-owned text, independent of notes, items and legacy chalk visuals. */
+export interface BoardSticky extends BoardGeometry {
+  id: string;
+  board_id: string;
+  text: string;
+  w: 240 | 416;
+  scale: 1;
+  color_index: 1 | null;
+  weight: BoardLineWeight;
+  layer_id?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export type BoardVisualKind = 'freehand' | 'shape' | 'image' | 'table' | 'connector' | 'sticky';
@@ -109,6 +146,8 @@ export interface BoardDetail {
   members: BoardMember[];
   edges: BoardEdge[];
   visuals: BoardVisual[];
+  /** Older snapshots omit this new board-resident family. */
+  stickies?: BoardSticky[];
   layers?: BoardLayer[];
 }
 
@@ -173,14 +212,27 @@ export interface MountBoardTextRangeInput extends Partial<BoardGeometry> {
   text_range: BoardTextRangeSelection;
 }
 
-export interface CreateBoardEdgeInput {
-  from_member_id: string;
-  to_member_id: string;
+export interface CreateBoardEdgeInput extends BoardEdgeVisualProperties {
+  from_member_id?: string | null;
+  to_member_id?: string | null;
+  from?: BoardEdgeEndpoint;
+  to?: BoardEdgeEndpoint;
+  visual_version?: 0 | 1;
   style?: BoardJsonObject;
   label?: string | null;
 }
 
 export type PatchBoardEdgeInput = Partial<CreateBoardEdgeInput>;
+
+export interface CreateBoardStickyInput extends Partial<Omit<BoardGeometry, 'scale' | 'w'>> {
+  text?: string;
+  w?: 240 | 416;
+  color_index?: 1 | null;
+  weight?: BoardLineWeight;
+  layer_id?: string | null;
+}
+
+export type PatchBoardStickyInput = Partial<CreateBoardStickyInput>;
 
 export interface CreateBoardVisualInput extends Partial<BoardGeometry> {
   layer_id?: string | null;

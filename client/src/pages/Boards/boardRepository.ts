@@ -11,12 +11,13 @@ import type { BoardViewportBookmark, CreateBoardViewportBookmarkInput } from '@s
 import type { ContentGroupV1, ItemV1, Note, NoteBlock } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
 import { textFromContent } from '@/pages/Notes/canvasEngine/blockContentService';
 import type {
-  Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual, BoardLayer,
+  Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual, BoardLayer, BoardSticky,
   CreateBoardInput, CreateBoardEdgeInput, CreateBoardVisualInput, MountBoardMemberInput,
   PatchBoardInput, PatchBoardMemberInput, PatchBoardEdgeInput, PatchBoardVisualInput,
   TrayRelocationResult,
   MountBoardTextRangeInput,
   CreateBoardLayerInput, PatchBoardLayerInput,
+  CreateBoardStickyInput, PatchBoardStickyInput,
 } from './boardTypes';
 
 export type { BoardCandidate } from './boardTypes';
@@ -101,6 +102,21 @@ export const boardRepository = {
   },
   async deleteEdge(boardId: string, id: string): Promise<void> {
     await api.delete(childPath(boardId, 'edges', id));
+  },
+  async rerouteEdge(boardId: string, id: string): Promise<BoardEdge> {
+    const { data } = await api.post<{ edge: BoardEdge }>(`${childPath(boardId, 'edges', id)}/reroute`, {});
+    return data.edge;
+  },
+  async createSticky(boardId: string, input: CreateBoardStickyInput): Promise<BoardSticky> {
+    const { data } = await api.post<{ sticky: BoardSticky }>(`${boardPath(boardId)}/stickies`, input);
+    return data.sticky;
+  },
+  async updateSticky(boardId: string, id: string, input: PatchBoardStickyInput): Promise<BoardSticky> {
+    const { data } = await api.patch<{ sticky: BoardSticky }>(childPath(boardId, 'stickies', id), input);
+    return data.sticky;
+  },
+  async deleteSticky(boardId: string, id: string): Promise<void> {
+    await api.delete(childPath(boardId, 'stickies', id));
   },
   async createVisual(boardId: string, input: CreateBoardVisualInput): Promise<BoardVisual> {
     const { data } = await api.post<{ visual: BoardVisual }>(`${boardPath(boardId)}/visuals`, input);

@@ -1,14 +1,14 @@
 import { boardRepository } from './boardRepository';
 import type {
-  BoardDetail, BoardEdge, BoardGeometry, BoardMember, BoardVisual,
+  BoardDetail, BoardEdge, BoardGeometry, BoardMember, BoardVisual, BoardSticky, BoardEdgeEndpoint,
   CreateBoardEdgeInput, CreateBoardVisualInput, PatchBoardEdgeInput,
-  PatchBoardMemberInput, PatchBoardVisualInput,
+  PatchBoardMemberInput, PatchBoardVisualInput, CreateBoardStickyInput, PatchBoardStickyInput,
 } from './boardTypes';
 
-type Kind = 'member' | 'edge' | 'visual';
-type Entity = BoardMember | BoardEdge | BoardVisual;
-type Snapshot = Entity | CreateBoardEdgeInput | CreateBoardVisualInput;
-type Patch = PatchBoardMemberInput | PatchBoardEdgeInput | PatchBoardVisualInput;
+type Kind = 'member' | 'edge' | 'visual' | 'sticky';
+type Entity = BoardMember | BoardEdge | BoardVisual | BoardSticky;
+type Snapshot = Entity | CreateBoardEdgeInput | CreateBoardVisualInput | CreateBoardStickyInput;
+type Patch = PatchBoardMemberInput | PatchBoardEdgeInput | PatchBoardVisualInput | PatchBoardStickyInput;
 type Direction = 'before' | 'after';
 interface Operation {
   kind: Kind;
@@ -19,7 +19,7 @@ interface Operation {
 }
 type Command = Operation[];
 export interface BoardGeometryChange {
-  kind: 'member' | 'visual';
+  kind: 'member' | 'visual' | 'sticky';
   id: string;
   input: Partial<BoardGeometry>;
 }
@@ -27,12 +27,16 @@ export interface BoardRemovalSelection {
   memberIds: string[];
   edgeIds: string[];
   visualIds: string[];
+  stickyIds?: string[];
 }
-export type BoardLayerSelection = Pick<BoardRemovalSelection, 'memberIds' | 'visualIds'>;
+export type BoardLayerSelection = Pick<BoardRemovalSelection, 'memberIds' | 'visualIds' | 'stickyIds'>;
 
 const geometryFields = ['x', 'y', 'w', 'h', 'scale', 'z_index', 'pinned'];
 const visualFields = [...geometryFields, 'layer_id', 'visual_kind', 'rotation', 'data', 'metadata'];
-const edgeFields = ['from_member_id', 'to_member_id', 'style', 'label'];
+const stickyFields = ['text', 'x', 'y', 'w', 'h', 'z_index', 'pinned', 'layer_id', 'color_index', 'weight'];
+const edgeFields = ['from_member_id', 'to_member_id', 'from', 'to', 'style', 'label', 'bend', 'dash', 'weight',
+  'cap_start', 'cap_end', 'color_index', 'label_position', 'visual_version'];
+const newEdgeFields = ['from', 'to', 'from_member_id', 'to_member_id', 'bend', 'dash', 'weight', 'cap_start', 'cap_end', 'color_index'];
 const otherDirection = (direction: Direction): Direction => direction === 'before' ? 'after' : 'before';
 function pick(value: Snapshot, fields: string[]): Record<string, unknown> {
   const record = value as unknown as Record<string, unknown>;
@@ -73,7 +77,8 @@ export class BoardCommandHistory {
 
   private entity(kind: Kind, id: string): Entity {
     const liveId = this.resolve(kind, id);
-    const items = kind === 'member' ? this.detail?.members : kind === 'edge' ? this.detail?.edges : this.detail?.visuals;
+    const items = kind === 'member' ? this.detail?.members : kind === 'edge' ? this.detail?.edges
+      : kind === 'sticky' ? this.detail?.stickies : this.detail?.visuals;
     const entity = items?.find((item) => item.id === liveId);
     if (!entity) throw new Error('Board object is no longer present');
     return entity;
@@ -91,7 +96,23 @@ export class BoardCommandHistory {
     };
     this.detail = kind === 'member' ? { ...this.detail, members: update(this.detail.members) }
       : kind === 'edge' ? { ...this.detail, edges: update(this.detail.edges) }
+        : kind === 'sticky' ? { ...this.detail, stickies: update(this.detail.stickies ?? []) }
         : { ...this.detail, visuals: update(this.detail.visuals) };
+  }
+
+  private resolveEdgeInput(input: Record<string, unknown>) {
+    for (const side of ['from', 'to'] as const) {
+      const endpoint = input[side] as BoardEdgeEndpoint | undefined;
+      if (endpoint && endpoint.kind !== 'point') {
+        input[side] = { ...endpoint, id: this.resolve(endpoint.kind, endpoint.id) };
+        // Canonical endpoints take precedence over legacy aliases.
+        delete input[`${side}_member_id`];
+      } else if (endpoint?.kind === 'point') delete input[`${side}_member_id`];
+      else if (typeof input[`${side}_member_id`] === 'string') {
+        input[`${side}_member_id`] = this.resolve('member', input[`${side}_member_id`] as string);
+      }
+    }
+    return input;
   }
 
   private async step(boardId: string, operation: Operation, direction: Direction) {
@@ -102,15 +123,22 @@ export class BoardCommandHistory {
     if (target === null) {
       if (!id) throw new Error('Board history has no live object');
       if (operation.kind === 'visual') await boardRepository.deleteVisual(boardId, id);
+      else if (operation.kind === 'sticky') await boardRepository.deleteSticky(boardId, id);
       else if (operation.kind === 'edge') await boardRepository.deleteEdge(boardId, id);
       else throw new Error('Member mounting is outside board history');
     } else if (origin === null) {
       if (operation.kind === 'visual') {
         saved = await boardRepository.createVisual(boardId, pick(target, visualFields) as unknown as CreateBoardVisualInput);
+      } else if (operation.kind === 'sticky') {
+        saved = await boardRepository.createSticky(boardId, pick(target, stickyFields) as CreateBoardStickyInput);
       } else if (operation.kind === 'edge') {
-        const input = pick(target, edgeFields) as unknown as CreateBoardEdgeInput;
-        input.from_member_id = this.resolve('member', input.from_member_id);
-        input.to_member_id = this.resolve('member', input.to_member_id);
+        const input = this.resolveEdgeInput(pick(target, edgeFields)) as CreateBoardEdgeInput;
+        // A pre-v1 snapshot has no visual version or bend. Recreating it must
+        // not acquire the server's new-edge routing or style defaults.
+        if ('id' in target && !('visual_version' in target)) {
+          input.visual_version = 0;
+          input.bend = 0;
+        }
         saved = await boardRepository.createEdge(boardId, input);
       } else throw new Error('Member mounting is outside board history');
     } else {
@@ -118,10 +146,9 @@ export class BoardCommandHistory {
       const input = pick(target, operation.fields!);
       if (operation.kind === 'member') saved = await boardRepository.updateMember(boardId, id, input);
       else if (operation.kind === 'visual') saved = await boardRepository.updateVisual(boardId, id, input);
+      else if (operation.kind === 'sticky') saved = await boardRepository.updateSticky(boardId, id, input);
       else {
-        if (typeof input.from_member_id === 'string') input.from_member_id = this.resolve('member', input.from_member_id);
-        if (typeof input.to_member_id === 'string') input.to_member_id = this.resolve('member', input.to_member_id);
-        saved = await boardRepository.updateEdge(boardId, id, input);
+        saved = await boardRepository.updateEdge(boardId, id, this.resolveEdgeInput(input));
       }
     }
     if (saved) {
@@ -175,10 +202,18 @@ export class BoardCommandHistory {
   private patchOperation(kind: Kind, id: string, input: Patch): Operation | null {
     const entity = this.entity(kind, id);
     // Legacy DTOs omit layer_id. Undo must explicitly PATCH null to restore Base.
-    const before = kind === 'edge' ? entity : { ...entity, layer_id: (entity as BoardMember | BoardVisual).layer_id ?? null };
-    const fields = Object.keys(input).filter((field) => field !== 'placed'
+    const before = kind === 'edge' ? {
+      bend: 0, dash: 'solid', weight: 1, cap_start: 'none', cap_end: 'none', color_index: null,
+      label_position: 0.5, visual_version: 0, ...entity,
+      from: (entity as BoardEdge).from ?? { kind: 'member', id: (entity as BoardEdge).from_member_id, anchor: 'auto' },
+      to: (entity as BoardEdge).to ?? { kind: 'member', id: (entity as BoardEdge).to_member_id, anchor: 'auto' },
+    } as BoardEdge : { ...entity, layer_id: (entity as BoardMember | BoardVisual | BoardSticky).layer_id ?? null };
+    const fields = Object.keys(input).filter((field) => field !== 'placed' && !(kind === 'sticky' && field === 'scale')
       && JSON.stringify((before as unknown as Record<string, unknown>)[field]) !== JSON.stringify((input as Record<string, unknown>)[field]));
-    return fields.length ? { kind, key: this.key(kind, id), before, after: { ...before, ...input }, fields } : null;
+    const promote = kind === 'edge' && fields.some((field) => newEdgeFields.includes(field)) && !('visual_version' in input);
+    if (promote && !fields.includes('visual_version')) fields.push('visual_version');
+    return fields.length ? { kind, key: this.key(kind, id), before,
+      after: { ...before, ...input, ...(promote ? { visual_version: 1 } : {}) }, fields } : null;
   }
 
   async patch(boardId: string, kind: Kind, id: string, input: Patch) {
@@ -198,7 +233,7 @@ export class BoardCommandHistory {
   async updateGeometryBatch(boardId: string, changes: BoardGeometryChange[]) {
     const command: Command = [];
     for (const change of changes) {
-      const current = this.entity(change.kind, change.id) as BoardMember | BoardVisual;
+      const current = this.entity(change.kind, change.id) as BoardMember | BoardVisual | BoardSticky;
       if (current.pinned) continue;
       const operation = this.patchOperation(change.kind, change.id, change.input);
       if (operation) command.push(operation);
@@ -208,8 +243,8 @@ export class BoardCommandHistory {
 
   async moveSelectionToLayer(boardId: string, selection: BoardLayerSelection, layerId: string | null) {
     const command: Command = [];
-    for (const kind of ['member', 'visual'] as const) {
-      const ids = kind === 'member' ? selection.memberIds : selection.visualIds;
+    for (const kind of ['member', 'visual', 'sticky'] as const) {
+      const ids = kind === 'member' ? selection.memberIds : kind === 'sticky' ? selection.stickyIds ?? [] : selection.visualIds;
       for (const id of new Set(ids)) {
         // Pinning restricts geometry gestures, not an object's layer membership.
         const operation = this.patchOperation(kind, id, { layer_id: layerId });
@@ -235,12 +270,25 @@ export class BoardCommandHistory {
       layers: (this.detail.layers ?? []).filter((layer) => layer.id !== layerId),
       members: this.detail.members.map(rehome),
       visuals: this.detail.visuals.map(rehome),
+      stickies: this.detail.stickies?.map(rehome),
     };
   }
 
-  async create(boardId: string, kind: 'edge' | 'visual', input: CreateBoardEdgeInput | CreateBoardVisualInput) {
+  async create(boardId: string, kind: 'edge' | 'visual' | 'sticky', input: CreateBoardEdgeInput | CreateBoardVisualInput | CreateBoardStickyInput) {
     const key = `${kind}:new:${++this.sequence}`;
     await this.commit(boardId, [{ kind, key, before: null, after: input }]);
+    return this.entity(kind, this.live.get(key)!);
+  }
+
+  async rerouteEdge(boardId: string, edgeId: string) {
+    const before = this.entity('edge', edgeId) as BoardEdge;
+    const saved = await boardRepository.rerouteEdge(boardId, before.id);
+    this.replace('edge', before.id, saved);
+    this.past = [...this.past, [{ kind: 'edge' as const, key: this.key('edge', before.id),
+      before: { ...before, bend: before.bend ?? 0, visual_version: before.visual_version ?? 0,
+        cap_start: before.cap_start ?? 'none', cap_end: before.cap_end ?? 'none' }, after: saved,
+      fields: ['bend', 'visual_version', 'cap_start', 'cap_end'] }]].slice(-80);
+    this.future = [];
   }
 
   /** Irreversible removals trim only affected operations, retaining unrelated parts of a gesture. */
@@ -248,7 +296,9 @@ export class BoardCommandHistory {
     const keys = new Set(ids.map((id) => this.key(kind, id)));
     const memberIds = new Set(kind === 'member' ? ids.map((id) => this.resolve(kind, id)) : []);
     const keep = (operation: Operation) => !keys.has(operation.key) && ![operation.before, operation.after].some((value) =>
-      value && 'from_member_id' in value && (memberIds.has(value.from_member_id) || memberIds.has(value.to_member_id)));
+      value && 'from_member_id' in value && (
+        (value.from_member_id != null && memberIds.has(value.from_member_id))
+        || (value.to_member_id != null && memberIds.has(value.to_member_id))));
     this.past = this.past.map((command) => command.filter(keep)).filter((command) => command.length > 0);
     this.future = this.future.map((command) => command.filter(keep)).filter((command) => command.length > 0);
   }
@@ -258,14 +308,23 @@ export class BoardCommandHistory {
     const memberSet = new Set(members);
     const edges = [...new Set(selection.edgeIds.map((id) => this.resolve('edge', id)))];
     const visuals = [...new Set(selection.visualIds.map((id) => this.resolve('visual', id)))];
+    const stickies = [...new Set((selection.stickyIds ?? []).map((id) => this.resolve('sticky', id)))];
+    const stickySet = new Set(stickies);
+    const onMember = (edge: BoardEdge) => (edge.from_member_id !== null && memberSet.has(edge.from_member_id))
+      || (edge.to_member_id !== null && memberSet.has(edge.to_member_id));
+    const onSticky = (edge: BoardEdge) => [edge.from, edge.to].some((endpoint) =>
+      endpoint?.kind === 'sticky' && stickySet.has(this.resolve('sticky', endpoint.id)));
+    // Delete all sticky incident edges before their cards; undo recreates cards first.
+    for (const edge of this.detail?.edges ?? []) if (onSticky(edge) && !edges.includes(edge.id)) edges.push(edge.id);
     const command: Command = [];
     for (const id of edges) {
       const before = this.entity('edge', id) as BoardEdge;
-      if (!memberSet.has(before.from_member_id) && !memberSet.has(before.to_member_id)) {
+      if (!onMember(before)) {
         command.push({ kind: 'edge', key: this.key('edge', id), before, after: null });
       }
     }
     for (const id of visuals) command.push({ kind: 'visual', key: this.key('visual', id), before: this.entity('visual', id), after: null });
+    for (const id of stickies) command.push({ kind: 'sticky', key: this.key('sticky', id), before: this.entity('sticky', id), after: null });
     // Each successful unmount remains irreversible even if a later request fails.
     // Its incident edges (including unselected ones) disappear through the same
     // existing cascade as single-member deletion and never enter the command.

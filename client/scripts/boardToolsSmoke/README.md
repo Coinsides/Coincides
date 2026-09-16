@@ -8,6 +8,9 @@ Vite environment loading is disabled. No application backend or database is used
 - Group sample: marquee all three objects, drag; the pinned card stays. Undo once. Shift-click toggles selection.
 - Mixed sample: select A, its horizontal edge and the drawing with Shift. Delete confirmation counts one card, both connected edges (including the unselected diagonal edge), and one drawing. Undo restores only the drawing.
 - Reopen saved board remounts the page against the same memory data and clears history.
+- Visual v1 sample: three sticky weights with neutral/primary colors, anchored arcs, independent caps, dashed stroke, and horizontal labels with real path gaps. Light theme/Dark theme switches only this synthetic page.
+- Add sticky, enter long multiline text, then change Square/Wide: inspect the saved height and card anchors. Drag an arc's bend, endpoints, and label; a simple label click must not write. Alt suppresses endpoint snapping; Reroute is explicit.
 - Synthetic saved state exposes fixture geometry, IDs, writes and simulated events for inspection. The existing server route suite separately verifies real cascade and `unmounted` behavior with its isolated database.
 
 The six automated workflows live in `src/pages/Boards/BoardPage.tools.test.tsx` and share this transport.
+Visual v1 workflows live in `src/pages/Boards/BoardPage.visualV1.test.tsx` and share the same transport.

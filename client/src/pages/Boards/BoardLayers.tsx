@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Eye, EyeOff, GripVertical, Plus, Trash2, X } from 'lucide-react';
-import { BOARD_LAYER_LIMIT, type BoardLayer, type BoardMember, type BoardVisual, type PatchBoardLayerInput } from './boardTypes';
+import { BOARD_LAYER_LIMIT, type BoardLayer, type BoardMember, type BoardVisual, type BoardSticky, type PatchBoardLayerInput } from './boardTypes';
 import styles from './BoardLayers.module.css';
 
 interface BoardLayersProps {
   layers: BoardLayer[];
   members: BoardMember[];
   visuals: BoardVisual[];
+  stickies?: BoardSticky[];
   activeLayerId: string | null;
   baseVisible: boolean;
   pending: boolean;
@@ -21,7 +22,7 @@ interface BoardLayersProps {
 }
 
 export function BoardLayers({
-  layers, members, visuals, activeLayerId, baseVisible, pending, onSelectLayer,
+  layers, members, visuals, stickies = [], activeLayerId, baseVisible, pending, onSelectLayer,
   onBaseVisibleChange, onCreateLayer, onUpdateLayer, onReorderLayers, onDeleteLayer, onClose,
 }: BoardLayersProps) {
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export function BoardLayers({
   const renameSaving = useRef(false);
   const ordered = [...layers].sort((a, b) => b.order_index - a.order_index);
   const deletingLayer = layers.find((layer) => layer.id === deletingId);
-  const objectCount = (layerId: string | null) => [...members, ...visuals]
+  const objectCount = (layerId: string | null) => [...members, ...visuals, ...stickies]
     .filter((object) => (object.layer_id ?? null) === layerId).length;
 
   useEffect(() => {

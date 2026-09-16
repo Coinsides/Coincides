@@ -15,6 +15,10 @@ import type {
   PatchBoardMemberInput,
   PatchBoardEdgeInput,
   PatchBoardVisualInput,
+  CreateBoardStickyInput,
+  PatchBoardStickyInput,
+  BoardEdgeVisualProperties,
+  BoardSticky,
 } from './boardTypes';
 
 interface BoardScope {
@@ -44,6 +48,7 @@ export function useBoard(boardId: string | undefined) {
   const alive = useRef(false);
   const queue = useRef<Promise<void>>(Promise.resolve());
   const saveFailure = useRef<{ scope: BoardScope; message: string } | null>(null);
+  const lastEdgeStyle = useRef<BoardEdgeVisualProperties>({});
   const [state, setState] = useState<BoardState>({
     scope: null, detail: null, loadingCount: 0, pendingCount: 0, error: null,
   });
@@ -188,7 +193,11 @@ export function useBoard(boardId: string | undefined) {
   ), [enqueue, scope]);
 
   const addEdge = useCallback((input: CreateBoardEdgeInput) => enqueue(
-    (id) => scope.history.create(id, 'edge', input),
+    async (id) => {
+      const withStyle = { ...lastEdgeStyle.current, ...input };
+      await scope.history.create(id, 'edge', withStyle);
+      lastEdgeStyle.current = rememberedEdgeStyle(withStyle);
+    },
     (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
@@ -200,9 +209,33 @@ export function useBoard(boardId: string | undefined) {
   ), [enqueue, scope]);
 
   const updateEdge = useCallback((edgeId: string, input: PatchBoardEdgeInput) => enqueue(
-    (id) => scope.history.patch(id, 'edge', edgeId, input),
+    async (id) => {
+      await scope.history.patch(id, 'edge', edgeId, input);
+      const edge = scope.history.detail?.edges.find((candidate) => candidate.id === scope.history.resolve('edge', edgeId));
+      if (edge) lastEdgeStyle.current = rememberedEdgeStyle(edge);
+    },
     (detail) => detail,
     'write', scope,
+  ), [enqueue, scope]);
+
+  const rerouteEdge = useCallback((edgeId: string) => enqueue(
+    (id) => scope.history.rerouteEdge(id, edgeId), (detail) => detail, 'write', scope,
+  ), [enqueue, scope]);
+
+  const addSticky = useCallback(async (input: CreateBoardStickyInput): Promise<BoardSticky | null> => {
+    let created: BoardSticky | null = null;
+    await enqueue((id) => scope.history.create(id, 'sticky', input), (detail, value) => {
+      created = value as BoardSticky;
+      return detail;
+    }, 'write', scope);
+    return created;
+  }, [enqueue, scope]);
+  const updateSticky = useCallback((stickyId: string, input: PatchBoardStickyInput) => enqueue(
+    (id) => scope.history.patch(id, 'sticky', stickyId, input), (detail) => detail, 'write', scope,
+  ), [enqueue, scope]);
+  const removeSticky = useCallback((stickyId: string) => enqueue(
+    (id) => scope.history.removeSelection(id, { memberIds: [], edgeIds: [], visualIds: [], stickyIds: [stickyId] }),
+    (detail) => detail, 'write', scope,
   ), [enqueue, scope]);
 
   const addVisual = useCallback((input: CreateBoardVisualInput) => enqueue(
@@ -279,5 +312,12 @@ export function useBoard(boardId: string | undefined) {
     addVisual, removeVisual, updateVisual, castVisual, updateEdge, clearError, flush,
     updateGeometryBatch, removeSelection, removeVisuals, undo, redo,
     createLayer, updateLayer, reorderLayers, deleteLayer, moveSelectionToLayer,
+    addSticky, updateSticky, removeSticky, rerouteEdge,
   };
+}
+
+/** Only presentation axes have inertia: never inherit bend, anchors or label position. */
+function rememberedEdgeStyle(edge: BoardEdgeVisualProperties): BoardEdgeVisualProperties {
+  return { dash: edge.dash ?? 'solid', weight: edge.weight ?? 1,
+    cap_start: edge.cap_start ?? 'none', cap_end: edge.cap_end ?? 'none', color_index: edge.color_index ?? null };
 }

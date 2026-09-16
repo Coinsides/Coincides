@@ -104,6 +104,8 @@ img {
   --text-muted: #777a82;
   --text-inverse: #0a0a0f;
 
+
+
   /* Accent */
   --accent-primary: #2563eb;
   --accent-primary-hover: #3b82f6;
@@ -166,6 +168,8 @@ img {
   --text-muted: #7a828e;
   --text-inverse: #ffffff;
 
+
+
   --accent-primary-bg: rgba(37, 99, 235, 0.08);
   --accent-primary-bg-hover: rgba(37, 99, 235, 0.14);
 
@@ -181,6 +185,63 @@ img {
   --glass-shadow-lg: 0 18px 48px rgba(18, 24, 38, 0.12);
   --orb-primary: transparent;
   --orb-secondary: transparent;
+}
+
+/* Re-resolve role aliases at the board skin scope as well as the app theme. */
+:root, [data-board-skin-preset] {
+  /* Board visual v1: roles derive from this same theme, never a second palette. */
+  --board-line-1: var(--border-subtle);
+  --board-line-2: var(--text-muted);
+  --board-line-3: var(--text-secondary);
+  --board-line-width-1: 1.5;
+  --board-line-width-2: 2.25;
+  --board-line-width-3: 3.375;
+  --board-sticky-neutral-fill: var(--bg-elevated);
+  --board-sticky-border: var(--border-default);
+  --board-sticky-text: var(--text-primary);
+  --board-sticky-medium-fill: var(--bg-hover);
+  --board-sticky-medium-border: var(--text-muted);
+  --board-sticky-strong-fill: var(--text-secondary);
+  --board-sticky-strong-text: var(--text-inverse);
+  --board-accent-1-line: var(--accent-primary);
+  --board-accent-1-fill: var(--accent-primary-bg);
+  --board-accent-1-text: var(--text-primary);
+  --board-accent-1-on-solid: var(--text-primary);
+  --board-binding-preview: var(--accent-primary-bg-hover);
+  --board-anchor-fill: var(--bg-elevated);
+  --board-anchor-stroke: var(--accent-primary);
+  --board-label-text: var(--text-secondary);
+  --board-sticky-font-size: 16px;
+  --board-sticky-line-height: 24px;
+  --board-label-font-size: 12px;
+  --board-label-line-height: 16px;
+}
+[data-theme='light'], [data-theme='light'] [data-board-skin-preset] {
+  --board-line-1: var(--border-subtle);
+  --board-line-2: var(--text-muted);
+  --board-line-3: var(--text-secondary);
+  --board-line-width-1: 1.5;
+  --board-line-width-2: 2.25;
+  --board-line-width-3: 3.375;
+  --board-sticky-neutral-fill: var(--bg-elevated);
+  --board-sticky-border: var(--border-default);
+  --board-sticky-text: var(--text-primary);
+  --board-sticky-medium-fill: var(--bg-hover);
+  --board-sticky-medium-border: var(--text-muted);
+  --board-sticky-strong-fill: var(--text-secondary);
+  --board-sticky-strong-text: var(--text-inverse);
+  --board-accent-1-line: var(--accent-primary);
+  --board-accent-1-fill: var(--accent-primary-bg);
+  --board-accent-1-text: var(--text-primary);
+  --board-accent-1-on-solid: var(--text-inverse);
+  --board-binding-preview: var(--accent-primary-bg-hover);
+  --board-anchor-fill: var(--bg-elevated);
+  --board-anchor-stroke: var(--accent-primary);
+  --board-label-text: var(--text-secondary);
+  --board-sticky-font-size: 16px;
+  --board-sticky-line-height: 24px;
+  --board-label-font-size: 12px;
+  --board-label-line-height: 16px;
 }
 
 /* --- Scrollbar --- */

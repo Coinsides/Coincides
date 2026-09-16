@@ -14,6 +14,9 @@ import {
   updateBoardEdgeSchema,
   createBoardVisualSchema,
   updateBoardVisualSchema,
+  createBoardStickySchema,
+  updateBoardStickySchema,
+  type BoardEdgeEndpoint,
   createBoardLayerSchema,
   updateBoardLayerSchema,
   reorderBoardLayersSchema,
@@ -25,6 +28,7 @@ import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from '.
 import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
 import { createBoardIdentityItem, createItem } from './items.js';
 import { parseStoredSkin, serializeSkin } from './skin.js';
+import { boardEdgeEndpoints, routeBoardEdge } from './boardVisualGeometry.js';
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
 type JsonObject = Record<string, unknown>;
@@ -68,11 +72,35 @@ interface BoardMemberRow extends GeometryRow {
 interface BoardEdgeRow {
   id: string;
   board_id: string;
-  from_member_id: string;
-  to_member_id: string;
+  from_member_id: string | null;
+  to_member_id: string | null;
+  from_sticky_id: string | null;
+  to_sticky_id: string | null;
+  from_x: number | null;
+  from_y: number | null;
+  to_x: number | null;
+  to_y: number | null;
+  from_anchor: 'auto' | 'n' | 'e' | 's' | 'w';
+  to_anchor: 'auto' | 'n' | 'e' | 's' | 'w';
+  bend: number;
+  dash: 'solid' | 'dashed';
+  weight: 1 | 2 | 3;
+  cap_start: 'none' | 'arrow' | 'dot';
+  cap_end: 'none' | 'arrow' | 'dot';
+  color_index: 1 | null;
+  label_position: number;
+  visual_version: 0 | 1;
   style: string;
   label: string | null;
   created_at: string;
+}
+
+interface BoardStickyRow {
+  id: string; board_id: string; text: string;
+  x: number; y: number; w: 240 | 416; h: number;
+  color_index: 1 | null; weight: 1 | 2 | 3;
+  layer_id: string | null; z_index: number; pinned: number;
+  created_at: string; updated_at: string;
 }
 
 interface BoardLayerRow {
@@ -170,7 +198,19 @@ function validateLayer(db: Database.Database, userId: string, boardId: string, l
 }
 
 function hydrateEdge(row: BoardEdgeRow) {
-  return { ...row, style: json<JsonObject>(row.style) };
+  return { ...row, style: json<JsonObject>(row.style), from: edgeEndpoint(row, 'from'), to: edgeEndpoint(row, 'to') };
+}
+
+function edgeEndpoint(row: BoardEdgeRow, end: 'from' | 'to'): BoardEdgeEndpoint {
+  const member = row[`${end}_member_id`];
+  const sticky = row[`${end}_sticky_id`];
+  if (member != null) return { kind: 'member', id: member, anchor: row[`${end}_anchor`] };
+  if (sticky != null) return { kind: 'sticky', id: sticky, anchor: row[`${end}_anchor`] };
+  return { kind: 'point', x: row[`${end}_x`]!, y: row[`${end}_y`]! };
+}
+
+function hydrateSticky(row: BoardStickyRow) {
+  return { ...row, scale: 1 as const, pinned: row.pinned === 1 };
 }
 
 function hydrateVisual(row: BoardVisualRow) {
@@ -256,6 +296,7 @@ export type BoardMember = ReturnType<typeof hydrateMember>;
 export type BoardEdge = ReturnType<typeof hydrateEdge>;
 export type BoardVisual = ReturnType<typeof hydrateVisual>;
 export type BoardLayer = ReturnType<typeof hydrateLayer>;
+export type BoardSticky = ReturnType<typeof hydrateSticky>;
 
 export function listBoardLayers(db: Database.Database, userId: string, boardId: string): BoardLayer[] {
   boardRow(db, userId, boardId);
@@ -311,9 +352,11 @@ export function deleteBoardLayer(db: Database.Database, userId: string, boardId:
     .run(now, boardId, layerId).changes;
   const visuals = db.prepare('UPDATE board_visuals SET layer_id = NULL, updated_at = ? WHERE board_id = ? AND layer_id = ?')
     .run(now, boardId, layerId).changes;
+  const stickies = db.prepare('UPDATE board_stickies SET layer_id = NULL, updated_at = ? WHERE board_id = ? AND layer_id = ?')
+    .run(now, boardId, layerId).changes;
   db.prepare('DELETE FROM board_layers WHERE id = ? AND board_id = ? AND user_id = ?').run(layerId, boardId, userId);
   touchBoard(db, boardId);
-  return { removed: true, moved_count: members + visuals };
+  return { removed: true, moved_count: members + visuals + stickies };
 }
 
 export function createBoard(db: Database.Database, userId: string, value: unknown) {
@@ -351,7 +394,9 @@ export function getBoard(db: Database.Database, userId: string, boardId: string)
     .all(boardId) as BoardEdgeRow[]).map(hydrateEdge);
   const visuals = (db.prepare('SELECT * FROM board_visuals WHERE board_id = ? ORDER BY z_index, created_at, id')
     .all(boardId) as BoardVisualRow[]).map(hydrateVisual);
-  return { board, members, edges, visuals, layers: listBoardLayers(db, userId, boardId) };
+  const stickies = (db.prepare('SELECT * FROM board_stickies WHERE board_id = ? ORDER BY z_index, created_at, id')
+    .all(boardId) as BoardStickyRow[]).map(hydrateSticky);
+  return { board, members, edges, visuals, stickies, layers: listBoardLayers(db, userId, boardId) };
 }
 
 export function updateBoard(db: Database.Database, userId: string, boardId: string, value: unknown): Board {
@@ -377,8 +422,9 @@ export function deleteBoard(db: Database.Database, userId: string, boardId: stri
   const counts = db.prepare(`SELECT
     (SELECT COUNT(*) FROM board_members WHERE board_id = ?) AS member_count,
     (SELECT COUNT(*) FROM board_edges WHERE board_id = ?) AS edge_count,
-    (SELECT COUNT(*) FROM board_visuals WHERE board_id = ?) AS visual_count
-  `).get(boardId, boardId, boardId) as { member_count: number; edge_count: number; visual_count: number };
+    (SELECT COUNT(*) FROM board_visuals WHERE board_id = ?) AS visual_count,
+    (SELECT COUNT(*) FROM board_stickies WHERE board_id = ?) AS sticky_count
+  `).get(boardId, boardId, boardId, boardId) as { member_count: number; edge_count: number; visual_count: number; sticky_count: number };
   // Capture impact before removing endpoints. Only the board's owned rows go;
   // the soul, referenced content and historical relocation batches survive.
   // The identity retires in this same transaction. Keep all Item and Relation history.
@@ -480,8 +526,45 @@ export function unmountBoardMember(db: Database.Database, userId: string, boardI
   return { member, removed: true };
 }
 
-function ensureEdgeMembers(db: Database.Database, boardId: string, from: string, to: string): void {
-  if (!memberRow(db, boardId, from) || !memberRow(db, boardId, to)) throw new AppError(404, 'board_edge_member_not_found');
+function stickyRow(db: Database.Database, boardId: string, stickyId: string): BoardStickyRow | undefined {
+  return db.prepare('SELECT * FROM board_stickies WHERE id = ? AND board_id = ?')
+    .get(stickyId, boardId) as BoardStickyRow | undefined;
+}
+
+function endpointGeometry(db: Database.Database, boardId: string, endpoint: BoardEdgeEndpoint) {
+  if (endpoint.kind === 'point') return { x: endpoint.x, y: endpoint.y };
+  const card = endpoint.kind === 'member'
+    ? memberRow(db, boardId, endpoint.id) : stickyRow(db, boardId, endpoint.id);
+  if (!card) throw new AppError(404, `board_edge_${endpoint.kind}_not_found`);
+  const scale = 'scale' in card ? card.scale : 1;
+  return { x: card.x, y: card.y, w: card.w * scale, h: card.h * scale, radius: 8 * scale };
+}
+
+function routedBend(db: Database.Database, boardId: string, from: BoardEdgeEndpoint, to: BoardEdgeEndpoint,
+  capStart: BoardEdgeRow['cap_start'], capEnd: BoardEdgeRow['cap_end']): number {
+  const endpoints = boardEdgeEndpoints(endpointGeometry(db, boardId, from), endpointGeometry(db, boardId, to), {
+    fromAnchor: from.kind === 'point' ? 'auto' : from.anchor,
+    toAnchor: to.kind === 'point' ? 'auto' : to.anchor, capStart, capEnd,
+  });
+  const hiddenLayers = new Set((db.prepare('SELECT id FROM board_layers WHERE board_id = ? AND visible = 0')
+    .all(boardId) as Array<{ id: string }>).map((layer) => layer.id));
+  const viewport = json<{ base_layer_visible?: boolean }>((db.prepare('SELECT viewport FROM boards WHERE id = ?')
+    .get(boardId) as { viewport: string }).viewport);
+  const obstacles = [
+    ...(db.prepare('SELECT * FROM board_members WHERE board_id = ? AND placed = 1').all(boardId) as BoardMemberRow[])
+      .map((card) => ({ ...card, kind: 'member', w: card.w * card.scale, h: card.h * card.scale })),
+    ...(db.prepare('SELECT * FROM board_stickies WHERE board_id = ?').all(boardId) as BoardStickyRow[])
+      .map((card) => ({ ...card, kind: 'sticky' })),
+  ].filter((card) => (card.layer_id == null ? viewport.base_layer_visible !== false : !hiddenLayers.has(card.layer_id))
+    && ![from, to].some((endpoint) => endpoint.kind !== 'point' && endpoint.kind === card.kind && endpoint.id === card.id))
+    .map(({ x, y, w, h }) => ({ x, y, w, h }));
+  return routeBoardEdge(endpoints.start, endpoints.end, obstacles);
+}
+
+function endpointColumns(endpoint: BoardEdgeEndpoint) {
+  return [endpoint.kind === 'member' ? endpoint.id : null, endpoint.kind === 'sticky' ? endpoint.id : null,
+    endpoint.kind === 'point' ? endpoint.x : null, endpoint.kind === 'point' ? endpoint.y : null,
+    endpoint.kind === 'point' ? 'auto' : endpoint.anchor];
 }
 
 function edgeRow(db: Database.Database, boardId: string, edgeId: string): BoardEdgeRow | undefined {
@@ -492,11 +575,22 @@ export function createBoardEdge(db: Database.Database, userId: string, boardId: 
   requireTransaction(db);
   const input = parse(createBoardEdgeSchema, value);
   boardRow(db, userId, boardId);
-  ensureEdgeMembers(db, boardId, input.from_member_id, input.to_member_id);
+  const from: BoardEdgeEndpoint = input.from ?? { kind: 'member', id: input.from_member_id!, anchor: 'auto' };
+  const to: BoardEdgeEndpoint = input.to ?? { kind: 'member', id: input.to_member_id!, anchor: 'auto' };
+  endpointGeometry(db, boardId, from);
+  endpointGeometry(db, boardId, to);
+  const capStart = input.cap_start ?? 'none';
+  const capEnd = input.cap_end ?? 'none';
+  const bend = input.bend ?? (input.visual_version === 0 ? 0 : routedBend(db, boardId, from, to, capStart, capEnd));
   const id = uuidv4();
-  db.prepare(`INSERT INTO board_edges (id, board_id, from_member_id, to_member_id, style, label, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(id, boardId, input.from_member_id, input.to_member_id,
-    JSON.stringify(input.style ?? {}), input.label ?? null, new Date().toISOString());
+  db.prepare(`INSERT INTO board_edges (id, board_id,
+    from_member_id, from_sticky_id, from_x, from_y, from_anchor,
+    to_member_id, to_sticky_id, to_x, to_y, to_anchor,
+    bend, dash, weight, cap_start, cap_end, color_index, label_position, visual_version, style, label, created_at)
+    VALUES (${Array(23).fill('?').join(',')})`).run(id, boardId, ...endpointColumns(from), ...endpointColumns(to),
+    bend, input.dash ?? 'solid', input.weight ?? 1, capStart, capEnd, input.color_index ?? null,
+    input.label_position ?? 0.5, input.visual_version ?? 1, JSON.stringify(input.style ?? {}),
+    input.label ?? null, new Date().toISOString());
   touchBoard(db, boardId);
   return hydrateEdge(edgeRow(db, boardId, id)!);
 }
@@ -507,14 +601,95 @@ export function updateBoardEdge(db: Database.Database, userId: string, boardId: 
   boardRow(db, userId, boardId);
   const row = edgeRow(db, boardId, edgeId);
   if (!row) throw new AppError(404, 'board_edge_not_found');
-  const from = input.from_member_id ?? row.from_member_id;
-  const to = input.to_member_id ?? row.to_member_id;
-  ensureEdgeMembers(db, boardId, from, to);
-  db.prepare(`UPDATE board_edges SET from_member_id = ?, to_member_id = ?, style = ?, label = ? WHERE id = ? AND board_id = ?`)
-    .run(from, to, input.style ? JSON.stringify(input.style) : row.style,
+  const from: BoardEdgeEndpoint = input.from ?? (input.from_member_id === undefined ? edgeEndpoint(row, 'from')
+    : { kind: 'member', id: input.from_member_id, anchor: 'auto' });
+  const to: BoardEdgeEndpoint = input.to ?? (input.to_member_id === undefined ? edgeEndpoint(row, 'to')
+    : { kind: 'member', id: input.to_member_id, anchor: 'auto' });
+  endpointGeometry(db, boardId, from);
+  endpointGeometry(db, boardId, to);
+  const visualChange = ['from', 'to', 'from_member_id', 'to_member_id', 'bend', 'dash', 'weight',
+    'cap_start', 'cap_end', 'color_index'].some((key) => Object.prototype.hasOwnProperty.call(input, key));
+  db.prepare(`UPDATE board_edges SET
+    from_member_id = ?, from_sticky_id = ?, from_x = ?, from_y = ?, from_anchor = ?,
+    to_member_id = ?, to_sticky_id = ?, to_x = ?, to_y = ?, to_anchor = ?,
+    bend = ?, dash = ?, weight = ?, cap_start = ?, cap_end = ?, color_index = ?,
+    label_position = ?, visual_version = ?, style = ?, label = ? WHERE id = ? AND board_id = ?`)
+    .run(...endpointColumns(from), ...endpointColumns(to), input.bend ?? row.bend, input.dash ?? row.dash,
+      input.weight ?? row.weight, input.cap_start ?? row.cap_start, input.cap_end ?? row.cap_end,
+      input.color_index === undefined ? row.color_index : input.color_index,
+      input.label_position ?? row.label_position, input.visual_version ?? (visualChange ? 1 : row.visual_version),
+      input.style ? JSON.stringify(input.style) : row.style,
       input.label === undefined ? row.label : input.label, edgeId, boardId);
   touchBoard(db, boardId);
   return hydrateEdge(edgeRow(db, boardId, edgeId)!);
+}
+
+export function rerouteBoardEdge(db: Database.Database, userId: string, boardId: string, edgeId: string): BoardEdge {
+  requireTransaction(db);
+  boardRow(db, userId, boardId);
+  const row = edgeRow(db, boardId, edgeId);
+  if (!row) throw new AppError(404, 'board_edge_not_found');
+  // Reroute opts legacy lines into the new renderer. Preserve their visible
+  // direction markers while computing the new arrow-tip gaps and arc.
+  const direction = json<JsonObject>(row.style).direction;
+  const capStart = row.visual_version === 0 ? (direction === 'both' ? 'arrow' : 'none') : row.cap_start;
+  const capEnd = row.visual_version === 0 ? (direction === 'forward' || direction === 'both' ? 'arrow' : 'none') : row.cap_end;
+  return updateBoardEdge(db, userId, boardId, edgeId, {
+    cap_start: capStart,
+    cap_end: capEnd,
+    bend: routedBend(db, boardId, edgeEndpoint(row, 'from'), edgeEndpoint(row, 'to'), capStart, capEnd),
+  });
+}
+
+/** Plain-text fallback matches fixed font sizing; the UI can refine measured height. */
+function stickyTextHeight(text: string, width: number): number {
+  // Fixed 16px padding plus the 1px border on each side, in border-box units.
+  const columns = Math.max(1, Math.floor((width - 34) / 16));
+  const lines = text.split('\n').reduce((total, line) => total + Math.max(1, Math.ceil(Array.from(line).length / columns)), 0);
+  return Math.max(width === 240 ? 240 : 120, lines * 24 + 34);
+}
+
+export function createBoardSticky(db: Database.Database, userId: string, boardId: string, value: unknown): BoardSticky {
+  requireTransaction(db);
+  const input = parse(createBoardStickySchema, value);
+  boardRow(db, userId, boardId);
+  validateLayer(db, userId, boardId, input.layer_id);
+  const id = uuidv4();
+  const now = new Date().toISOString();
+  const width = input.w ?? 240;
+  db.prepare(`INSERT INTO board_stickies (id,board_id,text,x,y,w,h,color_index,weight,layer_id,z_index,pinned,created_at,updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(id, boardId, input.text ?? '', input.x ?? 0, input.y ?? 0,
+    width, input.h ?? stickyTextHeight(input.text ?? '', width), input.color_index ?? null, input.weight ?? 1,
+    input.layer_id ?? null, input.z_index ?? 0, input.pinned ? 1 : 0, now, now);
+  touchBoard(db, boardId);
+  return hydrateSticky(stickyRow(db, boardId, id)!);
+}
+
+export function updateBoardSticky(db: Database.Database, userId: string, boardId: string, stickyId: string, value: unknown): BoardSticky {
+  requireTransaction(db);
+  const input = parse(updateBoardStickySchema, value);
+  boardRow(db, userId, boardId);
+  const row = stickyRow(db, boardId, stickyId);
+  if (!row) throw new AppError(404, 'board_sticky_not_found');
+  validateLayer(db, userId, boardId, input.layer_id);
+  const width = input.w ?? row.w;
+  const text = input.text ?? row.text;
+  const height = input.h ?? ((input.text !== undefined || input.w !== undefined) ? stickyTextHeight(text, width) : row.h);
+  db.prepare(`UPDATE board_stickies SET text=?,x=?,y=?,w=?,h=?,color_index=?,weight=?,layer_id=?,z_index=?,pinned=?,updated_at=?
+    WHERE id=? AND board_id=?`).run(text, input.x ?? row.x, input.y ?? row.y, width, height,
+    input.color_index === undefined ? row.color_index : input.color_index, input.weight ?? row.weight,
+    input.layer_id === undefined ? row.layer_id : input.layer_id, input.z_index ?? row.z_index,
+    input.pinned === undefined ? row.pinned : Number(input.pinned), new Date().toISOString(), stickyId, boardId);
+  touchBoard(db, boardId);
+  return hydrateSticky(stickyRow(db, boardId, stickyId)!);
+}
+
+export function deleteBoardSticky(db: Database.Database, userId: string, boardId: string, stickyId: string): boolean {
+  requireTransaction(db);
+  boardRow(db, userId, boardId);
+  const changed = db.prepare('DELETE FROM board_stickies WHERE id = ? AND board_id = ?').run(stickyId, boardId).changes > 0;
+  if (changed) touchBoard(db, boardId);
+  return changed;
 }
 
 export function deleteBoardEdge(db: Database.Database, userId: string, boardId: string, edgeId: string): boolean {

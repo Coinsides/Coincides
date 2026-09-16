@@ -33,6 +33,31 @@ const visual: BoardVisual = {
 beforeEach(() => vi.resetAllMocks());
 
 describe('board HTTP repository', () => {
+  it('round-trips independent board sticky CRUD through escaped board routes', async () => {
+    const sticky = { id: 'sticky/a', board_id: 'board/a', text: 'A board thought', x: 12, y: 34,
+      w: 240, h: 120, color_index: null, weight: 1 };
+    const input = { text: sticky.text, x: sticky.x, y: sticky.y };
+    api.post.mockResolvedValueOnce({ data: { sticky } });
+    expect(await boardRepository.createSticky('board/a', input)).toBe(sticky);
+    expect(api.post).toHaveBeenLastCalledWith('/boards/board%2Fa/stickies', input);
+    api.patch.mockResolvedValueOnce({ data: { sticky: { ...sticky, text: 'Revised' } } });
+    expect((await boardRepository.updateSticky('board/a', 'sticky/a', { text: 'Revised' })).text).toBe('Revised');
+    expect(api.patch).toHaveBeenLastCalledWith('/boards/board%2Fa/stickies/sticky%2Fa', { text: 'Revised' });
+    await boardRepository.deleteSticky('board/a', 'sticky/a');
+    expect(api.delete).toHaveBeenLastCalledWith('/boards/board%2Fa/stickies/sticky%2Fa');
+  });
+
+  it('sends polymorphic visual endpoints and explicitly reroutes only on request', async () => {
+    const input = { from: { kind: 'sticky' as const, id: 's1', anchor: 'e' as const },
+      to: { kind: 'point' as const, x: 400, y: 80 }, cap_end: 'arrow' as const, weight: 2 as const };
+    api.post.mockResolvedValueOnce({ data: { edge } });
+    await boardRepository.createEdge('board/a', input);
+    expect(api.post).toHaveBeenLastCalledWith('/boards/board%2Fa/edges', input);
+    api.post.mockResolvedValueOnce({ data: { edge: { ...edge, bend: 140 } } });
+    expect((await boardRepository.rerouteEdge('board/a', 'edge/a')).bend).toBe(140);
+    expect(api.post).toHaveBeenLastCalledWith('/boards/board%2Fa/edges/edge%2Fa/reroute', {});
+  });
+
   it('relocates only placement identities and undoes the server batch without client snapshots', async () => {
     const receipt = { board_id: 'board/a', batch_id: 'batch/b', placement_ids: ['placement-1'],
       visual_ids: ['visual-1'], member_ids: [], applied: true,

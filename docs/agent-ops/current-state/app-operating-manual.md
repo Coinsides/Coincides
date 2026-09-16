@@ -10,7 +10,7 @@
 
 - **Project(course)**:一切的家。笔记/材料/源/目标/任务/卡组都挂在某个 project 下;
 - **Note(笔记)**:一张纸=**块(blocks)的序列**。块经 placement 排序落页,纸面渲染由布局引擎投影。**title+description 只是封面信息,⛔是笔记内容**;
-- **Board(板)**:思考桌面,纯投影域。三种居民:members(引用 note/content_group/item)、edges(带 label 连线)、visuals(形状等装饰);板必须有 soul(purpose);
+- **Board(板)**:思考桌面,纯投影域。居民包括 members(引用 note/content_group/item/text_range)、stickies(板内便签)、edges(带 label 视觉连线)、visuals(粉笔/形状等装饰);板必须有 soul(purpose)。视觉线不写 Relation;
 - **两座内容库(⚠️互不相通)**:**材料库(documents)**——`/documents/upload` 进,Note Proposal 生成、Agent 的 search_documents/get_document_content 吃这里;**Source Library(sources)**——`/sources/upload` 进,引用源/imprint/重投影世界吃这里。**chat Agent 今天检索不到 Source Library 的内容**(已实锤的割裂,修法候拍);
 - **Deck/Card**:卡组挂 project;卡=知识内容,**创建唯一通道=提案**(create_card 已退役);
 - **提案(proposal)**:Agent 对人说话的信道。pending→人 apply/discard;待处理提案在 **Agent 面板头部「提案」收件箱**可见,显示计数、类型摘要、chat/材料来源与时间,逐条处理;材料三型(material_map/organized_note/material_reconciliation)的 CourseDetail 既有面保留;
@@ -40,9 +40,16 @@
 
 - 建板 `POST /api/boards {title, purpose:{title}}`(soul 必须有);
 - 上件 `POST /api/boards/:id/members {member_kind:'note'|'content_group'|'item', member_id, x,y,w,h}`;
-- 连线 `POST /api/boards/:id/edges {from_member_id, to_member_id, label}`;
+- **铺概念图用便签,⛔每节点一笔记**:短概念、草拟分类直接住板上;有正文价值的内容集中写成图例笔记再挂板。便签不进材料库、不是 Item、不能被 ContentGroup 引用;本版没有转正为笔记入口。旧粉笔仍保留其原操作;
+- **便签 UI**:板工具栏「Add sticky」创建中性方签,双击或「Edit sticky」编辑,换行保留,「Save sticky」/Ctrl+Enter 保存,Escape 取消编辑。正文固定 16px/Medium、随文字纵向长高。选中后 Width=Square(240)/Wide(416)、Weight=Light/Medium/Heavy、Color=Neutral/Primary accent;轻档始终中性,中档浅底描边,重档实底反衬。可拖动、钉住、移图层、删除及撤销,删除同时移除相连的板视觉线;
+- **便签 API**:`POST /api/boards/:id/stickies {text,x,y,w:240|416,h?,color_index:null|1,weight:1|2|3,layer_id?}`;`PATCH/DELETE /api/boards/:id/stickies/:stickyId`。纯文本上限 12000 字符,`h` 缺省时按内容估高,UI 保存时传实测高度;内容只存 `board_stickies`;
+- **连线 UI**:「Connect」依次选两张 member/便签卡;或从悬停/选中卡的四边中点把手拖出一条线,从把手起笔固定该锚。选中线可拖单个弯度手柄(bend=0 即直)、拖两端重新绑定;靠近卡片有淡轮廓预告、靠近把手有吸附,按 Alt 拖端点不吸附。「Unbind start/end」显式解绑,已绑定端随卡移动;
+- **线样式**:Line dash=Solid/Dashed,Line weight=1/2/3,Start cap/End cap 各 None/Arrow/Dot。中性线三档分别用 `--board-line-1/2/3`(border-subtle/text-muted/text-secondary),线宽 1.5/2.25/3.375,粗线也更深,端点色随线色;新线沿用当前会话上一条线的样式。新建时只计算一次避让(非端点卡+16px呼吸边距),无挡默认微弯;移动卡后不自动重算,「Reroute」显式重算一次;
+- **连线 API**:`POST /api/boards/:id/edges {from:{kind:'member'|'sticky',id,anchor:'auto'|'n'|'e'|'s'|'w'},to:{kind:'member'|'sticky',id,anchor:'auto'|'n'|'e'|'s'|'w'},label?,bend?,dash?,weight?,cap_start?,cap_end?,color_index?,label_position?}`。自由端为 `{kind:'point',x,y}`。旧 `{from_member_id,to_member_id,label}` 请求仍可用。更新/删除=`PATCH/DELETE /edges/:edgeId`;重新取道=`POST /edges/:edgeId/reroute`。`GET /boards/:id` 含 `stickies`。新边 `visual_version=1`;迁移旧边 `visual_version=0,bend=0` 保持原直线、原方向及样式,显式改新视觉轴/端点/取道才升级;
+- **标签**:双击线身即建/即编,纯文本可换行、约120px折行、水平显示;Ctrl+Enter/「Save label」保存。拖标签沿弧滑动,近中点吸回;存储 `label_position` 为 0–1,默认0.5。新线绘制跳过标签矩形内线段,不垫底色;
+- **排版体检器**:内部纯函数 `inspectBoardLayout({cards,edges})` 接收板坐标下的卡矩形、线折线采样与标签矩形,报告标签×卡、标签×标签、线穿非端点卡、超阈值卡×卡、近平行线重叠及坐标/严重度。只诊断不阻断操作,本单未接 UI/Agent 消费者;画面仍需人工检查。固定端点被其他卡覆盖时,单圆弧可能没有可避开的路径;
 - 装饰 `POST /api/boards/:id/visuals {visual_kind:'shape', w,h, data:{}}`;
-- 边界:板是投影——摆错零真相损失;别把板当存储。
+- 边界:板摆放不改来源正文;便签正文与视觉线仅属板域,不携存储语义关系、不接 `relations`。Agent 的板写动词和新版 `read_board` 消费面不在此版接入范围。
 
 ## 五 · Agent 能力边界表(给 Agent 的自我说明,也给操作者预期管理)
 

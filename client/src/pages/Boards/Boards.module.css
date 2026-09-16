@@ -57,6 +57,7 @@
 .edgeEditor { pointer-events: auto; overflow: visible; }
 .edgeEditor form { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 4px; padding: 4px; }
 .edgeEditor input { width: 100%; }
+.edgeEditor textarea { width: 100%; min-height: 60px; resize: vertical; padding: 6px; border: 1px solid var(--border-default); background: var(--bg-surface); }
 .boardMenu { position: relative; }
 .boardMenu summary { padding: 8px; cursor: pointer; color: var(--text-secondary); font-size: 12px; }
 .boardMenuContent { position: absolute; top: 100%; right: 0; z-index: 70; width: 288px; max-width: calc(100vw - 32px); max-height: calc(100vh - 120px); overflow: auto; padding: 12px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 6px; }
@@ -113,9 +114,32 @@
 .selectedLine { stroke: var(--accent-primary-hover); stroke-width: 3; }
 .lineHit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
 .lineHit:focus-visible { stroke: var(--accent-primary-bg); outline: none; }
-.edgeLabel { fill: var(--board-chalk, var(--text-primary)); font-size: 12px; text-anchor: middle; }
+.edgeLabel { fill: var(--board-chalk, var(--text-primary)); font-size: 12px; text-anchor: middle; pointer-events: auto; cursor: grab; user-select: none; }
 .member { position: absolute; padding: 16px; transform-origin: 0 0; background: var(--board-card, var(--bg-surface)); border: 1px solid var(--border-default); border-radius: 8px; cursor: grab; user-select: none; }
 .member:active { cursor: grabbing; }
+.stickyCard { position: absolute; padding: 16px; border: 1px solid var(--board-sticky-border); border-radius: 8px; background: var(--board-sticky-neutral-fill); color: var(--board-sticky-text); cursor: grab; user-select: none; }
+.stickyCard p, .stickyCard textarea { width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--board-sticky-font-size); line-height: var(--board-sticky-line-height); font-weight: 500; }
+.stickyCard textarea { display: block; resize: none; overflow: hidden; cursor: text; }
+.stickyCard[data-weight='2'] { background: var(--board-sticky-medium-fill); border-color: var(--board-sticky-medium-border); }
+.stickyCard[data-weight='3'] { background: var(--board-sticky-strong-fill); color: var(--board-sticky-strong-text); border-color: var(--board-sticky-strong-fill); }
+.stickyCard[data-accent='primary'][data-weight='2'] { background: var(--board-accent-1-fill); border-color: var(--board-accent-1-line); color: var(--board-accent-1-text); }
+.stickyCard[data-accent='primary'][data-weight='3'] { background: var(--board-accent-1-line); border-color: var(--board-accent-1-line); color: var(--board-accent-1-on-solid); }
+.stickyEditActions { position: absolute; top: calc(100% + 4px); left: 0; min-width: 240px; padding: 4px; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 6px; cursor: default; z-index: 1; }
+.stickyEditActions span { display: block; font-size: 12px; }
+[data-binding-preview='true'] { outline: 5px solid var(--board-binding-preview); outline-offset: 3px; }
+.cardAnchor { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--board-anchor-fill); border: 1px solid var(--board-anchor-stroke); opacity: 0; z-index: 2; cursor: crosshair; touch-action: none; }
+.cardAnchor[data-anchor='n'] { top: -7px; left: calc(50% - 7px); }
+.cardAnchor[data-anchor='e'] { right: -7px; top: calc(50% - 7px); }
+.cardAnchor[data-anchor='s'] { bottom: -7px; left: calc(50% - 7px); }
+.cardAnchor[data-anchor='w'] { left: -7px; top: calc(50% - 7px); }
+.member:hover .cardAnchor, .member:focus-within .cardAnchor, .stickyCard:hover .cardAnchor, .stickyCard:focus-within .cardAnchor, .selected .cardAnchor { opacity: .5; }
+.cardAnchor:hover, .cardAnchor:focus-visible, .cardAnchor[data-binding-anchor='true'] { opacity: 1 !important; transform: scale(1.5); }
+.arcLine { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.arcLabel { fill: var(--board-label-text); font-size: var(--board-label-font-size); text-anchor: middle; pointer-events: auto; cursor: grab; user-select: none; }
+.edgeHandle { fill: var(--board-anchor-fill); stroke: var(--board-anchor-stroke); stroke-width: 1.5; pointer-events: all; cursor: grab; }
+.edgeHandle:active { cursor: grabbing; }
+.edgeStyleControl { display: inline-flex; align-items: center; gap: 5px; padding: 0 6px; font-size: 12px; color: var(--text-secondary); }
+.edgeStyleControl select { border: 1px solid var(--border-default); border-radius: 4px; background: var(--bg-surface); padding: 5px; color: var(--text-primary); }
 .selected { border-color: var(--accent-primary-hover); outline: 1px solid var(--accent-primary-hover); }
 .member.selectionHighlight, .chalk.selectionHighlight, .selectionHighlight > .visualContent {
   outline: 3px solid var(--accent-primary-hover); outline-offset: 3px;

@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { FileText, Image, Layers, Minus, Pencil, Quote, Square, Table2, Type, X, type LucideIcon } from 'lucide-react';
 import { selectionKey, type BoardSelection } from './boardSelection';
+import { boardEndpoint, boardEndpointObject } from './boardEdgeGeometry';
 import type { BoardDetail, BoardMember, BoardVisual } from './boardTypes';
 import styles from './BoardSelectionSidebar.module.css';
 
 interface BoardSelectionSidebarProps {
-  detail: Pick<BoardDetail, 'members' | 'visuals' | 'edges'>;
+  detail: Pick<BoardDetail, 'members' | 'visuals' | 'edges' | 'stickies'>;
   selectedKeys: Set<string>;
   strokeOrder: Map<string, number>;
   highlightedKey: string | null;
@@ -16,8 +17,8 @@ interface BoardSelectionSidebarProps {
 }
 
 type SelectionRow = { selection: BoardSelection; key: string; title: string; kind: string; Icon: LucideIcon };
-type GroupName = 'Cards' | 'Chalk' | 'Strokes' | 'Connections' | 'Objects';
-const groupNames: GroupName[] = ['Cards', 'Chalk', 'Strokes', 'Connections', 'Objects'];
+type GroupName = 'Cards' | 'Stickies' | 'Chalk' | 'Strokes' | 'Connections' | 'Objects';
+const groupNames: GroupName[] = ['Cards', 'Stickies', 'Chalk', 'Strokes', 'Connections', 'Objects'];
 const memberKinds = {
   note: { label: 'Note', Icon: FileText },
   content_group: { label: 'Group', Icon: Layers },
@@ -65,6 +66,9 @@ export function BoardSelectionSidebar({ detail, selectedKeys, strokeOrder, highl
     const { label, Icon } = memberKinds[member.member_kind];
     append('Cards', { kind: 'member', id: member.id }, memberTitle(member), label, Icon);
   }
+  for (const sticky of detail.stickies ?? []) {
+    append('Stickies', { kind: 'sticky', id: sticky.id }, text(sticky.text) || 'Sticky', 'Sticky', Type);
+  }
   let strokeIndex = 0;
   for (const visual of detail.visuals) {
     const selection = { kind: 'visual' as const, id: visual.id };
@@ -80,11 +84,12 @@ export function BoardSelectionSidebar({ detail, selectedKeys, strokeOrder, highl
       append('Objects', selection, objectTitle(visual), visual.visual_kind, Icon);
     }
   }
-  const members = new Map(detail.members.map((member) => [member.id, member]));
   for (const edge of detail.edges) {
-    const from = members.get(edge.from_member_id);
-    const to = members.get(edge.to_member_id);
-    const title = text(edge.label) || (from && to ? `${memberTitle(from)} → ${memberTitle(to)}` : 'Connection');
+    const endpointTitle = (side: 'from' | 'to') => {
+      const object = boardEndpointObject(boardEndpoint(edge, side), detail);
+      return object ? ('member_kind' in object ? memberTitle(object) : text(object.text) || 'Sticky') : 'Free point';
+    };
+    const title = text(edge.label) || `${endpointTitle('from')} → ${endpointTitle('to')}`;
     append('Connections', { kind: 'edge', id: edge.id }, title, 'Connection', Minus);
   }
   const count = [...groups.values()].reduce((total, rows) => total + rows.length, 0);

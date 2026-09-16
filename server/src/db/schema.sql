@@ -1361,6 +1361,9 @@ CREATE TABLE IF NOT EXISTS board_edges (
   FOREIGN KEY (board_id, from_member_id) REFERENCES board_members(board_id, id) ON DELETE CASCADE,
   FOREIGN KEY (board_id, to_member_id) REFERENCES board_members(board_id, id) ON DELETE CASCADE
 );
+-- Migration 078 owns the polymorphic edge rebuild and board_stickies table.
+-- Startup keeps this legacy definition so databases with pre-078 edges can open
+-- before migration replaces their NOT NULL member columns and foreign keys.
 CREATE INDEX IF NOT EXISTS idx_board_edges_from ON board_edges(board_id, from_member_id);
 CREATE INDEX IF NOT EXISTS idx_board_edges_to ON board_edges(board_id, to_member_id);
 

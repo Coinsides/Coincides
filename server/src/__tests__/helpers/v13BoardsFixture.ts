@@ -9,6 +9,7 @@ interface FixtureOptions {
   beforeLayersMigration?: boolean;
   beforeTextSaveRevisionMigration?: boolean;
   beforeIdentityMigration?: boolean;
+  beforeBoardVisualMigration?: boolean;
 }
 
 /** Real schema/migrations in a disposable connection, without app startup or seed. */
@@ -59,6 +60,7 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
       if (options.beforeLayersMigration && file >= '062_') continue;
       if (options.beforeTextSaveRevisionMigration && file >= '063_') continue;
       if (options.beforeIdentityMigration && file >= '065_') continue;
+      if (options.beforeBoardVisualMigration && file >= '078_') continue;
       const { default: migration } = await import(new URL(file, directory).href) as {
         default: { up: (connection: Database.Database) => void };
       };
