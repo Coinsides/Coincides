@@ -46,6 +46,11 @@
   touch-action: none;
 }
 
+.pageViewport {
+  width: min(100%, calc(max(180px, 100dvh - 320px) * var(--cover-aspect-ratio)));
+  margin-inline: auto;
+}
+
 .status {
   position: absolute;
   inset: 0;

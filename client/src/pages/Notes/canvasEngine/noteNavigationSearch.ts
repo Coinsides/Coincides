@@ -19,7 +19,7 @@ export interface NoteNavigationSearchInput {
   paperHeader?: { titleDraft: string; descriptionDraft: string };
   noteCanvasRuntime: Pick<NoteCanvasRuntimeModel,
     'pageFrames' | 'blockFragmentProjections' | 'coordinateContract'>
-    & Partial<Pick<NoteCanvasRuntimeModel, 'blockPlacements'>>;
+    & Partial<Pick<NoteCanvasRuntimeModel, 'blockPlacements' | 'pageFrameExtensions'>>;
   pageOffsetX?: number;
 }
 
@@ -32,13 +32,17 @@ export interface NoteNavigationResult {
   match: string;
   after: string;
   frameId: string;
-  /** One-based mechanical page positions, shared with Page overview. */
+  /** Content starts at one; the optional cover has mechanical position zero. */
   pageNumbers: number[];
   /** First visible fragment in reading coordinates; header navigation uses the existing header DOM. */
   rect: CanvasRect;
 }
 
 function loadedBlockText(block: NoteBlock, input: NoteNavigationSearchInput): string {
+  if (block.block_type === 'note_ref') {
+    return block.content_json.field === 'description'
+      ? input.paperHeader?.descriptionDraft ?? '' : input.paperHeader?.titleDraft ?? '';
+  }
   // Item references own a separately loaded projection; their identifiers are not paper text.
   if (block.block_type === 'item_ref' || block.block_type === 'media') return '';
   const draftText = input.blockTextDrafts[block.id];
@@ -70,7 +74,8 @@ export function buildNoteNavigationResults(
   if (!needle) return [];
   const matcher = new RegExp(needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
   const { pageFrames, blockFragmentProjections, coordinateContract, blockPlacements = [] } = input.noteCanvasRuntime;
-  const pageNumbers = new Map(pageFrames.map((frame, index) => [frame.id, index + 1]));
+  const extensions = new Map(input.noteCanvasRuntime.pageFrameExtensions?.map((extension) => [extension.frameId, extension]) || []);
+  const pageNumbers = new Map(pageFrames.map((frame, index) => [frame.id, extensions.get(frame.id)?.mechanicalPageNumber ?? index + 1]));
   const placements = new Map(blockPlacements.map((placement) => [placement.blockId, placement]));
   const fragmentsByBlock = new Map<string, PageStackBlockFragmentProjection[]>();
   for (const fragment of blockFragmentProjections) {
@@ -98,7 +103,7 @@ export function buildNoteNavigationResults(
     }
   };
   const firstPage = pageFrames[0];
-  if (input.paperHeader && firstPage) {
+  if (input.paperHeader && firstPage && ![...extensions.values()].some((extension) => extension.isCover)) {
     appendMatches([input.paperHeader.titleDraft, input.paperHeader.descriptionDraft].join('\n'), {
       noteId: input.noteId, target: 'header', blockId: null,
       frameId: firstPage.id, pageNumbers: [1],

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { mergeRuntimeNoteBlockTemplateMetadata } from './templateDefinitions.js';
 import { assertItemRefBlockContent } from './itemRefBlocks.js';
+import { assertNoteRefCreation, noteRefCreationOverrides } from './noteCoverRules.js';
 import { assertMediaBlockAsset, mediaBlockAssetId } from './mediaBlocks.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import type { ManagedFileTask } from './managedFileCleanup.js';
@@ -430,6 +431,8 @@ export function createClientNoteBlock(
       };
     }
 
+    const existingReference = assertNoteRefCreation(db, userId, noteId, data);
+    if (existingReference) return { status: 'applied', created: false, block: existingReference };
     assertItemRefBlockContent(db, userId, data);
     assertMediaBlockAsset(db, userId, data);
     const blockId = uuidv4();
@@ -439,7 +442,7 @@ export function createClientNoteBlock(
     const title = data.title || null;
     const plainText = data.plain_text || null;
     const metadata = stringifyJson(
-      data.block_type === 'item_ref' ? (data.metadata || {}) : mergeRuntimeNoteBlockTemplateMetadata(
+      ['item_ref', 'note_ref'].includes(data.block_type) ? (data.metadata || {}) : mergeRuntimeNoteBlockTemplateMetadata(
         db,
         userId,
         data.metadata,
@@ -447,7 +450,8 @@ export function createClientNoteBlock(
       ).metadata,
       {},
     );
-    const displayOverrides = stringifyJson(stripLegacyLayoutOverride(data.display_overrides_json), {});
+    const displayOverrides = stringifyJson(noteRefCreationOverrides(db, userId, noteId, data.block_type,
+      stripLegacyLayoutOverride(data.display_overrides_json)), {});
     const sourceReferences = data.source_references || [];
     validateSourceReferences(db, userId, courseId, sourceReferences);
 

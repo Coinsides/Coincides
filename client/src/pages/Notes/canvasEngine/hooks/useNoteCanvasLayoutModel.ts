@@ -66,6 +66,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 
 export interface UseNoteCanvasFrameModelOptions {
   bindingSettings?: import('@shared/types/noteBinding').NoteBindingSettings | null;
+  noteTruth?: { title: string; description: string | null };
   pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan;
   notePagePreset?: string;
   coordinateContract?: CoordinateContract;
@@ -181,6 +182,7 @@ export function useNoteCanvasResolvedLayoutModel({
 
 export function useNoteCanvasFrameModel({
   bindingSettings,
+  noteTruth,
   pageFlowPlan,
   notePagePreset,
   blockLayouts,
@@ -343,6 +345,8 @@ export function useNoteCanvasFrameModel({
 
   const exportPreview = useMemo(() => {
     return buildExportPreviewModel(visibleBlocks, blockLayouts, {
+      bindingSettings,
+      noteTruth,
       pageFlowPlan,
       pageFrames: noteCanvasRuntime.pageFrames,
       pageStacks: noteCanvasRuntime.pageStacks,
@@ -350,7 +354,7 @@ export function useNoteCanvasFrameModel({
       primaryPageFrameId: noteCanvasRuntime.primaryPageFrame?.id || null,
       documentTypography: documentTypographyProfile,
     });
-  }, [pageFlowPlan, visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
+  }, [pageFlowPlan, bindingSettings, noteTruth, visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
 
   return {
     canvasBlockPlacements,

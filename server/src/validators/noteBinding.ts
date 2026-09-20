@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { NoteBindingSettings } from '../../../shared/types/noteBinding.js';
+import { noteCoverFrameSchema } from './noteCover.js';
 
 const slotNameSchema = z.enum([
   'header-left', 'header-center', 'header-right',
@@ -37,12 +38,20 @@ const sectionSchema = z.object({
   }).strict(),
 }).strict();
 
-export const noteBindingSettingsSchema: z.ZodType<NoteBindingSettings> = z.object({
-  version: z.literal(1),
+const settingsShape = {
   enabled: z.boolean(),
   dropFolioOnCover: z.boolean(),
   sections: z.array(sectionSchema).min(1).max(1000),
-}).strict().superRefine((settings, context) => {
+};
+
+export const noteBindingSettingsSchema: z.ZodType<NoteBindingSettings> = z.discriminatedUnion('version', [
+  z.object({ version: z.literal(1), ...settingsShape }).strict(),
+  z.object({ version: z.literal(2), ...settingsShape,
+    coverPage: z.object({ frameId: z.string().min(1).max(220).nullable(), exportIncluded: z.boolean() }).strict(),
+    cover: z.object({ assetId: z.string().min(1), card: noteCoverFrameSchema.optional(), page: noteCoverFrameSchema.optional() })
+      .strict().refine((cover) => Boolean(cover.card || cover.page), 'A cover requires at least one viewport').nullable(),
+  }).strict(),
+]).superRefine((settings, context) => {
   const ids = new Set<string>();
   settings.sections.forEach((section, index) => {
     if ((index === 0 && section.startPage !== 1)
@@ -60,4 +69,5 @@ export const noteBindingSettingsSchema: z.ZodType<NoteBindingSettings> = z.objec
 
 export const updateNoteBindingSettingsSchema = z.object({
   binding_settings: noteBindingSettingsSchema.nullable(),
+  collection: z.record(z.unknown()).optional(),
 }).strict();

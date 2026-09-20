@@ -62,6 +62,7 @@ import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
 import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
+import { NoteRefBlockProjection } from '../blocks/NoteRefBlockProjection';
 import { MediaBlockProjection, MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
@@ -239,6 +240,7 @@ export function BlockEditorLayer({
   const aiVisibility = getEffectiveAIVisibility(layout);
   const presentationKind = presentationKindForBlock(block);
   const itemReference = block.block_type === 'item_ref';
+  const noteReference = block.block_type === 'note_ref';
   const mediaBlock = block.block_type === 'media';
   const allowTextNavigation = !contentReadOnly && !layoutMode && supportsTextFlowBlockNavigation(block);
   useLayoutEffect(() => {
@@ -272,7 +274,7 @@ export function BlockEditorLayer({
   const formulaFields = presentationKind === 'formula'
     ? formulaFieldsFromBlock(block, fieldDraft ? text : undefined, fieldDraft)
     : null;
-  const blockTypeLabel = itemReference ? 'REFERENCED ITEM' : presentationKind === 'code'
+  const blockTypeLabel = noteReference ? (block.content_json.field === 'description' ? '述名件' : '题名件') : itemReference ? 'REFERENCED ITEM' : presentationKind === 'code'
     ? 'CODE'
     : getNoteBlockTemplateLabel(block.metadata, block.block_type);
   const showContextualTypeBadge = active || showBlockTypeBadge;
@@ -467,9 +469,9 @@ export function BlockEditorLayer({
         saving={saving}
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
-        bodyReadOnly={itemReference || mediaBlock}
+        bodyReadOnly={itemReference || noteReference || mediaBlock}
         onBeginMove={onBeginMove}
-        onInsertTextUnitBelow={!itemReference && !mediaBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
+        onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}
@@ -521,7 +523,9 @@ export function BlockEditorLayer({
           onFocusReleased(receipt);
         }}
       >
-        {mediaBlock ? (
+          {noteReference ? (
+            <NoteRefBlockProjection field={block.content_json.field === 'description' ? 'description' : 'title'} readOnly={contentReadOnly || layoutMode} />
+          ) : mediaBlock ? (
           mediaPlaceholder ? <MediaBlockPlaceholder block={block} /> : <MediaBlockProjection block={block} />
         ) : itemReference ? (
           <ItemRefBlockProjection itemId={typeof block.content_json.item_id === 'string' ? block.content_json.item_id : ''} />

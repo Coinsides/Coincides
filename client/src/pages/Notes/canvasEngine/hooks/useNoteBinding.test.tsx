@@ -6,6 +6,20 @@ const get = vi.hoisted(() => vi.fn());
 vi.mock('@/services/api', () => ({ default: { get } }));
 beforeEach(() => { get.mockReset(); });
 describe('A2 binding subresource hydration and save', () => {
+  it('publishes the persisted canonical cover, including the card frame supplied by storage', async () => {
+    get.mockResolvedValue({ data: { binding_settings: null } });
+    const submitted = createDefaultNoteBindingSettings();
+    const page = { crop: { x: 10, y: 5, width: 50, height: 80 }, zoom: 1.5 };
+    submitted.cover = { assetId: 'cover-image', page };
+    const canonical = { ...submitted, cover: { ...submitted.cover, card: {
+      crop: { x: 0, y: 25, width: 100, height: 50 }, zoom: 1,
+    } } };
+    const subject = renderHook(() => useNoteBinding('paper', async () => canonical));
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => subject.result.current.save(submitted));
+    expect(subject.result.current.value).toEqual(canonical);
+    expect(submitted.cover).toEqual({ assetId: 'cover-image', page });
+  });
   it('loads settings separately from Note and republishes a completed save', async () => {
     const stored = createDefaultNoteBindingSettings(); stored.enabled = false;
     get.mockResolvedValue({ data: { binding_settings: stored } });

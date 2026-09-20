@@ -39,6 +39,8 @@ import { createNoteMetadataRouter } from './noteMetadata.js';
 import { createNoteBindingRouter } from './noteBinding.js';
 import { mergeNoteSkin } from '../services/skin.js';
 import { assertNoteCoverAsset, mergeNoteCoverBinding } from '../services/noteCover.js';
+import { assertNoteRefCreation, noteRefCreationOverrides } from '../services/noteCoverRules.js';
+import { adaptCardCoverWrite } from '../services/noteCoverStorage.js';
 
 export { hydrateNote };
 
@@ -112,12 +114,13 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const id = uuidv4();
     const now = new Date().toISOString();
     const operationBatchId = createOperationBatch(req.userId!, data.course_id, `Create note: ${data.title}`);
+    const coverWrite = adaptCardCoverWrite({}, data.metadata, mergeNoteSkin({}, data.metadata, data.skin));
 
     db.prepare(`
       INSERT INTO notes (
-        id, user_id, course_id, title, description, page_format, metadata,
+        id, user_id, course_id, title, description, page_format, metadata, binding_settings_json,
         operation_batch_id, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       req.userId!,
@@ -125,7 +128,8 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.title,
       data.description || null,
       data.page_format,
-      stringifyJson(mergeNoteSkin({}, data.metadata, data.skin), {}),
+      stringifyJson(coverWrite.metadata, {}),
+      coverWrite.bindingSettings ? JSON.stringify(coverWrite.bindingSettings) : null,
       operationBatchId,
       now,
       now
@@ -173,12 +177,16 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
     if (data.page_format !== undefined) { fields.push('page_format = ?'); values.push(data.page_format); }
     if (data.metadata !== undefined || data.skin !== undefined) {
-      const current = getDb().prepare('SELECT metadata FROM notes WHERE id = ? AND user_id = ?')
-        .get(noteId, req.userId!) as { metadata: string };
+      const current = getDb().prepare('SELECT metadata, binding_settings_json FROM notes WHERE id = ? AND user_id = ?')
+        .get(noteId, req.userId!) as { metadata: string; binding_settings_json: string | null };
       const currentMetadata = JSON.parse(current.metadata || '{}') as Record<string, unknown>;
       const metadata = mergeNoteCoverBinding(currentMetadata, mergeNoteSkin(currentMetadata, data.metadata, data.skin));
+      const coverWrite = adaptCardCoverWrite(current, data.metadata, metadata);
       fields.push('metadata = ?');
-      values.push(stringifyJson(metadata, {}));
+      values.push(stringifyJson(coverWrite.metadata, {}));
+      if (coverWrite.bindingSettings) {
+        fields.push('binding_settings_json = ?'); values.push(JSON.stringify(coverWrite.bindingSettings));
+      }
     }
     if (data.status !== undefined) {
       fields.push('status = ?');
@@ -275,6 +283,8 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
       });
       return;
     }
+    const existingReference = assertNoteRefCreation(db, req.userId!, noteId, data);
+    if (existingReference) { res.json(hydrateBlock(existingReference)); return; }
     assertItemRefBlockContent(db, req.userId!, data);
     assertMediaBlockAsset(db, req.userId!, data);
     const id = uuidv4();
@@ -300,7 +310,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
         data.title || null,
         stringifyJson(data.content_json, {}),
         data.plain_text || null,
-        stringifyJson(data.block_type === 'item_ref' ? data.metadata : mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
+        stringifyJson(['item_ref', 'note_ref'].includes(data.block_type) ? data.metadata : mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
         operationBatchId,
         now,
         now
@@ -311,7 +321,8 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
           id, note_id, block_id, order_index, display_overrides_json, created_at, updated_at
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(placementId, note.id, id, nextOrder, stringifyJson(stripLegacyLayoutOverride(data.display_overrides_json), {}), now, now);
+      `).run(placementId, note.id, id, nextOrder, stringifyJson(noteRefCreationOverrides(db, req.userId!, noteId,
+        data.block_type, stripLegacyLayoutOverride(data.display_overrides_json)), {}), now, now);
 
       for (const ref of data.source_references || []) {
         if (ref.document_id) {

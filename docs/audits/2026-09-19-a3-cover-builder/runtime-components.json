@@ -1,0 +1,501 @@
+{
+  "scope": "非 git/secrets 的 23 组件",
+  "completeRuntimeGate": false,
+  "hqRemaining": [
+    "git diff --check",
+    "check:changed-file-secrets"
+  ],
+  "components": [
+    {
+      "index": 1,
+      "name": "check:test-wiring",
+      "attempts": [
+        {
+          "command": "npm run check:test-wiring",
+          "startedAt": "2026-09-20T02:22:18.925Z",
+          "durationMs": 637,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-01-check-test-wiring-1.log",
+          "summary": []
+        },
+        {
+          "command": "npm run check:test-wiring",
+          "startedAt": "2026-09-20T02:41:25.944Z",
+          "durationMs": 194,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-01-check-test-wiring-2.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "test:agent-knowledge",
+      "attempts": [
+        {
+          "command": "npm run test:agent-knowledge",
+          "startedAt": "2026-09-20T02:22:19.563Z",
+          "durationMs": 3250,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-02-test-agent-knowledge-1.log",
+          "summary": [
+            "# tests 28",
+            "# suites 0",
+            "# pass 28",
+            "# fail 0",
+            "# cancelled 0",
+            "# skipped 0",
+            "# todo 0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "check:agent-knowledge",
+      "attempts": [
+        {
+          "command": "npm run check:agent-knowledge",
+          "startedAt": "2026-09-20T02:22:22.913Z",
+          "durationMs": 442,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-03-check-agent-knowledge-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "check:tech-debt-table",
+      "attempts": [
+        {
+          "command": "npm run check:tech-debt-table",
+          "startedAt": "2026-09-20T02:22:23.357Z",
+          "durationMs": 274,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-04-check-tech-debt-table-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "name": "test:unit",
+      "attempts": [
+        {
+          "command": "npm run test:unit",
+          "startedAt": "2026-09-20T02:22:23.632Z",
+          "durationMs": 57792,
+          "exitCode": 1,
+          "log": ".codex-tmp/a3-cover/gate-05-test-unit-1.log",
+          "summary": [
+            "Test Files  10 failed | 183 passed (193)",
+            "Tests  18 failed | 1915 passed (1933)",
+            "Duration  56.50s (transform 122.39s, setup 46.02s, collect 493.91s, tests 466.44s, environment 182.45s, prepare 21.78s)"
+          ]
+        },
+        {
+          "command": "npm --prefix client run test:unit -- --maxWorkers=1",
+          "startedAt": "2026-09-20T02:27:16.561Z",
+          "durationMs": 213620,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-05-test-unit-2.log",
+          "summary": [
+            "Test Files  193 passed (193)",
+            "Tests  1934 passed (1934)",
+            "Duration  213.07s (transform 3.96s, setup 20.02s, collect 21.50s, tests 68.96s, environment 73.52s, prepare 9.91s)"
+          ],
+          "retryReason": "Full suite with one worker after default-concurrency timeouts; no case exclusion."
+        },
+        {
+          "command": "npm --prefix client run test:unit -- --maxWorkers=1",
+          "startedAt": "2026-09-20T02:41:26.572Z",
+          "durationMs": 220775,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-05-test-unit-3.log",
+          "summary": [
+            "Test Files  193 passed (193)",
+            "Tests  1940 passed (1940)",
+            "Duration  220.22s (transform 3.90s, setup 21.12s, collect 21.43s, tests 68.13s, environment 78.59s, prepare 10.49s)"
+          ],
+          "retryReason": "Final full-suite verification after cover-recreation deduplication changed to current cover frame and non-tray placements; maxWorkers=1, no case exclusion."
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "name": "test:tool-face-registry",
+      "attempts": [
+        {
+          "command": "npm run test:tool-face-registry",
+          "startedAt": "2026-09-20T02:23:21.426Z",
+          "durationMs": 607,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-06-test-tool-face-registry-1.log",
+          "summary": [
+            "# tests 5",
+            "# suites 0",
+            "# pass 5",
+            "# fail 0",
+            "# cancelled 0",
+            "# skipped 0",
+            "# todo 0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "name": "test:tool-face-manifest",
+      "attempts": [
+        {
+          "command": "npm run test:tool-face-manifest",
+          "startedAt": "2026-09-20T02:23:22.034Z",
+          "durationMs": 3564,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-07-test-tool-face-manifest-1.log",
+          "summary": [
+            "# tests 10",
+            "# suites 0",
+            "# pass 10",
+            "# fail 0",
+            "# cancelled 0",
+            "# skipped 0",
+            "# todo 0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "name": "check:tool-face-manifest",
+      "attempts": [
+        {
+          "command": "npm run check:tool-face-manifest",
+          "startedAt": "2026-09-20T02:23:25.600Z",
+          "durationMs": 607,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-08-check-tool-face-manifest-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "name": "test:tool-face-parity",
+      "attempts": [
+        {
+          "command": "npm run test:tool-face-parity",
+          "startedAt": "2026-09-20T02:23:26.208Z",
+          "durationMs": 5321,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-09-test-tool-face-parity-1.log",
+          "summary": [
+            "# tests 10",
+            "# suites 0",
+            "# pass 10",
+            "# fail 0",
+            "# cancelled 0",
+            "# skipped 0",
+            "# todo 0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "name": "check:tool-face-parity",
+      "attempts": [
+        {
+          "command": "npm run check:tool-face-parity",
+          "startedAt": "2026-09-20T02:23:31.531Z",
+          "durationMs": 524,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-10-check-tool-face-parity-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "name": "check:server-shared-runtime-import",
+      "attempts": [
+        {
+          "command": "npm run check:server-shared-runtime-import",
+          "startedAt": "2026-09-20T02:23:32.056Z",
+          "durationMs": 552,
+          "exitCode": 1,
+          "log": ".codex-tmp/a3-cover/gate-11-check-server-shared-runtime-import-1.log",
+          "summary": []
+        },
+        {
+          "command": "npm run check:server-shared-runtime-import",
+          "startedAt": "2026-09-20T02:31:10.992Z",
+          "durationMs": 542,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-11-check-server-shared-runtime-import-2.log",
+          "summary": []
+        },
+        {
+          "command": "npm run check:server-shared-runtime-import",
+          "startedAt": "2026-09-20T02:45:42.304Z",
+          "durationMs": 543,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-11-check-server-shared-runtime-import-3.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "name": "check:canvas-runtime-boundary",
+      "attempts": [
+        {
+          "command": "npm run check:canvas-runtime-boundary",
+          "startedAt": "2026-09-20T02:23:32.609Z",
+          "durationMs": 442,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-12-check-canvas-runtime-boundary-1.log",
+          "summary": []
+        },
+        {
+          "command": "npm run check:canvas-runtime-boundary",
+          "startedAt": "2026-09-20T02:41:26.139Z",
+          "durationMs": 432,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-12-check-canvas-runtime-boundary-2.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "name": "check:group-gallery-shell",
+      "attempts": [
+        {
+          "command": "npm run check:group-gallery-shell",
+          "startedAt": "2026-09-20T02:23:33.053Z",
+          "durationMs": 441,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-13-check-group-gallery-shell-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "name": "check:groups-rail-shell",
+      "attempts": [
+        {
+          "command": "npm run check:groups-rail-shell",
+          "startedAt": "2026-09-20T02:23:33.495Z",
+          "durationMs": 437,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-14-check-groups-rail-shell-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "name": "check:single-editor-shell",
+      "attempts": [
+        {
+          "command": "npm run check:single-editor-shell",
+          "startedAt": "2026-09-20T02:23:33.934Z",
+          "durationMs": 444,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-15-check-single-editor-shell-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "name": "check:source-experience",
+      "attempts": [
+        {
+          "command": "npm run check:source-experience",
+          "startedAt": "2026-09-20T02:23:34.379Z",
+          "durationMs": 937,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-16-check-source-experience-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "name": "check:v2-bn11-legacy-shutdown",
+      "attempts": [
+        {
+          "command": "npm run check:v2-bn11-legacy-shutdown",
+          "startedAt": "2026-09-20T02:23:35.318Z",
+          "durationMs": 440,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-17-check-v2-bn11-legacy-shutdown-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "name": "check:v2-bn11-relation-freshness",
+      "attempts": [
+        {
+          "command": "npm run check:v2-bn11-relation-freshness",
+          "startedAt": "2026-09-20T02:23:35.760Z",
+          "durationMs": 449,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-18-check-v2-bn11-relation-freshness-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "name": "smoke:canvas-engine-model-contract",
+      "attempts": [
+        {
+          "command": "npm run smoke:canvas-engine-model-contract",
+          "startedAt": "2026-09-20T02:23:36.211Z",
+          "durationMs": 1935,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-19-smoke-canvas-engine-model-contract-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 20,
+      "name": "build:client",
+      "attempts": [
+        {
+          "command": "npm run build:client",
+          "startedAt": "2026-09-20T02:23:38.148Z",
+          "durationMs": 22730,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-20-build-client-1.log",
+          "summary": []
+        },
+        {
+          "command": "npm run build:client",
+          "startedAt": "2026-09-20T02:31:11.535Z",
+          "durationMs": 13243,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-20-build-client-2.log",
+          "summary": []
+        },
+        {
+          "command": "npm run build:client",
+          "startedAt": "2026-09-20T02:45:42.848Z",
+          "durationMs": 13114,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-20-build-client-3.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 21,
+      "name": "build",
+      "attempts": [
+        {
+          "command": "npm run build",
+          "startedAt": "2026-09-20T02:24:00.878Z",
+          "durationMs": 8005,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-21-build-1.log",
+          "summary": []
+        },
+        {
+          "command": "npm run build",
+          "startedAt": "2026-09-20T02:31:24.779Z",
+          "durationMs": 7510,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-21-build-2.log",
+          "summary": []
+        },
+        {
+          "command": "npm run build",
+          "startedAt": "2026-09-20T02:45:55.963Z",
+          "durationMs": 7405,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-21-build-3.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 22,
+      "name": "smoke:canvas-engine-performance",
+      "attempts": [
+        {
+          "command": "npm run smoke:canvas-engine-performance",
+          "startedAt": "2026-09-20T02:24:08.883Z",
+          "durationMs": 1213,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-22-smoke-canvas-engine-performance-1.log",
+          "summary": []
+        }
+      ]
+    },
+    {
+      "index": 23,
+      "name": "docs:check",
+      "attempts": [
+        {
+          "command": "npm run docs:check",
+          "startedAt": "2026-09-20T02:24:10.096Z",
+          "durationMs": 278,
+          "exitCode": 1,
+          "log": ".codex-tmp/a3-cover/gate-23-docs-check-1.log",
+          "summary": []
+        },
+        {
+          "command": "npm run docs:check",
+          "startedAt": "2026-09-20T02:31:32.290Z",
+          "durationMs": 335,
+          "exitCode": 1,
+          "log": ".codex-tmp/a3-cover/gate-23-docs-check-2.log",
+          "summary": []
+        },
+        {
+          "command": "npm run docs:check",
+          "startedAt": "2026-09-20T02:33:19.041Z",
+          "durationMs": 608,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-23-docs-check-3.log",
+          "summary": []
+        },
+        {
+          "command": "npm run docs:check",
+          "startedAt": "2026-09-20T02:46:03.369Z",
+          "durationMs": 271,
+          "exitCode": 1,
+          "log": ".codex-tmp/a3-cover/gate-23-docs-check-4.log",
+          "summary": []
+        },
+        {
+          "command": "npm run docs:check",
+          "startedAt": "2026-09-20T02:48:33.164Z",
+          "durationMs": 554,
+          "exitCode": 0,
+          "log": ".codex-tmp/a3-cover/gate-23-docs-check-5.log",
+          "summary": []
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-09-20T02:48:33.756Z",
+  "result": {
+    "passed": 23,
+    "total": 23,
+    "completeRuntimeGate": false
+  },
+  "retryEvidence": {
+    "client": "Default-concurrency run: 193 files, 1933 tests, 17 five-second timeouts and one missing bookmark button. Full reruns use maxWorkers=1; no test-name filters, no timeout increases. The second run includes one new first-upload card-viewport test. The final run adds six title/description lifecycle tests for current-cover focus and old content-page/tray projections after cover recreation.",
+    "sharedRuntimeImports": "Initial 4 server runtime shared-import violations were fixed in product code; the gate script and its boundary were unchanged.",
+    "documentation": "First docs check stopped at agent-ops/INDEX.md. After its regeneration, the next check reached generated/object-inventory.md and reported it stale. Each attempt is retained."
+  }
+}

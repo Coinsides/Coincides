@@ -10,6 +10,7 @@ import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameMode
 
 export function useNotePageFlow(input: {
   noteId?: string; enabled: boolean; coordinateContract?: CoordinateContract;
+  coverFrameId?: string | null;
   blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>; pageFrames: PageFrameModel[];
   collection: PageFrameCollectionModel | null; typography: DocumentTypographyProfile;
   textDrafts: Record<string, string>; flowDrafts: Record<string, TextBlockContentV1>;
@@ -29,12 +30,12 @@ export function useNotePageFlow(input: {
   const blocks = useMemo(() => noteBlocksToPageFlow(input.blocks, input.layouts, input.textDrafts, input.flowDrafts),
     [input.blocks, input.layouts, input.textDrafts, input.flowDrafts]);
   const plan = useMemo(() => input.coordinateContract === 'v2'
-    && input.pageFrames.some((frame) => frame.templateId !== 'screen_note') ? resolveDocumentPageFlowPlan({
+    && input.pageFrames.some((frame) => frame.id !== input.coverFrameId && frame.templateId !== 'screen_note') ? resolveDocumentPageFlowPlan({
     collection: normalizePageFrameCollection(input.collection || {
       pageFrames: input.pageFrames, primaryFrameId: input.pageFrames[0]?.id || null,
-    }), blocks, documentTypography: input.typography, coordinateContract: input.coordinateContract,
+    }), blocks, coverFrameId: input.coverFrameId, documentTypography: input.typography, coordinateContract: input.coordinateContract,
     measureTextLines: measurer,
-  }) : undefined, [blocks, input.collection, input.pageFrames, input.typography, input.coordinateContract, measurer, measurementRevision]);
+  }) : undefined, [blocks, input.collection, input.pageFrames, input.coverFrameId, input.typography, input.coordinateContract, measurer, measurementRevision]);
   const layouts = useMemo(() => plan ? pageFlowFirstLayouts(plan, input.layouts) : input.layouts, [plan, input.layouts]);
   const latest = useRef(input);
   latest.current = input;

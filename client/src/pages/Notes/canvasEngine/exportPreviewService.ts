@@ -1,4 +1,5 @@
 import { textFromContent } from './blockContentService';
+import { getNoteBindingCoverPage, type NoteBindingSettings } from '../../../../../shared/types/noteBinding';
 import { mediaBlockAlt } from './mediaBlockService';
 import { sliceGraphemes } from '../../../../../shared/graphemes';
 import {
@@ -41,6 +42,9 @@ import type {
 } from './types';
 
 export interface ExportPreviewRow {
+  /** Live note-reference projection, never written into the block. */
+  projectedText?: string;
+  coverExcluded?: boolean;
   flowFragment?: import('./documentPageFlowService').PageFlowFragment;
   block: NoteBlock;
   layout?: BlockBoxLayout;
@@ -64,6 +68,8 @@ export interface ExportPreviewTypography {
 
 export interface PageFrameExportPreview {
   pageFrameId: string;
+  isCover?: boolean;
+  mechanicalPageNumber?: number;
   role: PageFrameModel['role'];
   pageSize?: PageFrameModel['pageSize'];
   exportable: boolean;
@@ -106,6 +112,8 @@ export interface ExportPreviewModel {
 }
 
 export interface BuildExportPreviewModelOptions {
+  bindingSettings?: NoteBindingSettings | null;
+  noteTruth?: { title: string; description: string | null };
   pageFlowPlan?: import('./documentPageFlowService').DocumentPageFlowPlan;
   pageFrames?: PageFrameModel[];
   pageStacks?: PageStackModel[];
@@ -116,6 +124,7 @@ export interface BuildExportPreviewModelOptions {
 }
 
 function isRowIncludedInExport(row: ExportPreviewRow): boolean {
+  if (row.coverExcluded) return false;
   if (row.exportPolicy) return row.exportPolicy.exportCandidate;
   return row.exportRole === 'included';
 }
@@ -198,6 +207,7 @@ export function buildExportPreviewModel(
   blockLayouts: Record<string, BlockBoxLayout>,
   options: BuildExportPreviewModelOptions = {},
 ): ExportPreviewModel {
+  const coverPage = getNoteBindingCoverPage(options.bindingSettings);
   const crossingExportPolicy = options.crossingExportPolicy || DEFAULT_PAGE_FRAME_CROSSING_EXPORT_POLICY;
   const documentTypography = normalizeDocumentTypographyProfile(
     options.documentTypography || DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
@@ -224,6 +234,8 @@ export function buildExportPreviewModel(
         policy: crossingExportPolicy,
       })
       : undefined;
+    const pageFrameId = derivedPageFrameBoundary?.pageFrameId || placement?.frameId || layout?.frame_id || null;
+    const field = block.content_json.field;
     return {
       block,
       layout,
@@ -231,7 +243,11 @@ export function buildExportPreviewModel(
       boundary,
       exportRole,
       aiVisibility,
-      pageFrameId: derivedPageFrameBoundary?.pageFrameId || placement?.frameId || null,
+      pageFrameId,
+      ...(block.block_type === 'note_ref' && (field === 'title' || field === 'description')
+        ? { projectedText: options.noteTruth?.[field] ?? '' } : {}),
+      ...(coverPage.frameId && pageFrameId === coverPage.frameId && !coverPage.exportIncluded
+        ? { coverExcluded: true } : {}),
       pageFrameRole: derivedPageFrameBoundary?.pageFrameRole || null,
       exportPolicy,
     };
@@ -252,13 +268,19 @@ export function buildExportPreviewModel(
         boundary: 'inside' as const, exportPolicy: undefined, flowFragment: fragment }] : [];
     }) || []),
   ];
-  const pageFrames = (options.pageFrames || []).map((pageFrame) => createPageFrameExportPreview(
+  const sourceFrames = options.pageFrames || [];
+  const coverFrame = sourceFrames.find((frame) => frame.id === coverPage.frameId);
+  const orderedFrames = coverFrame ? [coverFrame, ...sourceFrames.filter((frame) => frame.id !== coverFrame.id)] : sourceFrames;
+  const pageFrames = orderedFrames.map((pageFrame, index) => ({ ...createPageFrameExportPreview(
     pageFrame,
     pageRows.filter((row) => row.pageFrameId === pageFrame.id && row.boundary === 'inside'),
     options.primaryPageFrameId,
     documentTypography,
-  ));
-  const pageStacks = (options.pageStacks || []).map(createPageStackExportPreview);
+  ), isCover: pageFrame.id === coverPage.frameId, mechanicalPageNumber: coverFrame ? index : index + 1,
+  })).filter((frame) => !frame.isCover || coverPage.exportIncluded);
+  const pageStacks = (options.pageStacks || []).map((stack) => createPageStackExportPreview({ ...stack,
+    frameIds: stack.frameIds.filter((frameId) => frameId !== coverPage.frameId || coverPage.exportIncluded),
+  })).filter((stack) => stack.pageCount > 0);
 
   return {
     rows,
@@ -292,6 +314,8 @@ export function aiVisibilityLabel(visibility: AIVisibility): string {
 }
 
 export function exportPreviewRowLabel(row: ExportPreviewRow): string {
+  if (row.block.block_type === 'note_ref') return row.projectedText
+    || (row.block.content_json.field === 'description' ? 'Description' : 'Title');
   if (row.block.block_type === 'media') return mediaBlockAlt(row.block);
   if (row.flowFragment?.textRange) {
     const range = row.flowFragment.textRange;

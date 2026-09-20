@@ -414,7 +414,7 @@ test('PUT /api/notes/:id keeps status plus title in one mixed patch response', a
   });
 });
 
-test('PUT /api/notes/:id handler matches the authorized card-cover baseline apart from line endings', () => {
+test('PUT /api/notes/:id handler matches the authorized A3 canonical-cover baseline apart from line endings', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
   const start = routeSource.indexOf("router.put('/:id'");
@@ -431,8 +431,13 @@ test('PUT /api/notes/:id handler matches the authorized card-cover baseline apar
   // data.metadata, data.skin) reconstructs the prior B1c handler SHA-256 exactly:
   // 0dfd76eb9fa0f7c0f8002596663a4ff2fa052f0aa8c7e7d01318d1436f559b57.
   // The immutable page-preset and source-projection guards remain in this baseline.
+  // A3 authorized delivery: 2026-09-19-v14-a3-cover-page-order.md section IV.1-2.
+  // Removing only adaptCardCoverWrite, its binding_settings_json selection/type
+  // and field assignment, and restoring stringifyJson(metadata, {}) reproduces
+  // the card-cover baseline 41593a991c0fba093d9057f79a4781f6a5b0966b81006a3e0052842a4fae776c.
+  // Reconstruction evidence: docs/audits/2026-09-19-a3-cover-builder/backend.md.
   assert.equal(
     createHash('sha256').update(putRoute).digest('hex'),
-    '41593a991c0fba093d9057f79a4781f6a5b0966b81006a3e0052842a4fae776c',
+    'e01b1bec441fbbb2ddbea415c5627d01ee1abf26395bc46917ebb961c8e9c220',
   );
 });

@@ -8,11 +8,13 @@ import { PaperInkSvg } from './PaperInkSvg';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import styles from '../../NoteDetail.module.css';
 import { PageFrameSlotsLayer } from './PageFrameSlotsLayer';
+import { NoteCoverUnderlay } from './NoteCoverUnderlay';
 
 export type NoteReadOnlyPageContentProps = Pick<NoteWritingSurfaceLayerProps,
   'visibleBlocks' | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts' | 'anchorsBySourceRef'> & {
   frame: PageFrameModel;
   slots?: import('../types').PageFrameSlots;
+  coverImage?: import('@shared/types/noteBinding').NoteBindingCover | null;
   fragments: readonly PageStackBlockFragmentProjection[];
   canvasObjects?: readonly CanvasObject[];
   canvasPlacements?: readonly CanvasPlacement[];
@@ -35,12 +37,14 @@ const noSave = async (): Promise<BlockSaveOutcome> => ({
  * retain the existing print projection's exclusions.
  */
 export function NoteReadOnlyPageContent({
-  frame, slots, fragments, canvasObjects = [], canvasPlacements = [], print = false, documentTypography, ...input
+  frame, slots, coverImage, fragments, canvasObjects = [], canvasPlacements = [], print = false, documentTypography, ...input
 }: NoteReadOnlyPageContentProps) {
   const blocks = new Map(input.visibleBlocks.filter((block) => readStoredLayout(block)?.surface !== 'tray')
     .map((block) => [block.id, block]));
 
   return <>
+    {coverImage && <NoteCoverUnderlay assetId={coverImage.assetId} frame={coverImage.page}
+      width={frame.width} height={frame.height} />}
     <PageFrameSlotsLayer slots={slots} offsetX={-frame.x} offsetY={-frame.y} />
     {fragments
       .filter((fragment) => fragment.pageFrameId === frame.id && blocks.has(fragment.blockId))

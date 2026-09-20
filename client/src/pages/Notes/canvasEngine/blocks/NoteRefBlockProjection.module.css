@@ -1,0 +1,21 @@
+.projection {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 1.4em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.title { font-size: 36px; font-weight: 700; line-height: 1.5; }
+.description { font-size: 18px; line-height: 1.55; }
+.projection:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }

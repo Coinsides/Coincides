@@ -33,7 +33,7 @@ import {
   createDefaultPageFrameSlots,
   createBindingPageFrameSlots,
 } from './pageFrameSlotService';
-import type { NoteBindingSettings } from '@shared/types/noteBinding';
+import { getNoteBindingCover, getNoteBindingCoverPage, type NoteBindingSettings } from '../../../../../shared/types/noteBinding';
 import {
   DEFAULT_PAGE_FRAME_TEMPLATE_ID,
   applyPageFrameTemplate,
@@ -155,6 +155,8 @@ function buildPageFrameExtension(
   mechanicalPageNumber = 1,
 ): PageFrameExtension {
   const normalizedFrame = normalizePageFramePrintBaseline(pageFrame);
+  const coverPage = getNoteBindingCoverPage(bindingSettings);
+  const isCover = coverPage.frameId === normalizedFrame.id;
   const template = resolvePageFrameTemplate(normalizedFrame);
   const slots = createDefaultPageFrameSlots({
     pageFrame: normalizedFrame,
@@ -173,6 +175,9 @@ function buildPageFrameExtension(
     : slots;
   return {
     frameId: normalizedFrame.id,
+    isCover,
+    mechanicalPageNumber,
+    ...(isCover ? { coverImage: getNoteBindingCover(bindingSettings), coverExportIncluded: coverPage.exportIncluded } : {}),
     objectId: normalizedFrame.id,
     pageStackId: pageStackContext?.stack.id || null,
     pageStackPageIndex: pageStackContext?.index ?? null,
@@ -190,10 +195,11 @@ function buildPageFrameExtension(
     documentTypography: normalizeDocumentTypographyProfile(documentTypography),
     rulerEnabled: false,
     snapEnabled: true,
-    headerFooterEnabled: true,
-    pageNumberEnabled: true,
+    headerFooterEnabled: !isCover,
+    pageNumberEnabled: !isCover,
     slots: bindingSettings === undefined ? normalizedSlots : createBindingPageFrameSlots({
-      pageFrame: normalizedFrame, mechanicalPageNumber, bindingSettings,
+      pageFrame: normalizedFrame, mechanicalPageNumber,
+      bindingSettings: isCover && bindingSettings ? { ...bindingSettings, dropFolioOnCover: true } : bindingSettings, isCover,
     }),
     exportable: normalizedFrame.exportable,
   };
@@ -333,8 +339,12 @@ export function buildNoteCanvasRuntimeModel({
   const blockPlacements = inputBlockPlacements.filter((placement) => placement.surface !== 'tray'
     && !trayPlacementIds.has(placement.placementId));
   const canvasId = blockPlacements[0]?.canvasId || 'primary-note-canvas';
-  const runtimePageFrames = (pageFrames || (primaryPageFrame ? [primaryPageFrame] : []))
+  const coverFrameId = getNoteBindingCoverPage(bindingSettings).frameId;
+  const normalizedPageFrames = (pageFrames || (primaryPageFrame ? [primaryPageFrame] : []))
     .map(normalizePageFramePrintBaseline);
+  const coverFrame = normalizedPageFrames.find((frame) => frame.id === coverFrameId);
+  const runtimePageFrames = coverFrame
+    ? [coverFrame, ...normalizedPageFrames.filter((frame) => frame.id !== coverFrameId)] : normalizedPageFrames;
   const runtimePageStacks = normalizePageStacks({
     pageFrames: runtimePageFrames,
     pageStacks,
@@ -361,7 +371,7 @@ export function buildNoteCanvasRuntimeModel({
     resolvePageStackContext(pageStackCollectionContext, pageFrame.id),
     activeDocumentTypography,
     bindingSettings,
-    index + 1,
+    coverFrame ? index : index + 1,
   ));
   const blockCanvasObjects = blockPlacements.map(buildBlockCanvasObject);
   const blockCanvasPlacements = blockPlacements.map(buildCanvasPlacementFromBlockPlacement);

@@ -19,6 +19,7 @@ import { useNoteNavigationController } from '../hooks/useNoteNavigationControlle
 import { useNoteAmbientAgentContextHint } from '../hooks/useNoteAmbientAgentContextHint';
 import { NoteNavigationPane } from './NoteNavigationPane';
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
+import { NoteTruthBindingProvider } from '../NoteTruthBindingContext';
 import styles from '../../NoteDetail.module.css';
 
 export interface NoteRuntimeDocumentLayerProps {
@@ -54,6 +55,16 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   templateWarning,
   writingSurfaceProps,
 }, ref) {
+  const header = writingSurfaceProps.paperHeader;
+  const truth = {
+    title: header?.titleDraft ?? '', description: header?.descriptionDraft ?? '',
+    readOnly: writingSurfaceProps.contentReadOnly || header?.contentReadOnly,
+    onChange: (field: 'title' | 'description', value: string) => {
+      if (field === 'title') header?.onTitleDraftChange(value);
+      else header?.onDescriptionDraftChange(value);
+    },
+    onSave: (field: 'title' | 'description') => field === 'title' ? header?.onSaveTitle() : header?.onSaveDescription(),
+  };
   const [gapPreference, setGapPreference] = useState({ noteId: writingSurfaceProps.noteId, folded: false });
   const pageGapsFolded = gapPreference.noteId === writingSurfaceProps.noteId && gapPreference.folded;
   const pageGapPresentation = useMemo(() => createPageGapPresentation(writingSurfaceProps.noteCanvasRuntime.pageFrames,
@@ -113,8 +124,8 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       onClose={() => navigation.setOpen(false)} />}
     {document}
   </div> : document;
-  if (surfaceMode !== 'page' || !tray) return navigableDocument;
-  return <div className={styles.trayViewport}>
+  if (surfaceMode !== 'page' || !tray) return <NoteTruthBindingProvider value={truth}>{navigableDocument}</NoteTruthBindingProvider>;
+  return <NoteTruthBindingProvider value={truth}><div className={styles.trayViewport}>
     <button type="button" className={`${styles.contentGroupLauncher} ${styles.trayToggle}`} aria-expanded={tray.open}
       data-note-tray-toggle="true" onClick={() => tray.setOpen(!tray.open)}>
       <Inbox size={16} aria-hidden="true" /><span>Staging ({tray.entries.length})</span>
@@ -123,5 +134,5 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       {navigableDocument}
       {tray.open && <NoteTraySidebar tray={tray} />}
     </div>
-  </div>;
+  </div></NoteTruthBindingProvider>;
 });

@@ -10,6 +10,7 @@ import { PaperInkLayer } from './PaperInkLayer';
 import { ViewOptionsMenu } from './ViewOptionsMenu';
 import { NotePageGapLayer } from './NotePageGapLayer';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
+import { NoteCoverUnderlay } from './NoteCoverUnderlay';
 import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
 import { usePaperSkin } from '../PaperSkinContext';
@@ -493,7 +494,8 @@ export function NoteWritingSurfaceLayer({
   );
   const readingViewState = pageReadingViewState || createDefaultPageReadingViewState();
   const [headerHeight, setHeaderHeight] = useState(NOTE_HEADER_INITIAL_HEIGHT);
-  const displayHeaderHeight = paperHeader ? headerHeight : 0;
+    const hasCoverPage = noteCanvasRuntime.pageFrameExtensions.some((frame) => frame.isCover);
+    const displayHeaderHeight = paperHeader && !hasCoverPage ? headerHeight : 0;
   const pageReading = usePageReadingPresentation({
     enabled: surfaceMode === 'page' && !overviewOpen, noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
     pageFrames: readingPageFrames,
@@ -1514,7 +1516,7 @@ export function NoteWritingSurfaceLayer({
         overflowClipMargin: `${((paperSkin?.materialPreset ?? paperSkin?.preset) === 'warm-paper' ? 80 : 32) * pageReading.displayScale}px`,
         } : { display: 'contents' }}
       >
-      {surfaceMode === 'page' && paperHeader && <div className={styles.pageReadingHeaderBand}
+      {surfaceMode === 'page' && paperHeader && !hasCoverPage && <div className={styles.pageReadingHeaderBand}
         data-note-header-band="true" style={{
           ...primaryPageFrameTemplateStyle,
           width: pageReading.paperWidth,
@@ -1591,8 +1593,8 @@ export function NoteWritingSurfaceLayer({
         onDragOverCapture={handleStagingDragOver}
         onDropCapture={handleStagingDrop}
       >
-        {surfaceMode === 'page' && noteCanvasRuntime.pageFlowPlan && visiblePageFrames.map((frame) => {
-          if (paperHeader && frame.id === primaryPageFrameId) return null;
+          {surfaceMode === 'page' && (noteCanvasRuntime.pageFlowPlan || hasCoverPage) && visiblePageFrames.map((frame) => {
+            if (paperHeader && !hasCoverPage && frame.id === primaryPageFrameId) return null;
           const display = displayFrame(frame);
           const extension = pageFrameExtensionByFrameId.get(frame.id);
           return <div key={`${frame.id}:paper`} data-flow-page-paper={frame.id}
@@ -1601,7 +1603,11 @@ export function NoteWritingSurfaceLayer({
               left: display.x, top: display.y, width: display.width, height: display.height,
               background: 'var(--paper-material-fill, var(--paper-template-fill, var(--page-frame-background, var(--bg-primary))))',
               boxShadow: 'var(--paper-material-shadow, none)',
-              outline: 'var(--sk-header-rule, 1px solid var(--paper-template-border, var(--border-subtle)))' }} />;
+              outline: 'var(--sk-header-rule, 1px solid var(--paper-template-border, var(--border-subtle)))' }}>
+              {extension?.isCover && extension.coverImage && <NoteCoverUnderlay
+                assetId={extension.coverImage.assetId} frame={extension.coverImage.page}
+                width={display.width} height={display.height} />}
+            </div>;
         })}
         {surfaceMode === 'page' && !overviewOpen && noteCanvasRuntime.coordinateContract === 'v2'
           && visiblePageFrames.map((frame) => (

@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 402 份文档。
+共 403 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -389,7 +389,8 @@
 | [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `done` | — | — |
 | [handoffs/2026-09-16-v14-board-visual-v1-order.md](handoffs/2026-09-16-v14-board-visual-v1-order.md) | 板视觉 v1 | `done(HQ 机补验+应用内实测通过,2026-09-16)` | — | — |
 | [handoffs/2026-09-19-v14-a1-pagination-order.md](handoffs/2026-09-19-v14-a1-pagination-order.md) | A1 · 自动分页+断块 | `done(二轮施工;一轮停线=验证门×Git 禁令边界,HQ 补遗一裁定后续派;HQ 收口:client 全库 183 文件 1853/1853 亲跑定案+git diff --check/secrets 双门绿;本单服务端零 diff,builder 全量中两项既有 Python/MinerU 环境红为基线复现;2026-09-19)` | — | — |
-| [handoffs/2026-09-19-v14-a2-binding-order.md](handoffs/2026-09-19-v14-a2-binding-order.md) | A2 · 装订面三件套+折缝 | `done(builder 实现与验证回执已交;验收未全绿,待 HQ 收口;原 ready 由 HQ 按代理权翻牌)` | — | — |
+| [handoffs/2026-09-19-v14-a2-binding-order.md](handoffs/2026-09-19-v14-a2-binding-order.md) | A2 · 装订面三件套+折缝 | `done(builder 交付+HQ 收口全绿,2026-09-19:client 188 文件 1896/1896 亲跑定案;三未绿逐一过堂——契约闸旧断言按已拍「每页异形」新法更新、server 正式 build 由 HQ 补 shared 项目构建后绿(v2McpArtifact 2/2 复活)、板 wave1 两断言跟上板视觉 v1 现役回执(7/7);git/secrets 双门绿;应用内两砖合验冒烟过:真笔记自动翻页+页缝+页脚页码+装订面板;余 2 红=既有 Python/MinerU 环境基线)` | — | — |
+| [handoffs/2026-09-19-v14-a3-cover-page-order.md](handoffs/2026-09-19-v14-a3-cover-page-order.md) | A3 · 真封面页+真相绑定块 | `done(builder 施工与本轮验证已交工作树;HQ 验收及剩余门收口待办)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

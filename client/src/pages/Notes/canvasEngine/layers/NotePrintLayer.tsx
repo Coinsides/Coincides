@@ -20,12 +20,17 @@ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
   const flowPlan = input.noteCanvasRuntime.pageFlowPlan;
+  const extensions = new Map(input.noteCanvasRuntime.pageFrameExtensions.map((extension) => [extension.frameId, extension]));
+  const frames = input.noteCanvasRuntime.pageFrames.filter((frame) => {
+    const extension = extensions.get(frame.id);
+    return !extension?.isCover || extension.coverExportIncluded !== false;
+  });
   return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
-    {flowPlan && <style>{input.noteCanvasRuntime.pageFrames.map((frame, index) => {
+    {flowPlan && <style>{frames.map((frame, index) => {
       const size = getPagePrintGeometry(frame, true);
       return `@page coincides-flow-${index} { size: ${size.width}px ${size.height}px; margin: 0; }`;
     }).join('\n')}</style>}
-    {input.noteCanvasRuntime.pageFrames.flatMap((frame, frameIndex) => {
+    {frames.flatMap((frame, frameIndex) => {
       const print = getPagePrintGeometry(frame, Boolean(flowPlan));
       return getPagePrintSlices(frame, input.continuousWeb).map((slice) => <section
         key={`${frame.id}:${slice.index}`}
@@ -49,7 +54,8 @@ function PrintPages({ input }: { input: NotePrintInput }) {
         >
           <NoteReadOnlyPageContent
             frame={frame}
-            slots={input.noteCanvasRuntime.pageFrameExtensions.find((entry) => entry.frameId === frame.id)?.slots}
+            slots={extensions.get(frame.id)?.slots}
+            coverImage={extensions.get(frame.id)?.coverImage}
             documentTypography={input.documentTypographyProfile}
             fragments={input.continuousWeb && frame.templateId === 'screen_note'
               ? input.noteCanvasRuntime.blockFragmentProjections.filter((fragment) => (

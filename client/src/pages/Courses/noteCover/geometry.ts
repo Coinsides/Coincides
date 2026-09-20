@@ -1,4 +1,4 @@
-import { NOTE_CARD_COVER_ASPECT_RATIO, type NoteCoverCrop } from '@shared/types';
+import { createCenteredNoteCoverFrame, NOTE_CARD_COVER_ASPECT_RATIO, type NoteCoverCrop, type NoteCoverFrame } from '@shared/types';
 
 export interface CoverSize { width: number; height: number }
 export interface CoverPosition { x: number; y: number }
@@ -6,9 +6,9 @@ export interface CoverPosition { x: number; y: number }
 export const NOTE_COVER_MIN_ZOOM = 1;
 export const NOTE_COVER_MAX_ZOOM = 3;
 
-/** A card and its editor use the same viewport, regardless of display width. */
-export function coverViewport(width: number): CoverSize {
-  return { width, height: width / NOTE_CARD_COVER_ASPECT_RATIO };
+/** Each consuming frame chooses its ratio; existing card callers retain 2:1. */
+export function coverViewport(width: number, aspectRatio = NOTE_CARD_COVER_ASPECT_RATIO): CoverSize {
+  return { width, height: width / aspectRatio };
 }
 
 /** The unzoomed image always covers both viewport axes. */
@@ -33,7 +33,7 @@ export function clampCoverPosition(
   };
 }
 
-/** Percentages refer to original image axes, never card pixels. */
+/** Percentages refer to original image axes, never frame pixels. */
 export function coverPositionToCrop(
   position: CoverPosition, media: CoverSize, viewport: CoverSize, zoom: number,
 ): NoteCoverCrop {
@@ -49,7 +49,18 @@ export function coverPositionToCrop(
   };
 }
 
-export function centeredCoverCrop(image: CoverSize): NoteCoverCrop {
-  const viewport = coverViewport(image.width);
-  return coverPositionToCrop({ x: 0, y: 0 }, coverFitSize(image, viewport), viewport, NOTE_COVER_MIN_ZOOM);
+export function centeredCoverCrop(image: CoverSize, aspectRatio = NOTE_CARD_COVER_ASPECT_RATIO): NoteCoverCrop {
+  return createCenteredNoteCoverFrame(image.width, image.height, aspectRatio).crop;
+}
+
+/** Changing paper shape preserves the source-image focal point and zoom, without stretching it. */
+export function coverCropForViewport(frame: NoteCoverFrame, image: CoverSize, viewport: CoverSize): NoteCoverCrop {
+  const sourceRatio = image.width * frame.crop.width / (image.height * frame.crop.height);
+  if (Math.abs(sourceRatio - viewport.width / viewport.height) < 1e-9) return frame.crop;
+  const fitted = coverPositionToCrop({ x: 0, y: 0 }, coverFitSize(image, viewport), viewport, frame.zoom);
+  return {
+    ...fitted,
+    x: Math.max(0, Math.min(100 - fitted.width, frame.crop.x + frame.crop.width / 2 - fitted.width / 2)),
+    y: Math.max(0, Math.min(100 - fitted.height, frame.crop.y + frame.crop.height / 2 - fitted.height / 2)),
+  };
 }

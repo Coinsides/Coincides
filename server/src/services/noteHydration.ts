@@ -1,3 +1,5 @@
+import { projectNoteCoverMetadata } from './noteCoverStorage.js';
+
 function parseJson<T>(value: string | null | undefined, fallback: T): T {
   if (!value) return fallback;
   try {
@@ -12,7 +14,7 @@ export function hydrateNote(row: any) {
   const { binding_settings_json: _bindingSettings, ...note } = row;
   return {
     ...note,
-    metadata: parseJson(row.metadata, {}),
+    metadata: projectNoteCoverMetadata(row),
   };
 }
 

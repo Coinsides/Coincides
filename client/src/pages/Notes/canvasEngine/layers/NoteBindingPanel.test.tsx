@@ -1,12 +1,13 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createDefaultNoteBindingSettings } from '../../../../../../shared/types/noteBinding';
+import { createDefaultNoteBindingSettings, type NoteBindingSettings } from '../../../../../../shared/types/noteBinding';
 import { NoteBindingPanel } from './NoteBindingPanel';
+import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
 
 afterEach(cleanup);
 describe('A2 binding controls', () => {
   it('edits independent sections, template affixes, six slots and overrides, then saves a note setting', async () => {
-    const save = vi.fn(async (_value: ReturnType<typeof createDefaultNoteBindingSettings>) => {}), close = vi.fn();
+    const save = vi.fn(async (_value: NoteBindingSettings) => {}), close = vi.fn();
     render(<NoteBindingPanel pageCount={4} onSave={save} onClose={close} />);
     fireEvent.change(screen.getByLabelText('眉左文案'), { target: { value: '书名' } });
     fireEvent.click(screen.getByText('新增段'));
@@ -32,7 +33,7 @@ describe('A2 binding controls', () => {
   });
 
   it('retains edits after failed save and supports retry, whole off and deleting a section', async () => {
-    const save = vi.fn<(value: ReturnType<typeof createDefaultNoteBindingSettings>) => Promise<void>>()
+    const save = vi.fn<(value: NoteBindingSettings) => Promise<void>>()
       .mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined);
     const close = vi.fn();
     render(<NoteBindingPanel pageCount={2} onSave={save} onClose={close} />);
@@ -72,5 +73,27 @@ describe('A2 binding controls', () => {
     expect((screen.getAllByLabelText('字号')[0] as HTMLInputElement).checkValidity()).toBe(true);
     fireEvent.click(screen.getByText('保存装订'));
     await waitFor(() => expect(save).toHaveBeenCalledWith(value));
+  });
+
+  it('prevents parent save and cancel while a cover lifecycle save is pending', async () => {
+    let finish: () => void = () => {};
+    const save = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
+    const close = vi.fn();
+    render(<NoteBindingPanel pageCount={1} onSave={save} onClose={close} coverControls={{
+      noteId: 'cover-note', collection: createPageFrameCollectionSeed(), onAddBinding: vi.fn().mockResolvedValue(undefined),
+    }} />);
+    fireEvent.change(screen.getByLabelText('眉左文案'), { target: { value: '保留的装订草稿' } });
+    fireEvent.click(screen.getByRole('button', { name: '添加封面页' }));
+    expect(screen.getByRole('button', { name: '取消' }).matches(':disabled')).toBe(true);
+    expect(screen.getByRole('button', { name: '保存装订' }).matches(':disabled')).toBe(true);
+    fireEvent.submit(screen.getByRole('form', { name: '装订设置' }));
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(close).not.toHaveBeenCalled();
+    await act(async () => { finish(); });
+    expect(screen.getByRole('button', { name: '保存装订' }).matches(':disabled')).toBe(false);
+    expect(screen.getByRole('button', { name: '取消' }).matches(':disabled')).toBe(false);
+    expect((screen.getByLabelText('眉左文案') as HTMLInputElement).value).toBe('保留的装订草稿');
+    expect(close).not.toHaveBeenCalled();
   });
 });

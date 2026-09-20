@@ -10,6 +10,8 @@ import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, writeTypographyProfileMetadata } f
 import { usePaletteColors, usePaletteStore } from '@/hooks/usePaletteColors';
 import { useSkinSuites, useSkinSuiteStore } from '@/hooks/useSkinSuites';
 import { SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from '@/styles/skinPresets';
+import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
+import { addNoteCoverPage } from '../noteCoverPageCollection';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn(), addToast: vi.fn() }));
 vi.mock('@/services/api', () => ({
@@ -77,7 +79,7 @@ describe('B1a adapter paper skin write intent', () => {
     const subject = renderAdapter(); await loaded(subject);
     const a = createDefaultNoteBindingSettings(), b = createDefaultNoteBindingSettings();
     b.enabled = false;
-    let firstSave!: Promise<void>, secondSave!: Promise<void>;
+    let firstSave!: Promise<unknown>, secondSave!: Promise<unknown>;
     act(() => { firstSave = subject.result.current.saveBindingSettings(a); secondSave = subject.result.current.saveBindingSettings(b); });
     await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
     expect(mocks.put).toHaveBeenLastCalledWith('/notes/paper-a/binding-settings', { binding_settings: a });
@@ -87,6 +89,20 @@ describe('B1a adapter paper skin write intent', () => {
     await act(async () => { second.resolve({ data: { ...storedNotes['paper-a'], binding_settings: b } }); await secondSave; });
     expect(subject.result.current.note?.binding_settings).toEqual(b);
     expect(subject.result.current.note?.metadata).toEqual(storedNotes['paper-a'].metadata);
+  });
+
+  it('hydrates the atomically saved cover page collection from the binding response', async () => {
+    const subject = renderAdapter(); await loaded(subject);
+    const collection = addNoteCoverPage(createPageFrameCollectionSeed(), 'cover-page');
+    const value = createDefaultNoteBindingSettings(); value.coverPage.frameId = 'cover-page';
+    const canvas_persistence = { pageFrameCollection: collection, canvasObjects: [], canvasPlacements: [],
+      contentMounts: [], visualConnectors: [], imageObjects: [], structuredObjects: [], blockLayouts: [] };
+    mocks.put.mockResolvedValueOnce({ data: { ...storedNotes['paper-a'], binding_settings: value, canvas_persistence } });
+    await act(async () => { await subject.result.current.saveBindingSettings(value, collection); });
+    expect(mocks.put).toHaveBeenLastCalledWith('/notes/paper-a/binding-settings', { binding_settings: value, collection });
+    expect(subject.result.current.pageFrameCollection?.pageFrames[0].id).toBe('cover-page');
+    expect(subject.result.current.pageFrameCollection?.primaryFrameId).toBe(collection.primaryFrameId);
+    expect(subject.result.current.note?.binding_settings).toEqual(value);
   });
 
   it('publishes successive choices immediately, sends them serially and drains the entire queued intent', async () => {

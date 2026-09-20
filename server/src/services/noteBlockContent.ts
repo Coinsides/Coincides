@@ -5,6 +5,7 @@ import { mergeRuntimeNoteBlockTemplateMetadata } from './templateDefinitions.js'
 import { assertNoteBlockStatusChangeAllowed, restoreNoteBlockForCanvasLifecycle } from './canvasObjects.js';
 import { assertSourceProjectionBlockContentWriteAllowed } from './sourceProjectionPolicy.js';
 import { assertItemRefBlockContent } from './itemRefBlocks.js';
+import { assertCoverResident, assertNoteRefContent, findExistingNoteRefBlock, isBlockOnCover, storedCoverFrameId } from './noteCoverRules.js';
 import { assertMediaBlockAsset, mediaBlockAssetId } from './mediaBlocks.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import { enqueueManagedFileTask, type ManagedFileTask } from './managedFileCleanup.js';
@@ -30,6 +31,26 @@ function updateNoteBlockContentInTransaction(
   const data = updateNoteBlockSchema.parse(value);
   const nextBlockType = data.block_type ?? currentBlock.block_type;
   const nextMetadata = { ...parseJson<Record<string, unknown>>(currentBlock.metadata, {}), ...(data.metadata || {}) };
+  assertNoteRefContent({ block_type: nextBlockType,
+    content_json: data.content_json ?? parseJson(currentBlock.content_json, {}),
+    plain_text: data.plain_text === undefined ? currentBlock.plain_text : data.plain_text,
+    title: data.title === undefined ? currentBlock.title : data.title });
+  if (nextBlockType === 'note_ref' || data.block_type !== undefined || data.metadata !== undefined || data.content_json !== undefined) {
+    const notes = db.prepare('SELECT DISTINCT note_id FROM note_block_placements WHERE block_id = ?')
+      .all(blockId) as { note_id: string }[];
+    for (const { note_id } of notes) {
+      const coverId = storedCoverFrameId(db, userId, note_id);
+      if (!coverId || !isBlockOnCover(db, userId, note_id, blockId, coverId)) continue;
+      if (nextBlockType === 'note_ref') {
+        const field = (data.content_json ?? parseJson<Record<string, unknown>>(currentBlock.content_json, {})).field;
+        if (findExistingNoteRefBlock(db, userId, note_id, String(field), blockId)) {
+          throw new AppError(400, 'This cover already has that identity projection');
+        }
+      }
+      assertCoverResident('paragraph_block_projection', nextBlockType, nextMetadata,
+        data.content_json ?? parseJson(currentBlock.content_json, {}));
+    }
+  }
   if ((data.status ?? currentBlock.status) !== 'trashed') {
     assertMediaBlockAsset(db, userId, { block_type: nextBlockType, metadata: nextMetadata });
   }
@@ -59,7 +80,7 @@ function updateNoteBlockContentInTransaction(
     const hasTemplateReference = data.metadata && (typeof data.metadata.template_definition_id === 'string'
       || typeof data.metadata.template_key === 'string' || typeof data.metadata.template_id === 'string');
     fields.push('metadata = ?');
-    values.push(JSON.stringify((data.block_type ?? currentBlock.block_type) === 'item_ref' ? mergedMetadata
+    values.push(JSON.stringify(['item_ref', 'note_ref'].includes(data.block_type ?? currentBlock.block_type) ? mergedMetadata
       : mergeRuntimeNoteBlockTemplateMetadata(db, userId, mergedMetadata, data.block_type || currentBlock.block_type,
         { allowUnknownTemplateFallback: !hasTemplateReference }).metadata));
   }

@@ -2,21 +2,27 @@ import { useEffect, useRef, useState } from 'react';
 import { createDefaultNoteBindingSettings, NOTE_BINDING_SLOT_NAMES,
   type NoteBindingSettings, type NoteBindingSection, type NoteBindingSlotName } from '../../../../../../shared/types/noteBinding';
 import styles from './NoteBindingPanel.module.css';
+import { NoteCoverPageControls, type NoteCoverPageControlsProps } from './NoteCoverPageControls';
+import type { PageFrameCollectionModel } from '../types';
 
 export const bindingSlotLabels: Record<NoteBindingSlotName, string> = {
   'header-left': '眉左', 'header-center': '眉中', 'header-right': '眉右',
   'footer-left': '脚左', 'footer-center': '脚中', 'footer-right': '脚右',
 };
 
-export function NoteBindingPanel({ value, pageCount, onSave, onClose }: {
+export function NoteBindingPanel({ value, pageCount, onSave, onClose, coverControls }: {
   value?: NoteBindingSettings | null; pageCount: number;
-  onSave: (value: NoteBindingSettings) => Promise<void>; onClose: () => void;
+  onSave: (value: NoteBindingSettings, collection?: PageFrameCollectionModel) => Promise<void>; onClose: () => void;
+  coverControls?: Omit<NoteCoverPageControlsProps, 'value' | 'onChange' | 'onSave'>;
 }) {
   const [draft, setDraft] = useState(() => structuredClone(value ?? createDefaultNoteBindingSettings()));
   const [selected, setSelected] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [coverBusy, setCoverBusy] = useState(false);
   const [error, setError] = useState('');
   const mounted = useRef(true);
+  const saving = useRef(false);
+  const coverSaving = useRef(false);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const section = draft.sections[selected];
   const update = (patch: Partial<NoteBindingSection>) => setDraft((previous) => ({ ...previous,
@@ -32,13 +38,21 @@ export function NoteBindingPanel({ value, pageCount, onSave, onClose }: {
     setSelected(draft.sections.length);
   };
   return <form className={styles.panel} aria-label="装订设置" onSubmit={async (event) => {
-    event.preventDefault(); setBusy(true); setError('');
+    event.preventDefault();
+    if (saving.current || coverSaving.current) return;
+    saving.current = true; setBusy(true); setError('');
     try { await onSave(draft); if (mounted.current) onClose(); }
     catch { if (mounted.current) setError('装订设置未保存，请重试。'); }
-    finally { if (mounted.current) setBusy(false); }
+    finally { saving.current = false; if (mounted.current) setBusy(false); }
   }}>
-    <header><strong>装订</strong><button type="button" disabled={busy} onClick={onClose}>取消</button></header>
-    <fieldset disabled={busy}>
+    <header><strong>装订</strong><button type="button" disabled={busy || coverBusy} onClick={onClose}>取消</button></header>
+    <fieldset disabled={busy || coverBusy}>
+      {coverControls && <NoteCoverPageControls {...coverControls} value={draft} onChange={setDraft} onSave={onSave}
+        onBusyChange={(next) => {
+          coverSaving.current = next;
+          if (mounted.current) setCoverBusy(next);
+          coverControls.onBusyChange?.(next);
+        }} />}
       <label><input type="checkbox" checked={draft.enabled} onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} />显示装订</label>
       <p>设置应用到整段页面；机械页序保持不变。当前共 {pageCount} 页。</p>
       <label>装订段<select value={selected} onChange={(event) => setSelected(Number(event.target.value))}>

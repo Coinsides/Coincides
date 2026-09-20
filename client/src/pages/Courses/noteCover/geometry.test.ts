@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { NOTE_CARD_COVER_ASPECT_RATIO } from '@shared/types';
-import { centeredCoverCrop, clampCoverPosition, clampCoverZoom, coverFitSize, coverPositionToCrop, coverViewport } from './geometry';
+import { centeredCoverCrop, clampCoverPosition, clampCoverZoom, coverCropForViewport, coverFitSize, coverPositionToCrop, coverViewport } from './geometry';
 
 describe('note card cover geometry', () => {
   it('uses the one shared 2:1 viewport at any card width', () => {
@@ -88,5 +88,33 @@ describe('note card cover geometry', () => {
         }
       }
     }
+  });
+
+  it.each([210 / 297, 8.5 / 11, 297 / 210])('uses the paper ratio in the same percentage viewport: %s', (ratio) => {
+    const source = { width: 1600, height: 900 };
+    const small = coverViewport(420, ratio);
+    const large = coverViewport(840, ratio);
+    const crop = coverPositionToCrop({ x: 45, y: -30 }, coverFitSize(source, small), small, 1.5);
+    expect(large.height).toBeCloseTo(small.height * 2, 10);
+    expect(coverPositionToCrop({ x: 90, y: -60 }, coverFitSize(source, large), large, 1.5)).toEqual(crop);
+    expect(source.width * crop.width / (source.height * crop.height)).toBeCloseTo(ratio, 10);
+    expect(source.width * centeredCoverCrop(source, ratio).width
+      / (source.height * centeredCoverCrop(source, ratio).height)).toBeCloseTo(ratio, 10);
+  });
+
+  it('adapts to another paper shape with the same source focal point and zoom', () => {
+    const image = { width: 1000, height: 1000 };
+    const frame = { crop: { x: 40, y: 50, width: 50, height: 25 }, zoom: 2 };
+    expect(coverCropForViewport(frame, image, coverViewport(500))).toBe(frame.crop);
+    expect(coverCropForViewport(frame, image, { width: 500, height: 1000 })).toEqual({
+      x: 52.5, y: 37.5, width: 25, height: 50,
+    });
+    expect(frame).toEqual({ crop: { x: 40, y: 50, width: 50, height: 25 }, zoom: 2 });
+  });
+
+  it('keeps the adapted page viewport inside the original image at its edges', () => {
+    const frame = { crop: { x: 50, y: 75, width: 50, height: 25 }, zoom: 2 };
+    const crop = coverCropForViewport(frame, { width: 1000, height: 1000 }, { width: 500, height: 1000 });
+    expect(crop).toEqual({ x: 62.5, y: 50, width: 25, height: 50 });
   });
 });

@@ -7,6 +7,7 @@ import type { ManagedFileTask } from './managedFileCleanup.js';
 import { projectCanvasPlacementLayout } from './canvasPlacementLayout.js';
 import { readCoordinateContract } from './coordinateContract.js';
 import { paperFreehandDataSchema } from '../validators/paperInk.js';
+import { assertCoverCollection, assertCoverPlacement } from './noteCoverRules.js';
 
 interface OwnedNote {
   id: string;
@@ -1792,6 +1793,7 @@ export function savePageFrameCollection(
   objectLayoutUpdates: Array<{ placement_id: string; object_id: string; layout: Record<string, unknown> }> = [],
 ) {
   const note = getOwnedNote(db, userId, noteId);
+  assertCoverCollection(db, userId, noteId, collectionInput);
   const pageFrames = Array.isArray(collectionInput.pageFrames)
     ? collectionInput.pageFrames.filter(isRecord)
     : [];
@@ -2011,6 +2013,8 @@ export function saveCanvasObject(
   }
   const handler = getCanvasKindHandler(input.kind);
   const placementInput = isRecord(input.placement) ? input.placement : {};
+  assertCoverPlacement(db, userId, noteId, input.kind, placementInput,
+    isRecord(input.extension) ? optionalText(input.extension.block_id) ?? undefined : undefined);
   const placementId = cleanText(placementInput.placement_id, `${objectId}:placement`);
   const context: CanvasKindHandlerContext = { objectId, placementId, input };
 

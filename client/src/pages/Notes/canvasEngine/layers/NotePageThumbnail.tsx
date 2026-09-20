@@ -28,6 +28,8 @@ export const NotePageThumbnail = memo(function NotePageThumbnail({
   input, frame, pageNumber, width, height, scale, selected, renderContent,
   preserveEditingFocus = false, onSelectPage,
 }: NotePageThumbnailProps) {
+  const extension = input.noteCanvasRuntime.pageFrameExtensions.find((entry) => entry.frameId === frame.id);
+  const displayedPageNumber = extension?.mechanicalPageNumber ?? pageNumber;
   return <div className="noteOverviewSheet" data-note-overview-sheet="true"
     data-note-page-thumbnail="true" data-page-frame-id={frame.id}
     data-content-mounted={renderContent ? 'true' : 'false'}>
@@ -37,7 +39,7 @@ export const NotePageThumbnail = memo(function NotePageThumbnail({
         style={{ ...documentTypographyToCssVars(input.documentTypographyProfile),
           width: frame.width, height: frame.height, transform: `scale(${scale})` } as CSSProperties}>
         <NoteReadOnlyPageContent frame={frame}
-          slots={input.noteCanvasRuntime.pageFrameExtensions.find((entry) => entry.frameId === frame.id)?.slots}
+          slots={extension?.slots} coverImage={extension?.coverImage}
           documentTypography={input.documentTypographyProfile}
           fragments={input.noteCanvasRuntime.blockFragmentProjections}
           canvasObjects={input.noteCanvasRuntime.canvasObjects}
@@ -48,11 +50,11 @@ export const NotePageThumbnail = memo(function NotePageThumbnail({
       </div>}
     </div>
     <button type="button" className="noteOverviewPage" data-note-overview-page="true"
-      data-page-frame-id={frame.id} aria-label={`Read page ${pageNumber}`}
+      data-page-frame-id={frame.id} aria-label={extension?.isCover ? 'Read cover page' : `Read page ${displayedPageNumber}`}
       aria-current={selected ? 'page' : undefined}
       onMouseDown={(event) => { if (preserveEditingFocus) event.preventDefault(); }}
       onClick={() => onSelectPage(frame.id)}>
-      <span className="noteOverviewPageLabel">{pageNumber}</span>
+      <span className="noteOverviewPageLabel">{extension?.isCover ? 'Cover' : displayedPageNumber}</span>
     </button>
   </div>;
 });

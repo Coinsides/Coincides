@@ -9,9 +9,11 @@ const cropSchema = z.object({
 }).strict().refine((crop) => crop.x + crop.width <= 100 + 1e-6
   && crop.y + crop.height <= 100 + 1e-6, 'Cover crop must stay inside the original image');
 
+export const noteCoverFrameSchema = z.object({ crop: cropSchema, zoom: z.number().finite().min(1) }).strict();
+
 export const noteCoverSchema: z.ZodType<NoteCover> = z.object({
   assetId: z.string().min(1),
-  card: z.object({ crop: cropSchema, zoom: z.number().finite().min(1) }).strict(),
+  card: noteCoverFrameSchema,
 }).strict();
 
 const coverBindingMetadataSchema = z.object({

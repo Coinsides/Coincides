@@ -1,3 +1,5 @@
+import type { NoteCoverFrame } from './noteCover.js';
+
 /** Note-owned binding settings. Pages only project this data; they never store it. */
 export const NOTE_BINDING_SLOT_NAMES = [
   'header-left', 'header-center', 'header-right',
@@ -43,12 +45,47 @@ export interface NoteBindingSection {
   slots: Record<NoteBindingSlotName, NoteBindingSlotSettings>;
 }
 
-export interface NoteBindingSettings {
-  version: 1;
+interface NoteBindingSettingsBase {
   enabled: boolean;
-  /** Reserved cover-page hook; this setting does not create a cover page. */
+  /** Cover pages suppress all folio furniture. */
   dropFolioOnCover: boolean;
   sections: NoteBindingSection[];
+}
+
+export interface NoteBindingCoverPage {
+  /** Identity of an ordinary, persisted page_frame. Null means no cover page. */
+  frameId: string | null;
+  exportIncluded: boolean;
+}
+
+export interface NoteBindingCover {
+  assetId: string;
+  card?: NoteCoverFrame;
+  /** Same non-destructive viewport as the card frame, sized for the paper. */
+  page?: NoteCoverFrame;
+}
+
+export interface NoteBindingSettingsV1 extends NoteBindingSettingsBase { version: 1 }
+export interface NoteBindingSettingsV2 extends NoteBindingSettingsBase {
+  version: 2;
+  coverPage: NoteBindingCoverPage;
+  cover: NoteBindingCover | null;
+}
+export type NoteBindingSettings = NoteBindingSettingsV1 | NoteBindingSettingsV2;
+
+export function getNoteBindingCoverPage(settings: NoteBindingSettings | null | undefined): NoteBindingCoverPage {
+  return settings?.version === 2 ? settings.coverPage : { frameId: null, exportIncluded: true };
+}
+
+export function getNoteBindingCover(settings: NoteBindingSettings | null | undefined): NoteBindingCover | null {
+  return settings?.version === 2 ? settings.cover : null;
+}
+
+export function upgradeNoteBindingSettings(settings: NoteBindingSettings | null | undefined): NoteBindingSettingsV2 {
+  return settings?.version === 2 ? settings : {
+    ...(settings ?? createDefaultNoteBindingSettings()), version: 2,
+    coverPage: { frameId: null, exportIncluded: true }, cover: null,
+  };
 }
 
 export function createDefaultNoteBindingSection(id = 'default', startPage = 1): NoteBindingSection {
@@ -64,6 +101,7 @@ export function createDefaultNoteBindingSection(id = 'default', startPage = 1): 
 }
 
 /** Construction-period defaults; turning binding off remains an explicit setting. */
-export function createDefaultNoteBindingSettings(): NoteBindingSettings {
-  return { version: 1, enabled: true, dropFolioOnCover: true, sections: [createDefaultNoteBindingSection()] };
+export function createDefaultNoteBindingSettings(): NoteBindingSettingsV2 {
+  return { version: 2, enabled: true, dropFolioOnCover: true, sections: [createDefaultNoteBindingSection()],
+    coverPage: { frameId: null, exportIncluded: true }, cover: null };
 }

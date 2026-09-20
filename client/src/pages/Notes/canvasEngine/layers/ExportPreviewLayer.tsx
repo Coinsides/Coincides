@@ -78,7 +78,7 @@ function ExportPreviewGroup({
 function pageFrameExportPreviewLabel(pageFrame: PageFrameExportPreview, index: number): string {
   const role = pageFrame.role === 'primary_page_frame' ? 'Primary PageFrame' : 'Secondary PageFrame';
   const pageSize = pageFrame.pageSize || 'Custom';
-  return `${role} ${index + 1} / ${pageSize}`;
+  return pageFrame.isCover ? `Cover / ${pageSize}` : `${role} ${pageFrame.mechanicalPageNumber ?? index + 1} / ${pageSize}`;
 }
 
 function exportPolicyLabel(row: ExportPreviewRow): string {

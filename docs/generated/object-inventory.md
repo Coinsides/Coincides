@@ -218,7 +218,7 @@
 
 ## 3. Canvas object kinds（7）
 
-来源：`server/src/services/canvasObjects.ts` 的 `KIND_HANDLERS`（第 1327 行）。
+来源：`server/src/services/canvasObjects.ts` 的 `KIND_HANDLERS`（第 1328 行）。
 
 > 契约 I-8：**新增 kind ＝ 注册一个三元组，核心零 if-kind。**
 

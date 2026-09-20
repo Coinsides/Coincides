@@ -4,13 +4,16 @@ import Cropper, { type Area, type MediaSize, type Size } from 'react-easy-crop';
 import { NOTE_CARD_COVER_ASPECT_RATIO, type NoteCoverFrame } from '@shared/types';
 import {
   centeredCoverCrop, clampCoverPosition, clampCoverZoom,
-  NOTE_COVER_MAX_ZOOM, NOTE_COVER_MIN_ZOOM,
+  NOTE_COVER_MAX_ZOOM, NOTE_COVER_MIN_ZOOM, type CoverSize,
 } from './geometry';
 import styles from './NoteCoverEditor.module.css';
 
 export interface NoteCoverEditorProps {
   imageUrl: string;
   initialFrame?: NoteCoverFrame;
+  aspectRatio?: number;
+  frameKind?: 'card' | 'page';
+  onImageLoaded?: (size: CoverSize) => void;
   busy?: boolean;
   error?: string | null;
   onSave: (frame: NoteCoverFrame) => void;
@@ -19,7 +22,8 @@ export interface NoteCoverEditorProps {
 
 /** This component owns one image editing session; the caller remounts on replacement. */
 export function NoteCoverEditor({
-  imageUrl, initialFrame, busy = false, error, onSave, onCancel,
+  imageUrl, initialFrame, aspectRatio = NOTE_CARD_COVER_ASPECT_RATIO, frameKind = 'card',
+  busy = false, error, onSave, onCancel, onImageLoaded,
 }: NoteCoverEditorProps) {
   const titleId = useId();
   const instructionsId = useId();
@@ -76,7 +80,8 @@ export function NoteCoverEditor({
   const mediaLoaded = (size: MediaSize) => {
     media.current = size;
     if (size.naturalWidth <= 0 || size.naturalHeight <= 0) return;
-    latestCrop.current ??= initialFrame?.crop ?? centeredCoverCrop({ width: size.naturalWidth, height: size.naturalHeight });
+    onImageLoaded?.({ width: size.naturalWidth, height: size.naturalHeight });
+    latestCrop.current ??= initialFrame?.crop ?? centeredCoverCrop({ width: size.naturalWidth, height: size.naturalHeight }, aspectRatio);
     ready.current = true;
     setLoaded(true);
     setLoadFailed(false);
@@ -108,13 +113,14 @@ export function NoteCoverEditor({
       <section ref={dialog} className={styles.dialog} role="dialog" aria-modal="true"
         aria-labelledby={titleId} aria-describedby={instructionsId} aria-busy={busy} tabIndex={-1}>
         <header className={styles.header}>
-          <h2 id={titleId}>Crop cover</h2>
+          <h2 id={titleId}>{frameKind === 'page' ? '封面页取景' : 'Crop cover'}</h2>
           <p id={instructionsId}>Drag the image to position it. Use the slider, scroll, or pinch to zoom.</p>
         </header>
         <div className={styles.editorBody}>
-          <div className={styles.viewport} style={{ aspectRatio: NOTE_CARD_COVER_ASPECT_RATIO } as CSSProperties}>
+          <div className={`${styles.viewport} ${frameKind === 'page' ? styles.pageViewport : ''}`}
+            style={{ aspectRatio, '--cover-aspect-ratio': aspectRatio } as CSSProperties}>
             {!loadFailed && <Cropper image={imageUrl} crop={crop} zoom={zoom}
-              aspect={NOTE_CARD_COVER_ASPECT_RATIO} objectFit="cover"
+              aspect={aspectRatio} objectFit="cover"
               minZoom={NOTE_COVER_MIN_ZOOM} maxZoom={maximumZoom} restrictPosition
               zoomWithScroll={!busy} showGrid={!busy} onCropChange={(next) => { if (!busy) setCrop(next); }} onZoomChange={zoomChanged}
               onCropComplete={rememberCrop} onCropAreaChange={rememberCrop}

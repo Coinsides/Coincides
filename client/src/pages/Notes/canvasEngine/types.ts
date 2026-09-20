@@ -1,4 +1,4 @@
-import type { NoteBindingSlotName, NoteBindingSlotStyle } from '../../../../../shared/types/noteBinding';
+import type { NoteBindingCover, NoteBindingSlotName, NoteBindingSlotStyle } from '../../../../../shared/types/noteBinding';
 
 export type NoteCanvasMode = 'page' | 'canvas';
 
@@ -379,6 +379,11 @@ export interface ContentMount {
 
 export interface PageFrameExtension {
   frameId: string;
+  /** Read-side projection of binding settings; never page-owned storage. */
+  isCover?: boolean;
+  mechanicalPageNumber?: number;
+  coverImage?: NoteBindingCover | null;
+  coverExportIncluded?: boolean;
   objectId: string;
   pageStackId?: string | null;
   pageStackPageIndex?: number | null;

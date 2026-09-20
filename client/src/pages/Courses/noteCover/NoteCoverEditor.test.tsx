@@ -127,4 +127,28 @@ describe('NoteCoverEditor session', () => {
     expect(onCancel).not.toHaveBeenCalled();
     expect(onSave).not.toHaveBeenCalled();
   });
+
+  it('uses a page frame ratio and saves centered source percentages before the first crop callback', () => {
+    const onSave = vi.fn();
+    const onImageLoaded = vi.fn();
+    render(<NoteCoverEditor imageUrl="blob:page" frameKind="page" aspectRatio={0.5}
+      onSave={onSave} onCancel={vi.fn()} onImageLoaded={onImageLoaded} />);
+    expect(screen.getByRole('dialog', { name: '封面页取景' })).toBeTruthy();
+    expect(cropper().aspect).toBe(0.5);
+    act(() => { cropper().onMediaLoaded?.({ width: 600, height: 600, naturalWidth: 1000, naturalHeight: 1000 }); });
+    expect(onImageLoaded).toHaveBeenCalledExactlyOnceWith({ width: 1000, height: 1000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onSave).toHaveBeenCalledExactlyOnceWith({ crop: { x: 25, y: 0, width: 50, height: 100 }, zoom: 1 });
+  });
+
+  it('reopens a saved page frame without rewriting its crop or zoom', () => {
+    const frame = { crop: { x: 52.5, y: 37.5, width: 25, height: 50 }, zoom: 2 };
+    const onSave = vi.fn();
+    render(<NoteCoverEditor imageUrl="blob:page" frameKind="page" aspectRatio={0.5} initialFrame={frame}
+      onSave={onSave} onCancel={vi.fn()} />);
+    act(() => { cropper().onMediaLoaded?.({ width: 600, height: 600, naturalWidth: 1000, naturalHeight: 1000 }); });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onSave).toHaveBeenCalledExactlyOnceWith(frame);
+    expect(onSave.mock.calls[0][0]).toBe(frame);
+  });
 });

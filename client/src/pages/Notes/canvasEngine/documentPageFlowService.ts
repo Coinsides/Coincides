@@ -88,6 +88,8 @@ export interface DocumentPageFlowPlan {
 
 export interface ResolveDocumentPageFlowPlanInput {
   collection: PageFrameCollectionModel;
+  /** Binding-owned cover identity. Its page and residents never enter content flow. */
+  coverFrameId?: string | null;
   blocks: PageFlowBlock[];
   documentTypography?: DocumentTypographyProfile;
   coordinateContract?: CoordinateContract;
@@ -113,6 +115,7 @@ function isFlowBlock(block: PageFlowBlock, contract: CoordinateContract): boolea
  * are never mutated. Existing per-frame geometry is used on every continuation. */
 export function resolveDocumentPageFlowPlan({
   collection: originalCollection,
+  coverFrameId,
   blocks,
   documentTypography = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
   coordinateContract = 'v2',
@@ -129,12 +132,13 @@ export function resolveDocumentPageFlowPlan({
   const appendedFrameIds: string[] = [];
   const excludedBlockIds: string[] = [];
   const overflows: PageFlowOverflow[] = [];
-  const primaryFrameId = collection.primaryFrameId || collection.pageFrames[0]?.id;
+  const primaryFrameId = collection.primaryFrameId !== coverFrameId && collection.primaryFrameId
+    || collection.pageFrames.find((frame) => frame.id !== coverFrameId)?.id;
   const blocksByStack = new Map<string, PageFlowBlock[]>();
   for (const block of blocks) {
     const frameId = block.layout.frame_id || primaryFrameId;
     const stack = collection.pageStacks!.find((candidate) => candidate.frameIds.includes(frameId || ''));
-    if (!isFlowBlock(block, coordinateContract) || !stack) {
+    if (frameId === coverFrameId || !isFlowBlock(block, coordinateContract) || !stack) {
       excludedBlockIds.push(block.blockId);
       continue;
     }
@@ -146,13 +150,14 @@ export function resolveDocumentPageFlowPlan({
   for (const [stackId, stackBlocks] of blocksByStack) {
     let frameIndex = 0;
     let cursorY = 0;
+    const contentFrameIds = () => collection.pageStacks!.find((candidate) => candidate.id === stackId)!
+      .frameIds.filter((frameId) => frameId !== coverFrameId);
     const currentFrame = (): PageFrameModel => {
-      const stack = collection.pageStacks!.find((candidate) => candidate.id === stackId)!;
-      return collection.pageFrames.find((frame) => frame.id === stack.frameIds[frameIndex])!;
+      return collection.pageFrames.find((frame) => frame.id === contentFrameIds()[frameIndex])!;
     };
     const advanceFrame = (): void => {
       const stack = collection.pageStacks!.find((candidate) => candidate.id === stackId)!;
-      if (frameIndex + 1 >= stack.frameIds.length) {
+      if (frameIndex + 1 >= contentFrameIds().length) {
         // appendPageFrameToStack derives IDs from the input collection, no clock/randomness.
         const next = appendPageFrameToStack(collection, stackId, currentFrame().id);
         const added = next.pageFrames.find((frame) => !collection.pageFrames.some((previous) => previous.id === frame.id))!;

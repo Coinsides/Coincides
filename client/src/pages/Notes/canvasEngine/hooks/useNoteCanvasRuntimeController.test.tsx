@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { UseRuntimePresentationControllerOptions } from './useRuntimePresentationController';
@@ -8,6 +8,9 @@ import { createDefaultDocumentTypographyProfile, documentTypographyToCssVars } f
 import { estimateTypographyTextBlockHeight } from '../typographyMeasurementService';
 import { buildExportPreviewModel } from '../exportPreviewService';
 import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from '../types';
+import { createDefaultNoteBindingSettings, type NoteBindingSettings } from '../../../../../../shared/types/noteBinding';
+import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
+import { addNoteCoverPage } from '../noteCoverPageCollection';
 
 vi.mock('@/services/api', () => ({
   getToken: () => null, setToken: vi.fn(),
@@ -32,6 +35,11 @@ const rootBridgeContract = vi.hoisted(() => ({
   blockLayouts: {} as Record<string, BlockBoxLayout>,
   surfaceMode: 'page',
   presentationOptions: null as UseRuntimePresentationControllerOptions | null,
+  bindingSettings: undefined as NoteBindingSettings | undefined,
+  coordinateContract: 'v1' as 'v1' | 'v2',
+  createBlock: vi.fn<(...args: unknown[]) => Promise<NoteBlock | null>>(),
+  markBlockSelected: vi.fn(),
+  setFocusBlockId: vi.fn(),
   noop: () => undefined,
 }));
 
@@ -54,6 +62,8 @@ vi.mock('./useRuntimeSurfaceStateController', async () => {
       return new Proxy({
         ...surface,
         layoutMode: rootBridgeContract.layoutMode,
+        markBlockSelected: rootBridgeContract.markBlockSelected,
+        setFocusBlockId: rootBridgeContract.setFocusBlockId,
         blockListRef,
         movingBlockIdRef,
         suppressMeasuredReflowUntilRef,
@@ -81,6 +91,8 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
     persistedCanvasObjects: [],
     persistedCanvasPlacements: [],
     persistedContentMounts: [],
+    coordinateContract: rootBridgeContract.coordinateContract,
+    createBlock: rootBridgeContract.createBlock,
   }, {
     get(target, property, receiver) {
       return Reflect.has(target, property)
@@ -88,6 +100,11 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
         : rootBridgeContract.noop;
     },
   }),
+}));
+
+vi.mock('./useNoteBinding', () => ({
+  useNoteBinding: () => ({ value: rootBridgeContract.bindingSettings, loading: false, error: null,
+    save: rootBridgeContract.noop, retry: rootBridgeContract.noop }),
 }));
 
 vi.mock('./usePageFrameWalls', async () => {
@@ -235,6 +252,11 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     rootBridgeContract.hydratedProfile = createDefaultDocumentTypographyProfile();
     rootBridgeContract.dispatchedProfiles = {};
     rootBridgeContract.blockLayouts = {};
+    rootBridgeContract.bindingSettings = undefined;
+    rootBridgeContract.coordinateContract = 'v1';
+    rootBridgeContract.createBlock.mockReset();
+    rootBridgeContract.markBlockSelected.mockClear();
+    rootBridgeContract.setFocusBlockId.mockClear();
   });
 
   it('assembles Page without a surface toggle prop', () => {
@@ -242,6 +264,70 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     expect(rootBridgeContract.presentationOptions).not.toBeNull();
     expect(rootBridgeContract.presentationOptions).not.toHaveProperty('onToggleSurfaceMode');
     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+  });
+
+  function coverBindingCase(field: 'title' | 'description') {
+    const content = createPageFrameCollectionSeed();
+    rootBridgeContract.pageFrameCollection = addNoteCoverPage(content, 'rebuilt-cover');
+    const settings = createDefaultNoteBindingSettings();
+    settings.coverPage.frameId = 'rebuilt-cover';
+    rootBridgeContract.bindingSettings = settings;
+    rootBridgeContract.coordinateContract = 'v2';
+    const projection = (id: string, frameId: string): NoteBlock => ({ ...formalPageSpecimen,
+      id, placement_id: `placement-${id}`, block_type: 'note_ref', content_json: { field }, plain_text: '',
+      canvas_layout: { x: 40, y: 80, width: 400, height: 100, width_mode: 'manual',
+        frame_id: frameId, coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
+    });
+    return { old: projection('retained-binding', content.primaryFrameId!),
+      current: projection('current-binding', 'rebuilt-cover') };
+  }
+
+  it.each(['title', 'description'] as const)('focuses the current cover %s projection even when the content page retains an earlier one', async (field) => {
+    const specimens = coverBindingCase(field);
+    rootBridgeContract.blocks = [specimens.old, specimens.current];
+    render(<RootBridgeHarness />);
+    const add = rootBridgeContract.presentationOptions?.onAddNoteBinding;
+    expect(add).toBeTypeOf('function');
+    await act(async () => { await add!(field); });
+    expect(rootBridgeContract.createBlock).not.toHaveBeenCalled();
+    expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
+    expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
+  });
+
+  it.each(['title', 'description'] as const)('creates a fresh cover %s projection after the former one was handed to the content page', async (field) => {
+    const specimens = coverBindingCase(field);
+    rootBridgeContract.blocks = [specimens.old];
+    rootBridgeContract.createBlock.mockResolvedValue(specimens.current);
+    const before = structuredClone(specimens.old);
+    render(<RootBridgeHarness />);
+    const add = rootBridgeContract.presentationOptions?.onAddNoteBinding;
+    expect(add).toBeTypeOf('function');
+    await act(async () => { await add!(field); });
+    expect(rootBridgeContract.createBlock).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ legacy_block_type: 'note_ref' }), '',
+      expect.objectContaining({ contentJson: { field }, layout: expect.objectContaining({
+        frame_id: 'rebuilt-cover', width_mode: 'manual', coordinate_space: 'page_frame_local', surface: 'formal_page',
+      }) }),
+    );
+    expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
+    expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
+    expect(specimens.old).toEqual(before);
+  });
+
+  it.each(['title', 'description'] as const)('creates a current-cover %s projection when an earlier one is in the tray with a retained frame id', async (field) => {
+    const specimens = coverBindingCase(field);
+    const tray = { ...specimens.current, id: 'tray-binding', placement_id: 'tray-placement',
+      canvas_layout: { ...specimens.current.canvas_layout, surface: 'tray' as const } };
+    rootBridgeContract.blocks = [tray];
+    rootBridgeContract.createBlock.mockResolvedValue(specimens.current);
+    render(<RootBridgeHarness />);
+    const add = rootBridgeContract.presentationOptions?.onAddNoteBinding;
+    expect(add).toBeTypeOf('function');
+    await act(async () => { await add!(field); });
+    expect(rootBridgeContract.createBlock).toHaveBeenCalledOnce();
+    expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
+    expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
+    expect(tray.canvas_layout).toMatchObject({ surface: 'tray', frame_id: 'rebuilt-cover' });
   });
 
   it('gates both wall hook and runtime boundary with the current Layout state', () => {

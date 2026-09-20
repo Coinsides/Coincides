@@ -910,13 +910,19 @@ export function useNoteCanvasDataAdapter({
   const bindingSaveTails = useRef(new Map<string, Promise<unknown>>());
   const saveBindingSettings = useCallback(writeRegistry.hold('saveBindingSettings', async (
     bindingSettings: import('@shared/types/noteBinding').NoteBindingSettings,
+    collection?: PageFrameCollectionModel,
   ) => {
     const current = noteRef.current;
     if (!current || current.id !== routeNoteIdRef.current) throw new Error('Note is not loaded');
     const generation = routeRequestGenerationRef.current;
     const epoch = successfulHydrationEpochRef.current;
     const previous = bindingSaveTails.current.get(current.id) || Promise.resolve();
-    const write = previous.then(() => api.put<Note>(`/notes/${current.id}/binding-settings`, { binding_settings: bindingSettings }));
+    const write = previous.then(async () => {
+      if (collection && frameHealing.pending) await frameHealing.pending;
+      return api.put<Note & { canvas_persistence?: unknown }>(`/notes/${current.id}/binding-settings`, {
+        binding_settings: bindingSettings, ...(collection ? { collection: normalizePageFrameCollection(collection) } : {}),
+      });
+    });
     const settled = write.catch(() => undefined);
     bindingSaveTails.current.set(current.id, settled);
     try {
@@ -925,13 +931,29 @@ export function useNoteCanvasDataAdapter({
         && routeNoteIdRef.current === current.id && routeRequestGenerationRef.current === generation
         && successfulHydrationEpochRef.current === epoch) {
         const saved = response.data.binding_settings ?? null;
-        if (noteRef.current?.id === current.id) noteRef.current = { ...noteRef.current, binding_settings: saved };
-        setNote((latest) => latest?.id === current.id ? { ...latest, binding_settings: saved } : latest);
+        const bindingMetadata = response.data.metadata?.binding;
+        const withBinding = (latest: Note): Note => ({ ...latest, binding_settings: saved,
+          metadata: bindingMetadata === undefined ? latest.metadata : { ...latest.metadata, binding: bindingMetadata },
+        });
+        if (noteRef.current?.id === current.id) noteRef.current = withBinding(noteRef.current);
+        setNote((latest) => latest?.id === current.id ? withBinding(latest) : latest);
+        if (response.data.canvas_persistence) {
+          const persistence = normalizeCanvasPersistencePayload(response.data.canvas_persistence, coordinateContract);
+          frameHealing.collection = persistence.pageFrameCollection;
+          currentPageFrameCollectionRef.current = persistence.pageFrameCollection;
+          setPageFrameCollection(persistence.pageFrameCollection);
+          setPersistedCanvasObjects(persistence.canvasObjects);
+          setPersistedCanvasPlacements(persistence.canvasPlacements);
+          setBlocks((blocks) => applyCanvasLayoutsToBlocks(blocks, persistence.blockLayouts, {
+            pageFrameCollection: persistence.pageFrameCollection, coordinateContract,
+          }));
+        }
       }
+      return response.data.binding_settings ?? null;
     } finally {
       if (bindingSaveTails.current.get(current.id) === settled) bindingSaveTails.current.delete(current.id);
     }
-  }), [writeRegistry]);
+  }), [writeRegistry, frameHealing, coordinateContract]);
 
   const saveAnnotationTruthsOutcome = useCallback(writeRegistry.hold('saveAnnotationTruths', async (
     nextAnnotations: AnnotationTruthV1[], options: { preserveDrafts?: boolean } = {},
@@ -1334,7 +1356,7 @@ export function useNoteCanvasDataAdapter({
       && noteRef.current?.id === requestedNote.id
     );
     const body = text.trimEnd();
-    const metadata = template.legacy_block_type === 'item_ref' ? {} : {
+    const metadata = template.legacy_block_type === 'item_ref' || template.legacy_block_type === 'note_ref' ? {} : {
       ...metadataForTemplateOption(template),
       ...(options.metadataPatch || {}),
     };
@@ -1423,7 +1445,7 @@ export function useNoteCanvasDataAdapter({
     if (!requestIsCurrent()) return null;
     const createdTextFlow = getTextFlowContent(nextContent);
     const savedOrder = new Map(orderedBlocks?.map((block) => [block.id, block.order_index]));
-    setBlocks((current) => [...current, created]
+    setBlocks((current) => [...current.filter((block) => block.id !== created.id), created]
       .map((block) => savedOrder.has(block.id) ? { ...block, order_index: savedOrder.get(block.id)! } : block)
       .sort((a, b) => a.order_index - b.order_index));
     setBlockTextDrafts((current) => ({ ...current, [created.id]: text.trimEnd() }));
@@ -1703,7 +1725,7 @@ export function useNoteCanvasDataAdapter({
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
     // operations still cross this barrier and must not become failed writes.
-    if (block.block_type === 'item_ref') {
+    if (block.block_type === 'item_ref' || block.block_type === 'note_ref') {
       return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
     }
     if (!allowSourceContentMutation()) {
@@ -2226,7 +2248,7 @@ export function useNoteCanvasDataAdapter({
       baseRevision?: number;
     } = {},
   ) => {
-    if (block.block_type === 'item_ref' || !allowSourceContentMutation()) return null;
+    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || !allowSourceContentMutation()) return null;
     const requestedNoteId = noteRef.current?.id || null;
     if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) {
       console.error('Failed to convert block: route receipt is unavailable');

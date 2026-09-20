@@ -16,6 +16,8 @@ import { usePaperInkCommands } from './usePaperInkCommands';
 import { usePageFrameWalls } from './usePageFrameWalls';
 import { useNoteSkin } from './useNoteSkin';
 import { useNoteBinding } from './useNoteBinding';
+import { getNoteBindingCoverPage } from '../../../../../../shared/types/noteBinding';
+import type { BlockBoxLayout } from '../runtimeLayout';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
@@ -157,9 +159,9 @@ export function useNoteCanvasRuntimeController() {
     persistCanvasObject,
     deleteCanvasObject,
     saveDocumentTypographyProfile,
-    createBlock,
+    createBlock: createBlockRaw,
     transferTextUnit,
-    createDraftBlock,
+    createDraftBlock: createDraftBlockRaw,
     discardDraftBlock,
     finalizeDraftBlock,
     saveBlock: saveBlockRaw,
@@ -167,9 +169,9 @@ export function useNoteCanvasRuntimeController() {
     inspectBlockEditRecovery,
     replayBlockEditRecovery,
     dismissBlockEditRecovery,
-    saveDraftBlockPlacement,
+    saveDraftBlockPlacement: saveDraftBlockPlacementRaw,
     applyTemplateToBlock,
-    persistBlockLayout,
+    persistBlockLayout: persistBlockLayoutRaw,
     refreshTrayState,
     toggleBlockExportRole,
     toggleBlockAIVisibility,
@@ -201,6 +203,20 @@ export function useNoteCanvasRuntimeController() {
   });
   const skin = useNoteSkin(note, saveSkin, skinSaveError);
   const binding = useNoteBinding(note?.id, saveBindingSettings);
+  const coverFrameId = getNoteBindingCoverPage(binding.value).frameId;
+  const coverLayout = useCallback((layout: BlockBoxLayout): BlockBoxLayout =>
+    coverFrameId && layout.frame_id === coverFrameId ? { ...layout, width_mode: 'manual' } : layout, [coverFrameId]);
+  const createBlock: typeof createBlockRaw = useCallback((template, text, options = {}) =>
+    createBlockRaw(template, text, { ...options, ...(options.layout ? { layout: coverLayout(options.layout) } : {}) }),
+  [createBlockRaw, coverLayout]);
+  const createDraftBlock: typeof createDraftBlockRaw = useCallback((template, text, options) =>
+    createDraftBlockRaw(template, text, { ...options, ...(options.layout ? { layout: coverLayout(options.layout) } : {}) }),
+  [createDraftBlockRaw, coverLayout]);
+  const saveDraftBlockPlacement: typeof saveDraftBlockPlacementRaw = useCallback((block, layout, key, targetNoteId) =>
+    saveDraftBlockPlacementRaw(block, targetNoteId === noteId ? coverLayout(layout) : layout, key, targetNoteId),
+  [saveDraftBlockPlacementRaw, coverLayout, noteId]);
+  const persistBlockLayout: typeof persistBlockLayoutRaw = useCallback((block, layout) =>
+    persistBlockLayoutRaw(block, coverLayout(layout)), [persistBlockLayoutRaw, coverLayout]);
   const pageFrameCollection = walls.collection;
   const persistedCanvasPlacements = walls.placements;
 
@@ -275,6 +291,7 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const { plan: pageFlowPlan, layouts: blockLayouts } = useNotePageFlow({
+    coverFrameId,
     noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving,
     coordinateContract, blocks: visibleBlocks, layouts: unpaginatedBlockLayouts,
     pageFrames, collection: pageFrameCollection, typography: documentTypographyProfile,
@@ -594,6 +611,25 @@ export function useNoteCanvasRuntimeController() {
     onDeleteCanvasObject: inkCommands.deleteCanvasObject,
     onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
     onSaveBindingSettings: binding.loading || binding.error ? undefined : binding.save,
+    onAddNoteBinding: binding.loading || binding.error || sourceProjectionPolicy.contentReadOnly ? undefined : async (field) => {
+      if (!textHistory.boundary()) throw new Error('请先完成当前编辑。');
+      const frame = flowPageFrameCollection?.pageFrames.find((frame) => frame.id === coverFrameId);
+      if (!frame) throw new Error('请先添加封面页。');
+      const existing = blocks.find((block) => block.block_type === 'note_ref'
+        && block.content_json.field === field && unpaginatedBlockLayouts[block.id]?.frame_id === coverFrameId
+        && unpaginatedBlockLayouts[block.id]?.surface !== 'tray');
+      if (existing) { markBlockSelected(existing.id); setFocusBlockId(existing.id); return; }
+      const width = Math.max(80, frame.width - frame.contentInset.left - frame.contentInset.right);
+      const created = await createBlock({ ...defaultTextTemplate, legacy_block_type: 'note_ref' }, '', {
+        contentJson: { field }, layout: { ...defaultDraftLayout, x: 0,
+          y: field === 'title' ? 80 : 180, width, height: field === 'title' ? 110 : 70,
+          width_mode: 'manual', frame_id: frame.id, coordinate_space: 'page_frame_local',
+          surface: 'formal_page', boundary_role: 'inside',
+        },
+      });
+      if (!created) throw new Error('绑定块未添加，请重试。');
+      markBlockSelected(created.id); setFocusBlockId(created.id);
+    },
     bindingError: binding.error,
     onRetryBinding: binding.retry,
     onSelectBlock: markBlockSelected,

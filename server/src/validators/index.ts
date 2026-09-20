@@ -3,6 +3,7 @@ import { PROPOSAL_TYPES } from '../services/proposalTypes.js';
 import { skinSelectionSchema } from './skin.js';
 import { paperFreehandDataSchema } from './paperInk.js';
 import { noteMetadataSchema } from './noteCover.js';
+import { noteRefBlockDataSchema } from './noteRef.js';
 import { agentContextHintSchema } from './agentContextHint.js';
 
 // --- Auth ---
@@ -59,6 +60,7 @@ export const noteBlockTypeSchema = z.enum([
   'answer',
   'sidenote',
   'item_ref',
+  'note_ref',
   'media',
 ]);
 
@@ -764,6 +766,12 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 }).superRefine((data, ctx) => {
+  if (data.block_type === 'note_ref') {
+    const result = noteRefBlockDataSchema.safeParse(data.content_json);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });
+    if (data.plain_text || data.title) ctx.addIssue({ code: z.ZodIssueCode.custom,
+      message: 'Note identity blocks store only a field reference', path: ['plain_text'] });
+  }
   if (data.block_type === 'media') {
     const result = mediaBlockMetadataSchema.safeParse(data.metadata?.media);
     if (!result.success) {

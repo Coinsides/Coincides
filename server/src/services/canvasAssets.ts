@@ -235,6 +235,14 @@ export function releaseAssetReference(
     remaining.count += coverReferences.count;
   }
 
+  if ((db.pragma('table_info(notes)') as { name: string }[]).some((column) => column.name === 'binding_settings_json')) {
+    const pageCoverReferences = db.prepare(`SELECT COUNT(*) AS count FROM notes
+      WHERE user_id = ? AND json_valid(binding_settings_json)
+        AND json_extract(binding_settings_json, '$.cover.assetId') = ?`)
+      .get(userId, assetId) as { count: number };
+    remaining.count += pageCoverReferences.count;
+  }
+
   // A relocated visual owns a durable reference even after its original note is
   // removed. The existence check also keeps pre-board migration fixtures valid.
   if (db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'board_visuals'").get()) {
@@ -268,6 +276,18 @@ export function releaseAssetReference(
   };
 }
 
+function detachPageCoverReferences(db: Database.Database, userId: string, scope: 'id' | 'course_id', scopeId: string) {
+  if (!(db.pragma('table_info(notes)') as { name: string }[]).some((column) => column.name === 'binding_settings_json')) return [];
+  const rows = db.prepare(`SELECT json_extract(binding_settings_json, '$.cover.assetId') AS asset_id FROM notes
+    WHERE user_id = ? AND ${scope} = ? AND json_valid(binding_settings_json)
+      AND json_extract(binding_settings_json, '$.cover.assetId') IS NOT NULL`)
+    .all(userId, scopeId) as { asset_id: string }[];
+  db.prepare(`UPDATE notes SET binding_settings_json = json_set(binding_settings_json, '$.cover', NULL)
+    WHERE user_id = ? AND ${scope} = ? AND json_valid(binding_settings_json)
+      AND json_extract(binding_settings_json, '$.cover.assetId') IS NOT NULL`).run(userId, scopeId);
+  return rows;
+}
+
 export function releaseCourseCanvasAssets(
   db: Database.Database,
   userId: string,
@@ -282,6 +302,7 @@ export function releaseCourseCanvasAssets(
   db.prepare(`UPDATE notes SET metadata = json_remove(metadata, '$.binding.cover')
     WHERE user_id = ? AND course_id = ? AND json_valid(metadata)
       AND json_extract(metadata, '$.binding.cover.assetId') IS NOT NULL`).run(userId, courseId);
+  coverRows.push(...detachPageCoverReferences(db, userId, 'course_id', courseId));
   const mediaRows = db.prepare(`SELECT id AS block_id, json_extract(metadata, '$.media.asset_id') AS asset_id
     FROM note_blocks WHERE user_id = ? AND course_id = ? AND block_type = 'media'
       AND json_extract(metadata, '$.media.asset_id') IS NOT NULL`)
@@ -340,6 +361,7 @@ export function releaseNoteCanvasAssets(
   db.prepare(`UPDATE notes SET metadata = json_remove(metadata, '$.binding.cover')
     WHERE user_id = ? AND id = ? AND json_valid(metadata)
       AND json_extract(metadata, '$.binding.cover.assetId') IS NOT NULL`).run(userId, noteId);
+  coverRows.push(...detachPageCoverReferences(db, userId, 'id', noteId));
   // A Note can share a block with another Note. Only detach a block when this
   // is its last placement; references surviving elsewhere continue to own it.
   const mediaRows = db.prepare(`SELECT DISTINCT nb.id AS block_id,

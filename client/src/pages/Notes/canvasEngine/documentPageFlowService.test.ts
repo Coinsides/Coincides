@@ -42,6 +42,26 @@ function plan(blocks: PageFlowBlock[], frames?: PageFrameModel[]) {
 }
 
 describe('A1 document pagination projection', () => {
+  it('leaves the binding cover and every cover resident out of content reflow', () => {
+    const cover = frame('cover');
+    const content = frame('p1', 100, 80, 180);
+    const source = collection([cover, content]);
+    source.primaryFrameId = content.id;
+    const resident = block('cover-resident', '封面文字');
+    resident.layout.frame_id = cover.id;
+    const before = structuredClone({ source, resident });
+    const output = resolveDocumentPageFlowPlan({ collection: source, coverFrameId: cover.id,
+      blocks: [resident, block('content')], measureTextLines: measure });
+    expect(output.frames[0]).toEqual({ frame: cover, fragments: [] });
+    expect(output.excludedBlockIds).toEqual(['cover-resident']);
+    expect(output.fragments.every((fragment) => fragment.frameId !== cover.id)).toBe(true);
+    expect(output.fragments[0]!.frameId).toBe(content.id);
+    expect(output.appendedFrameIds).toHaveLength(2);
+    expect(output.collection.pageStacks![0].frameIds[0]).toBe(cover.id);
+    expect(output.placementUpdates.every((update) => update.blockId !== resident.blockId)).toBe(true);
+    expect({ source, resident }).toEqual(before);
+  });
+
   it('splits only at complete measured lines, covers all text once, and derives deterministic new pages', () => {
     const input = { collection: collection(), blocks: [block('text')], measureTextLines: measure };
     const before = structuredClone({ collection: input.collection, blocks: input.blocks });
