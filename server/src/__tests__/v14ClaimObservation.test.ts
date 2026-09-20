@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test, { type TestContext } from 'node:test';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import Database from 'better-sqlite3';
 import type { AgentTurnReceipt } from '../../../shared/types/agentTurnReceipt.js';
 import {
@@ -12,6 +14,7 @@ import migration074 from '../db/migrations/074_v14_agent_planning_events.js';
 import migration075 from '../db/migrations/075_v14_delete_authorizations.js';
 import migration076 from '../db/migrations/076_v14_claim_without_receipt_event.js';
 import { recordEvent } from '../db/recordEvent.js';
+import { projectTurnReceipt, type PersistedAgentMessage } from '../agent/turnReceipt.js';
 
 function ledgerDb(t: TestContext, latest = true): Database.Database {
   const db = new Database(':memory:');
@@ -134,6 +137,89 @@ test('ledger failure remains observation-only and emits no supplied content or d
   assert.deepEqual(events(db), []);
   assert.equal(messages[0].content, '已保存 private-body');
   assert.equal(db.inTransaction, false);
+});
+
+function memoryRound(name: string, content: string, result: unknown): PersistedAgentMessage[] {
+  return [
+    { id: 'call-message', role: 'assistant', content: '', turn_id: 'memory-turn',
+      tool_calls: JSON.stringify([{ id: 'memory-call', name, arguments: { category: 'preference', content, query: content } }]), tool_results: null },
+    { id: 'result-message', role: 'user', content: '', turn_id: 'memory-turn', tool_calls: null,
+      tool_results: JSON.stringify([{ tool_call_id: 'memory-call', content: JSON.stringify(result) }]) },
+  ];
+}
+
+test('original live specimen replays byte-for-byte with prior successful save receipts and zero flags', (t) => {
+  const db = ledgerDb(t); // No memory table: the observer can only use supplied transcript receipts.
+  const path = new URL('../../../.eval-runs/2026-09-14T10-54-13-381Z-167e5264/05-memory-journey.json', import.meta.url);
+  const bytes = readFileSync(path);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), '4b357901534adf8115a4c854df5c11eabf94e59509cf4657afe3ab8bef9f2a2b');
+  const specimen = JSON.parse(bytes.toString('utf8')) as { turns: Array<{ messages: PersistedAgentMessage[] }> };
+  assert.equal(specimen.turns.length, 3);
+  const previous: PersistedAgentMessage[] = [];
+  for (const [index, turn] of specimen.turns.entries()) {
+    const before = JSON.stringify(turn.messages);
+    const turnReceipt = projectTurnReceipt(turn.messages);
+    assert.equal(turnReceipt.write_ok_count, index < 2 ? 1 : 0);
+    if (index === 2) {
+      assert.equal(turn.messages.length, 2);
+      assert.deepEqual(turnReceipt.read_calls, []);
+      assert.ok(turn.messages.every(row => row.tool_calls === null && row.tool_results === null));
+    }
+    observeClaimWithoutReceipt(db, 'eval-user', 'eval-conversation', turn.messages, turnReceipt, previous);
+    assert.deepEqual(events(db), []);
+    assert.equal(JSON.stringify(turn.messages), before);
+    previous.push(...turn.messages);
+  }
+  assert.deepEqual(readFileSync(path), bytes);
+});
+
+test('current successful memory-search hits support literal quoted references in Chinese and English', (t) => {
+  const db = ledgerDb(t);
+  for (const [saved, reference] of [
+    ['我习惯清晨背诵，晚上做题。', '我已记住你的偏好：「清晨背诵,晚上做题」'],
+    ['Morning review.', 'I remembered your preference: "Morning review"'],
+  ]) {
+    const messages = [...memoryRound('search_memories', saved, [{ id: 'memory', kind: 'memory', content: saved }]),
+      { id: 'reference', role: 'assistant', content: reference }];
+    const turnReceipt = projectTurnReceipt(messages.map(row => ({ tool_calls: null, tool_results: null, ...row })));
+    assert.equal(turnReceipt.read_calls[0].ok, true);
+    observeClaimWithoutReceipt(db, 'u', 'c', messages, turnReceipt);
+  }
+  assert.deepEqual(events(db), []);
+});
+
+test('prior save Y cannot support a quoted claim of X (D4 addendum reverse regression)', (t) => {
+  const db = ledgerDb(t);
+  const previous = memoryRound('save_memory', '我习惯晚上做题。', { id: 'saved-Y' });
+  const messages = [{ id: 'claim-X', role: 'assistant', content: '我已记住你的偏好：「我习惯清晨背诵。」' }];
+  observeClaimWithoutReceipt(db, 'u', 'c', messages, receipt(), previous);
+  assert.equal(events(db).length, 1);
+  assert.deepEqual(JSON.parse(events(db)[0].meta).matched_terms, ['已记住']);
+});
+
+test('failed saves and searches without a matching memory hit keep reference observations', (t) => {
+  const db = ledgerDb(t);
+  const content = '清晨背诵';
+  const reference = { id: 'reference', role: 'assistant', content: `我已记住你的偏好：「${content}」` };
+  const variants = [
+    { previous: memoryRound('save_memory', content, { error: 'save failed' }), current: [] },
+    ...[[], { error: 'search failed' }, [{ id: 'other', kind: 'memory', content: '晚上做题' }]]
+      .map(result => ({ previous: [], current: memoryRound('search_memories', content, result) })),
+  ];
+  for (const { previous, current } of variants) {
+    observeClaimWithoutReceipt(db, 'u', 'c', [...current, reference], receipt(), previous);
+  }
+  assert.equal(events(db).length, variants.length);
+});
+
+test('a supported quotation does not erase another new claim in the same reply', (t) => {
+  const db = ledgerDb(t);
+  const previous = memoryRound('save_memory', '清晨背诵。', { id: 'saved' });
+  for (const content of [
+    '我已记住你的偏好：「清晨背诵。」另一个偏好也已记住。',
+    '我已记住你的偏好：「清晨背诵。」已创建复习计划。',
+  ]) observeClaimWithoutReceipt(db, 'u', 'c', [{ id: 'm', role: 'assistant', content }], receipt(), previous);
+  assert.deepEqual(events(db).map(row => JSON.parse(row.meta).matched_terms), [['已记住'], ['已创建']]);
 });
 
 test('076 widens only the CHECK and preserves historical rows, seq, indexes, triggers and other tables', (t) => {

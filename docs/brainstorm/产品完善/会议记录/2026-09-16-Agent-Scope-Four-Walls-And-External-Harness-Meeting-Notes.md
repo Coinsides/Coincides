@@ -281,3 +281,9 @@ Fable 初判(骨架级,⛔施工):
 2. 答毕将本记录相应段落转「已拍」,会议散时状态头转 active;
 3. 讨论续项:「人的一句话」全景清单(上一波已铺表)、驾驶舱动词族深挖、能力缺口件+触发器注册表的工单化、针四(源检索)批复——例②已使其由候批变刚需;
 4. 插曲件:「给朋友的介绍.md」已写(仅供 Henry 私发,⛔push)。
+
+## 2026-09-20 D4 第二轮 · §三点九出生即入包待办实况追加
+
+按 [D4 工单](../../../agent-ops/handoffs/2026-09-20-v14-d4-three-smalls-order.md) §四.2 的台账义务追加施工收据，原会议记录与方向裁定不回改。**未自标已清，放行与清债留 HQ。**
+
+隔离内存库实测：修前 castItem 已生成 Item/Snapshot 并认领 Anchor，但所属 content_group_members 为 0 行；既有最小修在同一事务写入 kind=item 成员后为 1 行，hydration 同样可见。HQ 补遗一已收下该最小修，本轮保留工作树原改动进入全量回归；新增出生即入包及扩展回滚断言，原定向 20/20。实现写点 `server/src/services/items.ts:795`、测试 `server/src/__tests__/v2Items.test.ts:284` / `:329`；不新建表列或角色。证据与最终全量数字见 [castItem 取证](../../../audits/2026-09-20-d4-smalls-builder/cast-item.md)、[第二轮验收](../../../audits/2026-09-20-d4-smalls-builder/verification-r2.md)。

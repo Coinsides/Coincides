@@ -7,6 +7,7 @@ import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
 import { prepareEpisodeContext } from './memory/episode-context.js';
+import { listConversationMessages } from './memory/episodes.js';
 import { buildSystemPrompt } from './system-prompt.js';
 import { projectTurnReceipt, type PersistedAgentMessage } from './turnReceipt.js';
 import { observeClaimWithoutReceipt } from './claimObservation.js';
@@ -150,6 +151,14 @@ export async function* runAgent(
   }
 
   // 6. Save user message
+  // Capture only this conversation's transcript before this turn starts. This
+  // observation input never enters the prompt and never looks up stored memories.
+  let previousClaimMessages: PersistedAgentMessage[] = [];
+  try {
+    previousClaimMessages = listConversationMessages(userId, conversationId);
+  } catch {
+    console.warn('claim_without_receipt_observation_failed');
+  }
   let lastAssistantMessageId: string | undefined;
   let lastAssistantContent = '';
   const answerMeta: AgentMessageMeta | undefined = contextHint?.type === 'note_view' && contextHint.data.selection
@@ -168,7 +177,7 @@ export async function* runAgent(
       WHERE conversation_id = ? AND turn_id = ?
       ORDER BY created_at ASC, rowid ASC`).all(conversationId, turnId) as PersistedAgentMessage[];
     const receipt = projectTurnReceipt(rows);
-    observeClaimWithoutReceipt(db, userId, conversationId, rows, receipt);
+    observeClaimWithoutReceipt(db, userId, conversationId, rows, receipt, previousClaimMessages);
     return { type: 'turn_receipt', data: receipt };
   };
 

@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(HQ 按代理权翻牌;三件挂账小活合单,均为已裁方向的核查/接线)
+> **状态 (Status)**: done(2026-09-20 HQ 收官:一轮冲突停线→补遗一裁定→二轮交齐;HQ 机 server 主集真全绿含 Python 系;双门绿)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-20
 > **单号**: V14 债务墙 · D4 小单三件(出生即入包核查/live 夹具核查/红旗上下文判别)
@@ -88,3 +88,65 @@
 - 三处原挂账均未清偿/未改判：09-16 会议 §三点九；评测场原工单 Result / live 基线发现三；live 基线发现二及 §159 量表课题。停线后只追加本 Result 和审计证据，原台账尚未追加完成结论，留 HQ 处理。
 - 禁区遵守：无真实模型调用、无用户库接触、无凭据值读取/修改、无 prompt/工具面/schema/依赖/Relation/笔记写权/坐标契约改动；未新增安全对抗用例。只读 git 用于工作树核查，未执行任何 git 写操作或 commit。
 - 所有子任务均已停止，无在跑测试。工作树保留上述①两文件最小改动，以及本 Result、三份审计证据；原始日志留 `.codex-tmp/d4-smalls/`。
+
+## Result 第二轮
+
+> **2026-09-20 · Codex builder · 三件施工与定向取证完成，整单未通过全量验收。** 补遗一已解除上轮判据冲突；本轮保留 HQ 已收的①工作树最小修、实现③并完成②补验。server 全量最后仍有 **2 项 Python 环境失败**，非 git/secrets 门 **24/25**（文档索引过期），据实保留 `ready`，不翻 `done`，不自标债务已清。代码与证据留工作树交 HQ；零 git 写操作、零 commit。
+
+### ① castItem：原断路已最小修，保留原改动进入全量回归
+
+- 修前隔离库成员 **0 行**，修后 **1 行**且 hydration 可见；沿用 `castItem` 既有事务写现役成员表，写点 `server/src/services/items.ts:795`。字段仍为 `kind='item'`、新 Item 引用、`target_id=NULL`、`source_sync_status='fresh'`、原包尾序、`metadata={}`；无新列或角色词表。
+- `server/src/__tests__/v2Items.test.ts:284` 出生即入包；`:329` 既有故障下成员/Item/Snapshot/Anchor 一起回滚。本轮未再修改这两份已收实现/测试。
+- 上轮定向 **20/20** 保留；本轮两次 server 109 文件全量执行均包含 `v2Items` / `v2ContentGroups`，对应断言无失败。全库另有环境失败，不能用本项通过代替全库通过。
+- 证据：[cast-item.md](../../audits/2026-09-20-d4-smalls-builder/cast-item.md)；原始标本与定向日志仍为 `.codex-tmp/d4-smalls/cast-*`，全量原始日志见下。
+
+### ② live segments：通，补齐取证后零生产/夹具改动
+
+- 共用 setup 在 `server/scripts/agent-eval/harness.ts:65`；播种点 `scenarios/03-proposal-journey.ts:22–23` / `06-loop-resilience.ts:41–44` 位于模式分支前。
+- 本轮补 **06 scripted setup 3/3**，四种 segments、四条 fragment 链接、零 provider turn；两轮矩阵 **03/06 × live/scripted 共 4 份、12/12**。外层始终使用 scripted 隔离 harness，只有 setup 受检模式标签不同，不进入 live provider。上轮 `--live --dry-run` **13 场景计划 / exit 0** 只表示计划通路。
+- claim 代码落稳后完整 scripted 回归：**13/13 场景、122/122 断言、0 失败、exit 0**，36 用户轮 / 29 工具轮；最终 run `2026-09-20T18-27-45-687Z-0eb7f14d`。02 空头支票 **4/4、红旗 1**；§143 对应 09 记忆直令 **5/5、红旗 0**；03 **6/6**，06 **11/11**。原 02/09 文件与断言零改。
+- 证据：[eval-segments.md:39](../../audits/2026-09-20-d4-smalls-builder/eval-segments.md#第二轮补验2026-09-20)，最终复核该文件第 63 行；原始日志 `.codex-tmp/d4-smalls/r2-eval-scripted-final.log`，完整结果及 worker 日志 `r2-eval-scripted-final-results/`、`r2-eval-scripted-final-workers/`。初轮与最终复跑不合并计数。
+
+### ③ claimObservation：按补遗一两路受理，原标本零红旗、反向仍计
+
+- `server/src/agent/orchestrator.ts:158` 在本轮第一条消息保存前捕获本会话完整 transcript；`:180` 传给观察器。沿现役 `listConversationMessages(userId, conversationId)` 双归属查询；不以摘要代收据，不进入 prompt，不事后查询记忆库。
+- `server/src/agent/claimObservation.ts:49` 复用现役收据投影的同轮调用/结果 ID 配对与成功规则：(a)本轮成功 `search_memories` 的真实 memory 命中；(b)本会话前轮成功 `save_memory` 配对调用的 `arguments.content`（成功结果只有 ID/message）。自动 prompt 记忆上下文、episode 摘要、其他会话、失败写入和空命中不作支撑。
+- 窄句式在 `claimObservation.ts:30`：中文「已记住/已保存/已记录」＋「偏好/习惯/记忆」＋冒号＋成对单行引号；英文 remembered/saved/recorded＋preference/habit/memory 对应形式，可选前缀见[规则完整申报](../../audits/2026-09-20-d4-smalls-builder/claim-context-r2.md)。`:35` 归一化删除明确列举的引号/标点、去首尾空白并折叠连续空白，内容不改大小写；必须为 **收据内容包含非空完整引文** 的字面子串，无 NLP/语义相似度。
+- `claimObservation.ts:84` 仅从临时匹配串去掉被支撑的引用片段，再用原词表判同回复其余宣称；`:96` 仍为 observe-only，原成功写入免旗行为、事件结构与回复均不变。
+- `v14ClaimObservation.test.ts:151` 直接读取原 `.eval-runs/2026-09-14T10-54-13-381Z-167e5264/05-memory-journey.json` 全 bytes，SHA-256 **`4b357901534adf8115a4c854df5c11eabf94e59509cf4657afe3ab8bef9f2a2b`**。原三轮 messages 仍 **4/4/2**、写成功 **1/1/0**、第三轮零工具/零读；累积红旗 **0/0/1 → 0/0/0**。消息与文件 bytes 前后相同，零派生；回放库无记忆表。
+- 反向 `v14ClaimObservation.test.ts:191` 前轮存 Y、本轮引 X → **1 红旗**；同回复其他新宣称 `:215` 照计。`v14ClaimReceipt.test.ts:250` 参数化两条真实 SSE/持久化链验证匹配 0、不匹配 1，回复逐字不变。新增 5 个 observer＋2 个集成功能回归，既有断言未改；定向两文件 **42/42，0 fail/skip/retry，exit 0**，文件预算 600000ms。
+- 固定 live 基线标注口径预期总旗 **2→1**、假旗 **1→0**、假旗占全部旗 **1/2→0/1**；本次直接证明的是原 05 标本误报归零及既有 02/09 断言不变，不外推线上误报率，不回改历史事件或原基线读数。证据：[claim-context-r2.md](../../audits/2026-09-20-d4-smalls-builder/claim-context-r2.md)，原始 `claim-targeted-r2.log`、`claim-replay-r2.mts/.log/.json`。
+
+### §四全量验收实况与环境受阻举证
+
+| 验收面 | 本轮结果 | 射程/原始日志（均在 `.codex-tmp/d4-smalls/`） |
+| --- | --- | --- |
+| agent 族 | **18 文件、260/260，exit 0**；0 fail/skip/retry | 独立回归，不与全量内重复测试相加；完整文件清单见 agent-files-r2.json |
+| client 全库 | **227 文件、2319/2319，exit 0** | test-unit-r2.log；零排除 |
+| server 首跑 | **109 文件；runner 计数 1103，1100 pass / 3 fail，exit 1** | server-full-r2.log；Python 两项＋编排未携 npm_execpath 导致 manifest-hook 原测试失败；保留首跑红 |
+| server 有因完整复跑 | **同 109 文件；runner 计数 1103，1101 pass / 2 fail，exit 1**；0 cancelled/skip/todo/retry | server-full-repeat-r2.log；只对子进程补实际 npm_execpath，原 manifest-hook 断言转绿；未排除/修改任何测试 |
+| v13WildernessExecute | **28/28**（两次全量均过） | 原文件在 27 文件补集中；最终 28 case 耗时合计 98045.5443ms，不冒充独立进程 wall |
+| 非 git/secrets 验证门 | **24/25 组件通过，docs:check 1 fail**；tech-debt-table 已通过 | 实拆现役 27 段，留 HQ 的 git diff --check 与 secrets 两组件未执行；不宣称原总门全绿 |
+
+server 全量清点 **109 = test:v2 主集 82 + 补集 27**，全部现役 `.test.ts` 路径已投递，文件预算 **600000ms**、并发 4，最终进程 wall **98.826s**（Node 报 98.301s），没有按 120s 超时判红。1103 是 runner 计数，包含加载失败文件项，**不表示 MineruWiring 内部所有测试都实际运行**。
+
+剩余两项证据：
+
+1. `server/src/__tests__/v2SourceMineruWiring.test.ts:60` 在模块加载时执行 `python.exe`，当前 PATH 无此命令，`ENOENT`，该文件内部回归未能加载。
+2. `server/src/__tests__/v2SourceRegionCells.test.ts:40` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，`:203` 真实解析入口启动失败。venv 的 `--version` 同样 `Unable to create process`；所指向的 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe` 直接 `--version` 为 **Access is denied / NativeCommandFailed**。原始 `python-path-r2.log`、`python-venv-r2.log`、`python-base-r2.log` 均保留非空错误证据。
+
+**停止扩面处理这两项环境失败**：当前权限不允许修解释器执行权限，本单又禁止新依赖/扩面；未替换固定 runtime、未改机器环境/权限、未弱化断言或排除文件。其余可独立运行的验收已执行。两项须在可执行原固定 Python 的环境补验，不能在本回执中洗成通过。完整组件清单/命令/时间/退出码及限制见 [verification-r2.md](../../audits/2026-09-20-d4-smalls-builder/verification-r2.md)。
+
+文档门受阻：`docs:check` 因 `docs/agent-ops/INDEX.md` 过期返回 exit 1。现役生成器仅在本单临时目录输出期望索引，差异 **415→416 条**：缺 D4 工单条目，另有 **D3a 工单 ready→HQ done 状态** 未同步；本轮未改两单状态头，Result/台账正文追加没有造成该元信息漂移。证据 `docs-index-expected-r2.md`、`docs-index-diff-r2.json`；因更新索引还会带入本单之外的 D3a 状态，本轮遵守“⛔三件之外零动”保留原索引不写，留 HQ 同步，不为过门扩大改动。
+
+原 docs:check 的 `&&` 未继续运行部分已分别补跑：对象清单 `--check` exit 0，glossary 的 K-1～K-3 全过、exit 0；只补齐取证，不另增组件 N，也不把 docs:check 改报通过。
+
+### 台账申报与未做项
+
+- ①会议原卷 `docs/brainstorm/产品完善/会议记录/2026-09-16-Agent-Scope-Four-Walls-And-External-Harness-Meeting-Notes.md:285` 已按本单 §四.2 追加 §三点九实况；只追加收据，原研究/会议结论不回改。
+- ②评测场原单 `docs/agent-ops/handoffs/2026-09-14-v14-agent-eval-harness-order.md:82` 已追加 live segments 核查结论。
+- ③原 live 量表挂账 `docs/audits/2026-09-14-agent-eval-live-baseline.md:33` 已追加发现二处置实况、固定标本误报变化及射程。**三处均未自标已清，放行与清债留 HQ。**
+- 未做：上述两项 Python 受阻补验、跨单索引同步及 docs:check 全绿收口；HQ 的 git 检查/secrets 两组件；真实模型复跑、用户库访问、主观验收、全局误报率估计。原 live 夹具仍是本机 `.eval-runs` 保留件，未上传/未另制副本，其他环境须具备同 hash 原件才能执行该回归。
+- 禁区：无 git 写操作/commit/push/PR/merge；无新表列、工具、依赖、prompt/Relation/判断域/笔记写权/TextFlow 真相 schema/坐标契约变更；未设计新增安全对抗用例，既有功能回归整库运行零排除。新增集成测试复用现有短合成凭据 `syn-receipt`（11 字符），未引入新 `--sk-` token。无权限/操作指令文件改动；不覆盖其他既有工作树文件。
+- 证据目录 `docs/audits/2026-09-20-d4-smalls-builder/`，原始日志 `.codex-tmp/d4-smalls/`；源码与原标本 hash 在 `artifact-hashes-r2.json`。应用操作说明书：无涉（只修既有内部观察行为与已收 Item 成员接线）。
+- 收尾时无在跑测试或未完成的并行子任务；仅上述环境/跨单索引与 HQ 检查、放行仍未完成。

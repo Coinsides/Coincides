@@ -246,6 +246,32 @@ test('NULL legacy history never gains guessed receipts or gets backfilled', asyn
   assert.deepEqual(db.prepare('SELECT * FROM agent_messages ORDER BY rowid').all(), before);
 });
 
+for (const matches of [true, false]) {
+  test(`persisted prior save supports only the matching quoted preference: ${matches}`, async t => {
+    const { db, post, get } = await fixture(t);
+    let round = 0;
+    const saved = '我习惯晚上做题。';
+    const reference = `我已记住你的偏好：「${matches ? saved : '我习惯清晨背诵。'}」`;
+    // Keep implicit retrieval empty to isolate the prior-transcript receipt path.
+    t.mock.method(MemoryManager.prototype, 'retrieveMemories', async () => []);
+    t.mock.method(OpenAIProvider.prototype, 'chat', async function* (): AsyncGenerator<StreamChunk> {
+      if (round++ === 0) {
+        const tool_call = { id: 'prior-save', name: 'save_memory', arguments: { category: 'preference', content: saved } };
+        yield { type: 'tool_call_start', tool_call };
+        yield { type: 'tool_call_end', tool_call };
+      } else yield { type: 'text', text: round === 2 ? '已保存。' : reference };
+      yield { type: 'done' };
+    });
+    const first = await post();
+    assert.equal((first.at(-2)!.data as AgentTurnReceipt).write_ok_count, 1);
+    const second = await post();
+    assert.deepEqual(second.at(-2)!.data, empty);
+    assert.equal(second.filter(event => event.type === 'text').map(event => (event.data as { content: string }).content).join(''), reference);
+    assert.equal(get().at(-1)?.content, reference);
+    assert.equal(db.prepare("SELECT * FROM events WHERE verb = 'claim_without_receipt'").all().length, matches ? 0 : 1);
+  });
+}
+
 function deferred() {
   let resolve!: () => void;
   const promise = new Promise<void>(done => { resolve = done; });

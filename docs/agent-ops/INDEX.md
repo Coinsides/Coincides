@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 415 份文档。
+共 416 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -402,7 +402,8 @@
 | [handoffs/2026-09-20-v14-c2-intent-router-order.md](handoffs/2026-09-20-v14-c2-intent-router-order.md) | C2 · 意图路由+注意力框+note_patch+答卡(Agent 的脑) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 223 文件 2274/2274 亲跑定案;git diff --check+secrets(91 文件)双门绿;wilderness 27/27(444s,预算行首见成效);余 2=Python/MinerU 基线)` | — | — |
 | [handoffs/2026-09-20-v14-c3-episode-memory-order.md](handoffs/2026-09-20-v14-c3-episode-memory-order.md) | C3 · 对话记忆情节层 v1(管家带地图,不背图书馆) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 224 文件 2282/2282 亲跑定案;git diff --check+secrets(50 文件)双门绿;余 2=Python/MinerU 基线)` | — | — |
 | [handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md](handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md) | C4a · 壳批机械半 | `done(二轮施工;一轮停线=斜杠条款互咬(第四型合同缺陷),补遗一裁「补齐七项斜杠+15 项零变」后续派;HQ 收口:client 227 文件 2319/2319 亲跑定案;builder 侧 shared/dist EPERM 环境红由 HQ 亲跑 tsc -b shared 转绿(server build exit 0,v2McpArtifact 2/2);双门绿;余 2=Python 基线;2026-09-20)` | — | — |
-| [handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md](handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md) | D3a · ownership 机械收敛 | `ready(HQ 按代理权翻牌;上游=TD-15 权威签名裁定稿已转正照准(09-12 §十四),本单=纯机械收敛)` | — | — |
+| [handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md](handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md) | D3a · ownership 机械收敛 | `done(二轮施工;一轮停线=裁定稿 404 条款×行为零变互咬,补遗一裁 get/find 分家后续派;HQ 收口:client 227 文件 2319/2319+server test:v2 真全绿(IPC 双恢复,Python 系在 HQ 机全过)亲跑定案;双门绿;2026-09-20)` | — | — |
+| [handoffs/2026-09-20-v14-d4-three-smalls-order.md](handoffs/2026-09-20-v14-d4-three-smalls-order.md) | D4 · 小单三件 | `done(2026-09-20 HQ 收官:一轮冲突停线→补遗一裁定→二轮交齐;HQ 机 server 主集真全绿含 Python 系;双门绿)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

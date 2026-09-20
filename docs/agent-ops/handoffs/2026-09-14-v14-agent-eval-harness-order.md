@@ -78,3 +78,11 @@ v1 JSON：`schemaVersion,runId,scenarios[]`；四数为 `taskCompletion.{passed,
 - 按现行 `verify:v2-bn8-runtime` 顺序执行非 git/secrets **23 组件**：22 首次 PASS；docs:check 依次发现 `docs/agent-ops/INDEX.md` 与 `docs/generated/object-inventory.md` 过期，按原生成器仅重生成这两件后补验 **PASS，最终 23/23**。依用户显式边界，未调用包含 git/secrets 的完整串行命令；这两项留 HQ。
 
 未做：LLM 评分器、幻觉率、live 真模型调用、主观验收、git/secrets 收口。未碰 `.git`、未 commit/push/PR/merge、未改 agent 操作指令/权限、未读真实凭据或用户库、未新增动词或依赖。**应用操作说明书：无涉**（只增开发评测命令）。
+
+### D4 第二轮 · live segments 挂账核查实况（2026-09-20）
+
+按 [D4 工单及补遗一](2026-09-20-v14-d4-three-smalls-order.md) 对 live 夹具 segments 播种遗留项补验：**现物通路已证通，零生产/场景/harness 改动，提交 HQ 复核，不自标债务已清**。`harness.ts:65` 两模式共用 setup；`scenarios/03-proposal-journey.ts:22–23`、`06-loop-resilience.ts:41–44` 均在模式分支前执行 `listCourseMaterials → ensureSegmentsForMaterial`。
+
+第一轮 03 live / 03 scripted / 06 live setup 各 **3/3**；本轮补跑 06 scripted setup **3/3**，矩阵合计 **4 份、12/12**。每份均有四种 segments、四条真实 fragment 链接，零 provider turn；请求模式仅传给原场景 setup，外层始终使用真实 scripted 隔离 harness，不进入 live provider 或机器凭据路径。原 `--live --dry-run` **13 场景计划、exit 0** 只表示计划通路，不冒充播种证据。
+
+claim 实现稳定后的完整 `npm.cmd run eval:agent`，最终 run `2026-09-20T18-27-45-687Z-0eb7f14d`：**13/13 场景、122/122 断言、0 失败、exit 0**，36 用户轮 / 29 工具轮。其中 03 **6/6**、06 **11/11**；02 空头支票仍为 **4/4、claim 1**，09 记忆直令仍为 **5/5、claim 0**。未执行真实模型；未对模型能力作评分或主观放行。证据见 [D4 live segments audit](../../audits/2026-09-20-d4-smalls-builder/eval-segments.md)，原始日志和完整结果位于 `.codex-tmp/d4-smalls/r2-eval-*`。

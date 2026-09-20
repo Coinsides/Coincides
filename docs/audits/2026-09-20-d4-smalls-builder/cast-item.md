@@ -1,4 +1,4 @@
-> **状态 (Status)**: partial — ①局部已修、定向 20/20；整单停线，未验收
+> **状态 (Status)**: 第二轮保留 HQ 已收最小修并执行全量回归；整单验收以第二轮记录为准，清债留 HQ
 > **日期**: 2026-09-20
 > **来源**: `docs/agent-ops/handoffs/2026-09-20-v14-d4-three-smalls-order.md` §一
 > **边界**: 本文仅记录 builder 子任务①的实测；清债与放行权留 HQ。
@@ -54,3 +54,9 @@ node ../scripts/run-server-test-suite.mjs --test-timeout=600000 src/__tests__/v2
 在以上局部修改与定向测试完成后，主 builder 通报③的工单条件与原始 live 标本存在矛盾：工单要求「本轮成功检索/记忆命中」且原标本转为零红旗，而原标本第 3 轮无 `search_memories`，相关记忆 `last_accessed` 仍为 `NULL`。依工单「冲突停线举证」停止新增实现与测试；具体③矛盾证据以主 builder 工单 `## Result` 为准。
 
 **整单未完成、未验收，不申报已清。** ①代码与回归保留在工作树交 HQ；agent 族、client 全库、server 全量补集（含 `v13WildernessExecute`）及非 git/secrets 验证门在停线时未由本子任务执行。未做 git 写操作、commit、push、PR、merge、真实模型调用或用户库写入。会议待办等共享台账由主 builder 汇总，子任务未改。
+
+## 第二轮（2026-09-20）
+
+HQ 补遗一已收下①现有最小修；本轮保留 `items.ts` 与 `v2Items.test.ts` 原有工作树改动，没有再改该实现。它们已进入按 `--test-timeout=600000` 执行的 server 109 文件全量集合，castItem / ContentGroup 对应断言没有失败；整批结果与环境阻塞如实记在 [第二轮验收](verification-r2.md)，不把本项通过写成全库通过。
+
+已按工单台账义务在 09-16 会议原卷末追加「§三点九出生即入包待办实况」，原会议判断与历史文本保留，不自标已清。没有执行 git 写操作；代码留当前工作树交 HQ。

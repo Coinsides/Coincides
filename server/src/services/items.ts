@@ -791,6 +791,20 @@ export function castItem(
       );
       if (result.changes !== 1) throw new AppError(409, 'Anchor claim conflict');
     }
+    db.prepare(`
+      INSERT INTO content_group_members (
+        id, user_id, content_group_id, course_id, note_id,
+        kind, target_id, item_id, source_sync_status,
+        order_index, metadata, created_at, updated_at
+      )
+      SELECT ?, ?, ?, ?, ?, 'item', NULL, ?, 'fresh',
+             COALESCE(MAX(order_index), -1) + 1, '{}', ?, ?
+      FROM content_group_members
+      WHERE user_id = ? AND content_group_id = ?
+    `).run(
+      `content-group-member-${uuidv4()}`, userId, group.id, group.course_id, group.note_id,
+      nextItemId, now, now, userId, group.id,
+    );
     options.faultInjector?.('after_anchor_claim');
     return nextItemId;
   })();

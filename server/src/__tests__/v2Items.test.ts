@@ -17,7 +17,7 @@ import {
   retireItem,
   updateItem,
 } from '../services/items.js';
-import { deleteContentGroupMember, upsertContentGroup } from '../services/contentGroups.js';
+import { deleteContentGroupMember, getContentGroup, upsertContentGroup } from '../services/contentGroups.js';
 import { createItemSchema, updateItemSchema } from '../validators/index.js';
 
 type Db = Awaited<ReturnType<typeof initDb>>;
@@ -281,7 +281,52 @@ test('pool Anchors support collect, discard, single cast, fusion cast, and same-
   });
 });
 
-test('cast fault injection rolls Item, Snapshot, and Anchor claim back together', async () => {
+test('cast Item is born in its ContentGroup, appending one membership for a fusion cast', async () => {
+  await withDb((db) => {
+    const userId = seedUser(db, 'Birth User');
+    const workspace = seedWorkspace(db, userId, 'Birth');
+    const group = upsertContentGroup(db, userId, {
+      id: workspace.groupId,
+      project_id: workspace.courseId,
+      note_id: workspace.noteId,
+      title: 'Birth group',
+      members: [{ id: 'existing-member', kind: 'content_range', current_content: 'Existing member' }],
+    });
+    const first = collectBlock(db, userId, workspace, 'Birth evidence A');
+    const second = collectBlock(db, userId, workspace, 'Birth evidence B');
+    const item = castItem(db, userId, {
+      anchor_ids: [first.id, second.id],
+      plain_text: 'Born in a package',
+    });
+
+    const members = getContentGroup(db, userId, group.id).members;
+    assert.equal(members.length, 2);
+    assert.deepEqual(members[0], group.members[0]);
+    assert.equal(members[1]?.kind, 'item');
+    assert.equal(members[1]?.item_id, item.id);
+    assert.equal(members[1]?.target_id, null);
+    assert.equal(members[1]?.order_index, 1);
+    const rows = db.prepare(`
+      SELECT user_id, content_group_id, course_id, note_id, kind, target_id,
+             item_id, source_sync_status, order_index, metadata
+      FROM content_group_members WHERE item_id = ?
+    `).all(item.id);
+    assert.deepEqual(rows, [{
+      user_id: userId,
+      content_group_id: workspace.groupId,
+      course_id: workspace.courseId,
+      note_id: workspace.noteId,
+      kind: 'item',
+      target_id: null,
+      item_id: item.id,
+      source_sync_status: 'fresh',
+      order_index: 1,
+      metadata: '{}',
+    }]);
+  });
+});
+
+test('cast fault injection rolls Item, Snapshot, Anchor claim, and membership back together', async () => {
   await withDb((db) => {
     const userId = seedUser(db, 'Atomic User');
     const workspace = seedWorkspace(db, userId, 'Atomic');
@@ -289,18 +334,23 @@ test('cast fault injection rolls Item, Snapshot, and Anchor claim back together'
     for (const stage of ['after_item_insert', 'after_anchor_claim'] as const) {
       const anchor = collectBlock(db, userId, workspace, `Fail at ${stage}`);
       const beforeItems = (db.prepare('SELECT COUNT(*) AS count FROM items').get() as { count: number }).count;
+      const beforeMembers = (db.prepare('SELECT COUNT(*) AS count FROM content_group_members').get() as { count: number }).count;
       assert.throws(() => castItem(db, userId, {
         anchor_ids: [anchor.id],
         plain_text: `Atomic ${stage}`,
         claimed_by: 'human',
       }, {
         faultInjector(point) {
+          if (point === 'after_anchor_claim') {
+            assert.equal((db.prepare('SELECT COUNT(*) AS count FROM content_group_members').get() as { count: number }).count, beforeMembers + 1);
+          }
           if (point === stage) throw new Error(`injected:${stage}`);
         },
       }), new RegExp(`injected:${stage}`));
 
       assert.equal((db.prepare('SELECT COUNT(*) AS count FROM items').get() as { count: number }).count, beforeItems);
       assert.equal((db.prepare('SELECT COUNT(*) AS count FROM item_snapshots').get() as { count: number }).count, beforeItems);
+      assert.equal((db.prepare('SELECT COUNT(*) AS count FROM content_group_members').get() as { count: number }).count, beforeMembers);
       const row = db.prepare(`
         SELECT item_id, pool_scope_kind, pool_scope_id, claimed_at, claimed_by
         FROM item_anchors WHERE id = ?
