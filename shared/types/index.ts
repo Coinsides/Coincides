@@ -548,7 +548,7 @@ export interface NoteBlockTemplateDefinition {
   render_hint: string;
   proposal_allowed: boolean;
   source_reference_allowed: boolean;
-  legacy_block_type: 'heading' | 'paragraph' | 'definition' | 'theorem' | 'proof' | 'formula' | 'example' | 'exercise' | 'answer' | 'sidenote' | 'media';
+  legacy_block_type: 'heading' | 'paragraph' | 'definition' | 'theorem' | 'proof' | 'formula' | 'example' | 'exercise' | 'answer' | 'sidenote' | 'media' | 'table';
 }
 
 export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
@@ -617,10 +617,18 @@ export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
   },
 ];
 
+NOTE_BLOCK_TEMPLATES.push({
+  template_id: 'media.table', label: 'Table', system_type: 'media', learning_role: 'note',
+  description: 'A table of plain-text cells.', fields: [],
+  default_content: { headers: ['Column 1', 'Column 2'], rows: [['', ''], ['', '']] },
+  render_hint: 'table', proposal_allowed: false, source_reference_allowed: false, legacy_block_type: 'table',
+});
+
 const TEMPLATE_BY_ID = new Map(NOTE_BLOCK_TEMPLATES.map((template) => [template.template_id, template]));
 
 const LEGACY_TEMPLATE_BY_BLOCK_TYPE: Record<string, string> = {
   media: 'media.image',
+  table: 'media.table',
   paragraph: 'text.paragraph',
   heading: 'text.paragraph',
   definition: 'text.paragraph',

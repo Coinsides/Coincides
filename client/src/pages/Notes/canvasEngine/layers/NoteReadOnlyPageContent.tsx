@@ -68,6 +68,7 @@ export function NoteReadOnlyPageContent({
             documentTypography={documentTypography}
             contentReadOnly
             mediaPlaceholder={print}
+            tablePrint={print}
             layoutMode={false}
             pageOffsetX={0}
             blockControlAnchor={null}

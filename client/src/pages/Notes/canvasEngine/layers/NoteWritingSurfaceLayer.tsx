@@ -1,5 +1,7 @@
 import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame, normalizeBlockLayoutForSave } from '../placementContractService';
 import { pasteMediaBlock } from '../mediaBlockPasteService';
+import { TableBlockEditor } from '../blocks/TableBlockEditor';
+import { createDefaultTableBlockPayload, type TableBlockPayload } from '../tableBlockService';
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
@@ -238,6 +240,8 @@ export interface NoteWritingSurfaceLayerProps {
   navigationOpen?: boolean;
   onToggleNavigation?: () => void;
   visibleBlocks: NoteBlock[];
+  onCreateTable?: (payload: TableBlockPayload) => Promise<boolean>;
+  onSaveTable?: (block: NoteBlock, payload: TableBlockPayload) => Promise<boolean>;
   onCreateBlock: (
     template: TemplateOption,
     text: string,
@@ -401,6 +405,8 @@ export function NoteWritingSurfaceLayer({
   onToggleNavigation,
   visibleBlocks,
   onCreateBlock,
+  onCreateTable,
+  onSaveTable,
   onPersistCanvasObject,
   onDeleteCanvasObject,
   onSaveAnnotationTruths,
@@ -447,6 +453,8 @@ export function NoteWritingSurfaceLayer({
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
+  const [creatingTable, setCreatingTable] = useState(false);
+  useEffect(() => { setCreatingTable(false); }, [noteId]);
   const itemDropPending = useRef(false);
   const mediaPastePending = useRef(false);
   const mediaPasteSession = useRef({ noteId, active: true });
@@ -1821,6 +1829,7 @@ export function NoteWritingSurfaceLayer({
                 else textNavigationTargetsRef.current.delete(block.id);
               }}
               onFieldDraftChange={(fieldValues) => onFieldDraftChange(block, text, fieldValues)}
+              onSaveTable={onSaveTable ? (payload) => onSaveTable(block, payload) : undefined}
               onSave={async (silent, fieldValues, textFlow) => {
                 const save = blockSaveTextAndFlow(block, text, fieldValues, textFlow);
                 return onSaveBlock(block, save.text, {
@@ -1900,6 +1909,9 @@ export function NoteWritingSurfaceLayer({
       {surfaceMode === 'page' && (
         <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
           {noteTools}
+          {onCreateTable && !contentReadOnly && <button type="button" className={styles.canvasZoomReset}
+            aria-label="Insert table" title="Insert table" disabled={overviewOpen || layoutMode}
+            onClick={() => setCreatingTable(true)}>Table</button>}
           {([{ key: 'selection', label: 'Selection', Icon: MousePointer2 },
             { key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
             <button key={key} type="button" className={styles.canvasZoomButton} aria-label={label} title={label}
@@ -1935,6 +1947,11 @@ export function NoteWritingSurfaceLayer({
             disabled={overviewOpen || readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
         </div>
       )}
+      {creatingTable && onCreateTable && <TableBlockEditor initialPayload={createDefaultTableBlockPayload()}
+        onCancel={() => setCreatingTable(false)} onSave={async (payload) => {
+          if (!await onCreateTable(payload)) throw new Error('Table could not be added. Please retry.');
+          setCreatingTable(false);
+        }} />}
       <AnnotationOverlayLayer
         annotations={annotationTruths}
         selectedAnnotationId={selectedAnnotationId}

@@ -5,6 +5,7 @@ import { paperFreehandDataSchema } from './paperInk.js';
 import { noteMetadataSchema } from './noteCover.js';
 import { noteRefBlockDataSchema } from './noteRef.js';
 import { agentContextHintSchema } from './agentContextHint.js';
+import { tableBlockContentSchema } from './tableBlock.js';
 
 // --- Auth ---
 
@@ -62,6 +63,7 @@ export const noteBlockTypeSchema = z.enum([
   'item_ref',
   'note_ref',
   'media',
+  'table',
 ]);
 
 const checklistItemSchema = z.object({
@@ -766,6 +768,10 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 }).superRefine((data, ctx) => {
+  if (data.block_type === 'table') {
+    const result = tableBlockContentSchema.safeParse(data.content_json);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });
+  }
   if (data.block_type === 'note_ref') {
     const result = noteRefBlockDataSchema.safeParse(data.content_json);
     if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });

@@ -18,6 +18,7 @@ import {
 } from '../exportPreviewService';
 import styles from '../../NoteDetail.module.css';
 import { MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
+import { TableBlockProjection } from '../blocks/TableBlockProjection';
 import mediaStyles from '../blocks/MediaBlockProjection.module.css';
 
 interface ExportPreviewLayerProps {
@@ -34,6 +35,7 @@ interface ExportPreviewLayerProps {
 }
 
 function ExportPreviewMedia({ row }: { row: ExportPreviewRow }) {
+  if (row.block.block_type === 'table') return <TableBlockProjection block={row.block} print />;
   if (row.block.block_type !== 'media') return null;
   const rect = row.layout ?? row.placement;
   if (!rect) return null;
@@ -64,7 +66,7 @@ function ExportPreviewGroup({
           <div className={styles.exportPreviewEmpty}>No blocks in this group.</div>
         ) : rows.map((row) => (
           <div key={`${label}-${row.block.id}`} className={styles.exportPreviewRow}
-            style={row.block.block_type === 'media' ? { minWidth: 0 } : undefined}>
+            style={row.block.block_type === 'media' || row.block.block_type === 'table' ? { minWidth: 0 } : undefined}>
             <span>{exportPreviewRowLabel(row)}</span>
             <small>{meta(row)}</small>
             <ExportPreviewMedia row={row} />
@@ -126,7 +128,7 @@ function ExportPreviewPageFrameGroup({
           <div className={styles.exportPreviewEmpty}>No inside blocks in this PageFrame.</div>
         ) : pageFrame.rows.map((row) => (
           <div key={`${pageFrame.pageFrameId}-${row.block.id}`} className={styles.exportPreviewRow}
-            style={row.block.block_type === 'media' ? { minWidth: 0 } : undefined}>
+            style={row.block.block_type === 'media' || row.block.block_type === 'table' ? { minWidth: 0 } : undefined}>
             <span>{exportPreviewRowLabel(row)}</span>
             <small>{exportRoleLabel(row.exportRole)} / {aiVisibilityLabel(row.aiVisibility)}</small>
             <ExportPreviewMedia row={row} />

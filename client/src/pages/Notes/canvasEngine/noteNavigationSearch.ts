@@ -39,6 +39,7 @@ export interface NoteNavigationResult {
 }
 
 function loadedBlockText(block: NoteBlock, input: NoteNavigationSearchInput): string {
+  if (block.block_type === 'table') return textFromContent(block);
   if (block.block_type === 'note_ref') {
     return block.content_json.field === 'description'
       ? input.paperHeader?.descriptionDraft ?? '' : input.paperHeader?.titleDraft ?? '';

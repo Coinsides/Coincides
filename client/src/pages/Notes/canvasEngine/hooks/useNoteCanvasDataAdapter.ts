@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
+import { tableBlockValidationError, type TableBlockPayload } from '../tableBlockService';
 import { saveSkinWithSuites } from '@/hooks/useSkinSuites';
 import { createCoordinateContractSession } from '../coordinateContractSession';
 import { requiresFrameLocalWriteContext, type CoordinateContract } from '../placementContractService';
@@ -1414,15 +1415,19 @@ export function useNoteCanvasDataAdapter({
     };
     const nextContent = options.contentJson || contentForTemplate(template, body);
     const nextKind = presentationKindForTemplate(template, true);
+    const rollbackUnplacedBlock = template.legacy_block_type === 'media' || template.legacy_block_type === 'table';
     let created: NoteBlock;
     const rollbackMediaCreation = async (failedOrderKey?: string) => {
       try {
         await writeRegistry.track('media-create-rollback:' + created.id, () => api.delete(`/note-blocks/${created.id}`));
         writeRegistry.confirm('placement:' + requestedNote.id + ':' + created.id);
         if (failedOrderKey) writeRegistry.confirm(failedOrderKey);
-        if (requestIsCurrent()) addToast('error', 'The image could not be placed. Please paste it again.');
+        if (requestIsCurrent()) addToast('error', template.legacy_block_type === 'table'
+          ? 'The table could not be placed. Your edits are still open.' : 'The image could not be placed. Please paste it again.');
       } catch {
-        if (requestIsCurrent()) addToast('error', 'The image placement failed and cleanup could not finish. Reopen the note before retrying.');
+        if (requestIsCurrent()) addToast('error', template.legacy_block_type === 'table'
+          ? 'The table placement failed and cleanup could not finish. Reopen the note before retrying.'
+          : 'The image placement failed and cleanup could not finish. Reopen the note before retrying.');
       }
     };
     try {
@@ -1441,7 +1446,7 @@ export function useNoteCanvasDataAdapter({
       return null;
     }
     if (!requestIsCurrent()) {
-      if (template.legacy_block_type === 'media') await rollbackMediaCreation();
+      if (rollbackUnplacedBlock) await rollbackMediaCreation();
       return null;
     }
 
@@ -1456,7 +1461,7 @@ export function useNoteCanvasDataAdapter({
         }));
         created = { ...created, canvas_layout: savedLayout.layout };
       } catch (err) {
-        if (template.legacy_block_type === 'media') {
+        if (rollbackUnplacedBlock) {
           await rollbackMediaCreation();
           return null;
         }
@@ -1471,7 +1476,7 @@ export function useNoteCanvasDataAdapter({
     }
 
     if (!requestIsCurrent()) {
-      if (template.legacy_block_type === 'media') await rollbackMediaCreation();
+      if (rollbackUnplacedBlock) await rollbackMediaCreation();
       return null;
     }
     let orderedBlocks: NoteBlock[] | null = null;
@@ -1486,7 +1491,7 @@ export function useNoteCanvasDataAdapter({
           orderedBlocks = currentBlocks.map((block, order_index) => ({ ...block, order_index }));
           created = orderedBlocks[anchorIndex + 1];
           } catch {
-            if (template.legacy_block_type === 'media') {
+            if (rollbackUnplacedBlock) {
               await rollbackMediaCreation('createBlock:reorder:' + requestedNote.id);
               return null;
             }
@@ -1760,6 +1765,29 @@ export function useNoteCanvasDataAdapter({
     }
   }), [writeRegistry, addToast]);
 
+  const saveTableBlock = useCallback(writeRegistry.hold('saveTableBlock', async (
+    block: NoteBlock, payload: TableBlockPayload,
+  ): Promise<boolean> => {
+    if (block.block_type !== 'table' || tableBlockValidationError(payload) || !allowSourceContentMutation()) return false;
+    const requestedNoteId = noteRef.current?.id;
+    const generation = routeRequestGenerationRef.current;
+    if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) return false;
+    const current = () => adapterMountActiveRef.current && noteRef.current?.id === requestedNoteId
+      && routeNoteIdRef.current === requestedNoteId && routeRequestGenerationRef.current === generation;
+    try {
+      const response = await writeRegistry.track('table-body:' + block.id, () => api.put(`/note-blocks/${block.id}`, {
+        content_json: structuredClone(payload), plain_text: null,
+      }));
+      if (!current()) return false;
+      const saved = hydrateClientBlock({ ...block, ...response.data });
+      setBlocks((existing) => existing.map((entry) => entry.id === block.id ? saved : entry));
+      return true;
+    } catch (error) {
+      if (current()) addToast('error', 'Table could not be saved. Your edits are still open.');
+      return false;
+    }
+  }), [writeRegistry, allowSourceContentMutation, addToast]);
+
   const saveBlock = useCallback(writeRegistry.hold((block: NoteBlock) => `block-save:${block.id}`, async (
     block: NoteBlock,
     text: string,
@@ -1777,7 +1805,7 @@ export function useNoteCanvasDataAdapter({
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
     // operations still cross this barrier and must not become failed writes.
-    if (block.block_type === 'item_ref' || block.block_type === 'note_ref') {
+    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'table') {
       return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
     }
     if (!allowSourceContentMutation()) {
@@ -2300,7 +2328,7 @@ export function useNoteCanvasDataAdapter({
       baseRevision?: number;
     } = {},
   ) => {
-    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || !allowSourceContentMutation()) return null;
+    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'table' || !allowSourceContentMutation()) return null;
     const requestedNoteId = noteRef.current?.id || null;
     if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) {
       console.error('Failed to convert block: route receipt is unavailable');
@@ -3044,6 +3072,7 @@ export function useNoteCanvasDataAdapter({
     discardDraftBlock,
     finalizeDraftBlock,
     saveBlock,
+    saveTableBlock,
     applyBlockEditRecovery,
     inspectBlockEditRecovery,
     replayBlockEditRecovery,

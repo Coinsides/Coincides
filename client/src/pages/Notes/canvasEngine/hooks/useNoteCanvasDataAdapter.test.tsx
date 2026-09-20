@@ -388,6 +388,63 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  it('B1 creates and saves a pure table payload, with no TextFlow body flush', async () => {
+    const payload = { caption: '熙宁新法表', headers: ['新法', '措施', '目的'], rows: [['青苗法', '春贷秋还', '缓解借贷']] };
+    const table = { ...serverBlock('', false), block_type: 'table', content_json: payload, plain_text: '' };
+    durableBlocks = [table];
+    mocks.post.mockImplementation(async (_url, body) => ({ data: { ...table, ...body, id: 'table-created' } }));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const template = subject.result.current.templateOptions.find((entry) => entry.legacy_block_type === 'table')!;
+    await act(async () => {
+      const created = await subject.result.current.createBlock(template, '', { contentJson: payload, silent: true });
+      expect(created?.content_json).toEqual(payload);
+    });
+    const next = { ...payload, rows: [['免役法', '募役', '减轻差役']] };
+    await act(async () => { expect(await subject.result.current.saveTableBlock(table, next)).toBe(true); });
+    expect(mocks.put).toHaveBeenCalledWith(`/note-blocks/${table.id}`, { content_json: next, plain_text: null });
+    expect(subject.result.current.blocks.find((entry) => entry.id === table.id)?.content_json).toEqual(next);
+    await act(async () => { expect((await subject.result.current.saveBlock(table, 'flush')).status).toBe('saved'); });
+    expect(mocks.atomicPut).not.toHaveBeenCalled();
+    expect(subject.result.current.blockTextFlowDrafts[table.id]).toBeUndefined();
+    mocks.put.mockRejectedValueOnce(new Error('Connection interrupted'));
+    await act(async () => { expect(await subject.result.current.saveTableBlock(table, payload)).toBe(false); });
+    expect(subject.result.current.blocks.find((entry) => entry.id === table.id)?.content_json).toEqual(next);
+  });
+
+  it.each(['placement', 'order'] as const)('B1 table creation rolls back an incomplete %s save', async (failure) => {
+    mocks.coordinateContract = 'v2';
+    const collection = f11RuntimeCollection();
+    const anchor = serverBlock('anchor', false);
+    durableBlocks = [anchor];
+    canvasPersistenceResponse = { pageFrameCollection: collection };
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => url.endsWith('/page-frame-collection') ? { data: collection } : originalGet(url));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const template = subject.result.current.templateOptions.find((entry) => entry.legacy_block_type === 'table')!;
+    mocks.post.mockImplementation(async (_url, body) => ({ data: { ...serverBlock('', false), ...body,
+      id: 'table', placement_id: 'table-place', order_index: 1 } }));
+    mocks.put.mockImplementation(async (url, body) => {
+      if (url.includes('/block-placements/')) {
+        if (failure === 'placement') throw new Error('Placement unavailable');
+        return f11PlacementResponse(url, body);
+      }
+      if (url.endsWith('/blocks/reorder')) throw new Error('Order unavailable');
+      return { data: {} };
+    });
+    mocks.delete.mockResolvedValue({ data: { success: true } });
+    await act(async () => {
+      expect(await subject.result.current.createBlock(template, '', { afterBlockId: anchor.id, silent: true,
+        layout: { x: 0, y: 100, width: 400, height: 80, width_mode: 'auto', frame_id: collection.primaryFrameId!,
+          coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
+      })).toBeNull();
+    });
+    expect(mocks.delete).toHaveBeenCalledWith('/note-blocks/table');
+    expect(subject.result.current.blocks.map((entry) => entry.id)).toEqual([anchor.id]);
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+  });
+
   it.each(['none', 'placement', 'order'] as const)('13.6 media creation saves order or rolls back and drains failures (%s)', async (failure) => {
     mocks.coordinateContract = 'v2';
     const collection = f11RuntimeCollection();

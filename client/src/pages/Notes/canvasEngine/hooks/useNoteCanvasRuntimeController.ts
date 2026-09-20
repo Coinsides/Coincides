@@ -15,6 +15,8 @@ import { useSlashBlockRollbackController } from './useSlashBlockRollbackControll
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
+import { useTableBlockHistory } from './useTableBlockHistory';
+import { STATIC_TEMPLATE_OPTIONS } from '@/services/templateOptions';
 import { usePageFrameWalls } from './usePageFrameWalls';
 import { usePaperSize } from './usePaperSize';
 import { resolvePaperSizeEditLayouts } from '../paperSizeEditService';
@@ -174,6 +176,7 @@ export function useNoteCanvasRuntimeController() {
     discardDraftBlock,
     finalizeDraftBlock,
     saveBlock: saveBlockRaw,
+    saveTableBlock,
     applyBlockEditRecovery,
     inspectBlockEditRecovery,
     replayBlockEditRecovery,
@@ -497,6 +500,10 @@ export function useNoteCanvasRuntimeController() {
   });
   textHistoryHostRef.current = { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle, isReplaying: isRuntimeHistoryReplaying };
 
+  const tableHistory = useTableBlockHistory({ noteId, generation: textHistoryGeneration, blocks, saveTableBlock,
+    boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
+    history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
+
   const inkCommands = usePaperInkCommands({
     noteId, generation: textHistoryGeneration,
     objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
@@ -623,6 +630,17 @@ export function useNoteCanvasRuntimeController() {
     onPageReadingStep: nudgePageReadingStep,
     onPageReadingViewportChange: setPageReadingViewport,
     onCreateBlock: createBlock,
+    onSaveTable: tableHistory.save,
+    onCreateTable: (payload) => {
+      if (sourceProjectionPolicy.contentReadOnly || !textHistory.boundary()) return Promise.resolve(false);
+      return enqueueRuntimeHistoryOperation(async () => {
+        const template = STATIC_TEMPLATE_OPTIONS.find((entry) => entry.legacy_block_type === 'table')!;
+        const created = await createBlock(template, '', { contentJson: { ...payload }, layout: defaultDraftLayout });
+        if (!created) return false;
+        markBlockSelected(created.id);
+        return pushHistoryEntry({ type: 'createdBlock', block: created }, { skipBoundary: true });
+      });
+    },
     onActivateDraft: activateDraft,
     onBeginMoveBlock: (...args) => {
       if (!chapters.beginChapterMove(args[0], args[1]) && textHistory.boundary()) beginMoveBlock(...args);

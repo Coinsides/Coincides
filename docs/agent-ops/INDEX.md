@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 405 份文档。
+共 406 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -392,7 +392,8 @@
 | [handoffs/2026-09-19-v14-a2-binding-order.md](handoffs/2026-09-19-v14-a2-binding-order.md) | A2 · 装订面三件套+折缝 | `done(builder 交付+HQ 收口全绿,2026-09-19:client 188 文件 1896/1896 亲跑定案;三未绿逐一过堂——契约闸旧断言按已拍「每页异形」新法更新、server 正式 build 由 HQ 补 shared 项目构建后绿(v2McpArtifact 2/2 复活)、板 wave1 两断言跟上板视觉 v1 现役回执(7/7);git/secrets 双门绿;应用内两砖合验冒烟过:真笔记自动翻页+页缝+页脚页码+装订面板;余 2 红=既有 Python/MinerU 环境基线)` | — | — |
 | [handoffs/2026-09-19-v14-a3-cover-page-order.md](handoffs/2026-09-19-v14-a3-cover-page-order.md) | A3 · 真封面页+真相绑定块 | `done(builder 一轮交付+HQ 收口全绿,2026-09-19:client 193 文件 1940/1940 亲跑定案;git diff --check+secrets(81 文件)双门绿;server 993/995,余 2=既有 Python/MinerU 环境基线;builder 实机证据覆盖封面全生命周期,原图上传/真实打印两项实机留后续冒烟顺手补)` | — | — |
 | [handoffs/2026-09-19-v14-a4-heading-chapters-order.md](handoffs/2026-09-19-v14-a4-heading-chapters-order.md) | A4 · heading 角色+章投影+导航标题树 | `done(builder 一轮交付+HQ 收口全绿,2026-09-19:client 199 文件 2014/2014 亲跑定案;git diff --check+secrets(63 文件)双门绿;server 余 2 红=Python/MinerU 环境基线;契约 amendment 落 docs/contracts/TextFlow-Contract.md:177 冻结正文零改;实浏览器走查并入下次纸面线冒烟)` | — | — |
-| [handoffs/2026-09-19-v14-a5-paper-freedom-order.md](handoffs/2026-09-19-v14-a5-paper-freedom-order.md) | A5 · 纸型自由化束 | `done(builder 施工交工作树；client 204 文件 2066/2066；非 git/secrets 23 组件按 Result 申报；server 两项 Python/MinerU 环境红、HQ 双门与放行待收口)` | — | — |
+| [handoffs/2026-09-19-v14-a5-paper-freedom-order.md](handoffs/2026-09-19-v14-a5-paper-freedom-order.md) | A5 · 纸型自由化束 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 204 文件 2066/2066 亲跑定案;git diff --check+secrets(59 文件)双门绿;server 余 2 红=Python/MinerU 环境基线;纸面线五砖至此封顶)` | — | — |
+| [handoffs/2026-09-20-v14-b1-table-block-order.md](handoffs/2026-09-20-v14-b1-table-block-order.md) | B1 · 表格块 v1 | `done(builder 二轮施工交工作树；client 209 文件 2109/2109；非 git/secrets 23 组件分次验证；server 两项 Python 环境红、HQ 双门与放行待收口)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

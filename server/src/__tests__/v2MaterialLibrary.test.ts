@@ -811,8 +811,8 @@ test('v2.5 template runtime seeds system templates idempotently', async () => {
     const secondSeed = seedSystemTemplateDefinitions(db, userId);
     const templates = listTemplateDefinitions(db, userId, {});
 
-    // The media advance delivery added media.image to the active system set.
-    const expectedTemplateKeys = ['code.snippet', 'formula.math', 'media.image', 'text.paragraph'];
+    // Images and native tables are both part of the active media family.
+    const expectedTemplateKeys = ['code.snippet', 'formula.math', 'media.image', 'media.table', 'text.paragraph'];
     assert.equal(firstSeed.length, expectedTemplateKeys.length);
     assert.equal(secondSeed.length, firstSeed.length);
     assert.equal(templates.length, firstSeed.length);

@@ -229,6 +229,8 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     viewportTransform: input.viewportTransform,
     visibleBlocks: input.visibleBlocks,
     onCreateBlock: input.onCreateBlock,
+    onCreateTable: input.onCreateTable,
+    onSaveTable: input.onSaveTable,
     onSaveAnnotationTruths: input.onSaveAnnotationTruths,
     onSaveContentGroups: input.onSaveContentGroups,
     onSaveDocumentTypographyProfile: input.onSaveDocumentTypographyProfile,

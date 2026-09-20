@@ -7,6 +7,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
   type CSSProperties,
   type KeyboardEvent,
   type DragEvent as ReactDragEvent,
@@ -66,6 +67,9 @@ import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { NoteRefBlockProjection } from '../blocks/NoteRefBlockProjection';
 import { MediaBlockProjection, MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
+import { TableBlockProjection } from '../blocks/TableBlockProjection';
+import { TableBlockEditor } from '../blocks/TableBlockEditor';
+import { readTableBlockPayload, type TableBlockPayload } from '../tableBlockService';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type { CrossBlockUnitDropTarget, TextUnitDropTarget } from '../hooks/useTextUnitHandleDrag';
@@ -90,6 +94,8 @@ interface BlockEditorLayerProps {
   block: NoteBlock;
   contentReadOnly: boolean;
   mediaPlaceholder?: boolean;
+  tablePrint?: boolean;
+  onSaveTable?: (payload: TableBlockPayload) => Promise<boolean>;
   allowSaveRecovery?: boolean;
   text: string;
   textFlowDraft?: TextBlockContentV1;
@@ -168,6 +174,8 @@ export function BlockEditorLayer({
   textUnitGutterLaneX,
   contentReadOnly,
   mediaPlaceholder = false,
+  tablePrint = false,
+  onSaveTable,
   allowSaveRecovery = false,
   text,
   textFlowDraft,
@@ -250,6 +258,9 @@ export function BlockEditorLayer({
   const itemReference = block.block_type === 'item_ref';
   const noteReference = block.block_type === 'note_ref';
   const mediaBlock = block.block_type === 'media';
+  const tableBlock = block.block_type === 'table';
+  const [editingTable, setEditingTable] = useState(false);
+  const tablePayload = tableBlock ? readTableBlockPayload(block) : null;
   const allowTextNavigation = !contentReadOnly && !layoutMode && supportsTextFlowBlockNavigation(block);
   useLayoutEffect(() => {
     if (allowTextNavigation || contentReadOnly || layoutMode) return;
@@ -453,6 +464,7 @@ export function BlockEditorLayer({
         minHeight: layout.height,
         ...(paginated ? { height: layout.height, overflow: 'visible', minWidth: 0 } : {}),
         ...(mediaBlock ? { height: layout.height, minWidth: 0, padding: 0 } : {}),
+        ...(tableBlock ? { minWidth: 0 } : {}),
         borderColor: affiliationOutline?.colorToken,
         borderStyle: affiliationOutline ? 'dashed' : undefined,
         ...(textUnitGutterLaneX !== undefined ? {
@@ -464,6 +476,10 @@ export function BlockEditorLayer({
       } as CSSProperties}
       onMouseDown={handleBlockMouseDown}
       onContextMenu={handleBlockContextMenu}
+      onDoubleClick={tableBlock ? (event) => {
+        event.stopPropagation();
+        if (!contentReadOnly && !layoutMode && onSaveTable) setEditingTable(true);
+      } : undefined}
     >
       {chapter && <ChapterHeadingFurniture {...chapter} />}
       <BlockStatusBadgeLayer
@@ -483,9 +499,9 @@ export function BlockEditorLayer({
         saving={saving}
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
-        bodyReadOnly={itemReference || noteReference || mediaBlock}
+        bodyReadOnly={itemReference || noteReference || mediaBlock || tableBlock}
         onBeginMove={onBeginMove}
-        onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
+        onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && !tableBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}
@@ -537,7 +553,9 @@ export function BlockEditorLayer({
           onFocusReleased(receipt);
         }}
       >
-          {noteReference ? (
+          {tableBlock ? (
+            <TableBlockProjection block={block} print={tablePrint} />
+          ) : noteReference ? (
             <NoteRefBlockProjection field={block.content_json.field === 'description' ? 'description' : 'title'} readOnly={contentReadOnly || layoutMode} />
           ) : mediaBlock ? (
           mediaPlaceholder ? <MediaBlockPlaceholder block={block} /> : <MediaBlockProjection block={block} />
@@ -616,6 +634,11 @@ export function BlockEditorLayer({
         </div>}
       </div>
 
+      {editingTable && tablePayload && onSaveTable && !contentReadOnly && <TableBlockEditor
+        initialPayload={tablePayload} onCancel={() => setEditingTable(false)} onSave={async (payload) => {
+          if (!await onSaveTable(payload)) throw new Error('Table could not be saved. Please retry.');
+          setEditingTable(false);
+        }} />}
       {!contentReadOnly && !mediaBlock && <BlockResizeHandleLayer onBeginResize={onBeginResize} />}
     </article>
   );
