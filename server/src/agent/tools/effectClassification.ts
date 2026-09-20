@@ -1,9 +1,11 @@
-import { AGENT_ACTION_TOOLS, AGENT_READ_TOOLS } from '../../toolFace/registry.js';
+import { AGENT_ACTION_TOOLS, AGENT_READ_TOOLS, AGENT_UI_TOOLS } from '../../toolFace/registry.js';
 
 // Authority: HQ's 2026-09-14 claim-receipt order and second resumption ruling.
 // These are effect classes, not admission rules. Never copy the registered lists.
 export const DOOR_WRITE_TOOLS: ReadonlySet<string> = new Set(AGENT_ACTION_TOOLS.map(tool => tool.name));
-export const CHANNEL_WRITE_TOOLS: ReadonlySet<string> = new Set(['save_memory', 'create_proposal']);
+// C4a supplement 1 admits only these two presentation verbs to the channel class.
+export const CHANNEL_WRITE_TOOLS: ReadonlySet<string> = new Set(['save_memory', 'create_proposal',
+  ...AGENT_UI_TOOLS.map(tool => tool.name)]);
 export const READ_TOOLS: ReadonlySet<string> = new Set([
   ...AGENT_READ_TOOLS.map(tool => tool.name),
   'list_courses', 'get_tasks', 'list_goals', 'list_decks', 'list_sections', 'list_cards',

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256",
-  "hash": "6b15e1be7ac79342203c14d32bd9ab2900bf6be8d4c337e9f97718f0193ce816",
+  "hash": "85acce270a2224893e4c011ce4e46e1625f01d5ceba81f7f393cca7aa2a78b15",
   "facts": {
     "registryNames": [
       "board_create_edge",
@@ -38,6 +38,8 @@
       "read_note",
       "resolve_selection",
       "trash_notes",
+      "ui_focus_object",
+      "ui_open_note",
       "update_time_block"
     ],
     "effects": {
@@ -62,7 +64,9 @@
       ],
       "channelWrite": [
         "create_proposal",
-        "save_memory"
+        "save_memory",
+        "ui_focus_object",
+        "ui_open_note"
       ],
       "read": [
         "collect_preferences",
@@ -130,12 +134,14 @@
       "search_documents",
       "search_memories",
       "suggest_next_topics",
+      "ui_focus_object",
+      "ui_open_note",
       "update_time_block"
     ]
   },
   "manual": {
     "path": "docs/agent-ops/current-state/app-operating-manual.md",
-    "version": "v1",
+    "version": "v2",
     "updated": "2026-09-20"
   }
 }

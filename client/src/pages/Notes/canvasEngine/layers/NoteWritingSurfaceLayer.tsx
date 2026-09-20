@@ -15,6 +15,12 @@ import { Boxes, MousePointer2, Pencil, Eraser, PanelLeft } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
 import { ViewOptionsMenu } from './ViewOptionsMenu';
+import { NoteToolbarGroup } from './NoteToolbarGroup';
+import { NoteInsertMenu } from './NoteInsertMenu';
+import { FloatingOverlayLayer } from './FloatingOverlayLayer';
+import { ParagraphFurnitureEditor } from '../blocks/ParagraphFurnitureEditor';
+import { canStyleParagraph, readParagraphFurniture, type ParagraphFurniture } from '../paragraphFurniture';
+import { NoteInsertCommandsContext, type NoteInsertCommandHost } from '../NoteInsertCommandsContext';
 import { NotePageGapLayer } from './NotePageGapLayer';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { NoteCoverUnderlay } from './NoteCoverUnderlay';
@@ -25,9 +31,10 @@ import { usePaperSkin } from '../PaperSkinContext';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
 import type { ItemRefBlockData } from '@shared/types/itemRef';
 import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
+import { useNoteDocumentShell } from '../hooks/useNoteDocumentShell';
 import { createDefaultPageReadingViewState, type PageReadingGear, type PageReadingViewState } from '../pageReadingViewportService';
 import type { TemplateOption } from '@/services/templateOptions';
-import { useEffect, useContext, useMemo, useRef, useState, type CSSProperties, type Dispatch, type DragEvent, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type RefObject, type SetStateAction } from 'react';
+import { useEffect, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type DragEvent, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type RefObject, type SetStateAction } from 'react';
 import type { NoteSlashCommand } from '../../noteSlashCommands';
 import {
   presentationKindForBlock,
@@ -471,6 +478,18 @@ export function NoteWritingSurfaceLayer({
   useEffect(() => { setCreatingTable(false); }, [noteId]);
   const [creatingComponent, setCreatingComponent] = useState<BuiltinComponentKind | null>(null);
   useEffect(() => { setCreatingComponent(null); }, [noteId]);
+  const insertHost = useContext(NoteInsertCommandsContext);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageAnchorRef = useRef<string | null>(null);
+  const furnitureDialogRef = useRef<HTMLDivElement>(null);
+  const [editingFurniture, setEditingFurniture] = useState<{ blockId: string; value: ParagraphFurniture } | null>(null);
+  useEffect(() => { setEditingFurniture(null); imageAnchorRef.current = null; }, [noteId]);
+  useEffect(() => {
+    if (!editingFurniture) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    furnitureDialogRef.current?.querySelector<HTMLSelectElement>('select')?.focus();
+    return () => { if (previous?.isConnected) previous.focus({ preventScroll: true }); };
+  }, [editingFurniture]);
   const itemDropPending = useRef(false);
   const mediaPastePending = useRef(false);
   const mediaPasteSession = useRef({ noteId, active: true });
@@ -522,6 +541,29 @@ export function NoteWritingSurfaceLayer({
     const worldY = resolveScreenRect(layout, frame, noteCanvasRuntime.coordinateContract, pageOffsetX).y;
     return { ...frame, y: frame.y + pageGapPresentation.toDisplayY(worldY) - worldY };
   };
+  useNoteDocumentShell({ noteId, title: paperHeader?.titleDraft ?? '', projectId,
+    enabled: hostMode === 'page' && isNoteAgentRoute, blockListRef,
+    beforeFocus: (target) => {
+      if (overviewOpen) onToggleOverview?.();
+      if (target.type !== 'note_block' || !chapterPresentation) return;
+      const chapters = chapterPresentation.projection.chapters.filter((chapter) => chapter.blockIds.includes(target.block_id));
+      if (chapters.some((chapter) => chapterPresentation.collapsedChapterIds.has(chapter.id))) {
+        const chapter = chapters[chapters.length - 1];
+        if (chapter) chapterPresentation.onRevealChapter(chapter.id);
+      }
+    },
+    resolveTarget: (target) => {
+      if (target.type === 'note_page') {
+        const frame = [...noteCanvasRuntime.pageFrames].sort((a, b) => a.y - b.y || a.x - b.x)[target.page_index];
+        return frame ? { rect: displayFrame(frame), selector: '[data-paper-ink-layer]', id: frame.id } : null;
+      }
+      if (target.type === 'note_block') {
+        const layout = blockLayouts[target.block_id];
+        return layout ? { rect: resolveScreenRect(layout, displayPlacementFrame(layout), noteCanvasRuntime.coordinateContract, pageOffsetX),
+          selector: '[data-note-block-shell="true"]', id: target.block_id } : null;
+      }
+      return null;
+    } });
   const primaryPageFrameId = primaryPageFrame?.id || 'none';
   const primaryPageFrameRole = primaryPageFrame?.role || 'none';
   const primaryPageFramePrimary = primaryPageFrame ? 'true' : 'false';
@@ -1520,6 +1562,48 @@ export function NoteWritingSurfaceLayer({
     }
   };
 
+  // The toolbar and slash command controller share these existing human doors.
+  const insertTargetBlockId = selectedBlockId ?? focusedTextOwner?.blockId ?? focusBlockId;
+  const insertCommandHost: NoteInsertCommandHost = {
+    disabledReason: (action, blockId = insertTargetBlockId) => {
+      if (contentReadOnly) return '引用源内容已锁定。';
+      if (overviewOpen || layoutMode) return '请先返回书写模式。';
+      if (document.querySelector('[data-runtime-textflow-composing="true"]')) return '请先完成当前输入。';
+      if (action === 'table') return onCreateTable ? undefined : '表格尚未就绪。';
+      if (action === 'timeline' || action === 'chart_bar' || action === 'chart_line') return onCreateComponent ? undefined : '组件尚未就绪。';
+      const block = allBlocks.find((candidate) => candidate.id === blockId);
+      if (!block) return '请先选择一个已保存的段落。';
+      if (action === 'media') {
+        const layout = blockLayouts[block.id];
+        return layout && layout.surface !== 'canvas_workspace' && layout.surface !== 'tray'
+          ? undefined : '请先选择纸上的段落。';
+      }
+      return onSaveParagraphFurniture && canStyleParagraph(block) ? undefined : '请先选择一个正文段落。';
+    },
+    run: (action, blockId = insertTargetBlockId) => {
+      const reason = insertCommandHost.disabledReason(action, blockId);
+      if (reason) { addToast('info', reason); return; }
+      if (action === 'table') { setCreatingTable(true); return; }
+      if (action === 'timeline' || action === 'chart_bar' || action === 'chart_line') { setCreatingComponent(action); return; }
+      const block = allBlocks.find((candidate) => candidate.id === blockId);
+      if (!block) return;
+      if (action === 'media') {
+        imageAnchorRef.current = block.id;
+        imageInputRef.current?.click();
+        return;
+      }
+      const existing = readParagraphFurniture(block);
+      setEditingFurniture({ blockId: block.id, value: action === 'quote_frame'
+        ? { variant: 'quote', source: existing?.variant === 'quote' ? existing.source : '' }
+        : { variant: 'callout', label: existing?.variant === 'callout' ? existing.label : '注' } });
+    },
+  };
+  useLayoutEffect(() => {
+    if (!insertHost) return;
+    insertHost.current = insertCommandHost;
+    return () => { if (insertHost.current === insertCommandHost) insertHost.current = null; };
+  });
+
   const handleStagingDrop = (event: DragEvent<HTMLDivElement>) => {
     if (hostMode !== 'modal' || !event.dataTransfer.types.includes(BOARD_STAGING_MIME)) return;
     event.preventDefault();
@@ -1950,16 +2034,8 @@ export function NoteWritingSurfaceLayer({
       </div>
       {surfaceMode === 'page' && (
         <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
-          {noteTools}
-          {onCreateTable && !contentReadOnly && <button type="button" className={styles.canvasZoomReset}
-            aria-label="Insert table" title="Insert table" disabled={overviewOpen || layoutMode}
-            onClick={() => setCreatingTable(true)}>Table</button>}
-          {onCreateComponent && !contentReadOnly && ([
-            ['timeline', 'Timeline', 'Insert timeline'], ['chart_bar', 'Bar chart', 'Insert bar chart'],
-            ['chart_line', 'Line chart', 'Insert line chart'],
-          ] as const).map(([kind, label, ariaLabel]) => <button key={kind} type="button" className={styles.canvasZoomReset}
-            aria-label={ariaLabel} title={ariaLabel} disabled={overviewOpen || layoutMode}
-            onClick={() => setCreatingComponent(kind)}>{label}</button>)}
+          <NoteToolbarGroup name="paper" label="纸的状态">{noteTools}</NoteToolbarGroup>
+          <NoteToolbarGroup name="pen" label="手上的笔">
           {([{ key: 'selection', label: 'Selection', Icon: MousePointer2 },
             { key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
             <button key={key} type="button" className={styles.canvasZoomButton} aria-label={label} title={label}
@@ -1968,6 +2044,14 @@ export function NoteWritingSurfaceLayer({
               <Icon size={14} aria-hidden="true" />
             </button>
           ))}
+          {isNoteAgentRoute && selectedBlockId && <button type="button" className={styles.canvasZoomReset}
+            onMouseDown={(event) => event.preventDefault()} onClick={() => { void askAgent(); }}>问 Agent</button>}
+          </NoteToolbarGroup>
+          <NoteToolbarGroup name="insert" label="插入内容">
+            <NoteInsertMenu disabledReason={(action) => insertCommandHost.disabledReason(action)}
+              onSelect={(action) => insertCommandHost.run(action)} />
+          </NoteToolbarGroup>
+          <NoteToolbarGroup name="view" label="看的方式">
           <ViewOptionsMenu open={showViewOptions} disabled={overviewOpen}
             pageGapsFolded={pageGapsFolded}
             onPageGapsFoldedChange={pageGapPresentation.enabled ? setPageGapsFolded : undefined}
@@ -1980,8 +2064,6 @@ export function NoteWritingSurfaceLayer({
                   surfaceRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]')?.scrollTo({ top: 0, behavior: 'auto' });
                 }
             }} />
-          {isNoteAgentRoute && selectedBlockId && <button type="button" className={styles.canvasZoomReset}
-            onMouseDown={(event) => event.preventDefault()} onClick={() => { void askAgent(); }}>问 Agent</button>}
           {onToggleNavigation && <button type="button" className={styles.canvasZoomReset}
             data-note-navigation-toggle="true" aria-label="Navigation pane" title="Navigation pane" aria-expanded={navigationOpen}
             disabled={overviewOpen} onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
@@ -1995,8 +2077,27 @@ export function NoteWritingSurfaceLayer({
           <output className={styles.pageReadingPercent} aria-label="Page display scale">{Math.round(pageReading.displayScale * 100)}%</output>
           <button type="button" className={styles.canvasZoomButton} aria-label="Increase page reading step"
             disabled={overviewOpen || readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
+          </NoteToolbarGroup>
         </div>
       )}
+      <input ref={imageInputRef} type="file" accept="image/*" hidden aria-label="选择媒体图"
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          const block = allBlocks.find((candidate) => candidate.id === imageAnchorRef.current);
+          event.currentTarget.value = '';
+          imageAnchorRef.current = null;
+          if (file && block) void handlePasteImage(block, file);
+        }} />
+      <FloatingOverlayLayer open={Boolean(editingFurniture && onSaveParagraphFurniture)} placement="free">
+        {editingFurniture && onSaveParagraphFurniture && <div ref={furnitureDialogRef} className={styles.toolbarFurnitureDialog}>
+          <ParagraphFurnitureEditor key={`${editingFurniture.blockId}:${editingFurniture.value.variant}`}
+            value={editingFurniture.value} onClose={() => setEditingFurniture(null)} onSave={async (value) => {
+              const block = allBlocks.find((candidate) => candidate.id === editingFurniture.blockId);
+              if (!block || contentReadOnly || layoutMode || overviewOpen) return false;
+              return onSaveParagraphFurniture(block, value);
+            }} />
+        </div>}
+      </FloatingOverlayLayer>
       {creatingComponent && onCreateComponent && <ComponentBlockEditor initialPayload={createDefaultComponentBlockPayload(creatingComponent)}
         onCancel={() => setCreatingComponent(null)} onSave={async (payload) => {
           if (!await onCreateComponent(payload)) throw new Error('Component could not be added. Please retry.');

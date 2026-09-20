@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 412 份文档。
+共 414 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -94,6 +94,7 @@
 | [analysis/2026-09-14-v14-1-executor-census.md](analysis/2026-09-14-v14-1-executor-census.md) | V14 · 14.1 executor 动词→人门映射普查 | `active` | — | — |
 | [analysis/2026-09-16-board-visual-grammar-benchmark.md](analysis/2026-09-16-board-visual-grammar-benchmark.md) | Coincides 板视觉语法 · 对标调研稿 | `active` | 2026-09-16 | — |
 | [analysis/2026-09-19-post-meeting-engineering-roadmap.md](analysis/2026-09-19-post-meeting-engineering-roadmap.md) | 会后工程总单与版本架构建议(2026-09-19) | `draft` | — | — |
+| [analysis/2026-09-20-sample-alignment-gap-list.md](analysis/2026-09-20-sample-alignment-gap-list.md) | 小样对齐差距清单(V14 射程内统计) | `draft` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -140,7 +141,7 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v1 | `active` | 2026-09-20 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-20 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
@@ -399,7 +400,8 @@
 | [handoffs/2026-09-20-v14-b5-image-editing-order.md](handoffs/2026-09-20-v14-b5-image-editing-order.md) | B5 · 图片编辑 v1 | `done(builder 二轮施工交工作树；非 git/secrets 23 组件最终通过；server 两项 Python 环境红、HQ 双门与放行待收口；行内媒体仍属 F2 候裁)` | — | — |
 | [handoffs/2026-09-20-v14-c1-board-sandbox-order.md](handoffs/2026-09-20-v14-c1-board-sandbox-order.md) | C1 · 板沙箱(Agent 的手) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 219 文件 2254/2254 亲跑定案;wilderness 超时红=builder 隔离跑法 120s 帽,HQ 600s 复跑 27/27(460.8s)恢复;git diff --check+secrets(62 文件)双门绿;余 2=Python/MinerU 环境基线)` | — | — |
 | [handoffs/2026-09-20-v14-c2-intent-router-order.md](handoffs/2026-09-20-v14-c2-intent-router-order.md) | C2 · 意图路由+注意力框+note_patch+答卡(Agent 的脑) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 223 文件 2274/2274 亲跑定案;git diff --check+secrets(91 文件)双门绿;wilderness 27/27(444s,预算行首见成效);余 2=Python/MinerU 基线)` | — | — |
-| [handoffs/2026-09-20-v14-c3-episode-memory-order.md](handoffs/2026-09-20-v14-c3-episode-memory-order.md) | C3 · 对话记忆情节层 v1(管家带地图,不背图书馆) | `done(builder 施工及授权验证已交回；server 全量保留 2 项既有 Python 环境失败，放行与 git/secrets 留 HQ)` | — | — |
+| [handoffs/2026-09-20-v14-c3-episode-memory-order.md](handoffs/2026-09-20-v14-c3-episode-memory-order.md) | C3 · 对话记忆情节层 v1(管家带地图,不背图书馆) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 224 文件 2282/2282 亲跑定案;git diff --check+secrets(50 文件)双门绿;余 2=Python/MinerU 基线)` | — | — |
+| [handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md](handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md) | C4a · 壳批机械半 | `ready(HQ 按代理权翻牌;14.5 壳批拆两半——本单=机械半;Home/悬浮窗/命令台=UX 原型半,候 Henry 商量⛔本单)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

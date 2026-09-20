@@ -1148,6 +1148,53 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   height: auto;
   min-height: 34px;
   flex-wrap: wrap;
+  gap: 0;
+  box-shadow: none;
+}
+
+.noteToolbarGroup { position: relative; flex: 0 0 auto; padding: 0 8px; }
+.noteToolbarGroup + .noteToolbarGroup { border-inline-start: 1px solid var(--border-subtle); }
+.noteToolbarGroupContent { display: flex; align-items: center; gap: 4px; }
+.toolbarGroupDisclosure { display: none; }
+.noteToolbarGroup :is(.canvasZoomButton, .canvasZoomReset, .modePill, .iconBtn) {
+  border-color: transparent; border-radius: 3px; background: transparent; box-shadow: none;
+}
+.noteToolbarGroup :is(.canvasZoomButton, .canvasZoomReset, .modePill, .iconBtn):hover {
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+.noteToolbarGroup button:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+.toolbarFurnitureDialog { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%, -50%); pointer-events: auto; }
+
+/* Collapse in the contracted order: view, then paper. Pen and insert stay visible. */
+@media (max-width: 1100px) {
+  .noteToolbarGroup[data-note-toolbar-group='pen'] { order: 0; border-inline-start: 0; }
+  .noteToolbarGroup[data-note-toolbar-group='insert'] { order: 1; }
+  .noteToolbarGroup[data-note-toolbar-group='paper'] { order: 2; border-inline-start: 1px solid var(--border-subtle); }
+  .noteToolbarGroup[data-note-toolbar-group='view'] { order: 3; }
+  .noteToolbarGroup[data-note-toolbar-group='view'] > .toolbarGroupDisclosure {
+    display: inline-flex; align-items: center; justify-content: center; height: 28px; min-width: 28px;
+    border: 0; border-radius: 3px; color: var(--text-secondary); background: transparent; cursor: pointer;
+  }
+  .noteToolbarGroup[data-note-toolbar-group='view'] > .noteToolbarGroupContent {
+    display: none; position: absolute; right: 0; bottom: calc(100% + 12px); padding: 8px;
+    width: max-content; max-width: calc(100vw - 32px); flex-wrap: wrap;
+    border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-primary);
+  }
+  .noteToolbarGroup[data-note-toolbar-group='view'][data-expanded='true'] > .noteToolbarGroupContent { display: flex; }
+}
+@media (max-width: 760px) {
+  .noteToolbarGroup[data-note-toolbar-group='paper'] > .toolbarGroupDisclosure {
+    display: inline-flex; align-items: center; justify-content: center; height: 28px; min-width: 28px;
+    border: 0; border-radius: 3px; color: var(--text-secondary); background: transparent; cursor: pointer;
+  }
+  .noteToolbarGroup[data-note-toolbar-group='paper'] > .noteToolbarGroupContent {
+    display: none; position: absolute; right: 0; bottom: calc(100% + 12px); padding: 8px;
+    width: max-content; max-width: calc(100vw - 32px); flex-wrap: wrap;
+    border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-primary);
+  }
+  .noteToolbarGroup[data-note-toolbar-group='paper'][data-expanded='true'] > .noteToolbarGroupContent { display: flex; }
+  .pageReadingControl { margin-inline: 8px; max-width: calc(100% - 16px); padding-inline: 3px; }
+  .noteToolbarGroup { padding-inline: 5px; }
 }
 
 .paperInkLayer {

@@ -23,6 +23,10 @@ import { useTagStore } from '@/stores/tagStore';
 import { useAuthStore } from '@/stores/authStore';
 import Onboarding from '@/components/Onboarding/Onboarding';
 import styles from './AppLayout.module.css';
+import { DocumentTabs } from './DocumentTabs';
+import { AgentUiBridge } from './AgentUiBridge';
+import { useDocumentTabsStore } from '@/stores/documentTabsStore';
+import { useAgentUiStore } from '@/stores/agentUiStore';
 
 const navItems = [
   { to: '/', icon: Home, labelKey: 'nav.home' },
@@ -36,6 +40,10 @@ const navItems = [
 
 export default function AppLayout() {
   const location = useLocation();
+  useEffect(() => () => {
+    useDocumentTabsStore.getState().reset();
+    useAgentUiStore.getState().reset();
+  }, []);
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
@@ -234,6 +242,9 @@ export default function AppLayout() {
       )}
 
       {/* Main content */}
+      <div className={styles.documentWorkspace}>
+      <DocumentTabs />
+      <AgentUiBridge />
       <main
         className={`${styles.main} ${contentGroupWorkspace ? styles.immersiveMain : ''} ${boardWorkspace ? styles.boardMain : ''}`}
         data-app-main-scroll="true"
@@ -245,6 +256,7 @@ export default function AppLayout() {
           <Outlet />
         </div>
       </main>
+      </div>
     </div>
   );
 }

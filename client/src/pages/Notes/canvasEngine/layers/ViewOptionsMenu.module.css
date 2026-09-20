@@ -37,6 +37,8 @@
   outline: none;
 }
 
+.option:disabled { color: var(--text-muted); cursor: default; opacity: 0.55; }
+
 .check {
   display: inline-flex;
   flex: 0 0 14px;

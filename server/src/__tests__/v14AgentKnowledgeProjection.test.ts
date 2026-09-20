@@ -10,9 +10,10 @@ import {
 import { buildSystemPrompt } from '../agent/system-prompt.js';
 import { toolDefinitions } from '../agent/tools/definitions.js';
 import { CHANNEL_WRITE_TOOLS, DOOR_WRITE_TOOLS, READ_TOOLS } from '../agent/tools/effectClassification.js';
-import { AGENT_READ_TOOLS } from '../toolFace/registry.js';
+import { AGENT_READ_TOOLS, AGENT_UI_TOOLS } from '../toolFace/registry.js';
 import { BOARD_ACTION_TOOLS } from '../toolFace/boardActions.js';
 import { NOTE_PATCH_PROMPT_BOUNDARY, renderDirectInstructionPrompt } from '../agent/intentRules.js';
+import { renderUiInstructionPrompt } from '../agent/uiPrompt.js';
 
 const context = { userName: 'Manual Reader', currentDate: '2026-09-14', courses: [], memories: [], documentSummaries: [] };
 // Before construction: four reader instruction lines (363) + LF (1) + the
@@ -26,7 +27,7 @@ function projectionText(withBoard = true) {
   const projection = projectAgentCapabilities();
   const doorWrite = withBoard ? projection.doorWrite : projection.doorWrite.filter(name => !BOARD_ACTION_TOOLS.some(tool => tool.name === name));
   return [renderPerceptionTools(projection.perceptionReaders), renderDoorWriteTools(doorWrite),
-    renderChannelWriteTools(projection.channelWrite)].join('\n');
+    renderChannelWriteTools(projection.channelWrite.filter(name => !AGENT_UI_TOOLS.some(tool => tool.name === name)))].join('\n');
 }
 
 function assertBudget(text: string, boardRosterBytes = 0) {
@@ -95,10 +96,11 @@ test('the projected fragments stay within both sides of the pre-edit UTF-8 budge
   assert.throws(() => assertBudget(''), /exceeds/);
 });
 
-test('restoring only the authorized roster and C2 amendment bytes reproduces the entire pre-edit prompt', () => {
+test('restoring only the authorized roster, C2 and C4a amendment bytes reproduces the entire pre-edit prompt', () => {
   const projection = projectAgentCapabilities();
   const restored = buildSystemPrompt('Manual Agent', context)
     .replace(renderDirectInstructionPrompt(), '')
+    .replace(renderUiInstructionPrompt(), '')
     .replace(NOTE_PATCH_PROMPT_BOUNDARY, '不能写改笔记正文；生成笔记只能发 organized_note 提案。不能直接创建卡片，不能碰人类判断记录，不能无仪式做不可逆删除。')
     .replace(renderDoorWriteTools(projection.doorWrite), oldDoorSentence)
     .replace(renderChannelWriteTools(projection.channelWrite) + '\n', '');

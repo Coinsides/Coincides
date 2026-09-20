@@ -1,5 +1,5 @@
 import type { ToolDefinition } from '../providers/types.js';
-import { AGENT_ACTION_TOOLS, AGENT_READ_TOOLS } from '../../toolFace/registry.js';
+import { AGENT_ACTION_TOOLS, AGENT_READ_TOOLS, AGENT_UI_TOOLS } from '../../toolFace/registry.js';
 import { loadToolFaceManifest } from '../../mcp/manifest.js';
 import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
 import { createOrganizedNoteProposalSchema } from '../../validators/index.js';
@@ -8,7 +8,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // The build projects the authoritative Zod registry into this runtime artifact.
 const manifest = loadToolFaceManifest();
-const registeredDefinitions: ToolDefinition[] = [...AGENT_ACTION_TOOLS, ...AGENT_READ_TOOLS].map((tool) => {
+const registeredDefinitions: ToolDefinition[] = [...AGENT_ACTION_TOOLS, ...AGENT_READ_TOOLS, ...AGENT_UI_TOOLS].map((tool) => {
   const projection = manifest.find((entry) => entry.name === tool.name);
   if (!projection) throw new Error(tool.name + ' registry projection is missing');
   return { name: tool.name, description: tool.description, parameters: projection.input_schema };

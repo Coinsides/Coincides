@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useState } from 'react';
+import { documentKey, useDocumentTabsStore } from '@/stores/documentTabsStore';
 import {
   createDefaultPageReadingViewState,
   nudgePageReadingStepFactor,
@@ -15,29 +16,38 @@ interface NotePageReadingState {
   viewState: PageReadingViewState;
 }
 
+function rememberedReading(noteId?: string) {
+  return useDocumentTabsStore.getState().tabs.find((tab) => tab.key === documentKey('note', noteId ?? ''))?.reading
+    ?? createDefaultPageReadingViewState();
+}
+
 export function usePageReadingViewportController({ noteId }: UsePageReadingViewportControllerOptions) {
   const [scopedState, setScopedState] = useState<NotePageReadingState>(() => ({
     noteId,
-    viewState: createDefaultPageReadingViewState(),
+    viewState: rememberedReading(noteId),
   }));
   // A same-mode route change must not expose the previous note's reading state,
   // including the render before the layout effect clears the old scope.
   const pageReadingViewState = scopedState.noteId === noteId
     ? scopedState.viewState
-    : createDefaultPageReadingViewState();
+    : rememberedReading(noteId);
 
   useLayoutEffect(() => {
     setScopedState((current) => current.noteId === noteId ? current : {
       noteId,
-      viewState: createDefaultPageReadingViewState(),
+      viewState: rememberedReading(noteId),
     });
   }, [noteId]);
 
+  useLayoutEffect(() => {
+    if (noteId && scopedState.noteId === noteId) useDocumentTabsStore.getState().remember(documentKey('note', noteId), { reading: scopedState.viewState });
+  }, [noteId, scopedState]);
+
   const updateViewState = useCallback((update: (current: PageReadingViewState) => PageReadingViewState) => {
-    setScopedState((current) => ({
-      noteId,
-      viewState: update(current.noteId === noteId ? current.viewState : createDefaultPageReadingViewState()),
-    }));
+    setScopedState((current) => {
+      const viewState = update(current.noteId === noteId ? current.viewState : rememberedReading(noteId));
+      return { noteId, viewState };
+    });
   }, [noteId]);
 
   const setPageReadingGear = useCallback((gear: PageReadingGear) => {

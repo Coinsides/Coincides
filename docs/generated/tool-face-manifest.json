@@ -8756,5 +8756,475 @@
       "notes:read",
       "relations:read"
     ]
+  },
+  {
+    "name": "ui_open_note",
+    "description": "Ask the current client to open an owned note in a document tab. No content is written. At most 8 UI commands per turn; repeated identical targets within 1 second are debounced. Success means issued, not displayed: the client may defer while the human types.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "note_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "dispatched": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "const": "debounced"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "command_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "turn_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conversation_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "const": "open_note"
+                },
+                "target": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "note"
+                    },
+                    "note_id": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "note_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "command_id",
+                "turn_id",
+                "conversation_id",
+                "kind",
+                "target"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "command_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "turn_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conversation_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "const": "focus_object"
+                },
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "note_block"
+                        },
+                        "note_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "block_id": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "note_id",
+                        "block_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "note_page"
+                        },
+                        "note_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "page_index": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "note_id",
+                        "page_index"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "board_member"
+                        },
+                        "board_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "member_id": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "board_id",
+                        "member_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "command_id",
+                "turn_id",
+                "conversation_id",
+                "kind",
+                "target"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "dispatched",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "content",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/notes/:id",
+      "client_call_site": "client/src/components/Layout/DocumentTabs.tsx"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "notes:read"
+    ]
+  },
+  {
+    "name": "ui_focus_object",
+    "description": "Ask the current client to locate and briefly highlight a note block, zero-based note page, or placed board member. Pass target.type and its owned IDs. Never changes content, selection text, or saved viewport. Shares the 8-per-turn UI budget; identical targets within 1 second are debounced. Issued is not applied; do not claim the client has displayed it.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "note_block"
+                },
+                "note_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "block_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "note_id",
+                "block_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "note_page"
+                },
+                "note_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "page_index": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "type",
+                "note_id",
+                "page_index"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "board_member"
+                },
+                "board_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "member_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "board_id",
+                "member_id"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "dispatched": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "const": "debounced"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "command_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "turn_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conversation_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "const": "open_note"
+                },
+                "target": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "note"
+                    },
+                    "note_id": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "note_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "command_id",
+                "turn_id",
+                "conversation_id",
+                "kind",
+                "target"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "command_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "turn_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conversation_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "const": "focus_object"
+                },
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "note_block"
+                        },
+                        "note_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "block_id": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "note_id",
+                        "block_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "note_page"
+                        },
+                        "note_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "page_index": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "note_id",
+                        "page_index"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "board_member"
+                        },
+                        "board_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "member_id": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "board_id",
+                        "member_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "command_id",
+                "turn_id",
+                "conversation_id",
+                "kind",
+                "target"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "dispatched",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "UI document navigation",
+      "client_call_site": "client/src/components/Layout/DocumentTabs.tsx"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "notes:read",
+      "boards:read"
+    ]
   }
 ]

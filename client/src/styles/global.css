@@ -354,3 +354,7 @@ textarea {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* C4a: ephemeral UI presentation, no selection or content mutation. */
+:root { --agent-presence: #38bdf8; }
+[data-agent-ui-highlight="true"] { outline: 2px solid var(--agent-presence); outline-offset: 3px; }

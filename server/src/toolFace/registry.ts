@@ -1,5 +1,7 @@
 import { z, type ZodTypeAny } from 'zod';
 import { BOARD_ACTION_TOOLS } from './boardActions.js';
+import { AGENT_UI_TOOLS } from './uiActions.js';
+export { AGENT_UI_TOOLS } from './uiActions.js';
 import {
   createGoalSchema,
   createTaskSchema,
@@ -1118,4 +1120,5 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   },
   ...AGENT_ACTION_TOOLS,
   ...AGENT_READ_TOOLS,
+  ...AGENT_UI_TOOLS,
 ];

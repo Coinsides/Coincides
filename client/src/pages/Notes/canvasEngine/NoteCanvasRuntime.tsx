@@ -7,6 +7,7 @@ import styles from '../NoteDetail.module.css';
 import { PaperSkinContext } from './PaperSkinContext';
 import { SkinFloatCard } from '@/components/Skin/SkinFloatCard';
 import { NotePaperControls } from './layers/NotePaperControls';
+import { NoteInsertCommandsProvider } from './NoteInsertCommandsContext';
 
 export interface NoteCanvasRuntimeHandle {
   dismissTransientUI: () => void;
@@ -14,7 +15,7 @@ export interface NoteCanvasRuntimeHandle {
   refreshBoardTextRanges: () => Promise<void>;
 }
 
-const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntime({ onRequestClose }, ref) {
+const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntimeContent({ onRequestClose }, ref) {
   const { hostMode = 'page', noteId } = useNoteCanvasRuntime();
   const { layerProps, loading, loadError, note, skin, paper, layoutMode, runtimePageFrameCollection, showAppearancePanel, toggleAppearancePanel,
     dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
@@ -54,6 +55,10 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
       anchorRef={appearanceAnchorRef} disabled={loading || !note || !layerProps || Boolean(loadError)} />
     {content}
   </>;
+});
+
+const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntime(props, ref) {
+  return <NoteInsertCommandsProvider><NoteCanvasRuntimeContent {...props} ref={ref} /></NoteInsertCommandsProvider>;
 });
 
 export default NoteCanvasRuntime;

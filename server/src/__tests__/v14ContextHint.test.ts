@@ -515,9 +515,9 @@ async function streamFixture(t: TestContext, activeProvider = 'openai') {
   return { db, rounds, requests, request };
 }
 
-function assertToolEvents(events: RouteEvent[], id: string, name: string, ok: boolean) {
+function assertToolEvents(events: RouteEvent[], id: string, name: string, ok: boolean, targetActivity?: { note_id: string }) {
   assert.deepEqual(events.filter(event => event.type === 'tool_start' && event.data.id === id), [
-    { type: 'tool_start', data: { id, name } },
+    { type: 'tool_start', data: { id, name, ...(targetActivity ? { target_activity: targetActivity } : {}) } },
   ]);
   assert.deepEqual(events.filter(event => event.type === 'tool_end' && event.data.id === id), [
     { type: 'tool_end', data: { id, name, ok } },
@@ -643,7 +643,8 @@ for (const tool of [
   test(`HTTP tool stream: ${tool.name} execution failure reports ok false with the matched ID`, async t => {
     const { db, rounds, requests, request } = await streamFixture(t);
     rounds.push(callRound('call-unavailable', tool.name, JSON.stringify(tool.arguments)), finalStreamRound);
-    assertToolEvents(await request(), 'call-unavailable', tool.name, false);
+    assertToolEvents(await request(), 'call-unavailable', tool.name, false,
+      'note_id' in tool.arguments ? { note_id: tool.arguments.note_id! } : undefined);
     assert.match(nextWireResult(requests, 'call-unavailable').error as string, tool.error);
     assertNoDeckWrites(db);
   });

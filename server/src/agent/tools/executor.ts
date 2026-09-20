@@ -29,14 +29,20 @@ import { createOrganizedNoteProposal } from '../../services/organizedNoteProposa
 import { createNotePatchProposal } from '../../services/notePatchProposals.js';
 import { readNoteForAgent, readBoardForAgent } from '../../services/agentReadSurfaces.js';
 import { readContentGroupsForAgent, readAnnotationsRelationsForAgent } from '../../services/agentReadKnowledge.js';
+import { AGENT_UI_TOOLS } from '../../toolFace/uiActions.js';
+import { executeAgentUiCommand, type AgentUiRunState } from './uiCommands.js';
 
 export async function executeTool(
   toolName: string,
   args: Record<string, unknown>,
   userId: string,
   context?: AgentActionContext,
+  uiState?: AgentUiRunState,
 ): Promise<string> {
   const db = getDb();
+  if (AGENT_UI_TOOLS.some(tool => tool.name === toolName)) {
+    return JSON.stringify(executeAgentUiCommand(db, toolName, args, userId, context, uiState));
+  }
   const today = new Date().toISOString().split('T')[0];
   if (BOARD_ACTION_TOOLS.some(tool => tool.name === toolName)) {
     return JSON.stringify(executeAgentBoardAction(db, toolName, args, userId, context));

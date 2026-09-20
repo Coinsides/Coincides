@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -62,6 +63,7 @@ import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 import type { ApplyBlockTextFlowEdit } from './useBlockTextFlowEditController';
 import type { TextFlowEditSelection } from '../textFlowEditSession';
 import { headingLevelForRole, type HeadingTextFlowStructureRequest } from '../headingRoleService';
+import { NoteInsertCommandsContext } from '../NoteInsertCommandsContext';
 
 export type { SlashTarget } from '../slashCommandReducer';
 
@@ -150,6 +152,7 @@ export function useSlashCommandController({
   templateOptions,
   activateDraft,
 }: UseSlashCommandControllerOptions) {
+  const insertHost = useContext(NoteInsertCommandsContext);
   const [slashTarget, setSlashTarget] = useState<SlashTarget | null>(
     INITIAL_SLASH_COMMAND_STATE.target,
   );
@@ -209,7 +212,12 @@ export function useSlashCommandController({
 
   const slashCommands = useMemo(() => (
     slashTarget
-      ? filterSlashCommands(slashTarget.trigger.query).map((command) => (
+      ? filterSlashCommands(slashTarget.trigger.query).map((command) => command.insertAction ? {
+        ...command,
+        disabledReason: insertHost?.current
+          ? insertHost.current.disabledReason(command.insertAction, slashTarget.blockId ?? null)
+          : '插入菜单尚未就绪。',
+      } : (
         command.disabledReason
         || command.commandKind === 'annotation_action'
         || command.objectKind === 'writing_role'
@@ -218,7 +226,7 @@ export function useSlashCommandController({
           : { ...command, disabledReason: `${command.label} is not enabled in this notebook build yet.` }
       ))
       : []
-  ), [slashTarget, insertTemplateOptions]);
+  ), [slashTarget, insertTemplateOptions, insertHost]);
 
   useEffect(() => {
     setActiveSlashCommandIndex((current) => transitionSlashCommandIndex(current, { type: 'reset_index' }));
@@ -465,6 +473,22 @@ export function useSlashCommandController({
       return;
     }
 
+    if (command.insertAction) {
+      const host = insertHost?.current;
+      const blockId = slashTarget.blockId ?? null;
+      const reason = host?.disabledReason(command.insertAction, blockId);
+      if (!host || reason) {
+        addToast('info', reason ?? '插入菜单尚未就绪。');
+        exitSlashSession('disabled');
+        return;
+      }
+      // Use the existing owner-checked rollback to remove only the slash text;
+      // the insert host never converts the paragraph or its writing role.
+      if (!exitSlashSession('escape', blockId ? blockTextDrafts[blockId] : undefined)) return;
+      host.run(command.insertAction, blockId);
+      return;
+    }
+
     if (command.objectKind === 'writing_role' && command.writingRole) {
       const headingRole = headingLevelForRole(command.writingRole);
       const headingOwner = slashTarget.target === 'block' ? blocks.find((item) => item.id === slashTarget.blockId) ?? null : null;
@@ -615,6 +639,7 @@ export function useSlashCommandController({
     blockTextFlowDrafts,
     draftTextRef,
     exitSlashSession,
+    insertHost,
     persistDraft,
     saveBlock,
     setBlockTextDrafts,

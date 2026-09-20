@@ -26,7 +26,23 @@ export interface NoteSlashCommand {
   requiresSelection?: boolean;
   keywords: string[];
   disabledReason?: string;
+  insertAction?: NoteInsertAction;
+  tooltip?: string;
 }
+
+export type NoteInsertAction = 'table' | 'timeline' | 'chart_bar' | 'chart_line' | 'media' | 'quote_frame' | 'callout_frame';
+
+/** One vocabulary for the toolbar menu and its seven additive slash entries. */
+export const NOTE_INSERT_COMMANDS: NoteSlashCommand[] = [
+  { id: 'insert-table', label: '表格', insertAction: 'table', keywords: ['table'], tooltip: 'Insert table' },
+  { id: 'insert-timeline', label: '时间线', insertAction: 'timeline', keywords: ['timeline'], tooltip: 'Insert timeline' },
+  { id: 'insert-bar-chart', label: '柱图', insertAction: 'chart_bar', keywords: ['bar', 'chart'], tooltip: 'Insert bar chart' },
+  { id: 'insert-line-chart', label: '折线图', insertAction: 'chart_line', keywords: ['line', 'chart'], tooltip: 'Insert line chart' },
+  { id: 'insert-media', label: '媒体图', insertAction: 'media', keywords: ['image', 'media'] },
+  { id: 'quote-frame', label: '引文框', insertAction: 'quote_frame', keywords: ['quoteframe'] },
+  { id: 'callout-frame', label: '提示框', insertAction: 'callout_frame', keywords: ['callout'] },
+].map((command) => ({ ...command, group: 'default', commandKind: 'insert_structure',
+  objectKind: 'structured_block', description: `${command.label} · 与插入菜单相同的入口。` } as NoteSlashCommand));
 
 export interface SlashTrigger {
   query: string;
@@ -171,6 +187,7 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommand[] = [
     keywords: ['line', 'separator', 'break'],
     disabledReason: 'Divider is reserved for the TextUnit/editor polish pass.',
   },
+  ...NOTE_INSERT_COMMANDS,
 ];
 
 export const SLASH_COMMAND_GROUP_LABELS: Record<SlashCommandGroup, string> = {
@@ -181,7 +198,7 @@ export const SLASH_COMMAND_GROUP_LABELS: Record<SlashCommandGroup, string> = {
 
 export function detectSlashTrigger(text: string, caretPosition = text.length): SlashTrigger | null {
   const beforeCaret = text.slice(0, caretPosition);
-  const match = beforeCaret.match(/(^|\s)\/([a-zA-Z][a-zA-Z0-9]*)?$/);
+  const match = beforeCaret.match(/(^|\s)\/([a-zA-Z][a-zA-Z0-9]*|[\u4e00-\u9fff]+)?$/);
   if (!match || match.index === undefined) return null;
   const slashOffset = match[1]?.length || 0;
   const start = match.index + slashOffset;

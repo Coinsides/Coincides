@@ -1,7 +1,7 @@
-import { createRef } from 'react';
+import { createRef, useState } from 'react';
 import { createPaperFreehand } from '../freehandService';
 import { MemoryRouter } from 'react-router-dom';
-import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, renderHook, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
 import { resolveDocumentPageFlowPlan } from '../documentPageFlowService';
@@ -23,6 +23,12 @@ import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowServ
 import { resolveScreenRect } from '../placementContractService';
 import { useNoteCanvasResolvedLayoutModel } from '../hooks/useNoteCanvasLayoutModel';
 import { useNoteCanvasLayerProps, type UseNoteCanvasLayerPropsInput } from '../hooks/useNoteCanvasLayerProps';
+import { NOTE_INSERT_COMMANDS } from '../../noteSlashCommands';
+import { NoteInsertCommandsContext, type NoteInsertCommandHost } from '../NoteInsertCommandsContext';
+import * as mediaPaste from '../mediaBlockPasteService';
+import { deriveChapterProjection } from '../chapterProjectionService';
+import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
+import { useAgentUiStore } from '@/stores/agentUiStore';
 
 vi.mock('../canvasAssetRepository', async (importOriginal) => ({
   ...await importOriginal<typeof import('../canvasAssetRepository')>(),
@@ -334,6 +340,111 @@ it('C4 paper tools are available in writing and disabled in layout and read-only
   expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(true);
   view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly layoutMode={false} />);
   expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(true);
+});
+
+describe('C4a four toolbar groups and shared insert doors', () => {
+  it('reveals a folded chapter for Agent focus before resolving its new page position, without a domain save', async () => {
+    const props = propsFor(frame(0), 'page');
+    const body = props.allBlocks[0];
+    const heading = { ...body, id: 'heading', content_json: { [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1('Chapter', 'heading_1') } };
+    const projection = deriveChapterProjection([heading, body]);
+    const reveal = vi.fn();
+    const scrollTo = vi.fn();
+    const main = document.createElement('main'); main.dataset.appMainScroll = 'true'; main.scrollTo = scrollTo;
+    document.body.append(main);
+    function FoldedSurface() {
+      const [collapsed, setCollapsed] = useState(true);
+      return <NoteAgentContextRoute.Provider value={true}><NoteWritingSurfaceLayer {...props}
+        visibleBlocks={collapsed ? [] : [body]} allBlocks={[heading, body]}
+        blockLayouts={{ ...props.blockLayouts, [body.id]: { ...props.blockLayouts[body.id], y: collapsed ? 10 : 960 } }}
+        chapterPresentation={{ projection, collapsedChapterIds: new Set(collapsed ? [projection.chapters[0].id] : []),
+          numbered: false, onToggleNumbering: vi.fn(), onToggleChapter: vi.fn(),
+          onRevealChapter: (id) => { reveal(id); setCollapsed(false); } }} />
+      </NoteAgentContextRoute.Provider>;
+    }
+    const view = render(<FoldedSurface />, { container: main, baseElement: document.body });
+    act(() => useAgentUiStore.setState({ focusCommand: { kind: 'focus_object', command_id: 'fold', turn_id: 'turn', conversation_id: 'conv',
+      target: { type: 'note_block', note_id: props.noteId, block_id: body.id } } }));
+    await waitFor(() => expect(main.querySelector('[data-note-block-shell][data-agent-ui-highlight="true"]')).not.toBeNull());
+    expect(reveal).toHaveBeenCalledExactlyOnceWith(projection.chapters[0].id);
+    expect(scrollTo).toHaveBeenCalledOnce();
+    expect(scrollTo.mock.calls[0][0].top).toBeGreaterThan(500);
+    expect(props.onSaveBlock).not.toHaveBeenCalled(); expect(props.onCreateBlock).not.toHaveBeenCalled();
+    expect(props.onPersistCanvasObject).not.toHaveBeenCalled();
+    act(() => useAgentUiStore.getState().reset());
+    view.unmount(); main.remove();
+  });
+  it('groups controls in the contracted order and exposes all seven menu labels with keyboard navigation', () => {
+    const props = propsFor(frame(0), 'page');
+    const view = render(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false}
+      onCreateTable={vi.fn(async () => true)} onCreateComponent={vi.fn(async () => true)} />);
+    const toolbar = view.getByRole('group', { name: 'Page reading controls' });
+    expect([...toolbar.querySelectorAll('[data-note-toolbar-group]')].map((group) => group.getAttribute('aria-label')))
+      .toEqual(['纸的状态', '手上的笔', '插入内容', '看的方式']);
+    expect(within(view.getByRole('group', { name: '手上的笔' })).getAllByRole('button').map((button) => button.getAttribute('aria-label')))
+      .toEqual(['Selection', 'Pen', 'Eraser']);
+    const trigger = view.getByRole('button', { name: '插入' });
+    fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+    const menu = view.getByRole('menu', { name: '插入' });
+    const items = within(menu).getAllByRole('menuitem') as HTMLButtonElement[];
+    expect(items.map((item) => item.textContent)).toEqual(['表格', '时间线', '柱图', '折线图', '媒体图', '引文框', '提示框']);
+    expect(document.activeElement).toBe(items[0]);
+    expect(items[0].title).toBe('Insert table');
+    expect(items.slice(4).every((item) => item.disabled)).toBe(true);
+    fireEvent.keyDown(menu, { key: 'End' }); expect(document.activeElement).toBe(items[3]);
+    fireEvent.keyDown(menu, { key: 'ArrowDown' }); expect(document.activeElement).toBe(items[0]);
+    fireEvent.keyDown(menu, { key: 'Escape' });
+    expect(view.queryByRole('menu', { name: '插入' })).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    expect(props.onCreateBlock).not.toHaveBeenCalled();
+  });
+
+  it.each(NOTE_INSERT_COMMANDS)('$label opens the same existing editor from menu and slash host', async (command) => {
+    const props = propsFor(frame(0), 'page');
+    const source = props.allBlocks[0];
+    const onCreateTable = vi.fn(async () => true);
+    const onCreateComponent = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onCreateComponent']>>(async () => true);
+    const onSaveParagraphFurniture = vi.fn(async () => true);
+    const paste = vi.spyOn(mediaPaste, 'pasteMediaBlock').mockResolvedValue(null);
+    const host: { current: NoteInsertCommandHost | null } = { current: null };
+    const view = render(<NoteInsertCommandsContext.Provider value={host}>
+      <NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false} selectedBlockId={source.id}
+        onCreateTable={onCreateTable} onCreateComponent={onCreateComponent} onSaveParagraphFurniture={onSaveParagraphFurniture} />
+    </NoteInsertCommandsContext.Provider>);
+    const before = structuredClone(source);
+    const imageInput = view.getByLabelText('选择媒体图') as HTMLInputElement;
+    const imageClick = vi.spyOn(imageInput, 'click');
+    for (const entry of ['menu', 'slash'] as const) {
+      if (entry === 'menu') {
+        fireEvent.click(view.getByRole('button', { name: '插入' }));
+        fireEvent.click(view.getByRole('menuitem', { name: command.label }));
+      } else act(() => host.current!.run(command.insertAction!, source.id));
+      if (command.insertAction === 'media') {
+        expect(imageClick).toHaveBeenCalledTimes(entry === 'menu' ? 1 : 2);
+        const file = new File(['png'], 'tiny.png', { type: 'image/png' });
+        fireEvent.change(imageInput, { target: { files: [file] } });
+        await waitFor(() => expect(paste).toHaveBeenCalledTimes(entry === 'menu' ? 1 : 2));
+        expect(paste.mock.lastCall?.[0]).toMatchObject({ blockId: source.id, file, createBlock: props.onCreateBlock });
+      } else if (command.insertAction === 'quote_frame' || command.insertAction === 'callout_frame') {
+        const dialog = view.getByRole('dialog', { name: '段落样式' });
+        expect((within(dialog).getByRole('combobox') as HTMLSelectElement).value)
+          .toBe(command.insertAction === 'quote_frame' ? 'quote' : 'callout');
+        fireEvent.click(within(dialog).getByRole('button', { name: '保存样式' }));
+        await waitFor(() => expect(view.queryByRole('dialog', { name: '段落样式' })).toBeNull());
+        expect(onSaveParagraphFurniture.mock.lastCall).toEqual([source, command.insertAction === 'quote_frame'
+          ? { variant: 'quote', source: '' } : { variant: 'callout', label: '注' }]);
+      } else {
+        const dialog = view.getByRole('dialog', { name: command.insertAction === 'table' ? 'Edit table'
+          : command.insertAction === 'timeline' ? 'Edit timeline' : 'Edit chart' });
+        fireEvent.click(within(dialog).getByRole('button', { name: /^Save/ }));
+        await waitFor(() => expect(view.queryByRole('dialog')).toBeNull());
+        if (command.insertAction === 'table') expect(onCreateTable).toHaveBeenCalledTimes(entry === 'menu' ? 1 : 2);
+        else expect(onCreateComponent.mock.lastCall?.[0]).toMatchObject({ component_kind: command.insertAction });
+      }
+    }
+    expect(source).toEqual(before);
+    expect(props.onSaveBlock).not.toHaveBeenCalled();
+  });
 });
 
 describe('view options writing-surface integration', () => {

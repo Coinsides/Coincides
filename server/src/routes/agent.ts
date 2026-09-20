@@ -171,7 +171,16 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
         if (chunk.type === 'text' && chunk.text) {
           sendEvent('text', { content: chunk.text });
         } else if (chunk.type === 'tool_call_start') {
-          sendEvent('tool_start', { id: chunk.tool_call?.id, name: chunk.tool_call?.name });
+          const input = chunk.tool_call?.arguments;
+          const target = input?.target && typeof input.target === 'object'
+            ? input.target as Record<string, unknown> : input;
+          const noteId = typeof target?.note_id === 'string' ? target.note_id : undefined;
+          const boardId = typeof target?.board_id === 'string' ? target.board_id : undefined;
+          sendEvent('tool_start', { id: chunk.tool_call?.id, name: chunk.tool_call?.name,
+            ...(noteId || boardId ? { target_activity: {
+              ...(noteId ? { note_id: noteId } : {}), ...(boardId ? { board_id: boardId } : {}),
+            } } : {}),
+          });
         } else if (chunk.type === 'tool_call_end') {
           sendEvent('tool_end', { id: chunk.tool_call?.id, name: chunk.tool_call?.name, ok: !chunk.error });
         } else if (chunk.type === 'preference_form') {
@@ -180,6 +189,8 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
           sendEvent('turn_receipt', chunk.data);
         } else if (chunk.type === 'message_meta') {
           sendEvent('message_meta', chunk.data);
+        } else if (chunk.type === 'ui_command') {
+          sendEvent('ui_command', chunk.data);
         } else if (chunk.type === 'round_limit') {
           const message = chunk.error || 'Tool round limit reached. Send another message to continue.';
           sendEvent('round_limit', { message, details: chunk.data });

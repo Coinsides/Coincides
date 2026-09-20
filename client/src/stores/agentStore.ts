@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { isAgentUiCommand, useAgentUiStore, type AgentUiState } from './agentUiStore';
 import { notifyBoardChanged } from '@/pages/Boards/boardEvents';
 import api, { getToken, API_BASE } from '@/services/api';
 import type { AgentContextHint, AgentConversation, AgentMessage, AgentTurnReceipt } from '@shared/types';
@@ -131,6 +132,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   sendMessage: async (message, contextHint?, image?) => {
+    const uiSession = useAgentUiStore.getState().session;
+    const projectUi = (update: Partial<AgentUiState> | ((state: AgentUiState) => Partial<AgentUiState>)) => {
+      if (useAgentUiStore.getState().session === uiSession) useAgentUiStore.setState(update);
+    };
     let convId = get().activeConversationId;
 
     // Auto-create conversation if none active
@@ -205,10 +210,23 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 try {
                   const parsed = JSON.parse(evt.data);
                   set({ activeToolName: parsed.name || null });
+                  if (typeof parsed.id === 'string' && parsed.target_activity) projectUi((state) => ({
+                    activities: { ...state.activities, [parsed.id]: parsed.target_activity },
+                  }));
                 } catch { /* ignore */ }
                 break;
               }
+              case 'ui_command': {
+                try { const command: unknown = JSON.parse(evt.data); if (isAgentUiCommand(command) && useAgentUiStore.getState().session === uiSession) useAgentUiStore.getState().enqueue(command); } catch { /* Invalid event stays unpresented. */ }
+                break;
+              }
               case 'tool_end': {
+                try {
+                  const parsed = JSON.parse(evt.data);
+                  projectUi((state) => {
+                    const activities = { ...state.activities }; delete activities[parsed.id]; return { activities };
+                  });
+                } catch { /* Keep active calls until a matching end or stream termination. */ }
                 set({ activeToolName: null });
                 break;
               }
@@ -248,6 +266,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 break;
               }
               case 'done': {
+                projectUi({ activities: {} });
                 // Add assistant message to messages
                 const assistantMsg: AgentMessage = {
                   id: responseMessageId ?? `resp-${Date.now()}`,
@@ -271,6 +290,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 break;
               }
               case 'error': {
+                projectUi({ activities: {} });
                 let errorMessage = 'Something went wrong. Please try again.';
                 try {
                   const parsed = JSON.parse(evt.data);
@@ -327,8 +347,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         });
       }
       if (get().streaming) set({ streaming: false, streamingText: '', streamingReceipt: null, activeToolName: null });
+      projectUi({ activities: {} });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Connection failed. Please try again.';
+      projectUi({ activities: {} });
       const errorMsg: AgentMessage = {
         id: `err-${Date.now()}`,
         conversation_id: convId!,

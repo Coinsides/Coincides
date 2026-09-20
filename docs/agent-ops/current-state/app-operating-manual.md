@@ -1,9 +1,9 @@
-> **状态 (Status)**: active(v1,2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
+> **状态 (Status)**: active(v2,2026-09-20 C4a 补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
 > **层 (Layer)**: 现状 / 应用操作说明书
 > **日期 (Updated)**: 2026-09-20
 > **防腐条款**: 交付新面的工单,申报义务含"说明书条目已更新/无涉";每版段收口过一遍 diff。发现缺条错条=当场补(steward: Fable)。
 
-# Coincides 应用操作说明书 v1
+# Coincides 应用操作说明书 v2
 
 **这份文档回答"怎么用",不回答"为什么这样设计"(那是 design/ 的事)。** 每条=对象是什么+界面路径+API 门+最小例+边界。v1 条目优先收录已知的翻车点。
 
@@ -18,6 +18,10 @@
 - **Agent 会话**:conversations+SSE 消息流;工具活动经 tool_start/tool_end 事件可见。
 
 ## 一 · 笔记:怎么写正文(翻车条目 #1)
+
+- **底部工具条(C4a,2026-09-20)**:四群以发丝线分隔。「纸的状态」=Preview/Layout/外观/装订及既有 More;「手上的笔」=Selection/Pen/Eraser;「+ 插入」=表格/时间线/柱图/折线图/媒体图/引文框/提示框;「看的方式」=View options/导航窗格/Overview/阅读步进,选块时保留「问 Agent」。既有按钮行为、tooltip 和只读禁用条件保留。窄屏先折叠「看」(1100px),再折叠「纸」(760px);笔与插入常驻,折叠菜单可键盘打开,没有功能被删除。
+- **插入双入口(C4a)**:上述七项与同名斜杠命令共用执行器。表格、时间线、柱图、折线图沿既有浮层编辑并保存;媒体图沿既有图片上传插入链。媒体图/引文框/提示框需以已保存的纸上段落为目标,菜单用选中或正在编辑的段落,斜杠用输入段落;条件不满足时显示禁用原因。引文框/提示框打开 B3 段落样式编辑器,仍需保存,取消不写。既有15项斜杠的文案与行为不变;`Source Quote` 仍只转换 TextFlow writing role,与这两个 placement 样式命令不同。
+- **文档标签条(C4a)**:打开笔记或板后,文档区顶部出现身份标签;点击切换,中键或×关闭,拖拽排序。标签可用左右键切换、Alt+左右键排序、Delete关闭。关闭只退出在场,原文档仍在 Project/Boards 列表;最后一张纸关闭回所属Project,最后一块板关闭回Boards。切换/关闭沿既有 blur 自动保存与离页等待,不另设「未保存」标签。每个标签记滚动位/阅读步进或板视口;仅内存会话态,无新表、无localStorage/sessionStorage持久化,刷新只重建当前URL页。当前工具的 note/board 目标由既有 tool_start/tool_end 活动投影为天青徽章,结束即灭;通知计数槽留空等C4b。不与 Staging/Recent/Favorites 合并。
 
 - **UI**:打开笔记→双击纸面开始写;
 - **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:1, units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
@@ -42,15 +46,15 @@
 - **样式存法与分页**:复用 `PUT /api/notes/:id/block-placements/:placementId {display_overrides_json:完整覆写对象}`;仅增删对象内 `paragraph_furniture_v1` 键,例 `{variant:'quote',source:'范仲淹《岳阳楼记》'}` 或 `{variant:'callout',label:'冷知识'}`。其余覆写保留,不新增块型、不改 TextFlow 正文。在流长段按 A1 继续分页,每片有底纹/边线,字签或标签只在首片、出处只在末片;版面为装饰留出空间,不改存储坐标。纸面、缩略投影及打印跟随当前皮。
 - **绢本与表头线(B3)**:「笔记外观」→皮预设「绢本」,沿用全局→Project→本页的三级继承与套装机制;亮暗主题切换时桌面及纸色随绢本亮暗表变化。「部件」中表头分隔线可调显示/隐藏、长短(满幅/版心/短线)、样式(实线/虚线/点线),颜色随皮;不改变四界墙。无封面时显示在题名带下缘,有封面时题名带退出。打印首张无封面内容页带冻结题名/述名及分隔线,为保持原页数,该页正文整体略缩以容纳题名带;后页比例不变。导出前按目标纸型检查首张成品。
 
-- **原生表格(B1,2026-09-20)**:笔记底部工具条→「Table」打开表格浮层,保存后入纸;双击现有表格重开。可改 caption、每格文字、增删行列及切换「Header row」。Esc 取消本次草稿,Ctrl+Enter(或 Cmd+Enter)保存。一次保存把全部单元格与结构变更合为一次现役撤销/重做;新建表格也可撤销。失败保留浮层草稿供重试。表头关闭时降为首数据行,打开时首数据行升为表头;已有 64 数据行时须先删一行才能关闭表头。
+- **原生表格(B1,2026-09-20)**:笔记底部工具条→「+ 插入」→「表格」打开表格浮层,保存后入纸;双击现有表格重开。可改 caption、每格文字、增删行列及切换「Header row」。Esc 取消本次草稿,Ctrl+Enter(或 Cmd+Enter)保存。一次保存把全部单元格与结构变更合为一次现役撤销/重做;新建表格也可撤销。失败保留浮层草稿供重试。表头关闭时降为首数据行,打开时首数据行升为表头;已有 64 数据行时须先删一行才能关闭表头。
 - **CSV/TSV 导入**:在编辑器的单元格粘贴多行 CSV/TSV,自动替换整个网格并保留 caption;也可展开「Import CSV / TSV」粘贴后点导入。表头开关决定首导入行是否作表头。解析优先采用引号外的制表符,否则逗号;支持双引号包裹逗号/制表符/换行、双引号转义、CRLF/LF 与首字节 BOM。短行补空字符串;未闭引号、超限等错误显示提示并保留原网格,不截断导入。
 - **表格 API 与边界**:`POST /api/notes/:id/blocks` body=`{block_type:'table',content_json:{caption:'新法表',headers:['新法','措施'],rows:[['青苗法','春贷秋还']]}}`;编辑走既有 `PUT /api/note-blocks/:id {content_json:完整表格,plain_text:null}`。媒体族、模板 `media.table`;真相仅为 `content_json` 的 caption?/headers/rows。1–64 列、0–64 数据行(可另有一行表头),表头与数据至少一行,各数据行列数必须一致,caption+表头+全部单元格总量≤65536 UTF-16 code units。`headers:[]` 表示无表头;单元格只存纯文本,允许换行,没有公式求值、合并单元格、列类型或单元格内 TextFlow/Item 锚。
 - **表格阅读、分页与检索**:表格字体随正文 Typography 低 2px,表头底纹、隔行底色和发丝线随皮 token。宽表仅块内横滚,不撑宽纸面。默认在流表格共用 A1 整块规则:能容纳则原页,页尾放不下则整块下移,超高独占一页并报告 `indivisible_block_exceeds_page`,不跨页断行;封面/manual 表格沿既有自由布局。编辑面、Overview、页面导航与打印共用 flow plan 和表格组件。打印/导出按块宽从左侧裁切宽表,不打印滚动条,超高仍显示既有溢出提示;成品前应调整内容或纸型检查裁切。纸内 Navigation→Results 可搜 caption、表头及各格当前已保存文本。
 - **表格 Agent 读面(B1 补遗一)**:`read_note` 保留实际 `kind:'table'`,仅在既有 `text` 键扁平输出:非空 caption 一行、非空 headers 制表分隔一行、rows 逐行制表分隔;caption/单元格内部 CRLF、TAB、CR、LF 替为空格。它是可检阅的有损文本投影,没有新增结构化 rows/headers 输出键;结构化投影槽归 C 波 14.3/14.4 注册表批,本单未接写动词。
 
 - **内置组件(B2,2026-09-20)**:组件块是第四族,`block_type:'component'`,内容只存 `{component_kind,params}`。内置件为手工闭集 `timeline`、`chart_bar`、`chart_line`;未知 kind 显示名称与「未注册组件」占位,保留原数据。没有动态加载、自由 HTML 或图表 DSL;**内置件=闭集,自由组件候产房**。组件不进入封面住户白名单。
-- **时间线编辑**:笔记底部工具条→「Timeline」新建,双击已有时间线重开浮层。可改标题、逐条 year/label/detail、增删条目、上下移动。阅读时点条目展开/折叠 detail,仅改变呈现,不保存折叠字段。Esc 取消草稿,Ctrl+Enter/Cmd+Enter 保存;一次保存进入现役撤销/重做栈,保存失败保留草稿。参数例:`{component_kind:'timeline',params:{title:'宋初年表',entries:[{year:'960',label:'北宋建立',detail:'陈桥兵变后建宋'}]}}`。条目 1–64 条,year/label 为必需纯文本,detail/title 可选。
-- **图表编辑**:工具条→「Bar chart」或「Line chart」打开浮层,双击已有图表重开。表格式网格可编辑横轴标签、系列名称与各数值,增删列和系列,另可改标题与纵轴标签;保存/取消/撤销规则同时间线。参数例:`{component_kind:'chart_bar',params:{title:'收入示意',x_labels:['前期','后期'],series:[{name:'田赋',values:[70,40]},{name:'工商',values:[30,60]}],y_label:'比例'}}`。1–32 点、1–4 系列,每组 values 数量必须等于 x_labels,数值须有限,支持零、负数及小数。bar/line 共用 SVG 轴、刻度、图例与数值标注,颜色从当前皮的强调/中性 token 派生。
+- **时间线编辑**:笔记底部工具条→「+ 插入」→「时间线」新建,双击已有时间线重开浮层。可改标题、逐条 year/label/detail、增删条目、上下移动。阅读时点条目展开/折叠 detail,仅改变呈现,不保存折叠字段。Esc 取消草稿,Ctrl+Enter/Cmd+Enter 保存;一次保存进入现役撤销/重做栈,保存失败保留草稿。参数例:`{component_kind:'timeline',params:{title:'宋初年表',entries:[{year:'960',label:'北宋建立',detail:'陈桥兵变后建宋'}]}}`。条目 1–64 条,year/label 为必需纯文本,detail/title 可选。
+- **图表编辑**:工具条→「+ 插入」→「柱图」或「折线图」打开浮层,双击已有图表重开。表格式网格可编辑横轴标签、系列名称与各数值,增删列和系列,另可改标题与纵轴标签;保存/取消/撤销规则同时间线。参数例:`{component_kind:'chart_bar',params:{title:'收入示意',x_labels:['前期','后期'],series:[{name:'田赋',values:[70,40]},{name:'工商',values:[30,60]}],y_label:'比例'}}`。1–32 点、1–4 系列,每组 values 数量必须等于 x_labels,数值须有限,支持零、负数及小数。bar/line 共用 SVG 轴、刻度、图例与数值标注,颜色从当前皮的强调/中性 token 派生。
 - **组件边界、分页与读面**:已知 params 只接受声明字段;标题、年份、标签、详情、轴名及系列名合计≤65536 UTF-16 code units。沿 A1 媒体整块规则:原页能放则原页,页尾放不下整块下移,超高独占并报告溢出,不切片。纸面、Overview、页面导航与打印共用组件及 flow plan;时间线在静态投影/打印中保留初始折叠,不强制展开详情改变分页高度。Navigation→Results 检索已保存的时间线详情/条目和图表标题/标签/系列名。`POST /api/notes/:id/blocks {block_type:'component',content_json:完整payload}` 创建,编辑仍走既有 `PUT /api/note-blocks/:id {content_json:完整payload,plain_text:null}`;无新增 Agent 写动词。`read_note` 的 kind 保持 `component`,既有 text 键按行扁平投影,字符串内部 CRLF/TAB/CR/LF 替为空格:时间线为标题+逐条年份/标签/详情,图表为标题/轴名/横轴标签+逐系列名称/数值。没有新增结构化输出键,结构化槽仍候 C 波。
 - **组件成品检查**:Overview/打印的新投影实例不继承纸面的时间线展开态;若阅读时已展开并测高,静态面会保留 flow plan 中的预留高度而出现留白。图表长横轴标签最多显示三行,余文省略,完整文字保留于 SVG 描述和检索;宽图打印缩放至块宽,点数较多时字号会缩小。应按目标纸型检查成品可读性。
 
@@ -122,6 +126,8 @@
 | `board_patch_visual` | 更新现役 sticky(旧粉笔)/shape/freehand 装饰 API;不含其他视觉种类 |
 
 板域不注册删除动词、建板、改 soul/板题或笔记写权,「直接放上去」显式授权通道仍未开放。七动词均在收据条逐项显示,批次与撤销入口见§四。
+
+**UI 呈现两动词(C4a)**:独立 UI 注册组归 `channel_write`,不加入域写集,不新增效果分类。`ui_open_note {note_id}` 打开笔记并挂标签;`ui_focus_object {target}` 支持 `{type:'note_block',note_id,block_id}`、`{type:'note_page',note_id,page_index}`(从0计页)、`{type:'board_member',board_id,member_id}`(已上板且层可见)。例 `ui_focus_object {target:{type:'note_page',note_id:'<note-id>',page_index:0}}` 只滚动定位、短暂高亮,不选中编辑器、不写笔记或板真相。缺失/不匹配目标返回错误。每轮最多发8条,同目标1秒内不重发;重复仍有成功工具结果但 `dispatched:false`。工具调用/结果成对落史后才发 SSE `ui_command`,收据条照记 `✓ ui_open_note` 等;成功表示指令已发出,不是浏览器已显示。用户正持有输入框/输入法组合/对话框焦点时延后,blur稳定150ms后只执行最新待办,不抢正在输入的人。板聚焦仅改会话视口,不调用板保存门;刷新或历史回读不重放旧 UI 命令。此通道只开放导航呈现,不允许模拟点击、预填、预武装确认或取得新写权。
 
 **不能(宪法四禁令+现状)**:写/改笔记正文(③);直建卡片(提案唯一);碰判断域(relation confirm 族);任何不可逆删除无仪式;模拟 UI(④);检索 Source Library(现状缺口);代用户 apply/discard 提案。用户可在 Agent 收件箱处理提案,但 chat 回复确认不等于已应用。
 

@@ -29,6 +29,9 @@ import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardText
 import { deletionScope, marqueeSelection, selectionFromKeys, selectionKey, selectionRect, visualBounds, type BoardSelection, type BoardRect } from './boardSelection';
 import { snapBoardTranslation, type BoardAlignmentGuide } from './boardSnapping';
 import styles from './Boards.module.css';
+import { documentKey, useDocumentTabsStore } from '@/stores/documentTabsStore';
+import { useAgentUiStore, userOwnsInput } from '@/stores/agentUiStore';
+import { DocumentLeaveBoundary } from '@/components/Layout/DocumentLeaveBoundary';
 
 type Tool = 'select' | 'pan' | 'connect' | 'pen' | 'eraser';
 type Selection = BoardSelection | null;
@@ -57,6 +60,13 @@ export default function BoardPage() {
   useAmbientAgentContextHint(contextHint);
   const navigate = useNavigate();
   const board = useBoard(boardId);
+  const uiCommand = useAgentUiStore((state) => state.focusCommand);
+  const [agentFlash, setAgentFlash] = useState<{ memberId: string; commandId: string } | null>(null);
+  useEffect(() => {
+    if (!agentFlash) return;
+    const timer = setTimeout(() => setAgentFlash(null), 2200);
+    return () => clearTimeout(timer);
+  }, [agentFlash]);
   const skin = useBoardSkin(board.detail?.board ?? null, board.updateBoard);
   const [tool, setTool] = useState<Tool>('select');
   const [selectionState, setSelectionState] = useState<{ keys: Set<string>; anchor: Selection }>({ keys: new Set(), anchor: null });
@@ -201,6 +211,7 @@ export default function BoardPage() {
     setListHoverKey(null);
     setBoardHoverKey(null);
     setFlash(null);
+    setAgentFlash(null);
     setDeleteKeys(null);
     setMarquee(null);
     setAlignmentGuides([]);
@@ -232,11 +243,37 @@ export default function BoardPage() {
     return () => { visitRevision.current += 1; };
   }, [boardId]);
   useEffect(() => {
-    if (detail && !viewportRef.current) {
-      viewportRef.current = detail.board.viewport;
-      setViewport(detail.board.viewport);
+    if (!detail) return;
+    useDocumentTabsStore.getState().open({ kind: 'board', id: detail.board.id, title: detail.board.title, projectId: detail.board.project_id });
+    if (!viewportRef.current) {
+      const remembered = useDocumentTabsStore.getState().tabs.find((tab) => tab.key === documentKey('board', detail.board.id))?.boardViewport;
+      viewportRef.current = remembered ?? detail.board.viewport;
+      setViewport(viewportRef.current);
     }
   }, [detail]);
+
+  useEffect(() => {
+    const target = uiCommand?.target;
+    if (uiCommand?.kind !== 'focus_object' || target?.type !== 'board_member' || target.board_id !== boardId || !detail || !surface.current) return;
+    if (userOwnsInput()) {
+      useAgentUiStore.setState({ pending: uiCommand, focusCommand: null }); return;
+    }
+    if (gesture.current || boardPaused.current) return;
+    const member = detail.members.find((entry) => entry.id === target.member_id && entry.placed !== false);
+    if (!member) return;
+    const visible = member.layer_id ? detail.layers?.find((layer) => layer.id === member.layer_id)?.visible !== false : detail.board.base_layer_visible !== false;
+    if (!visible) { useAgentUiStore.setState({ focusCommand: null }); return; }
+    const current = viewportRef.current ?? detail.board.viewport;
+    const width = surface.current.clientWidth; const height = surface.current.clientHeight;
+    const zoom = Math.max(0.1, Math.min(current.zoom, Math.max(1, width - 64) / Math.max(1, member.w * member.scale), Math.max(1, height - 64) / Math.max(1, member.h * member.scale)));
+    const next = { zoom, x: width / 2 - (member.x + member.w * member.scale / 2) * zoom, y: height / 2 - (member.y + member.h * member.scale / 2) * zoom };
+    // Presentation only: deliberately bypass changeViewport's persistence queue.
+    cancelViewportAnimation.current?.(); cancelViewportAnimation.current = null;
+    viewportRef.current = next; setViewport(next);
+    useDocumentTabsStore.getState().remember(documentKey('board', boardId!), { boardViewport: next });
+    setAgentFlash({ memberId: member.id, commandId: uiCommand.command_id });
+    useAgentUiStore.setState({ focusCommand: null });
+  });
 
   const commitViewport = useCallback(async () => {
     clearTimeout(viewportTimer.current);
@@ -266,6 +303,7 @@ export default function BoardPage() {
     }
     viewportRef.current = next;
     setViewport(next);
+    if (boardId) useDocumentTabsStore.getState().remember(documentKey('board', boardId), { boardViewport: next });
     viewportPending.current = next;
     setViewportDirty(true);
     clearTimeout(viewportTimer.current);
@@ -1066,7 +1104,11 @@ export default function BoardPage() {
     }, factor));
   }
 
-  return <><section className={styles.workspace} aria-label="Board workspace" style={skin.style} data-board-skin-preset={skin.materialPreset ?? skin.preset} onPaste={pasteReference} onKeyDown={keyDown}
+  return <><DocumentLeaveBoundary flush={async () => {
+    if (openNoteIdRef.current && !await noteModal.current?.requestClose()) throw new Error('Paper save failed');
+    if (!await commitViewport()) throw new Error('Viewport save failed');
+    await board.flush();
+  }} /><section className={styles.workspace} aria-label="Board workspace" style={skin.style} data-board-skin-preset={skin.materialPreset ?? skin.preset} onPaste={pasteReference} onKeyDown={keyDown}
     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
     onKeyUp={(event) => {
       if (event.key === 'Shift' && gesture.current?.kind === 'move') {
@@ -1299,6 +1341,7 @@ export default function BoardPage() {
             const openHint = isItem && !member.reference.note_id
               ? 'This item has no origin note. Double-click is unavailable.' : undefined;
             return <article key={member.id} data-testid={`board-member-${member.id}`} tabIndex={0}
+              data-agent-ui-highlight={agentFlash?.memberId === member.id ? 'true' : undefined}
               {...selectionEmphasis('member', member.id)}
               data-board-note-switch={member.member_kind === 'note' && canOpen ? 'true' : undefined}
               aria-label={title}

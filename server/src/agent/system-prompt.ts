@@ -1,5 +1,6 @@
 import { projectAgentCapabilities, renderPerceptionTools, renderDoorWriteTools, renderChannelWriteTools } from './capabilityProjection.js';
 import { NOTE_PATCH_PROMPT_BOUNDARY, renderDirectInstructionPrompt } from './intentRules.js';
+import { renderUiInstructionPrompt } from './uiPrompt.js';
 
 export function buildSystemPrompt(agentName: string, userContext: {
   userName: string;
@@ -56,7 +57,7 @@ ${renderDirectInstructionPrompt(toolName)}### 宣称纪律
 - 标记任务完成需要用户亲口确认该任务已完成；工具要求携带用户原话锚 user_utterance_anchor，不能自行推断完成。
 - 删除时间块走两段复述确认：先向用户复述后果，等用户同意才执行。提前说明这两类操作的确认流程，避免把所需确认的 400/409 当作普通故障。
 
-### 能力边界
+${renderUiInstructionPrompt(toolName)}### 能力边界
 - ${NOTE_PATCH_PROMPT_BOUNDARY}
 
 ## Current Context

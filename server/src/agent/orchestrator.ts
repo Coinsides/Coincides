@@ -17,6 +17,8 @@ import {
 import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
 import type { AgentMessageMeta } from '../../../shared/types/agentIntent.js';
 import { readAttentionContext, ATTENTION_CONTEXT_LIMITS } from './attentionContext.js';
+import { createAgentUiRunState } from './tools/uiCommands.js';
+import { AGENT_UI_TOOLS, agentUiCommandSchema } from '../toolFace/uiActions.js';
 
 const MAX_TOOL_ROUNDS = 8;
 
@@ -41,6 +43,7 @@ export async function* runAgent(
   options: AgentRunOptions = {},
 ): AsyncGenerator<StreamChunk> {
   const turnId = randomUUID();
+  const uiState = createAgentUiRunState(turnId);
   const deadline = options.deadline ?? Date.now() + AGENT_REQUEST_TIMEOUT_MS;
   const db = getDb();
   const memory = new MemoryManager(userId);
@@ -292,7 +295,7 @@ export async function* runAgent(
         try {
           const result = await runToolWithinBudget(() => executeTool(tc.name, tc.arguments, userId, {
             actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
-          }), deadline);
+          }, uiState), deadline);
 
           // Some existing executors return an error receipt instead of throwing.
           // Reflect both forms in SSE while preserving the original model result.
@@ -341,6 +344,16 @@ export async function* runAgent(
       // Persist intermediate tool round to DB so history stays complete
       // (each tool_use must have a matching tool_result in conversation history)
       const interrupted = agentStopError(deadline, options.signal);
+      if (interrupted) {
+        for (const tc of currentToolCalls.filter(call => AGENT_UI_TOOLS.some(tool => tool.name === call.name))) {
+          const result = toolResults.find(result => result.tool_call_id === tc.id);
+          if (result && !toolErrors.has(tc.id)) {
+            const error = 'UI command was not dispatched because the turn was interrupted';
+            result.content = JSON.stringify({ error });
+            toolErrors.set(tc.id, error);
+          }
+        }
+      }
       db.transaction(() => {
         saveTurnMessage(
           'assistant',
@@ -354,6 +367,13 @@ export async function* runAgent(
       for (const tc of currentToolCalls) {
         const error = toolErrors.get(tc.id);
         yield { type: 'tool_call_end', tool_call: tc, ...(error ? { error } : {}) };
+        if (!error && !interrupted && AGENT_UI_TOOLS.some(tool => tool.name === tc.name)) {
+          const result = toolResults.find(result => result.tool_call_id === tc.id);
+          const parsed = result ? JSON.parse(result.content) : undefined;
+          if (parsed?.dispatched === true) {
+            yield { type: 'ui_command', data: agentUiCommandSchema.parse(parsed.command) };
+          }
+        }
       }
       if (hasPreferenceForm && preferenceFormData) {
         yield { type: 'preference_form', data: preferenceFormData };

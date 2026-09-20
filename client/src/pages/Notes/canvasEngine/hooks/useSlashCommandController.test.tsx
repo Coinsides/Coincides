@@ -1,7 +1,8 @@
 import { act, renderHook } from '@testing-library/react';
-import type { KeyboardEvent, RefObject, SetStateAction } from 'react';
+import type { KeyboardEvent, ReactNode, RefObject, SetStateAction } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
+import { detectSlashTrigger, filterSlashCommands, NOTE_INSERT_COMMANDS, NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
+import { NoteInsertCommandsContext, type NoteInsertCommandHost } from '../NoteInsertCommandsContext';
 import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import { planSlashBlockRollback } from '../slashCommandReducer';
 import {
@@ -59,6 +60,7 @@ const rejectBlockRollback: UseSlashCommandControllerOptions['rollbackBlockSlashS
 function renderSubject(
   saveBlock: UseSlashCommandControllerOptions['saveBlock'],
   overrides: Partial<UseSlashCommandControllerOptions> = {},
+  insertHost?: NoteInsertCommandHost,
 ) {
   let blockTextDrafts: Record<string, string> = {};
   let blockTextFlowDrafts: Record<string, TextBlockContentV1> = {};
@@ -132,7 +134,8 @@ function renderSubject(
   const hook = renderHook(() => {
     renders += 1;
     return useSlashCommandController(options);
-  });
+  }, insertHost ? { wrapper: ({ children }: { children: ReactNode }) =>
+    <NoteInsertCommandsContext.Provider value={{ current: insertHost }}>{children}</NoteInsertCommandsContext.Provider> } : undefined);
   textarea.setSelectionRange(blockText.length, blockText.length);
 
   act(() => {
@@ -193,6 +196,45 @@ afterEach(() => {
 });
 
 describe('slash command async current behavior', () => {
+  it.each(NOTE_INSERT_COMMANDS)('C4a /$label accepts the same Chinese word printed in the insert menu', (command) => {
+    const text = `正文 /${command.label}`;
+    const trigger = detectSlashTrigger(text);
+    expect(trigger?.query).toBe(command.label);
+    expect(filterSlashCommands(trigger!.query)).toEqual([command]);
+  });
+  it.each(NOTE_INSERT_COMMANDS)('C4a keyboard $label removes only the trigger and invokes the shared insert host', async (command) => {
+    const host: NoteInsertCommandHost = { disabledReason: vi.fn(() => undefined), run: vi.fn() };
+    const subject = renderSubject(vi.fn(), {}, host);
+    const text = `alpha /${command.keywords[0]}`;
+    subject.setCurrentText(text);
+    act(() => subject.hook.result.current.handleBlockTextChange(block.id, text, text.length, subject.textarea));
+    const index = subject.hook.result.current.slashCommands.findIndex((candidate) => candidate.id === command.id);
+    expect(index).toBeGreaterThanOrEqual(0);
+    expect(subject.hook.result.current.slashCommands[index].disabledReason).toBeUndefined();
+    for (let move = 0; move < index; move++) {
+      act(() => subject.hook.result.current.handleBlockKeyDown(block, text, blockKeyEvent('ArrowDown')));
+    }
+    expect(subject.hook.result.current.activeSlashCommandId).toBe(command.id);
+    await act(async () => subject.hook.result.current.handleBlockKeyDown(block, text, blockKeyEvent('Enter')));
+    expect(host.run).toHaveBeenCalledExactlyOnceWith(command.insertAction, block.id);
+    expect(subject.blockTextDrafts()[block.id]).toBe('alpha ');
+    expect(subject.hook.result.current.slashTarget).toBeNull();
+    expect(subject.textarea.selectionStart).toBe(6);
+  });
+
+  it('C4a denies a newly unavailable insert door, keeps existing trigger rollback, and opens no editor', async () => {
+    let blocked = false;
+    const host: NoteInsertCommandHost = { disabledReason: () => blocked ? '请先返回书写模式。' : undefined, run: vi.fn() };
+    const subject = renderSubject(vi.fn(), {}, host);
+    const text = 'alpha /table';
+    subject.setCurrentText(text);
+    act(() => subject.hook.result.current.handleBlockTextChange(block.id, text, text.length, subject.textarea));
+    const command = subject.hook.result.current.slashCommands.find((candidate) => candidate.id === 'insert-table')!;
+    blocked = true;
+    await act(async () => subject.hook.result.current.handleSelectSlashCommand(command));
+    expect(host.run).not.toHaveBeenCalled();
+    expect(subject.blockTextDrafts()[block.id]).toBe('alpha ');
+  });
   it.each([
     { text: 'Title\nBody /h2', multiline: true },
     { text: 'Title /h2', multiline: false },
