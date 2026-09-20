@@ -304,6 +304,7 @@ export interface NoteWritingSurfaceLayerProps {
     text: string,
     options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
   ) => Promise<BlockSaveOutcome>;
+  onSaveParagraphFurniture?: (block: NoteBlock, value: import('../paragraphFurniture').ParagraphFurniture | null) => Promise<boolean>;
   onSelectBlock: (blockId: string) => void;
   onClearBlockSelection?: () => void;
   onSelectSlashCommand: (command: NoteSlashCommand) => void;
@@ -446,6 +447,7 @@ export function NoteWritingSurfaceLayer({
   onPersistDraft,
   onResizeDraftFromTextarea,
   onSaveBlock,
+  onSaveParagraphFurniture,
   onSelectBlock,
   onClearBlockSelection,
   onSelectSlashCommand,
@@ -1753,7 +1755,8 @@ export function NoteWritingSurfaceLayer({
             pageFrames: noteCanvasRuntime.pageFrames,
           });
           return (
-            <BlockEditorLayer
+                        <BlockEditorLayer
+                          onSaveParagraphFurniture={onSaveParagraphFurniture ? (value) => onSaveParagraphFurniture(block, value) : undefined}
               key={block.id}
               block={block}
               onPasteImage={(file) => handlePasteImage(block, file)}

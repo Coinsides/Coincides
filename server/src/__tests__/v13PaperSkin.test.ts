@@ -18,7 +18,7 @@ import { createBoardRouter } from '../routes/boards.js';
 import { parseStoredSkin } from '../services/skin.js';
 
 const userId = 'b1000000-0000-4000-8000-000000000001';
-const presets = ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const;
+const presets = ['default', 'quiet-ink', 'warm-paper', 'workbench', 'silk'] as const;
 
 async function fixture() {
   const temporaryRoot = resolve(tmpdir());
@@ -95,7 +95,7 @@ test('B1e board tokens and all five component overrides persist at every mount a
   assert.deepEqual((await f.request('GET', `notes/${note.id}`)).metadata.typography, { font: 'system', size: 16 });
 });
 
-test('B1a existing settings, project and note routes persist four preset selections across a database reopen', async (t) => {
+test('B1a/B3 existing settings, project and note routes persist five preset selections across a database reopen', async (t) => {
   const f = await fixture(); t.after(() => f.close());
   const project = await f.request('POST', 'courses', { name: 'Paper skins' }, 201);
   const note = await f.request('POST', 'notes', {

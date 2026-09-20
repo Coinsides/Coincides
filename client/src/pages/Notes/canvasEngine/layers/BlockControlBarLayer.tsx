@@ -11,6 +11,7 @@ import {
   useEffect,
   useState,
   type DragEvent as ReactDragEvent,
+  type ReactNode,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import type {
@@ -33,6 +34,7 @@ interface BlockControlBarLayerProps {
   contentReadOnly: boolean;
   allowSaveRecovery?: boolean;
   bodyReadOnly?: boolean;
+  paragraphStyleControl?: ReactNode;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
   onInsertTextUnitBelow?: () => void;
   onToggleExportRole: () => void;
@@ -52,6 +54,7 @@ export function BlockControlBarLayer({
   contentReadOnly,
   allowSaveRecovery = false,
   bodyReadOnly = false,
+  paragraphStyleControl,
   onBeginMove,
   onInsertTextUnitBelow,
   onToggleExportRole,
@@ -97,6 +100,7 @@ export function BlockControlBarLayer({
         style={{ left: anchor.x, top: anchor.y }}
       >
         <div className={styles.blockActions}>
+          {paragraphStyleControl}
           <button
             className={`${styles.iconBtn} ${styles.dragHandle}`}
             onPointerDown={onBeginMove}

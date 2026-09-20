@@ -5,6 +5,7 @@ import { resolveSkin } from '@/styles/skinPresets';
 import styles from './SkinControls.module.css';
 import { usePaletteColors } from '@/hooks/usePaletteColors';
 import { normalizeSkinSelection, useSkinSuites } from '@/hooks/useSkinSuites';
+import { useAuthStore } from '@/stores/authStore';
 
 /** Dispatch immediately so the owner can bind and track each intent before navigation. */
 export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced, preview = false, failed = false, surface = 'paper' }: {
@@ -16,6 +17,7 @@ export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced
   const [draft, setDraft] = useState(value);
   const palette = usePaletteColors();
   const suites = useSkinSuites();
+  const theme = useAuthStore((state) => state.user?.settings.theme ?? 'dark');
   const [error, setError] = useState(false);
   const pending = useRef(0);
   const mounted = useRef(true);
@@ -28,7 +30,7 @@ export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced
       if (mounted.current) setError(false);
     }, () => { if (mounted.current) setError(true); }).finally(() => { pending.current -= 1; });
   };
-  const { tokens } = resolveSkin(draft ?? inheritedValue, null, null, palette.values, suites.values);
+  const { tokens } = resolveSkin(draft ?? inheritedValue, null, null, palette.values, suites.values, theme);
   return <>
     <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} inheritedValue={inheritedValue} advanced={advanced} surface={surface} />
     {preview && <div className={styles.preview} aria-label="纸面颜色预览" style={{ background: tokens.paper, color: tokens.ink }}>

@@ -32,29 +32,30 @@
   box-sizing: border-box;
   width: 100%;
   resize: vertical;
-  padding: 8px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm, 4px);
+  padding: 9px;
+  border: 0;
+  border-radius: 0;
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background: transparent;
   font: inherit;
 }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 14px 0; }
 .toolbar label { display: flex; align-items: center; gap: 6px; }
 .toolbar input { accent-color: var(--accent-primary); }
 .toolbar span { margin-left: auto; color: var(--text-secondary); }
-.dialog button { padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm, 4px); color: var(--text-primary); background: var(--bg-surface, var(--bg-primary)); font: inherit; }
-.dialog button:hover:not(:disabled) { background: var(--bg-hover); }
+.dialog button { padding: 7px 11px; border: 0; border-radius: 0; color: var(--text-primary); background: transparent; font: inherit; }
+.dialog button:hover:not(:disabled), .dialog textarea:hover:not(:disabled) { background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
+.grid :is(th, td) button { color: var(--error); }
 .dialog button:disabled, .dialog input:disabled, .dialog textarea:disabled { opacity: 0.5; cursor: not-allowed; }
 .dialog :is(button, input, textarea, summary):focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
 .grid { width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
 .grid table { min-width: 100%; border-collapse: collapse; text-align: left; }
 .grid th, .grid td { min-width: 140px; padding: 4px; border-bottom: 1px solid var(--border-subtle, var(--border-default)); vertical-align: top; }
-.grid th { font-weight: 500; background: var(--bg-active, var(--bg-surface)); }
+.grid th { font-weight: 500; background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
 .grid th span { display: block; margin-bottom: 4px; }
 .grid th:last-child, .grid td:last-child { min-width: 90px; }
-.grid tbody tr:nth-child(even) { background: var(--bg-surface); }
-.import { margin-top: 16px; }
+.grid tbody tr:nth-child(even) { background: transparent; }
+.import { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
 .import summary { cursor: pointer; }
 .import textarea { display: block; margin: 8px 0; }
 .error { margin: 14px 0 0; color: var(--error, var(--text-primary)); }

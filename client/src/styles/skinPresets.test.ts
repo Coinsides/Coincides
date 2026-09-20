@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readSkin, resolveSkin, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from './skinPresets';
+import { readSkin, resolveSkin, SILK_LIGHT_TOKENS, SKIN_LABELS, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from './skinPresets';
 
 describe('user suite resolution', () => {
   const id = '14000000-0000-4000-8000-000000000021';
@@ -18,8 +18,8 @@ describe('user suite resolution', () => {
     expect(resolveSkin(detached).components).toEqual(suite.components);
     expect(resolveSkin(detached).materialPreset).toBe('warm-paper');
   });
-  it('材质仅接受四出厂枚举', () => {
-    for (const materialPreset of ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const) {
+  it('材质接受五出厂枚举', () => {
+    for (const materialPreset of ['default', 'quiet-ink', 'warm-paper', 'workbench', 'silk'] as const) {
       const skin = { preset: 'default' as const, materialPreset };
       expect(readSkin(skin)).toEqual(skin);
       expect(resolveSkin(skin).materialPreset).toBe(materialPreset);
@@ -36,6 +36,48 @@ describe('user suite resolution', () => {
   it('旧套装无谱系沿用原默认材质', () => {
     expect(resolveSkin(selected, null, null, {}, { [id]: { tokens: suite.tokens, components: suite.components } }).materialPreset).toBe('default');
     expect(resolveSkin(selected).materialPreset).toBe('default');
+  });
+});
+
+describe('B3 silk factory palette', () => {
+  it('exposes 绢本 as the fifth factory with the declared light and dark paper tokens', () => {
+    expect(Object.keys(SKIN_PRESETS)).toEqual(['default', 'quiet-ink', 'warm-paper', 'workbench', 'silk']);
+    expect(SKIN_LABELS.silk).toBe('绢本');
+    expect(resolveSkin({ preset: 'silk' }, null, null, {}, {}, 'light').tokens).toEqual(SILK_LIGHT_TOKENS);
+    expect(SILK_LIGHT_TOKENS).toMatchObject({ desk: '#e7dfcf', paper: '#faf5e9', ink: '#2d2418', 'ink-muted': '#6a5c46', accent: '#5f8f81', annotation: '#9a7016', hairline: '#d8cbae', danger: '#a63b2a', wall: '#d8cbae' });
+    expect(resolveSkin({ preset: 'silk' }, null, null, {}, {}, 'dark').tokens).toEqual(SKIN_PRESETS.silk);
+    expect(SKIN_PRESETS.silk).toMatchObject({ desk: '#17130e', paper: '#f2ead7', ink: '#2d2418', 'ink-muted': '#6a5c46', accent: '#5f8f81', annotation: '#9a7016', hairline: '#d2c4a2', danger: '#a63b2a', wall: '#d2c4a2' });
+    expect(resolveSkin({ preset: 'silk' }).components).toMatchObject({ titleFont: 'serif', headerRule: 'visible', headerRuleLength: 'content', headerRuleStyle: 'solid' });
+  });
+
+  it.each(['default', 'quiet-ink', 'warm-paper', 'workbench'] as const)('%s keeps its full incumbent snapshot in both themes', (preset) => {
+    expect(resolveSkin({ preset }, null, null, {}, {}, 'light')).toEqual(resolveSkin({ preset }, null, null, {}, {}, 'dark'));
+    expect(resolveSkin({ preset }, null, null, {}, {}, 'light').tokens).toEqual(SKIN_PRESETS[preset]);
+  });
+
+  it('theme switching preserves local colors and live palette references at the three existing mounts', () => {
+    const id = '14000000-0000-4000-8000-000000000061';
+    const selection = { preset: 'silk' as const, overrides: { accent: `palette:${id}`, paper: '#faf5e9' } };
+    const stored = JSON.stringify(selection);
+    for (const theme of ['light', 'dark'] as const) {
+      for (const [global, project, local] of [[selection, null, null], [null, selection, null], [null, null, selection]]) {
+        const resolved = resolveSkin(global, project, local, { [id]: '#668877' }, {}, theme);
+        expect(resolved.tokens.accent).toBe('#668877');
+        expect(resolved.tokens.paper).toBe('#faf5e9');
+        expect(resolved.tokens.desk).toBe(theme === 'light' ? '#e7dfcf' : '#17130e');
+      }
+    }
+    expect(JSON.stringify(selection)).toBe(stored);
+    expect(readSkin(JSON.parse(stored))).toEqual(selection);
+  });
+
+  it('a saved silk suite remains a complete literal snapshot when the app theme changes', () => {
+    const id = '14000000-0000-4000-8000-000000000062';
+    const suite = { tokens: SILK_LIGHT_TOKENS, components: SKIN_PRESET_COMPONENTS.silk, materialPreset: 'silk' as const };
+    const selection = { preset: `suite:${id}` as const };
+    for (const theme of ['light', 'dark'] as const) {
+      expect(resolveSkin(selection, null, null, {}, { [id]: suite }, theme)).toMatchObject(suite);
+    }
   });
 });
 

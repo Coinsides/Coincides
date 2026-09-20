@@ -176,4 +176,25 @@ describe('B1a note skin mounting', () => {
     expect(result.current.preset).toBe('quiet-ink');
     expect(mocks.get).not.toHaveBeenCalled();
   });
+
+  it('switches silk paper and its hover preview with the saved app theme without writing skin data', async () => {
+    mocks.get.mockResolvedValue(summary(null));
+    setGlobal({ preset: 'silk' });
+    const { result } = renderHook(() => useNoteSkin(note(), mocks.save));
+    await act(async () => {});
+    expect(result.current.style).toHaveProperty('--sk-desk', '#17130e');
+    expect(result.current.style).toHaveProperty('--sk-paper', '#f2ead7');
+    act(() => useAuthStore.setState((state) => ({ user: { ...state.user!, settings: { ...state.user!.settings, theme: 'light' } } })));
+    expect(result.current.style).toHaveProperty('--sk-desk', '#e7dfcf');
+    expect(result.current.style).toHaveProperty('--sk-paper', '#faf5e9');
+    act(() => setGlobal({ preset: 'quiet-ink' }));
+    act(() => result.current.preview({ preset: 'silk' }));
+    expect(result.current.style).toHaveProperty('--sk-paper', '#f2ead7');
+    act(() => useAuthStore.setState((state) => ({ user: { ...state.user!, settings: { ...state.user!.settings, theme: 'light' } } })));
+    expect(result.current.style).toHaveProperty('--sk-paper', '#faf5e9');
+    expect(result.current.committedResolved.tokens).toEqual(SKIN_PRESETS['quiet-ink']);
+    expect(mocks.save).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.get).toHaveBeenCalledTimes(1);
+  });
 });

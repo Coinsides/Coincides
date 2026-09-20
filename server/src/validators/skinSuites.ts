@@ -24,6 +24,8 @@ export const skinSuiteComponentsSchema = z.object({
   menuDensity: z.enum(['comfortable', 'compact']),
   handleStyle: z.enum(['capsule', 'rivet']),
   headerRule: z.enum(['visible', 'hidden']),
+  headerRuleLength: z.enum(['full', 'content', 'short']).optional(),
+  headerRuleStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
 }).strict();
 const name = z.string().trim().min(1).max(64);
 export const createSkinSuiteSchema = z.object({

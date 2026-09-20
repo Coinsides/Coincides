@@ -6,11 +6,12 @@ import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import './NotePrintLayer.css';
 import { usePaperSkin } from '../PaperSkinContext';
+import { NotePaperHeaderProjection, NOTE_HEADER_INITIAL_HEIGHT } from './NotePaperHeader';
 
 export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
   | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts'
-  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & {
+  | 'documentTypographyProfile' | 'anchorsBySourceRef' | 'paperHeader'> & {
     skinStyle?: CSSProperties;
     skinPreset?: string;
     /** Creation-time Web preset only; never inferred from a historical template. */
@@ -21,6 +22,7 @@ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
 function PrintPages({ input }: { input: NotePrintInput }) {
   const flowPlan = input.noteCanvasRuntime.pageFlowPlan;
   const extensions = new Map(input.noteCanvasRuntime.pageFrameExtensions.map((extension) => [extension.frameId, extension]));
+  const hasCover = input.noteCanvasRuntime.pageFrameExtensions.some((extension) => extension.isCover);
   const frames = input.noteCanvasRuntime.pageFrames.filter((frame) => {
     const extension = extensions.get(frame.id);
     return !extension?.isCover || extension.coverExportIncluded !== false;
@@ -32,14 +34,22 @@ function PrintPages({ input }: { input: NotePrintInput }) {
     }).join('\n')}</style>}
     {frames.flatMap((frame, frameIndex) => {
       const print = getPagePrintGeometry(frame, Boolean(flowPlan));
-      return getPagePrintSlices(frame, input.continuousWeb).map((slice) => <section
+      return getPagePrintSlices(frame, input.continuousWeb).map((slice) => {
+        const header = !hasCover && frameIndex === 0 && slice.index === 0 ? input.paperHeader : undefined;
+        const bandHeight = header ? NOTE_HEADER_INITIAL_HEIGHT : 0;
+        const pageHeight = print.height / print.scale;
+        // The first export view includes a display-only band. Fit that view into
+        // the same physical page without moving the frame, fragments or flow plan.
+        const scale = header ? print.scale * pageHeight / (pageHeight + bandHeight) : print.scale;
+        return <section
         key={`${frame.id}:${slice.index}`}
         data-note-print-page="true"
         data-page-frame-id={frame.id}
         data-print-slice-index={slice.index}
         data-print-slice-offset={slice.offsetY}
         data-paper-size={print.paperSize}
-        data-print-scale={print.scale}
+        data-print-scale={scale}
+        data-print-header-height={bandHeight || undefined}
         style={{ width: print.width, height: print.height, ...(flowPlan ? { page: `coincides-flow-${frameIndex}` } : {}) }}
       >
         <div
@@ -47,11 +57,16 @@ function PrintPages({ input }: { input: NotePrintInput }) {
           style={{
             ...documentTypographyToCssVars(input.documentTypographyProfile),
             width: frame.width,
-            height: frame.height,
+            height: header ? pageHeight + bandHeight : frame.height,
             top: slice.printTop,
-            transform: `scale(${print.scale})`,
+            ...(header ? { left: (print.width - frame.width * scale) / 2 } : {}),
+            transform: `scale(${scale})`,
           } as CSSProperties}
         >
+          {header && <NotePaperHeaderProjection titleDraft={header.titleDraft} descriptionDraft={header.descriptionDraft}
+            left={frame.contentInset.left} right={frame.contentInset.right} />}
+          <div data-note-print-body="true" style={header ? { position: 'absolute', top: bandHeight,
+            width: frame.width, height: pageHeight, overflow: 'hidden' } : { display: 'contents' }}>
           <NoteReadOnlyPageContent
             frame={frame}
             slots={extensions.get(frame.id)?.slots}
@@ -72,6 +87,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
             anchorsBySourceRef={input.anchorsBySourceRef}
             print
           />
+          </div>
         </div>
         {flowPlan?.overflows.filter((overflow) => overflow.frameId === frame.id).map((overflow) => (
           <small key={overflow.fragmentId} data-page-flow-overflow={overflow.kind}
@@ -79,7 +95,8 @@ function PrintPages({ input }: { input: NotePrintInput }) {
             Content exceeds this page by {Math.ceil(overflow.overflowPx)} px.
           </small>
         ))}
-      </section>);
+      </section>;
+      });
     })}
   </div>;
 }

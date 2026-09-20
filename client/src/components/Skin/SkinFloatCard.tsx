@@ -9,6 +9,8 @@ import { resolveSkin, SKIN_LABELS } from '@/styles/skinPresets';
 import { buildPaperMaterialStyles, buildPaperSkinStyles } from '@/pages/Notes/canvasEngine/paperSkinStyles';
 import { clampFloatCard, readFloatCardPosition, rememberFloatCardPosition, type FloatCardPosition } from './skinFloatCardGeometry';
 import styles from './SkinFloatCard.module.css';
+import { useAuthStore } from '@/stores/authStore';
+import { buildSkinComponentStyles, skinComponentValue } from '@/styles/skinComponentStyles';
 
 interface FloatCardSkin {
   selection: SkinSelection | null;
@@ -31,8 +33,8 @@ const paperTokens = [
   ['desk', '桌面'], ['paper', '纸面'], ['ink', '正文'], ['ink-muted', '弱字'], ['accent', '强调'],
   ['annotation', '批注'], ['hairline', '分隔线'], ['danger', '危险操作'], ['wall', '页边距墙'],
 ] as const;
-const componentLabels: Record<keyof SkinComponents, string> = { titleFont: '标题字', labelFont: '标签与刻度字', menuDensity: '菜单密度', handleStyle: '把手样式', headerRule: '表头分隔线' };
-const optionLabels: Record<string, string> = { sans: '无衬线', serif: '衬线', system: '系统', mono: '等宽', comfortable: '舒适', compact: '紧凑', capsule: '胶囊', rivet: '铆钉', visible: '显示', hidden: '隐藏' };
+const componentLabels: Record<keyof SkinComponents, string> = { titleFont: '标题字', labelFont: '标签与刻度字', menuDensity: '菜单密度', handleStyle: '把手样式', headerRule: '表头分隔线', headerRuleLength: '表头线长短', headerRuleStyle: '表头线样式' };
+const optionLabels: Record<string, string> = { sans: '无衬线', serif: '衬线', system: '系统', mono: '等宽', comfortable: '舒适', compact: '紧凑', capsule: '胶囊', rivet: '铆钉', visible: '显示', hidden: '隐藏', full: '通栏', content: '正文宽', short: '短线', solid: '实线', dashed: '虚线', dotted: '点线' };
 const isTextInput = (target: EventTarget | null) => target instanceof HTMLElement && (target.matches('textarea,input:not([type="button"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"])') || target.isContentEditable);
 const nativeControlFor = (target: EventTarget | null): HTMLElement | null => {
   if (!(target instanceof HTMLElement)) return null;
@@ -198,9 +200,10 @@ function FloatCardShell({ noteId, skin, onClose, anchorRef, disabled = false, pa
 type SampleSkin = { tokens: SkinTokens; components: SkinComponents; preset?: SkinSelection['preset']; materialPreset?: SkinPresetId };
 export function SkinSample({ tokens, components, preset = 'default', materialPreset }: SampleSkin) {
   const material = materialPreset ?? preset;
-  return <span className={styles.sample} aria-hidden="true" data-skin-sample data-skin-sample-material={material} style={{ ...buildPaperSkinStyles(tokens), ...buildPaperMaterialStyles(tokens, material), backgroundColor: tokens.paper, color: tokens.ink, borderBottom: components.headerRule === 'visible' ? `1px solid ${tokens.hairline}` : undefined }}>
+  return <span className={styles.sample} aria-hidden="true" data-skin-sample data-skin-sample-material={material} style={{ ...buildPaperSkinStyles(tokens), ...buildPaperMaterialStyles(tokens, material), ...buildSkinComponentStyles(components), backgroundColor: tokens.paper, color: tokens.ink }}>
     <span className={styles.sampleTitle} style={{ background: tokens.accent, borderRadius: components.titleFont === 'serif' ? 0 : 1 }} />
     <span className={styles.sampleLine} style={{ background: tokens.ink }} />
+    <span data-skin-sample-header-rule style={{ display: 'var(--sk-headrule-display)', width: components.headerRuleLength === 'short' ? '28%' : components.headerRuleLength === 'full' ? '100%' : '80%', borderBottom: '1px var(--sk-headrule-style) var(--sk-headrule-color)' }} />
     <span className={styles.sampleLine} style={{ background: tokens['ink-muted'] }} />
     <span className={styles.sampleLine} style={{ background: tokens.ink }} />
   </span>;
@@ -210,6 +213,7 @@ function FloatCardContent({ noteId, skin }: { noteId: string; skin: FloatCardSki
   const contentRef = useRef<HTMLDivElement>(null);
   const palette = usePaletteColors();
   const suites = useSkinSuites();
+  const theme = useAuthStore((s) => s.user?.settings.theme ?? 'dark');
   const [draft, setDraft] = useState<SkinSelection | null>(skin.selection);
   const draftRef = useRef(draft); draftRef.current = draft;
   const [saveFailed, setSaveFailed] = useState(false);
@@ -243,12 +247,12 @@ function FloatCardContent({ noteId, skin }: { noteId: string; skin: FloatCardSki
     return () => cancelAnimationFrame(frame);
   }, [revealPreset, dialog]);
   const base = normalizeSkinSelection(draft ?? skin.inheritedSelection ?? null) ?? { preset: 'default' as const };
-  const resolved = resolveSkin(base, null, null, palette.values, suites.values);
-  const binding = resolveSkin({ preset: base.preset }, null, null, palette.values, suites.values);
+  const resolved = resolveSkin(base, null, null, palette.values, suites.values, theme);
+  const binding = resolveSkin({ preset: base.preset }, null, null, palette.values, suites.values, theme);
   const boundSuite = suites.suites.find((suite) => `suite:${suite.id}` === base.preset);
   const name = boundSuite?.name ?? (base.preset.startsWith('suite:') ? '自定义外观' : SKIN_LABELS[base.preset as keyof typeof SKIN_LABELS]);
   const deviations = paperTokens.filter(([key]) => resolved.tokens[key].toLowerCase() !== binding.tokens[key].toLowerCase());
-  const componentDeviations = (Object.keys(SKIN_COMPONENT_OPTIONS) as Array<keyof SkinComponents>).filter((key) => resolved.components[key] !== binding.components[key]);
+  const componentDeviations = (Object.keys(SKIN_COMPONENT_OPTIONS) as Array<keyof SkinComponents>).filter((key) => skinComponentValue(resolved.components, key) !== skinComponentValue(binding.components, key));
   const change = (next: SkinSelection | null) => {
     clearPreview();
     const ownRevision = ++revision.current;
@@ -286,7 +290,7 @@ function FloatCardContent({ noteId, skin }: { noteId: string; skin: FloatCardSki
       {deviations.length + componentDeviations.length > 0 && <><span className={styles.deviation}>{deviations.length + componentDeviations.length} 项偏差</span><button type="button" onClick={() => { void change({ preset: base.preset, ...(base.materialPreset ? { materialPreset: base.materialPreset } : {}) }).catch(() => undefined); }}>全部还原</button></>}
     </div>
     <section className={styles.section} aria-label="出厂外观">
-      <div className={styles.presets} role="group" aria-label="外观预设快选">{SKIN_PRESET_IDS.map((preset) => <PresetCard key={preset} name={SKIN_LABELS[preset]} preset={preset} resolved={resolveSkin({ preset }, null, null, palette.values, suites.values)} selected={base.preset === preset}
+      <div className={styles.presets} role="group" aria-label="外观预设快选">{SKIN_PRESET_IDS.map((preset) => <PresetCard key={preset} name={SKIN_LABELS[preset]} preset={preset} resolved={resolveSkin({ preset }, null, null, palette.values, suites.values, theme)} selected={base.preset === preset}
         hover={() => hover(preset)} clearPreview={clearPreview} apply={() => { void change(selectionFor(preset)).catch(() => undefined); }} />)}</div>
     </section>
     <section className={styles.section} aria-label="Custom 套装">
@@ -294,7 +298,7 @@ function FloatCardContent({ noteId, skin }: { noteId: string; skin: FloatCardSki
       {suites.loading && <p className={styles.hint} role="status">正在读取套装…</p>}
       {suites.error && <p className={styles.error} role="alert">{suites.error}<button type="button" onClick={() => void suites.refresh()}>重试</button></p>}
       {!suites.loading && !suites.error && !suites.suites.length && <p className={styles.hint}>调好后，存为自己的套装。</p>}
-      <div className={styles.custom}>{suites.suites.map((suite) => <PresetCard key={suite.id} name={suite.name} preset={`suite:${suite.id}`} resolved={resolveSkin({ preset: `suite:${suite.id}` }, null, null, palette.values, suites.values)} selected={base.preset === `suite:${suite.id}`}
+      <div className={styles.custom}>{suites.suites.map((suite) => <PresetCard key={suite.id} name={suite.name} preset={`suite:${suite.id}`} resolved={resolveSkin({ preset: `suite:${suite.id}` }, null, null, palette.values, suites.values, theme)} selected={base.preset === `suite:${suite.id}`}
         hover={() => hover(`suite:${suite.id}`)} clearPreview={clearPreview} apply={() => { void change(selectionFor(`suite:${suite.id}`)).catch(() => undefined); }} menu={(x, y, keyboard) => openMenu(suite, x, y, keyboard)} />)}</div>
     </section>
     <section className={styles.section} aria-label="纸面颜色"><h3>颜色</h3>
@@ -307,7 +311,7 @@ function FloatCardContent({ noteId, skin }: { noteId: string; skin: FloatCardSki
     </section>
     <section className={styles.section} aria-label="部件样式"><h3>部件</h3>
       {(Object.keys(SKIN_COMPONENT_OPTIONS) as Array<keyof SkinComponents>).map((key) => <div className={styles.component} key={key}>
-        <span>{componentLabels[key]}</span><div className={styles.options} role="group" aria-label={componentLabels[key]}>{SKIN_COMPONENT_OPTIONS[key].map((option) => <button type="button" key={option} aria-pressed={resolved.components[key] === option} onClick={() => { void change({ ...base, components: { ...base.components, [key]: option } }).catch(() => undefined); }}>{optionLabels[option]}</button>)}</div>
+        <span>{componentLabels[key]}</span><div className={styles.options} role="group" aria-label={componentLabels[key]}>{SKIN_COMPONENT_OPTIONS[key].map((option) => <button type="button" key={option} aria-pressed={skinComponentValue(resolved.components, key) === option} onClick={() => { void change({ ...base, components: { ...base.components, [key]: option } }).catch(() => undefined); }}>{optionLabels[option]}</button>)}</div>
         {componentDeviations.includes(key) && <div className={styles.tokenActions}><span className={styles.deviation}>已偏离套装</span><button type="button" aria-label={`还原${componentLabels[key]}到套装`} onClick={() => { const components = { ...base.components }; delete components[key]; void change({ ...base, components }).catch(() => undefined); }}>还原</button></div>}
       </div>)}
     </section>

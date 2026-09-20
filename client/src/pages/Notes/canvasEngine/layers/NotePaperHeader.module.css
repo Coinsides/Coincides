@@ -1,4 +1,5 @@
 .header {
+  position: relative;
   box-sizing: border-box;
   padding-top: 56px;
   padding-bottom: 28px;
@@ -34,3 +35,7 @@
 .description[data-empty='true'] { opacity: 0; }
 .header:hover .description:not([readonly]),
 .header:focus-within .description:not([readonly]) { opacity: 1; }
+
+.printHeader { overflow: hidden; }
+.printTitle { height: auto; max-height: 2.4em; }
+.printDescription { height: 19.5px; max-height: 19.5px; }

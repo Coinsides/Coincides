@@ -42,7 +42,7 @@
 .noteNavigationEmpty { margin: 0; padding: 20px 16px; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
 .noteNavigationSearch { padding: 12px; }
 .noteNavigationSearch label { display: block; margin-bottom: 6px; font-size: 12px; }
-.noteNavigationSearch input { box-sizing: border-box; width: 100%; min-width: 0; height: 34px; padding: 6px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font: inherit; font-size: 13px; }
+.noteNavigationSearch input { box-sizing: border-box; width: 100%; min-width: 0; height: 34px; padding: 6px 8px; border: 0; border-bottom: 1px solid var(--border-subtle); border-radius: 0; background: transparent; color: var(--text-primary); font: inherit; font-size: 13px; }
 .noteNavigationCount { margin: 0; padding: 0 12px 8px; color: var(--text-secondary); font-size: 12px; }
 .noteNavigationResults { margin: 0; padding: 0 12px 12px; list-style: none; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .noteNavigationResult { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--border-default); padding: 12px 4px; background: transparent; color: var(--text-primary); font: inherit; font-size: 13px; line-height: 1.5; cursor: pointer; overflow-wrap: anywhere; }
@@ -50,6 +50,9 @@
 .noteNavigationResult small { display: block; margin-bottom: 4px; color: var(--text-secondary); font-size: 11px; }
 .noteNavigationResult mark { color: var(--text-primary); background: var(--bg-hover); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .noteNavigationPane :is(button, input):focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.noteNavigationPane :is(button, input):hover { background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
+.noteNavigationTabs button, .noteNavigationClose { border-radius: 0; }
+.noteNavigationTabs button[aria-selected='true'] { background: transparent; text-decoration: underline; text-underline-offset: 4px; }
 [data-note-block-shell][data-note-navigation-hit='true'],
 [data-note-paper-header][data-note-navigation-hit='true'] { outline: 2px solid var(--border-focus); outline-offset: 4px; }
 @media (max-width: 900px) {

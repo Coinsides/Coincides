@@ -9,6 +9,14 @@ function props(overrides: Partial<NotePaperHeaderProps> = {}) {
 }
 
 describe('paper note metadata', () => {
+  it('mounts its separator at the band lower edge with the two independent page insets', () => {
+    const view = render(<NotePaperHeader {...props()} style={{ paddingLeft: 48, paddingRight: 72 }} />);
+    const separator = view.container.querySelector<HTMLElement>('[data-note-header-separator]')!;
+    expect(separator.closest('[data-note-paper-header]')).not.toBeNull();
+    expect(separator.style.getPropertyValue('--note-header-inset-left')).toBe('48px');
+    expect(separator.style.getPropertyValue('--note-header-inset-right')).toBe('72px');
+    expect(separator.getAttribute('aria-hidden')).toBe('true');
+  });
   it('commits title and description through their existing adapter callbacks on ordinary blur/Enter', async () => {
     const input = props();
     render(<NotePaperHeader {...input} />);

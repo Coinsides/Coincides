@@ -8,6 +8,7 @@ import type { NoteBlock, TextBlockContentV1 } from './runtimeDataTypes';
 import type { DocumentPageFlowPlan, PageFlowBlock } from './documentPageFlowService';
 import type { PageStackBlockFragmentProjection } from './types';
 import { pageFlowSourceReferenceHeight } from './pageFlowSourceReferenceService';
+import { readParagraphFurniture } from './paragraphFurniture';
 
 /** Adapt the existing content truth; no fragment text is ever written back. */
 export function noteBlocksToPageFlow(
@@ -41,6 +42,7 @@ export function noteBlocksToPageFlow(
         indentLevel, writingRole: unit.writing_role, hidden };
     });
     return [{ blockId: block.id, layout, kind, text, units,
+      paragraphFurniture: kind === 'text' ? readParagraphFurniture(block) : null,
       firstFragmentExtraHeight: kind === 'text' ? pageFlowSourceReferenceHeight(block.source_references?.length ?? 0) : 0 }];
   });
 }

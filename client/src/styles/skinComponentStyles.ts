@@ -1,12 +1,31 @@
 import type { CSSProperties } from 'react';
 import type { SkinComponents } from '@shared/types/skin';
 
+/** Legacy suite snapshots inherit the factory defaults for the two new parts. */
+export function resolvedHeaderRule(components: SkinComponents) {
+  return { visibility: components.headerRule, length: components.headerRuleLength ?? 'content', style: components.headerRuleStyle ?? 'solid' };
+}
+
+export function skinComponentValue<K extends keyof SkinComponents>(components: SkinComponents, key: K) {
+  return components[key] ?? (key === 'headerRuleLength' ? 'content' : key === 'headerRuleStyle' ? 'solid' : undefined);
+}
+
 /** Fixed enum-to-CSS translation, scoped to each surface and its portals. */
 export function buildSkinComponentStyles(components: SkinComponents): CSSProperties {
+  const header = resolvedHeaderRule(components);
   return {
     // The guaranteed-invalid initial value resolves the outline fallback on each
     // sheet, where its template variables live, instead of on this skin root.
     '--sk-header-rule': components.headerRule === 'hidden' ? 'none' : 'initial',
+    // A real lower-edge separator; never shared with the legacy paper outline or walls.
+    '--sk-headrule-display': header.visibility === 'hidden' ? 'none' : 'block',
+    // Like the outline above, resolve each header's insets at the consumer,
+    // not prematurely at the skin root where local page geometry is absent.
+    '--sk-headrule-left': header.length === 'full' ? '0px' : 'initial',
+    '--sk-headrule-right': header.length === 'full' ? '0px' : 'initial',
+    '--sk-headrule-width': header.length === 'short' ? '7rem' : 'auto',
+    '--sk-headrule-style': header.style,
+    '--sk-headrule-color': 'var(--sk-hairline)',
     '--sk-title-font': components.titleFont === 'serif' ? 'Georgia, "Noto Serif SC", "Songti SC", SimSun, serif' : 'initial',
     '--sk-paper-title-size': components.titleFont === 'serif' ? '36px' : '34px',
     '--sk-paper-title-weight': components.titleFont === 'serif' ? '600' : '650',

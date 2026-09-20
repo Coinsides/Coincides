@@ -7,6 +7,12 @@ export const SKIN_PRESETS: Record<SkinPresetId, SkinTokens> = {
   'quiet-ink': { desk: '#101114', paper: '#17181C', ink: '#E7E8EB', 'ink-muted': '#8B909A', accent: '#7FA3D7', annotation: '#B89B4C', hairline: '#FFFFFF12', danger: '#C4766B', wall: '#FFFFFF14', 'board-desk': '#0E0F12', card: '#17181C', edge: '#8B909A', chalk: '#E7E8EB' },
   'warm-paper': { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC', 'board-desk': '#211D19', card: '#F7F3EA', edge: '#837A6C', chalk: '#F2EDE1' },
   workbench: { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A', 'board-desk': '#12151A', card: '#1A1E25', edge: '#E5A33C', chalk: '#DEE3EA' },
+  silk: { desk: '#17130e', paper: '#f2ead7', ink: '#2d2418', 'ink-muted': '#6a5c46', accent: '#5f8f81', annotation: '#9a7016', hairline: '#d2c4a2', danger: '#a63b2a', wall: '#d2c4a2', 'board-desk': '#17130e', card: '#f2ead7', edge: '#5f8f81', chalk: '#f2ead7' },
+};
+
+/** Only the fifth factory has a light companion. Existing factories stay literal snapshots. */
+export const SILK_LIGHT_TOKENS: SkinTokens = {
+  desk: '#e7dfcf', paper: '#faf5e9', ink: '#2d2418', 'ink-muted': '#6a5c46', accent: '#5f8f81', annotation: '#9a7016', hairline: '#d8cbae', danger: '#a63b2a', wall: '#d8cbae', 'board-desk': '#e7dfcf', card: '#faf5e9', edge: '#5f8f81', chalk: '#2d2418',
 };
 
 const defaultComponents: SkinComponents = { titleFont: 'sans', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule', headerRule: 'visible' };
@@ -15,10 +21,12 @@ export const SKIN_PRESET_COMPONENTS: Record<SkinPresetId, SkinComponents> = {
   'quiet-ink': { ...defaultComponents },
   'warm-paper': { ...defaultComponents, titleFont: 'serif' },
   workbench: { ...defaultComponents, labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' },
+  silk: { ...defaultComponents, titleFont: 'serif', headerRuleLength: 'content', headerRuleStyle: 'solid' },
 };
 
 export const SKIN_LABELS: Record<SkinPresetId, string> = {
   default: '默认', 'quiet-ink': '静墨', 'warm-paper': '暖纸', workbench: '工作台',
+  silk: '绢本',
 };
 
 export function readSkin(value: unknown): SkinSelection | null {
@@ -41,7 +49,7 @@ export function readSkin(value: unknown): SkinSelection | null {
 /** An absent mounting point inherits. A named snapshot replaces its parent's palette. */
 export type SkinSuiteSnapshot = { tokens: SkinTokens; components: SkinComponents; materialPreset?: SkinPresetId };
 
-export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null, palette: Readonly<Record<string, string>> = {}, suites: Readonly<Record<string, SkinSuiteSnapshot>> = {}) {
+export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null, palette: Readonly<Record<string, string>> = {}, suites: Readonly<Record<string, SkinSuiteSnapshot>> = {}, theme: 'light' | 'dark' = 'dark') {
   let preset: SkinSelection['preset'] = 'default';
   let materialPreset: SkinPresetId = 'default';
   let tokens = { ...SKIN_PRESETS.default };
@@ -52,7 +60,7 @@ export function resolveSkin(global?: SkinSelection | null, project?: SkinSelecti
     preset = skin.preset;
     const suite = preset.startsWith('suite:') ? suites[preset.slice(6)] : undefined;
     materialPreset = skin.materialPreset ?? suite?.materialPreset ?? (SKIN_PRESET_IDS.includes(preset as SkinPresetId) ? preset as SkinPresetId : 'default');
-    const baseTokens = suite?.tokens ?? SKIN_PRESETS[preset as SkinPresetId] ?? SKIN_PRESETS.default;
+    const baseTokens = suite?.tokens ?? (preset === 'silk' && theme === 'light' ? SILK_LIGHT_TOKENS : SKIN_PRESETS[preset as SkinPresetId]) ?? SKIN_PRESETS.default;
     tokens = { ...baseTokens };
     for (const key of SKIN_TOKEN_NAMES) {
       const stored = skin.overrides?.[key] ?? baseTokens[key];

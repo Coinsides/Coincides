@@ -266,6 +266,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onPersistDraft: input.onPersistDraft,
     onResizeDraftFromTextarea: input.onResizeDraftFromTextarea,
     onSaveBlock: input.onSaveBlock,
+    onSaveParagraphFurniture: input.onSaveParagraphFurniture,
     onSelectBlock: input.onSelectBlock,
     onClearBlockSelection: input.onClearBlockSelection,
     onSelectSlashCommand: input.onSelectSlashCommand,

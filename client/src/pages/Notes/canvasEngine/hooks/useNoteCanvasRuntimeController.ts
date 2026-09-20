@@ -16,6 +16,7 @@ import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
 import { useTableBlockHistory } from './useTableBlockHistory';
+import { useParagraphFurnitureHistory } from './useParagraphFurnitureHistory';
 import { useComponentBlockHistory } from './useComponentBlockHistory';
 import { STATIC_TEMPLATE_OPTIONS } from '@/services/templateOptions';
 import { usePageFrameWalls } from './usePageFrameWalls';
@@ -178,6 +179,7 @@ export function useNoteCanvasRuntimeController() {
     finalizeDraftBlock,
     saveBlock: saveBlockRaw,
     saveTableBlock,
+    saveParagraphFurniture,
     saveComponentBlock,
     applyBlockEditRecovery,
     inspectBlockEditRecovery,
@@ -510,6 +512,10 @@ export function useNoteCanvasRuntimeController() {
     boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
     history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
 
+  const paragraphHistory = useParagraphFurnitureHistory({ noteId, generation: textHistoryGeneration, blocks, saveParagraphFurniture,
+    boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
+    history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
+
   const inkCommands = usePaperInkCommands({
     noteId, generation: textHistoryGeneration,
     objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
@@ -703,6 +709,7 @@ export function useNoteCanvasRuntimeController() {
     onPersistDraft: (text, options) => persistDraft(text, undefined, options),
     onResizeDraftFromTextarea: resizeDraftFromTextarea,
     onSaveBlock: saveBlock,
+    onSaveParagraphFurniture: paragraphHistory.save,
     onSaveTitle: saveTitle,
     descriptionDraft,
     onDescriptionDraftChange: setDescriptionDraft,

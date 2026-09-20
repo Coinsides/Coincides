@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { SkinSelection } from '../../../shared/types/skin.js';
 
 // Runtime enum stays local to the server build; shared/types/skin.ts is the public type contract.
-export const skinPresetIdSchema = z.enum(['default', 'quiet-ink', 'warm-paper', 'workbench']);
+export const skinPresetIdSchema = z.enum(['default', 'quiet-ink', 'warm-paper', 'workbench', 'silk']);
 const colorSchema = z.string().regex(
   /^(?:#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|palette:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/,
   'Use a six- or eight-digit hex color or palette:<uuid>',
@@ -34,5 +34,7 @@ export const skinSelectionSchema: z.ZodType<SkinSelection> = z.object({
     menuDensity: z.enum(['comfortable', 'compact']).optional(),
     handleStyle: z.enum(['capsule', 'rivet']).optional(),
     headerRule: z.enum(['visible', 'hidden']).optional(),
+    headerRuleLength: z.enum(['full', 'content', 'short']).optional(),
+    headerRuleStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
   }).strict().optional(),
 }).strict();

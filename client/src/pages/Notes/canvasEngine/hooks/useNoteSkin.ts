@@ -20,6 +20,7 @@ export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null
     setPreviewState(noteId && selection ? { noteId, selection } : null);
   }, [noteId]);
   const global = useAuthStore((s) => s.user?.settings.skin);
+  const theme = useAuthStore((s) => s.user?.settings.theme ?? 'dark');
   const [project, setProject] = useState<{ id: string; skin: SkinSelection | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -35,10 +36,10 @@ export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null
   }, [courseId, attempt]);
   const selection = useMemo(() => normalizeSkinSelection(readSkin(note?.metadata?.skin)), [note?.metadata?.skin, suites.detached, palette.detached]);
   const inheritedSelection = normalizeSkinSelection((project && project.id === courseId ? project.skin : null) ?? readSkin(global));
-  const resolved = useMemo(() => resolveSkin(normalizeSkinSelection(readSkin(global)), normalizeSkinSelection(project && project.id === courseId ? project.skin : null), selection, palette.values, suites.values), [global, project, courseId, selection, palette.values, suites.values, suites.detached]);
+  const resolved = useMemo(() => resolveSkin(normalizeSkinSelection(readSkin(global)), normalizeSkinSelection(project && project.id === courseId ? project.skin : null), selection, palette.values, suites.values, theme), [global, project, courseId, selection, palette.values, suites.values, suites.detached, theme]);
   const renderedResolved = useMemo(() => previewState && previewState.noteId === noteId
-    ? resolveSkin(null, null, previewState.selection, palette.values, suites.values) : resolved,
-  [previewState, noteId, palette.values, suites.values, resolved]);
+    ? resolveSkin(null, null, previewState.selection, palette.values, suites.values, theme) : resolved,
+  [previewState, noteId, palette.values, suites.values, resolved, theme]);
   const style = useMemo(() => ({ ...buildPaperSkinStyles(renderedResolved.tokens),
     ...buildPaperMaterialStyles(renderedResolved.tokens, renderedResolved.materialPreset ?? renderedResolved.preset), ...buildSkinComponentStyles(renderedResolved.components),
   }), [renderedResolved.tokens, renderedResolved.components, renderedResolved.materialPreset, renderedResolved.preset]);

@@ -1,0 +1,12 @@
+.separator {
+  position: absolute;
+  display: var(--sk-headrule-display, block);
+  left: var(--sk-headrule-left, var(--note-header-inset-left, 0px));
+  right: var(--sk-headrule-right, var(--note-header-inset-right, 0px));
+  bottom: 0;
+  width: var(--sk-headrule-width, auto);
+  max-width: calc(100% - var(--sk-headrule-left, var(--note-header-inset-left, 0px)) - var(--sk-headrule-right, var(--note-header-inset-right, 0px)));
+  height: 0;
+  border-bottom: 1px var(--sk-headrule-style, solid) var(--sk-headrule-color, var(--sk-hairline));
+  pointer-events: none;
+}

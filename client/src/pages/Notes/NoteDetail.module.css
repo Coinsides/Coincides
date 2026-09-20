@@ -231,7 +231,7 @@
 .noteDeleteActions button:hover:not(:disabled),
 .pageFramePanelRow[role="button"]:hover,
 .exportPreviewGroup summary:hover {
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 
 .moreAction.noteDangerAction,
@@ -272,7 +272,7 @@
 }
 
 .moreAction:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 
 .moreAction svg {
@@ -304,7 +304,7 @@
 .trayClose:hover, .trayClose:focus-visible, .trayStageButton:hover:not(:disabled), .trayStageButton:focus-visible { border-color: var(--border-focus); background: var(--bg-hover); color: var(--text-primary); }
 .trayStageButton { font-size: 12px; }
 .trayStageButton:disabled { opacity: 0.5; cursor: default; }
-.trayEmpty { display: grid; place-items: center; min-height: 144px; margin-top: 12px; border: 1px dashed var(--border-default); border-radius: var(--radius-md); color: var(--text-muted); }
+.trayEmpty { display: grid; place-items: center; min-height: 144px; margin-top: 12px; border-top: 1px solid var(--border-subtle); color: var(--text-muted); }
 .trayEmpty svg { opacity: 0.45; }
 .traySidebar[data-drop-active='true'] .trayEmpty { border-color: var(--border-focus); background: var(--bg-hover); color: var(--text-primary); }
 .traySidebar[data-drop-active='true'] .trayEmpty svg { opacity: 1; }
@@ -338,6 +338,10 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px;
+}
+
+.blockTrashRow + .blockTrashRow {
+  border-top: 1px solid var(--border-subtle);
 }
 
 .blockTrashIdentity {
@@ -2081,17 +2085,18 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   width: 100%;
   box-sizing: border-box;
   padding: 7px 8px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  background: var(--bg-secondary);
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 700;
 }
 
 .annotationContextInput:focus {
-  border-color: var(--accent-primary);
-  outline: none;
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
 .annotationContextMenuItem {
@@ -2100,8 +2105,8 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   gap: 8px;
   min-height: 30px;
   padding: 0 8px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
@@ -2111,8 +2116,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .annotationContextMenuItem:hover:not(:disabled),
 .annotationContextMenuItem:focus-visible {
-  border-color: var(--border-default);
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   color: var(--text-primary);
   outline: none;
 }
@@ -2148,17 +2152,18 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 9px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  background: var(--bg-secondary);
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 720;
 }
 
 .inlineNamePromptInput:focus {
-  border-color: var(--accent-primary);
-  outline: none;
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
 .inlineNamePromptActions {
@@ -2200,8 +2205,8 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   gap: 7px;
   min-height: var(--sk-menu-row-height, 30px);
   padding: 0 8px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
@@ -2218,8 +2223,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .contextMenuItem:hover:not(:disabled),
 .contextMenuItem:focus-visible {
-  border-color: var(--border-subtle);
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   color: var(--text-primary);
   outline: none;
 }
@@ -3327,6 +3331,134 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   justify-self: start;
 }
 
+/* B3: note chrome keeps a single outer surface. ContentGroup/Relation chrome
+   deliberately has no selectors in this block. */
+.infoPopover,
+.annotationContextMenu,
+.inlineNamePrompt,
+.contextMenu,
+.contextSubmenu,
+.annotationInspector,
+.annotationOrganizer,
+.selectionToolbar,
+.selectionTypographyToolbar {
+  box-shadow: var(--glass-shadow-sm);
+}
+
+.inlineNamePrompt .secondaryBtn,
+.annotationInspector .iconBtn,
+.annotationOrganizer .iconBtn,
+.annotationOrganizer .secondaryBtn,
+.blockToolbar .iconBtn,
+.traySidebar .trayStageButton,
+.traySidebar .trayClose {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.annotationInspector .annotationDeleteButton,
+.blockToolbar .dangerBtn,
+.contextMenuItem.noteDangerAction {
+  color: var(--error);
+}
+
+.annotationInspector .iconBtn:hover:not(:disabled),
+.annotationOrganizer .iconBtn:hover:not(:disabled),
+.annotationOrganizer .secondaryBtn:hover:not(:disabled),
+.inlineNamePrompt .secondaryBtn:hover:not(:disabled),
+.blockToolbar .iconBtn:hover:not(:disabled),
+.traySidebar .trayStageButton:hover:not(:disabled),
+.traySidebar .trayClose:hover,
+.typographyControls :is(button, input, select):hover,
+.blockTrashRestoreButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.annotationInspector .annotationStackCard,
+.annotationInspector .annotationChildCard,
+.annotationOrganizer .annotationOrganizerSetCard {
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 12px 0 0;
+}
+
+.annotationInspector .annotationChildCard {
+  margin-left: 12px;
+}
+
+.annotationInspector .annotationChildCardFocused {
+  border-top-color: var(--border-focus);
+}
+
+.annotationInspector .annotationStackSummary,
+.annotationInspector .annotationInspectorMeta div,
+.annotationInspector .annotationRangePreview,
+.annotationInspector .annotationLabelInput,
+.annotationInspector .annotationEmptyNote,
+.annotationOrganizer .annotationOrganizerEmpty,
+.annotationOrganizer .annotationOrganizerChip,
+.annotationOrganizer .annotationOrganizerMemberText,
+.annotationOrganizer .annotationOrganizerSelect {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.annotationInspector .annotationRangePreview,
+.annotationOrganizer .annotationOrganizerSelect {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.annotationOrganizer .annotationOrganizerChipSelected {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.annotationInspector .annotationStackSummary:hover,
+.annotationInspector .annotationRangePreview:hover,
+.annotationInspector .annotationLabelInput:hover,
+.annotationOrganizer .annotationOrganizerChip:hover,
+.annotationOrganizer .annotationOrganizerSetSummary:hover,
+.annotationOrganizer .annotationOrganizerMemberText:hover {
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.selectionToolbarInput,
+.selectionToolbarButton,
+.selectionTypographySelect,
+.selectionTypographyNumber,
+.selectionTypographyButton {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.selectionToolbarButton:hover:not(:disabled),
+.selectionTypographySelect:hover,
+.selectionTypographyNumber:hover,
+.selectionTypographyButton:hover {
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.floatingPanelPopover :is(button, input, select, summary):focus-visible,
+.annotationInspector :is(button, input, textarea, summary):focus-visible,
+.annotationOrganizer :is(button, input, select, textarea):focus-visible,
+.annotationContextMenuItem:focus-visible,
+.contextMenuItem:focus-visible,
+.inlineNamePrompt .secondaryBtn:focus-visible,
+.blockToolbar .iconBtn:focus-visible,
+.selectionToolbar :is(button, input):focus-visible,
+.selectionTypographyToolbar :is(button, input, select):focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
 .resizeHandleRight {
   position: absolute;
   top: 12px;
@@ -3728,7 +3860,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--bg-primary);
-  box-shadow: var(--glass-shadow-lg);
+  box-shadow: var(--glass-shadow-sm);
   overflow: auto;
   pointer-events: auto;
 }
@@ -3761,17 +3893,18 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   width: 100%;
   gap: 2px;
   padding: 8px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   text-align: left;
 }
 
 .slashItem:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 
 .slashItemActive:not(:disabled) {
-  background: var(--accent-primary-bg);
-  outline: 1px solid color-mix(in srgb, var(--accent-primary) 72%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  outline: none;
+  box-shadow: inset 2px 0 var(--border-focus);
 }
 
 .slashItem:disabled {

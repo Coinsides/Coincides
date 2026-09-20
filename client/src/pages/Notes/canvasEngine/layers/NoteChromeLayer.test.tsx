@@ -309,7 +309,7 @@ describe('NoteChromeLayer appearance', () => {
     expect(container.contains(panel)).toBe(false);
     expect(panel.parentElement).toBe(document.body);
     const presets = screen.getByRole('group', { name: '外观预设快选' });
-    expect(within(presets).getAllByRole('button')).toHaveLength(4);
+    expect(within(presets).getAllByRole('button')).toHaveLength(SKIN_PRESET_IDS.length);
     expect(within(presets).getByRole('button', { name: '暖纸' }).getAttribute('aria-pressed')).toBe('true');
     for (const preset of SKIN_PRESET_IDS) {
       const button = within(presets).getByRole('button', { name: SKIN_LABELS[preset] });
@@ -327,7 +327,7 @@ describe('NoteChromeLayer appearance', () => {
     fireEvent.click(screen.getByRole('button', { name: '纸面' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Hex 颜色' }), { target: { value: '#123456' } });
     fireEvent.keyDown(screen.getByRole('dialog', { name: '纸面颜色' }), { key: 'Escape' });
-    await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { paper: '#123456' } }));
+    await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: SKIN_PRESET_IDS[SKIN_PRESET_IDS.length - 1], overrides: { paper: '#123456' } }));
     fireEvent.click(screen.getByRole('button', { name: '关闭外观' }));
     expect(document.querySelector('[data-skin-float-card]')).toBeNull();
     expect(screen.getByRole('button', { name: '笔记外观' }).getAttribute('aria-expanded')).toBe('false');

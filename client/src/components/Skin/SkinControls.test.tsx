@@ -11,6 +11,19 @@ vi.mock('@/services/api', () => ({
 }));
 
 describe('SkinControls appearance choices', () => {
+  it('offers independent separator length and style with legacy skin defaults', () => {
+    const onChange = vi.fn();
+    render(<SkinControls value={{ preset: 'quiet-ink', components: { headerRule: 'visible' } }} onChange={onChange} />);
+    fireEvent.click(screen.getByText('部件样式'));
+    const length = screen.getByRole('combobox', { name: '表头线长短' }) as HTMLSelectElement;
+    const style = screen.getByRole('combobox', { name: '表头线样式' }) as HTMLSelectElement;
+    expect(length.value).toBe('content');
+    expect(style.value).toBe('solid');
+    fireEvent.change(length, { target: { value: 'short' } });
+    expect(onChange).toHaveBeenLastCalledWith({ preset: 'quiet-ink', components: { headerRule: 'visible', headerRuleLength: 'short' } });
+    fireEvent.change(style, { target: { value: 'dotted' } });
+    expect(onChange).toHaveBeenLastCalledWith({ preset: 'quiet-ink', components: { headerRule: 'visible', headerRuleStyle: 'dotted' } });
+  });
   it('offers a labeled header rule switch and resets only its override', () => {
     const onChange = vi.fn();
     render(<SkinControls value={{ preset: 'quiet-ink', overrides: { paper: '#123456' }, components: { headerRule: 'hidden', titleFont: 'serif' } }} onChange={onChange} />);

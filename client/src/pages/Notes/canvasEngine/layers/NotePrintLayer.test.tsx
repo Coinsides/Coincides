@@ -17,6 +17,11 @@ import type { BlockBoxLayout } from '../runtimeLayout';
 import type { BlockPlacementModel, PageFrameModel } from '../types';
 import { NotePrintLayer, type NotePrintInput } from './NotePrintLayer';
 import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';
+import { PaperSkinContext } from '../PaperSkinContext';
+import { resolveSkin } from '@/styles/skinPresets';
+import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
+import { buildPaperSkinStyles } from '../paperSkinStyles';
+import { NOTE_HEADER_INITIAL_HEIGHT } from './NotePaperHeader';
 
 vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));
 
@@ -135,6 +140,49 @@ afterEach(() => {
 });
 
 describe('NotePrintLayer lifecycle and frozen print snapshot', () => {
+  it('fits a frozen lower-edge header and unchanged body into only the first page using the current separator tokens', () => {
+    const input = inputFor({ frames: [frame('first'), frame('second', { y: 1800 })] });
+    const before = JSON.stringify(input.noteCanvasRuntime);
+    const callbacks = { onTitleDraftChange: vi.fn(), onDescriptionDraftChange: vi.fn(), onSaveTitle: vi.fn(), onSaveDescription: vi.fn() };
+    const skin = resolveSkin({ preset: 'warm-paper', components: { headerRule: 'hidden', headerRuleLength: 'short', headerRuleStyle: 'dotted' } });
+    render(<PaperSkinContext.Provider value={{ preset: 'warm-paper', selection: null, error: null, retry: vi.fn(), save: vi.fn(),
+      style: { ...buildPaperSkinStyles(skin.tokens), ...buildSkinComponentStyles(skin.components) } }}>
+      <NotePrintLayer {...input} paperHeader={{ ...callbacks, titleDraft: 'Header title', descriptionDraft: 'Header detail', contentReadOnly: false }} />
+    </PaperSkinContext.Provider>);
+    printEvent('beforeprint');
+    const root = document.querySelector<HTMLElement>(ROOT)!;
+    expect(root.style.getPropertyValue('--sk-headrule-display')).toBe('none');
+    expect(root.style.getPropertyValue('--sk-headrule-style')).toBe('dotted');
+    expect(root.style.getPropertyValue('--sk-headrule-color')).toBe('var(--sk-hairline)');
+    expect(root.querySelectorAll('[data-note-print-header]')).toHaveLength(1);
+    expect(root.querySelector('[data-note-print-header]')?.textContent).toContain('Header title');
+    expect(root.querySelector('[data-note-print-header]')?.textContent).toContain('Header detail');
+    expect(root.querySelector('[data-note-print-header] [data-note-header-separator]')).not.toBeNull();
+    const first = pages()[0];
+    const print = getPagePrintGeometry(input.noteCanvasRuntime.pageFrames[0]);
+    const body = first.querySelector<HTMLElement>('[data-note-print-body]')!;
+    const header = first.querySelector<HTMLElement>('[data-note-print-header]')!;
+    expect(parseFloat(body.style.top)).toBe(parseFloat(header.style.height));
+    expect(body.style.overflow).toBe('hidden');
+    const scale = Number(first.dataset.printScale);
+    expect((parseFloat(body.style.height) + NOTE_HEADER_INITIAL_HEIGHT) * scale).toBeCloseTo(print.height);
+    expect(scale).toBeLessThan(print.scale);
+    expect(Number(pages()[1].dataset.printScale)).toBe(getPagePrintGeometry(input.noteCanvasRuntime.pageFrames[1]).scale);
+    expect(pages()[1].querySelector('[data-note-print-header]')).toBeNull();
+    expect(JSON.stringify(input.noteCanvasRuntime)).toBe(before);
+    Object.values(callbacks).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+  });
+
+  it('does not add a header band to an existing cover, including an excluded cover', () => {
+    const input = inputFor({ frames: [frame('first'), frame('second', { y: 1800 })] });
+    input.noteCanvasRuntime.pageFrameExtensions[0] = { ...input.noteCanvasRuntime.pageFrameExtensions[0], isCover: true, coverExportIncluded: false };
+    render(<NotePrintLayer {...input} paperHeader={{ titleDraft: 'Covered title', descriptionDraft: '', contentReadOnly: true,
+      onTitleDraftChange: vi.fn(), onDescriptionDraftChange: vi.fn(), onSaveTitle: vi.fn(), onSaveDescription: vi.fn() }} />);
+    printEvent('beforeprint');
+    expect(document.querySelector('[data-note-print-header]')).toBeNull();
+    expect(document.querySelector('[data-note-header-separator]')).toBeNull();
+  });
+
   it('mounts synchronously for beforeprint, stays absent from screen DOM, and removes a cancelled job', () => {
     const { container, unmount } = render(<NotePrintLayer {...inputFor()} />);
     expect(document.querySelector(ROOT)).toBeNull();

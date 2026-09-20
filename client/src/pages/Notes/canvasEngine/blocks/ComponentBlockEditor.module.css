@@ -16,16 +16,17 @@
 .body { min-height: 0; overflow: auto; padding: 20px; }
 .field { display: grid; gap: 6px; }
 .dialog textarea, .dialog input {
-  box-sizing: border-box; width: 100%; min-width: 0; padding: 8px;
-  border: 1px solid var(--border-default); border-radius: var(--radius-sm, 4px);
-  color: var(--text-primary); background: var(--bg-primary); font: inherit;
+  box-sizing: border-box; width: 100%; min-width: 0; padding: 9px;
+  border: 0; border-radius: 0;
+  color: var(--text-primary); background: transparent; font: inherit;
 }
 .dialog textarea { resize: vertical; }
 .dialog button {
-  padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm, 4px);
-  color: var(--text-primary); background: var(--bg-surface, var(--bg-primary)); font: inherit;
+  padding: 7px 11px; border: 0; border-radius: 0;
+  color: var(--text-primary); background: transparent; font: inherit;
 }
-.dialog button:hover:not(:disabled) { background: var(--bg-hover); }
+.dialog :is(button, input, textarea):hover:not(:disabled) { background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
+.actions button:last-child, .grid :is(th, td) button { color: var(--error); }
 .dialog button:disabled, .dialog input:disabled, .dialog textarea:disabled { opacity: 0.5; cursor: not-allowed; }
 .dialog :is(button, input, textarea):focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 14px 0; }
@@ -40,9 +41,9 @@
 .grid { width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
 .grid table { min-width: 100%; border-collapse: collapse; text-align: left; }
 .grid th, .grid td { min-width: 140px; padding: 6px; border-bottom: 1px solid var(--border-subtle, var(--border-default)); vertical-align: top; }
-.grid th { font-weight: 500; background: var(--bg-active, var(--bg-surface)); }
+.grid th { font-weight: 500; background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
 .grid th button { margin-top: 6px; }
-.grid tbody tr:nth-child(even) { background: var(--bg-surface); }
+.grid tbody tr:nth-child(even) { background: transparent; }
 .error { margin: 14px 0 0; color: var(--error, var(--text-primary)); }
 .footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border-default); }
 .footer .save { color: var(--text-inverse, var(--bg-primary)); background: var(--accent-primary); }

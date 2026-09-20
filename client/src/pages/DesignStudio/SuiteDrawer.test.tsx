@@ -1,4 +1,4 @@
-import { fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PaletteColor, SkinSelection, SkinSuite } from '@shared/types';
 import { SkinSample } from '@/components/Skin/SkinFloatCard';
@@ -37,24 +37,38 @@ beforeEach(() => {
 });
 
 describe('design studio suite inventory', () => {
-  it('renders custom first and four factories with the exact shared token/material sample', async () => {
+  it('renders custom first and five factories with the exact shared token/material sample', async () => {
     const view = render(<SuiteDrawer search="" />);
     await screen.findByRole('button', { name: '查看套装：读书纸' });
     await waitFor(() => expect(usePaletteStore.getState().loaded).toBe(true));
     const groups = screen.getAllByRole('list');
     expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual(['我的套装', '出厂套装']);
     expect(within(groups[1]).getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
-      '查看套装：默认', '查看套装：静墨', '查看套装：暖纸', '查看套装：工作台',
+      '查看套装：默认', '查看套装：静墨', '查看套装：暖纸', '查看套装：工作台', '查看套装：绢本',
     ]);
     expect(within(groups[1]).queryByRole('button', { name: /管理/ })).toBeNull();
     expect(view.container.querySelectorAll('details[open]')).toHaveLength(2);
-    expect(view.container.querySelectorAll('[data-skin-sample]')).toHaveLength(5);
+    expect(view.container.querySelectorAll('[data-skin-sample]')).toHaveLength(6);
     const resolved = resolveSkin({ preset: `suite:${suiteId}` }, null, null, { [colorId]: color.value }, { [suiteId]: suite });
     const reference = render(<SkinSample {...resolved} />);
     const actual = groups[0].querySelector('[data-skin-sample]')!;
     expect(actual.outerHTML).toBe(reference.container.querySelector('[data-skin-sample]')!.outerHTML);
     expect(actual.getAttribute('data-skin-sample-material')).toBe('warm-paper');
     expect(api.get.mock.calls.map(([url]) => url).sort()).toEqual(['/palette-colors', '/skin-suites']);
+  });
+
+  it('updates the generated silk sample and token summary when app theme changes', async () => {
+    useAuthStore.setState({ user: { id: 'silk-reader', settings: { theme: 'dark' } } as never });
+    render(<SuiteDrawer search="绢本" />);
+    const card = await screen.findByRole('button', { name: '查看套装：绢本' });
+    fireEvent.click(card);
+    expect(card.querySelector<HTMLElement>('[data-skin-sample]')!.style.getPropertyValue('--sk-paper')).toBe('#f2ead7');
+    expect(within(screen.getByRole('region', { name: '套装详情' })).getAllByText('#f2ead7').length).toBeGreaterThan(0);
+    act(() => useAuthStore.setState((state) => ({ user: { ...state.user!, settings: { ...state.user!.settings, theme: 'light' } } })));
+    expect(card.querySelector<HTMLElement>('[data-skin-sample]')!.style.getPropertyValue('--sk-paper')).toBe('#faf5e9');
+    expect(within(screen.getByRole('region', { name: '套装详情' })).getAllByText('#faf5e9').length).toBeGreaterThan(0);
+    expect(api.patch).not.toHaveBeenCalled();
+    expect(api.post).not.toHaveBeenCalled();
   });
 
   it('only selects and reveals token/material details, and filters names without any writes', async () => {

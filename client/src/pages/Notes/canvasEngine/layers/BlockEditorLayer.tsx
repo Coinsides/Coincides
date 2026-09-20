@@ -3,6 +3,9 @@ import { resolveScreenRect, type CoordinateContract } from '../placementContract
 import type { PageFrameModel, DocumentTypographyProfile } from '../types';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
 import { PaginatedTextBlockProjection } from '../blocks/PaginatedTextBlockProjection';
+import { canStyleParagraph, readParagraphFurniture, paragraphFurnitureGeometry, type ParagraphFurniture } from '../paragraphFurniture';
+import { ParagraphFurnitureDecoration } from '../blocks/ParagraphFurnitureDecoration';
+import { ParagraphFurnitureControl } from '../blocks/ParagraphFurnitureEditor';
 import {
   useEffect,
   useLayoutEffect,
@@ -101,6 +104,7 @@ interface BlockEditorLayerProps {
   onSaveTable?: (payload: TableBlockPayload) => Promise<boolean>;
   componentPrint?: boolean;
   onSaveComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
+  onSaveParagraphFurniture?: (value: ParagraphFurniture | null) => Promise<boolean>;
   allowSaveRecovery?: boolean;
   text: string;
   textFlowDraft?: TextBlockContentV1;
@@ -183,6 +187,7 @@ export function BlockEditorLayer({
   onSaveTable,
   componentPrint = false,
   onSaveComponent,
+  onSaveParagraphFurniture,
   allowSaveRecovery = false,
   text,
   textFlowDraft,
@@ -249,6 +254,12 @@ export function BlockEditorLayer({
     top: fragment.blockRect.y - (blockFragments[0]?.blockRect.y ?? screenRect.y),
   }] : []);
   const paginated = flowFragments.length > 0;
+  const paragraphFurniture = readParagraphFurniture(block);
+  const furnitureGeometry = paragraphFurnitureGeometry(paragraphFurniture, layout.width);
+  const decoratedFlowFragments = paragraphFurniture ? flowFragments.map((fragment) => ({ ...fragment,
+    left: fragment.left + furnitureGeometry.inset, top: fragment.top + furnitureGeometry.top,
+    layout: { ...fragment.layout, width: fragment.layout.width - furnitureGeometry.inset },
+  })) : flowFragments;
   const TextProjection = paginated ? PaginatedTextBlockProjection : TextBlockProjection;
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -494,6 +505,11 @@ export function BlockEditorLayer({
         }
       } : undefined}
     >
+      {paragraphFurniture && <ParagraphFurnitureDecoration value={paragraphFurniture} fragments={paginated
+        ? flowFragments.map((fragment) => ({ id: fragment.id, left: fragment.left, top: fragment.top,
+          width: fragment.layout.width, height: fragment.layout.height, first: fragment.isFirst, last: fragment.isLast,
+          sourceReferencesHeight: fragment.isFirst && block.source_references?.length ? PAGINATED_SOURCE_REFERENCE_HEIGHT_PX : 0 }))
+        : [{ id: block.id, left: 0, top: 0, width: layout.width, height: layout.height, first: true, last: true }]} />}
       {chapter && <ChapterHeadingFurniture {...chapter} />}
       <BlockStatusBadgeLayer
         blockTypeLabel={blockTypeLabel}
@@ -513,6 +529,8 @@ export function BlockEditorLayer({
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
         bodyReadOnly={itemReference || noteReference || mediaBlock || tableBlock || componentBlock}
+        paragraphStyleControl={!contentReadOnly && canStyleParagraph(block) && onSaveParagraphFurniture
+          ? <ParagraphFurnitureControl value={paragraphFurniture} onSave={onSaveParagraphFurniture} /> : undefined}
         onBeginMove={onBeginMove}
         onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && !tableBlock && !componentBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
@@ -558,7 +576,8 @@ export function BlockEditorLayer({
       <div
         ref={blockContentRef}
         data-annotation-stamp-block-content="true"
-        style={mediaBlock ? { position: 'absolute', inset: 0 } : paginated ? { position: 'relative' } : undefined}
+        style={mediaBlock ? { position: 'absolute', inset: 0 } : paginated ? { position: 'relative' } : paragraphFurniture
+          ? { position: 'relative', paddingTop: furnitureGeometry.top, paddingLeft: furnitureGeometry.inset, paddingBottom: furnitureGeometry.sourceHeight } : undefined}
         onBlurCapture={() => {
           const receipt = focusedReceiptRef.current;
           if (!receipt) return;
@@ -600,7 +619,7 @@ export function BlockEditorLayer({
           />
         ) : (
           <TextProjection
-            fragments={flowFragments}
+            fragments={decoratedFlowFragments}
             typography={documentTypography}
             onFlowSelectionStart={onFlowSelectionStart}
             blockId={block.id}

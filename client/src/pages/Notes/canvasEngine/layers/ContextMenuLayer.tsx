@@ -200,7 +200,7 @@ export function ContextMenuLayer({
       <button
         key={item.id}
         type="button"
-        className={styles.contextMenuItem}
+        className={`${styles.contextMenuItem} ${item.iconName === 'trash' ? styles.noteDangerAction : ''}`}
         disabled={item.disabled}
         title={item.disabled ? item.disabledReason : undefined}
         onClick={() => void handleAction(item)}

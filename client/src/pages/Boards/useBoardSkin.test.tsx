@@ -81,3 +81,16 @@ it('surfaces a rejected owner write to the editor instead of claiming it saved',
   const hook = renderHook(() => useBoardSkin(board('b', null), vi.fn().mockResolvedValue(false)));
   await expect(hook.result.current.save({ preset: 'default' })).rejects.toThrow('not saved');
 });
+
+it('uses the silk light and dark board companions without changing the stored binding', async () => {
+  const update = vi.fn().mockResolvedValue(true);
+  const { result } = renderHook(() => useBoardSkin(board('silk-board', null, { preset: 'silk' }), update));
+  await act(async () => {});
+  expect(result.current.style).toHaveProperty('--sk-board-desk', '#17130e');
+  expect(result.current.style).toHaveProperty('--sk-card', '#f2ead7');
+  act(() => useAuthStore.setState((state) => ({ user: { ...state.user!, settings: { ...state.user!.settings, theme: 'light' } } })));
+  expect(result.current.style).toHaveProperty('--sk-board-desk', '#e7dfcf');
+  expect(result.current.style).toHaveProperty('--sk-card', '#faf5e9');
+  expect(result.current.selection).toEqual({ preset: 'silk' });
+  expect(update).not.toHaveBeenCalled();
+});

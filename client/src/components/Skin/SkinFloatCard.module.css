@@ -3,8 +3,8 @@
 .header:active { cursor: grabbing; }
 .header strong { flex: 1; font-size: 14px; font-weight: 600; }
 .card[data-collapsed='true'] .header { border-bottom: 0; }
-.card button, .dialog button, .menu button { color: inherit; font: inherit; cursor: pointer; border-radius: 4px; min-height: 28px; padding: 4px 6px; }
-.card button:hover:not(:disabled), .dialog button:hover:not(:disabled), .menu button:hover:not(:disabled) { background-color: var(--bg-hover); }
+.card button, .dialog button, .menu button { color: inherit; font: inherit; cursor: pointer; border-radius: 0; min-height: 28px; padding: 4px 6px; }
+.card button:hover:not(:disabled), .dialog button:hover:not(:disabled), .menu button:hover:not(:disabled) { background-color: color-mix(in srgb, var(--text-primary) 4%, transparent); }
 .card button:disabled, .dialog button:disabled { opacity: .5; cursor: default; }
 .card :is(button, input):focus-visible, .dialog :is(button, input):focus-visible, .menu button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .header button { display: flex; align-items: center; justify-content: center; width: 28px; padding: 0; }
@@ -33,19 +33,20 @@
 .deviation { color: var(--text-secondary); }
 .tokenActions button { padding: 0 2px; min-height: 22px; text-decoration: underline; text-underline-offset: 3px; }
 .component { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; padding: 5px 0; }
-.options { display: flex; border: 1px solid var(--border-default); border-radius: 4px; }
+.options { display: flex; gap: 2px; }
 .card .options button { font-size: 11px; padding: 3px 6px; }
-.card .options button[aria-pressed='true'] { background: var(--bg-active); text-decoration: underline; text-underline-offset: 3px; }
-.card .save { width: 100%; border: 1px solid var(--border-default); text-align: left; padding: 7px 8px; }
+.card .options button[aria-pressed='true'] { color: var(--text-primary); background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.card .save { width: 100%; border: 0; border-top: 1px solid var(--border-subtle); text-align: left; padding: 12px 0 6px; }
 .error { margin: 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
 .error button { text-decoration: underline; }
 .dialog { position: fixed; z-index: 1200; margin: auto; width: min(300px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 16px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); font-size: 13px; }
 .dialog::backdrop { background: #0006; }
 .dialog h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
 .dialog label { display: flex; flex-direction: column; gap: 6px; }
-.dialog input { width: 100%; min-width: 0; border: 1px solid var(--border-default); border-radius: 4px; padding: 8px; background: var(--bg-surface); color: var(--text-primary); font: inherit; }
+.dialog input { width: 100%; min-width: 0; border: 0; border-bottom: 1px solid var(--border-subtle); border-radius: 0; padding: 8px 0; background: transparent; color: var(--text-primary); font: inherit; }
 .dialog .sample { width: 90px; height: 100px; margin: 12px auto; padding: 16px 12px; gap: 8px; }
 .dialogActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.dialogActions button[type='submit'] { border: 1px solid var(--border-focus); }
+.dialogActions button[type='submit'] { color: var(--accent-primary); font-weight: 600; }
 .menu { position: fixed; z-index: 1150; display: flex; flex-direction: column; min-width: 190px; max-width: calc(100vw - 16px); padding: 4px; background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 6px; font-size: 12px; }
 .menu button { text-align: left; padding: 7px 8px; }
+.menu button:last-child { color: var(--error); }

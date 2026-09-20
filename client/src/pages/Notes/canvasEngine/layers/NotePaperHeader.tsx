@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 import styles from './NotePaperHeader.module.css';
 import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
 import { usePaperSkin } from '../PaperSkinContext';
+import { NoteHeaderSeparator } from './NoteHeaderSeparator';
 
 export interface NotePaperHeaderProps {
   titleDraft: string;
@@ -16,6 +17,16 @@ export interface NotePaperHeaderProps {
 
 export const NOTE_HEADER_MAX_HEIGHT = 240;
 export const NOTE_HEADER_INITIAL_HEIGHT = 197;
+
+/** A frozen, non-interactive export view of the same title/description band. */
+export function NotePaperHeaderProjection({ titleDraft, descriptionDraft, left, right }: Pick<NotePaperHeaderProps, 'titleDraft' | 'descriptionDraft'> & { left: number; right: number }) {
+  return <header className={`${styles.header} ${styles.printHeader}`} data-note-print-header="true"
+    style={{ height: NOTE_HEADER_INITIAL_HEIGHT, paddingLeft: left, paddingRight: right }}>
+    <h1 className={`${styles.title} ${styles.printTitle}`}>{titleDraft || 'Untitled note'}</h1>
+    {descriptionDraft && <p className={`${styles.description} ${styles.printDescription}`}>{descriptionDraft}</p>}
+    <NoteHeaderSeparator left={left} right={right} />
+  </header>;
+}
 
 /** A display-only band before the existing paper coordinate origin. */
 export function NotePaperHeader({
@@ -87,5 +98,6 @@ export function NotePaperHeader({
         }
       }} />
     {metadata && <NoteCoverMetadata key={metadata.noteId} {...metadata} hidden={metadataHidden} />}
+    <NoteHeaderSeparator left={style?.paddingLeft} right={style?.paddingRight} />
   </header>;
 }

@@ -1,0 +1,20 @@
+.fragment { position: absolute; box-sizing: border-box; pointer-events: none; color: var(--sk-ink); }
+.quote { background: color-mix(in srgb, var(--sk-accent) 7%, var(--sk-paper)); }
+.callout { border: 1px dashed var(--sk-hairline); background: color-mix(in srgb, var(--sk-annotation) 7%, var(--sk-paper)); }
+.stamp { position: absolute; left: 4px; top: 7px; width: 22px; height: 26px; display: grid; place-items: center;
+  color: var(--sk-danger); border: 1px solid currentColor; font-family: var(--sk-title-font, serif); font-size: 14px; }
+.label { position: absolute; left: 34px; right: 10px; top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--sk-annotation); font-size: 12px; font-weight: 600; line-height: 20px; }
+.source { position: absolute; left: 34px; right: 10px; margin: 0; color: var(--sk-ink-muted); text-align: right;
+  font: 13px/20px Aptos, Calibri, "Segoe UI", Arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.editor { width: 280px; max-width: calc(100vw - 32px); padding: 14px; display: grid; gap: 12px;
+  background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }
+.editor label { display: grid; gap: 5px; font-size: 12px; }
+.editor input, .editor textarea, .editor select { width: 100%; box-sizing: border-box; padding: 6px 2px;
+  background: transparent; color: inherit; border: 0; border-bottom: 1px solid var(--border-subtle); font: inherit; }
+.editor textarea { min-height: 60px; resize: vertical; }
+.editor footer { display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-subtle); padding-top: 8px; }
+.editor button { padding: 5px 8px; background: transparent; color: inherit; border: 0; cursor: pointer; }
+.editor button:hover { background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
+.error { color: var(--error); font-size: 12px; }
+@media print { .fragment { print-color-adjust: exact; -webkit-print-color-adjust: exact; } .editor { display: none; } }

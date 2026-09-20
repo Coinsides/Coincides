@@ -8,6 +8,7 @@ import {
   type TypographyLineMeasurementInput,
 } from './typographyMeasurementService';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from './typographyProfileService';
+import { paragraphFurnitureGeometry, type ParagraphFurniture } from './paragraphFurniture';
 import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from './types';
 
 /** Read-side ranges use the same UTF-16 offsets as TextFlow and DOM selections. */
@@ -33,6 +34,7 @@ export interface PageFlowBlock {
   typography?: DocumentTypographyProfile;
   /** Existing first-fragment furniture (for example the source-reference row). */
   firstFragmentExtraHeight?: number;
+  paragraphFurniture?: ParagraphFurniture | null;
   /** Coverage citizens do not become flow merely because their width is auto. */
   flow?: boolean;
   presentation?: 'in_flow' | 'underlay' | 'overlay' | 'viewport';
@@ -182,14 +184,15 @@ export function resolveDocumentPageFlowPlan({
         const web = isWebFrame(frame);
         const width = deriveFrameLocalAutoWidth(block.layout, frame, 'v2')!;
         const text = block.text || '';
+        const furniture = paragraphFurnitureGeometry(block.paragraphFurniture, width);
         const lines = block.kind === 'text' ? measureTextLines({
-          text, width, typography: block.typography || documentTypography,
+          text, width: width - furniture.inset, typography: block.typography || documentTypography,
           indentLevel: block.indentLevel, writingRole: block.writingRole,
           units: block.units, startOffset: offset,
         }).lines : [];
         const available = web ? Infinity : Math.max(0, content.height - cursorY);
-        const firstFragmentExtraHeight = blockFragments.length === 0
-          ? Math.max(0, block.firstFragmentExtraHeight || 0) : 0;
+        const firstFragmentExtraHeight = furniture.extraHeight + (blockFragments.length === 0
+          ? Math.max(0, block.firstFragmentExtraHeight || 0) : 0);
         let takenLines: PageFlowLine[] = [];
         let height = Math.max(0, block.layout.height);
         if (block.kind === 'text') {

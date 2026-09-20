@@ -1,5 +1,5 @@
 /** Presentation tokens shared by paper and board; document typography stays independent. */
-export const SKIN_PRESET_IDS = ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const;
+export const SKIN_PRESET_IDS = ['default', 'quiet-ink', 'warm-paper', 'workbench', 'silk'] as const;
 export type SkinPresetId = typeof SKIN_PRESET_IDS[number];
 export type SkinSuiteReference = `suite:${string}`;
 export type SkinBindingId = SkinPresetId | SkinSuiteReference;
@@ -21,8 +21,13 @@ export const SKIN_COMPONENT_OPTIONS = {
   menuDensity: ['comfortable', 'compact'],
   handleStyle: ['capsule', 'rivet'],
   headerRule: ['visible', 'hidden'],
+  headerRuleLength: ['full', 'content', 'short'],
+  headerRuleStyle: ['solid', 'dashed', 'dotted'],
 } as const;
-export type SkinComponents = { -readonly [K in keyof typeof SKIN_COMPONENT_OPTIONS]: typeof SKIN_COMPONENT_OPTIONS[K][number] };
+type SkinComponentValues = { -readonly [K in keyof typeof SKIN_COMPONENT_OPTIONS]: typeof SKIN_COMPONENT_OPTIONS[K][number] };
+/** Older suites retain their exact stored shape; new furniture inherits defaults. */
+export type SkinComponents = Omit<SkinComponentValues, 'headerRuleLength' | 'headerRuleStyle'>
+  & Partial<Pick<SkinComponentValues, 'headerRuleLength' | 'headerRuleStyle'>>;
 
 /** Null/absence at a mounting point inherits its parent; a selection replaces the preset snapshot. */
 export interface SkinSelection {

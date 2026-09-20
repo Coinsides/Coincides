@@ -20,6 +20,7 @@ import {
   DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
 } from './typographyProfileService';
 import { textFromContent } from './blockContentService';
+import { readParagraphFurniture, paragraphFurnitureGeometry } from './paragraphFurniture';
 import type { NoteBlock } from './runtimeDataTypes';
 import type {
   DocumentTypographyProfile,
@@ -113,9 +114,10 @@ export function estimateBlockHeightForText(
     const media = readMediaBlockMetadata(block);
     return media ? Math.max(1, width * media.naturalHeight / media.naturalWidth) : DEFAULT_BLOCK_HEIGHT;
   }
-  return estimateTextBlockHeight({
+  const furniture = paragraphFurnitureGeometry(readParagraphFurniture(block), width);
+  return furniture.extraHeight + estimateTextBlockHeight({
     text,
-    width,
+    width: width - furniture.inset,
     typography,
     title: block.title,
     showPreview: shouldShowFormulaPreview(block, text),

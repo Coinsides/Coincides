@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
+import { canStyleParagraph, writeParagraphFurniture, type ParagraphFurniture } from '../paragraphFurniture';
 import { tableBlockValidationError, type TableBlockPayload } from '../tableBlockService';
 import { componentBlockValidationError, type ComponentBlockPayload } from '../componentBlockService';
 import { saveSkinWithSuites } from '@/hooks/useSkinSuites';
@@ -1769,6 +1770,30 @@ export function useNoteCanvasDataAdapter({
     }
   }), [writeRegistry, addToast]);
 
+  const saveParagraphFurniture = useCallback(writeRegistry.hold('saveParagraphFurniture', async (
+    block: NoteBlock, value: ParagraphFurniture | null,
+  ): Promise<boolean> => {
+    if (!canStyleParagraph(block) || !allowSourceContentMutation()) return false;
+    const requestedNoteId = noteRef.current?.id;
+    const generation = routeRequestGenerationRef.current;
+    if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) return false;
+    const current = () => adapterMountActiveRef.current && noteRef.current?.id === requestedNoteId
+      && routeNoteIdRef.current === requestedNoteId && routeRequestGenerationRef.current === generation;
+    try {
+      const response = await writeRegistry.track('paragraph-appearance:' + block.placement_id, () =>
+        api.put(`/notes/${requestedNoteId}/block-placements/${block.placement_id}`, {
+          display_overrides_json: writeParagraphFurniture(block, value),
+        }));
+      if (!current()) return false;
+      setBlocks((existing) => existing.map((entry) => entry.placement_id === block.placement_id
+        ? { ...entry, display_overrides_json: response.data.display_overrides_json } : entry));
+      return true;
+    } catch {
+      if (current()) addToast('error', '段落样式未能保存，请重试。');
+      return false;
+    }
+  }), [writeRegistry, allowSourceContentMutation, addToast]);
+
   const saveTableBlock = useCallback(writeRegistry.hold('saveTableBlock', async (
     block: NoteBlock, payload: TableBlockPayload,
   ): Promise<boolean> => {
@@ -3100,6 +3125,7 @@ export function useNoteCanvasDataAdapter({
     finalizeDraftBlock,
     saveBlock,
     saveTableBlock,
+    saveParagraphFurniture,
     saveComponentBlock,
     applyBlockEditRecovery,
     inspectBlockEditRecovery,

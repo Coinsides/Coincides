@@ -6,6 +6,7 @@ import { SkinSample } from '@/components/Skin/SkinFloatCard';
 import { usePaletteColors } from '@/hooks/usePaletteColors';
 import { useSkinSuites } from '@/hooks/useSkinSuites';
 import { resolveSkin, SKIN_LABELS } from '@/styles/skinPresets';
+import { useAuthStore } from '@/stores/authStore';
 import styles from './SuiteDrawer.module.css';
 
 type GallerySuite = { id: SkinSelection['preset']; name: string; suite?: SkinSuite };
@@ -14,6 +15,7 @@ type MenuState = { suite: SkinSuite; anchor: HTMLElement; x: number; y: number }
 export default function SuiteDrawer({ search }: { search: string }) {
   const suites = useSkinSuites();
   const palette = usePaletteColors();
+  const theme = useAuthStore((state) => state.user?.settings.theme ?? 'dark');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export default function SuiteDrawer({ search }: { search: string }) {
   const selected = [...custom, ...factory].find((entry) => entry.id === selectedId);
   const query = search.trim().toLocaleLowerCase();
   const matches = (entry: GallerySuite) => entry.name.toLocaleLowerCase().includes(query);
-  const resolved = selected ? resolveSkin({ preset: selected.id }, null, null, palette.values, suites.values) : null;
+  const resolved = selected ? resolveSkin({ preset: selected.id }, null, null, palette.values, suites.values, theme) : null;
 
   const openMenu = (suite: SkinSuite, anchor: HTMLElement, x?: number, y?: number) => {
     if (busy || renaming) return;
@@ -60,7 +62,7 @@ export default function SuiteDrawer({ search }: { search: string }) {
     } finally { setBusy(false); }
   };
   const renderCard = (entry: GallerySuite) => {
-    const sample = resolveSkin({ preset: entry.id }, null, null, palette.values, suites.values);
+    const sample = resolveSkin({ preset: entry.id }, null, null, palette.values, suites.values, theme);
     return <li key={entry.id} className={styles.card} data-suite-card={entry.id}
       onContextMenu={(event) => {
         if (!entry.suite) return;
