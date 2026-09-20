@@ -1,6 +1,7 @@
 import type { Proposal, ProposalType } from '@shared/types';
 
 const types = {
+  note_patch: { label: '笔记修订', field: 'patches', unit: '处修订' },
   study_plan: { label: '学习计划', field: 'items', unit: '项任务' },
   batch_cards: { label: '卡片', field: 'items', unit: '张卡片' },
   schedule_adjustment: { label: '日程调整', field: 'items', unit: '项调整' },
@@ -52,10 +53,10 @@ export function describeProposal(proposal: Proposal) {
     summary: text(data.title) || text(data.description) || preview || '未提供摘要',
     description: text(data.title) ? text(data.description) : '',
     detail: definition ? [Array.isArray(rawEntries) ? `${entries.length} ${definition.unit}` : '', preview].filter(Boolean).join(' · ') : '',
-    canApply: !!definition,
+    canApply: !!definition && proposal.type !== 'note_patch',
     applyLabel: reviewOnly ? '标记已复核' : '采纳',
     applyMessage: reviewOnly ? '提案已标记复核，未采纳候选证据' : '提案已采纳',
-    notice: !definition ? '此类提案暂不支持一键采纳'
+    notice: proposal.type === 'note_patch' ? '逐块查看旧文与新文。采纳由笔记编辑器执行，可在笔记中撤销。' : !definition ? '此类提案暂不支持一键采纳'
       : reviewOnly ? '这里只标记已复核，不采纳候选证据。逐组决策请在项目材料页处理。' : '',
   };
 }

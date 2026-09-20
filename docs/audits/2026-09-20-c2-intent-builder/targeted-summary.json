@@ -1,0 +1,843 @@
+{
+  "schemaVersion": 1,
+  "mode": "targeted",
+  "runId": "targeted-2026-09-20T09-28-51-878Z-2644",
+  "startedAt": "2026-09-20T09:28:51.883Z",
+  "rawRoot": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644",
+  "isolation": "OS environment allowlist; in-memory SQLite; empty dotenv and Vite env directory; dedicated temporary application data, assets, uploads and temp. No provider credentials inherited.",
+  "serverFileTimeoutMs": 660000,
+  "nodeTestTimeoutMs": 600000,
+  "runtimeGate": {
+    "totalComponents": 25,
+    "nonGitSecretsComponents": 23,
+    "commands": [
+      "check:test-wiring",
+      "test:agent-knowledge",
+      "check:agent-knowledge",
+      "check:tech-debt-table",
+      "test:unit",
+      "test:tool-face-registry",
+      "test:tool-face-manifest",
+      "check:tool-face-manifest",
+      "test:tool-face-parity",
+      "check:tool-face-parity",
+      "check:server-shared-runtime-import",
+      "check:canvas-runtime-boundary",
+      "check:group-gallery-shell",
+      "check:groups-rail-shell",
+      "check:single-editor-shell",
+      "check:source-experience",
+      "check:v2-bn11-legacy-shutdown",
+      "check:v2-bn11-relation-freshness",
+      "smoke:canvas-engine-model-contract",
+      "build:client",
+      "build",
+      "smoke:canvas-engine-performance",
+      "docs:check"
+    ],
+    "hqPending": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ],
+    "completeRuntimeGate": false
+  },
+  "discoveredServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14BoardVisual.test.ts",
+    "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ComponentBlocks.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14CoverPage.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NoteBinding.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14PaperFreedom.test.ts",
+    "server/src/__tests__/v14ParagraphFurniture.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v14TableBlocks.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "selectedServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/agent/providers/index.test.ts"
+  ],
+  "steps": [
+    {
+      "label": "shared-build",
+      "command": [
+        "node",
+        "server/node_modules/typescript/bin/tsc",
+        "-b",
+        "shared/tsconfig.json"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 132,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/001-shared-build.log",
+      "counts": {}
+    },
+    {
+      "label": "server-manifest-check",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 519,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/002-server-manifest-check.log",
+      "counts": {}
+    },
+    {
+      "label": "server-manifest-copy",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "copy:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 185,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/003-server-manifest-copy.log",
+      "counts": {}
+    },
+    {
+      "label": "server/scripts/agent-eval/harness.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "scripts/agent-eval/harness.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/scripts/agent-eval/harness.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1190,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/004-server_scripts_agent-eval_harness.test.ts.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1105.6878
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AgentMemories.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13AgentMemories.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13AgentMemories.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 626,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/005-server_src___tests___v13AgentMemories.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 542.8913
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AtomicTextSave.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13AtomicTextSave.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13AtomicTextSave.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10540,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/006-server_src___tests___v13AtomicTextSave.test.ts.log",
+      "counts": {
+        "tests": 26,
+        "suites": 0,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 10423.5678
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13AtomicTextSaveMigration.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13AtomicTextSaveMigration.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1177,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/007-server_src___tests___v13AtomicTextSaveMigration.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1083.9272
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentKnowledgeProjection.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentKnowledgeProjection.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 314,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/008-server_src___tests___v14AgentKnowledgeProjection.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 221.3167
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentRouteLifecycle.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentRouteLifecycle.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1846,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/009-server_src___tests___v14AgentRouteLifecycle.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1755.356
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentVerbTransfer.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentVerbTransfer.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 26502,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/010-server_src___tests___v14AgentVerbTransfer.test.ts.log",
+      "counts": {
+        "tests": 50,
+        "suites": 0,
+        "pass": 50,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 26372.775
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentWriteDoor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentWriteDoor.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentWriteDoor.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1315,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/011-server_src___tests___v14AgentWriteDoor.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1217.2336
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AttentionContext.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AttentionContext.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AttentionContext.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1455,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/012-server_src___tests___v14AttentionContext.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1358.4606
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14BoardSandbox.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14BoardSandbox.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14BoardSandbox.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2558,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/013-server_src___tests___v14BoardSandbox.test.ts.log",
+      "counts": {
+        "tests": 15,
+        "suites": 0,
+        "pass": 15,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2457.6057
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ClaimObservation.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ClaimObservation.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ClaimObservation.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 324,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/014-server_src___tests___v14ClaimObservation.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 227.7915
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ClaimReceipt.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ClaimReceipt.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ClaimReceipt.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2638,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/015-server_src___tests___v14ClaimReceipt.test.ts.log",
+      "counts": {
+        "tests": 26,
+        "suites": 0,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2530.2794
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ContextHint.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ContextHint.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ContextHint.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3126,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/016-server_src___tests___v14ContextHint.test.ts.log",
+      "counts": {
+        "tests": 35,
+        "suites": 0,
+        "pass": 35,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 3005.961
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14IntentRouter.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14IntentRouter.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14IntentRouter.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 917,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/017-server_src___tests___v14IntentRouter.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 825.7012
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14LoopRobustness.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14LoopRobustness.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14LoopRobustness.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2304,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/018-server_src___tests___v14LoopRobustness.test.ts.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2209.403
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14MemoryQuickwins.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14MemoryQuickwins.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14MemoryQuickwins.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2866,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/019-server_src___tests___v14MemoryQuickwins.test.ts.log",
+      "counts": {
+        "tests": 17,
+        "suites": 0,
+        "pass": 17,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2772.2951
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14NotePatch.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14NotePatch.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14NotePatch.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2182,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/020-server_src___tests___v14NotePatch.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2083.3594
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ProposalUnification.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ProposalUnification.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ProposalUnification.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2906,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/021-server_src___tests___v14ProposalUnification.test.ts.log",
+      "counts": {
+        "tests": 16,
+        "suites": 0,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2797.0223
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14TurnIdentity.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14TurnIdentity.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14TurnIdentity.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 875,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/022-server_src___tests___v14TurnIdentity.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 773.7637
+      }
+    },
+    {
+      "label": "server/src/agent/providers/index.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/agent/providers/index.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/agent/providers/index.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 403,
+      "rawLog": ".codex-tmp/c2-intent/targeted-2026-09-20T09-28-51-878Z-2644/023-server_src_agent_providers_index.test.ts.log",
+      "counts": {
+        "tests": 49,
+        "suites": 0,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 305.2544
+      }
+    }
+  ],
+  "serverTestAggregate": {
+    "tests": 325,
+    "pass": 325,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "executedServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/agent/providers/index.test.ts"
+  ],
+  "missingServerFiles": [],
+  "missingTapSummaries": [],
+  "nonPassingTapSummaries": [],
+  "filesWithTapCounts": 20,
+  "failedSteps": [],
+  "finishedAt": "2026-09-20T09:29:59.060Z",
+  "passed": true
+}

@@ -464,7 +464,8 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   it.each([
     ['table', 'table', 'placement'], ['table', 'table', 'order'],
     ['component', 'component.timeline', 'placement'], ['component', 'component.timeline', 'order'],
-  ] as const)('B1/B2 %s creation rolls back an incomplete %s %s save', async (blockType, templateKey, failure) => {
+    ['paragraph', 'answer', 'placement'], ['paragraph', 'answer', 'order'],
+  ] as const)('B1/B2/C2 %s creation rolls back an incomplete %s %s save', async (blockType, templateKey, failure) => {
     mocks.coordinateContract = 'v2';
     const collection = f11RuntimeCollection();
     const anchor = serverBlock('anchor', false);
@@ -474,8 +475,8 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     mocks.get.mockImplementation(async (url: string) => url.endsWith('/page-frame-collection') ? { data: collection } : originalGet(url));
     const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
     await waitFor(() => expect(subject.result.current.loading).toBe(false));
-    const template = subject.result.current.templateOptions.find((entry) => blockType === 'table'
-      ? entry.legacy_block_type === 'table' : entry.template_key === templateKey)!;
+    const template = subject.result.current.templateOptions.find((entry) => blockType === 'table' || blockType === 'paragraph'
+      ? entry.legacy_block_type === blockType : entry.template_key === templateKey)!;
     mocks.post.mockImplementation(async (_url, body) => ({ data: { ...serverBlock('', false), ...body,
       id: blockType, placement_id: `${blockType}-place`, order_index: 1 } }));
     mocks.put.mockImplementation(async (url, body) => {
@@ -489,6 +490,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     mocks.delete.mockResolvedValue({ data: { success: true } });
     await act(async () => {
       expect(await subject.result.current.createBlock(template, '', { afterBlockId: anchor.id, silent: true,
+        ...(blockType === 'paragraph' ? { requireAfterBlock: true } : {}),
         layout: { x: 0, y: 100, width: 400, height: 80, width_mode: 'auto', frame_id: collection.primaryFrameId!,
           coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
       })).toBeNull();

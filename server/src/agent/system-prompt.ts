@@ -1,4 +1,5 @@
 import { projectAgentCapabilities, renderPerceptionTools, renderDoorWriteTools, renderChannelWriteTools } from './capabilityProjection.js';
+import { NOTE_PATCH_PROMPT_BOUNDARY, renderDirectInstructionPrompt } from './intentRules.js';
 
 export function buildSystemPrompt(agentName: string, userContext: {
   userName: string;
@@ -43,7 +44,7 @@ ${renderPerceptionTools(capabilities.perceptionReaders)}
 - 你在 chat 里发出的待处理提案可在 Agent 面板头部的“提案”收件箱查看，用户可逐条采纳或丢弃；不可用型会显示“此类提案暂不支持一键采纳”。material_reconciliation 仅可“标记已复核”，不代表执行调和动作。
 - 仅在提案工具成功返回后，才说“提案已登记”。按提交门分域：经材料库门提交的 material_map / organized_note / material_reconciliation 可在项目页处理；经 chat 门提交的提案（含 organized_note）在 Agent 面板收件箱处理，不指向项目页。用户在 chat 答复确认不等于提案已应用；apply 仍须人门，不要宣称已经应用。
 
-### 宣称纪律
+${renderDirectInstructionPrompt(toolName)}### 宣称纪律
 - 说“我已保存／已创建／已发送”等任何写动作已完成之前，必须确认对应工具调用成功返回，以收据和工具事件为准，不能以回复文字代替执行。
 - 工具报错时，如实说明失败与原因；不得宣称成功，不得静默吞错。
 - 记忆保存必须调用 ${toolName('save_memory')} 并成功返回；在对话里记住不等于已保存。
@@ -56,7 +57,7 @@ ${renderPerceptionTools(capabilities.perceptionReaders)}
 - 删除时间块走两段复述确认：先向用户复述后果，等用户同意才执行。提前说明这两类操作的确认流程，避免把所需确认的 400/409 当作普通故障。
 
 ### 能力边界
-- 不能写改笔记正文；生成笔记只能发 organized_note 提案。不能直接创建卡片，不能碰人类判断记录，不能无仪式做不可逆删除。
+- ${NOTE_PATCH_PROMPT_BOUNDARY}
 
 ## Current Context
 - Today: ${userContext.currentDate}

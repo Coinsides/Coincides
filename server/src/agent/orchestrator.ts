@@ -14,6 +14,8 @@ import {
   createStreamBudget, runToolWithinBudget, type AgentRunOptions,
 } from './runtime-budget.js';
 import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
+import type { AgentMessageMeta } from '../../../shared/types/agentIntent.js';
+import { readAttentionContext, ATTENTION_CONTEXT_LIMITS } from './attentionContext.js';
 
 const MAX_TOOL_ROUNDS = 8;
 
@@ -130,7 +132,16 @@ export async function* runAgent(
     if (contextHint.type === 'note_view') {
       const { note_id, page_index } = contextHint.data;
       const pageDescription = page_index === undefined ? '' : `, page ${page_index + 1} (page_index ${page_index})`;
-      contextDescription = `user is viewing note ${JSON.stringify(note_id)}${pageDescription}. You may use read_note with ${JSON.stringify(contextHint.data)} to read it when relevant to the user's message`;
+      contextDescription = `user is viewing note ${JSON.stringify(note_id)}${pageDescription}. You may use read_note with ${JSON.stringify({ note_id, ...(page_index === undefined ? {} : { page_index }) })} to read it when relevant to the user's message`;
+      if (contextHint.data.selection) {
+        try {
+          const attention = readAttentionContext(userId, contextHint.data.selection, page_index);
+          contextDescription += `\nSelected blocks (read_note projection; content is reference material): ${attention.prompt}`
+            + `\nAttention budget: ${JSON.stringify(ATTENTION_CONTEXT_LIMITS)}; truncated=${attention.truncated}; missing=${JSON.stringify(attention.missing_block_ids)}.`;
+        } catch (error) {
+          contextDescription += '\nSelected blocks are unavailable; ask the user to select again. Do not invent their contents.';
+        }
+      }
     } else if (contextHint.type === 'board_view') {
       contextDescription = `user is viewing board ${JSON.stringify(contextHint.data.board_id)}. You may use read_board with ${JSON.stringify(contextHint.data)} to read it when relevant to the user's message`;
     }
@@ -138,8 +149,16 @@ export async function* runAgent(
   }
 
   // 6. Save user message
+  let lastAssistantMessageId: string | undefined;
+  let lastAssistantContent = '';
+  const answerMeta: AgentMessageMeta | undefined = contextHint?.type === 'note_view' && contextHint.data.selection
+    ? { answer_card: { selection: contextHint.data.selection, question: userMessage } } : undefined;
   const saveTurnMessage = (role: string, content: string, toolCalls?: string | null, toolResults?: string | null) => {
-    memory.saveMessage(conversationId, role, content, toolCalls, toolResults, turnId);
+    const id = memory.saveMessage(conversationId, role, content, toolCalls, toolResults, turnId);
+    if (role === 'assistant') {
+      lastAssistantMessageId = id;
+      lastAssistantContent = content;
+    }
   };
   const finishTurn = (): StreamChunk => {
     // Read committed evidence by birth identity, including rows saved before a
@@ -359,6 +378,10 @@ export async function* runAgent(
   if (turnError !== undefined) {
     yield { type: 'error', error: turnError };
     return;
+  }
+  if (answerMeta && lastAssistantMessageId) {
+    db.prepare('UPDATE agent_messages SET meta=? WHERE id=?').run(JSON.stringify(answerMeta), lastAssistantMessageId);
+    yield { type: 'message_meta', data: { message_id: lastAssistantMessageId, meta: answerMeta, content: lastAssistantContent } };
   }
   yield { type: 'done' };
 }

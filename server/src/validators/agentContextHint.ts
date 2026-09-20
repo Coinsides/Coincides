@@ -17,7 +17,9 @@ const contextHintSchemas = {
   }).strict(),
   note_view: z.object({
     type: z.literal('note_view'),
-    data: z.object({ note_id: z.string().min(1), page_index: z.number().int().min(0).optional() }).strict(),
+    data: z.object({ note_id: z.string().min(1), page_index: z.number().int().min(0).optional(),
+      selection: z.object({ note_id: z.string().min(1), block_ids: z.array(z.string().min(1)).min(1).max(32) }).strict().optional(),
+    }).strict().refine(data => !data.selection || data.selection.note_id === data.note_id, 'Selection must belong to the viewed note'),
   }).strict(),
   board_view: z.object({
     type: z.literal('board_view'),

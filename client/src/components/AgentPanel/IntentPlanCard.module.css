@@ -1,0 +1,9 @@
+.plan { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border); }
+.plan ol { padding-left: 20px; max-height: 280px; overflow: auto; }
+.plan li { margin-block: 6px; overflow-wrap: anywhere; }
+.plan li span { color: var(--text-secondary); font-size: 12px; }
+.plan p { margin-block: 8px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions button { padding: 6px 14px; color: var(--text-primary); background: var(--glass-elevated); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); cursor: pointer; }
+.actions button:disabled { opacity: .5; cursor: wait; }
+.actions button:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }

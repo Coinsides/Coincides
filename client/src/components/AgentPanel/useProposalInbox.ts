@@ -42,10 +42,12 @@ export function useProposalInbox(enabled: boolean, streaming: boolean) {
     void refresh();
     const onFocus = () => { void refresh(); };
     window.addEventListener('focus', onFocus);
+    window.addEventListener('coincides:proposals-changed', onFocus);
     return () => {
       active.current = false;
       request.current += 1;
       window.removeEventListener('focus', onFocus);
+      window.removeEventListener('coincides:proposals-changed', onFocus);
     };
   }, [enabled, streaming, refresh]);
 

@@ -10,6 +10,7 @@ export * from './noteRef.js';
 export * from './noteBinding.js';
 export * from './mediaImageEdit.js';
 export type * from './agentContextHint.js';
+export type * from './agentIntent.js';
 
 // --- Enums ---
 
@@ -95,9 +96,10 @@ export type ProposalType =
   | 'time_block_setup'
   | 'material_map'
   | 'organized_note'
+  | 'note_patch'
   | 'material_reconciliation';
 
-/** Chat can issue the five planning proposals and the existing organized-note proposal. */
+/** Chat issues five planning proposals, organized notes, and reviewed note patches. */
 export type ChatProposalType = Exclude<ProposalType, 'material_map' | 'material_reconciliation'>;
 
 export type ProposalStatus = 'pending' | 'applied' | 'discarded';
@@ -389,6 +391,7 @@ export interface AgentMessage {
   tool_results: unknown | null;
   token_count: number | null;
   turn_id?: string | null;
+  meta?: import('./agentIntent.js').AgentMessageMeta;
   turn_receipt?: import('./agentTurnReceipt.js').AgentTurnReceipt;
   created_at: string;
 }

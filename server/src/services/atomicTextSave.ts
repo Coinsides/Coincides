@@ -7,6 +7,8 @@ import { listAnnotationTruths, patchTextSaveAnnotationRanges } from './annotatio
 import { getBoardTextRange, updateTextSaveBoardTextRanges } from './boardTextRanges.js';
 import { updateNoteBlockContent } from './noteBlockContent.js';
 import { assertSourceProjectionNoteContentWriteAllowed } from './sourceProjectionPolicy.js';
+import { notePatchAcceptanceSchema } from '../validators/notePatch.js';
+import { prepareNotePatchAcceptance } from './notePatchProposals.js';
 
 const id = z.string().trim().min(1).max(180);
 const textSaveSchema = z.object({
@@ -17,6 +19,7 @@ const textSaveSchema = z.object({
     annotation_id: id, range: z.record(z.unknown()),
   }).strict()).max(10000) }).strict(),
   text_ranges: updateTextSaveBoardTextRangesSchema.shape.text_ranges,
+  proposal_patch: notePatchAcceptanceSchema.optional(),
 }).strict();
 
 /** Scope: one block's text-save door, not generic canvas/placement or board-owned writes. */
@@ -33,6 +36,8 @@ export function saveAtomicText(db: Database.Database, userId: string, blockId: s
     if (current.text_save_revision !== input.base_revision) {
       throw new AppError(409, 'stale_revision', { code: 'stale_revision', current_revision: current.text_save_revision });
     }
+    const acceptPatch = input.proposal_patch ? prepareNotePatchAcceptance(db, userId, input.note_id,
+      blockId, input.base_revision, input.block, input.proposal_patch) : undefined;
     // Conditional read and write share the same synchronous SQLite transaction.
     // Semantic range validation intentionally happens after the body write: any
     // rejection (including a late range failure) rolls this update back as well.
@@ -45,6 +50,7 @@ export function saveAtomicText(db: Database.Database, userId: string, blockId: s
       }
     }
     const textRanges = updateTextSaveBoardTextRanges(db, userId, input.note_id, { text_ranges: input.text_ranges });
+    acceptPatch?.(block);
     db.prepare('UPDATE notes SET updated_at = ? WHERE id = ? AND user_id = ?')
       .run(new Date().toISOString(), input.note_id, userId);
     return { block, annotations: listAnnotationTruths(db, userId, input.note_id),

@@ -25,6 +25,7 @@ import { usePaperSize } from './usePaperSize';
 import { resolvePaperSizeEditLayouts } from '../paperSizeEditService';
 import { useNoteSkin } from './useNoteSkin';
 import { useNoteBinding } from './useNoteBinding';
+import { useNoteAgentHumanEditor } from './useNoteAgentHumanEditor';
 import { getNoteBindingCoverPage } from '../../../../../../shared/types/noteBinding';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { tableObjectSavePayload } from '../tableObjectService';
@@ -505,6 +506,13 @@ export function useNoteCanvasRuntimeController() {
     trashBlock,
   });
   textHistoryHostRef.current = { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle, isReplaying: isRuntimeHistoryReplaying };
+
+  useNoteAgentHumanEditor({ noteId, enabled: !loading && Boolean(note) && hostMode === 'page',
+    readOnly: sourceProjectionPolicy.contentReadOnly, textHistory,
+    history: { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle }, whenIdle,
+    createBlock, template: defaultTextTemplate, layouts: blockLayouts, selectBlock: markBlockSelected,
+    beforeAction: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
+  });
 
   const mediaImageHistory = useMediaImageHistory({ noteId, generation: textHistoryGeneration, blocks, saveMediaImageEdit,
     boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),

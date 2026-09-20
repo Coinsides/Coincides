@@ -26,6 +26,7 @@ import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
 import { createOrganizedNoteProposalSchema, proposalTypeSchema } from '../../validators/index.js';
 import { createProposal } from '../../services/proposals.js';
 import { createOrganizedNoteProposal } from '../../services/organizedNoteProposals.js';
+import { createNotePatchProposal } from '../../services/notePatchProposals.js';
 import { readNoteForAgent, readBoardForAgent } from '../../services/agentReadSurfaces.js';
 import { readContentGroupsForAgent, readAnnotationsRelationsForAgent } from '../../services/agentReadKnowledge.js';
 
@@ -290,6 +291,11 @@ export async function executeTool(
           course_id: proposal.data.course_id, blocks_count: proposal.data.blocks.length,
           message: 'Organized note proposal created. Review and apply it from the Proposals inbox (「提案」收件箱) in the Agent panel.',
         });
+      }
+      if (type === 'note_patch') {
+        const proposal = createNotePatchProposal(db, userId, args.data, context);
+        return JSON.stringify({ id: proposal.id, type, status: proposal.status, note_id: proposal.data.note_id,
+          patches_count: proposal.data.patches.length, message: 'Note patch proposed. The human must review each diff and accept through the note text-save door; no note content was changed.' });
       }
       const data = args.data as Record<string, unknown>;
 

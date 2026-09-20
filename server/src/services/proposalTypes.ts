@@ -9,6 +9,7 @@ export const PROPOSAL_TYPES = [
   'time_block_setup',
   'material_map',
   'organized_note',
+  'note_patch',
   'material_reconciliation',
 ] as const satisfies readonly ProposalType[];
 
@@ -19,6 +20,7 @@ export const CHAT_PROPOSAL_TYPES = [
   'schedule_adjustment',
   'time_block_setup',
   'organized_note',
+  'note_patch',
 ] as const satisfies readonly ChatProposalType[];
 
 type Assert<T extends true> = T;

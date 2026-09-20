@@ -97,13 +97,14 @@ export class MemoryManager {
     toolCalls?: string | null,
     toolResults?: string | null,
     turnId?: string | null,
+    meta?: import('../../../../shared/types/agentIntent.js').AgentMessageMeta,
   ): string {
     const db = getDb();
     const id = uuidv4();
     const now = new Date().toISOString();
     db.prepare(
-      'INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at, turn_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    ).run(id, conversationId, role, content, toolCalls || null, toolResults || null, now, turnId ?? null);
+      'INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at, turn_id, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    ).run(id, conversationId, role, content, toolCalls || null, toolResults || null, now, turnId ?? null, JSON.stringify(meta ?? {}));
 
     // Update conversation updated_at
     db.prepare('UPDATE agent_conversations SET updated_at = ? WHERE id = ?').run(now, conversationId);

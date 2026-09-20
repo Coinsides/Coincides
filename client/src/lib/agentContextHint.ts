@@ -13,7 +13,7 @@ export function describeAgentContextHint(hint: AgentContextHint): string {
   switch (hint.type) {
     case 'note_view':
       return `${CONTEXT_LABELS.note_view} ${hint.data.note_id}${hint.data.page_index === undefined
-        ? '' : ` · Page ${hint.data.page_index + 1}`}`;
+        ? '' : ` · Page ${hint.data.page_index + 1}`}${hint.data.selection ? ` · ${hint.data.selection.block_ids.length} 块` : ''}`;
     case 'board_view':
       return `${CONTEXT_LABELS.board_view} ${hint.data.board_id}`;
     default:

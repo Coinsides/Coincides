@@ -7,6 +7,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "test:v14-c2-intent": "node ../scripts/run-server-test-suite.mjs --test-timeout=600000 src/__tests__/v14NotePatch.test.ts src/__tests__/v14IntentRouter.test.ts src/__tests__/v14AttentionContext.test.ts",
     "predev": "npm run check:tool-face-manifest && npm run copy:tool-face-manifest",
     "dev": "node --import tsx src/index.ts",
     "predev:jiti": "npm run check:tool-face-manifest && npm run copy:tool-face-manifest",

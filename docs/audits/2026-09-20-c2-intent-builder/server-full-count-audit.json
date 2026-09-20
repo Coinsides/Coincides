@@ -1,0 +1,1752 @@
+{
+  "runId": "server-full-2026-09-20T09-18-15-875Z-32056",
+  "finishedAt": "2026-09-20T09:32:22.570Z",
+  "expectedFileCount": 105,
+  "executedFileCount": 105,
+  "inventoryMatches": true,
+  "allTapSummariesComplete": true,
+  "allCountsMatchSummary": true,
+  "aggregate": {
+    "tests": 1060,
+    "pass": 1058,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "failedFiles": [
+    {
+      "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "exitCode": 1,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/099-server_src___tests___v2SourceMineruWiring.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+      "exitCode": 1,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/101-server_src___tests___v2SourceRegionCells.test.ts.log"
+    }
+  ],
+  "missingFiles": [],
+  "wilderness": {
+    "file": "server/scripts/v13WildernessExecute.test.ts",
+    "exitCode": 0,
+    "timedOut": false,
+    "counts": {
+      "tests": 27,
+      "pass": 27,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "complete": true,
+    "matchesSummary": true,
+    "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/005-server_scripts_v13WildernessExecute.test.ts.log"
+  },
+  "files": [
+    {
+      "file": "server/scripts/agent-eval/harness.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 14,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/004-server_scripts_agent-eval_harness.test.ts.log"
+    },
+    {
+      "file": "server/scripts/v13WildernessExecute.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 27,
+        "pass": 27,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/005-server_scripts_v13WildernessExecute.test.ts.log"
+    },
+    {
+      "file": "server/scripts/v13WildernessShadowRun.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/006-server_scripts_v13WildernessShadowRun.test.ts.log"
+    },
+    {
+      "file": "server/scripts/v2Bn12LifecycleMigration.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/007-server_scripts_v2Bn12LifecycleMigration.test.ts.log"
+    },
+    {
+      "file": "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/008-server_scripts_v2OperationBatchTimestampMigration.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/providerCredentials.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/009-server_src___tests___providerCredentials.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/textFlowIdentityContract.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/010-server_src___tests___textFlowIdentityContract.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13AgentMemories.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/011-server_src___tests___v13AgentMemories.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13AtomicTextSave.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/012-server_src___tests___v13AtomicTextSave.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/013-server_src___tests___v13AtomicTextSaveMigration.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/014-server_src___tests___v13BoardCeremonyNote.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardChalk.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/015-server_src___tests___v13BoardChalk.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardIdentity.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/016-server_src___tests___v13BoardIdentity.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardRoutes.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/017-server_src___tests___v13BoardRoutes.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardSchema.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/018-server_src___tests___v13BoardSchema.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardServices.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/019-server_src___tests___v13BoardServices.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardStaging.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/020-server_src___tests___v13BoardStaging.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardTextRanges.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/021-server_src___tests___v13BoardTextRanges.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/022-server_src___tests___v13BoardTrayRelocation.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/023-server_src___tests___v13BoardViewportBookmarks.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13BoardWave1.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/024-server_src___tests___v13BoardWave1.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13CanvasRetirement.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/025-server_src___tests___v13CanvasRetirement.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13CoordinateContract.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/026-server_src___tests___v13CoordinateContract.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13EventsLedger.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/027-server_src___tests___v13EventsLedger.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/028-server_src___tests___v13GraphemeTextRanges.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13ItemFloor.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/029-server_src___tests___v13ItemFloor.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13ItemRefBlocks.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/030-server_src___tests___v13ItemRefBlocks.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13MediaBlocks.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/031-server_src___tests___v13MediaBlocks.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13NoteMetadata.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/032-server_src___tests___v13NoteMetadata.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13PagePresets.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/033-server_src___tests___v13PagePresets.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13PaperInk.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/034-server_src___tests___v13PaperInk.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13PaperSkin.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/035-server_src___tests___v13PaperSkin.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/036-server_src___tests___v13ProjectDeletionReferences.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13RecordedAction.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/037-server_src___tests___v13RecordedAction.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/038-server_src___tests___v13SourceProjectionRepair.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/039-server_src___tests___v13SourceReprojection.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13Tray.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/040-server_src___tests___v13Tray.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13TrayOrder.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/041-server_src___tests___v13TrayOrder.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v13WallCollectionBatch.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/042-server_src___tests___v13WallCollectionBatch.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/043-server_src___tests___v14AgentKnowledgeProjection.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/044-server_src___tests___v14AgentRouteLifecycle.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 50,
+        "pass": 50,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/045-server_src___tests___v14AgentVerbTransfer.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14AgentWriteDoor.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/046-server_src___tests___v14AgentWriteDoor.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14AttentionContext.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/047-server_src___tests___v14AttentionContext.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/048-server_src___tests___v14BoardLayoutInspector.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14BoardSandbox.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 15,
+        "pass": 15,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/049-server_src___tests___v14BoardSandbox.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14BoardVisual.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/050-server_src___tests___v14BoardVisual.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 19,
+        "pass": 19,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/051-server_src___tests___v14BoardVisualGeometry.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14CardCover.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/052-server_src___tests___v14CardCover.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ClaimObservation.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/053-server_src___tests___v14ClaimObservation.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ClaimReceipt.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/054-server_src___tests___v14ClaimReceipt.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ComponentBlocks.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 11,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/055-server_src___tests___v14ComponentBlocks.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ContextHint.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 35,
+        "pass": 35,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/056-server_src___tests___v14ContextHint.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14CoverPage.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/057-server_src___tests___v14CoverPage.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14DeleteCeremony.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 16,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/058-server_src___tests___v14DeleteCeremony.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14IntentRouter.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/059-server_src___tests___v14IntentRouter.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14LoopRobustness.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 14,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/060-server_src___tests___v14LoopRobustness.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14MemoryQuickwins.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 17,
+        "pass": 17,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/061-server_src___tests___v14MemoryQuickwins.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14NoteBinding.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/062-server_src___tests___v14NoteBinding.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14NotePatch.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/063-server_src___tests___v14NotePatch.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14PaletteColors.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/064-server_src___tests___v14PaletteColors.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14PaperFreedom.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/065-server_src___tests___v14PaperFreedom.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ParagraphFurniture.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/066-server_src___tests___v14ParagraphFurniture.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ProposalUnification.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 16,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/067-server_src___tests___v14ProposalUnification.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14ReadTools.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 11,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/068-server_src___tests___v14ReadTools.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14SkinSuites.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/069-server_src___tests___v14SkinSuites.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14TableBlocks.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/070-server_src___tests___v14TableBlocks.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v14TurnIdentity.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/071-server_src___tests___v14TurnIdentity.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/072-server_src___tests___v2BlockRestoreDoor.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 49,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/073-server_src___tests___v2CanvasPersistenceCutover.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2ContentGroups.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/074-server_src___tests___v2ContentGroups.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2DevQuickLogin.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/075-server_src___tests___v2DevQuickLogin.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2DocumentParserPdf.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/076-server_src___tests___v2DocumentParserPdf.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2GroupFolders.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/077-server_src___tests___v2GroupFolders.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2ImprintCitations.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/078-server_src___tests___v2ImprintCitations.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2ImprintEmbedding.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/079-server_src___tests___v2ImprintEmbedding.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2ImprintRetrieval.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/080-server_src___tests___v2ImprintRetrieval.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2ItemRelationFloor.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/081-server_src___tests___v2ItemRelationFloor.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2Items.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/082-server_src___tests___v2Items.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2MaterialLibrary.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 59,
+        "pass": 59,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/083-server_src___tests___v2MaterialLibrary.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2McpArtifact.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/084-server_src___tests___v2McpArtifact.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2McpTransport.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 49,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/085-server_src___tests___v2McpTransport.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 25,
+        "pass": 25,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/086-server_src___tests___v2NoteBlockLifecycle.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2NoteFoundation.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/087-server_src___tests___v2NoteFoundation.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2NotesLifecycle.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/088-server_src___tests___v2NotesLifecycle.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2NotesListService.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/089-server_src___tests___v2NotesListService.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2Purposes.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/090-server_src___tests___v2Purposes.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/091-server_src___tests___v2RelationLifecycleClosure.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2Relations.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/092-server_src___tests___v2Relations.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceContainerIntake.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 14,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/093-server_src___tests___v2SourceContainerIntake.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceFileIntake.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/094-server_src___tests___v2SourceFileIntake.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/095-server_src___tests___v2SourceIdentityFloor.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceImprints.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/096-server_src___tests___v2SourceImprints.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/097-server_src___tests___v2SourceLifecycleClosure.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceMaterialization.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 11,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/098-server_src___tests___v2SourceMaterialization.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "exitCode": 1,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/099-server_src___tests___v2SourceMineruWiring.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceNeverReject.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/100-server_src___tests___v2SourceNeverReject.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+      "exitCode": 1,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/101-server_src___tests___v2SourceRegionCells.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceT0Alignment.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/102-server_src___tests___v2SourceT0Alignment.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/103-server_src___tests___v2SourceTranscriberFingerprint.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/104-server_src___tests___v2TemplateStudioDecommission.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/105-server_src___tests___v2TestV2ManifestHook.test.ts.log"
+    },
+    {
+      "file": "server/src/__tests__/v2TrashNotesTool.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 23,
+        "pass": 23,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/106-server_src___tests___v2TrashNotesTool.test.ts.log"
+    },
+    {
+      "file": "server/src/agent/providers/index.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 49,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/107-server_src_agent_providers_index.test.ts.log"
+    },
+    {
+      "file": "server/src/toolFace/registry.test.ts",
+      "exitCode": 0,
+      "timedOut": false,
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "complete": true,
+      "matchesSummary": true,
+      "rawLog": ".codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/108-server_src_toolFace_registry.test.ts.log"
+    }
+  ],
+  "countAuditPassed": true,
+  "testsPassed": false
+}

@@ -1397,12 +1397,16 @@ export function useNoteCanvasDataAdapter({
       contentJson?: Record<string, unknown>;
       metadataPatch?: Record<string, unknown>;
       afterBlockId?: string;
+      /** Human answer insertion must retain its selected reading-order anchor. */
+      requireAfterBlock?: boolean;
       layout?: BlockBoxLayout;
       silent?: boolean;
     } = {},
   ): Promise<NoteBlock | null> => {
     if (!note) return null;
     if (!allowSourceContentMutation()) return null;
+    if (options.requireAfterBlock && (!options.afterBlockId
+      || !mediaInsertionBlocksRef.current.some((block) => block.id === options.afterBlockId))) return null;
     const requestedNote = note;
     const requestGeneration = routeRequestGenerationRef.current;
     const requestIsCurrent = () => (
@@ -1419,7 +1423,7 @@ export function useNoteCanvasDataAdapter({
     };
     const nextContent = options.contentJson || contentForTemplate(template, body);
     const nextKind = presentationKindForTemplate(template, true);
-    const rollbackUnplacedBlock = template.legacy_block_type === 'media' || template.legacy_block_type === 'table'
+    const rollbackUnplacedBlock = options.requireAfterBlock || template.legacy_block_type === 'media' || template.legacy_block_type === 'table'
       || template.legacy_block_type === 'component';
     let created: NoteBlock;
     const rollbackMediaCreation = async (failedOrderKey?: string) => {
@@ -1427,11 +1431,13 @@ export function useNoteCanvasDataAdapter({
         await writeRegistry.track('media-create-rollback:' + created.id, () => api.delete(`/note-blocks/${created.id}`));
         writeRegistry.confirm('placement:' + requestedNote.id + ':' + created.id);
         if (failedOrderKey) writeRegistry.confirm(failedOrderKey);
-        if (requestIsCurrent()) addToast('error', template.legacy_block_type === 'component'
+        if (requestIsCurrent()) addToast('error', options.requireAfterBlock
+          ? 'The answer could not be inserted below its anchor. Please retry.' : template.legacy_block_type === 'component'
           ? 'The component could not be placed. Your edits are still open.' : template.legacy_block_type === 'table'
           ? 'The table could not be placed. Your edits are still open.' : 'The image could not be placed. Please paste it again.');
       } catch {
-        if (requestIsCurrent()) addToast('error', template.legacy_block_type === 'component'
+        if (requestIsCurrent()) addToast('error', options.requireAfterBlock
+          ? 'The answer insertion failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'component'
           ? 'The component placement failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'table'
           ? 'The table placement failed and cleanup could not finish. Reopen the note before retrying.'
           : 'The image placement failed and cleanup could not finish. Reopen the note before retrying.');
@@ -1490,6 +1496,10 @@ export function useNoteCanvasDataAdapter({
     if (options.afterBlockId) {
       const currentBlocks = [...mediaInsertionBlocksRef.current].sort((a, b) => a.order_index - b.order_index);
       const anchorIndex = currentBlocks.findIndex((block) => block.id === options.afterBlockId);
+      if (anchorIndex < 0 && options.requireAfterBlock) {
+        await rollbackMediaCreation();
+        return null;
+      }
       if (anchorIndex >= 0) {
         currentBlocks.splice(anchorIndex + 1, 0, created);
         const placements = currentBlocks.map((block, order_index) => ({ placement_id: block.placement_id, order_index }));
@@ -1885,6 +1895,7 @@ export function useNoteCanvasDataAdapter({
       annotationRanges?: AnnotationRangeSnapshot[];
       baseRevision?: number;
       contentSnapshot?: Pick<BlockEditRecoveryReceipt, 'contentJson' | 'plainText'>;
+      proposalPatch?: { proposal_id: string; patch_index: number };
     } = {},
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
@@ -2098,6 +2109,7 @@ export function useNoteCanvasDataAdapter({
         block: { content_json: nextContent, plain_text: requestedPlainText },
         annotationRanges, boardRanges: boardRangeSnapshot.ranges,
         historyRestore: boardRangeSnapshot.historyRestore,
+        proposalPatch: options.proposalPatch,
       }));
       const res = { data: result.block };
       committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));

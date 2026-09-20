@@ -110,3 +110,10 @@
   background: var(--accent-primary-bg);
   color: var(--text-primary);
 }
+
+.patchReview { display: grid; gap: 12px; }
+.patchReview section { border-top: 1px solid var(--border-default); padding-block: 10px; }
+.patchReview a { text-decoration: underline; }
+.patchDiff { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-block: 8px; }
+.patchDiff > div { min-width: 0; padding: 8px; background: var(--bg-elevated); }
+.patchDiff pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; margin-top: 6px; }

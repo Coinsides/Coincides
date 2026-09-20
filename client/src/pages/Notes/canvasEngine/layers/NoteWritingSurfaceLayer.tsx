@@ -7,6 +7,8 @@ import type { MediaImageEditV1 } from '@shared/types';
 import { createDefaultComponentBlockPayload, type ComponentBlockPayload, type BuiltinComponentKind } from '../componentBlockService';
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
+import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
+import { NoteAnswerCards } from './NoteAnswerCards';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { createPageGapPresentation, projectPageFrameToReadingSurface } from '../pageFramePresentationService';
 import { Boxes, MousePointer2, Pencil, Eraser, PanelLeft } from 'lucide-react';
@@ -464,6 +466,7 @@ export function NoteWritingSurfaceLayer({
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
+  const isNoteAgentRoute = useContext(NoteAgentContextRoute);
   const [creatingTable, setCreatingTable] = useState(false);
   useEffect(() => { setCreatingTable(false); }, [noteId]);
   const [creatingComponent, setCreatingComponent] = useState<BuiltinComponentKind | null>(null);
@@ -1191,6 +1194,7 @@ export function NoteWritingSurfaceLayer({
   };
 
   const handleSelectionContextAction = async (actionId: CommandActionId) => {
+    if (actionId === 'ask_agent') { await askAgent(); return; }
     if (actionId === 'copy') {
       await copyTextToClipboard(textFromSelectionDraft());
       return;
@@ -1261,6 +1265,7 @@ export function NoteWritingSurfaceLayer({
   const handleBlockContextAction = async (actionId: CommandActionId) => {
     const blockId = blockContextMenu?.blockId;
     if (!blockId) return;
+    if (actionId === 'ask_agent') { await askAgent([blockId]); return; }
     const block = visibleBlocks.find((item) => item.id === blockId);
     const layout = blockLayouts[blockId];
     if (!block || !layout) return;
@@ -1315,12 +1320,33 @@ export function NoteWritingSurfaceLayer({
     });
   };
 
+  const askAgent = async (explicitBlockIds?: string[]) => {
+    if (!isNoteAgentRoute) return;
+    const blockIds = [...new Set(explicitBlockIds ?? (selectionDraft?.ranges.length
+      ? selectionDraft.ranges.map((range) => range.blockId)
+      : documentTextSelection.ordered()?.blocks.map(({ block }) => block.id) ?? (selectedBlockId ? [selectedBlockId] : [])))];
+    if (!blockIds.length) return;
+    if (blockIds.length > 32) { useUIStore.getState().addToast('error', '每次最多选择 32 个块。'); return; }
+    if (!contentReadOnly) for (const id of blockIds) {
+      const block = visibleBlocks.find((candidate) => candidate.id === id);
+      if (!block) return;
+      const outcome = await onSaveBlock(block, blockTextDrafts[id] ?? textFromContent(block), {
+        silent: true, textFlow: blockTextFlowDrafts[id],
+      });
+      if (outcome.status !== 'saved') return;
+    }
+    useUIStore.getState().openAgentWithContext({ type: 'note_view', data: {
+      note_id: noteId, selection: { note_id: noteId, block_ids: blockIds },
+    } });
+    clearDraft(); setBlockContextMenu(null); setAnnotationContextMenu(null);
+  };
+
   const textSelectionContextMenu: CommandSurfaceMenu | null = annotationContextMenu ? {
     id: 'text-selection-context-menu',
     kind: 'text_selection',
     point: annotationContextMenu.point,
     title: 'Selection',
-    items: buildTextSelectionMenu(),
+    items: [...(isNoteAgentRoute ? [{ id: 'ask-agent', kind: 'item' as const, label: '问 Agent', actionId: 'ask_agent' as const }] : []), ...buildTextSelectionMenu()],
   } : null;
 
   const annotationHighlightMenu: CommandSurfaceMenu | null = annotationHighlightContextMenu ? {
@@ -1336,7 +1362,7 @@ export function NoteWritingSurfaceLayer({
     kind: 'block_shell',
     point: blockContextMenu.point,
     title: 'Block',
-    items: buildBlockShellMenu().filter((item) => item.id !== 'save-block'
+    items: [...(isNoteAgentRoute ? [{ id: 'ask-agent', kind: 'item' as const, label: '问 Agent', actionId: 'ask_agent' as const }] : []), ...buildBlockShellMenu()].filter((item) => item.id !== 'save-block'
       || visibleBlocks.find((block) => block.id === blockContextMenu.blockId)?.block_type !== 'item_ref'),
   } : null;
 
@@ -1954,6 +1980,8 @@ export function NoteWritingSurfaceLayer({
                   surfaceRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]')?.scrollTo({ top: 0, behavior: 'auto' });
                 }
             }} />
+          {isNoteAgentRoute && selectedBlockId && <button type="button" className={styles.canvasZoomReset}
+            onMouseDown={(event) => event.preventDefault()} onClick={() => { void askAgent(); }}>问 Agent</button>}
           {onToggleNavigation && <button type="button" className={styles.canvasZoomReset}
             data-note-navigation-toggle="true" aria-label="Navigation pane" title="Navigation pane" aria-expanded={navigationOpen}
             disabled={overviewOpen} onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
@@ -1995,7 +2023,9 @@ export function NoteWritingSurfaceLayer({
           <span>Groups</span>
         </button>
       )}
+      {isNoteAgentRoute && <NoteAnswerCards noteId={noteId} surfaceRef={surfaceRef} />}
       <SelectionToolbarLayer
+        onAskAgent={isNoteAgentRoute ? () => { void askAgent(); } : undefined}
         selection={selectionDraft && latestDraftRange ? {
           range: latestDraftRange,
           anchorRect: selectionDraft.anchorRect,
@@ -2008,6 +2038,7 @@ export function NoteWritingSurfaceLayer({
         onCancelDraft={clearDraft}
       />
       <SelectionTypographyToolbarLayer
+        onAskAgent={isNoteAgentRoute ? () => { void askAgent(); } : undefined}
         selection={!contentReadOnly && selectionDraft && latestDraftRange && draftRangeCount === 1 && !annotationContextMenu ? {
           range: latestDraftRange,
           anchorRect: selectionDraft.anchorRect,

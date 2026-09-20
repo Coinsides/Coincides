@@ -11,6 +11,7 @@ import type { AgentContextHint } from '../../../shared/types/agentContextHint.js
 import { OpenAIProvider } from '../agent/providers/openai.js';
 import type { ProviderMessage, StreamChunk, ToolDefinition } from '../agent/providers/types.js';
 import { buildSystemPrompt } from '../agent/system-prompt.js';
+import { classifyDirectInstruction, DIRECT_INSTRUCTION_RULES, NOTE_PATCH_PROMPT_BOUNDARY, renderDirectInstructionPrompt } from '../agent/intentRules.js';
 import { closeDb, initDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import agentRouter from '../routes/agent.js';
@@ -187,6 +188,31 @@ function promptSection(heading: string, prompt = buildSystemPrompt('Manual Agent
   return lines.slice(starts[0], end === -1 ? undefined : end).join('\n');
 }
 
+test('C2 direct instructions share exactly two prompt rules and preserve ordinary discussion', () => {
+  assert.deepEqual(DIRECT_INSTRUCTION_RULES.map(rule => [rule.kind, rule.tool]), [
+    ['memory', 'save_memory'], ['proposal', 'create_proposal'],
+  ]);
+  for (const input of ['请记住我习惯早晨复习', '别忘了我喜欢短回答', '下次提醒我先看目录',
+    '请帮我记住：用中文回答', '请记住这句话：先读材料', 'Please remember concise answers']) {
+    assert.equal(classifyDirectInstruction(input), 'memory', input);
+  }
+  for (const input of ['整理这份材料', '请整理这份材料成笔记', '帮我归纳当前资料',
+    '请把这份材料整理成笔记', 'Please organize this document']) {
+    assert.equal(classifyDirectInstruction(input), 'proposal', input);
+  }
+  for (const input of ['不要记住这件事', '请不要保存我的偏好', '别整理这份材料',
+    '“请记住我喜欢早晨复习”', '他说请记住这个例子', '记住是什么意思？',
+    '请解释“整理这份材料”的意思', '这份材料讲如何整理房间', '请问该怎么保存记忆', '请记住']) {
+    assert.equal(classifyDirectInstruction(input), null, input);
+  }
+  const prompt = buildSystemPrompt('Manual Agent', emptyContext);
+  assert.equal(prompt.split(renderDirectInstructionPrompt()).length - 1, 1);
+  for (const rule of DIRECT_INSTRUCTION_RULES) assert.ok(prompt.includes(rule.prompt));
+  assert.match(renderDirectInstructionPrompt(), /成功收据返回后才说已保存/u);
+  assert.match(renderDirectInstructionPrompt(), /organized_note 提案/u);
+  assert.match(prompt, /note_patch 提案[^\n]*人门 text-save[^\n]*现役撤销/u);
+});
+
 test('product manual explains notes, projection boards, proposal-only cards and the two libraries', () => {
   const manual = productManual();
   for (const statement of [
@@ -254,7 +280,7 @@ test('product manual explains task completion and time block deletion ceremonies
 
 test('product manual closes with the current note, card, judgment and irreversible deletion boundaries', () => {
   const manual = productManual();
-  assert.match(manual, /不能写改笔记正文；生成笔记只能发 organized_note 提案/u);
+  assert.ok(manual.includes(NOTE_PATCH_PROMPT_BOUNDARY));
   assert.match(manual, /不能直接创建卡片，不能碰人类判断记录，不能无仪式做不可逆删除/u);
 });
 

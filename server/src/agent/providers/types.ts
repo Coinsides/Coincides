@@ -39,7 +39,7 @@ export interface ToolDefinition {
 }
 
 export interface StreamChunk {
-  type: 'text' | 'tool_call_start' | 'tool_call_delta' | 'tool_call_end' | 'done' | 'error' | 'preference_form' | 'round_limit' | 'turn_receipt';
+  type: 'text' | 'tool_call_start' | 'tool_call_delta' | 'tool_call_end' | 'done' | 'error' | 'preference_form' | 'round_limit' | 'turn_receipt' | 'message_meta';
   text?: string;
   tool_call?: Partial<ToolCall>;
   error?: string;

@@ -8,6 +8,8 @@ import { ZodError } from 'zod';
 import { runAgent } from '../agent/orchestrator.js';
 import { AGENT_REQUEST_TIMEOUT_MS } from '../agent/runtime-budget.js';
 import { projectMessageReceipts, type PersistedAgentMessage } from '../agent/turnReceipt.js';
+import { prepareIntentMessage, resolveIntentMessage } from '../services/agentIntentPlans.js';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -49,9 +51,15 @@ router.get('/conversations/:id/messages', (req: AuthRequest, res: Response) => {
   if (!conv) throw new AppError(404, 'Conversation not found');
 
   const messages = db.prepare(
-    'SELECT id, role, content, tool_calls, tool_results, created_at, turn_id FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC, rowid ASC',
-  ).all(req.params.id) as PersistedAgentMessage[];
-  res.json(projectMessageReceipts(messages));
+    'SELECT id, conversation_id, role, content, tool_calls, tool_results, created_at, turn_id, meta FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC, rowid ASC',
+  ).all(req.params.id) as (PersistedAgentMessage & { meta: string })[];
+  res.json(projectMessageReceipts(messages.map(message => ({ ...message, meta: JSON.parse(message.meta) }))));
+});
+
+router.post('/conversations/:id/messages/:messageId/plan', (req: AuthRequest, res: Response) => {
+  const parsed = z.object({ decision: z.enum(['release', 'discard']) }).strict().safeParse(req.body);
+  if (!parsed.success) throw new AppError(400, 'Invalid plan decision');
+  res.json(resolveIntentMessage(req.userId!, req.params.id as string, req.params.messageId as string, parsed.data.decision));
 });
 
 // DELETE /api/agent/conversations/:id — delete conversation
@@ -77,6 +85,16 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
 
     if (!conv) {
       res.status(404).json({ error: 'Conversation not found' });
+      return;
+    }
+
+    const planned = data.image ? null : prepareIntentMessage(req.userId!, req.params.id as string, data.message, data.context_hint);
+    if (planned) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.write(`event: text\ndata: ${JSON.stringify({ content: planned.content })}\n\n`);
+      res.write(`event: message_meta\ndata: ${JSON.stringify({ message_id: planned.message_id, meta: planned.meta, content: planned.content })}\n\n`);
+      res.end('event: done\ndata: {}\n\n');
       return;
     }
 
@@ -160,6 +178,8 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
           sendEvent('preference_form', { questions: chunk.data });
         } else if (chunk.type === 'turn_receipt') {
           sendEvent('turn_receipt', chunk.data);
+        } else if (chunk.type === 'message_meta') {
+          sendEvent('message_meta', chunk.data);
         } else if (chunk.type === 'round_limit') {
           const message = chunk.error || 'Tool round limit reached. Send another message to continue.';
           sendEvent('round_limit', { message, details: chunk.data });

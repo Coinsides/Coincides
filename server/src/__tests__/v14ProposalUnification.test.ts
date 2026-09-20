@@ -143,12 +143,12 @@ async function fixture(t: TestContext) {
   return { db, request };
 }
 
-test('A3a server proposal vocabulary contains exactly the five chat and three material types', () => {
-  const allTypes = [...legacyCases.map(entry => entry.type), ...materialCases.map(entry => entry.type)];
-  assert.equal(allTypes.length, 8);
+test('A3a + C2 proposal vocabulary contains five planning, three material, and note_patch types', () => {
+  const allTypes = [...legacyCases.map(entry => entry.type), ...materialCases.map(entry => entry.type), 'note_patch'];
+  assert.equal(allTypes.length, 9);
   assert.deepEqual([...PROPOSAL_TYPES].sort(), [...allTypes].sort());
   for (const type of allTypes) assert.equal(proposalTypeSchema.parse(type), type);
-  const chatTypes = [...legacyCases.map(entry => entry.type), 'organized_note'];
+  const chatTypes = [...legacyCases.map(entry => entry.type), 'organized_note', 'note_patch'];
   assert.deepEqual([...CHAT_PROPOSAL_TYPES].sort(), [...chatTypes].sort());
   const definition = toolDefinitions.find(entry => entry.name === 'create_proposal');
   assert.ok(definition);
@@ -157,6 +157,7 @@ test('A3a server proposal vocabulary contains exactly the five chat and three ma
   const branches = parameters.properties.data.anyOf as Row[];
   assert.ok(branches.some(branch => branch.required?.includes('course_id')));
   assert.ok(branches.some(branch => branch.required?.includes('items')));
+  assert.ok(branches.some(branch => branch.required?.includes('note_id') && branch.required?.includes('patches')));
 });
 
 for (const spec of legacyCases) {

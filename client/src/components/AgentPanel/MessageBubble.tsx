@@ -1,5 +1,6 @@
 import type { AgentMessage, AgentTurnReceipt } from '@shared/types';
 import styles from './MessageBubble.module.css';
+import IntentPlanCard from './IntentPlanCard';
 
 function renderMarkdown(text: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
@@ -148,6 +149,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         <div className={styles.content}>{renderMarkdown(message.content)}</div>
       ) : null}
       {message.role === 'assistant' && <TurnReceipt receipt={message.turn_receipt} text={message.content} />}
+      {message.role === 'assistant' && message.meta?.intent_plan && <IntentPlanCard message={message} />}
     </div>
   );
 }

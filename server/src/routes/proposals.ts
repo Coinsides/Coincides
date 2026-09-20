@@ -14,6 +14,7 @@ import { applyMaterialMapProposal, createMaterialMapProposal } from '../services
 import { applyMaterialReconciliationProposal, createMaterialReconciliationProposal } from '../services/materialReconciliationProposals.js';
 import { applyOrganizedNoteProposal, createOrganizedNoteProposal } from '../services/organizedNoteProposals.js';
 import { ZodError } from 'zod';
+import { discardNotePatch, projectNotePatchProposal } from '../services/notePatchProposals.js';
 
 const router = Router();
 
@@ -63,7 +64,8 @@ router.get('/', (req: AuthRequest, res: Response) => {
   }
   query += ' ORDER BY created_at DESC';
   const proposals = db.prepare(query).all(...params) as ProposalRow[];
-  const result = proposals.map((p) => ({ ...p, data: JSON.parse(p.data) }));
+  const result = proposals.map((p) => ({ ...p, data: p.type === 'note_patch'
+    ? projectNotePatchProposal(db, req.userId!, JSON.parse(p.data)) : JSON.parse(p.data) }));
   res.json(result);
 });
 
@@ -117,7 +119,14 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
   ).get(req.params.id, req.userId!) as ProposalRow | undefined;
 
   if (!proposal) throw new AppError(404, 'Proposal not found');
-  res.json({ ...proposal, data: JSON.parse(proposal.data) });
+  res.json({ ...proposal, data: proposal.type === 'note_patch'
+    ? projectNotePatchProposal(db, req.userId!, JSON.parse(proposal.data)) : JSON.parse(proposal.data) });
+});
+
+router.post('/:id/patches/:patchIndex/discard', (req: AuthRequest, res: Response) => {
+  const index = Number(req.params.patchIndex);
+  if (!Number.isInteger(index) || index < 0 || index > 63) throw new AppError(400, 'Invalid patch index');
+  res.json({ data: discardNotePatch(getDb(), req.userId!, String(req.params.id), index) });
 });
 
 // POST /api/proposals/:id/apply — apply proposal
@@ -128,6 +137,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
   ).get(req.params.id, req.userId!) as ProposalRow | undefined;
 
   if (!proposal) throw new AppError(404, 'Proposal not found or already resolved');
+  if (proposal.type === 'note_patch') throw new AppError(409, 'Review and accept each note patch through the human text-save door');
   if (proposal.type === 'canvas_layout' || proposal.type === 'composition_template') {
     throw new AppError(410, 'Legacy Learning Canvas proposals can no longer be applied');
   }
@@ -323,6 +333,18 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
 router.post('/:id/discard', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const now = new Date().toISOString();
+  const notePatch = db.prepare("SELECT id,data FROM proposals WHERE id = ? AND user_id = ? AND type = 'note_patch' AND status = 'pending'")
+    .get(req.params.id, req.userId!) as { id: string; data: string } | undefined;
+  if (notePatch) {
+    const data = JSON.parse(notePatch.data);
+    db.transaction(() => {
+      for (let index = 0; index < data.patches.length; index++) {
+        if (data.patches[index].status === 'pending') discardNotePatch(db, req.userId!, notePatch.id, index);
+      }
+    })();
+    res.json({ message: 'Remaining note patches discarded' });
+    return;
+  }
   const result = db.prepare(
     "UPDATE proposals SET status = 'discarded', resolved_at = ? WHERE id = ? AND user_id = ? AND status = 'pending'",
   ).run(now, req.params.id, req.userId!);
@@ -336,6 +358,8 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
     const body = updateProposalSchema.parse(req.body);
     const db = getDb();
+    const proposal = db.prepare('SELECT type FROM proposals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as { type: string } | undefined;
+    if (proposal?.type === 'note_patch') throw new AppError(409, 'A reviewed note patch baseline is immutable; issue a new proposal');
     const now = new Date().toISOString();
     const result = db.prepare(
       "UPDATE proposals SET data = ?, resolved_at = NULL WHERE id = ? AND user_id = ? AND status = 'pending'",

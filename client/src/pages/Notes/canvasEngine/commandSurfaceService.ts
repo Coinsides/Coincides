@@ -13,6 +13,7 @@ export type CommandSurfaceKind =
 export type CommandItemKind = 'item' | 'submenu' | 'separator';
 
 export type CommandActionId =
+  | 'ask_agent'
   | 'copy'
   | 'cut'
   | 'paste'

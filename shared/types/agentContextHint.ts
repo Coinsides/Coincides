@@ -9,10 +9,12 @@ export type AgentContextHintType =
 export interface OnboardingContextHintData { isNewUser: boolean }
 export interface CalendarContextHintData { date: string }
 export interface DeckContextHintData { deck_id: string; deck_name?: string }
+export interface NoteSelection { note_id: string; block_ids: string[] }
 export interface NoteViewContextHintData {
   note_id: string;
   /** Zero-based paper order, matching read_note. */
   page_index?: number;
+  selection?: NoteSelection;
 }
 export interface BoardViewContextHintData { board_id: string }
 

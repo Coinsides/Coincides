@@ -31,6 +31,7 @@ interface SelectionTypographyToolbarLayerProps {
   onClose: () => void;
   onCopyBoardReference?: () => void | Promise<void>;
   onSendToStaging?: () => Promise<boolean>;
+  onAskAgent?: () => void;
 }
 
 export function SelectionTypographyToolbarLayer({
@@ -40,6 +41,7 @@ export function SelectionTypographyToolbarLayer({
   onClose,
   onCopyBoardReference,
   onSendToStaging,
+  onAskAgent,
 }: SelectionTypographyToolbarLayerProps) {
   const sending = useRef(false);
   const [sendingToStaging, setSendingToStaging] = useState(false);
@@ -122,6 +124,7 @@ export function SelectionTypographyToolbarLayer({
       data-selection-typography-scope="document"
       onMouseDown={handleToolbarMouseDown}
     >
+      {onAskAgent && <button type="button" className={styles.selectionTypographyButton} onClick={onAskAgent}>问 Agent</button>}
       {onCopyBoardReference && (
         <button
           type="button"

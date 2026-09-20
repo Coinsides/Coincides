@@ -14,6 +14,8 @@ export interface TextFlowEditMetadata {
   afterSelection: TextFlowEditSelection;
   isComposing: boolean;
   kind: 'typing' | 'structural';
+  /** Human acceptance provenance; history replay deliberately omits this envelope. */
+  proposalPatch?: { proposal_id: string; patch_index: number };
 }
 
 export type TextFlowEditBoundary = 'selection' | 'focus' | 'blur' | 'compositionStart' | 'compositionEnd';

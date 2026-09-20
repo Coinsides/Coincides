@@ -153,6 +153,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     };
     set({ messages: [...get().messages, userMsg], streaming: true, streamingText: '', streamingReceipt: null, activeToolName: null });
     let turnReceipt: AgentTurnReceipt | undefined;
+    let responseMeta: AgentMessage['meta'];
+    let responseMessageId: string | undefined;
+    let responseContent: string | undefined;
 
     try {
       const token = getToken();
@@ -222,6 +225,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 } catch { /* ignore */ }
                 break;
               }
+              case 'message_meta': {
+                try {
+                  const parsed = JSON.parse(evt.data);
+                  if (typeof parsed.message_id === 'string' && parsed.meta && typeof parsed.meta === 'object') {
+                    responseMessageId = parsed.message_id;
+                    responseMeta = parsed.meta;
+                    if (typeof parsed.content === 'string') responseContent = parsed.content;
+                  }
+                } catch { /* Invalid projection metadata does not discard the answer. */ }
+                break;
+              }
               case 'turn_receipt': {
                 try {
                   const parsed: unknown = JSON.parse(evt.data);
@@ -236,10 +250,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
               case 'done': {
                 // Add assistant message to messages
                 const assistantMsg: AgentMessage = {
-                  id: `resp-${Date.now()}`,
+                  id: responseMessageId ?? `resp-${Date.now()}`,
                   conversation_id: convId!,
                   role: 'assistant' as AgentMessage['role'],
-                  content: accumulated,
+                  content: responseContent ?? accumulated,
+                  ...(responseMeta ? { meta: responseMeta } : {}),
                   ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
                   tool_calls: null,
                   tool_results: null,
@@ -292,10 +307,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       // If stream ended without explicit 'done', finalize
       if (get().streaming && (accumulated || turnReceipt)) {
         const assistantMsg: AgentMessage = {
-          id: `resp-${Date.now()}`,
+          id: responseMessageId ?? `resp-${Date.now()}`,
           conversation_id: convId!,
           role: 'assistant' as AgentMessage['role'],
-          content: accumulated,
+          content: responseContent ?? accumulated,
+                  ...(responseMeta ? { meta: responseMeta } : {}),
           ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
           tool_calls: null,
           tool_results: null,

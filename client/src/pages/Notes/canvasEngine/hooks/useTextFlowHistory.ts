@@ -129,6 +129,8 @@ export function useTextFlowHistory(options: Options) {
     let replaying = false;
     let templatePending = false;
     let documentPending = false;
+    let proposalPending = false;
+    const proposalWrites = new Map<string, Promise<boolean>>();
     let batchEntries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] | null = null;
     let reserveBatch: (() => boolean) | null = null;
     const pushEntry = (entry: RuntimeHistoryEntry, settings?: { skipBoundary?: boolean }): boolean => {
@@ -219,6 +221,8 @@ export function useTextFlowHistory(options: Options) {
           silent: true, textFlow: snapshot.textFlow, boardRangeSnapshot: boardSnapshot(snapshot.boardRanges, historyRestore), preserveDrafts: true,
           annotationRanges: snapshot.annotationRanges,
           baseRevision: baseFor(transaction, side, block),
+          ...(!historyRestore && side === 'after' && transaction.metadata.proposalPatch
+            ? { proposalPatch: transaction.metadata.proposalPatch } : {}),
         });
         if (!current()) return false;
         success = outcome.status === 'saved';
@@ -535,6 +539,39 @@ export function useTextFlowHistory(options: Options) {
       onSeal(transaction) {
         if (!current()) return;
         const host = latest.current.history.current;
+        if (host && transaction.metadata.proposalPatch) {
+          const patch = transaction.metadata.proposalPatch;
+          const key = `${patch.proposal_id}:${patch.patch_index}`;
+          proposalPending = true;
+          setReplayScope(token);
+          const pending = host.enqueueRuntimeHistoryOperation(async () => {
+            try {
+              if (await persist(transaction, 'after', false)) return pushEntry({ type: 'reversibleEdit',
+                undo: () => persist(transaction, 'before', true), redo: () => persist(transaction, 'after', true),
+              }, { skipBoundary: true });
+              // A rejected proposal was never adopted. Restore only local drafts;
+              // do not create an undo entry that could overwrite a newer server block.
+              if (current()) {
+                const api = latest.current;
+                const before = transaction.before;
+                api.setBlockTextFlowDrafts((drafts) => ({ ...drafts, [transaction.blockId]: before.textFlow }));
+                api.setBlockTextDrafts((drafts) => ({ ...drafts, [transaction.blockId]: plainTextFromTextFlow(before.textFlow) }));
+                api.setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(api.readAnnotationTruths(), before.annotationRanges));
+                api.restoreBoardTextRanges(transaction.blockId, before.textFlow, { ranges: before.boardRanges });
+              }
+              failures.delete(transaction);
+              issuedBases.delete(transaction);
+              transactionOrder.delete(transaction);
+              lastSave.delete(transaction.blockId);
+              return false;
+            } finally {
+              proposalPending = false;
+              if (current()) setReplayScope(null);
+            }
+          });
+          proposalWrites.set(key, pending);
+          return;
+        }
         if (!host || !pushEntry({
           type: 'reversibleEdit',
           undo: () => persist(transaction, 'before', true),
@@ -543,7 +580,7 @@ export function useTextFlowHistory(options: Options) {
         void host.enqueueRuntimeHistoryOperation(() => persist(transaction, 'after', false));
       },
     });
-    return { token, current, session, failures, lastSave, persist, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
+    return { token, current, session, failures, lastSave, persist, proposalWrites, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
       async runBatch(operation: (record: (entry: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>) => void) => Promise<boolean>) {
         if (batchEntries || !current()) return false;
         const entries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] = [];
@@ -569,7 +606,7 @@ export function useTextFlowHistory(options: Options) {
       },
       documentFailures, persistDocument, setDocumentPending,
       setTemplatePending(value: boolean) { templatePending = value; if (current()) setReplayScope(value ? token : null); },
-      isReplaying: () => replaying || templatePending || documentPending };
+      isReplaying: () => replaying || templatePending || documentPending || proposalPending };
   }, [options.noteId, options.generation]);
   active.current = scope.token;
 
@@ -603,7 +640,12 @@ export function useTextFlowHistory(options: Options) {
     const previousTextFlow = editOptions?.previousTextFlow
       ?? (!latest.current.blockTextFlowDrafts[block.id] && !getTextFlowContent(block.content_json ?? {}) && fullBlock
         ? createTextBlockContentV1(fullBlock.plain_text ?? '') : undefined);
-    return apply(block, flow, { ...editOptions, previousTextFlow });
+    const result = await apply(block, flow, { ...editOptions, previousTextFlow });
+    const patch = editOptions?.metadata?.proposalPatch;
+    if (!patch) return result;
+    const key = `${patch.proposal_id}:${patch.patch_index}`;
+    try { return { ...result, success: result.success && await scope.proposalWrites.get(key) === true }; }
+    finally { scope.proposalWrites.delete(key); }
   }, [apply, scope]);
   const boundary = useCallback((reason?: TextFlowEditBoundary, selection?: TextFlowEditSelection): boolean => {
     if (!scope.current() || scope.isReplaying() || latest.current.history.current?.isReplaying?.()) return false;
@@ -875,7 +917,7 @@ export function useTextFlowHistory(options: Options) {
         };
         await scope.persist(failed, scope.failures.get(failed) ?? 'after', false, snapshot);
         outcome = scope.lastSave.get(block.id)?.outcome ?? rejected();
-      } else if (previous && !saveOptions?.fieldValues
+      } else if (previous && !saveOptions?.fieldValues && !saveOptions?.proposalPatch
         && text === plainTextFromTextFlow(previous.transaction[previous.side].textFlow)
         && JSON.stringify(previous.transaction[previous.side].textFlow) === JSON.stringify(saveOptions?.textFlow ?? latest.current.blockTextFlowDrafts[block.id])) {
         outcome = previous.outcome;

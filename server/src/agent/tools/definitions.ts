@@ -3,6 +3,7 @@ import { AGENT_ACTION_TOOLS, AGENT_READ_TOOLS } from '../../toolFace/registry.js
 import { loadToolFaceManifest } from '../../mcp/manifest.js';
 import { CHAT_PROPOSAL_TYPES } from '../../services/proposalTypes.js';
 import { createOrganizedNoteProposalSchema } from '../../validators/index.js';
+import { createNotePatchProposalSchema } from '../../validators/notePatch.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // The build projects the authoritative Zod registry into this runtime artifact.
@@ -110,17 +111,17 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_proposal',
-    description: 'Create a proposal for the student to review and approve before applying. Use for batch cards, study plans, goal breakdowns, schedule adjustments, time blocks, or source-backed organized notes.',
+    description: 'Create a proposal for the student to review and approve before applying. Use for batch cards, study plans, goal breakdowns, schedule adjustments, time blocks, source-backed organized notes, or note_patch unit text replacements. Creating a note_patch never writes note content.',
     parameters: {
       type: 'object',
       properties: {
         type: {
           type: 'string',
           enum: [...CHAT_PROPOSAL_TYPES],
-          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks), time_block_setup (create Time Blocks for days missing study blocks), organized_note (generate a candidate note from project materials; data is the source selection, not authored blocks)',
+          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks), time_block_setup (create Time Blocks for days missing study blocks), organized_note (generate a candidate note from project materials; data is the source selection, not authored blocks), note_patch (whole existing unit text replacement; human reviews each patch in the inbox)',
         },
         data: {
-          description: 'For organized_note, supply course_id and optional source selection fields or note_title. For the five planning types, supply title, description and items.',
+          description: 'For organized_note, supply course_id and optional source selection fields or note_title. For note_patch, supply note_id and patches [{block_id,unit_id?,new_text}]; unit_id is required when a block has multiple units. For the five planning types, supply title, description and items.',
           anyOf: [{
             type: 'object',
             properties: {
@@ -133,7 +134,8 @@ export const toolDefinitions: ToolDefinition[] = [
               },
             },
             required: ['title', 'description', 'items'],
-          }, zodToJsonSchema(createOrganizedNoteProposalSchema, { $refStrategy: 'none' })],
+          }, zodToJsonSchema(createOrganizedNoteProposalSchema, { $refStrategy: 'none' }),
+          zodToJsonSchema(createNotePatchProposalSchema, { $refStrategy: 'none' })],
         },
       },
       required: ['type', 'data'],

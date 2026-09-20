@@ -59,10 +59,12 @@ export async function saveAtomicText(input: {
   annotationRanges: AnnotationRangeSnapshot[];
   boardRanges: BoardTextRangeV1[];
   historyRestore?: true;
+  proposalPatch?: { proposal_id: string; patch_index: number };
 }): Promise<AtomicTextSaveResult> {
   const { data } = await api.put<AtomicTextSaveResult>(`/note-blocks/${input.blockId}/text-save`, {
     note_id: input.noteId,
     base_revision: input.baseRevision,
+    ...(input.proposalPatch ? { proposal_patch: input.proposalPatch } : {}),
     block: input.block,
     annotations: { range_updates: input.annotationRanges.map(({ annotationId, range }) => ({ annotation_id: annotationId, range })) },
     text_ranges: input.boardRanges.map(({ id, block_id, text_flow_id, text_unit_id, start_offset, end_offset, excerpt, status, pre_edit_offsets }) => ({

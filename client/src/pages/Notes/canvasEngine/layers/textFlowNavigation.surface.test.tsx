@@ -13,6 +13,8 @@ import { NoteWritingSurfaceLayer, type NoteWritingSurfaceLayerProps } from './No
 
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { useBlockSelectionController } from '../hooks/useBlockSelectionController';
+import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
+import { useUIStore } from '@/stores/uiStore';
 
 vi.mock('@/services/api', () => ({ default: { get: vi.fn(), put: vi.fn(), post: vi.fn() } }));
 vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn(async () => 'data:image/png;base64,') }));
@@ -168,5 +170,32 @@ describe('fix1 real writing surface navigation (synthetic memory)', () => {
     expect(document.activeElement).toBe(first);
     expect(editor.container.querySelector('[data-textflow-selection-layer]')).toBeNull();
     expect(editor.apply).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('C2 attention uses the current block selection', () => {
+  it('opens the existing contextHint channel after saving selected text, without a model call', async () => {
+    const props = propsFor(frame(0), 'page');
+    const block = props.visibleBlocks[0];
+    const save = vi.fn(async () => ({ status: 'saved' as const, block, recoveryReceipt: null, reconciliation: 'response' as const }));
+    useUIStore.setState({ agentPanelOpen: false, agentContextHint: null });
+    const view = render(<NoteAgentContextRoute.Provider value={true}><NoteWritingSurfaceLayer {...props}
+      selectedBlockId={block.id} contentReadOnly={false} layoutMode={false} onSaveBlock={save} />
+    </NoteAgentContextRoute.Provider>);
+    expect(useUIStore.getState().agentPanelOpen).toBe(false);
+    await act(async () => fireEvent.click(view.getByRole('button', { name: '问 Agent' })));
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(useUIStore.getState().agentContextHint).toEqual({ type: 'note_view', data: {
+      note_id: props.noteId, selection: { note_id: props.noteId, block_ids: [block.id] },
+    } });
+    expect(useUIStore.getState().agentPanelOpen).toBe(true);
+    expect(props.onCreateBlock).not.toHaveBeenCalled();
+  });
+
+  it('does not install the note selection entry inside the board modal route', () => {
+    const props = propsFor(frame(0), 'page');
+    const view = render(<NoteWritingSurfaceLayer {...props} selectedBlockId={props.visibleBlocks[0].id} />);
+    expect(view.queryByRole('button', { name: '问 Agent' })).toBeNull();
   });
 });

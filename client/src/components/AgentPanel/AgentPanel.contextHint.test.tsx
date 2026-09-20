@@ -42,6 +42,50 @@ async function send(text: string) {
 const body = (index: number) => JSON.parse(vi.mocked(fetch).mock.calls[index][1]!.body as string);
 
 describe('B2 visible, passive context on the real panel and message transport', () => {
+  it('C2 carries selected block identities once and retains authoritative answer-card metadata from SSE and history', async () => {
+    const selection = { note_id: 'note-a', block_ids: ['block-a', 'block-b'] };
+    const meta = { answer_card: { selection, question: 'Explain these blocks' } };
+    vi.mocked(fetch).mockResolvedValueOnce(new Response([
+      'event: text\ndata: {"content":"An anchored answer"}\n\n',
+      `event: message_meta\ndata: ${JSON.stringify({ message_id: 'durable-answer', meta })}\n\n`,
+      'event: done\ndata: {}\n\n',
+    ].join(''), { headers: { 'Content-Type': 'text/event-stream' } }));
+    render(<AgentPanel />);
+    act(() => useUIStore.getState().openAgentWithContext({ type: 'note_view', data: { note_id: 'note-a', selection } }));
+    expect(screen.getByText('Viewing: Note note-a · 2 块')).toBeTruthy();
+    await send('Explain these blocks');
+    expect(body(0).context_hint.data.selection).toEqual(selection);
+    expect(useUIStore.getState().agentContextHint).toBeNull();
+    const messages = useAgentStore.getState().messages;
+    const response = messages[messages.length - 1];
+    expect(response).toMatchObject({ id: 'durable-answer', content: 'An anchored answer', meta });
+    http.get.mockResolvedValueOnce({ data: [response] });
+    await act(async () => useAgentStore.getState().fetchMessages('conversation-a'));
+    expect(useAgentStore.getState().messages[0].meta).toEqual(meta);
+  });
+
+  it.each(['done', 'eof'])('C2 uses the authoritative final message body after tool-round narration (%s)', async (ending) => {
+    const selection = { note_id: 'note-a', block_ids: ['block-a'] };
+    const meta = { answer_card: { selection, question: 'Explain this block' } };
+    const event = (name: string, data: unknown) => `event: ${name}\ndata: ${JSON.stringify(data)}\n\n`;
+    vi.mocked(fetch).mockResolvedValueOnce(new Response([
+      event('text', { content: 'I will read the selected block. ' }),
+      event('tool_start', { name: 'read_note' }), event('tool_end', { name: 'read_note', ok: true }),
+      event('text', { content: 'Final explanation.' }),
+      event('message_meta', { message_id: 'durable-final', meta, content: 'Final explanation.' }),
+      ...(ending === 'done' ? [event('done', {})] : []),
+    ].join(''), { headers: { 'Content-Type': 'text/event-stream' } }));
+    await act(async () => useAgentStore.getState().sendMessage('Explain this block', {
+      type: 'note_view', data: { note_id: 'note-a', selection },
+    }));
+    const messages = useAgentStore.getState().messages;
+    const response = messages[messages.length - 1];
+    expect(response).toMatchObject({ id: 'durable-final', content: 'Final explanation.', meta });
+    http.get.mockResolvedValueOnce({ data: [response] });
+    await act(async () => useAgentStore.getState().fetchMessages('conversation-a'));
+    expect(useAgentStore.getState().messages[0]).toEqual(response);
+  });
+
   it('only registers with the panel open, follows pages without stealing focus, and clears on departure', async () => {
     const view = render(<><AmbientView /><AgentPanel /></>);
     expect(effective()).toBeNull();

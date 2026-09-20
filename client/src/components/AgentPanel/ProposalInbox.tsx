@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { X } from 'lucide-react';
+import { NotePatchReview } from './NotePatchReview';
 import { describeProposal, proposalTime } from './proposalInboxModel';
 import type { useProposalInbox } from './useProposalInbox';
 import styles from './ProposalInbox.module.css';
@@ -34,6 +35,7 @@ export default function ProposalInbox({ proposals, loading, error, busy, refresh
                 {view.description && <p>{view.description}</p>}
                 {view.detail && <p>{view.detail}</p>}
                 {view.notice && <p className={styles.notice}>{view.notice}</p>}
+                {proposal.type === 'note_patch' && <NotePatchReview proposal={proposal} onRefresh={refresh} />}
                 <div className={styles.actions}>
                   {view.canApply && <button type="button" className={styles.apply} disabled={!!pendingAction}
                     onClick={() => { region.current?.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true }); void resolve(proposal, 'apply'); }}>

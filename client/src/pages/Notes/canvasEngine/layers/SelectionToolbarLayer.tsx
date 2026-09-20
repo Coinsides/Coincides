@@ -22,6 +22,7 @@ interface SelectionToolbarLayerProps {
   onCommitDraft: (label: string) => void | Promise<void>;
   onCancelDraft: () => void;
   suggestedLabelName: string;
+  onAskAgent?: () => void;
 }
 
 export function SelectionToolbarLayer({
@@ -32,6 +33,7 @@ export function SelectionToolbarLayer({
   onCommitDraft,
   onCancelDraft,
   suggestedLabelName,
+  onAskAgent,
 }: SelectionToolbarLayerProps) {
   const [labelDraft, setLabelDraft] = useState(suggestedLabelName);
   const [editingLabel, setEditingLabel] = useState(false);
@@ -103,6 +105,7 @@ export function SelectionToolbarLayer({
       data-selection-toolbar="true"
       onMouseDown={(event) => event.preventDefault()}
     >
+      {onAskAgent && <button type="button" className={styles.selectionToolbarButton} onClick={onAskAgent}>问 Agent</button>}
       {editingLabel ? (
         <>
           <input
