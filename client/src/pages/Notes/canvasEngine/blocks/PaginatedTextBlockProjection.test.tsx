@@ -59,6 +59,90 @@ function subject(initialText = '甲乙丙丁戊己庚辛', overrides: Partial<Pa
 }
 function focus(node: HTMLTextAreaElement, start: number, end = start) { act(() => { node.focus(); node.setSelectionRange(start, end); }); fireEvent.select(node); }
 
+describe('A4 paginated heading input requests', () => {
+  it('recognizes a heading marker typed after an existing hard newline', () => {
+    const onHeadingStructure = vi.fn();
+    const editor = subject('Body\n##', { onHeadingStructure });
+    const node = editor.nodes()[1];
+    fireEvent.change(node, { target: { value: '\n## ', selectionStart: 4, selectionEnd: 4 } });
+    const request = onHeadingStructure.mock.calls[0][0];
+    expect(request.nextTextFlow.units.map((unit: { text: string; writing_role: string }) => [unit.text, unit.writing_role]))
+      .toEqual([['Body', 'paragraph'], ['', 'heading_2']]);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+  it('normalizes both a multiline drop and local range Enter through the single structure callback', () => {
+    const onHeadingStructure = vi.fn();
+    const drop = subject('', { onHeadingStructure }, createTextBlockContentV1('Head', 'heading_1'));
+    fireEvent.drop(drop.nodes()[0], { clientX: 8, clientY: 0,
+      dataTransfer: { getData: () => JSON.stringify({ kind: 'block', block_id: 'source', text_preview: 'Alpha\nBeta' }) } });
+    expect(onHeadingStructure.mock.calls[0][0].nextTextFlow.units.map((unit: { writing_role: string }) => unit.writing_role))
+      .toEqual(['heading_1', 'paragraph']);
+    expect(drop.onFlow).not.toHaveBeenCalled();
+    drop.unmount(); onHeadingStructure.mockClear();
+    const range = subject('', { onHeadingStructure }, createTextBlockContentV1('ABCDEFGH', 'heading_2'));
+    const [first, second] = range.nodes(); focus(first, 2);
+    fireEvent.keyDown(first, { key: 'ArrowDown', shiftKey: true });
+    fireEvent.keyDown(second, { key: 'Enter' });
+    expect(onHeadingStructure).toHaveBeenCalledOnce();
+    expect(onHeadingStructure.mock.calls[0][0].nextTextFlow.units.map((unit: { text: string; writing_role: string }) => [unit.text, unit.writing_role]))
+      .toEqual([['AB', 'heading_2'], ['GH', 'paragraph']]);
+    expect(range.onFlow).not.toHaveBeenCalled();
+  });
+  it('routes a heading handle to chapter movement while retaining its menu', () => {
+    const onBeginHeadingMove = vi.fn();
+    const editor = subject('', { onBeginHeadingMove }, createTextBlockContentV1('Head', 'heading_1'));
+    const handle = editor.container.querySelector<HTMLElement>('[data-text-unit-handle]')!;
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0 });
+    expect(onBeginHeadingMove).toHaveBeenCalledOnce();
+    expect(editor.container.querySelector('[data-heading-unit="true"]')).toBeTruthy();
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    fireEvent.click(handle);
+    expect(editor.getByRole('menu', { name: 'Text unit' })).toBeTruthy();
+  });
+  it.each([1, 2, 3])('requests block isolation when the level %i marker is completed', (level) => {
+    const onHeadingStructure = vi.fn();
+    const editor = subject('#'.repeat(level), { onHeadingStructure });
+    const node = editor.nodes()[0];
+    focus(node, level);
+    fireEvent.change(node, { target: { value: '#'.repeat(level) + ' ', selectionStart: level + 1, selectionEnd: level + 1 } });
+    expect(onHeadingStructure).toHaveBeenCalledOnce();
+    expect(onHeadingStructure.mock.calls[0][0]).toMatchObject({ headingUnitId: 'tu-1', inputType: 'insertHeading',
+      nextTextFlow: { units: [{ writing_role: `heading_${level}`, text: '' }] }, focus: { unitId: 'tu-1', caret: 0 } });
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+  it('hands heading Enter to the host with a new body unit and preserves the heading', () => {
+    const onHeadingStructure = vi.fn();
+    const editor = subject('', { onHeadingStructure }, createTextBlockContentV1('Head', 'heading_2'));
+    const node = editor.nodes()[0]; focus(node, 4);
+    fireEvent.keyDown(node, { key: 'Enter' });
+    const request = onHeadingStructure.mock.calls[0][0];
+    expect(request.inputType).toBe('insertParagraphAfterHeading');
+    expect(request.nextTextFlow.units.map((unit: { writing_role: string }) => unit.writing_role)).toEqual(['heading_2', 'paragraph']);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+  it('keeps the marker literal when the cover disables headings', () => {
+    const onHeadingStructure = vi.fn();
+    const editor = subject('#', { onHeadingStructure, allowHeading: false });
+    fireEvent.change(editor.nodes()[0], { target: { value: '# ', selectionStart: 2, selectionEnd: 2 } });
+    expect(onHeadingStructure).not.toHaveBeenCalled();
+    expect(editor.flow().units[0]).toMatchObject({ text: '# ', writing_role: 'paragraph' });
+  });
+  it('sends every pasted heading in one request, and keeps the same paste literal on a cover', () => {
+    const onHeadingStructure = vi.fn();
+    const body = subject('', { onHeadingStructure });
+    fireEvent.paste(body.nodes()[0], { clipboardData: { getData: () => '# One\n## Two\nBody' } });
+    expect(onHeadingStructure.mock.calls[0][0].nextTextFlow.units.map((unit: { writing_role: string }) => unit.writing_role))
+      .toEqual(['heading_1', 'heading_2', 'paragraph']);
+    expect(body.onFlow).not.toHaveBeenCalled();
+    body.unmount();
+    const cover = subject('', { allowHeading: false, onHeadingStructure });
+    fireEvent.paste(cover.nodes()[0], { clipboardData: { getData: () => '# One\n## Two\nBody' } });
+    expect(cover.flow().units).toHaveLength(1);
+    expect(cover.flow().units[0]).toMatchObject({ writing_role: 'paragraph', text: '# One\n## Two\nBody' });
+    expect(onHeadingStructure).toHaveBeenCalledOnce();
+  });
+});
+
 describe('A1 logical editing across rendered fragments', () => {
   it('splices typing in a continuation into the full unit and reports global history offsets', () => {
     const editor = subject(); const second = editor.nodes()[1]; focus(second, 1);

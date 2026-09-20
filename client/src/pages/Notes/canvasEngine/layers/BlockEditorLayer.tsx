@@ -60,6 +60,8 @@ import {
 } from '../contentGroupDragService';
 import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
+import { ChapterHeadingFurniture, type ChapterHeadingFurnitureProps } from './ChapterHeadingFurniture';
+import { headingLevelForRole } from '../headingRoleService';
 import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { NoteRefBlockProjection } from '../blocks/NoteRefBlockProjection';
@@ -120,6 +122,9 @@ interface BlockEditorLayerProps {
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onPasteImage?: (file: File) => Promise<void> | void;
   onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
+  allowHeading?: boolean;
+  chapter?: ChapterHeadingFurnitureProps;
+  onHeadingStructure?: (request: import('../headingRoleService').HeadingTextFlowStructureRequest) => Promise<boolean>;
   onMoveTextUnit?: (unitId: string, target: CrossBlockUnitDropTarget) => void;
   onUnitDropTargetChange?: (target: CrossBlockUnitDropTarget | null) => void;
   unitDropTarget?: TextUnitDropTarget | null;
@@ -195,6 +200,9 @@ export function BlockEditorLayer({
   onTextEditBoundary,
   onPasteImage,
   onExtractTextUnit,
+  allowHeading,
+  chapter,
+  onHeadingStructure,
   onMoveTextUnit,
   onUnitDropTargetChange,
   unitDropTarget,
@@ -318,6 +326,11 @@ export function BlockEditorLayer({
     if (!insertedUnit) return;
 
     const nextFlow = setTextUnitWritingRole(splitFlow, insertedUnit.id, 'paragraph');
+    if (headingLevelForRole(targetUnit.writing_role) && onHeadingStructure) {
+      void onHeadingStructure({ previousTextFlow: currentFlow, nextTextFlow: nextFlow,
+        headingUnitId: targetUnit.id, focus: { unitId: insertedUnit.id, caret: 0 }, inputType: 'insertParagraphAfterHeading' });
+      return;
+    }
     const projection = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, text);
     onTextFlowChange(nextFlow, {
       unitId: targetUnit.id, inputType: 'insertParagraph', kind: 'structural', isComposing: false,
@@ -452,6 +465,7 @@ export function BlockEditorLayer({
       onMouseDown={handleBlockMouseDown}
       onContextMenu={handleBlockContextMenu}
     >
+      {chapter && <ChapterHeadingFurniture {...chapter} />}
       <BlockStatusBadgeLayer
         blockTypeLabel={blockTypeLabel}
         boundary={boundary}
@@ -577,6 +591,9 @@ export function BlockEditorLayer({
             onTextEditBoundary={onTextEditBoundary}
             onPasteImage={onPasteImage}
             onExtractTextUnit={onExtractTextUnit}
+            allowHeading={allowHeading}
+            onHeadingStructure={onHeadingStructure}
+            onBeginHeadingMove={onBeginMove}
             onMoveTextUnit={onMoveTextUnit}
             onUnitDropTargetChange={onUnitDropTargetChange}
             unitDropTarget={unitDropTarget}

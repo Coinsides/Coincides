@@ -96,4 +96,58 @@ function fixture(): Input {
     expect(input.saveCollection).not.toHaveBeenCalled();
     expect(input.persistLayout).not.toHaveBeenCalled();
   });
+
+  it('reflows collapsed content only in presentation and expands without additional page or affiliation writes', async () => {
+    const input = fixture();
+    const heading: NoteBlock = { ...input.blocks[1], id: 'chapter', placement_id: 'chapter-placement',
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1('Chapter', 'heading_1') }, plain_text: 'Chapter' };
+    input.blocks = [heading, ...input.blocks];
+    input.layouts = { ...input.layouts, chapter: { ...input.layouts['block-1'] } };
+    const storedBefore = structuredClone({ blocks: input.blocks, layouts: input.layouts, collection: input.collection });
+    const { result, rerender } = renderHook((props: Input) => useNotePageFlow(props), { initialProps: input });
+    const complete = result.current.fullPlan!;
+    await waitFor(() => expect(input.persistLayout).toHaveBeenCalledTimes(complete.placementUpdates.length));
+    expect(input.saveCollection).toHaveBeenCalledTimes(1);
+    const writes = vi.mocked(input.persistLayout).mock.calls.length;
+    const expandedLayouts = result.current.fullLayouts;
+    const fullBodyFragments = complete.fragments.filter((fragment) => fragment.blockId === 'block-0');
+    expect(fullBodyFragments.length).toBeGreaterThan(1);
+    const lastExpanded = complete.fragments.find((fragment) => fragment.blockId === 'block-1')!;
+    expect(lastExpanded.frameId).not.toBe(input.pageFrames[0].id);
+
+    await act(async () => rerender({ ...input, hiddenBlockIds: new Set(['block-0']) }));
+    expect(result.current.fullPlan).toBe(complete);
+    expect(result.current.fullLayouts).toBe(expandedLayouts);
+    expect(result.current.fullPlan!.fragments.filter((fragment) => fragment.blockId === 'block-0')).toEqual(fullBodyFragments);
+    expect(result.current.plan!.fragments.map((fragment) => fragment.blockId)).toEqual(['chapter', 'block-1']);
+    expect(result.current.plan!.fragments.find((fragment) => fragment.blockId === 'block-1')!.frameId)
+      .toBe(input.pageFrames[0].id);
+    expect(result.current.plan!.collection.pageFrames).toEqual(complete.collection.pageFrames);
+    expect(input.saveCollection).toHaveBeenCalledTimes(1);
+    expect(input.persistLayout).toHaveBeenCalledTimes(writes);
+
+    await act(async () => rerender({ ...input, hiddenBlockIds: new Set() }));
+    expect(result.current.plan).toBe(complete);
+    expect(result.current.layouts).toBe(expandedLayouts);
+    expect(input.saveCollection).toHaveBeenCalledTimes(1);
+    expect(input.persistLayout).toHaveBeenCalledTimes(writes);
+    expect({ blocks: input.blocks, layouts: input.layouts, collection: input.collection }).toEqual(storedBefore);
+  });
+
+  it('persists the complete page plan even when mounted collapsed and retains hidden body fragments for full consumers', async () => {
+    const input: Input = { ...fixture(), hiddenBlockIds: new Set(['block-0']) };
+    const storedLayouts = structuredClone(input.layouts);
+    const { result } = renderHook(() => useNotePageFlow(input));
+    const full = result.current.fullPlan!;
+    await waitFor(() => expect(input.persistLayout).toHaveBeenCalledTimes(full.placementUpdates.length));
+    expect(input.saveCollection).toHaveBeenCalledExactlyOnceWith(full.collection);
+    for (const update of full.placementUpdates) {
+      expect(input.persistLayout).toHaveBeenCalledWith(input.blocks.find((block) => block.id === update.blockId), update.layout);
+    }
+    expect(result.current.plan!.fragments.map((fragment) => fragment.blockId)).toEqual(['block-1']);
+    expect(result.current.plan!.fragments[0].frameId).toBe(input.pageFrames[0].id);
+    expect(full.fragments.some((fragment) => fragment.blockId === 'block-0')).toBe(true);
+    expect(result.current.fullLayouts['block-1'].frame_id).not.toBe(result.current.layouts['block-1'].frame_id);
+    expect(input.layouts).toEqual(storedLayouts);
+  });
 });

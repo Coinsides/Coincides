@@ -86,6 +86,9 @@ import styles from '../../NoteDetail.module.css';
 import type { TextFocusReceipt } from '../textFocusReceipt';
 import { imageOnlyClipboardFile } from '../mediaBlockPasteService';
 import { textareaUnitStart } from '../fragmentTextareaService';
+import { headingLevelForRole, type HeadingTextFlowStructureRequest } from '../headingRoleService';
+import { applyHeadingInputAtLine, headingStructureRequestForEdit, normalizeHeadingTextFlow } from '../headingInputService';
+import { headingTextCssProperties } from '../typographyMeasurementService';
 import type {
   TextFlowEditBoundary,
   TextFlowEditMetadata,
@@ -123,6 +126,9 @@ export interface TextBlockProjectionProps {
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFlowSelectionStart?: () => void;
   onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
+  onHeadingStructure?: (request: HeadingTextFlowStructureRequest) => void | Promise<boolean>;
+  onBeginHeadingMove?: (event: import('react').PointerEvent<HTMLButtonElement>) => void;
+  allowHeading?: boolean;
   onMoveTextUnit?: (unitId: string, target: CrossBlockUnitDropTarget) => void;
   onUnitDropTargetChange?: (target: CrossBlockUnitDropTarget | null) => void;
   unitDropTarget?: TextUnitDropTarget | null;
@@ -518,6 +524,9 @@ export function TextBlockProjection({
   onNavigationTarget,
   onFlowSelectionStart,
   onExtractTextUnit,
+  onHeadingStructure,
+  onBeginHeadingMove,
+  allowHeading = true,
   onMoveTextUnit,
   onUnitDropTargetChange,
   unitDropTarget,
@@ -831,6 +840,14 @@ export function TextBlockProjection({
     caretLineRef.current = null;
     nativeLineTargetRef.current = null;
     const previousTextFlow = latestFlowRef.current || editableFlow;
+    const headingRequest = onHeadingStructure && allowHeading && !compositionRef.current
+      ? headingStructureRequestForEdit(previousTextFlow, nextFlow, { unitId, caret }) : null;
+    if (headingRequest) {
+      latestFlowRef.current = headingRequest.nextTextFlow;
+      pendingFocusRef.current = headingRequest.focus;
+      void onHeadingStructure?.(headingRequest);
+      return;
+    }
     const sourceUnitId = anchorElement?.dataset.textUnitId || unitId;
     const beforeSelection = anchorElement
       ? readSelection(sourceUnitId, anchorElement)
@@ -855,6 +872,19 @@ export function TextBlockProjection({
       return;
     }
     publish();
+  };
+
+  const emitHeadingStructure = (request: HeadingTextFlowStructureRequest, textarea?: HTMLTextAreaElement | null) => {
+    const normalized = normalizeHeadingTextFlow(request.nextTextFlow, request.focus);
+    request = { ...request, nextTextFlow: normalized.flow, focus: normalized.focus };
+    if (onHeadingStructure) {
+      clearFlowSelection();
+      latestFlowRef.current = request.nextTextFlow;
+      pendingFocusRef.current = request.focus;
+      void onHeadingStructure(request);
+    } else {
+      emitFlowChange(request.nextTextFlow, request.focus.unitId, request.focus.caret, textarea);
+    }
   };
 
   const handleUnitTextChange = (
@@ -910,6 +940,11 @@ export function TextBlockProjection({
         ? selectionRef.current
         : { unitId: unit.id, start: prefix, end: currentUnit.text.length - suffix };
     const isComposing = compositionRef.current || nativeIsComposing;
+    const heading = !isComposing && allowHeading ? applyHeadingInputAtLine(currentFlow, unit.id, value, afterSelection.start) : null;
+    if (heading) {
+      emitHeadingStructure(heading, textarea);
+      return;
+    }
     let editStart = beforeSelection.start;
     let editEnd = beforeSelection.end;
     if (editStart === editEnd && value.length < currentUnit.text.length) {
@@ -1061,7 +1096,14 @@ export function TextBlockProjection({
 
   const handleSetRole = (unit: TextUnit, role: TextUnitWritingRole) => {
     if (readOnly || compositionRef.current) return;
-    const nextFlow = setTextUnitWritingRole(editableFlow, unit.id, role);
+    const nextRole = role === 'heading' ? 'heading_1' : role;
+    if (headingLevelForRole(nextRole) && !allowHeading) return;
+    const nextFlow = setTextUnitWritingRole(editableFlow, unit.id, nextRole);
+    if (headingLevelForRole(nextRole)) {
+      emitHeadingStructure({ previousTextFlow: editableFlow, nextTextFlow: nextFlow, headingUnitId: unit.id,
+        focus: { unitId: unit.id, caret: unit.text.length }, inputType: 'formatHeading' }, unitRefs.current[unit.id]);
+      return;
+    }
     pendingFocusRef.current = { unitId: unit.id, caret: unit.text.length };
     emitFlowChange(nextFlow, unit.id, unit.text.length, unitRefs.current[unit.id]);
   };
@@ -1289,12 +1331,17 @@ export function TextBlockProjection({
       }
     }
 
-    if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+    if (event.key === 'Enter' && (!event.shiftKey || headingLevelForRole(unit.writing_role)) && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
       const nextFlow = splitTextUnitForEnter(editableFlow, unit.id, textarea.selectionStart, textarea.selectionEnd);
       const currentIndex = nextFlow.units.findIndex((item) => item.id === unit.id);
       const nextUnit = nextFlow.units[currentIndex + 1];
       if (nextUnit) {
+        if (headingLevelForRole(unit.writing_role)) {
+          emitHeadingStructure({ previousTextFlow: editableFlow, nextTextFlow: nextFlow, headingUnitId: unit.id,
+            focus: { unitId: nextUnit.id, caret: 0 }, inputType: 'insertParagraphAfterHeading' }, textarea);
+          return;
+        }
         pendingFocusRef.current = { unitId: nextUnit.id, caret: 0 };
         emitFlowChange(nextFlow, nextUnit.id, 0, textarea, { sync: true });
         focusTextUnit(nextUnit.id, 0);
@@ -1446,9 +1493,21 @@ export function TextBlockProjection({
     if (!pastedText.includes('\n') && !/^(#{1,6}\s|[-*]\s|\d+[.)]\s|>\s?|\[ ?x? ?\])/i.test(pastedText.trim())) return;
     event.preventDefault();
     const textarea = event.currentTarget;
+    if (!allowHeading && /^#{1,3} /m.test(pastedText)) {
+      const result = replaceFlowSelection(editableFlow, { anchor: { unitId: unit.id, offset: textarea.selectionStart },
+        focus: { unitId: unit.id, offset: textarea.selectionEnd } }, pastedText);
+      if (result) emitFlowChange(result.flow, result.caret.unitId, result.caret.offset, textarea);
+      return;
+    }
     const nextFlow = pasteTextIntoTextFlow(editableFlow, unit.id, textarea.selectionStart, pastedText, textarea.selectionEnd);
     const pastedUnit = nextFlow.units[Math.min(nextFlow.units.length - 1, editableFlow.units.findIndex((item) => item.id === unit.id) + 1)]
       || nextFlow.units[0];
+    const pastedHeading = allowHeading && nextFlow.units.find((candidate) => headingLevelForRole(candidate.writing_role));
+    if (pastedHeading) {
+      emitHeadingStructure({ previousTextFlow: editableFlow, nextTextFlow: nextFlow, headingUnitId: pastedHeading.id,
+        focus: { unitId: pastedUnit.id, caret: pastedUnit.text.length }, inputType: 'insertHeading' }, textarea);
+      return;
+    }
     pendingFocusRef.current = { unitId: pastedUnit.id, caret: pastedUnit.text.length };
     emitFlowChange(nextFlow, pastedUnit.id, pastedUnit.text.length, textarea);
   };
@@ -1597,7 +1656,7 @@ export function TextBlockProjection({
           ))
         ));
         const roleTextClassNames = [
-          unit.writing_role === 'heading' ? styles.headingTextArea : '',
+          headingLevelForRole(unit.writing_role) ? styles.headingTextArea : '',
           unit.writing_role === 'quote' ? styles.quoteTextArea : '',
           unit.writing_role === 'code_line' ? styles.codeTextArea : '',
         ].filter(Boolean);
@@ -1606,10 +1665,11 @@ export function TextBlockProjection({
           <div
             key={unit.id}
             data-text-unit-row={unit.id}
+            data-heading-unit={headingLevelForRole(unit.writing_role) ? 'true' : undefined}
             data-text-unit-dragging={unitHandleDrag.draggingUnitId === unit.id || undefined}
             className={[
               styles.textUnitRow,
-              unit.writing_role === 'heading' ? styles.textUnitHeadingRow : '',
+              headingLevelForRole(unit.writing_role) ? styles.textUnitHeadingRow : '',
               hasFullUnitAnnotation ? styles.textUnitAnnotated : '',
               hasSelectedFullUnitAnnotation ? styles.textUnitAnnotationSelected : '',
               hasDraftRange ? styles.textUnitDraftRange : '',
@@ -1623,7 +1683,11 @@ export function TextBlockProjection({
               disabled={readOnly || layoutMode}
               layoutMode={layoutMode}
               menuOpen={textUnitContextMenu?.unitId === unit.id}
-              onPointerDown={(event) => unitHandleDrag.start(unit.id, event)}
+              onPointerDown={(event) => {
+                if (readOnly || layoutMode || compositionRef.current) return;
+                if (headingLevelForRole(unit.writing_role)) onBeginHeadingMove?.(event);
+                else unitHandleDrag.start(unit.id, event);
+              }}
               onClickMenu={(point) => {
                 if (unitHandleDrag.canOpenMenu()) setTextUnitContextMenu({ unitId: unit.id, point });
               }}
@@ -1676,6 +1740,7 @@ export function TextBlockProjection({
                       ...roleTextClassNames,
                     ].filter(Boolean).join(' ')}
                     aria-hidden="true"
+                    style={headingTextCssProperties(unit.writing_role)}
                   >
                     {highlightSegments.map((segment, segmentIndex) => (
                       segment.annotationIds.length > 0 ? (() => {
@@ -1732,6 +1797,7 @@ export function TextBlockProjection({
                     ...roleTextClassNames,
                   ].filter(Boolean).join(' ')}
                   value={unit.text}
+                  style={headingTextCssProperties(unit.writing_role)}
                   readOnly={readOnly}
                   onFocus={(event) => {
                     if (!traversingRef.current) {

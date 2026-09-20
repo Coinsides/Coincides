@@ -65,6 +65,7 @@ export function useRuntimePresentationController(
 ) {
   const {
     exportPreview,
+    searchSource,
     noteCanvasRuntime,
     pageContentHeight,
     primaryPageFrame,
@@ -208,6 +209,7 @@ export function useRuntimePresentationController(
 
   const layerProps = useNoteCanvasLayerProps({
     ...options,
+    chapterPresentation: options.chapterPresentation ? { ...options.chapterPresentation, searchSource } : undefined,
     exportPreview,
     noteCanvasRuntime,
     pageContentHeight,

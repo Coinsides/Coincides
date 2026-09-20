@@ -2724,6 +2724,30 @@ export function useNoteCanvasDataAdapter({
     persistedVisualConnectors,
   ]);
 
+  // A caller may expand a derived chapter into the existing placement reorder
+  // batch. This writes only the established block order, never chapter ownership.
+  const reorderBlocks = useCallback(async (blockIds: readonly string[]): Promise<boolean> => {
+    if (!note || !allowSourceContentMutation()) return false;
+    const requestedNoteId = note.id;
+    const generation = routeRequestGenerationRef.current;
+    const byId = new Map(sortedBlocks.map((block) => [block.id, block]));
+    if (blockIds.length !== sortedBlocks.length || new Set(blockIds).size !== blockIds.length
+      || blockIds.some((id) => !byId.has(id))) return false;
+    const reordered = blockIds.map((id) => byId.get(id)!);
+    try {
+      await writeRegistry.track('moveBlock:' + `/notes/${requestedNoteId}/blocks/reorder`, () =>
+        api.put(`/notes/${requestedNoteId}/blocks/reorder`, { placements: reordered.map((block, order_index) => ({
+          placement_id: block.placement_id, order_index,
+        })) }));
+      if (routeNoteIdRef.current !== requestedNoteId || routeRequestGenerationRef.current !== generation) return false;
+      setBlocks(reordered.map((block, order_index) => ({ ...block, order_index })));
+      return true;
+    } catch {
+      addToast('error', 'Failed to reorder blocks');
+      return false;
+    }
+  }, [note, sortedBlocks, allowSourceContentMutation, writeRegistry, addToast]);
+
   const moveBlock = useCallback(writeRegistry.hold('moveBlock', async (placementId: string, direction: -1 | 1) => {
     if (!note) return;
     if (!allowSourceContentMutation()) return;
@@ -2982,6 +3006,7 @@ export function useNoteCanvasDataAdapter({
     restoreBlock,
     restoreBlockById,
     moveBlock,
+    reorderBlocks,
     handleViewSource,
   };
 }

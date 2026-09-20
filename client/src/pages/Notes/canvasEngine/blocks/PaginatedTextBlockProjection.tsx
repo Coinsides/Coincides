@@ -27,6 +27,8 @@ import { imageOnlyClipboardFile } from '../mediaBlockPasteService';
 import { hasContentGroupDragPayloadType, plainTextFromContentGroupDragPayload, readContentGroupDragPayload, writeContentGroupDragPayload } from '../contentGroupDragService';
 import type { TextFlowBoundaryNavigationRequest } from '../textFlowBlockNavigation';
 import styles from '../../NoteDetail.module.css';
+import { headingLevelForRole, type HeadingTextFlowStructureRequest } from '../headingRoleService';
+import { applyHeadingInputAtLine, headingStructureRequestForEdit, normalizeHeadingTextFlow } from '../headingInputService';
 
 export interface PaginatedTextBlockProjectionProps extends TextBlockProjectionProps {
   fragments: PositionedPageFlowFragment[];
@@ -127,6 +129,9 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
   const emit = (next: TextBlockContentV1, caret: FlowPoint, node: HTMLTextAreaElement | undefined,
     metadata?: TextFlowEditMetadata) => {
     const previous = latestFlow.current;
+    const headingRequest = props.onHeadingStructure && props.allowHeading !== false && !composition.current
+      ? headingStructureRequestForEdit(previous, next, { unitId: caret.unitId, caret: caret.offset }) : null;
+    if (headingRequest) { emitHeadingStructure(headingRequest, node); return; }
     caretLine.current = null; nativeLineTarget.current = null; column.current = null;
     const before = selectionRef.current ?? { unitId: caret.unitId, start: caret.offset, end: caret.offset };
     const edit = metadata ?? { unitId: before.unitId, inputType: 'structure', beforeSelection: before,
@@ -139,6 +144,16 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
     let globalOffset = caret.offset;
     for (const unit of next.units) { if (unit.id === caret.unitId) break; globalOffset += unit.text.length + 1; }
     props.onTextChange(next.units.map((unit) => unit.text).join('\n'), globalOffset, node);
+  };
+  const emitHeadingStructure = (request: HeadingTextFlowStructureRequest, node?: HTMLTextAreaElement) => {
+    const normalized = normalizeHeadingTextFlow(request.nextTextFlow, request.focus);
+    request = { ...request, nextTextFlow: normalized.flow, focus: normalized.focus };
+    if (props.onHeadingStructure) {
+      clearRange();
+      latestFlow.current = request.nextTextFlow;
+      pendingFocus.current = { unitId: request.focus.unitId, offset: request.focus.caret };
+      void props.onHeadingStructure(request);
+    } else emit(request.nextTextFlow, { unitId: request.focus.unitId, offset: request.focus.caret }, node);
   };
   const replaceRange = (value: string, node?: HTMLTextAreaElement, inputType = 'replaceFlowSelection') => {
     if (readOnly || composition.current) return false;
@@ -250,6 +265,11 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
     if (composing) composing.value = node.value;
     const afterSelection = readSelection(slice, node);
     if (nextText === unit.text) { selectionRef.current = afterSelection; return; }
+    const heading = !composing && !isComposing && props.allowHeading !== false ? applyHeadingInputAtLine(current, unit.id, nextText, afterSelection.start) : null;
+    if (heading) {
+      emitHeadingStructure(heading, node);
+      return;
+    }
     let delta = deriveSingleTextEditDelta(unit.text, nextText);
     if (captured?.selection.unitId === unit.id) {
       let start = captured.selection.start;
@@ -353,11 +373,14 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
     const unitIndex = current.units.findIndex((entry) => entry.id === slice.unit.id);
     const unit = current.units[unitIndex];
     if (!unit) return;
-    if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+    if (event.key === 'Enter' && (!event.shiftKey || headingLevelForRole(unit.writing_role)) && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
       const next = splitTextUnitForEnter(current, unit.id, selection.start, selection.end);
       const target = next.units[unitIndex + 1];
-      if (target) emit(next, { unitId: target.id, offset: 0 }, node);
+      if (target && headingLevelForRole(unit.writing_role)) {
+        emitHeadingStructure({ previousTextFlow: current, nextTextFlow: next, headingUnitId: unit.id,
+          focus: { unitId: target.id, caret: 0 }, inputType: 'insertParagraphAfterHeading' }, node);
+      } else if (target) emit(next, { unitId: target.id, offset: 0 }, node);
     } else if (event.key === 'Tab') {
       event.preventDefault(); emit(event.shiftKey ? outdentTextUnit(current, unit.id) : indentTextUnit(current, unit.id), { unitId: unit.id, offset: selection.start }, node);
     } else if (event.key === 'Backspace' && selection.start === selection.end && node.selectionStart === 0) {
@@ -399,8 +422,12 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
   const menuAction = (action: CommandActionId) => {
     const unit = latestFlow.current.units.find((entry) => entry.id === menu?.unitId);
     if (!unit || readOnly || composition.current) return;
-    const role = action === 'turn_unit_into_code_line' ? 'code_line' : WRITING_ROLE_BY_COMMAND[action];
-    if (role) emit(setTextUnitWritingRole(latestFlow.current, unit.id, role), { unitId: unit.id, offset: unit.text.length }, undefined);
+    const role = action === 'turn_unit_into_code_line' ? 'code_line' : action === 'turn_into_heading' ? 'heading_1' : WRITING_ROLE_BY_COMMAND[action];
+    if (role && headingLevelForRole(role)) {
+      if (props.allowHeading === false) { setMenu(null); return; }
+      emitHeadingStructure({ previousTextFlow: latestFlow.current, nextTextFlow: setTextUnitWritingRole(latestFlow.current, unit.id, role),
+        headingUnitId: unit.id, focus: { unitId: unit.id, caret: unit.text.length }, inputType: 'formatHeading' });
+    } else if (role) emit(setTextUnitWritingRole(latestFlow.current, unit.id, role), { unitId: unit.id, offset: unit.text.length }, undefined);
     else if (action === 'label_text_unit') {
       const slice = slices.find((entry) => entry.unit.id === unit.id);
       const node = slice && refs.current.get(slice.key);
@@ -450,11 +477,16 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
           ? Math.min(slice.end, slice.unitIndex === ordered.endIndex ? ordered.end.offset : unit.text.length) : slice.start;
         return <div key={slice.key} data-page-flow-fragment-id={slice.fragmentId} data-page-flow-frame-id={slice.frameId}
           data-text-unit-row={slice.first ? unit.id : undefined} data-text-unit-continuation={!slice.first || undefined}
+          data-heading-unit={headingLevelForRole(unit.writing_role) ? 'true' : undefined}
           data-text-unit-dragging={unitHandleDrag.draggingUnitId === unit.id || undefined}
           style={{ position: 'absolute', left: slice.left, top: slice.top, width: slice.width - 20, height: slice.height,
             '--text-unit-indent': 0 } as CSSProperties}>
           {slice.first && <TextUnitGutterLayer unitId={unit.id} role={unit.writing_role} disabled={readOnly || layoutMode} layoutMode={layoutMode}
-            menuOpen={menu?.unitId === unit.id} onPointerDown={(event) => unitHandleDrag.start(unit.id, event)}
+            menuOpen={menu?.unitId === unit.id} onPointerDown={(event) => {
+              if (readOnly || layoutMode || composition.current) return;
+              if (headingLevelForRole(unit.writing_role)) props.onBeginHeadingMove?.(event);
+              else unitHandleDrag.start(unit.id, event);
+            }}
             onClickMenu={(point) => { if (unitHandleDrag.canOpenMenu()) setMenu({ unitId: unit.id, point }); }}
             onOpenMenu={layoutMode ? undefined : (point) => setMenu({ unitId: unit.id, point })} />}
           {slice.first && handleDropTarget?.unitId === unit.id && <div className={styles.textUnitDropIndicator}
@@ -542,6 +574,12 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
                 event.preventDefault();
                 if (replaceRange(pasted, event.currentTarget, 'insertFromPaste')) return;
                 const selection = readSelection(slice, event.currentTarget); selectionRef.current = selection;
+                if (props.allowHeading === false && /^#{1,3} /m.test(pasted)) {
+                  const result = replaceFlowSelection(latestFlow.current, { anchor: { unitId: unit.id, offset: selection.start },
+                    focus: { unitId: unit.id, offset: selection.end } }, pasted);
+                  if (result) emit(result.flow, result.caret, event.currentTarget);
+                  return;
+                }
                 if (!pasted.includes('\n') && !/^(#{1,6}\s|[-*]\s|\d+[.)]\s|>\s?|\[ ?x? ?\])/i.test(pasted.trim())) {
                   const result = replaceFlowSelection(latestFlow.current, { anchor: { unitId: unit.id, offset: selection.start }, focus: { unitId: unit.id, offset: selection.end } }, pasted);
                   if (result) emit(result.flow, result.caret, event.currentTarget);
@@ -552,7 +590,11 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
                 const added = next.units.length - latestFlow.current.units.length;
                 const target = next.units[sourceIndex + added] ?? next.units[sourceIndex];
                 const suffixLength = unit.text.length - selection.end;
-                emit(next, { unitId: target.id, offset: Math.max(0, target.text.length - suffixLength) }, event.currentTarget);
+                const pastedHeading = props.allowHeading !== false && next.units.find((candidate) => headingLevelForRole(candidate.writing_role));
+                if (pastedHeading) {
+                  emitHeadingStructure({ previousTextFlow: latestFlow.current, nextTextFlow: next, headingUnitId: pastedHeading.id,
+                    focus: { unitId: target.id, caret: Math.max(0, target.text.length - suffixLength) }, inputType: 'insertHeading' }, event.currentTarget);
+                } else emit(next, { unitId: target.id, offset: Math.max(0, target.text.length - suffixLength) }, event.currentTarget);
               }}
               onDragOver={readOnly ? undefined : (event) => { if (hasContentGroupDragPayloadType(event.dataTransfer)) { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; } }}
               onDrop={readOnly ? undefined : (event) => {

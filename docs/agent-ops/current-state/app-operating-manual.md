@@ -21,7 +21,10 @@
 - **UI**:打开笔记→双击纸面开始写;
 - **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:1, units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
 - 建笔记:`POST /api/notes {course_id, title, description?, page_format:'a4_portrait'}`;
-- **边界**:无 heading 块型(章节块候 V14,章题暂用【】段落);块正文改写走 text-save 门(`PUT /note-blocks/:id/text-save`);**Agent 零笔记写权**(宪法③,note_patch 候 14.4)——Agent 侧生成笔记的唯一路=organized_note 提案。
+- **标题与章节(A4,2026-09-19)**:正文行首输入 `# `、`## `、`### ` 建一/二/三级标题;在既有段落输入 `/h1`、`/h2`、`/h3` 可升降级,`/body` 还原正文。标题仍是普通 text 块里的 unit `writing_role:'heading_1'|'heading_2'|'heading_3'`,没有 heading 块型。标题占一条硬行、独立成块;Enter/Shift+Enter 在后面续正文块,长标题视觉换行不另造单位。改字号/行高时标题随 Typography 同步。
+- **章操作**:章由标题和后续块序派生,截止下一个同级或更高层标题。删标题块只解散章,不删后文;拖标题旁的章把手搬整章,一次撤销/重做覆盖整批。标题前的文字是前言,缺级不造虚拟章。折叠箭头只改变本次阅读呈现,不存章节归属或折叠字段;隐藏正文不参与阅读分页,展开恢复。已有空页保留;打印仍包含完整正文。
+- **标题导航**:左侧 Navigation→Headings（标题树）,点击标题跳到章锚,阅读位置变化时当前章高亮;隐藏目标先展开再跳。标题与层级随编辑刷新,无需重载。Chapter numbers 开关控制派生编号,不改正文。agenda 是同一标题投影的接口,目录页未实装。
+- **封面与边界**:封面题名/述名仍属笔记身份,封面正文不提供标题升格,也不进入正文章树或 agenda;既有服务端封面白名单仍按 text 家族读取,本单没有增加服务端角色禁令。块正文改写继续走 text-save 门(`PUT /note-blocks/:id/text-save`);**Agent 零笔记写权**(宪法③,note_patch 候 14.4),本单不接章级动词——Agent 侧生成笔记的唯一路仍为 organized_note 提案。
 - **纸型自动分页(A1)**:A4/Letter 等纸型中,在流且 auto 的块按正文顺序灌入所属页叠。文字到版心底部按完整渲染行续到下一页,需要时自动续页;同一个逻辑块可以显示在多页,正文仍只存一份。最小例:在 A4 笔记输入一段长正文,超过下墙后继续写,后文自动出现在下页。Web 长页保持单帧向下生长,不转为分页纸。
 - **改版与页籍**:通过「笔记外观」改字号/行高/纸型,或进入 Layout 态调四界墙,会重新分页;每页可用自己的纸型和边距,跨页文字按目标页现宽重新换行。自动宽度来自该页现版心,储存的 x/y/width 不因分页被重写;块的 `frame_id` 只随首片换籍,经既有 placement 门保存。分片范围、后续片位置与行盒是派生数据,没有独立正文或分片写入 API。
 - **跨片编辑**:在任意一片上编辑仍修改原逻辑块;片尾/片头的方向键继续穿行,跨页选区可复制和删除,撤销/重做后重新分页。块把手、标注章等可点击附属件随首片显示,同一件不会在每片重复出现。编辑面、Overview 和打印共用本次分页结果。

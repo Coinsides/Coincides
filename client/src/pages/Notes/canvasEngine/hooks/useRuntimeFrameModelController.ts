@@ -15,6 +15,7 @@ import type {
 } from '../types';
 
 export interface UseRuntimeFrameModelControllerOptions {
+  exportContent?: import('./useNoteCanvasLayoutModel').UseNoteCanvasFrameModelOptions['exportContent'];
   pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan;
   note?: (Pick<Note, 'page_format' | 'binding_settings'> & Partial<Pick<Note, 'title' | 'description'>>) | null;
   coordinateContract?: CoordinateContract;
@@ -39,6 +40,7 @@ export interface UseRuntimeFrameModelControllerOptions {
 }
 
 export function useRuntimeFrameModelController({
+  exportContent,
   pageFlowPlan,
   note,
   blockLayouts,
@@ -62,6 +64,7 @@ export function useRuntimeFrameModelController({
   visibleBlocks,
 }: UseRuntimeFrameModelControllerOptions) {
   return useNoteCanvasFrameModel({
+    exportContent,
     bindingSettings: note?.binding_settings ?? null,
     noteTruth: note ? { title: note.title ?? '', description: note.description ?? null } : undefined,
     pageFlowPlan,

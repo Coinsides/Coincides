@@ -150,6 +150,17 @@ import {
 } from '../textFocusReceipt';
 
 export interface NoteWritingSurfaceLayerProps {
+  /** A4: content-derived chapters plus local presentation controls, never persisted ownership. */
+  chapterPresentation?: {
+    projection: import('../chapterProjectionService').ChapterProjection;
+    collapsedChapterIds: ReadonlySet<string>;
+    numbered: boolean;
+    onToggleChapter: (chapterId: string) => void;
+    onRevealChapter: (chapterId: string) => void;
+    onToggleNumbering: () => void;
+    searchSource?: { blocks: readonly NoteBlock[];
+      runtime: import('../noteNavigationSearch').NoteNavigationSearchInput['noteCanvasRuntime'] };
+  };
   continuousWeb?: boolean;
   paperHeader?: NotePaperHeaderProps;
   noteTools?: import('react').ReactNode;
@@ -262,6 +273,7 @@ export interface NoteWritingSurfaceLayerProps {
   onApplyBlockTextFlowEdit: ApplyBlockTextFlowEdit;
   onApplyDocumentTextFlowEdit?: (changes: DocumentFlowEdit[]) => Promise<boolean>;
   onExtractTextUnit?: (block: NoteBlock, unitId: string, layout: BlockBoxLayout) => Promise<boolean>;
+  onHeadingStructure?: (block: NoteBlock, request: import('../headingRoleService').HeadingTextFlowStructureRequest) => Promise<boolean>;
   onMoveTextUnit?: (block: NoteBlock, unitId: string, targetBlock: NoteBlock, targetUnitId: string, edge: 'before' | 'after') => Promise<boolean>;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
@@ -311,6 +323,7 @@ function nextNeutralLabelName(annotations: AnnotationTruthV1[]): string {
 }
 
 export function NoteWritingSurfaceLayer({
+  chapterPresentation,
   paperHeader,
   noteTools,
   hostMode = 'page',
@@ -401,6 +414,7 @@ export function NoteWritingSurfaceLayer({
   onApplyBlockTextFlowEdit,
   onApplyDocumentTextFlowEdit,
   onExtractTextUnit,
+  onHeadingStructure,
   onMoveTextUnit,
   onTextEditBoundary,
   onClearSlashTarget,
@@ -1061,7 +1075,8 @@ export function NoteWritingSurfaceLayer({
   };
 
   const applyWritingRoleToSelection = async (actionId: CommandActionId) => {
-    const role = WRITING_ROLE_BY_COMMAND[actionId];
+    const commandRole = WRITING_ROLE_BY_COMMAND[actionId];
+    const role = commandRole === 'heading' ? 'heading_1' : commandRole;
     if (!role || !selectionDraft) return;
 
     const blockIds = Array.from(new Set(selectionDraft.ranges.map((range) => range.blockId)));
@@ -1081,6 +1096,13 @@ export function NoteWritingSurfaceLayer({
       });
 
       const nextPlainText = plainTextFromTextFlow(nextTextFlow);
+      if (role === 'heading_1' && onHeadingStructure) {
+        if (noteCanvasRuntime.pageFrameExtensions.some((frame) => frame.isCover && frame.frameId === blockLayouts[block.id]?.frame_id)) return;
+        const unitId = [...unitIds][0];
+        if (unitId && !await onHeadingStructure(block, { previousTextFlow: currentTextFlow, nextTextFlow,
+          headingUnitId: unitId, focus: { unitId, caret: 0 }, inputType: 'formatHeading' })) return;
+        continue;
+      }
       await handleBlockTextFlowChange(block, nextTextFlow);
       onBlockTextChange(block.id, nextPlainText, nextPlainText.length, null);
       const savedBlock = await saveBlockAndConsumeOutcome(block, nextPlainText, {
@@ -1762,6 +1784,15 @@ export function NoteWritingSurfaceLayer({
               }}
               onTextFlowChange={(textFlow, metadata, previousTextFlow) => void handleBlockTextFlowChange(block, textFlow, metadata, previousTextFlow)}
               onTextEditBoundary={onTextEditBoundary}
+              allowHeading={!noteCanvasRuntime.pageFrameExtensions.some((frame) => frame.isCover && frame.frameId === layout.frame_id)}
+              chapter={(() => {
+                const chapter = chapterPresentation?.projection.chapters.find((entry) => entry.blockId === block.id);
+                return chapter && chapterPresentation ? { id: chapter.id, title: chapter.title,
+                  number: chapterPresentation.numbered ? chapter.number.join('.') : '',
+                  collapsed: chapterPresentation.collapsedChapterIds.has(chapter.id),
+                  onToggle: () => chapterPresentation.onToggleChapter(chapter.id) } : undefined;
+              })()}
+              onHeadingStructure={onHeadingStructure ? (request) => onHeadingStructure(block, request) : undefined}
               onExtractTextUnit={(unitId, point) => handleExtractTextUnit(block, unitId, point)}
               onMoveTextUnit={onMoveTextUnit ? (unitId, target) => {
                 if (contentReadOnly || layoutMode || document.querySelector('[data-runtime-textflow-composing="true"]')) return;

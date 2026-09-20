@@ -6,6 +6,7 @@ import type {
 } from './runtimeDataTypes';
 import { remapUnitInlineStructures } from './inlineLifecycle';
 import { replaceTextUnitText } from './textFlowService';
+import { headingLevelForRole, headingRoleForLevel, type HeadingLevel } from './headingRoleService';
 import { expandGraphemeRange, snapGraphemeOffset } from '../../../../../shared/graphemes';
 
 const TEXT_FLOW_CONTENT_VERSION = 'TextBlockContentV1';
@@ -135,6 +136,7 @@ export function splitTextUnitAtOffset(
 }
 
 function enterSplitRoleForUnit(unit: TextUnit, splitOffset: number): TextUnitWritingRole {
+  if (headingLevelForRole(unit.writing_role)) return 'paragraph';
   if (unit.writing_role === 'toggle_item' && splitOffset === unit.text.length) return 'paragraph';
   return unit.writing_role;
 }
@@ -221,8 +223,8 @@ export function setTextUnitWritingRole(
   unitId: string,
   role: TextUnitWritingRole,
 ): TextBlockContentV1 {
-  const nextFlow = cloneFlow(flow);
-  return {
+  let nextFlow = cloneFlow(flow);
+  nextFlow = {
     ...nextFlow,
     units: nextFlow.units.map((unit) => (
       unit.id === unitId
@@ -230,6 +232,17 @@ export function setTextUnitWritingRole(
         : unit
     )),
   };
+  const unit = nextFlow.units.find((candidate) => candidate.id === unitId);
+  const lineEnd = unit?.text.indexOf('\n') ?? -1;
+  if (headingLevelForRole(role) && lineEnd >= 0) {
+    nextFlow = splitTextUnitAtOffset(nextFlow, unitId, lineEnd);
+    const nextIndex = nextFlow.units.findIndex((candidate) => candidate.id === unitId) + 1;
+    const body = nextFlow.units[nextIndex];
+    nextFlow = replaceTextUnitText({ textFlow: nextFlow, textUnitId: body.id, nextText: body.text.slice(1),
+      edit: { editedStartOffset: 0, editedEndOffset: 1, replacementText: '' } });
+    nextFlow.units[nextIndex] = { ...nextFlow.units[nextIndex], writing_role: 'paragraph' };
+  }
+  return nextFlow;
 }
 
 export function updateTextUnitMetadata(
@@ -311,9 +324,9 @@ function stripIndent(line: string): string {
 function parseLine(line: string, index: number): TextUnit {
   const indentLevel = leadingIndentLevel(line);
   const trimmedStart = stripIndent(line);
-  const headingMatch = trimmedStart.match(/^(#{1,6})\s+(.+)$/);
+  const headingMatch = trimmedStart.match(/^(#{1,3})\s+(.+)$/);
   if (headingMatch) {
-    return createParsedUnit(`tu-${index + 1}`, headingMatch[2], 'heading', indentLevel, index);
+    return createParsedUnit(`tu-${index + 1}`, headingMatch[2], headingRoleForLevel(headingMatch[1].length as HeadingLevel), indentLevel, index);
   }
 
   const checkedMatch = trimmedStart.match(/^(?:[-*]\s*)?\[(x|X| )\]\s+(.*)$/);
@@ -400,6 +413,7 @@ export function pasteTextIntoTextFlow(
   const firstUnit: TextUnit = {
     ...target,
     text: `${prefix}${firstParsed.text}`,
+    writing_role: !prefix && headingLevelForRole(firstParsed.writing_role) ? firstParsed.writing_role : target.writing_role,
     metadata: { ...target.metadata, ...firstParsed.metadata },
   };
   const middleUnits = parsedUnits.slice(1);
@@ -411,6 +425,7 @@ export function pasteTextIntoTextFlow(
         units: [...nextFlow.units, ...parsedUnits],
       }),
       text: suffix,
+      writing_role: headingLevelForRole(target.writing_role) ? 'paragraph' : target.writing_role,
     }]
     : [];
 

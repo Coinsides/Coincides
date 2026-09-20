@@ -1,8 +1,9 @@
 import { cleanup, render, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { resolveDocumentPageFlowPlan } from '../documentPageFlowService';
+import { deriveChapterProjection, getCollapsedChapterBlockIds } from '../chapterProjectionService';
 import { noteBlocksToPageFlow, pageFlowFirstLayouts, pageFlowFragmentProjections } from '../notePageFlowService';
-import { useNoteCanvasFrameModel } from '../hooks/useNoteCanvasLayoutModel';
+import { useNoteCanvasFrameModel, type UseNoteCanvasFrameModelOptions } from '../hooks/useNoteCanvasLayoutModel';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
 import { createPageStackFromFrame } from '../pageStackCollectionService';
@@ -83,6 +84,67 @@ describe('A1 one plan across writing, print and Overview', () => {
     expect(result.current.noteCanvasRuntime.pageFrames.map((frame) => frame.id)).toEqual(data.plan.collection.pageFrames.map((frame) => frame.id));
     expect(result.current.exportPreview.pageFrames.flatMap((frame) => frame.rows.map((row) => row.flowFragment)))
       .toEqual(data.plan.fragments);
+  });
+
+  it('keeps hidden auto text and a manual box on their complete export pages after folding a chapter', () => {
+    const data = seed();
+    const headingFlow = createTextBlockContentV1('宋代地方社会');
+    headingFlow.units[0]!.writing_role = 'heading_1';
+    const heading: NoteBlock = { ...data.block, id: 'heading', placement_id: 'heading-place',
+      plain_text: '宋代地方社会', content_json: { [TEXT_FLOW_CONTENT_KEY]: headingFlow } };
+    const autoBlocks = [heading, data.block];
+    const autoLayouts = { heading: data.layout, chapter: data.layout };
+    const autoPlan = resolveDocumentPageFlowPlan({ collection: data.collection, documentTypography: data.typography,
+      blocks: noteBlocksToPageFlow(autoBlocks, autoLayouts, {}, {}) });
+    const manualFrame = autoPlan.collection.pageFrames[1]!;
+    expect(manualFrame).toMatchObject({ x: 0, y: 700 });
+    const manualLayout: BlockBoxLayout = { ...data.layout, frame_id: manualFrame.id, width_mode: 'manual',
+      x: 30, y: 100, width: 170, height: 80 };
+    const manual: NoteBlock = { ...data.block, id: 'manual', placement_id: 'manual-place',
+      plain_text: '手动旁注', content_json: { [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1('手动旁注') },
+      canvas_layout: { ...manualLayout } };
+    const blocks = [...autoBlocks, manual];
+    const layouts = { ...autoLayouts, manual: manualLayout };
+    const fullPlan = resolveDocumentPageFlowPlan({ collection: autoPlan.collection, documentTypography: data.typography,
+      blocks: noteBlocksToPageFlow(blocks, layouts, {}, {}) });
+    const fullLayouts = pageFlowFirstLayouts(fullPlan, layouts);
+    const chapter = deriveChapterProjection(blocks);
+    const hidden = getCollapsedChapterBlockIds(chapter, new Set([chapter.roots[0]!.id]));
+    const foldedBlocks = blocks.filter((block) => !hidden.has(block.id));
+    const foldedPlan = resolveDocumentPageFlowPlan({ collection: data.collection, documentTypography: data.typography,
+      blocks: noteBlocksToPageFlow(foldedBlocks, layouts, {}, {}) });
+    const options: UseNoteCanvasFrameModelOptions = {
+      coordinateContract: 'v2', pageFlowPlan: fullPlan, blockLayouts: fullLayouts, defaultDraftLayout: data.layout,
+      documentTypographyProfile: data.typography, draftActive: false, draftLayout: null,
+      pageFrameCollection: data.collection, persistedCanvasObjects: [], persistedCanvasPlacements: [],
+      persistedContentMounts: [], persistedVisualConnectors: [], persistedImageObjects: [], persistedStructuredObjects: [],
+      pageOffsetX: 0, surfaceMode: 'page', viewportTransform: { x: 0, y: 0, width: 1000, height: 800, zoom: 1 },
+      visibleBlocks: blocks, exportContent: { blocks, layouts: fullLayouts, pageFlowPlan: fullPlan },
+    };
+    const { result, rerender } = renderHook((props) => useNoteCanvasFrameModel(props), { initialProps: options });
+    const expandedExport = result.current.exportPreview;
+    rerender({ ...options, visibleBlocks: foldedBlocks, pageFlowPlan: foldedPlan,
+      blockLayouts: pageFlowFirstLayouts(foldedPlan, { heading: data.layout }) });
+
+    expect(result.current.noteCanvasRuntime.blockPlacements.map((placement) => placement.blockId)).toEqual(['heading']);
+    expect(result.current.noteCanvasRuntime.pageFrames).toHaveLength(1);
+    expect(result.current.searchSource.blocks.map((block) => block.id)).toEqual(['heading', 'chapter', 'manual']);
+    expect(result.current.searchSource.runtime.pageFrames).toEqual(fullPlan.collection.pageFrames);
+    expect(result.current.searchSource.runtime.blockPlacements.find((placement) => placement.blockId === manual.id))
+      .toMatchObject({ frameId: manualFrame.id, x: 80, y: 840, width: 170, height: 80 });
+    expect(result.current.exportPreview).toEqual(expandedExport);
+    expect(result.current.exportPreview.includedRows.map((row) => row.block.id)).toEqual(['heading', 'chapter', 'manual']);
+    const manualExport = result.current.exportPreview.pageFrames.find((frame) => frame.pageFrameId === manualFrame.id)!
+      .includedRows.find((row) => row.block.id === manual.id)!;
+    expect(manualExport).toMatchObject({ pageFrameId: manualFrame.id, boundary: 'inside',
+      layout: { x: 30, y: 100, width_mode: 'manual' },
+      placement: { frameId: manualFrame.id, x: 80, y: 840, width: 170, height: 80 } });
+    const autoExport = result.current.exportPreview.pageFrames.flatMap((frame) => frame.includedRows)
+      .filter((row) => row.block.id === data.block.id);
+    expect(autoExport.length).toBeGreaterThanOrEqual(3);
+    expect(autoExport.map((row) => row.flowFragment)).toEqual(fullPlan.fragments.filter((fragment) => fragment.blockId === data.block.id));
+    expect(autoExport.map((row) => data.text.slice(row.flowFragment!.textRange!.start, row.flowFragment!.textRange!.end)).join(''))
+      .toBe(data.text);
   });
 
   it.each([false, true])('keeps ink on its original page when text starts later and creates continuation pages (print=%s)', (print) => {

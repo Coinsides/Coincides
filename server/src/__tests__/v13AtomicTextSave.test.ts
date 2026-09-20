@@ -75,6 +75,55 @@ async function withFixture(run: (fixture: {
   }
 }
 
+for (const role of ['heading_1', 'heading_2', 'heading_3']) {
+  test(`A4 ${role} round-trips through ordinary text-save and snapshot undo/redo without a new block kind`, async () => {
+    await withFixture(async ({ db, put, snapshot }) => {
+      const before = snapshot();
+      const schema = db.prepare('SELECT type, name, tbl_name, sql FROM sqlite_schema ORDER BY type, name').all();
+      const placements = db.prepare('SELECT * FROM note_block_placements ORDER BY rowid').all();
+      const readBlock = () => db.prepare('SELECT block_type, content_json, plain_text, text_save_revision FROM note_blocks WHERE id = ?')
+        .get(BLOCK) as { block_type: string; content_json: string; plain_text: string; text_save_revision: number };
+      const original = readBlock();
+      const originalSnapshot = { content_json: JSON.parse(original.content_json), plain_text: original.plain_text };
+      const headingSnapshot = structuredClone(originalSnapshot);
+      headingSnapshot.content_json.text_flow.units[0].writing_role = role;
+      const saveSnapshot = (block: typeof originalSnapshot) => put(`/note-blocks/${BLOCK}/text-save`, {
+        note_id: NOTE, base_revision: readBlock().text_save_revision, block,
+        annotations: { range_updates: [] }, text_ranges: [],
+      });
+      const assertStored = (expected: typeof originalSnapshot, revision: number) => {
+        const stored = readBlock();
+        assert.equal(stored.block_type, 'paragraph');
+        assert.deepEqual(JSON.parse(stored.content_json), expected.content_json);
+        assert.equal(stored.plain_text, expected.plain_text);
+        assert.equal(stored.text_save_revision, revision);
+      };
+
+      const saved = await saveSnapshot(headingSnapshot);
+      assert.equal(saved.revision, 1);
+      assert.deepEqual(saved.block.content_json, headingSnapshot.content_json);
+      assertStored(headingSnapshot, 1);
+      // History replays the old body snapshot through the same existing save route.
+      const undone = await saveSnapshot(originalSnapshot);
+      assert.equal(undone.revision, 2);
+      assert.deepEqual(undone.block.content_json, originalSnapshot.content_json);
+      assertStored(originalSnapshot, 2);
+      const redone = await saveSnapshot(headingSnapshot);
+      assert.equal(redone.revision, 3);
+      assert.deepEqual(redone.block.content_json, headingSnapshot.content_json);
+      assertStored(headingSnapshot, 3);
+
+      const after = snapshot();
+      assert.equal(after.note_blocks.length, before.note_blocks.length);
+      for (const table of ['annotation_truths', 'annotation_ranges', 'board_text_ranges']) {
+        assert.deepEqual(after[table], before[table], `${role}: unchanged text keeps ${table}`);
+      }
+      assert.deepEqual(db.prepare('SELECT * FROM note_block_placements ORDER BY rowid').all(), placements);
+      assert.deepEqual(db.prepare('SELECT type, name, tbl_name, sql FROM sqlite_schema ORDER BY type, name').all(), schema);
+    });
+  });
+}
+
 test('B7 smoke 1 pre-fix: split body then annotation rejection cannot roll back body', async () => {
   await withFixture(async ({ put, snapshot }) => {
     const before = snapshot();

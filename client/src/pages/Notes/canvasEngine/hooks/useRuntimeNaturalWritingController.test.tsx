@@ -358,7 +358,7 @@ describe('useRuntimeNaturalWritingController Page draft authority', () => {
     expect(calls).toEqual(['boundary', 'history', 'save']);
     expect(directFlowSetter).not.toHaveBeenCalled();
     expect(applyEdit).toHaveBeenCalledWith(block, expect.objectContaining({
-      units: [flow.units[0], expect.objectContaining({ id: 'tu-2', text: 'second', writing_role: 'heading' })],
+      units: [flow.units[0], expect.objectContaining({ id: 'tu-2', text: 'second', writing_role: 'heading_1' })],
     }), expect.objectContaining({
       previousTextFlow: flow,
       metadata: expect.objectContaining({

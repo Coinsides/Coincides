@@ -1,0 +1,9 @@
+.noteNavigationHeadings { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.noteNavigationHeadingTree { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; margin: 0; padding: 8px; list-style: none; }
+.noteNavigationHeadingTree ol { margin: 0; padding-left: 16px; list-style: none; }
+.noteNavigationHeading { display: flex; gap: 8px; width: 100%; border: 0; border-radius: var(--radius-sm); padding: 9px 8px; text-align: left; font: inherit; font-size: 13px; line-height: 1.5; color: var(--text-primary); background: transparent; cursor: pointer; overflow-wrap: anywhere; }
+.noteNavigationHeading:hover { background: var(--bg-hover); }
+.noteNavigationHeading[aria-current='location'] { background: var(--bg-hover); font-weight: 650; box-shadow: inset 2px 0 var(--border-focus); }
+.noteNavigationHeadingNumber { flex: 0 0 auto; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.noteNavigationHeadingNumbers { align-self: flex-start; margin: 8px 12px 0; padding: 5px 7px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--text-secondary); background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.noteNavigationHeadingNumbers[aria-pressed='true'] { color: var(--text-primary); background: var(--bg-hover); }

@@ -5,15 +5,34 @@ import type { CanvasRect, PageFrameModel } from '../types';
 export const NOTE_NAVIGATION_OPEN_KEY = 'coincides:note-navigation:open';
 export type NoteNavigationTab = 'headings' | 'pages' | 'results';
 
+export interface NoteNavigationHeadingAnchor {
+  chapterId: string;
+  blockId: string;
+  frameId: string;
+  rect: CanvasRect;
+}
+const EMPTY_HEADING_ANCHORS: readonly NoteNavigationHeadingAnchor[] = [];
+
+export function currentChapterAtReadingY(anchors: readonly NoteNavigationHeadingAnchor[], readingY: number): string | null {
+  let current: NoteNavigationHeadingAnchor | null = null;
+  for (const anchor of anchors) {
+    if (anchor.rect.y <= readingY && (!current || anchor.rect.y >= current.rect.y)) current = anchor;
+  }
+  return current?.chapterId ?? null;
+}
+
 /** Local presentation only. The reading surface and its editors stay mounted. */
-export function useNoteNavigationController({ noteId, enabled, blockListRef, pageFrames }: {
+export function useNoteNavigationController({ noteId, enabled, blockListRef, pageFrames,
+  headingAnchors = EMPTY_HEADING_ANCHORS }: {
   noteId: string; enabled: boolean; blockListRef: RefObject<HTMLElement>; pageFrames: PageFrameModel[];
+  headingAnchors?: readonly NoteNavigationHeadingAnchor[];
 }) {
   const [preferredOpen, setPreferredOpen] = useState(() => {
     try { return localStorage.getItem(NOTE_NAVIGATION_OPEN_KEY) === 'true'; } catch { return false; }
   });
   const [tab, setTab] = useState<NoteNavigationTab>('pages');
   const [currentFrameId, setCurrentFrameId] = useState<string | null>(null);
+  const [currentChapter, setCurrentChapter] = useState<{ noteId: string; id: string | null } | null>(null);
   const [highlight, setHighlight] = useState<{ noteId: string; blockId: string | null } | null>(null);
   const open = enabled && preferredOpen;
   const setOpen = useCallback((value: boolean) => {
@@ -36,6 +55,9 @@ export function useNoteNavigationController({ noteId, enabled, blockListRef, pag
       const current = pageFrames.reduce<PageFrameModel | null>((best, frame) =>
         !best || distance(frame) < distance(best) ? frame : best, null);
       setCurrentFrameId(current?.id ?? null);
+      const chapterId = currentChapterAtReadingY(headingAnchors, readingY);
+      setCurrentChapter((previous) => previous?.noteId === noteId && previous.id === chapterId
+        ? previous : { noteId, id: chapterId });
     };
     const schedule = () => {
       cancelAnimationFrame(request);
@@ -53,7 +75,7 @@ export function useNoteNavigationController({ noteId, enabled, blockListRef, pag
       window.removeEventListener('resize', schedule);
       observer?.disconnect();
     };
-  }, [noteId, enabled, open, blockListRef, pageFrames]);
+  }, [noteId, enabled, open, blockListRef, pageFrames, headingAnchors]);
 
   useEffect(() => {
     if (!highlight || highlight.noteId !== noteId) return;
@@ -87,7 +109,7 @@ export function useNoteNavigationController({ noteId, enabled, blockListRef, pag
     scrollPageReadingToRect(blockListRef.current, { ...frame, x: 0 });
     setCurrentFrameId(frameId);
   };
-  const selectResult = (blockId: string | null, frameId: string, rect: CanvasRect) => {
+  const selectResult = useCallback((blockId: string | null, frameId: string, rect: CanvasRect) => {
     const blockList = blockListRef.current;
     if (blockId === null) {
       const appMain = blockList?.closest<HTMLElement>('[data-app-main-scroll="true"]');
@@ -99,7 +121,14 @@ export function useNoteNavigationController({ noteId, enabled, blockListRef, pag
     } else scrollPageReadingToRect(blockList, rect);
     setCurrentFrameId(frameId);
     setHighlight({ noteId, blockId });
-  };
+  }, [blockListRef, noteId]);
+  const selectHeading = useCallback((anchor: NoteNavigationHeadingAnchor) => {
+    scrollPageReadingToRect(blockListRef.current, anchor.rect);
+    setCurrentFrameId(anchor.frameId);
+    setCurrentChapter({ noteId, id: anchor.chapterId });
+    setHighlight({ noteId, blockId: anchor.blockId });
+  }, [blockListRef, noteId]);
   return { open, setOpen, toggle: () => setOpen(!preferredOpen), tab, setTab,
-    currentFrameId, selectPage, selectResult };
+    currentFrameId, selectPage, selectResult, selectHeading,
+    currentChapterId: currentChapter?.noteId === noteId ? currentChapter.id : null };
 }

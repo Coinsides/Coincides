@@ -13,6 +13,7 @@ import {
   type UseSlashCommandControllerOptions,
 } from './useSlashCommandController';
 import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
+import { createTextBlockContentV1 } from '../textFlowService';
 
 const blockText = 'alpha /hea';
 const rolledBackBlockText = 'alpha ';
@@ -57,6 +58,7 @@ const rejectBlockRollback: UseSlashCommandControllerOptions['rollbackBlockSlashS
 
 function renderSubject(
   saveBlock: UseSlashCommandControllerOptions['saveBlock'],
+  overrides: Partial<UseSlashCommandControllerOptions> = {},
 ) {
   let blockTextDrafts: Record<string, string> = {};
   let blockTextFlowDrafts: Record<string, TextBlockContentV1> = {};
@@ -124,6 +126,7 @@ function renderSubject(
     setInteractionState,
     templateOptions: [],
     activateDraft: vi.fn(),
+    ...overrides,
   };
   let renders = 0;
   const hook = renderHook(() => {
@@ -165,6 +168,10 @@ function renderSubject(
       options.focusedTextOwner = nextOwner;
       hook.rerender();
     },
+    setDraftOwnerReconciliation: (receipt: UseSlashCommandControllerOptions['draftOwnerReconciliation']) => {
+      options.draftOwnerReconciliation = receipt;
+      hook.rerender();
+    },
     setFocusBlockId,
     setInteractionState,
     textarea,
@@ -186,6 +193,87 @@ afterEach(() => {
 });
 
 describe('slash command async current behavior', () => {
+  it.each([
+    { text: 'Title\nBody /h2', multiline: true },
+    { text: 'Title /h2', multiline: false },
+  ])('finishes draft heading creation with multiline=$multiline through its existing owner receipt', async ({ text, multiline }) => {
+    const frames: FrameRequestCallback[] = [];
+    const requestFrame = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const cancelFrame = vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(() => undefined);
+    const owner = textFocusReceiptForDraft(12);
+    const persistDraft = vi.fn<UseSlashCommandControllerOptions['persistDraft']>(async () => undefined);
+    const onHeadingStructure = vi.fn<NonNullable<UseSlashCommandControllerOptions['onHeadingStructure']>>(async () => true);
+    const subject = renderSubject(vi.fn(async () => rejectedBlockSaveOutcome), {
+      draftText: text, draftTextRef: { current: text }, persistDraft, onHeadingStructure,
+    });
+    subject.setFocusedTextOwner(owner);
+    subject.textarea.dataset.blockId = owner.blockId;
+    subject.textarea.dataset.textFlowId = owner.textFlowId;
+    subject.textarea.dataset.textUnitId = owner.textUnitId;
+    subject.textarea.value = text;
+    act(() => subject.hook.result.current.handleDraftChange(text, text.length, subject.textarea));
+    await act(async () => {
+      await subject.hook.result.current.handleSelectSlashCommand(NOTE_SLASH_COMMANDS.find((command) => command.id === 'heading-2')!);
+    });
+    expect(persistDraft).toHaveBeenCalledOnce();
+    const persistedFlow = persistDraft.mock.calls[0][2]!.textFlow!;
+    expect(persistedFlow.units).toHaveLength(1);
+    expect(persistedFlow.units[0]).toMatchObject({ text: multiline ? 'Title\nBody' : 'Title', writing_role: multiline ? 'paragraph' : 'heading_2' });
+    expect(onHeadingStructure).not.toHaveBeenCalled();
+    const created: NoteBlock = { ...block, id: 'created-draft', content_json: { text_flow: persistedFlow }, plain_text: multiline ? 'Title\nBody' : 'Title' };
+    // Creation may publish its owner before React publishes the new block list.
+    subject.setDraftOwnerReconciliation({ from: owner, to: textFocusReceiptForBlock(created.id), selectionStart: 0, selectionEnd: 0 });
+    subject.setBlocks([block, created]);
+    await act(async () => { for (const callback of frames) callback(0); });
+    if (multiline) {
+      expect(onHeadingStructure).toHaveBeenCalledOnce();
+      const [headingBlock, request] = onHeadingStructure.mock.calls[0];
+      expect(headingBlock.id).toBe(created.id);
+      expect(request.previousTextFlow).toEqual(persistedFlow);
+      expect(request.nextTextFlow.units.map((unit) => [unit.writing_role, unit.text])).toEqual([
+        ['heading_2', 'Title'], ['paragraph', 'Body'],
+      ]);
+    } else {
+      expect(onHeadingStructure).not.toHaveBeenCalled();
+      expect(frames).toHaveLength(0);
+    }
+    subject.hook.unmount();
+    requestFrame.mockRestore();
+    cancelFrame.mockRestore();
+  });
+  it('preserves and shifts a retained inline anchor after removing a heading command before existing text', async () => {
+    const flow = createTextBlockContentV1('/h2 Title');
+    flow.inline_structures = [{ id: 'title-code', parent_text_unit_id: 'tu-1', semantic_kind: 'inline_code',
+      anchor_text: 'Title', anchor_range: { start: 4, end: 9 }, field_values: { language: 'text' }, metadata: {}, status: 'active' }];
+    const onHeadingStructure = vi.fn<NonNullable<UseSlashCommandControllerOptions['onHeadingStructure']>>(async () => true);
+    const subject = renderSubject(vi.fn(async () => rejectedBlockSaveOutcome), {
+      blockTextFlowDrafts: { [block.id]: flow }, onHeadingStructure,
+    });
+    subject.setCurrentText('/h2 Title');
+    subject.textarea.setSelectionRange(3, 3);
+    act(() => subject.hook.result.current.handleBlockTextChange(block.id, '/h2 Title', 3, subject.textarea));
+    expect(subject.hook.result.current.slashTarget?.trigger.query).toBe('h2');
+    await act(async () => { await subject.hook.result.current.handleSelectSlashCommand(subject.hook.result.current.slashCommands.find((command) => command.id === 'heading-2')!); });
+    const request = onHeadingStructure.mock.calls[0][1];
+    expect(request.nextTextFlow.units[0]).toMatchObject({ text: ' Title', writing_role: 'heading_2' });
+    expect(request.nextTextFlow.inline_structures).toEqual([{ ...flow.inline_structures[0], anchor_range: { start: 1, end: 6 } }]);
+    expect(flow.inline_structures[0].anchor_range).toEqual({ start: 4, end: 9 });
+  });
+  it.each(['heading', 'heading-2', 'heading-3'])('hands %s conversion to the heading host without a duplicate save', async (id) => {
+    const saveBlock = vi.fn(async () => rejectedBlockSaveOutcome);
+    const onHeadingStructure = vi.fn<NonNullable<UseSlashCommandControllerOptions['onHeadingStructure']>>(async () => true);
+    const subject = renderSubject(saveBlock, { onHeadingStructure });
+    const command = NOTE_SLASH_COMMANDS.find((candidate) => candidate.id === id)!;
+    await act(async () => { await subject.hook.result.current.handleSelectSlashCommand(command); });
+    expect(onHeadingStructure).toHaveBeenCalledOnce();
+    expect(onHeadingStructure.mock.calls[0][1]).toMatchObject({ inputType: 'formatHeading', headingUnitId: 'tu-1',
+      nextTextFlow: { units: [{ writing_role: command.writingRole, text: 'alpha' }] } });
+    expect(saveBlock).not.toHaveBeenCalled();
+    expect(subject.hook.result.current.slashTarget).toBeNull();
+  });
   it('keeps Enter commit behavior: removes the trigger and closes the menu', async () => {
     const subject = renderSubject(vi.fn(async () => rejectedBlockSaveOutcome));
     const event = blockKeyEvent('Enter');

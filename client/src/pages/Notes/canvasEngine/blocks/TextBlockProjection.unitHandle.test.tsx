@@ -81,6 +81,48 @@ function renderEditor(options: Partial<ProjectionProps> = {}, initial = syntheti
     ids: () => [...view.container.querySelectorAll<HTMLTextAreaElement>('textarea')].map((node) => node.dataset.textUnitId) };
 }
 
+describe('A4 unpaginated heading input requests', () => {
+  it('normalizes a multiline drop through the heading host without a duplicate ordinary edit', () => {
+    const onHeadingStructure = vi.fn();
+    const editor = renderEditor({ onHeadingStructure }, createTextBlockContentV1('Head', 'heading_1'));
+    fireEvent.drop(editor.container.querySelector('textarea')!, { clientX: 0, clientY: 0,
+      dataTransfer: { getData: () => JSON.stringify({ kind: 'block', block_id: 'source', text_preview: 'Alpha\nBeta' }) } });
+    expect(onHeadingStructure).toHaveBeenCalledOnce();
+    expect(onHeadingStructure.mock.calls[0][0].nextTextFlow.units.map((unit: { text: string; writing_role: string }) => [unit.text, unit.writing_role]))
+      .toEqual([['Alpha', 'heading_1'], ['Beta', 'paragraph'], ['Head', 'paragraph']]);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+  it('routes a heading handle to chapter movement and retains the existing unit menu', () => {
+    const onBeginHeadingMove = vi.fn();
+    const editor = renderEditor({ onBeginHeadingMove }, createTextBlockContentV1('Title', 'heading_2'));
+    pointer(editor.handle('tu-1'), 'pointerdown', 85, 110);
+    expect(onBeginHeadingMove).toHaveBeenCalledOnce();
+    expect(editor.row('tu-1').dataset.headingUnit).toBe('true');
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    fireEvent.click(editor.handle('tu-1'));
+    expect(screen.getByRole('menu', { name: 'Text unit' })).toBeTruthy();
+  });
+  it.each([1, 2, 3])('hands level %i prefix completion to the block structure host', (level) => {
+    const onHeadingStructure = vi.fn();
+    const editor = renderEditor({ onHeadingStructure }, createTextBlockContentV1('#'.repeat(level)));
+    const node = editor.container.querySelector('textarea')!;
+    fireEvent.change(node, { target: { value: '#'.repeat(level) + ' ', selectionStart: level + 1, selectionEnd: level + 1 } });
+    expect(onHeadingStructure).toHaveBeenCalledOnce();
+    expect(onHeadingStructure.mock.calls[0][0].nextTextFlow.units[0]).toMatchObject({ writing_role: `heading_${level}`, text: '' });
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+  it('uses Shift+Enter to leave a single-line heading for a body paragraph', () => {
+    const onHeadingStructure = vi.fn();
+    const editor = renderEditor({ onHeadingStructure }, createTextBlockContentV1('Title', 'heading_1'));
+    const node = editor.container.querySelector('textarea')!;
+    node.setSelectionRange(5, 5);
+    fireEvent.keyDown(node, { key: 'Enter', shiftKey: true });
+    expect(onHeadingStructure.mock.calls[0][0].nextTextFlow.units.map((unit: { writing_role: string }) => unit.writing_role))
+      .toEqual(['heading_1', 'paragraph']);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+});
+
 describe('B10 real unit handle events with synthetic content', () => {
   it('without a writing-surface move host, another block retains B10 outside-extraction behavior', () => {
     const source = renderEditor({ blockId: 'c3-source' });
@@ -115,7 +157,7 @@ describe('B10 real unit handle events with synthetic content', () => {
   });
 
   it.each([
-    ['Text', 'paragraph'], ['Heading', 'heading'], ['Quote', 'quote'],
+    ['Text', 'paragraph'], ['Heading', 'heading_1'], ['Quote', 'quote'],
     ['Bullet list', 'bullet_item'], ['Numbered list', 'numbered_item'],
     ['To-do list', 'todo_item'], ['Toggle list', 'toggle_item'], ['Code line', 'code_line'],
   ] satisfies Array<[string, TextUnitWritingRole]>)('smoke 1: click menu changes the unit role to %s', (label, role) => {

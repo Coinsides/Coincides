@@ -53,8 +53,20 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommand[] = [
     description: 'Section heading.',
     commandKind: 'convert_block',
     objectKind: 'writing_role',
-    writingRole: 'heading',
-    keywords: ['title', 'section', 'h1', 'h2'],
+    writingRole: 'heading_1',
+    keywords: ['title', 'section', 'h1'],
+  },
+  {
+    id: 'heading-2', label: 'Heading 2', group: 'default', description: 'Second-level chapter heading.',
+    commandKind: 'convert_block', objectKind: 'writing_role', writingRole: 'heading_2', keywords: ['h2'],
+  },
+  {
+    id: 'heading-3', label: 'Heading 3', group: 'default', description: 'Third-level chapter heading.',
+    commandKind: 'convert_block', objectKind: 'writing_role', writingRole: 'heading_3', keywords: ['h3'],
+  },
+  {
+    id: 'body', label: 'Body text', group: 'default', description: 'Restore this paragraph to body text.',
+    commandKind: 'convert_block', objectKind: 'writing_role', writingRole: 'paragraph', keywords: ['body', 'paragraph', 'normal'],
   },
   {
     id: 'bullet-list',
@@ -169,7 +181,7 @@ export const SLASH_COMMAND_GROUP_LABELS: Record<SlashCommandGroup, string> = {
 
 export function detectSlashTrigger(text: string, caretPosition = text.length): SlashTrigger | null {
   const beforeCaret = text.slice(0, caretPosition);
-  const match = beforeCaret.match(/(^|\s)\/([a-zA-Z]*)$/);
+  const match = beforeCaret.match(/(^|\s)\/([a-zA-Z][a-zA-Z0-9]*)?$/);
   if (!match || match.index === undefined) return null;
   const slashOffset = match[1]?.length || 0;
   const start = match.index + slashOffset;

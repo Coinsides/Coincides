@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Inbox } from 'lucide-react';
 import {
   NoteFloatingPanelLayer,
@@ -18,6 +18,8 @@ import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
 import { useNoteNavigationController } from '../hooks/useNoteNavigationController';
 import { useNoteAmbientAgentContextHint } from '../hooks/useNoteAmbientAgentContextHint';
 import { NoteNavigationPane } from './NoteNavigationPane';
+import { chapterNavigationAnchors, chapterProjectionForNavigation } from './NoteNavigationHeadings';
+import { buildNoteNavigationResults, type NoteNavigationResult } from '../noteNavigationSearch';
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import { NoteTruthBindingProvider } from '../NoteTruthBindingContext';
 import styles from '../../NoteDetail.module.css';
@@ -39,6 +41,14 @@ export interface NoteRuntimeDocumentLayerProps {
 
 export interface NoteRuntimeDocumentHandle {
   resumeEditingForExit: () => void;
+}
+
+/** Search can discover folded text using the full plan; jumps resolve the current reading plan. */
+function readingSearchDestination(result: NoteNavigationResult, input: NoteWritingSurfaceLayerProps): NoteNavigationResult | null {
+  if (result.target === 'header') return result;
+  return buildNoteNavigationResults({ ...input,
+    visibleBlocks: input.visibleBlocks.filter((block) => block.id === result.blockId),
+  }, result.match).find((candidate) => candidate.id === result.id) ?? null;
 }
 
 export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, NoteRuntimeDocumentLayerProps>(function NoteRuntimeDocumentLayer({
@@ -69,6 +79,14 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   const pageGapsFolded = gapPreference.noteId === writingSurfaceProps.noteId && gapPreference.folded;
   const pageGapPresentation = useMemo(() => createPageGapPresentation(writingSurfaceProps.noteCanvasRuntime.pageFrames,
     surfaceMode === 'page' && pageGapsFolded), [writingSurfaceProps.noteCanvasRuntime.pageFrames, surfaceMode, pageGapsFolded]);
+  const chapterProjection = useMemo(() => chapterProjectionForNavigation(writingSurfaceProps),
+    [writingSurfaceProps.chapterPresentation?.projection, writingSurfaceProps.visibleBlocks,
+      writingSurfaceProps.blockTextFlowDrafts, writingSurfaceProps.noteCanvasRuntime.pageFrameExtensions]);
+  const headingAnchors = useMemo(() => chapterNavigationAnchors(chapterProjection, writingSurfaceProps,
+    pageGapPresentation.offsetByFrameId), [chapterProjection, writingSurfaceProps.noteCanvasRuntime,
+    writingSurfaceProps.pageOffsetX, pageGapPresentation]);
+  const [pendingChapter, setPendingChapter] = useState<{ noteId: string; id: string } | null>(null);
+  const [pendingSearchResult, setPendingSearchResult] = useState<NoteNavigationResult | null>(null);
   const overview = useNoteOverviewController({
     noteId: writingSurfaceProps.noteId,
     surfaceMode,
@@ -80,7 +98,84 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     enabled: surfaceMode === 'page' && !overview.open,
     blockListRef: writingSurfaceProps.blockListRef,
     pageFrames: pageGapPresentation.pageFrames,
+    headingAnchors,
   });
+  const presentation = writingSurfaceProps.chapterPresentation;
+  const chapterNeedsReveal = (id: string) => {
+    let chapter = chapterProjection.chapters.find((candidate) => candidate.id === id);
+    while (chapter) {
+      if (presentation?.collapsedChapterIds.has(chapter.id)) return true;
+      const parentId = chapter.parentId;
+      chapter = chapterProjection.chapters.find((candidate) => candidate.id === parentId);
+    }
+    return false;
+  };
+  const selectChapter = (id: string) => {
+    setPendingSearchResult(null);
+    presentation?.onRevealChapter(id);
+    if (chapterNeedsReveal(id)) {
+      setPendingChapter({ noteId: writingSurfaceProps.noteId, id });
+      return;
+    }
+    setPendingChapter(null);
+    const anchor = headingAnchors.find((candidate) => candidate.chapterId === id);
+    if (anchor) navigation.selectHeading(anchor);
+  };
+  useEffect(() => {
+    if (!pendingChapter) return;
+    if (pendingChapter.noteId !== writingSurfaceProps.noteId
+      || !chapterProjection.chapters.some((chapter) => chapter.id === pendingChapter.id)) {
+      setPendingChapter(null);
+      return;
+    }
+    if (chapterNeedsReveal(pendingChapter.id)) return;
+    const anchor = headingAnchors.find((candidate) => candidate.chapterId === pendingChapter.id);
+    if (!anchor) return;
+    navigation.selectHeading(anchor);
+    setPendingChapter(null);
+  }, [pendingChapter, writingSurfaceProps.noteId, presentation?.collapsedChapterIds, chapterProjection,
+    headingAnchors, navigation.selectHeading]);
+  const chapterForSearchResult = (result: NoteNavigationResult) => {
+    for (let index = chapterProjection.chapters.length - 1; index >= 0; index -= 1) {
+      const chapter = chapterProjection.chapters[index];
+      if (result.blockId && chapter.blockIds.includes(result.blockId)) return chapter;
+    }
+    return null;
+  };
+  const jumpToSearchResult = (result: NoteNavigationResult) => navigation.selectResult(result.blockId, result.frameId, {
+    ...result.rect, y: result.rect.y + (pageGapPresentation.offsetByFrameId.get(result.frameId) || 0),
+  });
+  const selectSearchResult = (result: NoteNavigationResult) => {
+    if (result.noteId !== writingSurfaceProps.noteId) return;
+    setPendingChapter(null);
+    const chapter = chapterForSearchResult(result);
+    if (chapter && chapterNeedsReveal(chapter.id)) {
+      setPendingSearchResult(result);
+      presentation?.onRevealChapter(chapter.id);
+      return;
+    }
+    setPendingSearchResult(null);
+    const destination = readingSearchDestination(result, writingSurfaceProps);
+    if (destination) jumpToSearchResult(destination);
+  };
+  useEffect(() => {
+    if (!pendingSearchResult) return;
+    const blocks = presentation?.searchSource?.blocks ?? writingSurfaceProps.allBlocks ?? writingSurfaceProps.visibleBlocks;
+    if (pendingSearchResult.noteId !== writingSurfaceProps.noteId
+      || !blocks.some((block) => block.id === pendingSearchResult.blockId)) {
+      setPendingSearchResult(null);
+      return;
+    }
+    const chapter = chapterForSearchResult(pendingSearchResult);
+    if (chapter && chapterNeedsReveal(chapter.id)) return;
+    const destination = readingSearchDestination(pendingSearchResult, writingSurfaceProps);
+    if (!destination) return;
+    jumpToSearchResult(destination);
+    setPendingSearchResult(null);
+  }, [pendingSearchResult, writingSurfaceProps.noteId, writingSurfaceProps.visibleBlocks, writingSurfaceProps.allBlocks,
+    writingSurfaceProps.blockTextDrafts, writingSurfaceProps.blockTextFlowDrafts, writingSurfaceProps.blockFieldDrafts,
+    writingSurfaceProps.noteCanvasRuntime, writingSurfaceProps.pageOffsetX, presentation?.searchSource,
+    presentation?.collapsedChapterIds, chapterProjection, pageGapPresentation, navigation.selectResult]);
   useNoteAmbientAgentContextHint({
     noteId: writingSurfaceProps.noteId,
     surfaceMode,
@@ -117,10 +212,9 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     data-note-navigation-with-tray={tray ? 'true' : undefined}>
     {navigation.open && <NoteNavigationPane writingSurfaceProps={writingSurfaceProps}
       tab={navigation.tab} onTabChange={navigation.setTab} currentPageFrameId={navigation.currentFrameId}
+      chapterProjection={chapterProjection} currentChapterId={navigation.currentChapterId} onSelectChapter={selectChapter}
       onSelectPage={navigation.selectPage}
-      onSelectResult={(result) => navigation.selectResult(result.blockId, result.frameId, {
-        ...result.rect, y: result.rect.y + (pageGapPresentation.offsetByFrameId.get(result.frameId) || 0),
-      })}
+      onSelectResult={selectSearchResult}
       onClose={() => navigation.setOpen(false)} />}
     {document}
   </div> : document;

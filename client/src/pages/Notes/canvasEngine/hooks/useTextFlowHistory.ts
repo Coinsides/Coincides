@@ -129,6 +129,15 @@ export function useTextFlowHistory(options: Options) {
     let replaying = false;
     let templatePending = false;
     let documentPending = false;
+    let batchEntries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] | null = null;
+    let reserveBatch: (() => boolean) | null = null;
+    const pushEntry = (entry: RuntimeHistoryEntry, settings?: { skipBoundary?: boolean }): boolean => {
+      if (batchEntries && entry.type === 'reversibleEdit') {
+        if (!reserveBatch?.()) return false;
+        batchEntries.push(entry); return true;
+      }
+      return latest.current.history.current?.pushHistoryEntry(entry, settings) ?? false;
+    };
     // Recovery attempts are keyed by the same immutable history entry, never a second undo stack.
     const failures = new Map<TextFlowEditTransaction, 'before' | 'after'>();
     const lastSave = new Map<string, { transaction: TextFlowEditTransaction; side: 'before' | 'after'; outcome: BlockSaveOutcome }>();
@@ -526,7 +535,7 @@ export function useTextFlowHistory(options: Options) {
       onSeal(transaction) {
         if (!current()) return;
         const host = latest.current.history.current;
-        if (!host?.pushHistoryEntry({
+        if (!host || !pushEntry({
           type: 'reversibleEdit',
           undo: () => persist(transaction, 'before', true),
           redo: () => persist(transaction, 'after', true),
@@ -534,7 +543,30 @@ export function useTextFlowHistory(options: Options) {
         void host.enqueueRuntimeHistoryOperation(() => persist(transaction, 'after', false));
       },
     });
-    return { token, current, session, failures, lastSave, persist, templateFailures, lastTemplateSave, persistTemplate, confirmBlock,
+    return { token, current, session, failures, lastSave, persist, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
+      async runBatch(operation: (record: (entry: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>) => void) => Promise<boolean>) {
+        if (batchEntries || !current()) return false;
+        const entries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] = [];
+        let cursor: number | null = null;
+        const replay = async (side: 'before' | 'after') => {
+          if (!current()) return false;
+          cursor ??= entries.length;
+          while (side === 'before' ? cursor > 0 : cursor < entries.length) {
+            const index = side === 'before' ? cursor - 1 : cursor;
+            if (!await entries[index][side === 'before' ? 'undo' : 'redo']() || !current()) return false;
+            cursor += side === 'before' ? -1 : 1;
+          }
+          return true;
+        };
+        let reserved = false;
+        reserveBatch = () => reserved || (reserved = latest.current.history.current?.pushHistoryEntry({ type: 'reversibleEdit',
+          undo: () => replay('before'), redo: () => replay('after') }, { skipBoundary: true }) ?? false);
+        batchEntries = entries;
+        try { return await operation((entry) => {
+          if (!pushEntry(entry)) throw new Error('Heading history is unavailable');
+        }); }
+        finally { batchEntries = null; reserveBatch = null; }
+      },
       documentFailures, persistDocument, setDocumentPending,
       setTemplatePending(value: boolean) { templatePending = value; if (current()) setReplayScope(value ? token : null); },
       isReplaying: () => replaying || templatePending || documentPending };
@@ -605,7 +637,7 @@ export function useTextFlowHistory(options: Options) {
     };
     // Seal and reserve before applying drafts or awaiting work. No per-block
     // controller invocation below is allowed to create another history entry.
-    if (!host.pushHistoryEntry({ type: 'reversibleEdit',
+    if (!scope.pushEntry({ type: 'reversibleEdit',
       undo: () => scope.persistDocument(transaction, 'before', true), redo: () => scope.persistDocument(transaction, 'after', true),
     }, { skipBoundary: true })) return false;
     scope.setDocumentPending(true);
@@ -644,7 +676,8 @@ export function useTextFlowHistory(options: Options) {
       scope.setDocumentPending(false);
     }
   }, [apply, boundary, scope]);
-  const extractUnit = useCallback(async (block: NoteBlock, textUnitId: string, template: TemplateOption, layout: BlockBoxLayout): Promise<boolean> => {
+  const extractUnit = useCallback(async (block: NoteBlock, textUnitId: string, template: TemplateOption, layout: BlockBoxLayout,
+    onExtracted?: (created: NoteBlock) => void): Promise<boolean> => {
     if (!scope.current() || scope.templateFailures.size || scope.documentFailures.size || !boundary()) return false;
     const api = latest.current;
     const host = api.history.current;
@@ -674,12 +707,16 @@ export function useTextFlowHistory(options: Options) {
           after: { content_json: contentForEditedTextFlowBlock(live, split.remaining), plain_text: plainTextFromTextFlow(split.remaining) },
         } },
     });
-    if (!host.pushHistoryEntry({ type: 'reversibleEdit',
+    if (!scope.pushEntry({ type: 'reversibleEdit',
       undo: () => scope.persistDocument(transaction, 'before', true),
       redo: () => scope.persistDocument(transaction, 'after', true),
     }, { skipBoundary: true })) return false;
     scope.setDocumentPending(true);
-    try { return await host.enqueueRuntimeHistoryOperation(() => scope.persistDocument(transaction, 'after')); }
+    try {
+      const saved = await host.enqueueRuntimeHistoryOperation(() => scope.persistDocument(transaction, 'after'));
+      if (saved && transaction.extraction?.createdBlock) onExtracted?.(transaction.extraction.createdBlock);
+      return saved;
+    }
     finally { scope.setDocumentPending(false); }
   }, [boundary, scope]);
   const moveUnit = useCallback(async (
@@ -725,7 +762,7 @@ export function useTextFlowHistory(options: Options) {
       move: { sourceBlock: source, targetBlock: target, textUnitId, idMapping: moved.idMapping, appliedSide: 'before',
         sourcePayload: payloads(source, sourceFlow, moved.source), targetPayload: payloads(target, targetFlow, moved.target) },
     });
-    if (!host.pushHistoryEntry({ type: 'reversibleEdit',
+    if (!scope.pushEntry({ type: 'reversibleEdit',
       undo: () => scope.persistDocument(transaction, 'before', true),
       redo: () => scope.persistDocument(transaction, 'after', true),
     }, { skipBoundary: true })) return false;
@@ -781,7 +818,7 @@ export function useTextFlowHistory(options: Options) {
       typingRecovery: beforeFlow ? { textFlow: beforeFlow, selection: beforeSelection,
         annotationRanges: beforeAnnotationRanges, boardRanges: beforeBoardRanges } : undefined,
     });
-    if (!host.pushHistoryEntry({ type: 'reversibleEdit',
+    if (!scope.pushEntry({ type: 'reversibleEdit',
       undo: () => scope.persistTemplate(transaction, 'before', true), redo: () => scope.persistTemplate(transaction, 'after', true),
     }, { skipBoundary: true })) return null;
     scope.setTemplatePending(true);
@@ -857,6 +894,10 @@ export function useTextFlowHistory(options: Options) {
     }
   }, [boundary, options.history, scope]);
   return { applyEdit, applyDocumentEdit, extractUnit, moveUnit, applyTemplateToBlock, boundary, saveBlock, flush,
+    runStructureBatch: async (operation: Parameters<typeof scope.runBatch>[0]) => { await flush(); return scope.runBatch(operation); },
+    readLiveBlock: (id: string) => latest.current.blocks.find((block) => block.id === id),
+    readLiveFlow: (id: string) => latest.current.blockTextFlowDrafts[id]
+      ?? getTextFlowContent(latest.current.blocks.find((block) => block.id === id)?.content_json ?? {}),
     isReplaying: () => scope.isReplaying() || Boolean(latest.current.history.current?.isReplaying?.()),
     recoveryBlockIds: scope.isReplaying() ? [] : [...new Set([
       ...[...scope.templateFailures.keys()].map((transaction) => transaction.blockId),

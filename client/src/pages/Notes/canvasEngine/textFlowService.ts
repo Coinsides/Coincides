@@ -35,6 +35,9 @@ function writingRoleValue(value: unknown): TextUnitWritingRole {
   const role = stringValue(value);
   if (
     role === 'heading'
+    || role === 'heading_1'
+    || role === 'heading_2'
+    || role === 'heading_3'
     || role === 'quote'
     || role === 'bullet_item'
     || role === 'numbered_item'

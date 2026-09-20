@@ -4096,7 +4096,7 @@ function testTextUnitEditorService(): void {
     '> Quote',
     'Plain paragraph',
   ].join('\n'));
-  assertEqual(parsedUnits[0].writing_role, 'heading', 'markdown heading parses to heading role');
+  assertEqual(parsedUnits[0].writing_role, 'heading_1', 'markdown heading parses to level-one heading role');
   assertEqual(parsedUnits[0].text, 'Topic', 'markdown heading removes heading marker');
   assertEqual(parsedUnits[1].writing_role, 'numbered_item', 'numbered line parses to numbered role');
   assertEqual(parsedUnits[2].indent_level, 1, 'indented child line keeps indent level');
@@ -4166,7 +4166,7 @@ function testSlashCommandFoundation(): void {
   const todo = NOTE_SLASH_COMMANDS.find((command) => command.id === 'todo-list');
   const toggle = NOTE_SLASH_COMMANDS.find((command) => command.id === 'toggle-list');
   assert(text && text.commandKind === 'create_block' && text.writingRole === 'paragraph', 'text command creates paragraph writing seed');
-  assert(heading && heading.commandKind === 'convert_block' && heading.writingRole === 'heading', 'heading command is a writing-role conversion seed');
+  assert(heading && heading.commandKind === 'convert_block' && heading.writingRole === 'heading_1', 'heading command is a level-one writing-role conversion seed');
   assert(definition && definition.commandKind === 'annotation_action', 'definition is an annotation action');
   assert(definition && definition.objectKind === 'annotation', 'definition targets AnnotationTruth, not TextUnit role metadata');
   assert(definition && !definition.templateKey, 'definition slash command no longer points at a block template');

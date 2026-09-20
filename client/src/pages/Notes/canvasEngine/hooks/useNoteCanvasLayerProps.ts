@@ -133,6 +133,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   };
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
+    chapterPresentation: input.chapterPresentation,
     continuousWeb: input.note.page_format === 'screen_note',
     paperHeader: {
       titleDraft: input.titleDraft, descriptionDraft: input.descriptionDraft,
@@ -243,6 +244,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onApplyBlockTextFlowEdit: input.onApplyBlockTextFlowEdit,
     onApplyDocumentTextFlowEdit: input.onApplyDocumentTextFlowEdit,
     onExtractTextUnit: input.onExtractTextUnit,
+    onHeadingStructure: input.onHeadingStructure,
     onMoveTextUnit: input.onMoveTextUnit,
     onTextEditBoundary: input.onTextEditBoundary,
     onClearSlashTarget: input.onClearSlashTarget,

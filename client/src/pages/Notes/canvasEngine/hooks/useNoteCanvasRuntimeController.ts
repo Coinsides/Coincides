@@ -4,6 +4,8 @@ import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperations
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useNotePageFlow } from './useNotePageFlow';
+import { useChapterPresentation } from './useChapterPresentation';
+import { useHeadingStructureController } from './useHeadingStructureController';
 import { createDefaultDraftLayout } from '../pageFrameService';
 import { useRuntimePresentationController } from './useRuntimePresentationController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
@@ -102,6 +104,7 @@ export function useNoteCanvasRuntimeController() {
     coordinateContract,
     blocks,
     sortedBlocks,
+    reorderBlocks,
     loading,
     loadError,
     titleDraft,
@@ -290,14 +293,31 @@ export function useNoteCanvasRuntimeController() {
     surfacePolicy,
   });
 
-  const { plan: pageFlowPlan, layouts: blockLayouts } = useNotePageFlow({
+  const chapterBoundaryRef = useRef<() => boolean>(() => false);
+  const headingBusyRef = useRef<() => boolean>(() => false);
+  const chapterMoveContext = useRef<{
+    layouts: Record<string, BlockBoxLayout>;
+    collection: typeof pageFrameCollection;
+    plan?: import('../documentPageFlowService').DocumentPageFlowPlan;
+  }>({ layouts: unpaginatedBlockLayouts, collection: pageFrameCollection });
+  const chapters = useChapterPresentation({ noteId, blocks: visibleBlocks, orderedBlocks: sortedBlocks,
+    layouts: unpaginatedBlockLayouts, flowDrafts: blockTextFlowDrafts, coverFrameId,
+    readOnly: sourceProjectionPolicy.contentReadOnly, reorderBlocks, history: textHistoryHostRef,
+    beforeStructure: () => chapterBoundaryRef.current(),
+    coordinateContract, getMoveContext: () => chapterMoveContext.current, persistLayoutSnapshot, whenWritesIdle: whenIdle,
+  });
+  const { plan: pageFlowPlan, layouts: blockLayouts, fullPlan: fullPageFlowPlan, fullLayouts: fullBlockLayouts } = useNotePageFlow({
     coverFrameId,
-    noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving,
+    noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving
+      && !chapters.isMoving && !headingBusyRef.current(),
     coordinateContract, blocks: visibleBlocks, layouts: unpaginatedBlockLayouts,
     pageFrames, collection: pageFrameCollection, typography: documentTypographyProfile,
     textDrafts: blockTextDrafts, flowDrafts: blockTextFlowDrafts,
     saveCollection: savePageFrameCollection, persistLayout: persistBlockLayout,
+    hiddenBlockIds: chapters.hiddenBlockIds,
   });
+  chapterMoveContext.current = { layouts: fullBlockLayouts, collection: fullPageFlowPlan?.collection || pageFrameCollection,
+    plan: fullPageFlowPlan };
   const flowPageFrameCollection = pageFlowPlan?.collection || pageFrameCollection;
   const defaultDraftLayout = useMemo(() => pageFlowPlan ? createDefaultDraftLayout({
     ...blockLayouts,
@@ -324,6 +344,14 @@ export function useNoteCanvasRuntimeController() {
     createDraftBlock, saveDraftBlockPlacement, discardDraftBlock, trashBlock, restoreBlock, transferTextUnit,
   });
   const { applyEdit: applyBlockTextFlowEdit, saveBlock } = textHistory;
+  const headingStructure = useHeadingStructureController({ noteId, blocks: sortedBlocks, layouts: blockLayouts,
+    coverFrameId, readOnly: sourceProjectionPolicy.contentReadOnly || chapters.isMoving, template: defaultTextTemplate, textHistory, reorderBlocks,
+    onFocusBlock: setFocusBlockId,
+    whenWritesIdle: whenIdle,
+    onFailure: () => addToast('error', 'Heading changes could not be completed. Undo to restore the previous text.'),
+  });
+  headingBusyRef.current = headingStructure.isBusy;
+  chapterBoundaryRef.current = () => !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary();
   wallBoundaryRef.current = () => layoutMode && textHistory.boundary();
   const rollbackBlockSlashSession = useSlashBlockRollbackController({
     applyBlockTextFlowEdit,
@@ -377,8 +405,11 @@ export function useNoteCanvasRuntimeController() {
   } = useRuntimeBlockOperationsController({
     noteId,
     generation: textHistoryGeneration,
-    beforeHistoryBoundary: textHistory.boundary,
+    beforeHistoryBoundary: () => !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
     beforeTextStructure: textHistory.boundary,
+    onHeadingStructure: headingStructure.onHeadingStructure,
+    canUseHeading: (block) => block ? headingStructure.canUseHeading(block)
+      : !coverFrameId || defaultDraftLayout.frame_id !== coverFrameId,
     applyBlockTextFlowEdit,
     trayDropTargetRef,
     onMoveBlockToTray: (blockId, before) => { void tray.moveBlockToTray(blockId, before); },
@@ -546,7 +577,7 @@ export function useNoteCanvasRuntimeController() {
     groupFolders,
     purposeFrames,
     sourceReferenceCount,
-    contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying || walls.saving,
+    contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying || walls.saving || headingStructure.busy || chapters.isMoving,
     recoveryBlockIds: sourceProjectionPolicy.contentReadOnly || historyReplaying ? [] : textHistory.recoveryBlockIds,
     surfaceMode,
     surfacePolicy,
@@ -556,7 +587,9 @@ export function useNoteCanvasRuntimeController() {
     trashedBlocks,
     restoringBlockId,
     viewportTransform,
-    visibleBlocks,
+    visibleBlocks: chapters.visibleBlocks,
+    chapterPresentation: chapters.presentation,
+    exportContent: { blocks: visibleBlocks, layouts: fullBlockLayouts, pageFlowPlan: fullPageFlowPlan },
     pageReadingViewState,
     pageReadingViewport,
     onPageReadingGearChange: setPageReadingGear,
@@ -564,7 +597,9 @@ export function useNoteCanvasRuntimeController() {
     onPageReadingViewportChange: setPageReadingViewport,
     onCreateBlock: createBlock,
     onActivateDraft: activateDraft,
-    onBeginMoveBlock: (...args) => { if (textHistory.boundary()) beginMoveBlock(...args); },
+    onBeginMoveBlock: (...args) => {
+      if (!chapters.beginChapterMove(args[0], args[1]) && textHistory.boundary()) beginMoveBlock(...args);
+    },
     onBeginResizeBlock: (...args) => { if (textHistory.boundary()) beginResizeBlock(...args); },
     onBlockKeyDown: (...args) => {
       const event = args[2];
@@ -575,10 +610,16 @@ export function useNoteCanvasRuntimeController() {
     onBlockTextChange: (...args) => { if (!textHistory.isReplaying()) handleBlockTextChange(...args); },
     onBlockTextFlowChange: setBlockTextFlowDrafts,
     onApplyBlockTextFlowEdit: applyBlockTextFlowEdit,
-    onApplyDocumentTextFlowEdit: textHistory.applyDocumentEdit,
+    onHeadingStructure: headingStructure.onHeadingStructure,
+    onApplyDocumentTextFlowEdit: headingStructure.onDocumentEdit,
     onExtractTextUnit: (block: Parameters<typeof textHistory.extractUnit>[0], unitId: string, layout: Parameters<typeof textHistory.extractUnit>[3]) =>
-      textHistory.extractUnit(block, unitId, defaultTextTemplate, layout),
-    onMoveTextUnit: textHistory.moveUnit,
+      chapters.projection.chapters.some((chapter) => chapter.blockId === block.id) ? Promise.resolve(false)
+        : textHistory.extractUnit(block, unitId, defaultTextTemplate, layout),
+    onMoveTextUnit: (block, unitId, target, targetUnitId, edge) => {
+      const chapter = chapters.projection.chapters.find((entry) => entry.blockId === block.id && entry.unitId === unitId);
+      if (!chapter && chapters.projection.chapters.some((entry) => entry.blockId === target.id)) return Promise.resolve(false);
+      return chapter ? chapters.moveChapter(chapter.id, target.id, edge) : textHistory.moveUnit(block, unitId, target, targetUnitId, edge);
+    },
     onTextEditBoundary: sourceProjectionPolicy.contentReadOnly ? undefined : textHistory.boundary,
     onApplyBlockEditRecovery: applyBlockEditRecovery,
     onInspectBlockEditRecovery: inspectBlockEditRecovery,

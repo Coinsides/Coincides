@@ -11,6 +11,7 @@ import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameMode
 export function useNotePageFlow(input: {
   noteId?: string; enabled: boolean; coordinateContract?: CoordinateContract;
   coverFrameId?: string | null;
+  hiddenBlockIds?: ReadonlySet<string>;
   blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>; pageFrames: PageFrameModel[];
   collection: PageFrameCollectionModel | null; typography: DocumentTypographyProfile;
   textDrafts: Record<string, string>; flowDrafts: Record<string, TextBlockContentV1>;
@@ -69,5 +70,15 @@ export function useNotePageFlow(input: {
       setPersistenceRevision((value) => value + 1);
     });
   }, [input.enabled, input.noteId, plan, planSignature, persistenceRevision]);
-  return { plan, layouts };
+  // Folding changes only this second, disposable reading projection. The effect
+  // above always sees the complete plan, including hidden chapter contents.
+  const presentationPlan = useMemo(() => plan && input.hiddenBlockIds?.size
+    ? resolveDocumentPageFlowPlan({ collection: plan.collection,
+      blocks: blocks.filter((block) => !input.hiddenBlockIds!.has(block.blockId)),
+      coverFrameId: input.coverFrameId, documentTypography: input.typography,
+      coordinateContract: input.coordinateContract, measureTextLines: measurer,
+    }) : plan, [plan, blocks, input.hiddenBlockIds, input.coverFrameId, input.typography, input.coordinateContract, measurer]);
+  const presentationLayouts = useMemo(() => presentationPlan === plan ? layouts
+    : pageFlowFirstLayouts(presentationPlan!, input.layouts), [presentationPlan, plan, layouts, input.layouts]);
+  return { plan: presentationPlan, layouts: presentationLayouts, fullPlan: plan, fullLayouts: layouts };
 }

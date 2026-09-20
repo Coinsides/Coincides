@@ -2,6 +2,7 @@
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, normalizeDocumentTypographyProfile } from './typographyProfileService';
 import type { TextUnitWritingRole } from './runtimeDataTypes';
 import type { DocumentTypographyProfile } from './types';
+import { headingLevelForRole } from './headingRoleService';
 
 // Shared with .blockBox (7px 9px padding, 1px border) and .textUnitRow.
 export const TYPOGRAPHY_TEXT_BLOCK_MIN_HEIGHT = 42;
@@ -10,6 +11,23 @@ export const TYPOGRAPHY_TEXT_BLOCK_VERTICAL_CHROME = 16;
 export const TYPOGRAPHY_UNIT_INDENT_PX = 24;
 export const TYPOGRAPHY_UNIT_MIN_HEIGHT = 28;
 export const TYPOGRAPHY_MEASUREMENT_TOLERANCE_PX = 0.5;
+
+function headingTypographyRatios(role: TextUnitWritingRole): { font: number; line: number } | null {
+  const level = headingLevelForRole(role);
+  return level === 1 ? { font: 1.4, line: 28.35 }
+    : level === 2 ? { font: 1.2, line: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx * 1.15 }
+      : level === 3 ? { font: 1.1, line: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx * 1.05 } : null;
+}
+
+/** The unpaginated editor shares the metrics ratios and inherits the other skin controls. */
+export function headingTextCssProperties(role: TextUnitWritingRole): Record<string, string> {
+  const ratios = headingTypographyRatios(role);
+  return ratios ? {
+    fontSize: `calc(var(--document-font-size, ${DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontSizePx}px) * ${ratios.font})`,
+    lineHeight: `calc(var(--document-line-height, ${DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx}px) * ${ratios.line / DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx})`,
+    fontWeight: '780',
+  } : {};
+}
 
 export interface TypographyMeasurementUnit {
   hidden?: boolean;
@@ -80,6 +98,8 @@ export function typographyTextMetrics(input: TypographyLineMeasurementInput, uni
 }): TypographyTextMetrics {
   const profile = normalizeDocumentTypographyProfile(input.typography);
   const role = unit.writingRole ?? 'paragraph';
+  const headingLevel = headingLevelForRole(role);
+  const headingRatios = headingTypographyRatios(role);
   const indentLevel = Math.max(0, Math.min(6, Math.trunc(unit.indentLevel ?? 0)));
   const markerWidth = ['bullet_item', 'numbered_item', 'todo_item', 'toggle_item'].includes(role) ? 29 : 0;
   // Keep the existing default role hierarchy while all roles follow the same
@@ -89,15 +109,15 @@ export function typographyTextMetrics(input: TypographyLineMeasurementInput, uni
   return {
     fontFamily: role === 'code_line'
       ? 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace' : profile.fontFamily,
-    fontSizePx: role === 'heading' ? 21 * fontScale : role === 'code_line' ? 14 * fontScale : profile.fontSizePx,
-    fontWeight: role === 'heading' ? 780 : 400,
-    lineHeightPx: role === 'heading' ? 28.35 * lineScale : role === 'code_line' ? 21.7 * lineScale : profile.lineHeightPx,
+    fontSizePx: headingRatios ? profile.fontSizePx * headingRatios.font : role === 'code_line' ? 14 * fontScale : profile.fontSizePx,
+    fontWeight: headingLevel ? 780 : 400,
+    lineHeightPx: headingRatios ? lineScale * headingRatios.line : role === 'code_line' ? 21.7 * lineScale : profile.lineHeightPx,
     paragraphSpacingPx: profile.paragraphSpacingPx,
     textWidth: Math.max(1, input.width - TYPOGRAPHY_TEXT_BLOCK_HORIZONTAL_CHROME
       - indentLevel * TYPOGRAPHY_UNIT_INDENT_PX - markerWidth - (role === 'quote' ? 14 : 0)),
     indentLevel,
     writingRole: role,
-    rowMarginPx: role === 'heading' ? 5 : 0,
+    rowMarginPx: headingLevel ? 5 : 0,
   };
 }
 

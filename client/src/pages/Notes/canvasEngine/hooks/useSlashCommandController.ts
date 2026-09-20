@@ -31,6 +31,7 @@ import {
   createTextBlockContentV1,
   getTextFlowContent,
   projectTextFlowContent,
+  replaceTextUnitText,
   TEXT_FLOW_CONTENT_KEY,
 } from '../textFlowService';
 import {
@@ -60,6 +61,7 @@ import type { RollbackBlockSlashSession } from './useSlashBlockRollbackControlle
 import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 import type { ApplyBlockTextFlowEdit } from './useBlockTextFlowEditController';
 import type { TextFlowEditSelection } from '../textFlowEditSession';
+import { headingLevelForRole, type HeadingTextFlowStructureRequest } from '../headingRoleService';
 
 export type { SlashTarget } from '../slashCommandReducer';
 
@@ -82,6 +84,8 @@ function textareaMatchesOwner(
 
 export interface UseSlashCommandControllerOptions {
   applyBlockTextFlowEdit?: ApplyBlockTextFlowEdit;
+  onHeadingStructure?: (block: NoteBlock, request: HeadingTextFlowStructureRequest) => boolean | Promise<boolean>;
+  canUseHeading?: (block: NoteBlock | null) => boolean;
   beforeTextStructure?: () => boolean;
   addToast: (type: Toast['type'], message: string) => void;
   applyTemplateToBlock: (
@@ -121,6 +125,8 @@ export interface UseSlashCommandControllerOptions {
 
 export function useSlashCommandController({
   applyBlockTextFlowEdit,
+  onHeadingStructure,
+  canUseHeading,
   beforeTextStructure,
   addToast,
   applyTemplateToBlock,
@@ -155,8 +161,43 @@ export function useSlashCommandController({
   const slashOwnerElementRef = useRef<HTMLTextAreaElement | null>(null);
   const focusedTextOwnerRef = useRef(focusedTextOwner);
   const blockTextDraftsRef = useRef(blockTextDrafts);
+  const pendingDraftHeadingRef = useRef<{
+    owner: TextFocusReceipt;
+    role: TextUnitWritingRole;
+    caret: number;
+  } | null>(null);
+  const draftHeadingHostRef = useRef({ blocks, blockTextFlowDrafts, draftOwnerReconciliation, onHeadingStructure, addToast });
   focusedTextOwnerRef.current = focusedTextOwner;
   blockTextDraftsRef.current = blockTextDrafts;
+  draftHeadingHostRef.current = { blocks, blockTextFlowDrafts, draftOwnerReconciliation, onHeadingStructure, addToast };
+
+  useLayoutEffect(() => {
+    const pending = pendingDraftHeadingRef.current;
+    if (!pending || !draftOwnerReconciliation
+      || !textFocusReceiptsEqual(pending.owner, draftOwnerReconciliation.from)) return;
+    // The existing draft reconciliation is the creation receipt. Allow its
+    // acknowledged block to reach the live host before starting unit transfers.
+    const frame = requestAnimationFrame(() => {
+      if (pendingDraftHeadingRef.current !== pending) return;
+      pendingDraftHeadingRef.current = null;
+      const host = draftHeadingHostRef.current;
+      if (!textFocusReceiptsEqual(host.draftOwnerReconciliation?.from, pending.owner)
+        || !textFocusReceiptsEqual(host.draftOwnerReconciliation?.to, draftOwnerReconciliation.to)) return;
+      const block = host.blocks.find((candidate) => candidate.id === draftOwnerReconciliation.to.blockId);
+      const flow = block && (host.blockTextFlowDrafts[block.id] || getTextFlowContent(block.content_json));
+      const unitId = draftOwnerReconciliation.to.textUnitId;
+      const unit = flow?.units.find((candidate) => candidate.id === unitId);
+      if (!block || !flow || !unit || !host.onHeadingStructure) {
+        host.addToast('error', 'Could not finish the heading layout.');
+        return;
+      }
+      const nextFlow = setTextUnitWritingRole(flow, unitId, pending.role);
+      void host.onHeadingStructure(block, { previousTextFlow: flow, nextTextFlow: nextFlow,
+        headingUnitId: unitId, focus: { unitId, caret: Math.min(pending.caret, nextFlow.units.find((candidate) => candidate.id === unitId)?.text.length ?? 0) },
+        inputType: 'formatHeading' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [draftOwnerReconciliation]);
 
   const dispatchSlashSession = useCallback((action: SlashSessionAction) => {
     setSlashSession((current) => {
@@ -391,22 +432,26 @@ export function useSlashCommandController({
   ): TextBlockContentV1 => {
     let offset = 0;
     let targetUnitId = flow.units[0]?.id || 'tu-1';
-    const nextUnits = flow.units.map((unit) => {
+    let nextFlow = flow;
+    for (const unit of flow.units) {
       const start = offset;
       const end = start + unit.text.length;
       offset = end + 1;
-      if (trigger.start < start || trigger.start > end) return unit;
+      if (trigger.start < start || trigger.start > end) continue;
 
       targetUnitId = unit.id;
       const localStart = Math.max(0, trigger.start - start);
       const localEnd = Math.max(localStart, Math.min(unit.text.length, trigger.end - start));
-      return {
-        ...unit,
-        text: `${unit.text.slice(0, localStart)}${unit.text.slice(localEnd)}`.trimEnd(),
-      };
-    });
+      const cleaned = `${unit.text.slice(0, localStart)}${unit.text.slice(localEnd)}`;
+      nextFlow = replaceTextUnitText({ textFlow: nextFlow, textUnitId: unit.id, nextText: cleaned,
+        edit: { editedStartOffset: localStart, editedEndOffset: localEnd, replacementText: '' } });
+      const trimmed = cleaned.trimEnd();
+      if (trimmed !== cleaned) nextFlow = replaceTextUnitText({ textFlow: nextFlow, textUnitId: unit.id, nextText: trimmed,
+        edit: { editedStartOffset: trimmed.length, editedEndOffset: cleaned.length, replacementText: '' } });
+      break;
+    }
 
-    return setTextUnitWritingRole({ ...flow, units: nextUnits }, targetUnitId, role);
+    return setTextUnitWritingRole(nextFlow, targetUnitId, role);
   }, []);
 
   const handleSelectSlashCommand = useCallback(async (command: NoteSlashCommand) => {
@@ -421,22 +466,34 @@ export function useSlashCommandController({
     }
 
     if (command.objectKind === 'writing_role' && command.writingRole) {
+      const headingRole = headingLevelForRole(command.writingRole);
+      const headingOwner = slashTarget.target === 'block' ? blocks.find((item) => item.id === slashTarget.blockId) ?? null : null;
+      if (headingRole && canUseHeading?.(headingOwner) === false) {
+        addToast('info', 'Chapter headings belong on body pages.');
+        return;
+      }
       if (slashTarget.target === 'draft') {
         const cleanedText = applySlashExitToText({
           text: draftTextRef.current,
           target: slashTarget,
           reason: 'commit',
         });
+        const baseFlow = createTextBlockContentV1(cleanedText, 'paragraph');
         const textFlow = setTextUnitWritingRole(
-          createTextBlockContentV1(cleanedText, 'paragraph'),
+          baseFlow,
           'tu-1',
           command.writingRole,
         );
+        const draftOwner = slashSessionRef.current?.owner || focusedTextOwnerRef.current;
+        const isolateAfterCreate = Boolean(headingRole && textFlow.units.length > 1 && onHeadingStructure && draftOwner);
+        pendingDraftHeadingRef.current = isolateAfterCreate && draftOwner
+          ? { owner: draftOwner, role: command.writingRole, caret: slashTarget.trigger.start }
+          : null;
         const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlow }, cleanedText).plain_text;
         exitSlashSession('commit', draftTextRef.current);
         setDraftText(projected);
         draftTextRef.current = projected;
-        await persistDraft(projected, undefined, { textFlow });
+        await persistDraft(projected, undefined, { textFlow: isolateAfterCreate ? baseFlow : textFlow });
         return;
       }
 
@@ -452,6 +509,19 @@ export function useSlashCommandController({
         || createTextBlockContentV1(currentText, 'paragraph');
       const nextFlow = applyWritingRoleToFlow(baseFlow, slashTarget.trigger, command.writingRole);
       const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, currentText).plain_text;
+      if (headingRole && onHeadingStructure) {
+        let offset = 0;
+        const unit = baseFlow.units.find((candidate) => {
+          if (slashTarget.trigger.start <= offset + candidate.text.length) return true;
+          offset += candidate.text.length + 1;
+          return false;
+        }) ?? baseFlow.units[0];
+        if (!unit) return;
+        const success = await onHeadingStructure(block, { previousTextFlow: baseFlow, nextTextFlow: nextFlow,
+          headingUnitId: unit.id, focus: { unitId: unit.id, caret: Math.max(0, slashTarget.trigger.start - offset) }, inputType: 'formatHeading' });
+        if (success) exitSlashSession('commit', currentText);
+        return;
+      }
       if (applyBlockTextFlowEdit) {
         let offset = 0;
         const unit = baseFlow.units.find((candidate) => {
@@ -535,6 +605,8 @@ export function useSlashCommandController({
   }, [
     addToast,
     applyBlockTextFlowEdit,
+    onHeadingStructure,
+    canUseHeading,
     beforeTextStructure,
     applyWritingRoleToFlow,
     applyTemplateToBlock,

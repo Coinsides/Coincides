@@ -60,6 +60,9 @@ export type TextFlowContentVersion = 'TextBlockContentV1';
 export type TextUnitWritingRole =
   | 'paragraph'
   | 'heading'
+  | 'heading_1'
+  | 'heading_2'
+  | 'heading_3'
   | 'quote'
   | 'bullet_item'
   | 'numbered_item'

@@ -65,6 +65,8 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 }
 
 export interface UseNoteCanvasFrameModelOptions {
+  exportContent?: { blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>;
+    pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan };
   bindingSettings?: import('@shared/types/noteBinding').NoteBindingSettings | null;
   noteTruth?: { title: string; description: string | null };
   pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan;
@@ -181,6 +183,7 @@ export function useNoteCanvasResolvedLayoutModel({
 }
 
 export function useNoteCanvasFrameModel({
+  exportContent,
   bindingSettings,
   noteTruth,
   pageFlowPlan,
@@ -343,21 +346,47 @@ export function useNoteCanvasFrameModel({
     pageReadingViewport,
   ]);
 
+  const searchSource = useMemo(() => {
+    if (!exportContent) return { blocks: visibleBlocks, runtime: noteCanvasRuntime };
+    const fullPlan = exportContent.pageFlowPlan;
+    const fullFrames = fullPlan?.collection.pageFrames || noteCanvasRuntime.pageFrames;
+    const placements = exportContent.blocks.flatMap((block, index) => {
+      const layout = exportContent.layouts[block.id];
+      return layout ? [buildRuntimeBlockPlacement({ block, canvasId: 'primary-note-canvas', layout,
+        pageOffsetX, pageFrame: primaryPageFrame, pageFrames: fullFrames, contract: coordinateContract, zIndex: index })] : [];
+    });
+    return { blocks: exportContent.blocks, runtime: {
+      pageFrames: fullFrames, coordinateContract, blockPlacements: placements,
+      pageFrameExtensions: noteCanvasRuntime.pageFrameExtensions,
+      blockFragmentProjections: fullPlan ? pageFlowFragmentProjections(fullPlan) : noteCanvasRuntime.blockFragmentProjections,
+    } };
+  }, [exportContent, visibleBlocks, noteCanvasRuntime, pageOffsetX, primaryPageFrame, coordinateContract]);
+
   const exportPreview = useMemo(() => {
-    return buildExportPreviewModel(visibleBlocks, blockLayouts, {
-      bindingSettings,
-      noteTruth,
-      pageFlowPlan,
+    if (!exportContent) return buildExportPreviewModel(visibleBlocks, blockLayouts, {
+      bindingSettings, noteTruth, pageFlowPlan,
       pageFrames: noteCanvasRuntime.pageFrames,
       pageStacks: noteCanvasRuntime.pageStacks,
       blockPlacements: noteCanvasRuntime.blockPlacements,
       primaryPageFrameId: noteCanvasRuntime.primaryPageFrame?.id || null,
       documentTypography: documentTypographyProfile,
     });
-  }, [pageFlowPlan, bindingSettings, noteTruth, visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
+    const fullPlan = exportContent.pageFlowPlan || pageFlowPlan;
+    return buildExportPreviewModel(exportContent.blocks, exportContent.layouts, {
+      bindingSettings,
+      noteTruth,
+      pageFlowPlan: fullPlan,
+      pageFrames: fullPlan?.collection.pageFrames || noteCanvasRuntime.pageFrames,
+      pageStacks: fullPlan?.collection.pageStacks || noteCanvasRuntime.pageStacks,
+      blockPlacements: searchSource.runtime.blockPlacements,
+      primaryPageFrameId: noteCanvasRuntime.primaryPageFrame?.id || null,
+      documentTypography: documentTypographyProfile,
+    });
+  }, [exportContent, searchSource, pageFlowPlan, bindingSettings, noteTruth, visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
 
   return {
     canvasBlockPlacements,
+    searchSource,
     exportPreview,
     noteCanvasRuntime,
     pageContentHeight: resolvedPageContentHeight,

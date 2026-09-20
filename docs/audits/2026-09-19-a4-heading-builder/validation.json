@@ -1,0 +1,155 @@
+{
+  "workOrder": "V14 A4 heading chapters",
+  "date": "2026-09-19",
+  "claim": "23 non-git/secrets components passed; this is not a complete runtime gate pass",
+  "components": [
+    {
+      "component": "check:test-wiring",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/final-check-test-wiring.log"
+    },
+    {
+      "component": "test:agent-knowledge",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-test-agent-knowledge.log"
+    },
+    {
+      "component": "check:agent-knowledge",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-agent-knowledge.log"
+    },
+    {
+      "component": "check:tech-debt-table",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-tech-debt-table.log"
+    },
+    {
+      "component": "test:unit",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/client-full-final2.log"
+    },
+    {
+      "component": "test:tool-face-registry",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-test-tool-face-registry.log"
+    },
+    {
+      "component": "test:tool-face-manifest",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-test-tool-face-manifest.log"
+    },
+    {
+      "component": "check:tool-face-manifest",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-tool-face-manifest.log"
+    },
+    {
+      "component": "test:tool-face-parity",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-test-tool-face-parity.log"
+    },
+    {
+      "component": "check:tool-face-parity",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-tool-face-parity.log"
+    },
+    {
+      "component": "check:server-shared-runtime-import",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-server-shared-runtime-import.log"
+    },
+    {
+      "component": "check:canvas-runtime-boundary",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/final-check-canvas-runtime-boundary.log"
+    },
+    {
+      "component": "check:group-gallery-shell",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-group-gallery-shell.log"
+    },
+    {
+      "component": "check:groups-rail-shell",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-groups-rail-shell.log"
+    },
+    {
+      "component": "check:single-editor-shell",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-single-editor-shell.log"
+    },
+    {
+      "component": "check:source-experience",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-source-experience.log"
+    },
+    {
+      "component": "check:v2-bn11-legacy-shutdown",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-v2-bn11-legacy-shutdown.log"
+    },
+    {
+      "component": "check:v2-bn11-relation-freshness",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-check-v2-bn11-relation-freshness.log"
+    },
+    {
+      "component": "smoke:canvas-engine-model-contract",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/final-smoke-canvas-engine-model-contract.log"
+    },
+    {
+      "component": "build:client",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-build-client-final3.log"
+    },
+    {
+      "component": "build",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-build.log"
+    },
+    {
+      "component": "smoke:canvas-engine-performance",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/gate-smoke-canvas-engine-performance.log"
+    },
+    {
+      "component": "docs:check",
+      "exitCode": 0,
+      "log": ".codex-tmp/a4-heading/final-docs-check.log"
+    }
+  ],
+  "reservedForHQ": [
+    "git diff --check",
+    "check:changed-file-secrets"
+  ],
+  "client": {
+    "files": 199,
+    "passed": 2014,
+    "failed": 0,
+    "log": ".codex-tmp/a4-heading/client-full-final2.log"
+  },
+  "serverFull": {
+    "status": "failed",
+    "firstRun": {
+      "total": 767,
+      "passed": 763,
+      "failed": 4
+    },
+    "recoveredByExistingWrapper": [
+      "v2CanvasPersistenceCutover.test.ts",
+      "v2MaterialLibrary.test.ts"
+    ],
+    "remainingEnvironmentFailures": [
+      "v2SourceMineruWiring.test.ts: python.exe ENOENT",
+      "v2SourceRegionCells.test.ts: pinned Python EPERM / venv exit 101"
+    ],
+    "log": ".codex-tmp/a4-heading/server-full.log"
+  },
+  "browser": {
+    "status": "blocked-by-login-page",
+    "log": ".codex-tmp/a4-heading/browser-smoke.log"
+  },
+  "gitWrites": false,
+  "commit": false
+}

@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { buildNoteNavigationResults, type NoteNavigationResult } from '../noteNavigationSearch';
 import type { NoteNavigationTab } from '../hooks/useNoteNavigationController';
 import { NoteNavigationPages } from './NoteNavigationPages';
+import { NoteNavigationHeadings, chapterProjectionForNavigation } from './NoteNavigationHeadings';
+import type { ChapterProjection } from '../chapterProjectionService';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import './NoteNavigationPane.css';
 
@@ -14,13 +16,17 @@ export interface NoteNavigationPaneProps {
   tab: NoteNavigationTab;
   onTabChange: (tab: NoteNavigationTab) => void;
   currentPageFrameId: string | null;
+  chapterProjection?: ChapterProjection;
+  currentChapterId?: string | null;
+  onSelectChapter?: (chapterId: string) => void;
   onSelectPage: (frameId: string) => void;
   onSelectResult: (result: NoteNavigationResult) => void;
   onClose: () => void;
 }
 
 function NoteNavigationContents({ writingSurfaceProps: input, tab, onTabChange,
-  currentPageFrameId, onSelectPage, onSelectResult, onClose }: NoteNavigationPaneProps) {
+  currentPageFrameId, chapterProjection, currentChapterId, onSelectChapter,
+  onSelectPage, onSelectResult, onClose }: NoteNavigationPaneProps) {
   const id = useId();
   const [query, setQuery] = useState('');
   const [settledQuery, setSettledQuery] = useState('');
@@ -29,12 +35,17 @@ function NoteNavigationContents({ writingSurfaceProps: input, tab, onTabChange,
     const timeout = window.setTimeout(() => setSettledQuery(trimmedQuery), NOTE_NAVIGATION_SEARCH_DELAY);
     return () => window.clearTimeout(timeout);
   }, [trimmedQuery]);
-  const results = useMemo(() => buildNoteNavigationResults(input, settledQuery),
+  const searchSource = input.chapterPresentation?.searchSource;
+  const results = useMemo(() => buildNoteNavigationResults(searchSource ? { ...input,
+    visibleBlocks: searchSource.blocks, noteCanvasRuntime: searchSource.runtime } : input, settledQuery),
     [settledQuery, input.noteId, input.visibleBlocks, input.blockTextDrafts, input.blockTextFlowDrafts,
-      input.blockFieldDrafts, input.noteCanvasRuntime, input.pageOffsetX,
+      input.blockFieldDrafts, input.noteCanvasRuntime, input.pageOffsetX, searchSource,
       input.paperHeader?.titleDraft, input.paperHeader?.descriptionDraft]);
   const pending = trimmedQuery !== settledQuery;
   const visibleResults = trimmedQuery && !pending ? results : [];
+  const chapters = useMemo(() => chapterProjection ?? chapterProjectionForNavigation(input),
+    [chapterProjection, input.chapterPresentation, input.visibleBlocks, input.blockTextFlowDrafts,
+      input.noteCanvasRuntime.pageFrameExtensions]);
 
   return <aside className="noteNavigationDock" data-note-navigation="true" aria-label="Note navigation"
     onMouseDown={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
@@ -65,7 +76,9 @@ function NoteNavigationContents({ writingSurfaceProps: input, tab, onTabChange,
           }}>{label}</button>)}
       </div>
       <div className="noteNavigationPanel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${tab}`}>
-        {tab === 'headings' && <p className="noteNavigationEmpty">The heading tree will arrive with chapter heading blocks.</p>}
+        {tab === 'headings' && <NoteNavigationHeadings projection={chapters} currentChapterId={currentChapterId}
+          onSelectChapter={onSelectChapter} numbered={input.chapterPresentation?.numbered}
+          onToggleNumbering={input.chapterPresentation?.onToggleNumbering} />}
         {tab === 'pages' && <NoteNavigationPages writingSurfaceProps={input}
           currentPageFrameId={currentPageFrameId} onSelectPage={onSelectPage} />}
         {tab === 'results' && <>

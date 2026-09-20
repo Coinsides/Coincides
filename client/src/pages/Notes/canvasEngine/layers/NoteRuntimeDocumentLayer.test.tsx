@@ -23,6 +23,8 @@ import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyS
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import { useCanvasSurfacePointerController } from '../hooks/useCanvasSurfacePointerController';
+import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { deriveChapterProjection } from '../chapterProjectionService';
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 
@@ -434,6 +436,138 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     return props;
   }
 
+  function headingProps(): NoteWritingSurfaceLayerProps {
+    const props = searchableProps();
+    const blocks = ['First chapter', 'Nested chapter'].map((title, index): NoteBlock => {
+      const flow = createTextBlockContentV1(title);
+      flow.units[0].id = `heading-unit-${index}`;
+      flow.units[0].writing_role = index ? 'heading_2' : 'heading_1';
+      const id = index ? 'nested-heading' : codeBlock.id;
+      return { ...codeBlock, id, placement_id: `placement-${id}`, metadata: {},
+        order_index: index, plain_text: title, content_json: { [TEXT_FLOW_CONTENT_KEY]: flow },
+        canvas_layout: { x: 0, y: 42 + index * 180, width: 540, height: 44,
+          frame_id: props.selectedPageFrameId!, coordinate_space: 'page_frame_local', surface: 'formal_page' } };
+    });
+    props.visibleBlocks = blocks;
+    props.allBlocks = blocks;
+    props.blockLayouts = Object.fromEntries(blocks.map((block, index) => [block.id,
+      { x: 0, y: 42 + index * 180, width: 540, height: 44,
+        frame_id: props.selectedPageFrameId!, coordinate_space: 'page_frame_local', surface: 'formal_page' }]));
+    const original = props.noteCanvasRuntime.blockFragmentProjections[0];
+    props.noteCanvasRuntime = { ...props.noteCanvasRuntime,
+      blockFragmentProjections: blocks.map((block, index) => ({ ...original, blockId: block.id,
+        visibleRect: { ...original.visibleRect, y: 42 + index * 180, height: 44 } })) };
+    return props;
+  }
+
+  it('A4 heading navigation follows two chapters on one page and jumps to the chapter anchor', async () => {
+    const props = headingProps();
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container } = render(documentFor(props));
+    const blockList = props.blockListRef.current!;
+    const appMain = blockList.closest<HTMLElement>('[data-app-main-scroll="true"]')!;
+    const scale = Number(blockList.closest<HTMLElement>('[data-page-display-scale]')!.dataset.pageDisplayScale);
+    const blockBounds = vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(new DOMRect(180, 60, 760 * scale, 4000 * scale));
+    vi.spyOn(appMain, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 60, 960, 720));
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Headings' }));
+    const first = screen.getByRole('treeitem', { name: 'First chapter' });
+    const nested = screen.getByRole('treeitem', { name: 'Nested chapter' });
+    expect(first.getAttribute('aria-current')).toBe('location');
+    blockBounds.mockReturnValue(new DOMRect(180, 60 - 180 * scale, 760 * scale, 4000 * scale));
+    fireEvent.scroll(appMain);
+    await waitFor(() => expect(nested.getAttribute('aria-current')).toBe('location'));
+    expect(first.hasAttribute('aria-current')).toBe(false);
+    fireEvent.click(first);
+    expect(scroll).toHaveBeenLastCalledWith(blockList, { x: 0, y: 42, width: 540, height: 44 });
+    expect(first.getAttribute('aria-current')).toBe('location');
+    expect(container.querySelector('[data-note-block-shell][data-block-id="block-a"]')?.getAttribute('data-note-navigation-hit')).toBe('true');
+  });
+
+  it('A4 revealing a folded chapter waits for its new fragment before applying the folded page gap destination', async () => {
+    const props = headingProps();
+    const projection = deriveChapterProjection(props.allBlocks);
+    const reveal = vi.fn();
+    const presentation = { projection, numbered: false, collapsedChapterIds: new Set([projection.roots[0].id]),
+      onToggleChapter: vi.fn(), onRevealChapter: reveal, onToggleNumbering: vi.fn() };
+    const folded = { ...props, visibleBlocks: [props.visibleBlocks[0]], chapterPresentation: presentation,
+      noteCanvasRuntime: { ...props.noteCanvasRuntime,
+        blockFragmentProjections: [props.noteCanvasRuntime.blockFragmentProjections[0]] } };
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { rerender } = render(documentFor(folded));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Fold page gaps' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Headings' }));
+    scroll.mockClear();
+    fireEvent.click(screen.getByRole('treeitem', { name: 'Nested chapter' }));
+    expect(reveal).toHaveBeenCalledExactlyOnceWith(projection.chapters[1].id);
+    expect(scroll).not.toHaveBeenCalled();
+    const expanded = { ...props, chapterPresentation: { ...presentation, collapsedChapterIds: new Set<string>() },
+      noteCanvasRuntime: { ...props.noteCanvasRuntime,
+        blockFragmentProjections: props.noteCanvasRuntime.blockFragmentProjections.map((fragment, index) => index
+          ? { ...fragment, pageFrameId: 'overview-page-2', pageIndex: 1,
+            visibleRect: { ...fragment.visibleRect, y: 1490 } } : fragment) } };
+    const blockList = props.blockListRef.current!;
+    const scale = Number(blockList.closest<HTMLElement>('[data-page-display-scale]')!.dataset.pageDisplayScale);
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, -1410 * scale, 760 * scale, 4000 * scale));
+    vi.spyOn(blockList.closest<HTMLElement>('[data-app-main-scroll="true"]')!, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, 0, 960, 720));
+    rerender(documentFor(expanded));
+    await waitFor(() => expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current,
+      { x: 0, y: 1410, width: 540, height: 44 }));
+    expect(screen.getByRole('treeitem', { name: 'Nested chapter' }).getAttribute('aria-current')).toBe('location');
+  });
+
+  it('A4 searches folded body drafts and reveals their chapter before jumping to the current repaginated destination', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const props = headingProps();
+    const bodyFlow = createTextBlockContentV1('Hidden body evidence');
+    const body: NoteBlock = { ...props.visibleBlocks[1], id: 'folded-body', placement_id: 'body-placement',
+      order_index: 2, content_json: { [TEXT_FLOW_CONTENT_KEY]: bodyFlow }, plain_text: 'Hidden body evidence' };
+    const blocks = [...props.visibleBlocks, body];
+    const original = props.noteCanvasRuntime.blockFragmentProjections[0];
+    const bodyFragment = { ...original, blockId: body.id, pageFrameId: 'overview-page-3', pageIndex: 2,
+      visibleRect: { ...original.visibleRect, y: 2800, height: 44 } };
+    const fullRuntime = { ...props.noteCanvasRuntime,
+      blockFragmentProjections: [...props.noteCanvasRuntime.blockFragmentProjections, bodyFragment] };
+    const projection = deriveChapterProjection(blocks);
+    const reveal = vi.fn();
+    const presentation = { projection, numbered: false,
+      collapsedChapterIds: new Set([projection.roots[0].id, projection.chapters[1].id]),
+      onToggleChapter: vi.fn(), onRevealChapter: reveal, onToggleNumbering: vi.fn(),
+      searchSource: { blocks, runtime: fullRuntime } };
+    const folded = { ...props, allBlocks: blocks, visibleBlocks: [blocks[0]], chapterPresentation: presentation,
+      noteCanvasRuntime: { ...props.noteCanvasRuntime, blockFragmentProjections: [original] } };
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container, rerender } = render(documentFor(folded));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Fold page gaps' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Results' }));
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search this note' }), { target: { value: 'evidence' } });
+    act(() => vi.advanceTimersByTime(180));
+    expect(screen.getByRole('button', { name: 'Page 3 Hidden body evidence' })).not.toBeNull();
+    const edited = { ...folded, blockTextDrafts: { [body.id]: 'Fresh hidden evidence' } };
+    rerender(documentFor(edited));
+    const result = screen.getByRole('button', { name: 'Page 3 Fresh hidden evidence' });
+    expect(container.querySelector('[data-note-block-shell][data-block-id="folded-body"]')).toBeNull();
+    scroll.mockClear();
+    fireEvent.click(result);
+    expect(reveal).toHaveBeenCalledExactlyOnceWith(projection.chapters[1].id);
+    expect(scroll).not.toHaveBeenCalled();
+    const expanded = { ...edited, visibleBlocks: blocks,
+      blockLayouts: { ...props.blockLayouts, [body.id]: { x: 0, y: 132, width: 540, height: 44,
+        coordinate_space: 'page_frame_local' as const, frame_id: 'overview-page-2', surface: 'formal_page' as const } },
+      chapterPresentation: { ...presentation, collapsedChapterIds: new Set<string>() },
+      noteCanvasRuntime: { ...fullRuntime,
+        blockFragmentProjections: [...props.noteCanvasRuntime.blockFragmentProjections,
+          { ...bodyFragment, pageFrameId: 'overview-page-2', pageIndex: 1,
+            visibleRect: { ...bodyFragment.visibleRect, y: 1490 } }] } };
+    rerender(documentFor(expanded));
+    expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current, { x: 0, y: 1410, width: 540, height: 44 });
+    expect(container.querySelector('[data-note-block-shell][data-block-id="folded-body"]')?.getAttribute('data-note-navigation-hit')).toBe('true');
+    expect(bodyFlow.units[0].text).toBe('Hidden body evidence');
+  });
+
   it('navigation keeps the real editor mounted, editable and saveable, and Escape leaves the pane open', async () => {
     const props = overviewProps(3);
     const { container, rerender } = render(documentFor(props));
@@ -606,7 +740,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     expect(screen.getByText('Search the loaded text in this note.')).not.toBeNull();
   });
 
-  it('navigation exposes only the heading placeholder and supports arrow, Home and End tab navigation', () => {
+  it('navigation exposes the empty heading tree state and supports arrow, Home and End tab navigation', () => {
     const props = overviewProps(3);
     const before = JSON.stringify({ blocks: props.visibleBlocks, runtime: props.noteCanvasRuntime });
     render(documentFor(props));
@@ -618,7 +752,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     fireEvent.keyDown(tabs[1], { key: 'ArrowLeft' });
     expect(document.activeElement).toBe(tabs[0]);
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByRole('tabpanel').textContent).toBe('The heading tree will arrive with chapter heading blocks.');
+    expect(screen.getByRole('tabpanel').textContent).toBe('Add a heading to start the chapter tree.');
     expect(screen.queryByRole('tree')).toBeNull();
     fireEvent.keyDown(tabs[0], { key: 'End' });
     expect(document.activeElement).toBe(tabs[2]);
