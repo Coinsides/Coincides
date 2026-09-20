@@ -14,19 +14,24 @@ interface DocumentRow {
   error_message: string | null;
 }
 
-interface SourceMaterialRow {
+export interface SourceMaterialRow {
   id: string;
   user_id: string;
   course_id: string;
   document_id: string;
+  source_type: string;
   title: string;
+  status: string;
   parse_status: string;
   fragment_status: string;
   segment_status: string;
   proposal_status: string;
   used_in_note_count: number;
+  confidence: number | null;
   warnings_json: string;
   metadata: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 interface DocumentChunkRow {
@@ -260,13 +265,13 @@ export function listCourseMaterials(db: Database.Database, userId: string, cours
   `).all(userId, courseId).map(hydrateMaterial);
 }
 
-export function getOwnedSourceMaterial(db: Database.Database, userId: string, sourceMaterialId: string) {
+export function findOwnedSourceMaterial(db: Database.Database, userId: string, sourceMaterialId: string): SourceMaterialRow | undefined {
   return db.prepare('SELECT * FROM source_materials WHERE id = ? AND user_id = ?')
     .get(sourceMaterialId, userId) as SourceMaterialRow | undefined;
 }
 
 export function listSourceFragments(db: Database.Database, userId: string, sourceMaterialId: string) {
-  const material = getOwnedSourceMaterial(db, userId, sourceMaterialId);
+  const material = findOwnedSourceMaterial(db, userId, sourceMaterialId);
   if (!material) return null;
   const document = db.prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?')
     .get(material.document_id, userId) as DocumentRow | undefined;
@@ -342,7 +347,7 @@ function createSegment(
 }
 
 export function ensureSegmentsForMaterial(db: Database.Database, userId: string, sourceMaterialId: string): void {
-  const material = getOwnedSourceMaterial(db, userId, sourceMaterialId);
+  const material = findOwnedSourceMaterial(db, userId, sourceMaterialId);
   if (!material || material.fragment_status !== 'ready') return;
 
   const fragments = listSourceFragments(db, userId, sourceMaterialId) as SourceFragmentRow[] | null;
@@ -403,7 +408,7 @@ export function ensureSegmentsForMaterial(db: Database.Database, userId: string,
 }
 
 export function listMaterialSegments(db: Database.Database, userId: string, sourceMaterialId: string) {
-  const material = getOwnedSourceMaterial(db, userId, sourceMaterialId);
+  const material = findOwnedSourceMaterial(db, userId, sourceMaterialId);
   if (!material) return null;
   ensureSegmentsForMaterial(db, userId, sourceMaterialId);
   return db.prepare(`

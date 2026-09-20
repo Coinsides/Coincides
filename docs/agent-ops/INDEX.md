@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 414 份文档。
+共 415 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -145,7 +145,7 @@
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-09-13(13.6 裁决半场批量补账:12 天欠账一次清——TD-25/28 关行、TD-6 部分清偿、TD-21 触发、TD-22 加重、TD-15 增长、TD-41 新增;裁决档=analysis/2026-09-13-v13-6-adjudication.md) | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-09-20(D3a 二轮 TD-15/16 施工实况更新；清债判定留 HQ) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
@@ -401,7 +401,8 @@
 | [handoffs/2026-09-20-v14-c1-board-sandbox-order.md](handoffs/2026-09-20-v14-c1-board-sandbox-order.md) | C1 · 板沙箱(Agent 的手) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 219 文件 2254/2254 亲跑定案;wilderness 超时红=builder 隔离跑法 120s 帽,HQ 600s 复跑 27/27(460.8s)恢复;git diff --check+secrets(62 文件)双门绿;余 2=Python/MinerU 环境基线)` | — | — |
 | [handoffs/2026-09-20-v14-c2-intent-router-order.md](handoffs/2026-09-20-v14-c2-intent-router-order.md) | C2 · 意图路由+注意力框+note_patch+答卡(Agent 的脑) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 223 文件 2274/2274 亲跑定案;git diff --check+secrets(91 文件)双门绿;wilderness 27/27(444s,预算行首见成效);余 2=Python/MinerU 基线)` | — | — |
 | [handoffs/2026-09-20-v14-c3-episode-memory-order.md](handoffs/2026-09-20-v14-c3-episode-memory-order.md) | C3 · 对话记忆情节层 v1(管家带地图,不背图书馆) | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 224 文件 2282/2282 亲跑定案;git diff --check+secrets(50 文件)双门绿;余 2=Python/MinerU 基线)` | — | — |
-| [handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md](handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md) | C4a · 壳批机械半 | `ready(HQ 按代理权翻牌;14.5 壳批拆两半——本单=机械半;Home/悬浮窗/命令台=UX 原型半,候 Henry 商量⛔本单)` | — | — |
+| [handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md](handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md) | C4a · 壳批机械半 | `done(二轮施工;一轮停线=斜杠条款互咬(第四型合同缺陷),补遗一裁「补齐七项斜杠+15 项零变」后续派;HQ 收口:client 227 文件 2319/2319 亲跑定案;builder 侧 shared/dist EPERM 环境红由 HQ 亲跑 tsc -b shared 转绿(server build exit 0,v2McpArtifact 2/2);双门绿;余 2=Python 基线;2026-09-20)` | — | — |
+| [handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md](handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md) | D3a · ownership 机械收敛 | `ready(HQ 按代理权翻牌;上游=TD-15 权威签名裁定稿已转正照准(09-12 §十四),本单=纯机械收敛)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

@@ -545,16 +545,48 @@ export function retireItem(
   return getItem(db, userId, itemId);
 }
 
+export interface OwnedContentGroupRow {
+  id: string;
+  user_id: string;
+  course_id: string;
+  note_id: string | null;
+  canvas_id: string | null;
+  primary_folder_id: string | null;
+  parent_group_id: string | null;
+  title: string;
+  status: string;
+  created_by: string;
+  identity_status: string;
+  identity_type: string | null;
+  identity_role: string | null;
+  identity_topic: string | null;
+  identity_summary: string | null;
+  identity_created_by: string;
+  identity_reviewed_by: string | null;
+  identity_confidence: number | null;
+  identity_updated_at: string | null;
+  identity_accepted_at: string | null;
+  identity_metadata: string;
+  placements_json: string;
+  members_json: string;
+  fragments_json: string;
+  petals_json: string;
+  view_state_json: string;
+  metadata: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 function getOwnedContentGroup(
   db: Database.Database,
   userId: string,
   groupId: string,
-) {
+): OwnedContentGroupRow {
   const row = db.prepare(`
-    SELECT id, course_id, note_id
+    SELECT *
     FROM content_groups
     WHERE id = ? AND user_id = ? AND status != 'deleted'
-  `).get(groupId, userId) as { id: string; course_id: string; note_id: string | null } | undefined;
+  `).get(groupId, userId) as OwnedContentGroupRow | undefined;
   if (!row) throw new AppError(404, 'Content group not found');
   return row;
 }

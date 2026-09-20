@@ -1,3 +1,4 @@
+import { getOwnedNote, type OwnedNoteRow as OwnedNote } from './noteOwnership.js';
 import type Database from 'better-sqlite3';
 import { assertCanvasPlacementWriteAllowed } from './canvasWritePolicy.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -8,12 +9,6 @@ import { projectCanvasPlacementLayout } from './canvasPlacementLayout.js';
 import { readCoordinateContract } from './coordinateContract.js';
 import { paperFreehandDataSchema } from '../validators/paperInk.js';
 import { assertCoverCollection, assertCoverPlacement } from './noteCoverRules.js';
-
-interface OwnedNote {
-  id: string;
-  user_id: string;
-  course_id: string;
-}
 
 interface CanvasPlacementRow {
   id: string;
@@ -267,13 +262,6 @@ function numeric(value: unknown, fallback: number): number {
 
 function integer(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? Math.trunc(value) : fallback;
-}
-
-function getOwnedNote(db: Database.Database, userId: string, noteId: string): OwnedNote {
-  const note = db.prepare('SELECT id, user_id, course_id FROM notes WHERE id = ? AND user_id = ?')
-    .get(noteId, userId) as OwnedNote | undefined;
-  if (!note) throw new AppError(404, 'Note not found');
-  return note;
 }
 
 function pageFrameObjectId(noteId: string, frameId: string): string {

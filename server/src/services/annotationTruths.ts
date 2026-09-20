@@ -1,10 +1,6 @@
+import { getOwnedNote } from './noteOwnership.js';
 import type Database from 'better-sqlite3';
 import { AppError } from '../middleware/errorHandler.js';
-
-interface OwnedNote {
-  id: string;
-  course_id: string;
-}
 
 interface AnnotationTruthRow {
   id: string;
@@ -233,13 +229,6 @@ export function normalizeAnnotationTruthsForNote(
       ranges,
     };
   });
-}
-
-function getOwnedNote(db: Database.Database, userId: string, noteId: string): OwnedNote {
-  const note = db.prepare('SELECT id, course_id FROM notes WHERE id = ? AND user_id = ?')
-    .get(noteId, userId) as OwnedNote | undefined;
-  if (!note) throw new AppError(404, 'Note not found');
-  return note;
 }
 
 function deriveRangeMetadata(

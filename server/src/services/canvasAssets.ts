@@ -1,3 +1,4 @@
+import { getOwnedNote } from './noteOwnership.js';
 import type Database from 'better-sqlite3';
 import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -19,12 +20,6 @@ const IMAGE_MIME_EXTENSIONS: Record<string, string> = {
   'image/webp': '.webp',
   'image/gif': '.gif',
 };
-
-interface OwnedNote {
-  id: string;
-  user_id: string;
-  course_id: string;
-}
 
 interface CanvasAssetRow {
   id: string;
@@ -57,13 +52,6 @@ interface AssetReferenceRow {
 interface MediaAssetReferenceRow {
   block_id: string;
   asset_id: string;
-}
-
-function getOwnedNote(db: Database.Database, userId: string, noteId: string): OwnedNote {
-  const note = db.prepare('SELECT id, user_id, course_id FROM notes WHERE id = ? AND user_id = ?')
-    .get(noteId, userId) as OwnedNote | undefined;
-  if (!note) throw new AppError(404, 'Note not found');
-  return note;
 }
 
 function parseJson(value: string | null | undefined): Record<string, unknown> {

@@ -22,7 +22,7 @@ function hydrate(row: SkinSuiteRow): SkinSuite {
   };
 }
 
-export function getOwnedSkinSuite(db: Database.Database, userId: string, suiteId: string): SkinSuite {
+export function loadOwnedSkinSuiteHydrated(db: Database.Database, userId: string, suiteId: string): SkinSuite {
   const row = db.prepare('SELECT * FROM skin_suites WHERE user_id = ? AND id = ?').get(userId, suiteId) as SkinSuiteRow | undefined;
   if (!row) throw new AppError(404, 'Skin suite not found', { code: 'SKIN_SUITE_NOT_FOUND' });
   return hydrate(row);
@@ -36,16 +36,16 @@ export function createSkinSuite(db: Database.Database, userId: string, input: Cr
   const id = uuidv4();
   db.prepare(`INSERT INTO skin_suites (id, user_id, name, tokens_json, components_json, material_preset, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)`).run(id, userId, input.name, JSON.stringify(input.tokens), JSON.stringify(input.components), input.materialPreset ?? null, new Date().toISOString());
-  return getOwnedSkinSuite(db, userId, id);
+  return loadOwnedSkinSuiteHydrated(db, userId, id);
 }
 
 export function updateSkinSuite(db: Database.Database, userId: string, suiteId: string, input: UpdateSkinSuiteInput): SkinSuite {
   return db.transaction(() => {
-    const current = getOwnedSkinSuite(db, userId, suiteId);
+    const current = loadOwnedSkinSuiteHydrated(db, userId, suiteId);
     // All bound selections keep identity and local deviations; the next resolution follows this entire snapshot.
     db.prepare('UPDATE skin_suites SET name = ?, tokens_json = ?, components_json = ?, material_preset = ? WHERE id = ?')
       .run(input.name ?? current.name, JSON.stringify(input.tokens ?? current.tokens), JSON.stringify(input.components ?? current.components), input.materialPreset ?? current.materialPreset ?? null, current.id);
-    return getOwnedSkinSuite(db, userId, current.id);
+    return loadOwnedSkinSuiteHydrated(db, userId, current.id);
   }).immediate();
 }
 
@@ -63,7 +63,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function deleteSkinSuite(db: Database.Database, userId: string, suiteId: string): SkinSuiteDeleteResult {
   return db.transaction(() => {
-    const suite = getOwnedSkinSuite(db, userId, suiteId);
+    const suite = loadOwnedSkinSuiteHydrated(db, userId, suiteId);
     const reference = `suite:${suite.id}`;
     const palette = Object.fromEntries((db.prepare('SELECT id, value FROM palette_colors WHERE user_id = ?')
       .all(userId) as Array<{ id: string; value: string }>).map(({ id, value }) => [id, value]));

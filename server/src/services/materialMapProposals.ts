@@ -1,9 +1,10 @@
+import { getOwnedCourse } from './courseOwnership.js';
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import {
   ensureSegmentsForMaterial,
-  getOwnedSourceMaterial,
+  findOwnedSourceMaterial,
   listCourseMaterials,
   listMaterialSegments,
 } from './courseMaterials.js';
@@ -48,11 +49,6 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   } catch {
     return fallback;
   }
-}
-
-function getOwnedCourse(db: Database.Database, userId: string, courseId: string): void {
-  const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId);
-  if (!course) throw new AppError(404, 'Course not found');
 }
 
 function scopedSourceMaterials(
@@ -190,7 +186,7 @@ export function applyMaterialMapProposal(db: Database.Database, userId: string, 
   }
 
   const materialIds = [...new Set(data.source_material_ids || data.segments.map((segment) => segment.source_material_id))]
-    .filter((id) => Boolean(getOwnedSourceMaterial(db, userId, id)));
+    .filter((id) => Boolean(findOwnedSourceMaterial(db, userId, id)));
   if (materialIds.length > 0) {
     db.prepare(`
       UPDATE source_materials

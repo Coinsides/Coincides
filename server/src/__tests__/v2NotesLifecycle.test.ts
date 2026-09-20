@@ -414,7 +414,7 @@ test('PUT /api/notes/:id keeps status plus title in one mixed patch response', a
   });
 });
 
-test('PUT /api/notes/:id handler matches the authorized A3 canonical-cover baseline apart from line endings', () => {
+test('PUT /api/notes/:id handler matches the authorized D3a ownership baseline apart from line endings', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
   const start = routeSource.indexOf("router.put('/:id'");
@@ -436,8 +436,13 @@ test('PUT /api/notes/:id handler matches the authorized A3 canonical-cover basel
   // and field assignment, and restoring stringifyJson(metadata, {}) reproduces
   // the card-cover baseline 41593a991c0fba093d9057f79a4781f6a5b0966b81006a3e0052842a4fae776c.
   // Reconstruction evidence: docs/audits/2026-09-19-a3-cover-builder/backend.md.
+  // D3a authority: 2026-09-20-v14-d3a-ownership-convergence-order.md, addendum 1.
+  // Reversing only getOwnedNote(getDb(), req.userId!, noteId) to
+  // getOwnedNote(noteId, req.userId!) reconstructs the A3 full-handler baseline:
+  // e01b1bec441fbbb2ddbea415c5627d01ee1abf26395bc46917ebb961c8e9c220.
+  // The full source lock and all behavioral assertions remain intact.
   assert.equal(
     createHash('sha256').update(putRoute).digest('hex'),
-    'e01b1bec441fbbb2ddbea415c5627d01ee1abf26395bc46917ebb961c8e9c220',
+    'b904e32f0c7769b899383b6d5106fa065059c63d4e45eb3653afb851b96c470d',
   );
 });

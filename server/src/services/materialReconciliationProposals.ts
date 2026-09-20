@@ -1,3 +1,4 @@
+import { getOwnedCourse } from './courseOwnership.js';
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
@@ -226,11 +227,6 @@ function isString(value: unknown): value is string {
 function excerpt(content: string): string {
   const compact = content.replace(/\s+/g, ' ').trim();
   return compact.length > 240 ? `${compact.slice(0, 237)}...` : compact;
-}
-
-function getOwnedCourse(db: Database.Database, userId: string, courseId: string): void {
-  const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId);
-  if (!course) throw new AppError(404, 'Course not found');
 }
 
 function firstSegmentForFragment(db: Database.Database, fragmentId: string): string | null {

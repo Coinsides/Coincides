@@ -14,7 +14,7 @@ import coursesRoutes from '../routes/courses.js';
 import notesRoutes from '../routes/notes.js';
 import settingsRoutes from '../routes/settings.js';
 import { createBoardRouter } from '../routes/boards.js';
-import { createSkinSuite, deleteSkinSuite, getOwnedSkinSuite, listSkinSuites, updateSkinSuite } from '../services/skinSuites.js';
+import { createSkinSuite, deleteSkinSuite, loadOwnedSkinSuiteHydrated, listSkinSuites, updateSkinSuite } from '../services/skinSuites.js';
 import { parseStoredSkin } from '../services/skin.js';
 import { skinSelectionSchema } from '../validators/skin.js';
 
@@ -98,7 +98,7 @@ test('V14 migrations preserve existing 071 suites and add optional material line
     const writeMaterial = db.prepare('UPDATE skin_suites SET material_preset = ? WHERE id = ?');
     for (const preset of ['default', 'quiet-ink', 'warm-paper', 'workbench']) {
       writeMaterial.run(preset, colorId);
-      assert.equal(getOwnedSkinSuite(db, userId, colorId).materialPreset, preset);
+      assert.equal(loadOwnedSkinSuiteHydrated(db, userId, colorId).materialPreset, preset);
     }
     assert.throws(() => writeMaterial.run('custom', colorId), /CHECK constraint/);
     const foreignKeys = db.pragma('foreign_key_list(skin_suites)') as Array<{ table: string; from: string; on_delete: string }>;
@@ -175,7 +175,7 @@ test('V14 suite routes accept only factory material IDs within complete appearan
   }
   await f.request('PATCH', `skin-suites/${suite.id}`, { materialPreset: 'warm-paper' }, 400);
   await f.request('PATCH', `skin-suites/${suite.id}`, { name: 'Paper', materialPreset: 'warm-paper' }, 400);
-  assert.deepEqual(getOwnedSkinSuite(db, userId, suite.id), suite);
+  assert.deepEqual(loadOwnedSkinSuiteHydrated(db, userId, suite.id), suite);
 });
 
 function seedConsumers(db: Database.Database, suite: SkinSuite) {
@@ -247,7 +247,7 @@ test('V14 update-to-match keeps every binding and its deviations; detachment rol
     db.exec("CREATE TRIGGER fail_suite_detach BEFORE UPDATE OF skin ON boards BEGIN SELECT RAISE(ABORT, 'detach failure'); END");
     assert.throws(() => deleteSkinSuite(db, userId, suite.id), /detach failure/);
     assert.deepEqual(storedConsumers(db), before);
-    assert.deepEqual(getOwnedSkinSuite(db, userId, suite.id), updated);
+    assert.deepEqual(loadOwnedSkinSuiteHydrated(db, userId, suite.id), updated);
   } finally { db.close(); }
 });
 

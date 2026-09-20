@@ -1,3 +1,4 @@
+import { getOwnedCourse } from '../services/courseOwnership.js';
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { ZodError } from 'zod';
@@ -29,13 +30,6 @@ function hydrateProjection(row: any) {
     source_versions_json: parseJson(row.source_versions_json, {}),
     metadata: parseJson(row.metadata, {}),
   };
-}
-
-function getOwnedCourse(courseId: string, userId: string): void {
-  const course = getDb()
-    .prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
-    .get(courseId, userId);
-  if (!course) throw new AppError(404, 'Course not found');
 }
 
 function createOperationBatch(userId: string, courseId: string, label: string): string {
@@ -88,7 +82,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
   const courseId = req.query.course_id as string | undefined;
   if (!courseId) throw new AppError(400, 'course_id query parameter is required');
 
-  getOwnedCourse(courseId, req.userId!);
+  getOwnedCourse(getDb(), req.userId!, courseId);
 
   const type = req.query.type as string | undefined;
   const params: unknown[] = [req.userId!, courseId, 'active'];
@@ -107,7 +101,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
 router.post('/', (req: AuthRequest, res: Response) => {
   try {
     const data = createProjectionSchema.parse(req.body);
-    getOwnedCourse(data.course_id, req.userId!);
+    getOwnedCourse(getDb(), req.userId!, data.course_id);
 
     const built = data.source_note_id
       ? buildSnapshotFromNote(data.source_note_id, req.userId!, data.course_id)

@@ -1,6 +1,7 @@
+import { getOwnedCourse } from './courseOwnership.js';
+import { getOwnedNote } from './noteOwnership.js';
 import { getDb } from '../db/init.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { getOwnedCourse, getOwnedNote } from '../routes/notes.js';
 import { hydrateBlock, hydrateNote } from './noteHydration.js';
 import { assertSourceProjectionNoteContentWriteAllowed } from './sourceProjectionPolicy.js';
 
@@ -58,7 +59,7 @@ export function restoreNote({ userId, noteId }: NoteLifecycleTarget): NoteLifecy
 
 function ownedNoteOrMissing({ userId, noteId }: NoteLifecycleTarget) {
   try {
-    return getOwnedNote(noteId, userId);
+    return getOwnedNote(getDb(), userId, noteId);
   } catch (error) {
     if (error instanceof AppError && error.statusCode === 404 && error.message === 'Note not found') {
       return null;
@@ -125,7 +126,7 @@ export function listNotes({
     throw new AppError(400, 'Invalid status');
   }
 
-  getOwnedCourse(courseId, userId);
+  getOwnedCourse(getDb(), userId, courseId);
 
   return getDb()
     .prepare('SELECT * FROM notes WHERE user_id = ? AND course_id = ? AND status = ? ORDER BY updated_at DESC')
@@ -146,7 +147,7 @@ export function listNoteBlocks({
   noteId,
   status = 'active',
 }: NoteBlockReadTarget) {
-  getOwnedNote(noteId, userId);
+  getOwnedNote(getDb(), userId, noteId);
 
   const blocks = getDb().prepare(`
     SELECT

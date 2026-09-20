@@ -7,6 +7,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "test:owned-helper-contract": "node ../scripts/run-server-test-suite.mjs --test-timeout=600000 scripts/v14OwnershipContract.test.ts",
     "test:v14-c4a-shell": "node ../scripts/run-server-test-suite.mjs --test-timeout=600000 src/__tests__/v14UiCommands.test.ts",
     "test:v14-c3-episode": "node ../scripts/run-server-test-suite.mjs --test-timeout=600000 src/__tests__/v14EpisodeStorage.test.ts src/__tests__/v14EpisodeContext.test.ts",
     "test:v14-c2-intent": "node ../scripts/run-server-test-suite.mjs --test-timeout=600000 src/__tests__/v14NotePatch.test.ts src/__tests__/v14IntentRouter.test.ts src/__tests__/v14AttentionContext.test.ts",

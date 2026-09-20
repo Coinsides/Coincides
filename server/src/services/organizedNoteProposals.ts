@@ -1,3 +1,4 @@
+import { getOwnedCourse } from './courseOwnership.js';
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
@@ -77,13 +78,6 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   } catch {
     return fallback;
   }
-}
-
-function getOwnedCourse(db: Database.Database, userId: string, courseId: string): { id: string; name: string } {
-  const course = db.prepare('SELECT id, name FROM courses WHERE id = ? AND user_id = ?')
-    .get(courseId, userId) as { id: string; name: string } | undefined;
-  if (!course) throw new AppError(404, 'Course not found');
-  return course;
 }
 
 function getUserSettings(db: Database.Database, userId: string): Record<string, unknown> {

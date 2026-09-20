@@ -1,3 +1,5 @@
+import { getOwnedCourse } from '../services/courseOwnership.js';
+import { getOwnedNote } from '../services/noteOwnership.js';
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { z, ZodError } from 'zod';
@@ -59,31 +61,6 @@ function stripLegacyLayoutOverride(value: Record<string, unknown> | undefined): 
   return next;
 }
 
-export function getOwnedCourse(courseId: string, userId: string): { id: string } {
-  const course = getDb()
-    .prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
-    .get(courseId, userId) as { id: string } | undefined;
-  if (!course) throw new AppError(404, 'Course not found');
-  return course;
-}
-
-export function getOwnedNote(
-  noteId: string,
-  userId: string,
-): { id: string; course_id: string; note_class: string; status: string; page_format: string } {
-  const note = getDb()
-    .prepare('SELECT id, course_id, note_class, status, page_format FROM notes WHERE id = ? AND user_id = ?')
-    .get(noteId, userId) as {
-      id: string;
-      course_id: string;
-      note_class: string;
-      status: string;
-      page_format: string;
-    } | undefined;
-  if (!note) throw new AppError(404, 'Note not found');
-  return note;
-}
-
 function createOperationBatch(userId: string, courseId: string, label: string): string {
   const id = uuidv4();
   const now = new Date().toISOString();
@@ -108,7 +85,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
   try {
     const data = createNoteSchema.parse(req.body);
     const db = getDb();
-    getOwnedCourse(data.course_id, req.userId!);
+    getOwnedCourse(db, req.userId!, data.course_id);
     assertNoteCoverAsset(db, req.userId!, data.metadata);
 
     const id = uuidv4();
@@ -156,7 +133,7 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
 router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
-    const note = getOwnedNote(noteId, req.userId!);
+    const note = getOwnedNote(getDb(), req.userId!, noteId);
     const data = updateNoteSchema.parse(req.body);
     assertNoteCoverAsset(getDb(), req.userId!, data.metadata);
     assertSourceProjectionNoteUpdateAllowed(getDb(), req.userId!, noteId, data);
@@ -257,7 +234,7 @@ router.get('/:id/blocks', (req: AuthRequest, res: Response) => {
 router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
-    const note = getOwnedNote(noteId, req.userId!);
+    const note = getOwnedNote(getDb(), req.userId!, noteId);
     assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'create_note_block');
     const data = createNoteBlockSchema.parse(req.body);
     const db = getDb();
@@ -381,7 +358,7 @@ router.put('/:id/block-placements/:placementId', (req: AuthRequest, res: Respons
   try {
     const noteId = req.params.id as string;
     const placementId = req.params.placementId as string;
-    const note = getOwnedNote(noteId, req.userId!);
+    const note = getOwnedNote(getDb(), req.userId!, noteId);
     const data = updateNoteBlockPlacementSchema.parse(req.body);
     const db = getDb();
 
@@ -425,7 +402,7 @@ router.put('/:id/block-placements/:placementId', (req: AuthRequest, res: Respons
 router.post('/:id/blocks/discard-client-create', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
-    const note = getOwnedNote(noteId, req.userId!);
+    const note = getOwnedNote(getDb(), req.userId!, noteId);
     assertSourceProjectionNoteContentWriteAllowed(
       getDb(),
       req.userId!,
@@ -453,7 +430,7 @@ router.post('/:id/blocks/discard-client-create', (req: AuthRequest, res: Respons
 router.put('/:id/blocks/reorder', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
-    const note = getOwnedNote(noteId, req.userId!);
+    const note = getOwnedNote(getDb(), req.userId!, noteId);
     assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'reorder_note_blocks');
     const data = reorderNoteBlocksSchema.parse(req.body);
     const db = getDb();

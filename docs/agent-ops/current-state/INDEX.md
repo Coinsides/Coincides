@@ -18,4 +18,4 @@
 | [deferred-tests.md](deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [glossary.md](glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [page-frame-and-layout-contract.md](page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-09-13(13.6 裁决半场批量补账:12 天欠账一次清——TD-25/28 关行、TD-6 部分清偿、TD-21 触发、TD-22 加重、TD-15 增长、TD-41 新增;裁决档=analysis/2026-09-13-v13-6-adjudication.md) | — |
+| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-09-20(D3a 二轮 TD-15/16 施工实况更新；清债判定留 HQ) | — |
