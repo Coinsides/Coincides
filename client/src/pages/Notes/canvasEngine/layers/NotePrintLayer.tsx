@@ -19,9 +19,14 @@ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
 
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
+  const flowPlan = input.noteCanvasRuntime.pageFlowPlan;
   return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
-    {input.noteCanvasRuntime.pageFrames.flatMap((frame) => {
-      const print = getPagePrintGeometry(frame);
+    {flowPlan && <style>{input.noteCanvasRuntime.pageFrames.map((frame, index) => {
+      const size = getPagePrintGeometry(frame, true);
+      return `@page coincides-flow-${index} { size: ${size.width}px ${size.height}px; margin: 0; }`;
+    }).join('\n')}</style>}
+    {input.noteCanvasRuntime.pageFrames.flatMap((frame, frameIndex) => {
+      const print = getPagePrintGeometry(frame, Boolean(flowPlan));
       return getPagePrintSlices(frame, input.continuousWeb).map((slice) => <section
         key={`${frame.id}:${slice.index}`}
         data-note-print-page="true"
@@ -30,7 +35,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
         data-print-slice-offset={slice.offsetY}
         data-paper-size={print.paperSize}
         data-print-scale={print.scale}
-        style={{ width: print.width, height: print.height }}
+        style={{ width: print.width, height: print.height, ...(flowPlan ? { page: `coincides-flow-${frameIndex}` } : {}) }}
       >
         <div
           data-note-print-canvas="true"
@@ -44,6 +49,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
         >
           <NoteReadOnlyPageContent
             frame={frame}
+            documentTypography={input.documentTypographyProfile}
             fragments={input.continuousWeb && frame.templateId === 'screen_note'
               ? input.noteCanvasRuntime.blockFragmentProjections.filter((fragment) => (
                 fragment.visibleRect.y < frame.y + slice.offsetY + slice.height
@@ -60,6 +66,12 @@ function PrintPages({ input }: { input: NotePrintInput }) {
             print
           />
         </div>
+        {flowPlan?.overflows.filter((overflow) => overflow.frameId === frame.id).map((overflow) => (
+          <small key={overflow.fragmentId} data-page-flow-overflow={overflow.kind}
+            style={{ position: 'absolute', bottom: 4, left: 8 }}>
+            Content exceeds this page by {Math.ceil(overflow.overflowPx)} px.
+          </small>
+        ))}
       </section>);
     })}
   </div>;

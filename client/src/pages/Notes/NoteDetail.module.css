@@ -3658,6 +3658,35 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   margin-top: 10px;
 }
 
+.sourcesPaginated {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sourcesPaginated .sourceRef {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  height: var(--page-source-chip-height);
+  padding: 2px 6px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.sourcesPaginated .sourceRefAction {
+  box-sizing: border-box;
+  height: var(--page-source-action-height);
+  padding: 2px 6px;
+  line-height: 14px;
+  flex: 0 0 auto;
+}
+
 .sourceRef {
   display: inline-flex;
   align-items: center;

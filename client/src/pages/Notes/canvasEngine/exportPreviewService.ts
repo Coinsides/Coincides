@@ -41,6 +41,7 @@ import type {
 } from './types';
 
 export interface ExportPreviewRow {
+  flowFragment?: import('./documentPageFlowService').PageFlowFragment;
   block: NoteBlock;
   layout?: BlockBoxLayout;
   placement?: BlockPlacementModel;
@@ -105,6 +106,7 @@ export interface ExportPreviewModel {
 }
 
 export interface BuildExportPreviewModelOptions {
+  pageFlowPlan?: import('./documentPageFlowService').DocumentPageFlowPlan;
   pageFrames?: PageFrameModel[];
   pageStacks?: PageStackModel[];
   blockPlacements?: BlockPlacementModel[];
@@ -240,9 +242,19 @@ export function buildExportPreviewModel(
   const aiHiddenRows = rows.filter((row) => row.aiVisibility === 'hidden');
   const crossingObjects = rows.filter((row) => row.boundary === 'crossing');
   const workspaceOnlyObjects = rows.filter((row) => row.boundary === 'outside');
+  const flowBlockIds = new Set(options.pageFlowPlan?.fragments.map((fragment) => fragment.blockId) || []);
+  const rowsByBlock = new Map(rows.map((row) => [row.block.id, row]));
+  const pageRows: ExportPreviewRow[] = [
+    ...rows.filter((row) => !flowBlockIds.has(row.block.id)),
+    ...(options.pageFlowPlan?.fragments.flatMap((fragment) => {
+      const row = rowsByBlock.get(fragment.blockId);
+      return row ? [{ ...row, pageFrameId: fragment.frameId, layout: fragment.layout,
+        boundary: 'inside' as const, exportPolicy: undefined, flowFragment: fragment }] : [];
+    }) || []),
+  ];
   const pageFrames = (options.pageFrames || []).map((pageFrame) => createPageFrameExportPreview(
     pageFrame,
-    rows.filter((row) => row.pageFrameId === pageFrame.id && row.boundary === 'inside'),
+    pageRows.filter((row) => row.pageFrameId === pageFrame.id && row.boundary === 'inside'),
     options.primaryPageFrameId,
     documentTypography,
   ));
@@ -281,5 +293,9 @@ export function aiVisibilityLabel(visibility: AIVisibility): string {
 
 export function exportPreviewRowLabel(row: ExportPreviewRow): string {
   if (row.block.block_type === 'media') return mediaBlockAlt(row.block);
+  if (row.flowFragment?.textRange) {
+    const range = row.flowFragment.textRange;
+    return sliceGraphemes(textFromContent(row.block).slice(range.start, range.end), 0, 72) || 'Text';
+  }
   return row.block.title || sliceGraphemes(textFromContent(row.block), 0, 72) || 'Untitled block';
 }

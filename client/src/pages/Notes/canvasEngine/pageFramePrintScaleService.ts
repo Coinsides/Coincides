@@ -96,7 +96,9 @@ export function normalizePageFramePrintBaseline(pageFrame: PageFrameModel): Page
     ...pageFrame,
     pageSize,
     width: shouldApplyPresetGeometry ? profile.width : pageFrame.width,
-    height: Math.max(shouldApplyPresetGeometry ? profile.height : pageFrame.height, profile.height),
+    // A4/Letter identify the paper family, not a minimum-height constraint.
+    // Explicit per-frame geometry (including shorter variant pages) is truth.
+    height: shouldApplyPresetGeometry ? profile.height : pageFrame.height,
     // A missing historical pageSize does not make its live walls disposable.
     // Fill missing inset edges only; in particular a stored top of 0 is valid.
     contentInset: {

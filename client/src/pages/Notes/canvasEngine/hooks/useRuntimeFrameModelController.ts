@@ -15,6 +15,7 @@ import type {
 } from '../types';
 
 export interface UseRuntimeFrameModelControllerOptions {
+  pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan;
   note?: Pick<Note, 'page_format'> | null;
   coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
@@ -38,6 +39,7 @@ export interface UseRuntimeFrameModelControllerOptions {
 }
 
 export function useRuntimeFrameModelController({
+  pageFlowPlan,
   note,
   blockLayouts,
   coordinateContract,
@@ -60,6 +62,7 @@ export function useRuntimeFrameModelController({
   visibleBlocks,
 }: UseRuntimeFrameModelControllerOptions) {
   return useNoteCanvasFrameModel({
+    pageFlowPlan,
     notePagePreset: note?.page_format,
     coordinateContract,
     blockLayouts,

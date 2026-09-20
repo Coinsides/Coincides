@@ -1,4 +1,5 @@
 import { useCallback, useEffect, type RefObject } from 'react';
+import { textareaUnitStart, textareaUnitText } from '../fragmentTextareaService';
 import { useUIStore } from '@/stores/uiStore';
 import {
   boardReferenceFromSelection, copyBoardReference, writeBoardReferenceClipboard,
@@ -32,7 +33,7 @@ export function useBoardReferenceClipboard({ noteId, surfaceRef, selection, bloc
     const draftReference = (textarea: HTMLTextAreaElement) => (
       selection && selection.blockId === textarea.dataset.blockId
       && selection.textFlowId === textarea.dataset.textFlowId
-      && selection.textUnitId === textarea.dataset.textUnitId && selection.text === textarea.value
+      && selection.textUnitId === textarea.dataset.textUnitId && selection.text === textareaUnitText(textarea)
         ? boardReferenceFromSelection(noteId, selection) : null
     );
     const onCopy = (event: ClipboardEvent) => {
@@ -41,8 +42,8 @@ export function useBoardReferenceClipboard({ noteId, surfaceRef, selection, bloc
       if (!textarea) return;
       const reference = boardReferenceFromSelection(noteId, {
         blockId: textarea.dataset.blockId || '', textFlowId: textarea.dataset.textFlowId || '',
-        textUnitId: textarea.dataset.textUnitId || '', startOffset: textarea.selectionStart,
-        endOffset: textarea.selectionEnd, text: textarea.value,
+        textUnitId: textarea.dataset.textUnitId || '', startOffset: textarea.selectionStart + textareaUnitStart(textarea),
+        endOffset: textarea.selectionEnd + textareaUnitStart(textarea), text: textareaUnitText(textarea),
       }) || (textarea.selectionStart === textarea.selectionEnd ? draftReference(textarea) : null);
       if (!reference) return;
       writeBoardReferenceClipboard(event.clipboardData, reference);
@@ -75,7 +76,7 @@ export function useBoardReferenceClipboard({ noteId, surfaceRef, selection, bloc
     }
     const textarea = Array.from(surfaceRef.current?.querySelectorAll<HTMLTextAreaElement>('textarea[data-text-unit-id]') || [])
       .find((element) => element.dataset.blockId === selection.blockId && element.dataset.textUnitId === selection.textUnitId);
-    if (textarea && textarea.value !== selection.text) {
+    if (textarea && textareaUnitText(textarea) !== selection.text) {
       addToast('info', 'The text has changed. Select the passage again before copying.');
       return;
     }

@@ -202,6 +202,8 @@ export interface PageStackBlockFragmentProjection extends PageStackBlockFragment
   blockId: string;
   blockRect: CanvasRect;
   pageContentRect: CanvasRect;
+  /** A1: transient line projection; never part of a placement or TextFlow write. */
+  flowFragment?: import('./documentPageFlowService').PageFlowFragment;
 }
 
 export interface PageSliceOpenOriginalTarget {
@@ -678,6 +680,8 @@ export interface RelationEndpointReserve {
 }
 
 export interface NoteCanvasRuntimeModel {
+  /** The single derived plan consumed by writing, print and Overview. */
+  pageFlowPlan?: import('./documentPageFlowService').DocumentPageFlowPlan;
   coordinateContract?: import('./placementContractService').CoordinateContract;
   version: string;
   route: 'self_owned_minimal_hybrid';

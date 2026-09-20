@@ -51,8 +51,18 @@ export function useTextUnitHandleDrag(options: Options) {
         if (!latest.current.onMove || !surface || destination.closest('[data-text-unit-move-scope]') !== surface
           || destination.dataset.textUnitMoveEnabled !== 'true') return null;
       }
-      const bounds = destination.getBoundingClientRect();
-      const scale = bounds.width / (destination.offsetWidth || bounds.width || 1);
+      const editorBounds = destination.getBoundingClientRect();
+      const scale = editorBounds.width / (destination.offsetWidth || editorBounds.width || 1);
+      // A paginated logical editor deliberately keeps its transparent container
+      // short. Its absolute page fragments own the real interaction geometry.
+      const fragmentBounds = destination.dataset.paginatedTextEditor === 'true'
+        ? Array.from(destination.querySelectorAll<HTMLElement>('[data-page-flow-fragment-id]'))
+          .map((fragment) => fragment.getBoundingClientRect()).filter((rect) => rect.width > 0 && rect.height > 0)
+        : [];
+      const bounds = fragmentBounds.length ? {
+        left: Math.min(...fragmentBounds.map((rect) => rect.left)), right: Math.max(...fragmentBounds.map((rect) => rect.right)),
+        top: Math.min(...fragmentBounds.map((rect) => rect.top)), bottom: Math.max(...fragmentBounds.map((rect) => rect.bottom)),
+      } : editorBounds;
       // Include the existing gutter and a small end-of-block insertion strip.
       if (x < bounds.left - 24 * scale || x > bounds.right
         || y < bounds.top - 8 * scale || y > bounds.bottom + 8 * scale) return null;

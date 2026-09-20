@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
+import { findUnitTextarea, textareaUnitStart } from '../fragmentTextareaService';
 import type { RuntimeHistoryEntry } from '../historyService';
 import type { BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
 import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
@@ -113,12 +114,12 @@ export function useTextFlowHistory(options: Options) {
   useLayoutEffect(() => {
     if (!selectionRequest || appliedSelection.current === selectionRequest
       || active.current !== selectionRequest.token || replayScope === selectionRequest.token) return;
-    const editor = Array.from(document.querySelectorAll<HTMLTextAreaElement>('textarea[data-runtime-textflow-editor="true"]'))
-      .find((node) => node.dataset.blockId === selectionRequest.blockId && node.dataset.textUnitId === selectionRequest.selection.unitId);
+    const editor = findUnitTextarea(Array.from(document.querySelectorAll<HTMLTextAreaElement>('textarea[data-runtime-textflow-editor="true"]')),
+      selectionRequest.blockId, selectionRequest.selection.unitId, selectionRequest.selection.start);
     if (!editor) return;
     appliedSelection.current = selectionRequest;
     editor.focus();
-    editor.setSelectionRange(selectionRequest.selection.start, selectionRequest.selection.end);
+    editor.setSelectionRange(selectionRequest.selection.start - textareaUnitStart(editor), selectionRequest.selection.end - textareaUnitStart(editor));
   }, [selectionRequest, replayScope]);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 

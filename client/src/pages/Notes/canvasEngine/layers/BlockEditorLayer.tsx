@@ -1,6 +1,8 @@
 import { useAnnotationStampLayout } from '../annotationStampLayout';
 import { resolveScreenRect, type CoordinateContract } from '../placementContractService';
-import type { PageFrameModel } from '../types';
+import type { PageFrameModel, DocumentTypographyProfile } from '../types';
+import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
+import { PaginatedTextBlockProjection } from '../blocks/PaginatedTextBlockProjection';
 import {
   useEffect,
   useLayoutEffect,
@@ -73,6 +75,7 @@ import {
 import { BlockControlBarLayer } from './BlockControlBarLayer';
 import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
+import { PAGINATED_SOURCE_REFERENCE_HEIGHT_PX } from '../pageFlowSourceReferenceService';
 import { BlockStatusBadgeLayer } from './BlockStatusBadgeLayer';
 import styles from '../../NoteDetail.module.css';
 
@@ -92,6 +95,7 @@ interface BlockEditorLayerProps {
   selectedAnnotationIds: string[];
   layout: BlockBoxLayout;
   blockFragments?: PageStackBlockFragmentProjection[];
+  documentTypography?: DocumentTypographyProfile;
   blockControlAnchor: { x: number; y: number } | null;
   affiliationOutline: BlockAffiliationOutlineState | null;
   fieldDraft?: FieldValueRecord;
@@ -166,6 +170,7 @@ export function BlockEditorLayer({
   selectedAnnotationIds,
   layout,
   blockFragments = [],
+  documentTypography = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
   blockControlAnchor,
   affiliationOutline,
   fieldDraft,
@@ -214,6 +219,13 @@ export function BlockEditorLayer({
   onViewSource,
 }: BlockEditorLayerProps) {
   const screenRect = resolveScreenRect(layout, pageFrame, coordinateContract, pageOffsetX);
+  const flowFragments = blockFragments.flatMap((fragment) => fragment.flowFragment?.textRange ? [{
+    ...fragment.flowFragment,
+    left: fragment.flowFragment.layout.x - (blockFragments[0]?.flowFragment?.layout.x ?? layout.x),
+    top: fragment.blockRect.y - (blockFragments[0]?.blockRect.y ?? screenRect.y),
+  }] : []);
+  const paginated = flowFragments.length > 0;
+  const TextProjection = paginated ? PaginatedTextBlockProjection : TextBlockProjection;
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const shellRef = useRef<HTMLElement | null>(null);
@@ -314,7 +326,7 @@ export function BlockEditorLayer({
   };
 
   useBlockMeasurement({
-    enabled: !mediaBlock,
+    enabled: !mediaBlock && !paginated,
     blockContentRef,
     textareaRef,
     text,
@@ -411,6 +423,7 @@ export function BlockEditorLayer({
           columnX: navigationColumnRef.current });
       }}
       data-note-block-shell="true"
+      data-note-flow-block={paginated ? 'true' : undefined}
       data-paper-block-border={!contentReadOnly && !active && !affiliationOutline && !crossPageFragment
         && boundary === 'inside' && layout.surface === 'formal_page' ? 'quiet' : undefined}
       data-cross-page-block-fragment={crossPageFragment ? 'true' : undefined}
@@ -423,6 +436,7 @@ export function BlockEditorLayer({
         top: screenRect.y,
         width: layout.width,
         minHeight: layout.height,
+        ...(paginated ? { height: layout.height, overflow: 'visible', minWidth: 0 } : {}),
         ...(mediaBlock ? { height: layout.height, minWidth: 0, padding: 0 } : {}),
         borderColor: affiliationOutline?.colorToken,
         borderStyle: affiliationOutline ? 'dashed' : undefined,
@@ -499,7 +513,7 @@ export function BlockEditorLayer({
       <div
         ref={blockContentRef}
         data-annotation-stamp-block-content="true"
-        style={mediaBlock ? { position: 'absolute', inset: 0 } : undefined}
+        style={mediaBlock ? { position: 'absolute', inset: 0 } : paginated ? { position: 'relative' } : undefined}
         onBlurCapture={() => {
           const receipt = focusedReceiptRef.current;
           if (!receipt) return;
@@ -534,7 +548,9 @@ export function BlockEditorLayer({
             onKeyDown={onKeyDown}
           />
         ) : (
-          <TextBlockProjection
+          <TextProjection
+            fragments={flowFragments}
+            typography={documentTypography}
             onFlowSelectionStart={onFlowSelectionStart}
             blockId={block.id}
             readOnly={contentReadOnly}
@@ -567,12 +583,16 @@ export function BlockEditorLayer({
           />
         )}
 
-        <BlockSourceReferenceLayer
+        {(!paginated || blockFragments[0]?.flowFragment?.isFirst) && <div
+          style={paginated ? { position: 'absolute', top: layout.height - 16 - PAGINATED_SOURCE_REFERENCE_HEIGHT_PX, left: 0, right: 0 } : undefined}>
+          <BlockSourceReferenceLayer
+            paginated={paginated}
           sourceReferences={block.source_references}
           anchorsBySourceRef={anchorsBySourceRef}
           sourceJumpBusy={sourceJumpBusy}
           onViewSource={onViewSource}
         />
+        </div>}
       </div>
 
       {!contentReadOnly && !mediaBlock && <BlockResizeHandleLayer onBeginResize={onBeginResize} />}

@@ -1,4 +1,5 @@
 import { useCallback, useContext, type RefObject } from 'react';
+import { textareaUnitText } from '../fragmentTextareaService';
 import { useUIStore } from '@/stores/uiStore';
 import { boardReferenceFromSelection } from '@/pages/Boards/boardTextRangeClipboard';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
@@ -22,7 +23,7 @@ export function useBoardStagingSelection({ noteId, surfaceRef, selection, blockI
     const textarea = Array.from(surfaceRef.current?.querySelectorAll<HTMLTextAreaElement>('textarea[data-text-unit-id]') || [])
       .find((element) => element.dataset.blockId === selection.blockId
         && element.dataset.textFlowId === selection.textFlowId && element.dataset.textUnitId === selection.textUnitId);
-    if (textarea && textarea.value !== selection.text) {
+    if (textarea && textareaUnitText(textarea) !== selection.text) {
       addToast('info', 'The text has changed. Select the passage again before sending it to staging.');
       return false;
     }

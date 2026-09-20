@@ -22,6 +22,11 @@
 - **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:1, units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
 - 建笔记:`POST /api/notes {course_id, title, description?, page_format:'a4_portrait'}`;
 - **边界**:无 heading 块型(章节块候 V14,章题暂用【】段落);块正文改写走 text-save 门(`PUT /note-blocks/:id/text-save`);**Agent 零笔记写权**(宪法③,note_patch 候 14.4)——Agent 侧生成笔记的唯一路=organized_note 提案。
+- **纸型自动分页(A1)**:A4/Letter 等纸型中,在流且 auto 的块按正文顺序灌入所属页叠。文字到版心底部按完整渲染行续到下一页,需要时自动续页;同一个逻辑块可以显示在多页,正文仍只存一份。最小例:在 A4 笔记输入一段长正文,超过下墙后继续写,后文自动出现在下页。Web 长页保持单帧向下生长,不转为分页纸。
+- **改版与页籍**:通过「笔记外观」改字号/行高/纸型,或进入 Layout 态调四界墙,会重新分页;每页可用自己的纸型和边距,跨页文字按目标页现宽重新换行。自动宽度来自该页现版心,储存的 x/y/width 不因分页被重写;块的 `frame_id` 只随首片换籍,经既有 placement 门保存。分片范围、后续片位置与行盒是派生数据,没有独立正文或分片写入 API。
+- **跨片编辑**:在任意一片上编辑仍修改原逻辑块;片尾/片头的方向键继续穿行,跨页选区可复制和删除,撤销/重做后重新分页。块把手、标注章等可点击附属件随首片显示,同一件不会在每片重复出现。编辑面、Overview 和打印共用本次分页结果。
+- **整块与溢出**:媒体、投影、组件本版不切片;当前页放不下时整块移到下一页。高于整页版心的块独占一页,保留完整高度并报告结构化溢出,不会静默裁短;应调整块尺寸或该页纸型后再检查成品。
+- **自由摆放与墨水**:manual 块和非流覆盖件保持现有摆放,不随正文重排。墨水属于原页,文字跨页或首片换籍都不迁移墨水。正文回缩后既有页帧保留,以免连带删除原页墨水或手摆内容;空页不表示正文被复制。
 
 ## 二 · 上传:先想清楚去哪座库(翻车条目 #2)
 

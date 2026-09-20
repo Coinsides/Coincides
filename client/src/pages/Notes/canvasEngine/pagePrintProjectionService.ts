@@ -8,7 +8,7 @@ const PAPER_MM = {
 };
 
 /** Output geometry has no dependency on the reading viewport or growing screen box. */
-export function getPagePrintGeometry(frame: PageFrameModel) {
+export function getPagePrintGeometry(frame: PageFrameModel, useFlowPageGeometry = false) {
   const family = getPageFrameTypographyFamily(frame);
   const pageSize = frame.pageSize ?? (frame.templateId === 'letter_portrait' ? 'Letter' : 'A4');
   const paperSize = family === 'paper' && pageSize === 'Letter' ? 'Letter' : 'A4';
@@ -18,6 +18,9 @@ export function getPagePrintGeometry(frame: PageFrameModel) {
   const scale = family === 'paper'
     ? getPageFramePhysicalMapping(pageSize, frame.width, frame.templateId).physicalScale
     : width / frame.width;
+  if (useFlowPageGeometry && frame.templateId !== 'screen_note') {
+    return { paperSize, width: frame.width * scale, height: frame.height * scale, scale };
+  }
   return { paperSize, width, height, scale };
 }
 
@@ -42,6 +45,13 @@ export function getPagePrintFragmentGeometry(
   fragment: PageStackBlockFragmentProjection,
 ) {
   const { visibleRect, blockRect } = fragment;
+  // A1 fragments are complete projected pieces at the target page width. Their
+  // text range comes from the shared flow plan, never a second print paginator.
+  if (fragment.flowFragment) return {
+    clip: { left: visibleRect.x - frame.x, top: visibleRect.y - frame.y,
+      width: visibleRect.width, height: visibleRect.height },
+    block: { x: 0, y: 0, width: visibleRect.width, height: visibleRect.height },
+  };
   return {
     clip: {
       left: visibleRect.x - frame.x,

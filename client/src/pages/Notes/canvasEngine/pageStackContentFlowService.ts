@@ -19,6 +19,14 @@ import type {
   PageFrameModel,
 } from './types';
 
+// A1: the full document plan is the load-bearing projection; the draft API below
+// remains a compatibility helper for the existing natural-writing entry points.
+export { resolveDocumentPageFlowPlan } from './documentPageFlowService';
+export type {
+  DocumentPageFlowPlan, PageFlowBlock, PageFlowFragment, PageFlowLine, PageFlowOverflow,
+  ResolveDocumentPageFlowPlanInput,
+} from './documentPageFlowService';
+
 interface ResolvePageStackContentFlowPlanInput {
   coordinateContract?: CoordinateContract;
   collection: PageFrameCollectionModel;

@@ -2,6 +2,7 @@ import { resolveScreenRect, selectPlacementFrame, toStoredLayout, type Coordinat
 import { useMemo } from 'react';
 import { createNotePagePresetSeed, growWebPageCollection, isNotePagePreset, measurePresetPageContentHeight } from '../notePagePresetService';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
+import { pageFlowFragmentProjections } from '../notePageFlowService';
 import { buildExportPreviewModel } from '../exportPreviewService';
 import { estimateBlockHeight } from '../measurementService';
 import {
@@ -64,6 +65,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 }
 
 export interface UseNoteCanvasFrameModelOptions {
+  pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan;
   notePagePreset?: string;
   coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
@@ -177,6 +179,7 @@ export function useNoteCanvasResolvedLayoutModel({
 }
 
 export function useNoteCanvasFrameModel({
+  pageFlowPlan,
   notePagePreset,
   blockLayouts,
   coordinateContract,
@@ -228,6 +231,7 @@ export function useNoteCanvasFrameModel({
   ], [blockLayouts, draftActive, draftLayout, defaultDraftLayout, persistedCanvasPlacements]);
 
   const runtimePageFrameCollection = useMemo(() => {
+    if (pageFlowPlan) return pageFlowPlan.collection;
     if (isNotePagePreset(notePagePreset)) {
       const collection = normalizePageFrameCollection(pageFrameCollection || createNotePagePresetSeed(notePagePreset));
       return notePagePreset === 'screen_note'
@@ -237,7 +241,7 @@ export function useNoteCanvasFrameModel({
     return normalizePageFrameCollection(pageFrameCollection, {
       fallbackPageFrame: primaryPageFrameSeed,
     });
-  }, [notePagePreset, pageFrameCollection, primaryPageFrameSeed, presetContentLayouts, coordinateContract]);
+  }, [pageFlowPlan, notePagePreset, pageFrameCollection, primaryPageFrameSeed, presetContentLayouts, coordinateContract]);
 
   const primaryPageFrame = useMemo(() => (
     runtimePageFrameCollection.pageFrames.find((frame) => frame.id === runtimePageFrameCollection.primaryFrameId)
@@ -282,7 +286,7 @@ export function useNoteCanvasFrameModel({
       })
       : seedViewport;
 
-    return { ...buildNoteCanvasRuntimeModel({
+    const runtime = buildNoteCanvasRuntimeModel({
       mode: surfaceMode,
       world: createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {
         pageFrames: runtimePageFrameCollection.pageFrames,
@@ -302,8 +306,17 @@ export function useNoteCanvasFrameModel({
       genericImageObjects: persistedImageObjects,
       genericStructuredObjects: persistedStructuredObjects,
       textByContentTargetId: buildTextByContentTargetId(contentLookupBlocks || visibleBlocks),
-    }), coordinateContract };
+    });
+    if (pageFlowPlan) {
+      const paginated = new Set(pageFlowPlan.fragments.map((fragment) => fragment.blockId));
+      runtime.blockFragmentProjections = [
+        ...runtime.blockFragmentProjections.filter((fragment) => !paginated.has(fragment.blockId)),
+        ...pageFlowFragmentProjections(pageFlowPlan),
+      ];
+    }
+    return { ...runtime, coordinateContract, pageFlowPlan };
   }, [
+    pageFlowPlan,
     canvasBlockPlacements,
     coordinateContract,
     contentLookupBlocks,
@@ -326,13 +339,14 @@ export function useNoteCanvasFrameModel({
 
   const exportPreview = useMemo(() => {
     return buildExportPreviewModel(visibleBlocks, blockLayouts, {
+      pageFlowPlan,
       pageFrames: noteCanvasRuntime.pageFrames,
       pageStacks: noteCanvasRuntime.pageStacks,
       blockPlacements: noteCanvasRuntime.blockPlacements,
       primaryPageFrameId: noteCanvasRuntime.primaryPageFrame?.id || null,
       documentTypography: documentTypographyProfile,
     });
-  }, [visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
+  }, [pageFlowPlan, visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
 
   return {
     canvasBlockPlacements,

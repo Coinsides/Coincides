@@ -1,4 +1,6 @@
 import { Eye } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import { PAGINATED_SOURCE_REFERENCE_ACTION_HEIGHT_PX, PAGINATED_SOURCE_REFERENCE_CHIP_HEIGHT_PX, PAGINATED_SOURCE_REFERENCE_GAP_PX, PAGINATED_SOURCE_REFERENCE_STRIP_HEIGHT_PX } from '../pageFlowSourceReferenceService';
 import type {
   NoteBlock,
   SourceAnchor,
@@ -10,6 +12,8 @@ interface BlockSourceReferenceLayerProps {
   anchorsBySourceRef: Record<string, SourceAnchor>;
   sourceJumpBusy: string | null;
   onViewSource: (anchorId: string) => void;
+  /** The first flow fragment reserves one fixed strip, regardless of source count. */
+  paginated?: boolean;
 }
 
 export function BlockSourceReferenceLayer({
@@ -17,11 +21,17 @@ export function BlockSourceReferenceLayer({
   anchorsBySourceRef,
   sourceJumpBusy,
   onViewSource,
+  paginated = false,
 }: BlockSourceReferenceLayerProps) {
   if (!sourceReferences?.length) return null;
 
   return (
-    <div className={styles.sources}>
+    <div className={[styles.sources, paginated ? styles.sourcesPaginated : ''].filter(Boolean).join(' ')}
+      data-page-flow-sources={paginated ? 'true' : undefined}
+      role={paginated ? 'region' : undefined} aria-label={paginated ? 'Source references' : undefined} tabIndex={paginated ? 0 : undefined}
+      style={paginated ? { height: PAGINATED_SOURCE_REFERENCE_STRIP_HEIGHT_PX, marginTop: PAGINATED_SOURCE_REFERENCE_GAP_PX,
+        '--page-source-chip-height': `${PAGINATED_SOURCE_REFERENCE_CHIP_HEIGHT_PX}px`,
+        '--page-source-action-height': `${PAGINATED_SOURCE_REFERENCE_ACTION_HEIGHT_PX}px` } as CSSProperties : undefined}>
       {sourceReferences.map((source, sourceIndex) => {
         const anchor = source.id ? anchorsBySourceRef[source.id] : undefined;
         return (

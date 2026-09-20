@@ -480,6 +480,7 @@ export function NoteWritingSurfaceLayer({
   const pageDisplayBounds = useMemo(() => {
     const screen = (layout: BlockBoxLayout) => resolveScreenRect(layout, selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract), noteCanvasRuntime.coordinateContract);
     const layouts = visibleBlocks.map((block) => blockLayouts[block.id]).filter(Boolean).map(screen);
+    noteCanvasRuntime.pageFlowPlan?.fragments.forEach((fragment) => layouts.push(screen(fragment.layout)));
     if (draftActive) layouts.push(screen(draftLayout || defaultDraftLayout));
     const left = Math.min(0, ...layouts.map((layout) => pageReading.inset.left + layout.x));
     const top = Math.min(0, ...layouts.map((layout) => pageReading.inset.top + layout.y));
@@ -493,7 +494,9 @@ export function NoteWritingSurfaceLayer({
     layoutMode,
     interactionMode: interactionState.mode,
   });
-  const visiblePageFrames = useMemo(() => primaryPageFrame ? [primaryPageFrame] : [], [primaryPageFrame]);
+  const visiblePageFrames = useMemo(() => noteCanvasRuntime.pageFlowPlan
+    ? noteCanvasRuntime.pageFrames : primaryPageFrame ? [primaryPageFrame] : [],
+  [noteCanvasRuntime.pageFlowPlan, noteCanvasRuntime.pageFrames, primaryPageFrame]);
   const blockPlacementByBlockId = useMemo(() => (
     new Map(noteCanvasRuntime.blockPlacements.map((placement) => [placement.blockId, placement]))
   ), [noteCanvasRuntime.blockPlacements]);
@@ -1463,7 +1466,7 @@ export function NoteWritingSurfaceLayer({
         data-note-header-band="true" style={{
           ...primaryPageFrameTemplateStyle,
           width: pageReading.paperWidth,
-          height: pageDisplayBounds.height + displayHeaderHeight,
+          height: (noteCanvasRuntime.pageFlowPlan ? primaryPageFrame?.height || 0 : pageDisplayBounds.height) + displayHeaderHeight,
           left: -pageDisplayBounds.left * pageReading.displayScale,
           transform: `scale(${pageReading.displayScale})`, transformOrigin: '0 0',
         }}>
@@ -1480,7 +1483,8 @@ export function NoteWritingSurfaceLayer({
           ...primaryPageFrameTemplateStyle,
           width: pageReading.paperWidth,
           height: pageReading.paperHeight,
-          ...(paperHeader ? { background: 'transparent', outline: 'none' } : {}),
+          ...(paperHeader || noteCanvasRuntime.pageFlowPlan ? { background: 'transparent', outline: 'none' } : {}),
+          ...(noteCanvasRuntime.pageFlowPlan ? { boxShadow: 'none' } : {}),
           left: -pageDisplayBounds.left * pageReading.displayScale,
           top: (displayHeaderHeight - pageDisplayBounds.top) * pageReading.displayScale,
           paddingTop: pageReading.inset.top,
@@ -1535,6 +1539,18 @@ export function NoteWritingSurfaceLayer({
         onDragOverCapture={handleStagingDragOver}
         onDropCapture={handleStagingDrop}
       >
+        {surfaceMode === 'page' && noteCanvasRuntime.pageFlowPlan && visiblePageFrames.map((frame) => {
+          if (paperHeader && frame.id === primaryPageFrameId) return null;
+          const display = projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX);
+          const extension = pageFrameExtensionByFrameId.get(frame.id);
+          return <div key={`${frame.id}:paper`} data-flow-page-paper={frame.id}
+            aria-hidden="true" style={{ ...pageFrameTemplateToCssVars(extension?.background || frame.background),
+              position: 'absolute', pointerEvents: 'none', zIndex: -1,
+              left: display.x, top: display.y, width: display.width, height: display.height,
+              background: 'var(--paper-material-fill, var(--paper-template-fill, var(--page-frame-background, var(--bg-primary))))',
+              boxShadow: 'var(--paper-material-shadow, none)',
+              outline: 'var(--sk-header-rule, 1px solid var(--paper-template-border, var(--border-subtle)))' }} />;
+        })}
         {surfaceMode === 'page' && !overviewOpen && noteCanvasRuntime.coordinateContract === 'v2'
           && visiblePageFrames.map((frame) => (
             <PageFrameWallLayer key={`${frame.id}:walls`}
@@ -1661,6 +1677,15 @@ export function NoteWritingSurfaceLayer({
         {snapGuide?.x !== undefined && (
           <div className={styles.snapGuideVertical} style={{ left: screenSnapGuide.x }} />
         )}
+        {noteCanvasRuntime.pageFlowPlan?.overflows.map((overflow) => {
+          const fragment = noteCanvasRuntime.pageFlowPlan!.fragments.find((entry) => entry.id === overflow.fragmentId)!;
+          const rect = resolveScreenRect(fragment.layout,
+            noteCanvasRuntime.pageFrames.find((frame) => frame.id === fragment.frameId), 'v2', pageOffsetX);
+          return <small key={overflow.fragmentId} role="status" data-page-flow-overflow={overflow.kind}
+            style={{ position: 'absolute', left: rect.x, top: rect.y - 22 }}>
+            Content exceeds this page by {Math.ceil(overflow.overflowPx)} px.
+          </small>;
+        })}
         {snapGuide?.y !== undefined && (
           <div className={styles.snapGuideHorizontal} style={{ top: screenSnapGuide.y }} />
         )}
@@ -1688,6 +1713,7 @@ export function NoteWritingSurfaceLayer({
               text={text}
               layout={layout}
               blockFragments={blockFragmentsByBlockId.get(block.id)}
+              documentTypography={documentTypographyProfile}
               blockControlAnchor={blockControlAnchor}
               affiliationOutline={affiliationOutline}
               textFlowDraft={blockTextFlowDrafts[block.id]}

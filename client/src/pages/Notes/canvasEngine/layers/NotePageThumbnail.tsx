@@ -37,6 +37,7 @@ export const NotePageThumbnail = memo(function NotePageThumbnail({
         style={{ ...documentTypographyToCssVars(input.documentTypographyProfile),
           width: frame.width, height: frame.height, transform: `scale(${scale})` } as CSSProperties}>
         <NoteReadOnlyPageContent frame={frame}
+          documentTypography={input.documentTypographyProfile}
           fragments={input.noteCanvasRuntime.blockFragmentProjections}
           canvasObjects={input.noteCanvasRuntime.canvasObjects}
           canvasPlacements={input.noteCanvasRuntime.canvasPlacements}

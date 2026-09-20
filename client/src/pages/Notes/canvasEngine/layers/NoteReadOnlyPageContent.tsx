@@ -2,7 +2,7 @@ import { textFromContent } from '../blockContentService';
 import { readStoredLayout } from '../placementService';
 import { getPagePrintFragmentGeometry } from '../pagePrintProjectionService';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
-import type { CanvasObject, CanvasPlacement, PageFrameModel, PageStackBlockFragmentProjection } from '../types';
+import type { CanvasObject, CanvasPlacement, DocumentTypographyProfile, PageFrameModel, PageStackBlockFragmentProjection } from '../types';
 import { BlockEditorLayer } from './BlockEditorLayer';
 import { PaperInkSvg } from './PaperInkSvg';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
@@ -16,6 +16,7 @@ export type NoteReadOnlyPageContentProps = Pick<NoteWritingSurfaceLayerProps,
   canvasPlacements?: readonly CanvasPlacement[];
   /** Retain the existing print fragment markers without sharing its event lifecycle. */
   print?: boolean;
+  documentTypography?: DocumentTypographyProfile;
 };
 
 const noOp = () => undefined;
@@ -32,7 +33,7 @@ const noSave = async (): Promise<BlockSaveOutcome> => ({
  * retain the existing print projection's exclusions.
  */
 export function NoteReadOnlyPageContent({
-  frame, fragments, canvasObjects = [], canvasPlacements = [], print = false, ...input
+  frame, fragments, canvasObjects = [], canvasPlacements = [], print = false, documentTypography, ...input
 }: NoteReadOnlyPageContentProps) {
   const blocks = new Map(input.visibleBlocks.filter((block) => readStoredLayout(block)?.surface !== 'tray')
     .map((block) => [block.id, block]));
@@ -44,7 +45,7 @@ export function NoteReadOnlyPageContent({
         const block = blocks.get(fragment.blockId)!;
         const geometry = getPagePrintFragmentGeometry(frame, fragment);
         return <div
-          key={block.id}
+          key={`${block.id}:${fragment.fragmentIndex}`}
           data-note-readonly-fragment="true"
           data-note-print-fragment={print ? 'true' : undefined}
           data-block-id={block.id}
@@ -56,6 +57,8 @@ export function NoteReadOnlyPageContent({
             textFlowDraft={input.blockTextFlowDrafts[block.id]}
             fieldDraft={input.blockFieldDrafts[block.id]}
             layout={geometry.block}
+            blockFragments={fragment.flowFragment ? [fragment] : undefined}
+            documentTypography={documentTypography}
             contentReadOnly
             mediaPlaceholder={print}
             layoutMode={false}

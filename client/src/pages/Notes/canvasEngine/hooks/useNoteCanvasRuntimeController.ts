@@ -3,6 +3,8 @@ import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
+import { useNotePageFlow } from './useNotePageFlow';
+import { createDefaultDraftLayout } from '../pageFrameService';
 import { useRuntimePresentationController } from './useRuntimePresentationController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
 import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
@@ -247,9 +249,9 @@ export function useNoteCanvasRuntimeController() {
   }, [persistCanvasObject, persistedCanvasObjects, persistedCanvasPlacements, persistedStructuredObjects]);
 
   const {
-    blockLayouts,
+    blockLayouts: unpaginatedBlockLayouts,
     contentWidth,
-    defaultDraftLayout,
+    defaultDraftLayout: unpaginatedDefaultDraftLayout,
     pageFrames,
     persistChangedBlockLayouts,
     persistLayoutSnapshot,
@@ -268,6 +270,20 @@ export function useNoteCanvasRuntimeController() {
     surfaceMode,
     surfacePolicy,
   });
+
+  const { plan: pageFlowPlan, layouts: blockLayouts } = useNotePageFlow({
+    noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving,
+    coordinateContract, blocks: visibleBlocks, layouts: unpaginatedBlockLayouts,
+    pageFrames, collection: pageFrameCollection, typography: documentTypographyProfile,
+    textDrafts: blockTextDrafts, flowDrafts: blockTextFlowDrafts,
+    saveCollection: savePageFrameCollection, persistLayout: persistBlockLayout,
+  });
+  const flowPageFrameCollection = pageFlowPlan?.collection || pageFrameCollection;
+  const defaultDraftLayout = useMemo(() => pageFlowPlan ? createDefaultDraftLayout({
+    ...blockLayouts,
+    ...Object.fromEntries(pageFlowPlan.fragments.map((fragment) => [fragment.id, fragment.layout])),
+  }, contentWidth, pageFlowPlan.collection.pageFrames, coordinateContract) : unpaginatedDefaultDraftLayout,
+  [pageFlowPlan, blockLayouts, contentWidth, coordinateContract, unpaginatedDefaultDraftLayout]);
 
   const textHistory = useTextFlowHistory({
     noteId: noteId ?? '', generation: textHistoryGeneration, blocks,
@@ -370,8 +386,8 @@ export function useNoteCanvasRuntimeController() {
     onDraftFocusReceipt: markDraftFocused,
     orderedBlocks: visibleBlocks,
     pageOffsetX,
-    pageFrameCollection,
-    pageFrames,
+    pageFrameCollection: flowPageFrameCollection,
+    pageFrames: flowPageFrameCollection?.pageFrames || pageFrames,
     selectedPageFrameId: pageFrameCollection?.selectedFrameId || pageFrameCollection?.primaryFrameId || null,
     viewportTransform: surfaceMode === 'page' ? pageReadingViewport || viewportTransform : viewportTransform,
     persistChangedBlockLayouts: (layouts) => {
@@ -438,6 +454,7 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const { layerProps, runtimePageFrameCollection } = useRuntimePresentationController({
+    pageFlowPlan,
     onPageFrameWallPointerDown: walls.begin,
     activePageFrameWall: walls.activeWall,
     hostMode,

@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-16
+> **日期 (Updated)**: 2026-09-20
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 397 份文档。
+共 400 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -93,6 +93,7 @@
 | [analysis/2026-09-14-v14-1-census-adjudication.md](analysis/2026-09-14-v14-1-census-adjudication.md) | 14.1 普查候裁十项 · HQ 裁定书 | `active` | — | — |
 | [analysis/2026-09-14-v14-1-executor-census.md](analysis/2026-09-14-v14-1-executor-census.md) | V14 · 14.1 executor 动词→人门映射普查 | `active` | — | — |
 | [analysis/2026-09-16-board-visual-grammar-benchmark.md](analysis/2026-09-16-board-visual-grammar-benchmark.md) | Coincides 板视觉语法 · 对标调研稿 | `active` | 2026-09-16 | — |
+| [analysis/2026-09-19-post-meeting-engineering-roadmap.md](analysis/2026-09-19-post-meeting-engineering-roadmap.md) | 会后工程总单与版本架构建议(2026-09-19) | `draft` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -386,7 +387,8 @@
 | [handoffs/2026-09-14-v14-prompt-repair-order.md](handoffs/2026-09-14-v14-prompt-repair-order.md) | prompt 修缮单 | `done` | — | — |
 | [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `done` | — | — |
 | [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `done` | — | — |
-| [handoffs/2026-09-16-v14-board-visual-v1-order.md](handoffs/2026-09-16-v14-board-visual-v1-order.md) | 板视觉 v1 | `ready` | — | — |
+| [handoffs/2026-09-16-v14-board-visual-v1-order.md](handoffs/2026-09-16-v14-board-visual-v1-order.md) | 板视觉 v1 | `done(HQ 机补验+应用内实测通过,2026-09-16)` | — | — |
+| [handoffs/2026-09-19-v14-a1-pagination-order.md](handoffs/2026-09-19-v14-a1-pagination-order.md) | A1 · 自动分页+断块 | `done(builder 二轮施工交付；HQ 验收与完整门收口未代行)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
@@ -405,6 +407,7 @@
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `active` | 2026-09-09 | — |
 | [handoffs/plans/v14-eve-design-package.md](handoffs/plans/v14-eve-design-package.md) | V14 前夜设计包 | `draft` | 2026-09-13 | — |
+| [handoffs/plans/v14-remainder-roadmap.md](handoffs/plans/v14-remainder-roadmap.md) | V14 余部 Roadmap(以《宋史手册》为齐平基准) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
 | [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-26 | — |

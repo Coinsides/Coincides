@@ -85,13 +85,14 @@ import {
 import styles from '../../NoteDetail.module.css';
 import type { TextFocusReceipt } from '../textFocusReceipt';
 import { imageOnlyClipboardFile } from '../mediaBlockPasteService';
+import { textareaUnitStart } from '../fragmentTextareaService';
 import type {
   TextFlowEditBoundary,
   TextFlowEditMetadata,
   TextFlowEditSelection,
 } from '../textFlowEditSession';
 
-interface TextBlockProjectionProps {
+export interface TextBlockProjectionProps {
   blockId: string;
   readOnly: boolean;
   text: string;
@@ -1347,7 +1348,7 @@ export function TextBlockProjection({
         const caret = textareaCaretAtPoint(event.currentTarget, event.clientX, event.clientY);
         const localAnchor = documentSelection.anchorFor(current?.dataset.blockId ?? '');
         const anchor = documentRange?.anchor ?? { blockId: current!.dataset.blockId!, ...(localAnchor ?? {
-          unitId: current!.dataset.textUnitId!, offset: current!.selectionDirection === 'backward' ? current!.selectionEnd : current!.selectionStart }) };
+          unitId: current!.dataset.textUnitId!, offset: textareaUnitStart(current!) + (current!.selectionDirection === 'backward' ? current!.selectionEnd : current!.selectionStart) }) };
         event.preventDefault();
         if (caret && documentSelection.select(anchor, { blockId, unitId: event.currentTarget.dataset.textUnitId!, offset: caret.offset })) onFlowSelectionStart?.();
         flowShiftClickRef.current = true;
