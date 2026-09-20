@@ -2,20 +2,26 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../../db/init.js';
 import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
+import { searchEpisodes } from './episodes.js';
+import type { AgentEpisodeRecord } from '../../../../shared/types/agentEpisodes.js';
 
 export interface MemoryMatch {
+  kind: 'memory' | 'episode';
   id: string;
   category: string;
   content: string;
   created_at: string;
   similarity_score?: number;
+  conversation_id?: string;
+  message_range?: AgentEpisodeRecord['message_range'];
+  anchor_manifest?: AgentEpisodeRecord['anchor_manifest'];
 }
 
 /** The single retrieval path for prompt context and search_memories. */
 export async function searchMemories(
   userId: string,
   query: string,
-  { limit = 10, category }: { limit?: number; category?: string } = {},
+  { limit = 10, category, includeEpisodes = true }: { limit?: number; category?: string; includeEpisodes?: boolean } = {},
 ): Promise<MemoryMatch[]> {
   const db = getDb();
   const store = new VectorStore();
@@ -36,6 +42,7 @@ export async function searchMemories(
       const queryEmbeddings = await provider.embed([query], 'query');
       if (queryEmbeddings.length > 0) {
         semanticMapped = store.searchMemoriesWithContent(queryEmbeddings[0], limit, userId).map((row) => ({
+          kind: 'memory',
           id: row.memory_id,
           category: row.category,
           content: row.content,
@@ -59,15 +66,23 @@ export async function searchMemories(
     if (category && memory.category !== category) continue;
     if (!seenIds.has(memory.id)) {
       seenIds.add(memory.id);
-      results.push(memory);
+      results.push({ ...memory, kind: 'memory' });
     }
   }
 
+  if (includeEpisodes && !category) {
+    for (const episode of searchEpisodes(userId, query, limit)) {
+      results.push({ kind: 'episode', id: episode.id, category: 'episode', content: episode.summary_text,
+        created_at: episode.created_at, conversation_id: episode.conversation_id,
+        message_range: episode.message_range, anchor_manifest: episode.anchor_manifest });
+    }
+  }
   const selected = results.slice(0, limit);
-  if (selected.length > 0) {
-    const placeholders = selected.map(() => '?').join(',');
+  const selectedMemories = selected.filter(memory => memory.kind === 'memory');
+  if (selectedMemories.length > 0) {
+    const placeholders = selectedMemories.map(() => '?').join(',');
     db.prepare(`UPDATE agent_memories SET last_accessed = ? WHERE user_id = ? AND id IN (${placeholders})`)
-      .run(new Date().toISOString(), userId, ...selected.map((memory) => memory.id));
+      .run(new Date().toISOString(), userId, ...selectedMemories.map((memory) => memory.id));
   }
   return selected;
 }

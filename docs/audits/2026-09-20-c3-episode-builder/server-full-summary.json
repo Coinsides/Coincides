@@ -1,0 +1,3548 @@
+{
+  "schemaVersion": 1,
+  "mode": "server-full",
+  "runId": "server-full-2026-09-20T09-51-16-479Z-31344",
+  "startedAt": "2026-09-20T09:51:16.483Z",
+  "rawRoot": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344",
+  "isolation": "OS environment allowlist; in-memory SQLite; empty dotenv and Vite env directory; dedicated temporary application data, assets, uploads and temp. No provider credentials inherited.",
+  "serverFileTimeoutMs": 660000,
+  "nodeTestTimeoutMs": 600000,
+  "runtimeGate": {
+    "totalComponents": 25,
+    "nonGitSecretsComponents": 23,
+    "commands": [
+      "check:test-wiring",
+      "test:agent-knowledge",
+      "check:agent-knowledge",
+      "check:tech-debt-table",
+      "test:unit",
+      "test:tool-face-registry",
+      "test:tool-face-manifest",
+      "check:tool-face-manifest",
+      "test:tool-face-parity",
+      "check:tool-face-parity",
+      "check:server-shared-runtime-import",
+      "check:canvas-runtime-boundary",
+      "check:group-gallery-shell",
+      "check:groups-rail-shell",
+      "check:single-editor-shell",
+      "check:source-experience",
+      "check:v2-bn11-legacy-shutdown",
+      "check:v2-bn11-relation-freshness",
+      "smoke:canvas-engine-model-contract",
+      "build:client",
+      "build",
+      "smoke:canvas-engine-performance",
+      "docs:check"
+    ],
+    "hqPending": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ],
+    "completeRuntimeGate": false
+  },
+  "discoveredServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14BoardVisual.test.ts",
+    "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ComponentBlocks.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14CoverPage.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14EpisodeContext.test.ts",
+    "server/src/__tests__/v14EpisodeStorage.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NoteBinding.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14PaperFreedom.test.ts",
+    "server/src/__tests__/v14ParagraphFurniture.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v14TableBlocks.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "selectedServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14BoardVisual.test.ts",
+    "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ComponentBlocks.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14CoverPage.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14EpisodeContext.test.ts",
+    "server/src/__tests__/v14EpisodeStorage.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NoteBinding.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14PaperFreedom.test.ts",
+    "server/src/__tests__/v14ParagraphFurniture.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v14TableBlocks.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "steps": [
+    {
+      "label": "shared-build",
+      "command": [
+        "node",
+        "server/node_modules/typescript/bin/tsc",
+        "-b",
+        "shared/tsconfig.json"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 137,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/001-shared-build.log",
+      "counts": {}
+    },
+    {
+      "label": "server-manifest-check",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 528,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/002-server-manifest-check.log",
+      "counts": {}
+    },
+    {
+      "label": "server-manifest-copy",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "copy:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 190,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/003-server-manifest-copy.log",
+      "counts": {}
+    },
+    {
+      "label": "server/scripts/agent-eval/harness.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "scripts/agent-eval/harness.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/scripts/agent-eval/harness.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1248,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/004-server_scripts_agent-eval_harness.test.ts.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1163.3517
+      }
+    },
+    {
+      "label": "server/scripts/v13WildernessExecute.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "scripts/v13WildernessExecute.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/scripts/v13WildernessExecute.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 448296,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/005-server_scripts_v13WildernessExecute.test.ts.log",
+      "counts": {
+        "tests": 27,
+        "suites": 0,
+        "pass": 27,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 448180.2652
+      }
+    },
+    {
+      "label": "server/scripts/v13WildernessShadowRun.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "scripts/v13WildernessShadowRun.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/scripts/v13WildernessShadowRun.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1886,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/006-server_scripts_v13WildernessShadowRun.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1793.1746
+      }
+    },
+    {
+      "label": "server/scripts/v2Bn12LifecycleMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "scripts/v2Bn12LifecycleMigration.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/scripts/v2Bn12LifecycleMigration.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 284,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/007-server_scripts_v2Bn12LifecycleMigration.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 193.0017
+      }
+    },
+    {
+      "label": "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "scripts/v2OperationBatchTimestampMigration.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/scripts/v2OperationBatchTimestampMigration.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 494,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/008-server_scripts_v2OperationBatchTimestampMigration.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 404.1932
+      }
+    },
+    {
+      "label": "server/src/__tests__/providerCredentials.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/providerCredentials.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/providerCredentials.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 543,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/009-server_src___tests___providerCredentials.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 449.7546
+      }
+    },
+    {
+      "label": "server/src/__tests__/textFlowIdentityContract.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/textFlowIdentityContract.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/textFlowIdentityContract.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2407,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/010-server_src___tests___textFlowIdentityContract.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2314.7084
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AgentMemories.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13AgentMemories.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13AgentMemories.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 643,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/011-server_src___tests___v13AgentMemories.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 547.4345
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AtomicTextSave.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13AtomicTextSave.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13AtomicTextSave.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 11438,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/012-server_src___tests___v13AtomicTextSave.test.ts.log",
+      "counts": {
+        "tests": 26,
+        "suites": 0,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 11315.0201
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13AtomicTextSaveMigration.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13AtomicTextSaveMigration.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1184,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/013-server_src___tests___v13AtomicTextSaveMigration.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1095.3774
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardCeremonyNote.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardCeremonyNote.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 956,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/014-server_src___tests___v13BoardCeremonyNote.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 870.319
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardChalk.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardChalk.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardChalk.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1007,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/015-server_src___tests___v13BoardChalk.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 915.5621
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardIdentity.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardIdentity.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardIdentity.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1930,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/016-server_src___tests___v13BoardIdentity.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1834.6138
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardRoutes.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardRoutes.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardRoutes.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 830,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/017-server_src___tests___v13BoardRoutes.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 739.4449
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardSchema.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardSchema.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardSchema.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 848,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/018-server_src___tests___v13BoardSchema.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 756.9014
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardServices.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardServices.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardServices.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 886,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/019-server_src___tests___v13BoardServices.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 791.4983
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardStaging.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardStaging.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardStaging.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 860,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/020-server_src___tests___v13BoardStaging.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 767.4509
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardTextRanges.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardTextRanges.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardTextRanges.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1426,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/021-server_src___tests___v13BoardTextRanges.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1333.3
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardTrayRelocation.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardTrayRelocation.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1675,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/022-server_src___tests___v13BoardTrayRelocation.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1585.5623
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardViewportBookmarks.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardViewportBookmarks.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1480,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/023-server_src___tests___v13BoardViewportBookmarks.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1386.892
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13BoardWave1.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13BoardWave1.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13BoardWave1.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 699,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/024-server_src___tests___v13BoardWave1.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 602.7978
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13CanvasRetirement.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13CanvasRetirement.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13CanvasRetirement.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 649,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/025-server_src___tests___v13CanvasRetirement.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 557.3296
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13CoordinateContract.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13CoordinateContract.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13CoordinateContract.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1340,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/026-server_src___tests___v13CoordinateContract.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1240.3862
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13EventsLedger.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13EventsLedger.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13EventsLedger.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 816,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/027-server_src___tests___v13EventsLedger.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 716.0575
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13GraphemeTextRanges.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13GraphemeTextRanges.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 509,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/028-server_src___tests___v13GraphemeTextRanges.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 411.0641
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13ItemFloor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13ItemFloor.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13ItemFloor.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 675,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/029-server_src___tests___v13ItemFloor.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 584.9884
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13ItemRefBlocks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13ItemRefBlocks.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13ItemRefBlocks.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 696,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/030-server_src___tests___v13ItemRefBlocks.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 602.0091
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13MediaBlocks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13MediaBlocks.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13MediaBlocks.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2019,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/031-server_src___tests___v13MediaBlocks.test.ts.log",
+      "counts": {
+        "tests": 13,
+        "suites": 0,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1925.9118
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13NoteMetadata.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13NoteMetadata.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13NoteMetadata.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1414,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/032-server_src___tests___v13NoteMetadata.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1322.0032
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13PagePresets.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13PagePresets.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13PagePresets.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 969,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/033-server_src___tests___v13PagePresets.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 875.5004
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13PaperInk.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13PaperInk.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13PaperInk.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 787,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/034-server_src___tests___v13PaperInk.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 705.4133
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13PaperSkin.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13PaperSkin.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13PaperSkin.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2169,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/035-server_src___tests___v13PaperSkin.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2083.5818
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13ProjectDeletionReferences.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13ProjectDeletionReferences.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 969,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/036-server_src___tests___v13ProjectDeletionReferences.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 877.9452
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13RecordedAction.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13RecordedAction.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13RecordedAction.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 285,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/037-server_src___tests___v13RecordedAction.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 187.1733
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13SourceProjectionRepair.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13SourceProjectionRepair.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1425,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/038-server_src___tests___v13SourceProjectionRepair.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1331.4926
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13SourceReprojection.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13SourceReprojection.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1961,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/039-server_src___tests___v13SourceReprojection.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1875.4924
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13Tray.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13Tray.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13Tray.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 786,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/040-server_src___tests___v13Tray.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 687.055
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13TrayOrder.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13TrayOrder.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13TrayOrder.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 897,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/041-server_src___tests___v13TrayOrder.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 800.1368
+      }
+    },
+    {
+      "label": "server/src/__tests__/v13WallCollectionBatch.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v13WallCollectionBatch.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v13WallCollectionBatch.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 309,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/042-server_src___tests___v13WallCollectionBatch.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 216.5982
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentKnowledgeProjection.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentKnowledgeProjection.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 315,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/043-server_src___tests___v14AgentKnowledgeProjection.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 225.1079
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentRouteLifecycle.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentRouteLifecycle.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1882,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/044-server_src___tests___v14AgentRouteLifecycle.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1793.5592
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentVerbTransfer.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentVerbTransfer.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 27299,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/045-server_src___tests___v14AgentVerbTransfer.test.ts.log",
+      "counts": {
+        "tests": 50,
+        "suites": 0,
+        "pass": 50,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 27180.4014
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AgentWriteDoor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AgentWriteDoor.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AgentWriteDoor.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1285,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/046-server_src___tests___v14AgentWriteDoor.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1191.247
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14AttentionContext.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14AttentionContext.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14AttentionContext.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1447,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/047-server_src___tests___v14AttentionContext.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1351.3401
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14BoardLayoutInspector.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14BoardLayoutInspector.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 260,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/048-server_src___tests___v14BoardLayoutInspector.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 167.1001
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14BoardSandbox.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14BoardSandbox.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14BoardSandbox.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2410,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/049-server_src___tests___v14BoardSandbox.test.ts.log",
+      "counts": {
+        "tests": 15,
+        "suites": 0,
+        "pass": 15,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2315.88
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14BoardVisual.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14BoardVisual.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14BoardVisual.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2092,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/050-server_src___tests___v14BoardVisual.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1998.7445
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14BoardVisualGeometry.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14BoardVisualGeometry.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 285,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/051-server_src___tests___v14BoardVisualGeometry.test.ts.log",
+      "counts": {
+        "tests": 19,
+        "suites": 0,
+        "pass": 19,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 185.5389
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14CardCover.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14CardCover.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14CardCover.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1209,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/052-server_src___tests___v14CardCover.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1121.0604
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ClaimObservation.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ClaimObservation.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ClaimObservation.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 300,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/053-server_src___tests___v14ClaimObservation.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 211.3191
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ClaimReceipt.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ClaimReceipt.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ClaimReceipt.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2547,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/054-server_src___tests___v14ClaimReceipt.test.ts.log",
+      "counts": {
+        "tests": 26,
+        "suites": 0,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2452.8159
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ComponentBlocks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ComponentBlocks.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ComponentBlocks.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1114,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/055-server_src___tests___v14ComponentBlocks.test.ts.log",
+      "counts": {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1019.3294
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ContextHint.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ContextHint.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ContextHint.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3108,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/056-server_src___tests___v14ContextHint.test.ts.log",
+      "counts": {
+        "tests": 35,
+        "suites": 0,
+        "pass": 35,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2984.1757
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14CoverPage.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14CoverPage.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14CoverPage.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1751,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/057-server_src___tests___v14CoverPage.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1663.2596
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14DeleteCeremony.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14DeleteCeremony.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14DeleteCeremony.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2538,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/058-server_src___tests___v14DeleteCeremony.test.ts.log",
+      "counts": {
+        "tests": 16,
+        "suites": 0,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2438.558
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14EpisodeContext.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14EpisodeContext.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14EpisodeContext.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1742,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/059-server_src___tests___v14EpisodeContext.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1643.1687
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14EpisodeStorage.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14EpisodeStorage.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14EpisodeStorage.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 895,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/060-server_src___tests___v14EpisodeStorage.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 797.758
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14IntentRouter.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14IntentRouter.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14IntentRouter.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 896,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/061-server_src___tests___v14IntentRouter.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 801.8903
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14LoopRobustness.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14LoopRobustness.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14LoopRobustness.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2259,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/062-server_src___tests___v14LoopRobustness.test.ts.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2164.9945
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14MemoryQuickwins.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14MemoryQuickwins.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14MemoryQuickwins.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2764,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/063-server_src___tests___v14MemoryQuickwins.test.ts.log",
+      "counts": {
+        "tests": 17,
+        "suites": 0,
+        "pass": 17,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2670.924
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14NoteBinding.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14NoteBinding.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14NoteBinding.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1085,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/064-server_src___tests___v14NoteBinding.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 993.4703
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14NotePatch.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14NotePatch.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14NotePatch.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1774,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/065-server_src___tests___v14NotePatch.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1679.4178
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14PaletteColors.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14PaletteColors.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14PaletteColors.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 723,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/066-server_src___tests___v14PaletteColors.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 641.0563
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14PaperFreedom.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14PaperFreedom.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14PaperFreedom.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 506,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/067-server_src___tests___v14PaperFreedom.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 409.4807
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ParagraphFurniture.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ParagraphFurniture.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ParagraphFurniture.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1637,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/068-server_src___tests___v14ParagraphFurniture.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1553.8448
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ProposalUnification.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ProposalUnification.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ProposalUnification.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2662,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/069-server_src___tests___v14ProposalUnification.test.ts.log",
+      "counts": {
+        "tests": 16,
+        "suites": 0,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2568.4657
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14ReadTools.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14ReadTools.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14ReadTools.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2981,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/070-server_src___tests___v14ReadTools.test.ts.log",
+      "counts": {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2882.9341
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14SkinSuites.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14SkinSuites.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14SkinSuites.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 734,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/071-server_src___tests___v14SkinSuites.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 645.3029
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14TableBlocks.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14TableBlocks.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14TableBlocks.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1096,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/072-server_src___tests___v14TableBlocks.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1005.9023
+      }
+    },
+    {
+      "label": "server/src/__tests__/v14TurnIdentity.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v14TurnIdentity.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v14TurnIdentity.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 820,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/073-server_src___tests___v14TurnIdentity.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 729.3092
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2BlockRestoreDoor.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2BlockRestoreDoor.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1045,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/074-server_src___tests___v2BlockRestoreDoor.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 961.5838
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2CanvasPersistenceCutover.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2CanvasPersistenceCutover.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 27387,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/075-server_src___tests___v2CanvasPersistenceCutover.test.ts.log",
+      "counts": {
+        "tests": 49,
+        "suites": 0,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 27245.8658
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ContentGroups.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2ContentGroups.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2ContentGroups.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2322,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/076-server_src___tests___v2ContentGroups.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2230.3813
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2DevQuickLogin.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2DevQuickLogin.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2DevQuickLogin.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 19758,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/077-server_src___tests___v2DevQuickLogin.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 19640.2126
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2DocumentParserPdf.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2DocumentParserPdf.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2DocumentParserPdf.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1615,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/078-server_src___tests___v2DocumentParserPdf.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1531.7638
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2GroupFolders.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2GroupFolders.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2GroupFolders.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1547,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/079-server_src___tests___v2GroupFolders.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1454.4836
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ImprintCitations.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2ImprintCitations.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2ImprintCitations.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 531,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/080-server_src___tests___v2ImprintCitations.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 436.3473
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ImprintEmbedding.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2ImprintEmbedding.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2ImprintEmbedding.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 306,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/081-server_src___tests___v2ImprintEmbedding.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 211.1413
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ImprintRetrieval.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2ImprintRetrieval.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2ImprintRetrieval.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 533,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/082-server_src___tests___v2ImprintRetrieval.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 442.3697
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2ItemRelationFloor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2ItemRelationFloor.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2ItemRelationFloor.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1972,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/083-server_src___tests___v2ItemRelationFloor.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1877.7132
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2Items.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2Items.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2Items.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1624,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/084-server_src___tests___v2Items.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1534.3999
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2MaterialLibrary.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2MaterialLibrary.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2MaterialLibrary.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 44662,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/085-server_src___tests___v2MaterialLibrary.test.ts.log",
+      "counts": {
+        "tests": 59,
+        "suites": 0,
+        "pass": 59,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 44538.1732
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2McpArtifact.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2McpArtifact.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2McpArtifact.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 56544,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/086-server_src___tests___v2McpArtifact.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 56436.0658
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2McpTransport.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2McpTransport.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2McpTransport.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 43928,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/087-server_src___tests___v2McpTransport.test.ts.log",
+      "counts": {
+        "tests": 49,
+        "suites": 0,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 43820.4889
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2NoteBlockLifecycle.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2NoteBlockLifecycle.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 8013,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/088-server_src___tests___v2NoteBlockLifecycle.test.ts.log",
+      "counts": {
+        "tests": 25,
+        "suites": 0,
+        "pass": 25,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 7890.1408
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NoteFoundation.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2NoteFoundation.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2NoteFoundation.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 724,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/089-server_src___tests___v2NoteFoundation.test.ts.log",
+      "counts": {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 636.4157
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NotesLifecycle.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2NotesLifecycle.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2NotesLifecycle.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1847,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/090-server_src___tests___v2NotesLifecycle.test.ts.log",
+      "counts": {
+        "tests": 13,
+        "suites": 0,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1746.3448
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2NotesListService.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2NotesListService.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2NotesListService.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 23926,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/091-server_src___tests___v2NotesListService.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 23822.5874
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2Purposes.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2Purposes.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2Purposes.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 368,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/092-server_src___tests___v2Purposes.test.ts.log",
+      "counts": {
+        "tests": 6,
+        "suites": 0,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 277.8044
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2RelationLifecycleClosure.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2RelationLifecycleClosure.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 898,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/093-server_src___tests___v2RelationLifecycleClosure.test.ts.log",
+      "counts": {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 811.9975
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2Relations.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2Relations.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2Relations.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1394,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/094-server_src___tests___v2Relations.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1297.869
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceContainerIntake.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceContainerIntake.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceContainerIntake.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2184,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/095-server_src___tests___v2SourceContainerIntake.test.ts.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2100.0067
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceFileIntake.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceFileIntake.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceFileIntake.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3006,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/096-server_src___tests___v2SourceFileIntake.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2913.1974
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceIdentityFloor.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceIdentityFloor.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1557,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/097-server_src___tests___v2SourceIdentityFloor.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1461.9783
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceImprints.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceImprints.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceImprints.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10563,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/098-server_src___tests___v2SourceImprints.test.ts.log",
+      "counts": {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 10445.34
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceLifecycleClosure.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceLifecycleClosure.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1816,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/099-server_src___tests___v2SourceLifecycleClosure.test.ts.log",
+      "counts": {
+        "tests": 8,
+        "suites": 0,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1725.9734
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceMaterialization.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceMaterialization.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceMaterialization.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3004,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/100-server_src___tests___v2SourceMaterialization.test.ts.log",
+      "counts": {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2907.7222
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceMineruWiring.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceMineruWiring.test.ts"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 788,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/101-server_src___tests___v2SourceMineruWiring.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 703.0229
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceNeverReject.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceNeverReject.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceNeverReject.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2400,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/102-server_src___tests___v2SourceNeverReject.test.ts.log",
+      "counts": {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2313.8153
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceRegionCells.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceRegionCells.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceRegionCells.test.ts"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2527,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/103-server_src___tests___v2SourceRegionCells.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2444.5641
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceT0Alignment.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceT0Alignment.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceT0Alignment.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2069,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/104-server_src___tests___v2SourceT0Alignment.test.ts.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1980.0557
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2SourceTranscriberFingerprint.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1569,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/105-server_src___tests___v2SourceTranscriberFingerprint.test.ts.log",
+      "counts": {
+        "tests": 7,
+        "suites": 0,
+        "pass": 7,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1480.505
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2TemplateStudioDecommission.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2TemplateStudioDecommission.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 554,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/106-server_src___tests___v2TemplateStudioDecommission.test.ts.log",
+      "counts": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 463.9073
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2TestV2ManifestHook.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2TestV2ManifestHook.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 437,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/107-server_src___tests___v2TestV2ManifestHook.test.ts.log",
+      "counts": {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 343.2846
+      }
+    },
+    {
+      "label": "server/src/__tests__/v2TrashNotesTool.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/__tests__/v2TrashNotesTool.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/__tests__/v2TrashNotesTool.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10049,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/108-server_src___tests___v2TrashNotesTool.test.ts.log",
+      "counts": {
+        "tests": 23,
+        "suites": 0,
+        "pass": 23,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 9937.3526
+      }
+    },
+    {
+      "label": "server/src/agent/providers/index.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/agent/providers/index.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/agent/providers/index.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 376,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/109-server_src_agent_providers_index.test.ts.log",
+      "counts": {
+        "tests": 49,
+        "suites": 0,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 290.984
+      }
+    },
+    {
+      "label": "server/src/toolFace/registry.test.ts",
+      "command": [
+        "node",
+        "../scripts/run-server-test-suite.mjs",
+        "--test-concurrency=1",
+        "--test-timeout=600000",
+        "src/toolFace/registry.test.ts"
+      ],
+      "cwd": "server",
+      "files": [
+        "server/src/toolFace/registry.test.ts"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 285,
+      "rawLog": ".codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/110-server_src_toolFace_registry.test.ts.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 194.2102
+      }
+    }
+  ],
+  "serverTestAggregate": {
+    "tests": 1077,
+    "pass": 1075,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "executedServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14BoardVisual.test.ts",
+    "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ComponentBlocks.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14CoverPage.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14EpisodeContext.test.ts",
+    "server/src/__tests__/v14EpisodeStorage.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NoteBinding.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14PaperFreedom.test.ts",
+    "server/src/__tests__/v14ParagraphFurniture.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v14TableBlocks.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "missingServerFiles": [],
+  "missingTapSummaries": [],
+  "nonPassingTapSummaries": [
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts"
+  ],
+  "filesWithTapCounts": 107,
+  "failedSteps": [
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts"
+  ],
+  "finishedAt": "2026-09-20T10:05:34.192Z",
+  "passed": false
+}

@@ -6,6 +6,7 @@ import { isArgumentObject, parseToolArguments, toolArgumentError } from './provi
 import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
+import { prepareEpisodeContext } from './memory/episode-context.js';
 import { buildSystemPrompt } from './system-prompt.js';
 import { projectTurnReceipt, type PersistedAgentMessage } from './turnReceipt.js';
 import { observeClaimWithoutReceipt } from './claimObservation.js';
@@ -105,7 +106,7 @@ export async function* runAgent(
   const parsedSettings = JSON.parse(user.settings || '{}');
   // Detect L1 onboarding context
   const isNewUser = contextHint?.type === 'l1_onboarding';
-  const systemPrompt = buildSystemPrompt(agentName, {
+  let systemPrompt = buildSystemPrompt(agentName, {
     userName: user.name,
     courses,
     memories: memories.map((m) => ({ category: m.category, content: m.content })),
@@ -121,9 +122,6 @@ export async function* runAgent(
     language: parsedSettings.language,
     isNewUser,
   });
-
-  // 4. Get conversation history
-  const history = memory.getConversationHistory(conversationId);
 
   // 5. Add context hint if provided
   let augmentedMessage = userMessage;
@@ -173,6 +171,12 @@ export async function* runAgent(
 
   let turnError: string | undefined;
   try {
+    // C3 projection only: full originals remain available to history/receipts.
+    const context = await prepareEpisodeContext(userId, conversationId, {
+      systemPrompt, currentMessage: augmentedMessage, toolContext: JSON.stringify(toolDefinitions),
+      provider, deadline, signal: options.signal,
+    });
+    systemPrompt += context.episodePrompt;
     saveTurnMessage('user', augmentedMessage);
 
     // 7. Build messages array
@@ -185,7 +189,7 @@ export async function* runAgent(
     }
 
     const messages: ProviderMessage[] = [
-      ...history,
+      ...context.history,
       { role: 'user', content: userContent },
     ];
 

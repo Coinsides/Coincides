@@ -99,6 +99,14 @@
 
 ## 五 · Agent 能力边界表(给 Agent 的自我说明,也给操作者预期管理)
 
+**对话情节记忆(C3)**:Agent 记忆独立页的「Episodes」页签按会话展示机器摘要、原消息首末 ID / 时间范围、完整 note/board/item/proposal/memory 锚清单。可按摘要/会话/锚 ID 查找,每页25条;GET `/api/settings/agent-episodes` 查本人投影,DELETE `/api/settings/agent-episodes/:id` 仅删除该摘要投影。沿记忆页行内二次确认,无编辑门。删除文案明确原始对话仍保留;下次组装超阈时可由原消息重新生成。
+
+**压缩是视图,不是销毁**:唯一新增业务表 `agent_episodes`(083),不更新或删除原始 `agent_messages`。锚从工具调用/收据与 meta 机械提取,不交给模型猜测。组装顺序=既有常驻包→最近最多3条 episode(含完整锚 ID 行)→未压缩原消息→当前消息。episode 段总预算2048估算tokens,超限整条截老,不裁锚 ID;超大最新一条也整条移出常驻,仍可查。
+
+**看门狗口径**:常驻包、工具定义、episode、近水与当前文字合计超过24000估算tokens才压最老连续段,每段最多8个完整轮次组,保留最近4组;交错的 turn_id 跨度合组,旧无 turn_id 消息按普通 user 开轮,工具调用/结果不切开。seq 是段首原消息 rowid,唯一键保证同段幂等,删除后重压仍沿用稳定序位。估算为ASCII每4字符约1token、其余Unicode码点每个约1token,不是模型精确计费;不可压的近期/当前消息或常驻包自身过大时允许仍超阈,不静默裁原文。
+
+**摘要与唤醒**:生产摘要用本次会话经现役 resolver 得到的同一 provider/model,每段一次、无工具、最多等待15秒且服从300秒请求预算;失败或空输出回退为各轮首个有文本消息的首句按序拼接,摘要上限768估算tokens。测试环境强制回退,不调用摘要模型。现役 `search_memories` 保留 semantic→FTS→LIKE 三路语义记忆优先,随后并入 episode 摘要 FTS,总数仍受 limit;结果带 `kind: memory|episode`,episode 携会话/范围/完整锚清单。category 过滤仅选语义记忆。自动常驻记忆检索不纳入旧 episode;更老情节需显式搜索唤醒,不新增工具或写权。
+
 **能(域写过写门:同事务史记+收据+可撤;发提案/存记忆为信道写)**:建目标/子目标/任务/卡组/分区/时间块×批;改时间块;标任务完成(**必须携用户原话锚**——用户没亲口说完成就是不能标);删时间块(**两段复述确认仪式**);发提案(九型,含 organized_note 与 note_patch);存/搜自己的记忆;读:read_note/read_board/read_content_groups/read_annotations_relations+search_documents/get_document_content(⚠️只见材料库)。
 
 **板写七动词(C1)**:全部为 `door_write`,复用人类板服务并同事务写 `actor=agent` 史记与可撤收据。统一输入 `{board_id,input:{...}}`,更新另携对应 `member_id/sticky_id/visual_id`。

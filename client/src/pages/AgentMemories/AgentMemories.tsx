@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { AgentMemoryRecord } from '@shared/types/agentMemories';
 import api from '@/services/api';
+import AgentEpisodes from './AgentEpisodes';
 import styles from '../Settings/Settings.module.css';
 import pageStyles from './AgentMemories.module.css';
 
@@ -10,6 +11,8 @@ const memoriesPath = '/settings/agent-memories';
 const pageSize = 25;
 
 export default function AgentMemoriesPage() {
+  const [activeTab, setActiveTab] = useState<'memories' | 'episodes'>('memories');
+  const [episodeBusy, setEpisodeBusy] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [memories, setMemories] = useState<AgentMemoryRecord[]>([]);
@@ -98,6 +101,32 @@ export default function AgentMemoriesPage() {
     <section className={pageStyles.page} aria-labelledby="agent-memories-title">
       <Link to="/settings" className={pageStyles.backLink}>Back to Settings</Link>
       <h1 id="agent-memories-title" className={styles.title} ref={headingRef} tabIndex={-1}>Agent memories</h1>
+      <div className={pageStyles.tabs} role="tablist" aria-label="Agent memory views">
+        {(['memories', 'episodes'] as const).map((tab, index) => (
+          <button key={tab} type="button" role="tab" id={`agent-${tab}-tab`}
+            aria-selected={activeTab === tab} aria-controls={`agent-${tab}-panel`}
+            tabIndex={activeTab === tab ? 0 : -1}
+            disabled={busyId !== null || editingId !== null || confirmingId !== null || episodeBusy}
+            onClick={() => setActiveTab(tab)}
+            onKeyDown={(event) => {
+              const nextTab = event.key === 'ArrowRight' || event.key === 'ArrowLeft'
+                ? (index === 0 ? 'episodes' : 'memories')
+                : event.key === 'Home' ? 'memories' : event.key === 'End' ? 'episodes' : null;
+              if (!nextTab) return;
+              event.preventDefault();
+              setActiveTab(nextTab);
+              document.getElementById(`agent-${nextTab}-tab`)?.focus();
+            }}>
+            {tab === 'memories' ? 'Memories' : 'Episodes'}
+          </button>
+        ))}
+      </div>
+      {activeTab === 'episodes' ? (
+        <div role="tabpanel" id="agent-episodes-panel" aria-labelledby="agent-episodes-tab" tabIndex={0}>
+          <AgentEpisodes onBusyChange={setEpisodeBusy} />
+        </div>
+      ) : (
+      <div role="tabpanel" id="agent-memories-panel" aria-labelledby="agent-memories-tab" tabIndex={0}>
       {!loading && !loadError && (
         <p className={pageStyles.count}>
           {memories.length} {memories.length === 1 ? 'memory' : 'memories'}
@@ -207,6 +236,8 @@ export default function AgentMemoriesPage() {
         )}
       </div>
       {!loading && !loadError && memories.length > pageSize && pagination('Memory pages (bottom)')}
+      </div>
+      )}
     </section>
   );
 }

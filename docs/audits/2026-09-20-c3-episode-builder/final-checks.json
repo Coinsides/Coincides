@@ -1,0 +1,41 @@
+{
+  "steps": [
+    {
+      "label": "docs:check",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "exitCode": 0,
+      "rawLog": ".codex-tmp/c3-episode/final-docs_check.log",
+      "durationMs": 568
+    },
+    {
+      "label": "check:agent-knowledge",
+      "command": [
+        "node",
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:agent-knowledge"
+      ],
+      "exitCode": 0,
+      "rawLog": ".codex-tmp/c3-episode/final-check_agent-knowledge.log",
+      "durationMs": 348
+    },
+    {
+      "label": "server-typecheck-final",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "exitCode": 0,
+      "rawLog": ".codex-tmp/c3-episode/final-server-typecheck-final.log",
+      "durationMs": 17969
+    }
+  ],
+  "passed": true,
+  "gateReconciliation": "gates-summary.json preserves 22 passing components plus the initial outdated-index failure. This final docs:check closes that component; the HQ git/secrets components were not run."
+}

@@ -1,0 +1,9 @@
+{
+    "label":  "docs:check after handoff Result and regenerated INDEX",
+    "startedAt":  "2026-09-20T10:10:51.9457041Z",
+    "finishedAt":  "2026-09-20T10:10:52.5446015Z",
+    "exitCode":  0,
+    "passed":  true,
+    "rawLog":  ".codex-tmp/c3-episode/post-result-docs-check.log",
+    "command":  "node npm-cli.js run docs:check"
+}

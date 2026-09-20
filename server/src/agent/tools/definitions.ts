@@ -175,7 +175,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'search_memories',
-    description: 'Search long-term memories about the student using semantic similarity. Finds memories related to the query even without exact keyword matches. Results include similarity scores when semantic search is available.',
+    description: 'Search long-term memories using semantic, full-text and literal retrieval, followed by full-text conversation episode summaries. Results carry kind: memory or episode; episodes include conversation, message range and original anchor IDs. Category filtering selects long-term memories only. Use this tool to recall older episodes that are not in the current context.',
     parameters: {
       type: 'object',
       properties: {

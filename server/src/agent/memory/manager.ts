@@ -12,18 +12,7 @@ interface DbMessage {
   created_at: string;
 }
 
-export class MemoryManager {
-  constructor(private userId: string) {}
-
-  getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
-    const db = getDb();
-    const rows = db.prepare(
-      'SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = ? ORDER BY created_at DESC, rowid DESC LIMIT ?',
-    ).all(conversationId, limit) as DbMessage[];
-
-    // rowid breaks same-millisecond ties so tool_use/result pairs survive reversal.
-    rows.reverse();
-
+export function sanitizeConversationHistory(rows: readonly DbMessage[]): ProviderMessage[] {
     const messages: ProviderMessage[] = rows.map((row) => {
       const msg: ProviderMessage = {
         role: row.role as 'user' | 'assistant' | 'system',
@@ -88,6 +77,18 @@ export class MemoryManager {
     }
 
     return sanitized;
+}
+
+export class MemoryManager {
+  constructor(private userId: string) {}
+
+  getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
+    const db = getDb();
+    const rows = db.prepare(
+      'SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = ? ORDER BY created_at DESC, rowid DESC LIMIT ?',
+    ).all(conversationId, limit) as DbMessage[];
+    // rowid breaks same-millisecond ties so tool_use/result pairs survive reversal.
+    return sanitizeConversationHistory(rows.reverse());
   }
 
   saveMessage(
@@ -112,7 +113,8 @@ export class MemoryManager {
   }
 
   retrieveMemories(query: string, limit: number = 5): Promise<MemoryMatch[]> {
-    return searchMemories(this.userId, query, { limit });
+    // Episode recall is explicit via search_memories, not an unbounded resident lane.
+    return searchMemories(this.userId, query, { limit, includeEpisodes: false });
   }
 
   extractMemories(conversationId: string, userMessage: string): void {

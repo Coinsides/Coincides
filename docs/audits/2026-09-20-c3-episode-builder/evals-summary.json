@@ -1,0 +1,1077 @@
+{
+  "schemaVersion": 1,
+  "mode": "evals",
+  "runId": "evals-2026-09-20T10-01-19-096Z-42460",
+  "startedAt": "2026-09-20T10:01:19.099Z",
+  "rawRoot": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460",
+  "isolation": "OS environment allowlist; in-memory SQLite; empty dotenv and Vite env directory; dedicated temporary application data, assets, uploads and temp. No provider credentials inherited.",
+  "serverFileTimeoutMs": 660000,
+  "nodeTestTimeoutMs": 600000,
+  "runtimeGate": {
+    "totalComponents": 25,
+    "nonGitSecretsComponents": 23,
+    "commands": [
+      "check:test-wiring",
+      "test:agent-knowledge",
+      "check:agent-knowledge",
+      "check:tech-debt-table",
+      "test:unit",
+      "test:tool-face-registry",
+      "test:tool-face-manifest",
+      "check:tool-face-manifest",
+      "test:tool-face-parity",
+      "check:tool-face-parity",
+      "check:server-shared-runtime-import",
+      "check:canvas-runtime-boundary",
+      "check:group-gallery-shell",
+      "check:groups-rail-shell",
+      "check:single-editor-shell",
+      "check:source-experience",
+      "check:v2-bn11-legacy-shutdown",
+      "check:v2-bn11-relation-freshness",
+      "smoke:canvas-engine-model-contract",
+      "build:client",
+      "build",
+      "smoke:canvas-engine-performance",
+      "docs:check"
+    ],
+    "hqPending": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ],
+    "completeRuntimeGate": false
+  },
+  "discoveredServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14BoardVisual.test.ts",
+    "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ComponentBlocks.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14CoverPage.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14EpisodeContext.test.ts",
+    "server/src/__tests__/v14EpisodeStorage.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NoteBinding.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14PaperFreedom.test.ts",
+    "server/src/__tests__/v14ParagraphFurniture.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v14TableBlocks.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "selectedServerFiles": [],
+  "steps": [
+    {
+      "label": "shared-build",
+      "command": [
+        "node",
+        "server/node_modules/typescript/bin/tsc",
+        "-b",
+        "shared/tsconfig.json"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 130,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/001-shared-build.log",
+      "counts": {}
+    },
+    {
+      "label": "server-manifest-check",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 528,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/002-server-manifest-check.log",
+      "counts": {}
+    },
+    {
+      "label": "server-manifest-copy",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "copy:tool-face-manifest"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 195,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/003-server-manifest-copy.log",
+      "counts": {}
+    },
+    {
+      "label": "01-goal-task-journey",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/01-goal-task-journey.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/01-goal-task-journey.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 806,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/004-01-goal-task-journey.log",
+      "counts": {},
+      "eval": {
+        "name": "01-goal-task-journey",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-3: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn 1: exact domain rows and parent links",
+            "passed": true
+          },
+          {
+            "name": "turn 1: SSE tool result and persisted receipt agree",
+            "passed": true
+          },
+          {
+            "name": "turn 1: actual IDs reconcile result, ledger, receipt API and undo registration",
+            "passed": true
+          },
+          {
+            "name": "turn 2: exact domain rows and parent links",
+            "passed": true
+          },
+          {
+            "name": "turn 2: SSE tool result and persisted receipt agree",
+            "passed": true
+          },
+          {
+            "name": "turn 2: actual IDs reconcile result, ledger, receipt API and undo registration",
+            "passed": true
+          },
+          {
+            "name": "turn 3: exact domain rows and parent links",
+            "passed": true
+          },
+          {
+            "name": "turn 3: SSE tool result and persisted receipt agree",
+            "passed": true
+          },
+          {
+            "name": "turn 3: actual IDs reconcile result, ledger, receipt API and undo registration",
+            "passed": true
+          }
+        ],
+        "assertionCount": 12,
+        "passed": 12,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 616.19,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/01-goal-task-journey.json"
+      }
+    },
+    {
+      "label": "02-empty-claim",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/02-empty-claim.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/02-empty-claim.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 665,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/005-02-empty-claim.log",
+      "counts": {},
+      "eval": {
+        "name": "02-empty-claim",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "one anchored claim_without_receipt ledger event",
+            "passed": true
+          },
+          {
+            "name": "zero tools and identical live/history zero-write receipt projection",
+            "passed": true
+          },
+          {
+            "name": "memory API and table remain empty, without a domain receipt",
+            "passed": true
+          }
+        ],
+        "assertionCount": 4,
+        "passed": 4,
+        "claimWithoutReceiptCount": 1,
+        "durationMs": 503.8136,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/02-empty-claim.json"
+      }
+    },
+    {
+      "label": "03-proposal-journey",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/03-proposal-journey.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/03-proposal-journey.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 656,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/006-03-proposal-journey.log",
+      "counts": {},
+      "eval": {
+        "name": "03-proposal-journey",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "organized_note pending data comes from the real service with source references",
+            "passed": true
+          },
+          {
+            "name": "proposal_issued ledger event identifies the pending object and chat conversation",
+            "passed": true
+          },
+          {
+            "name": "existing inbox list and detail APIs expose the same pending proposal",
+            "passed": true
+          },
+          {
+            "name": "channel-write SSE and history receipt report proposal creation only",
+            "passed": true
+          },
+          {
+            "name": "pending proposal does not directly write notes, blocks, placements or door receipts",
+            "passed": true
+          }
+        ],
+        "assertionCount": 6,
+        "passed": 6,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 494.05670000000003,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/03-proposal-journey.json"
+      }
+    },
+    {
+      "label": "04-delete-ceremony",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/04-delete-ceremony.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/04-delete-ceremony.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 619,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/007-04-delete-ceremony.log",
+      "counts": {},
+      "eval": {
+        "name": "delete-ceremony",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "two complete SSE turns preserve tool start/end IDs and saved receipt projections",
+            "passed": true
+          },
+          {
+            "name": "unconfirmed call returns complete system restatement and a 24-hour unconsumed authorization",
+            "passed": true
+          },
+          {
+            "name": "unconfirmed call leaves block/tasks unchanged with zero deletion events or door receipts",
+            "passed": true
+          },
+          {
+            "name": "confirmed call deletes only the block, unbinds retained tasks and consumes the same authorization",
+            "passed": true
+          },
+          {
+            "name": "deletion event ledger and applied door receipt reconcile exact confirmation and affected resources",
+            "passed": true
+          },
+          {
+            "name": "existing human receipt API actually restores block and bindings without resetting consumed authorization",
+            "passed": true
+          }
+        ],
+        "assertionCount": 8,
+        "passed": 8,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 464.0165999999999,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/04-delete-ceremony.json"
+      }
+    },
+    {
+      "label": "05-memory-journey",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/05-memory-journey.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/05-memory-journey.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 640,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/008-05-memory-journey.log",
+      "counts": {},
+      "eval": {
+        "name": "memory-journey",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-3: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "three SSE turns finish and read/write receipt projections agree with saved history",
+            "passed": true
+          },
+          {
+            "name": "Chinese save persists exact content and the duplicate reuses the existing ID without a second row",
+            "passed": true
+          },
+          {
+            "name": "Chinese semantic-only fixture has neither FTS nor literal LIKE candidates",
+            "passed": true
+          },
+          {
+            "name": "search_memories tool retrieves the Chinese semantic match with ownership filtering",
+            "passed": true
+          },
+          {
+            "name": "actual runAgent environment prompt contains Chinese semantic memory and excludes another user",
+            "passed": true
+          },
+          {
+            "name": "MemoryManager shared retrieval entry returns the same Chinese semantic ID and updates access time",
+            "passed": true
+          },
+          {
+            "name": "duplicate save creates no extra embedding while query retrieval uses the existing vector",
+            "passed": true
+          },
+          {
+            "name": "successful memory channel writes do not generate claim_without_receipt or domain door receipts",
+            "passed": true
+          }
+        ],
+        "assertionCount": 11,
+        "passed": 11,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 480.26599999999996,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/05-memory-journey.json"
+      }
+    },
+    {
+      "label": "06-loop-resilience",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/06-loop-resilience.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/06-loop-resilience.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 631,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/009-06-loop-resilience.log",
+      "counts": {},
+      "eval": {
+        "name": "06-loop-resilience",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "the real tool budget fires at 60 seconds, not before",
+            "passed": true
+          },
+          {
+            "name": "timeout becomes a failed SSE tool result followed by a successful recovery tool",
+            "passed": true
+          },
+          {
+            "name": "the timeout ToolResult is persisted with its call identity and error",
+            "passed": true
+          },
+          {
+            "name": "timeout receipt preserves failure even when the accepted proposal later commits",
+            "passed": true
+          },
+          {
+            "name": "the late proposal commits once through its existing event and inbox without a direct note write",
+            "passed": true
+          },
+          {
+            "name": "the second journey reaches exactly eight successful tool rounds",
+            "passed": true
+          },
+          {
+            "name": "round exhaustion emits the existing round_limit and compatible notice once",
+            "passed": true
+          },
+          {
+            "name": "round-limit receipt contains precisely the eight persisted reads",
+            "passed": true
+          },
+          {
+            "name": "all ten tool pairs survive the messages API and provider history replay without duplicates",
+            "passed": true
+          }
+        ],
+        "assertionCount": 11,
+        "passed": 11,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 472.0198,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/06-loop-resilience.json"
+      }
+    },
+    {
+      "label": "07-board-concept-map",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/07-board-concept-map.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/07-board-concept-map.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 872,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/010-07-board-concept-map.log",
+      "counts": {},
+      "eval": {
+        "name": "07-board-concept-map",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn 1: board API and persisted Staging geometry agree",
+            "passed": true
+          },
+          {
+            "name": "turn 1: SSE, history, ledger and same-conversation receipts reconcile",
+            "passed": true
+          },
+          {
+            "name": "turn 1: latest diagnostic accompanies the receipt without blocking writes",
+            "passed": true
+          },
+          {
+            "name": "turn 2: board API and persisted Staging geometry agree",
+            "passed": true
+          },
+          {
+            "name": "turn 2: SSE, history, ledger and same-conversation receipts reconcile",
+            "passed": true
+          },
+          {
+            "name": "turn 2: latest diagnostic accompanies the receipt without blocking writes",
+            "passed": true
+          },
+          {
+            "name": "board-only projection leaves notes and Relations untouched",
+            "passed": true
+          }
+        ],
+        "assertionCount": 9,
+        "passed": 9,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 711.8340000000001,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/07-board-concept-map.json"
+      }
+    },
+    {
+      "label": "08-board-batch-revert",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/08-board-batch-revert.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/08-board-batch-revert.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 887,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/011-08-board-batch-revert.log",
+      "counts": {},
+      "eval": {
+        "name": "08-board-batch-revert",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn 1: board API and persisted Staging geometry agree",
+            "passed": true
+          },
+          {
+            "name": "turn 1: SSE, history, ledger and same-conversation receipts reconcile",
+            "passed": true
+          },
+          {
+            "name": "turn 1: latest diagnostic accompanies the receipt without blocking writes",
+            "passed": true
+          },
+          {
+            "name": "turn 2: board API and persisted Staging geometry agree",
+            "passed": true
+          },
+          {
+            "name": "turn 2: SSE, history, ledger and same-conversation receipts reconcile",
+            "passed": true
+          },
+          {
+            "name": "turn 2: latest diagnostic accompanies the receipt without blocking writes",
+            "passed": true
+          },
+          {
+            "name": "board-only projection leaves notes and Relations untouched",
+            "passed": true
+          },
+          {
+            "name": "human batch API reverses all 9 stickies and 13 edges and preserves the original board",
+            "passed": true
+          },
+          {
+            "name": "all 22 undo receipts match human rolled-back events and created-object removals",
+            "passed": true
+          },
+          {
+            "name": "identical second batch request rejects idempotently with zero new events or changes",
+            "passed": true
+          }
+        ],
+        "assertionCount": 12,
+        "passed": 12,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 722.2278,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/08-board-batch-revert.json"
+      }
+    },
+    {
+      "label": "09-memory-directive",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/09-memory-directive.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/09-memory-directive.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 615,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/012-09-memory-directive.log",
+      "counts": {},
+      "eval": {
+        "name": "09-memory-directive",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "natural user wording contains no tool instruction and actual prompt includes the two-family amendment",
+            "passed": true
+          },
+          {
+            "name": "save_memory executes once successfully and yields the persisted successful turn receipt",
+            "passed": true
+          },
+          {
+            "name": "the real memory store and memory API contain the exact naturally requested preference",
+            "passed": true
+          },
+          {
+            "name": "the natural memory directive has zero claim_without_receipt flags and no note or proposal writes",
+            "passed": true
+          }
+        ],
+        "assertionCount": 5,
+        "passed": 5,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 454.57140000000004,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/09-memory-directive.json"
+      }
+    },
+    {
+      "label": "10-note-patch-journey",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/10-note-patch-journey.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/10-note-patch-journey.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 638,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/013-10-note-patch-journey.log",
+      "counts": {},
+      "eval": {
+        "name": "10-note-patch-journey",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-3: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "Agent proposal freezes both old/new unit diffs and leaves note text unchanged while pending",
+            "passed": true
+          },
+          {
+            "name": "human text-save accepts one unit only and the remaining patch stays pending",
+            "passed": true
+          },
+          {
+            "name": "discarding the remaining patch resolves the partial proposal without changing any block bytes",
+            "passed": true
+          },
+          {
+            "name": "human undo/redo replays exact text snapshots through the real text-save handler with consecutive revisions",
+            "passed": true
+          },
+          {
+            "name": "an intervening human save makes the next diff stale and rejects acceptance without overwriting text",
+            "passed": true
+          },
+          {
+            "name": "discarding a stale proposal leaves current human text untouched",
+            "passed": true
+          },
+          {
+            "name": "only proposal creation appears in Agent tool receipts, with zero claim_without_receipt flags",
+            "passed": true
+          }
+        ],
+        "assertionCount": 10,
+        "passed": 10,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 481.5648,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/10-note-patch-journey.json"
+      }
+    },
+    {
+      "label": "11-episode-compression-journey",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/11-episode-compression-journey.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/11-episode-compression-journey.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 687,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/014-11-episode-compression-journey.log",
+      "counts": {},
+      "eval": {
+        "name": "11-episode-compression-journey",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-2: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-3: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-4: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-5: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-6: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-7: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-8: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-9: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-10: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-11: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-12: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-13: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "turn-14: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "scripted multi-turn injection exceeds the runtime threshold and creates projected episodes",
+            "passed": true
+          },
+          {
+            "name": "compression preserves every original message field and all per-turn history API rows",
+            "passed": true
+          },
+          {
+            "name": "all summaries use deterministic fallback and call the chat provider only for scripted user turns",
+            "passed": true
+          },
+          {
+            "name": "mechanical anchor manifest retains the exact successful save_memory receipt ID",
+            "passed": true
+          },
+          {
+            "name": "actual assembly appends recent bounded episodes after the resident package and omits covered raw turns",
+            "passed": true
+          },
+          {
+            "name": "the complete journey has one receipted memory write and no domain write or empty claim",
+            "passed": true
+          }
+        ],
+        "assertionCount": 20,
+        "passed": 20,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 521.9142,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/11-episode-compression-journey.json"
+      }
+    },
+    {
+      "label": "12-episode-recall-journey",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/agent-eval/worker.ts",
+        "server/scripts/agent-eval/scenarios/12-episode-recall-journey.ts",
+        ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/12-episode-recall-journey.json",
+        "scripted"
+      ],
+      "cwd": "server",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 629,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/015-12-episode-recall-journey.log",
+      "counts": {},
+      "eval": {
+        "name": "12-episode-recall-journey",
+        "mode": "scripted",
+        "assertions": [
+          {
+            "name": "turn-1: complete SSE and persisted receipt",
+            "passed": true
+          },
+          {
+            "name": "the oldest of four episodes is absent from the actual resident prompt and replay history",
+            "passed": true
+          },
+          {
+            "name": "the existing search_memories tool recalls the old episode through FTS with kind and original anchors",
+            "passed": true
+          },
+          {
+            "name": "the automatic memory lane does not silently promote the recalled old episode to resident memory",
+            "passed": true
+          },
+          {
+            "name": "recall leaves all episode projections and every original source-message field untouched",
+            "passed": true
+          },
+          {
+            "name": "recall has a persisted read-only turn receipt, no domain writes and no empty claim",
+            "passed": true
+          }
+        ],
+        "assertionCount": 6,
+        "passed": 6,
+        "claimWithoutReceiptCount": 0,
+        "durationMs": 469.80559999999997,
+        "rawResult": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/12-episode-recall-journey.json"
+      }
+    },
+    {
+      "label": "agent-eval-selftests",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:agent-eval"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1182,
+      "rawLog": ".codex-tmp/c3-episode/evals-2026-09-20T10-01-19-096Z-42460/016-agent-eval-selftests.log",
+      "counts": {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 980.3827
+      }
+    }
+  ],
+  "serverTestAggregate": {
+    "tests": 0,
+    "pass": 0,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "executedServerFiles": [],
+  "missingServerFiles": [],
+  "missingTapSummaries": [],
+  "nonPassingTapSummaries": [],
+  "filesWithTapCounts": 0,
+  "failedSteps": [],
+  "finishedAt": "2026-09-20T10:01:29.801Z",
+  "passed": true
+}

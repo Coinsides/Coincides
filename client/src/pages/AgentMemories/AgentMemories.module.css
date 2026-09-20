@@ -35,3 +35,104 @@
   gap: 12px;
   margin: 16px 0;
 }
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 24px;
+}
+
+.tabs button {
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected='true'] {
+  border-bottom-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.tabs button:disabled {
+  cursor: default;
+}
+
+.tabs button:focus-visible,
+.searchInput:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+.searchLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.searchInput {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.episodeGroup + .episodeGroup {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.conversationHeading,
+.episodeHeading {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.conversationId {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.anchorHeading {
+  margin: 12px 0 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.anchorManifest {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+
+.anchorManifest > div {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.anchorManifest dt {
+  color: var(--text-secondary);
+}
+
+.anchorManifest dd {
+  margin: 0;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.anchorManifest code {
+  display: block;
+  white-space: pre-wrap;
+}

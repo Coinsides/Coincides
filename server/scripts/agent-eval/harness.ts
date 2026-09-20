@@ -9,7 +9,7 @@ import { loadScenario } from './discovery.js';
 import type { Fixtures, Mode, Row, Scenario, ScenarioResult, TurnRecord } from './types.js';
 
 export const EVIDENCE_TABLES = ['goals', 'tasks', 'time_blocks', 'agent_authorizations', 'agent_memories',
-  'operation_batches', 'events', 'proposals', 'notes', 'note_blocks', 'note_block_placements', 'agent_messages'] as const;
+  'operation_batches', 'events', 'proposals', 'notes', 'note_blocks', 'note_block_placements', 'agent_messages', 'agent_episodes'] as const;
 
 /** One invocation per worker process: global DB/provider state cannot cross scenarios. */
 export async function runScenario(input: Scenario | string, mode: Mode = 'scripted'): Promise<ScenarioResult> {

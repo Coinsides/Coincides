@@ -2,6 +2,17 @@ export const AGENT_REQUEST_TIMEOUT_MS = 300_000;
 export const AGENT_ROUND_TIMEOUT_MS = 300_000;
 export const AGENT_TOOL_TIMEOUT_MS = 60_000;
 
+/** C3: estimates, not model-tokenizer counts; original messages are never trimmed. */
+export const AGENT_EPISODE_BUDGET = Object.freeze({
+  triggerTokens: 24_000,
+  keepRecentTurns: 4,
+  maxTurnsPerEpisode: 8,
+  recentEpisodes: 3,
+  episodeTokens: 2_048,
+  summaryTokens: 768,
+  summaryTimeoutMs: 15_000,
+});
+
 export interface AgentRunOptions {
   signal?: AbortSignal;
   /** Absolute request deadline (epoch milliseconds), shared with the SSE route. */

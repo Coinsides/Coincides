@@ -5,12 +5,14 @@ import { AppError } from '../middleware/errorHandler.js';
 import { updateSettingsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 import agentMemoriesRoutes from './agentMemories.js';
+import agentEpisodesRoutes from './agentEpisodes.js';
 import providerCredentialsRoutes from './providerCredentials.js';
 import { publicSettings } from '../services/publicSettings.js';
 
 const router = Router();
 
 router.use('/agent-memories', agentMemoriesRoutes);
+router.use('/agent-episodes', agentEpisodesRoutes);
 router.use('/providers', providerCredentialsRoutes);
 
 // GET /api/settings

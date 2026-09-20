@@ -1,0 +1,629 @@
+{
+  "schemaVersion": 1,
+  "mode": "gates",
+  "runId": "gates-2026-09-20T09-51-54-670Z-30608",
+  "startedAt": "2026-09-20T09:51:54.674Z",
+  "rawRoot": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608",
+  "isolation": "OS environment allowlist; in-memory SQLite; empty dotenv and Vite env directory; dedicated temporary application data, assets, uploads and temp. No provider credentials inherited.",
+  "serverFileTimeoutMs": 660000,
+  "nodeTestTimeoutMs": 600000,
+  "runtimeGate": {
+    "totalComponents": 25,
+    "nonGitSecretsComponents": 23,
+    "commands": [
+      "check:test-wiring",
+      "test:agent-knowledge",
+      "check:agent-knowledge",
+      "check:tech-debt-table",
+      "test:unit",
+      "test:tool-face-registry",
+      "test:tool-face-manifest",
+      "check:tool-face-manifest",
+      "test:tool-face-parity",
+      "check:tool-face-parity",
+      "check:server-shared-runtime-import",
+      "check:canvas-runtime-boundary",
+      "check:group-gallery-shell",
+      "check:groups-rail-shell",
+      "check:single-editor-shell",
+      "check:source-experience",
+      "check:v2-bn11-legacy-shutdown",
+      "check:v2-bn11-relation-freshness",
+      "smoke:canvas-engine-model-contract",
+      "build:client",
+      "build",
+      "smoke:canvas-engine-performance",
+      "docs:check"
+    ],
+    "hqPending": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ],
+    "completeRuntimeGate": false
+  },
+  "discoveredServerFiles": [
+    "server/scripts/agent-eval/harness.test.ts",
+    "server/scripts/v13WildernessExecute.test.ts",
+    "server/scripts/v13WildernessShadowRun.test.ts",
+    "server/scripts/v2Bn12LifecycleMigration.test.ts",
+    "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+    "server/src/__tests__/providerCredentials.test.ts",
+    "server/src/__tests__/textFlowIdentityContract.test.ts",
+    "server/src/__tests__/v13AgentMemories.test.ts",
+    "server/src/__tests__/v13AtomicTextSave.test.ts",
+    "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+    "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+    "server/src/__tests__/v13BoardChalk.test.ts",
+    "server/src/__tests__/v13BoardIdentity.test.ts",
+    "server/src/__tests__/v13BoardRoutes.test.ts",
+    "server/src/__tests__/v13BoardSchema.test.ts",
+    "server/src/__tests__/v13BoardServices.test.ts",
+    "server/src/__tests__/v13BoardStaging.test.ts",
+    "server/src/__tests__/v13BoardTextRanges.test.ts",
+    "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+    "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+    "server/src/__tests__/v13BoardWave1.test.ts",
+    "server/src/__tests__/v13CanvasRetirement.test.ts",
+    "server/src/__tests__/v13CoordinateContract.test.ts",
+    "server/src/__tests__/v13EventsLedger.test.ts",
+    "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+    "server/src/__tests__/v13ItemFloor.test.ts",
+    "server/src/__tests__/v13ItemRefBlocks.test.ts",
+    "server/src/__tests__/v13MediaBlocks.test.ts",
+    "server/src/__tests__/v13NoteMetadata.test.ts",
+    "server/src/__tests__/v13PagePresets.test.ts",
+    "server/src/__tests__/v13PaperInk.test.ts",
+    "server/src/__tests__/v13PaperSkin.test.ts",
+    "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+    "server/src/__tests__/v13RecordedAction.test.ts",
+    "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+    "server/src/__tests__/v13SourceReprojection.test.ts",
+    "server/src/__tests__/v13Tray.test.ts",
+    "server/src/__tests__/v13TrayOrder.test.ts",
+    "server/src/__tests__/v13WallCollectionBatch.test.ts",
+    "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+    "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+    "server/src/__tests__/v14AgentWriteDoor.test.ts",
+    "server/src/__tests__/v14AttentionContext.test.ts",
+    "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+    "server/src/__tests__/v14BoardSandbox.test.ts",
+    "server/src/__tests__/v14BoardVisual.test.ts",
+    "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+    "server/src/__tests__/v14CardCover.test.ts",
+    "server/src/__tests__/v14ClaimObservation.test.ts",
+    "server/src/__tests__/v14ClaimReceipt.test.ts",
+    "server/src/__tests__/v14ComponentBlocks.test.ts",
+    "server/src/__tests__/v14ContextHint.test.ts",
+    "server/src/__tests__/v14CoverPage.test.ts",
+    "server/src/__tests__/v14DeleteCeremony.test.ts",
+    "server/src/__tests__/v14EpisodeContext.test.ts",
+    "server/src/__tests__/v14EpisodeStorage.test.ts",
+    "server/src/__tests__/v14IntentRouter.test.ts",
+    "server/src/__tests__/v14LoopRobustness.test.ts",
+    "server/src/__tests__/v14MemoryQuickwins.test.ts",
+    "server/src/__tests__/v14NoteBinding.test.ts",
+    "server/src/__tests__/v14NotePatch.test.ts",
+    "server/src/__tests__/v14PaletteColors.test.ts",
+    "server/src/__tests__/v14PaperFreedom.test.ts",
+    "server/src/__tests__/v14ParagraphFurniture.test.ts",
+    "server/src/__tests__/v14ProposalUnification.test.ts",
+    "server/src/__tests__/v14ReadTools.test.ts",
+    "server/src/__tests__/v14SkinSuites.test.ts",
+    "server/src/__tests__/v14TableBlocks.test.ts",
+    "server/src/__tests__/v14TurnIdentity.test.ts",
+    "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+    "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+    "server/src/__tests__/v2ContentGroups.test.ts",
+    "server/src/__tests__/v2DevQuickLogin.test.ts",
+    "server/src/__tests__/v2DocumentParserPdf.test.ts",
+    "server/src/__tests__/v2GroupFolders.test.ts",
+    "server/src/__tests__/v2ImprintCitations.test.ts",
+    "server/src/__tests__/v2ImprintEmbedding.test.ts",
+    "server/src/__tests__/v2ImprintRetrieval.test.ts",
+    "server/src/__tests__/v2ItemRelationFloor.test.ts",
+    "server/src/__tests__/v2Items.test.ts",
+    "server/src/__tests__/v2MaterialLibrary.test.ts",
+    "server/src/__tests__/v2McpArtifact.test.ts",
+    "server/src/__tests__/v2McpTransport.test.ts",
+    "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+    "server/src/__tests__/v2NoteFoundation.test.ts",
+    "server/src/__tests__/v2NotesLifecycle.test.ts",
+    "server/src/__tests__/v2NotesListService.test.ts",
+    "server/src/__tests__/v2Purposes.test.ts",
+    "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "server/src/__tests__/v2Relations.test.ts",
+    "server/src/__tests__/v2SourceContainerIntake.test.ts",
+    "server/src/__tests__/v2SourceFileIntake.test.ts",
+    "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+    "server/src/__tests__/v2SourceImprints.test.ts",
+    "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+    "server/src/__tests__/v2SourceMaterialization.test.ts",
+    "server/src/__tests__/v2SourceMineruWiring.test.ts",
+    "server/src/__tests__/v2SourceNeverReject.test.ts",
+    "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "server/src/__tests__/v2SourceT0Alignment.test.ts",
+    "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+    "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+    "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+    "server/src/__tests__/v2TrashNotesTool.test.ts",
+    "server/src/agent/providers/index.test.ts",
+    "server/src/toolFace/registry.test.ts"
+  ],
+  "selectedServerFiles": [],
+  "steps": [
+    {
+      "label": "shared-build",
+      "command": [
+        "node",
+        "server/node_modules/typescript/bin/tsc",
+        "-b",
+        "shared/tsconfig.json"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 132,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/001-shared-build.log",
+      "counts": {}
+    },
+    {
+      "label": "check:test-wiring",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:test-wiring"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 248,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/002-check_test-wiring.log",
+      "counts": {}
+    },
+    {
+      "label": "test:agent-knowledge",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:agent-knowledge"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3288,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/003-test_agent-knowledge.log",
+      "counts": {
+        "tests": 29,
+        "suites": 0,
+        "pass": 29,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2268.7497
+      }
+    },
+    {
+      "label": "check:agent-knowledge",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:agent-knowledge"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 367,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/004-check_agent-knowledge.log",
+      "counts": {}
+    },
+    {
+      "label": "check:tech-debt-table",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tech-debt-table"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 207,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/005-check_tech-debt-table.log",
+      "counts": {}
+    },
+    {
+      "label": "test:unit",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "cwd": "client",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 141006,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/006-test_unit.log",
+      "counts": {
+        "vitestFiles": {
+          "passed": 224,
+          "total": 224
+        },
+        "vitestTests": {
+          "passed": 2282,
+          "total": 2282
+        }
+      }
+    },
+    {
+      "label": "test:tool-face-registry",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:tool-face-registry"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 613,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/007-test_tool-face-registry.log",
+      "counts": {
+        "tests": 5,
+        "suites": 0,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 186.248
+      }
+    },
+    {
+      "label": "test:tool-face-manifest",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:tool-face-manifest"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3614,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/008-test_tool-face-manifest.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 3156.8882
+      }
+    },
+    {
+      "label": "check:tool-face-manifest",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-manifest"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 570,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/009-check_tool-face-manifest.log",
+      "counts": {}
+    },
+    {
+      "label": "test:tool-face-parity",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "test:tool-face-parity"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5227,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/010-test_tool-face-parity.log",
+      "counts": {
+        "tests": 10,
+        "suites": 0,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 5018.4774
+      }
+    },
+    {
+      "label": "check:tool-face-parity",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:tool-face-parity"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 525,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/011-check_tool-face-parity.log",
+      "counts": {}
+    },
+    {
+      "label": "check:server-shared-runtime-import",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:server-shared-runtime-import"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 555,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/012-check_server-shared-runtime-import.log",
+      "counts": {}
+    },
+    {
+      "label": "check:canvas-runtime-boundary",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:canvas-runtime-boundary"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 437,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/013-check_canvas-runtime-boundary.log",
+      "counts": {}
+    },
+    {
+      "label": "check:group-gallery-shell",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:group-gallery-shell"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 430,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/014-check_group-gallery-shell.log",
+      "counts": {}
+    },
+    {
+      "label": "check:groups-rail-shell",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:groups-rail-shell"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 418,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/015-check_groups-rail-shell.log",
+      "counts": {}
+    },
+    {
+      "label": "check:single-editor-shell",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:single-editor-shell"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 437,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/016-check_single-editor-shell.log",
+      "counts": {}
+    },
+    {
+      "label": "check:source-experience",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:source-experience"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 950,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/017-check_source-experience.log",
+      "counts": {}
+    },
+    {
+      "label": "check:v2-bn11-legacy-shutdown",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:v2-bn11-legacy-shutdown"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 419,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/018-check_v2-bn11-legacy-shutdown.log",
+      "counts": {}
+    },
+    {
+      "label": "check:v2-bn11-relation-freshness",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check:v2-bn11-relation-freshness"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 411,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/019-check_v2-bn11-relation-freshness.log",
+      "counts": {}
+    },
+    {
+      "label": "smoke:canvas-engine-model-contract",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "smoke:canvas-engine-model-contract"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1946,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/020-smoke_canvas-engine-model-contract.log",
+      "counts": {}
+    },
+    {
+      "label": "build:client",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build:client"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 55046,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/021-build_client.log",
+      "counts": {}
+    },
+    {
+      "label": "build",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 26823,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/022-build.log",
+      "counts": {}
+    },
+    {
+      "label": "smoke:canvas-engine-performance",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "smoke:canvas-engine-performance"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1325,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/023-smoke_canvas-engine-performance.log",
+      "counts": {}
+    },
+    {
+      "label": "docs:check",
+      "command": [
+        "node",
+        "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "cwd": ".",
+      "files": [],
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 278,
+      "rawLog": ".codex-tmp/c3-episode/gates-2026-09-20T09-51-54-670Z-30608/024-docs_check.log",
+      "counts": {}
+    }
+  ],
+  "serverTestAggregate": {
+    "tests": 0,
+    "pass": 0,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "executedServerFiles": [],
+  "missingServerFiles": [],
+  "missingTapSummaries": [],
+  "nonPassingTapSummaries": [],
+  "filesWithTapCounts": 0,
+  "failedSteps": [
+    "docs:check"
+  ],
+  "finishedAt": "2026-09-20T09:56:00.076Z",
+  "passed": false
+}
