@@ -10,6 +10,7 @@ import { assertMediaBlockAsset, mediaBlockAssetId } from './mediaBlocks.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import { enqueueManagedFileTask, type ManagedFileTask } from './managedFileCleanup.js';
 import { assertTableBlockContent } from './tableBlocks.js';
+import { assertComponentBlockContent } from './componentBlocks.js';
 
 function parseJson<T>(value: string | null | undefined, fallback: T): T {
   if (!value) return fallback;
@@ -32,6 +33,8 @@ function updateNoteBlockContentInTransaction(
   const data = updateNoteBlockSchema.parse(value);
   const nextBlockType = data.block_type ?? currentBlock.block_type;
   assertTableBlockContent({ block_type: nextBlockType,
+    content_json: data.content_json ?? parseJson(currentBlock.content_json, {}) });
+  assertComponentBlockContent({ block_type: nextBlockType,
     content_json: data.content_json ?? parseJson(currentBlock.content_json, {}) });
   const nextMetadata = { ...parseJson<Record<string, unknown>>(currentBlock.metadata, {}), ...(data.metadata || {}) };
   assertNoteRefContent({ block_type: nextBlockType,

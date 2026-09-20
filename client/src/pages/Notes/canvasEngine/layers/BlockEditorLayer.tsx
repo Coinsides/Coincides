@@ -70,6 +70,9 @@ import { MediaBlockProjection, MediaBlockPlaceholder } from '../blocks/MediaBloc
 import { TableBlockProjection } from '../blocks/TableBlockProjection';
 import { TableBlockEditor } from '../blocks/TableBlockEditor';
 import { readTableBlockPayload, type TableBlockPayload } from '../tableBlockService';
+import { ComponentBlockProjection } from '../blocks/ComponentBlockProjection';
+import { ComponentBlockEditor } from '../blocks/ComponentBlockEditor';
+import { isBuiltinComponentKind, readComponentBlockPayload, type ComponentBlockPayload } from '../componentBlockService';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type { CrossBlockUnitDropTarget, TextUnitDropTarget } from '../hooks/useTextUnitHandleDrag';
@@ -96,6 +99,8 @@ interface BlockEditorLayerProps {
   mediaPlaceholder?: boolean;
   tablePrint?: boolean;
   onSaveTable?: (payload: TableBlockPayload) => Promise<boolean>;
+  componentPrint?: boolean;
+  onSaveComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
   allowSaveRecovery?: boolean;
   text: string;
   textFlowDraft?: TextBlockContentV1;
@@ -176,6 +181,8 @@ export function BlockEditorLayer({
   mediaPlaceholder = false,
   tablePrint = false,
   onSaveTable,
+  componentPrint = false,
+  onSaveComponent,
   allowSaveRecovery = false,
   text,
   textFlowDraft,
@@ -261,6 +268,9 @@ export function BlockEditorLayer({
   const tableBlock = block.block_type === 'table';
   const [editingTable, setEditingTable] = useState(false);
   const tablePayload = tableBlock ? readTableBlockPayload(block) : null;
+  const componentBlock = block.block_type === 'component';
+  const [editingComponent, setEditingComponent] = useState(false);
+  const componentPayload = componentBlock ? readComponentBlockPayload(block) : null;
   const allowTextNavigation = !contentReadOnly && !layoutMode && supportsTextFlowBlockNavigation(block);
   useLayoutEffect(() => {
     if (allowTextNavigation || contentReadOnly || layoutMode) return;
@@ -464,7 +474,7 @@ export function BlockEditorLayer({
         minHeight: layout.height,
         ...(paginated ? { height: layout.height, overflow: 'visible', minWidth: 0 } : {}),
         ...(mediaBlock ? { height: layout.height, minWidth: 0, padding: 0 } : {}),
-        ...(tableBlock ? { minWidth: 0 } : {}),
+        ...(tableBlock || componentBlock ? { minWidth: 0 } : {}),
         borderColor: affiliationOutline?.colorToken,
         borderStyle: affiliationOutline ? 'dashed' : undefined,
         ...(textUnitGutterLaneX !== undefined ? {
@@ -476,9 +486,12 @@ export function BlockEditorLayer({
       } as CSSProperties}
       onMouseDown={handleBlockMouseDown}
       onContextMenu={handleBlockContextMenu}
-      onDoubleClick={tableBlock ? (event) => {
+      onDoubleClick={tableBlock || componentBlock ? (event) => {
         event.stopPropagation();
-        if (!contentReadOnly && !layoutMode && onSaveTable) setEditingTable(true);
+        if (!contentReadOnly && !layoutMode) {
+          if (tableBlock && onSaveTable) setEditingTable(true);
+          if (componentBlock && onSaveComponent && componentPayload && isBuiltinComponentKind(componentPayload.component_kind)) setEditingComponent(true);
+        }
       } : undefined}
     >
       {chapter && <ChapterHeadingFurniture {...chapter} />}
@@ -499,9 +512,9 @@ export function BlockEditorLayer({
         saving={saving}
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
-        bodyReadOnly={itemReference || noteReference || mediaBlock || tableBlock}
+        bodyReadOnly={itemReference || noteReference || mediaBlock || tableBlock || componentBlock}
         onBeginMove={onBeginMove}
-        onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && !tableBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
+        onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && !tableBlock && !componentBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}
@@ -553,7 +566,9 @@ export function BlockEditorLayer({
           onFocusReleased(receipt);
         }}
       >
-          {tableBlock ? (
+          {componentBlock ? (
+            <ComponentBlockProjection block={block} print={componentPrint} />
+          ) : tableBlock ? (
             <TableBlockProjection block={block} print={tablePrint} />
           ) : noteReference ? (
             <NoteRefBlockProjection field={block.content_json.field === 'description' ? 'description' : 'title'} readOnly={contentReadOnly || layoutMode} />
@@ -634,6 +649,11 @@ export function BlockEditorLayer({
         </div>}
       </div>
 
+      {editingComponent && componentPayload && onSaveComponent && !contentReadOnly && <ComponentBlockEditor
+        initialPayload={componentPayload} onCancel={() => setEditingComponent(false)} onSave={async (payload) => {
+          if (!await onSaveComponent(payload)) throw new Error('Component could not be saved. Please retry.');
+          setEditingComponent(false);
+        }} />}
       {editingTable && tablePayload && onSaveTable && !contentReadOnly && <TableBlockEditor
         initialPayload={tablePayload} onCancel={() => setEditingTable(false)} onSave={async (payload) => {
           if (!await onSaveTable(payload)) throw new Error('Table could not be saved. Please retry.');

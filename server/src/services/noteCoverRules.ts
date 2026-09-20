@@ -78,7 +78,7 @@ export function assertCoverResident(kind: string, blockType?: string, metadata?:
   // variants remain text; code/formula templates and Item projections do not.
   const templateKey = [meta.template_key, meta.template_id, meta.legacy_template_id]
     .find((value) => typeof value === 'string' && value.length > 0) as string | undefined ?? '';
-  const component = blockType === 'formula' || templateKey.includes('formula') || templateKey.includes('code')
+  const component = blockType === 'component' || blockType === 'formula' || templateKey.includes('formula') || templateKey.includes('code')
     || (typeof body.language === 'string' && body.language.length > 0);
   const accepted = kind === 'paragraph_block_projection'
     ? Boolean(blockType && blockType !== 'item_ref' && !component)

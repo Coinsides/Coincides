@@ -811,8 +811,8 @@ test('v2.5 template runtime seeds system templates idempotently', async () => {
     const secondSeed = seedSystemTemplateDefinitions(db, userId);
     const templates = listTemplateDefinitions(db, userId, {});
 
-    // Images and native tables are both part of the active media family.
-    const expectedTemplateKeys = ['code.snippet', 'formula.math', 'media.image', 'media.table', 'text.paragraph'];
+    // Media and the three closed-set component templates share the active template lifecycle.
+    const expectedTemplateKeys = ['code.snippet', 'component.chart_bar', 'component.chart_line', 'component.timeline', 'formula.math', 'media.image', 'media.table', 'text.paragraph'];
     assert.equal(firstSeed.length, expectedTemplateKeys.length);
     assert.equal(secondSeed.length, firstSeed.length);
     assert.equal(templates.length, firstSeed.length);

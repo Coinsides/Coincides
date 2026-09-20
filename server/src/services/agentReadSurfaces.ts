@@ -6,6 +6,7 @@ import { getNoteCanvasPersistence } from './canvasObjects.js';
 import { getNote, listNoteBlocks } from './notes.js';
 import { validTextFlowUnits } from './textFlowUnits.js';
 import { tableBlockPlainText } from './tableBlocks.js';
+import { componentBlockPlainText } from './componentBlocks.js';
 
 export const AGENT_NOTE_BLOCK_LIMIT = 200;
 export const AGENT_BOARD_ENTRY_LIMIT = 200;
@@ -88,7 +89,8 @@ function projectNoteBlock(userId: string, block: RecordValue) {
     placement_id: text(block.placement_id),
     kind,
     role,
-    text: kind === 'table' ? tableBlockPlainText(content) : text(block.plain_text),
+    text: kind === 'table' ? tableBlockPlainText(content)
+      : kind === 'component' ? componentBlockPlainText(content) : text(block.plain_text),
     ...(units ? { text_units: units.map((unit) => ({
       id: text(unit.id) || null,
       role: text(unit.writing_role) || null,

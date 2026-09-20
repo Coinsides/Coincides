@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 406 份文档。
+共 407 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -394,6 +394,7 @@
 | [handoffs/2026-09-19-v14-a4-heading-chapters-order.md](handoffs/2026-09-19-v14-a4-heading-chapters-order.md) | A4 · heading 角色+章投影+导航标题树 | `done(builder 一轮交付+HQ 收口全绿,2026-09-19:client 199 文件 2014/2014 亲跑定案;git diff --check+secrets(63 文件)双门绿;server 余 2 红=Python/MinerU 环境基线;契约 amendment 落 docs/contracts/TextFlow-Contract.md:177 冻结正文零改;实浏览器走查并入下次纸面线冒烟)` | — | — |
 | [handoffs/2026-09-19-v14-a5-paper-freedom-order.md](handoffs/2026-09-19-v14-a5-paper-freedom-order.md) | A5 · 纸型自由化束 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 204 文件 2066/2066 亲跑定案;git diff --check+secrets(59 文件)双门绿;server 余 2 红=Python/MinerU 环境基线;纸面线五砖至此封顶)` | — | — |
 | [handoffs/2026-09-20-v14-b1-table-block-order.md](handoffs/2026-09-20-v14-b1-table-block-order.md) | B1 · 表格块 v1 | `done(builder 二轮施工交工作树；client 209 文件 2109/2109；非 git/secrets 23 组件分次验证；server 两项 Python 环境红、HQ 双门与放行待收口)` | — | — |
+| [handoffs/2026-09-20-v14-b2-timeline-chart-order.md](handoffs/2026-09-20-v14-b2-timeline-chart-order.md) | B2 · 时间线件+图表件 v1 | `done(builder 施工交工作树;client 214 文件/2181 测试通过;非 git/secrets 的 23 组件分次验证;server 两项 Python 环境失败、HQ 两组件与验收待收口)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

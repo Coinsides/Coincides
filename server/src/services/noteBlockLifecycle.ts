@@ -9,6 +9,7 @@ import { assertMediaBlockAsset, mediaBlockAssetId } from './mediaBlocks.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import type { ManagedFileTask } from './managedFileCleanup.js';
 import { assertTableBlockContent } from './tableBlocks.js';
+import { assertComponentBlockContent } from './componentBlocks.js';
 
 const CLIENT_CREATE_SOURCE_TYPE = 'client_note_block_create';
 const CLIENT_CREATE_CLEANUP_CONFLICT_SOURCE_TYPE = 'client_note_block_cleanup_conflict';
@@ -437,6 +438,7 @@ export function createClientNoteBlock(
     assertItemRefBlockContent(db, userId, data);
     assertMediaBlockAsset(db, userId, data);
     assertTableBlockContent(data);
+    assertComponentBlockContent(data);
     const blockId = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();

@@ -19,7 +19,7 @@ export function noteBlocksToPageFlow(
     if (!layout) return [];
     const flow = flowDrafts[block.id] || getTextFlowContent(block.content_json);
     const text = textDrafts[block.id] ?? (flow ? flow.units.map((unit) => unit.text).join('\n') : textFromContent(block));
-    const kind = block.block_type === 'media' || block.block_type === 'table' ? 'media' : block.block_type === 'item_ref' ? 'projection'
+    const kind = block.block_type === 'media' || block.block_type === 'table' || block.block_type === 'component' ? 'media' : block.block_type === 'item_ref' ? 'projection'
       : presentationKindForBlock(block) === 'paragraph' ? 'text' : 'component';
     // Legacy plain-text drafts can update one render before their TextFlow draft.
     // Align by row just as TextBlockProjection does, so new text is never outside

@@ -412,7 +412,38 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(subject.result.current.blocks.find((entry) => entry.id === table.id)?.content_json).toEqual(next);
   });
 
-  it.each(['placement', 'order'] as const)('B1 table creation rolls back an incomplete %s save', async (failure) => {
+  it.each(['timeline', 'chart_bar', 'chart_line'] as const)('B2 hydrates, creates and saves %s without TextFlow body conversion', async (kind) => {
+    const payload = { component_kind: kind, params: kind === 'timeline'
+      ? { title: '宋初年表', entries: [{ year: '960', label: '北宋建立', detail: '陈桥兵变' }] }
+      : { title: '岁入的换血', x_labels: ['宋初', '中期', '后期'], series: [{ name: '商税', values: [20, 40, 65] }] } };
+    const component = { ...serverBlock('', false), block_type: 'component', content_json: payload, plain_text: '' };
+    durableBlocks = [component];
+    mocks.post.mockImplementation(async (_url, body) => ({ data: { ...component, ...body, id: 'component-created' } }));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    expect(subject.result.current.blocks[0].content_json).toEqual(payload);
+    const template = subject.result.current.templateOptions.find((entry) => entry.template_key === `component.${kind}`)!;
+    expect(template).toBeDefined();
+    await act(async () => {
+      const created = await subject.result.current.createBlock(template, '', { contentJson: payload, silent: true });
+      expect(created?.content_json).toEqual(payload);
+    });
+    const next = { ...payload, params: { ...payload.params, title: '更新标题' } };
+    await act(async () => { expect(await subject.result.current.saveComponentBlock(component, next)).toBe(true); });
+    expect(mocks.put).toHaveBeenCalledWith(`/note-blocks/${component.id}`, { content_json: next, plain_text: null });
+    expect(subject.result.current.blocks.find((entry) => entry.id === component.id)?.content_json).toEqual(next);
+    await act(async () => { expect((await subject.result.current.saveBlock(component, 'flush')).status).toBe('saved'); });
+    expect(mocks.atomicPut).not.toHaveBeenCalled();
+    expect(subject.result.current.blockTextFlowDrafts[component.id]).toBeUndefined();
+    mocks.put.mockRejectedValueOnce(new Error('Connection interrupted'));
+    await act(async () => { expect(await subject.result.current.saveComponentBlock(component, payload)).toBe(false); });
+    expect(subject.result.current.blocks.find((entry) => entry.id === component.id)?.content_json).toEqual(next);
+  });
+
+  it.each([
+    ['table', 'table', 'placement'], ['table', 'table', 'order'],
+    ['component', 'component.timeline', 'placement'], ['component', 'component.timeline', 'order'],
+  ] as const)('B1/B2 %s creation rolls back an incomplete %s %s save', async (blockType, templateKey, failure) => {
     mocks.coordinateContract = 'v2';
     const collection = f11RuntimeCollection();
     const anchor = serverBlock('anchor', false);
@@ -422,9 +453,10 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     mocks.get.mockImplementation(async (url: string) => url.endsWith('/page-frame-collection') ? { data: collection } : originalGet(url));
     const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
     await waitFor(() => expect(subject.result.current.loading).toBe(false));
-    const template = subject.result.current.templateOptions.find((entry) => entry.legacy_block_type === 'table')!;
+    const template = subject.result.current.templateOptions.find((entry) => blockType === 'table'
+      ? entry.legacy_block_type === 'table' : entry.template_key === templateKey)!;
     mocks.post.mockImplementation(async (_url, body) => ({ data: { ...serverBlock('', false), ...body,
-      id: 'table', placement_id: 'table-place', order_index: 1 } }));
+      id: blockType, placement_id: `${blockType}-place`, order_index: 1 } }));
     mocks.put.mockImplementation(async (url, body) => {
       if (url.includes('/block-placements/')) {
         if (failure === 'placement') throw new Error('Placement unavailable');
@@ -440,7 +472,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
           coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
       })).toBeNull();
     });
-    expect(mocks.delete).toHaveBeenCalledWith('/note-blocks/table');
+    expect(mocks.delete).toHaveBeenCalledWith(`/note-blocks/${blockType}`);
     expect(subject.result.current.blocks.map((entry) => entry.id)).toEqual([anchor.id]);
     await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
   });

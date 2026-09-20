@@ -12,6 +12,7 @@ import {
 } from './placementService';
 import { readMediaBlockMetadata } from './mediaBlockService';
 import { estimateTableBlockHeight, readTableBlockPayload } from './tableBlockService';
+import { estimateComponentBlockHeight, readComponentBlockPayload } from './componentBlockService';
 import {
   estimateTypographyTextBlockHeight,
 } from './typographyMeasurementService';
@@ -98,6 +99,10 @@ export function estimateBlockHeightForText(
   width: number,
   typography?: DocumentTypographyProfile,
 ): number {
+  if (block.block_type === 'component') {
+    const payload = readComponentBlockPayload(block);
+    return payload ? Math.max(MIN_BLOCK_HEIGHT, estimateComponentBlockHeight(payload, width, typography) + BLOCK_VERTICAL_CHROME) : DEFAULT_BLOCK_HEIGHT;
+  }
   if (block.block_type === 'table') {
     const payload = readTableBlockPayload(block);
     return payload ? Math.max(MIN_BLOCK_HEIGHT, estimateTableBlockHeight(payload, width, typography) + BLOCK_VERTICAL_CHROME) : DEFAULT_BLOCK_HEIGHT;

@@ -1,0 +1,50 @@
+.component {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: var(--sk-ink, var(--text-primary));
+  font-family: var(--document-font-family, inherit);
+  font-size: var(--document-font-size, 15px);
+  line-height: var(--document-line-height, 22px);
+}
+.title { margin: 0 0 16px; font: inherit; font-weight: 600; overflow-wrap: anywhere; white-space: pre-wrap; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { position: relative; display: grid; grid-template-columns: minmax(3.5em, 5em) minmax(0, 1fr); gap: 16px; padding: 0 0 20px; }
+.timeline li:last-child { padding-bottom: 0; }
+.year { color: var(--sk-accent, var(--accent-primary)); font-variant-numeric: tabular-nums; font-weight: 600; overflow-wrap: anywhere; white-space: pre-wrap; }
+.entry, .entryLabel { position: relative; min-width: 0; padding-left: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.entry::before, .entryLabel::before { content: ''; position: absolute; top: 8px; bottom: -28px; left: 0; border-left: 1px solid var(--sk-hairline, var(--border-default)); }
+.timeline li:last-child .entry::before, .timeline li:last-child .entryLabel::before { bottom: 0; }
+.entry::after, .entryLabel::after { content: ''; position: absolute; top: 7px; left: -3px; width: 5px; height: 5px; border: 1px solid var(--sk-accent, var(--accent-primary)); border-radius: 50%; background: var(--sk-paper, var(--bg-primary)); }
+.entry summary { cursor: pointer; font-weight: 500; }
+.entry p { margin: 8px 0 0; color: var(--sk-ink-muted, var(--text-secondary)); }
+.entry summary:focus-visible, .chartViewport:focus-visible { outline: 2px solid var(--sk-accent, var(--accent-primary)); outline-offset: 2px; }
+.axisLabel { margin: 0 0 4px; color: var(--sk-ink-muted, var(--text-secondary)); font-size: 0.85em; overflow-wrap: anywhere; white-space: pre-wrap; }
+.chartViewport { max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
+.chart { display: block; max-width: none; font: inherit; font-size: 12px; }
+.axis line { stroke: var(--sk-ink-muted, var(--text-secondary)); stroke-width: 1; }
+.axis .gridline { stroke: var(--sk-hairline, var(--border-default)); }
+.axis text { fill: var(--sk-ink-muted, var(--text-secondary)); stroke: none; }
+.series0 { --series-color: var(--sk-accent, var(--accent-primary)); }
+.series1 { --series-color: var(--sk-ink-muted, var(--text-secondary)); }
+.series2 { --series-color: color-mix(in srgb, var(--sk-accent, var(--accent-primary)) 65%, var(--sk-ink, var(--text-primary))); }
+.series3 { --series-color: var(--sk-ink, var(--text-primary)); }
+.bar, .point { fill: var(--series-color); }
+.line { stroke: var(--series-color); fill: none; stroke-width: 2; stroke-linejoin: round; }
+.series1 .line { stroke-dasharray: 6 3; }
+.series2 .line { stroke-dasharray: 2 3; }
+.series3 .line { stroke-dasharray: 8 3 2 3; }
+.value { fill: var(--sk-ink, var(--text-primary)); font-variant-numeric: tabular-nums; font-size: 11px; }
+.legend { display: flex; flex-wrap: wrap; list-style: none; margin: 12px 0 0; padding: 0; gap: 8px 20px; font-size: 0.85em; }
+.legend li { display: flex; align-items: baseline; gap: 6px; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.swatch { display: inline-block; width: 12px; height: 8px; flex-shrink: 0; background: var(--series-color); }
+.unknown { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--sk-hairline, var(--border-default)); overflow-wrap: anywhere; }
+.unknown span, .invalid { color: var(--sk-ink-muted, var(--text-secondary)); }
+.print .chartViewport { overflow: hidden; }
+.print .chart { width: 100%; height: auto; }
+@media print {
+  .component { break-inside: avoid; print-color-adjust: exact; }
+  .chartViewport { overflow: hidden; }
+  .chart { width: 100%; height: auto; }
+}

@@ -493,7 +493,32 @@ export type NoteBlockSystemType =
   | 'source_quote'
   | 'task'
   | 'media'
-  | 'table';
+  | 'table'
+  | 'component';
+
+/** B2 built-ins are a manual closed set; unknown envelopes remain readable placeholders. */
+export type ComponentKind = 'timeline' | 'chart_bar' | 'chart_line';
+
+export interface TimelineComponentParams {
+  title?: string;
+  entries: Array<{ year: string; label: string; detail?: string }>;
+}
+
+export interface ChartComponentParams {
+  title?: string;
+  x_labels: string[];
+  series: Array<{ name: string; values: number[] }>;
+  y_label?: string;
+}
+
+export interface ComponentBlockContent {
+  component_kind: string;
+  params: Record<string, unknown>;
+}
+
+export type BuiltinComponentBlockContent =
+  | { component_kind: 'timeline'; params: TimelineComponentParams }
+  | { component_kind: 'chart_bar' | 'chart_line'; params: ChartComponentParams };
 
 export type NoteBlockLearningRole =
   | 'note'
@@ -548,7 +573,7 @@ export interface NoteBlockTemplateDefinition {
   render_hint: string;
   proposal_allowed: boolean;
   source_reference_allowed: boolean;
-  legacy_block_type: 'heading' | 'paragraph' | 'definition' | 'theorem' | 'proof' | 'formula' | 'example' | 'exercise' | 'answer' | 'sidenote' | 'media' | 'table';
+  legacy_block_type: 'heading' | 'paragraph' | 'definition' | 'theorem' | 'proof' | 'formula' | 'example' | 'exercise' | 'answer' | 'sidenote' | 'media' | 'table' | 'component';
 }
 
 export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
@@ -624,11 +649,34 @@ NOTE_BLOCK_TEMPLATES.push({
   render_hint: 'table', proposal_allowed: false, source_reference_allowed: false, legacy_block_type: 'table',
 });
 
+
+NOTE_BLOCK_TEMPLATES.push(
+  {
+    template_id: 'component.timeline', label: 'Timeline', system_type: 'component', learning_role: 'note',
+    description: 'A timeline with expandable details.', fields: [],
+    default_content: { component_kind: 'timeline', params: { entries: [{ year: '', label: '' }] } },
+    render_hint: 'component', proposal_allowed: false, source_reference_allowed: false, legacy_block_type: 'component',
+  },
+  {
+    template_id: 'component.chart_bar', label: 'Bar chart', system_type: 'component', learning_role: 'note',
+    description: 'A grouped bar chart.', fields: [],
+    default_content: { component_kind: 'chart_bar', params: { x_labels: ['Label 1'], series: [{ name: 'Series 1', values: [0] }] } },
+    render_hint: 'component', proposal_allowed: false, source_reference_allowed: false, legacy_block_type: 'component',
+  },
+  {
+    template_id: 'component.chart_line', label: 'Line chart', system_type: 'component', learning_role: 'note',
+    description: 'A line chart.', fields: [],
+    default_content: { component_kind: 'chart_line', params: { x_labels: ['Label 1'], series: [{ name: 'Series 1', values: [0] }] } },
+    render_hint: 'component', proposal_allowed: false, source_reference_allowed: false, legacy_block_type: 'component',
+  },
+);
+
 const TEMPLATE_BY_ID = new Map(NOTE_BLOCK_TEMPLATES.map((template) => [template.template_id, template]));
 
 const LEGACY_TEMPLATE_BY_BLOCK_TYPE: Record<string, string> = {
   media: 'media.image',
   table: 'media.table',
+  component: 'component.timeline',
   paragraph: 'text.paragraph',
   heading: 'text.paragraph',
   definition: 'text.paragraph',

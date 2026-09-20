@@ -2,6 +2,8 @@ import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame, normalize
 import { pasteMediaBlock } from '../mediaBlockPasteService';
 import { TableBlockEditor } from '../blocks/TableBlockEditor';
 import { createDefaultTableBlockPayload, type TableBlockPayload } from '../tableBlockService';
+import { ComponentBlockEditor } from '../blocks/ComponentBlockEditor';
+import { createDefaultComponentBlockPayload, type ComponentBlockPayload, type BuiltinComponentKind } from '../componentBlockService';
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
@@ -242,6 +244,8 @@ export interface NoteWritingSurfaceLayerProps {
   visibleBlocks: NoteBlock[];
   onCreateTable?: (payload: TableBlockPayload) => Promise<boolean>;
   onSaveTable?: (block: NoteBlock, payload: TableBlockPayload) => Promise<boolean>;
+  onCreateComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
+  onSaveComponent?: (block: NoteBlock, payload: ComponentBlockPayload) => Promise<boolean>;
   onCreateBlock: (
     template: TemplateOption,
     text: string,
@@ -407,6 +411,8 @@ export function NoteWritingSurfaceLayer({
   onCreateBlock,
   onCreateTable,
   onSaveTable,
+  onCreateComponent,
+  onSaveComponent,
   onPersistCanvasObject,
   onDeleteCanvasObject,
   onSaveAnnotationTruths,
@@ -455,6 +461,8 @@ export function NoteWritingSurfaceLayer({
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
   const [creatingTable, setCreatingTable] = useState(false);
   useEffect(() => { setCreatingTable(false); }, [noteId]);
+  const [creatingComponent, setCreatingComponent] = useState<BuiltinComponentKind | null>(null);
+  useEffect(() => { setCreatingComponent(null); }, [noteId]);
   const itemDropPending = useRef(false);
   const mediaPastePending = useRef(false);
   const mediaPasteSession = useRef({ noteId, active: true });
@@ -1830,6 +1838,7 @@ export function NoteWritingSurfaceLayer({
               }}
               onFieldDraftChange={(fieldValues) => onFieldDraftChange(block, text, fieldValues)}
               onSaveTable={onSaveTable ? (payload) => onSaveTable(block, payload) : undefined}
+              onSaveComponent={onSaveComponent ? (payload) => onSaveComponent(block, payload) : undefined}
               onSave={async (silent, fieldValues, textFlow) => {
                 const save = blockSaveTextAndFlow(block, text, fieldValues, textFlow);
                 return onSaveBlock(block, save.text, {
@@ -1912,6 +1921,12 @@ export function NoteWritingSurfaceLayer({
           {onCreateTable && !contentReadOnly && <button type="button" className={styles.canvasZoomReset}
             aria-label="Insert table" title="Insert table" disabled={overviewOpen || layoutMode}
             onClick={() => setCreatingTable(true)}>Table</button>}
+          {onCreateComponent && !contentReadOnly && ([
+            ['timeline', 'Timeline', 'Insert timeline'], ['chart_bar', 'Bar chart', 'Insert bar chart'],
+            ['chart_line', 'Line chart', 'Insert line chart'],
+          ] as const).map(([kind, label, ariaLabel]) => <button key={kind} type="button" className={styles.canvasZoomReset}
+            aria-label={ariaLabel} title={ariaLabel} disabled={overviewOpen || layoutMode}
+            onClick={() => setCreatingComponent(kind)}>{label}</button>)}
           {([{ key: 'selection', label: 'Selection', Icon: MousePointer2 },
             { key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
             <button key={key} type="button" className={styles.canvasZoomButton} aria-label={label} title={label}
@@ -1947,6 +1962,11 @@ export function NoteWritingSurfaceLayer({
             disabled={overviewOpen || readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
         </div>
       )}
+      {creatingComponent && onCreateComponent && <ComponentBlockEditor initialPayload={createDefaultComponentBlockPayload(creatingComponent)}
+        onCancel={() => setCreatingComponent(null)} onSave={async (payload) => {
+          if (!await onCreateComponent(payload)) throw new Error('Component could not be added. Please retry.');
+          setCreatingComponent(null);
+        }} />}
       {creatingTable && onCreateTable && <TableBlockEditor initialPayload={createDefaultTableBlockPayload()}
         onCancel={() => setCreatingTable(false)} onSave={async (payload) => {
           if (!await onCreateTable(payload)) throw new Error('Table could not be added. Please retry.');

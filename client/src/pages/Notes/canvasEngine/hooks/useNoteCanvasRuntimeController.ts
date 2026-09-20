@@ -16,6 +16,7 @@ import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
 import { useTableBlockHistory } from './useTableBlockHistory';
+import { useComponentBlockHistory } from './useComponentBlockHistory';
 import { STATIC_TEMPLATE_OPTIONS } from '@/services/templateOptions';
 import { usePageFrameWalls } from './usePageFrameWalls';
 import { usePaperSize } from './usePaperSize';
@@ -177,6 +178,7 @@ export function useNoteCanvasRuntimeController() {
     finalizeDraftBlock,
     saveBlock: saveBlockRaw,
     saveTableBlock,
+    saveComponentBlock,
     applyBlockEditRecovery,
     inspectBlockEditRecovery,
     replayBlockEditRecovery,
@@ -504,6 +506,10 @@ export function useNoteCanvasRuntimeController() {
     boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
     history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
 
+  const componentHistory = useComponentBlockHistory({ noteId, generation: textHistoryGeneration, blocks, saveComponentBlock,
+    boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
+    history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
+
   const inkCommands = usePaperInkCommands({
     noteId, generation: textHistoryGeneration,
     objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
@@ -631,6 +637,18 @@ export function useNoteCanvasRuntimeController() {
     onPageReadingViewportChange: setPageReadingViewport,
     onCreateBlock: createBlock,
     onSaveTable: tableHistory.save,
+    onSaveComponent: componentHistory.save,
+    onCreateComponent: (payload) => {
+      if (sourceProjectionPolicy.contentReadOnly || !textHistory.boundary()) return Promise.resolve(false);
+      return enqueueRuntimeHistoryOperation(async () => {
+        const template = STATIC_TEMPLATE_OPTIONS.find((entry) => entry.template_key === `component.${payload.component_kind}`);
+        if (!template) return false;
+        const created = await createBlock(template, '', { contentJson: { ...payload }, layout: defaultDraftLayout });
+        if (!created) return false;
+        markBlockSelected(created.id);
+        return pushHistoryEntry({ type: 'createdBlock', block: created }, { skipBoundary: true });
+      });
+    },
     onCreateTable: (payload) => {
       if (sourceProjectionPolicy.contentReadOnly || !textHistory.boundary()) return Promise.resolve(false);
       return enqueueRuntimeHistoryOperation(async () => {

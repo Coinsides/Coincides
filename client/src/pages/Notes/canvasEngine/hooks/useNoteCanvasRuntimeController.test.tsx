@@ -11,6 +11,7 @@ import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameMode
 import { createDefaultNoteBindingSettings, type NoteBindingSettings } from '../../../../../../shared/types/noteBinding';
 import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
 import { addNoteCoverPage } from '../noteCoverPageCollection';
+import { createDefaultComponentBlockPayload } from '../componentBlockService';
 
 vi.mock('@/services/api', () => ({
   getToken: () => null, setToken: vi.fn(),
@@ -38,6 +39,8 @@ const rootBridgeContract = vi.hoisted(() => ({
   bindingSettings: undefined as NoteBindingSettings | undefined,
   coordinateContract: 'v1' as 'v1' | 'v2',
   createBlock: vi.fn<(...args: unknown[]) => Promise<NoteBlock | null>>(),
+  pushHistoryEntry: vi.fn(() => true),
+  enqueueRuntimeHistoryOperation: vi.fn(async (operation: () => Promise<boolean>) => operation()),
   markBlockSelected: vi.fn(),
   setFocusBlockId: vi.fn(),
   noop: () => undefined,
@@ -146,7 +149,10 @@ vi.mock('./useRuntimeLayoutModelController', async () => {
 vi.mock('./useRuntimeBlockOperationsController', () => ({
   useRuntimeBlockOperationsController: ({ documentTypographyProfile }: { documentTypographyProfile: DocumentTypographyProfile }) => {
     rootBridgeContract.dispatchedProfiles.operations = documentTypographyProfile;
-    return new Proxy({}, { get: () => rootBridgeContract.noop });
+    return new Proxy({ pushHistoryEntry: rootBridgeContract.pushHistoryEntry,
+      enqueueRuntimeHistoryOperation: rootBridgeContract.enqueueRuntimeHistoryOperation,
+    }, { get: (target, property, receiver) => Reflect.has(target, property)
+      ? Reflect.get(target, property, receiver) : rootBridgeContract.noop });
   },
 }));
 
@@ -255,6 +261,8 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     rootBridgeContract.bindingSettings = undefined;
     rootBridgeContract.coordinateContract = 'v1';
     rootBridgeContract.createBlock.mockReset();
+    rootBridgeContract.pushHistoryEntry.mockClear();
+    rootBridgeContract.enqueueRuntimeHistoryOperation.mockClear();
     rootBridgeContract.markBlockSelected.mockClear();
     rootBridgeContract.setFocusBlockId.mockClear();
   });
@@ -264,6 +272,23 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     expect(rootBridgeContract.presentationOptions).not.toBeNull();
     expect(rootBridgeContract.presentationOptions).not.toHaveProperty('onToggleSurfaceMode');
     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+  });
+
+  it.each(['timeline', 'chart_bar', 'chart_line'] as const)('B2 creates %s through its existing block template and history lane', async (kind) => {
+    const payload = createDefaultComponentBlockPayload(kind);
+    const component = { ...formalPageSpecimen, id: `new-${kind}`, block_type: 'component', content_json: payload };
+    rootBridgeContract.createBlock.mockResolvedValue(component);
+    render(<RootBridgeHarness />);
+    const create = rootBridgeContract.presentationOptions?.onCreateComponent;
+    expect(create).toBeTypeOf('function');
+    await act(async () => { expect(await create!(payload)).toBe(true); });
+    expect(rootBridgeContract.createBlock).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ template_key: `component.${kind}`, legacy_block_type: 'component' }), '',
+      expect.objectContaining({ contentJson: payload }),
+    );
+    expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith(component.id);
+    expect(rootBridgeContract.enqueueRuntimeHistoryOperation).toHaveBeenCalledOnce();
+    expect(rootBridgeContract.pushHistoryEntry).toHaveBeenCalledWith({ type: 'createdBlock', block: component }, { skipBoundary: true });
   });
 
   function coverBindingCase(field: 'title' | 'description') {

@@ -6,6 +6,7 @@ import { noteMetadataSchema } from './noteCover.js';
 import { noteRefBlockDataSchema } from './noteRef.js';
 import { agentContextHintSchema } from './agentContextHint.js';
 import { tableBlockContentSchema } from './tableBlock.js';
+import { componentBlockContentSchema } from './componentBlock.js';
 
 // --- Auth ---
 
@@ -64,6 +65,7 @@ export const noteBlockTypeSchema = z.enum([
   'note_ref',
   'media',
   'table',
+  'component',
 ]);
 
 const checklistItemSchema = z.object({
@@ -768,6 +770,10 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 }).superRefine((data, ctx) => {
+  if (data.block_type === 'component') {
+    const result = componentBlockContentSchema.safeParse(data.content_json);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });
+  }
   if (data.block_type === 'table') {
     const result = tableBlockContentSchema.safeParse(data.content_json);
     if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });
