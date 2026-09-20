@@ -6,6 +6,7 @@ import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './laye
 import styles from '../NoteDetail.module.css';
 import { PaperSkinContext } from './PaperSkinContext';
 import { SkinFloatCard } from '@/components/Skin/SkinFloatCard';
+import { NotePaperControls } from './layers/NotePaperControls';
 
 export interface NoteCanvasRuntimeHandle {
   dismissTransientUI: () => void;
@@ -15,7 +16,7 @@ export interface NoteCanvasRuntimeHandle {
 
 const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntime({ onRequestClose }, ref) {
   const { hostMode = 'page', noteId } = useNoteCanvasRuntime();
-  const { layerProps, loading, loadError, note, skin, showAppearancePanel, toggleAppearancePanel,
+  const { layerProps, loading, loadError, note, skin, paper, layoutMode, runtimePageFrameCollection, showAppearancePanel, toggleAppearancePanel,
     dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
   const appearanceAnchorRef = useRef<HTMLButtonElement>(null);
@@ -47,6 +48,9 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
   );
   return <>
     <SkinFloatCard noteId={noteId ?? ''} skin={skin} open={showAppearancePanel} onClose={toggleAppearancePanel}
+      paperControls={paper && runtimePageFrameCollection ? <NotePaperControls key={`paper-${noteId}`} paper={paper}
+        collection={runtimePageFrameCollection} layoutMode={layoutMode}
+        disabled={Boolean(layerProps?.chromeProps.contentReadOnly)} /> : undefined}
       anchorRef={appearanceAnchorRef} disabled={loading || !note || !layerProps || Boolean(loadError)} />
     {content}
   </>;

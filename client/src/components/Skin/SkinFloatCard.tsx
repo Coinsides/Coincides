@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent, type RefObject, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { SKIN_COMPONENT_OPTIONS, SKIN_PRESET_IDS, type SkinComponents, type SkinPresetId, type SkinSelection, type SkinSuite, type SkinTokens } from '@shared/types';
@@ -24,6 +24,7 @@ export interface SkinFloatCardProps {
   onClose: () => void;
   anchorRef: RefObject<HTMLElement>;
   disabled?: boolean;
+  paperControls?: ReactNode;
 }
 
 const paperTokens = [
@@ -46,7 +47,7 @@ export function SkinFloatCard({ open, ...props }: SkinFloatCardProps) {
   return open ? <FloatCardShell {...props} /> : null;
 }
 
-function FloatCardShell({ noteId, skin, onClose, anchorRef, disabled = false }: Omit<SkinFloatCardProps, 'open'>) {
+function FloatCardShell({ noteId, skin, onClose, anchorRef, disabled = false, paperControls }: Omit<SkinFloatCardProps, 'open'>) {
   const panel = useRef<HTMLDivElement>(null);
   const initial = useRef(readFloatCardPosition());
   const [position, setPosition] = useState<FloatCardPosition>(initial.current ?? { x: 8, y: 8, collapsed: false });
@@ -190,7 +191,7 @@ function FloatCardShell({ noteId, skin, onClose, anchorRef, disabled = false }: 
       <button type="button" aria-label={position.collapsed ? '展开外观浮卡' : '折叠外观浮卡'} aria-expanded={!position.collapsed} onClick={collapse}>{position.collapsed ? <ChevronRight size={15} aria-hidden /> : <ChevronDown size={15} aria-hidden />}</button>
       <button type="button" aria-label="关闭外观" onClick={onClose}><X size={15} aria-hidden /></button>
     </header>
-    {!position.collapsed && <div className={styles.body}>{disabled ? <p role="status">正在读取当前笔记…</p> : <FloatCardContent key={noteId} noteId={noteId} skin={skin} />}</div>}
+    {!position.collapsed && <div className={styles.body}>{disabled ? <p role="status">正在读取当前笔记…</p> : <>{paperControls}<FloatCardContent key={noteId} noteId={noteId} skin={skin} /></>}</div>}
   </div>, document.body);
 }
 

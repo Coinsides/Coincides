@@ -1,24 +1,20 @@
-import { getPageFramePhysicalMapping } from './pageFramePrintScaleService';
+import { getPageFramePhysicalMapping, PAPER_PHYSICAL_SIZES_MM } from './pageFramePrintScaleService';
 import { getPageFrameTypographyFamily } from './pageFrameTypographyService';
 import type { PageFrameModel, PageStackBlockFragmentProjection } from './types';
-
-const PAPER_MM = {
-  A4: { width: 210, height: 297 },
-  Letter: { width: 215.9, height: 279.4 },
-};
 
 /** Output geometry has no dependency on the reading viewport or growing screen box. */
 export function getPagePrintGeometry(frame: PageFrameModel, useFlowPageGeometry = false) {
   const family = getPageFrameTypographyFamily(frame);
   const pageSize = frame.pageSize ?? (frame.templateId === 'letter_portrait' ? 'Letter' : 'A4');
-  const paperSize = family === 'paper' && pageSize === 'Letter' ? 'Letter' : 'A4';
-  const paper = PAPER_MM[paperSize];
-  const width = paper.width / 25.4 * 96;
-  const height = paper.height / 25.4 * 96;
+  const paperSize = family === 'paper' && pageSize !== 'Custom' ? pageSize : 'A4';
+  const paper = PAPER_PHYSICAL_SIZES_MM[paperSize];
+  const landscape = frame.templateId?.endsWith('_landscape');
+  const width = (landscape ? paper.height : paper.width) / 25.4 * 96;
+  const height = (landscape ? paper.width : paper.height) / 25.4 * 96;
   const scale = family === 'paper'
-    ? getPageFramePhysicalMapping(pageSize, frame.width, frame.templateId).physicalScale
+    ? getPageFramePhysicalMapping(pageSize, frame.width, frame.templateId, frame.paperSizeReferenceWidth).physicalScale
     : width / frame.width;
-  if (useFlowPageGeometry && frame.templateId !== 'screen_note') {
+  if ((useFlowPageGeometry || frame.paperSizeOverride) && frame.templateId !== 'screen_note') {
     return { paperSize, width: frame.width * scale, height: frame.height * scale, scale };
   }
   return { paperSize, width, height, scale };

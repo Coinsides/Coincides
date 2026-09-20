@@ -1,5 +1,6 @@
 import { createPrimaryPageFrame } from './engineModel';
 import { normalizePageFramePrintBaseline } from './pageFramePrintScaleService';
+import { inheritNotebookPaperGeometry } from './paperSizeService';
 import {
   createPageStackFromFrame,
   normalizePageStacksWithFrameCoverage,
@@ -133,6 +134,7 @@ export function normalizePageFrameCollection(
     : selectedFrameStackId || primaryStackId;
 
   return {
+    ...(collection?.paperDefault ? { paperDefault: { ...collection.paperDefault } } : {}),
     pageFrames: normalizedPageFrames,
     pageStacks,
     primaryFrameId,
@@ -187,10 +189,11 @@ export function insertPageFrameAfter(
     : normalized.pageFrames[normalized.pageFrames.length - 1];
   if (!source) return normalized;
   const insertedFrame = createInsertedFrame({
-    source,
+    source: inheritNotebookPaperGeometry(normalized, source),
     pageFrames: normalized.pageFrames,
     id: options.id,
   });
+  insertedFrame.y = source.y + source.height + PAGE_FRAME_INSERT_GAP;
   const insertIndex = sourceIndex >= 0 ? sourceIndex + 1 : normalized.pageFrames.length;
 
   return normalizePageFrameCollection({
@@ -212,7 +215,9 @@ export function duplicatePageFrame(
   const normalized = normalizePageFrameCollection(collection);
   const source = normalized.pageFrames.find((frame) => frame.id === frameId);
   if (!source) return normalized;
-  return insertPageFrameAfter(normalized, source.id, options);
+  const inserted = insertPageFrameAfter(normalized, source.id, options);
+  return { ...inserted, pageFrames: inserted.pageFrames.map((frame) => frame.id === inserted.selectedFrameId
+    ? { ...source, id: frame.id, role: 'secondary_page_frame', y: frame.y } : frame) };
 }
 
 export function setPrimaryPageFrame(
@@ -321,6 +326,7 @@ export function pageFrameCollectionFromMetadata(
   if (!Array.isArray(payload.pageFrames)) return null;
   return normalizePageFrameCollection({
     pageFrames: payload.pageFrames.filter(validPageFrame),
+    ...(payload.paperDefault ? { paperDefault: payload.paperDefault } : {}),
     pageStacks: Array.isArray(payload.pageStacks)
       ? payload.pageStacks.filter((stack): stack is PageStackModel => Boolean(stack) && typeof stack === 'object')
       : [],
@@ -340,6 +346,7 @@ export function writePageFrameCollectionMetadata(
     ...(metadata || {}),
     [NOTE_PAGE_FRAME_COLLECTION_METADATA_KEY]: {
       version: PAGE_FRAME_COLLECTION_VERSION,
+      ...(normalized.paperDefault ? { paperDefault: normalized.paperDefault } : {}),
       pageFrames: normalized.pageFrames,
       pageStacks: normalized.pageStacks || [],
       primaryFrameId: normalized.primaryFrameId,

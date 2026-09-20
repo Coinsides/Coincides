@@ -163,6 +163,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
       },
     },
     onPageFrameWallPointerDown: input.onPageFrameWallPointerDown,
+    onPagePaperResizePointerDown: input.onPagePaperResizePointerDown,
     activePageFrameWall: input.activePageFrameWall,
     hostMode: input.hostMode,
     trackPendingWrite: input.trackPendingWrite,

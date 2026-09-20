@@ -12,6 +12,7 @@ import { NotePageGapLayer } from './NotePageGapLayer';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { NoteCoverUnderlay } from './NoteCoverUnderlay';
 import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
+import { PagePaperSizeHandle } from './PagePaperSizeHandle';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
 import { usePaperSkin } from '../PaperSkinContext';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
@@ -230,6 +231,7 @@ export interface NoteWritingSurfaceLayerProps {
   pageGapsFolded?: boolean;
   onPageGapsFoldedChange?: (folded: boolean) => void;
   onPageFrameWallPointerDown?: (event: ReactPointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
+  onPagePaperResizePointerDown?: (event: ReactPointerEvent<HTMLElement>, frameId: string) => void;
   activePageFrameWall?: ActivePageFrameWall | null;
   overviewOpen?: boolean;
   onToggleOverview?: () => void;
@@ -391,6 +393,7 @@ export function NoteWritingSurfaceLayer({
   pageGapsFolded: controlledPageGapsFolded,
   onPageGapsFoldedChange,
   onPageFrameWallPointerDown,
+  onPagePaperResizePointerDown,
   activePageFrameWall,
   overviewOpen = false,
   onToggleOverview,
@@ -1638,6 +1641,11 @@ export function NoteWritingSurfaceLayer({
               idleHeaderHeight={frame.id === primaryPageFrameId ? displayHeaderHeight : 0}
               interactive={layoutMode && !contentReadOnly && Boolean(onPageFrameWallPointerDown)}
               activeWall={activePageFrameWall} onPointerDown={onPageFrameWallPointerDown} />
+          ))}
+        {surfaceMode === 'page' && layoutMode && !contentReadOnly && !overviewOpen
+          && noteCanvasRuntime.coordinateContract === 'v2' && onPagePaperResizePointerDown
+          && visiblePageFrames.filter((frame) => frame.templateId !== 'screen_note').map((frame) => (
+            <PagePaperSizeHandle key={`${frame.id}:paper-size`} frame={displayFrame(frame)} onPointerDown={onPagePaperResizePointerDown} />
           ))}
         {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (
           <PaperInkLayer key={frame.id} frame={frame}

@@ -4,12 +4,24 @@ import { buildNoteCanvasRuntimeModel, createPrimaryPageFrame, createViewport } f
 import { resolveDocumentPageFlowPlan, type PageFlowBlock } from './documentPageFlowService';
 import { createPageFrameCollectionSeed } from './pageFrameCollectionService';
 import { addNoteCoverPage, removeNoteCoverPage } from './noteCoverPageCollection';
+import { resizePagePaper } from './paperSizeService';
 
 function seed() {
   return createPageFrameCollectionSeed(createPrimaryPageFrame({ id: 'content-page', x: 100, y: 250 }));
 }
 
 describe('A3 cover page collection', () => {
+  it('creates a new cover at the notebook default even when its source content page is odd-shaped', () => {
+    const original = seed();
+    const odd = resizePagePaper(original, original.primaryFrameId!, { width: 170, height: 200 });
+    const result = addNoteCoverPage(odd, 'cover-page');
+    expect(result.pageFrames[0]).toMatchObject({ width: original.pageFrames[0].width, height: original.pageFrames[0].height });
+    expect(result.pageFrames[0].paperSizeOverride).toBeUndefined();
+    expect(result.pageFrames[0].paperSizeReferenceWidth).toBeUndefined();
+    expect(result.pageFrames[0].y + result.pageFrames[0].height).toBe(odd.pageFrames[0].y - 80);
+    expect(result.pageFrames[1]).toEqual(odd.pageFrames[0]);
+    expect(result.paperDefault).toEqual(odd.paperDefault);
+  });
   it('adds a preceding cover in its own stack while keeping the content page identity and coordinates', () => {
     const original = seed();
     const before = structuredClone(original);

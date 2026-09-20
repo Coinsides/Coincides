@@ -49,6 +49,7 @@ async function createNote() {
   fireEvent.click(await screen.findByRole('button', { name: 'Staging (1)' }));
   fireEvent.click(screen.getByRole('button', { name: 'New note' }));
   const dialog = await screen.findByRole('dialog', { name: 'New note' });
+  expect(within(dialog).queryByRole('combobox', { name: 'Paper size' })).toBeNull();
   const project = within(dialog).getByRole('combobox', { name: 'Project' });
   await waitFor(() => expect((project as HTMLSelectElement).disabled).toBe(false));
   fireEvent.change(project, { target: { value: '__new_project__' } });

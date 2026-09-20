@@ -4,6 +4,7 @@ import type {
   PageStackCreatedFrom,
   PageStackModel,
 } from './types';
+import { inheritNotebookPaperGeometry } from './paperSizeService';
 
 export const DEFAULT_PAGE_STACK_GAP = 80;
 export const DEFAULT_PAGE_STACK_COLLAPSED_PREVIEW_PAGES = 1;
@@ -246,7 +247,8 @@ export function appendPageFrameToStack(
     return normalizeStackSelection(collection, pageStacks);
   }
 
-  const appendedFrame = createAppendedFrame(source, collection.pageFrames, options);
+  const appendedFrame = { ...createAppendedFrame(inheritNotebookPaperGeometry(collection, source), collection.pageFrames, options),
+    y: source.y + source.height + stack.layout.gap };
   const pageFrameInsertIndex = sourceIndex + 1;
   const stackFrameInsertIndex = stack.frameIds.indexOf(afterFrameId) + 1;
   const nextPageFrames = [

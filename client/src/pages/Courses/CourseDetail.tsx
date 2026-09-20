@@ -11,7 +11,6 @@ import api from '@/services/api';
 import { getNoteBlockTemplateLabel } from '@shared/types';
 import type { Course, Goal, SourceMaterial, MaterialSegment } from '@shared/types';
 import { createNotePagePresetSeed, DEFAULT_NOTE_PAGE_PRESET, type NotePagePreset } from '../Notes/canvasEngine/notePagePresetService';
-import { NotePagePresetSelect } from '../Notes/NotePagePresetSelect';
 import {
   savePageFrameCollectionForNote,
 } from '../Notes/canvasEngine/canvasObjectRepository';
@@ -173,7 +172,6 @@ export function ProjectNotesSection({
   addToast,
 }: ProjectNotesSectionProps) {
   const [busyNoteId, setBusyNoteId] = useState<string | null>(null);
-  const [pagePreset, setPagePreset] = useState<NotePagePreset>(DEFAULT_NOTE_PAGE_PRESET);
 
   const runNoteAction = async (noteId: string) => {
     setBusyNoteId(noteId);
@@ -212,8 +210,7 @@ export function ProjectNotesSection({
               Trash
             </button>
           </div>
-          <NotePagePresetSelect value={pagePreset} onChange={setPagePreset} />
-          <button type="button" className={styles.sectionAddBtn} onClick={() => onCreateNote(pagePreset)}>
+          <button type="button" className={styles.sectionAddBtn} onClick={() => onCreateNote(DEFAULT_NOTE_PAGE_PRESET)}>
             <Plus size={15} />
             New Note
           </button>

@@ -6,6 +6,7 @@ import type { Note, NoteBlock } from '../runtimeDataTypes';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { insertPageFrameAfter, normalizePageFrameCollection } from '../pageFrameCollectionService';
 import { buildPageFrameWallEdit, movePageFrameWall } from '../pageFrameWallService';
+import { resizePagePaper, setNotebookPaperPreset } from '../paperSizeService';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { usePlacementHistory } from './usePlacementHistory';
 
@@ -120,6 +121,66 @@ describe('page wall adapter persistence through the real collection repository',
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
   afterEach(() => vi.restoreAllMocks());
+
+  it('persists paper defaults, per-page dimensions and clamp batches atomically through history', async () => {
+    const { result } = renderAdapter();
+    await waitFor(() => expect(result.current.adapter.blocks).toHaveLength(2));
+    const initial = visibleState(result.current.adapter);
+    const before = result.current.adapter.pageFrameCollection!;
+    const preset = setNotebookPaperPreset(before, 'a5_portrait');
+    const after = resizePagePaper(preset, 'note-1-frame-2', { width: 160, height: 250 });
+    const edit = buildPageFrameWallEdit({ before, after, blocks: result.current.adapter.blocks,
+      objects: result.current.adapter.persistedCanvasObjects, placements: result.current.adapter.persistedCanvasPlacements,
+      coordinateContract: 'v2' });
+    await act(async () => {
+      expect(await result.current.adapter.savePageFrameGeometry(edit.after)).toBe(true);
+      expect(result.current.history.pushHistoryEntry({ type: 'reversibleEdit',
+        undo: () => result.current.adapter.savePageFrameGeometry(edit.before),
+        redo: () => result.current.adapter.savePageFrameGeometry(edit.after),
+      })).toBe(true);
+    });
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    const payload = mocks.put.mock.calls[0][1];
+    expect(payload.collection.paperDefault.templateId).toBe('a5_portrait');
+    expect(payload.collection.pageFrames[1]).toMatchObject({ paperSizeOverride: true, paperSizeReferenceWidth: preset.pageFrames[1].width });
+    expect(payload.layout_updates).toHaveLength(1);
+    expect(payload.object_layout_updates).toHaveLength(1);
+    expect(result.current.adapter.blocks[0]).toEqual(initial.blocks[0]);
+    const changed = visibleState(result.current.adapter);
+    await act(async () => expect(await result.current.history.undoRuntimeHistory()).toBe(true));
+    expect(visibleState(result.current.adapter)).toEqual(initial);
+    await act(async () => expect(await result.current.history.redoRuntimeHistory()).toBe(true));
+    expect(visibleState(result.current.adapter)).toEqual(changed);
+    expect(mocks.put).toHaveBeenCalledTimes(3);
+  });
+
+  it('keeps paper geometry unchanged when the collection transaction fails', async () => {
+    const { result } = renderAdapter();
+    await waitFor(() => expect(result.current.adapter.blocks).toHaveLength(2));
+    const initial = visibleState(result.current.adapter);
+    mocks.put.mockRejectedValueOnce(new Error('Paper write failed'));
+    await act(async () => expect(await result.current.adapter.savePageFrameGeometry({
+      collection: setNotebookPaperPreset(result.current.adapter.pageFrameCollection!, 'a3_landscape'),
+      layoutUpdates: [], objectLayoutUpdates: [],
+    })).toBe(false));
+    expect(visibleState(result.current.adapter)).toEqual(initial);
+  });
+
+  it('does not publish a paper save into another note after navigation', async () => {
+    const { result, rerender } = renderAdapter();
+    await waitFor(() => expect(result.current.adapter.blocks).toHaveLength(2));
+    const collection = setNotebookPaperPreset(result.current.adapter.pageFrameCollection!, 'legal_portrait');
+    const held = deferred<{ data: unknown }>();
+    mocks.put.mockReturnValueOnce(held.promise);
+    let saved!: Promise<boolean>;
+    act(() => { saved = result.current.adapter.savePageFrameGeometry({ collection, layoutUpdates: [], objectLayoutUpdates: [] }); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    rerender({ noteId: 'note-2' });
+    await waitFor(() => expect(result.current.adapter.note?.id).toBe('note-2'));
+    const nextNote = visibleState(result.current.adapter);
+    await act(async () => { held.resolve({ data: collection }); expect(await saved).toBe(false); });
+    expect(visibleState(result.current.adapter)).toEqual(nextNote);
+  });
 
   it('sends one PUT containing all insets plus both clamp batches and keeps auto storage unchanged', async () => {
     const { result } = renderAdapter();

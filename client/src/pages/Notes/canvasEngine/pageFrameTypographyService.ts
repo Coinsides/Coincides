@@ -33,6 +33,7 @@ export function createPageFrameDefaultTypographyProfile(
     pageSize,
     frame?.width ?? printProfile.width,
     frame?.templateId,
+    frame?.paperSizeReferenceWidth,
   );
   const fontSizePx = family === 'paper' ? (11 * 96 / 72) / physicalScale : 16;
   // Keep the existing family's line/paragraph/character proportions. For paper,

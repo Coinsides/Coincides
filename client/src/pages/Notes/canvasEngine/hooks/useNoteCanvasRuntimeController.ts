@@ -16,6 +16,8 @@ import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
 import { usePageFrameWalls } from './usePageFrameWalls';
+import { usePaperSize } from './usePaperSize';
+import { resolvePaperSizeEditLayouts } from '../paperSizeEditService';
 import { useNoteSkin } from './useNoteSkin';
 import { useNoteBinding } from './useNoteBinding';
 import { getNoteBindingCoverPage } from '../../../../../../shared/types/noteBinding';
@@ -32,6 +34,9 @@ export function useNoteCanvasRuntimeController() {
   const trayDropTargetRef = useRef<HTMLElement>(null);
   const textHistoryHostRef = useRef<TextFlowHistoryHost | null>(null);
   const wallBoundaryRef = useRef<() => boolean>(() => false);
+  const paperBoundaryRef = useRef<() => boolean>(() => false);
+  const paperBusyRef = useRef(false);
+  const paperLayoutsRef = useRef<Record<string, BlockBoxLayout>>({});
   const addToast = useUIStore((state) => state.addToast);
   const {
     activeBlockId,
@@ -159,6 +164,7 @@ export function useNoteCanvasRuntimeController() {
     saveGroupFolders,
     savePageFrameCollection,
     savePageFrameWalls,
+    savePageFrameGeometry,
     persistCanvasObject,
     deleteCanvasObject,
     saveDocumentTypographyProfile,
@@ -202,7 +208,7 @@ export function useNoteCanvasRuntimeController() {
     },
     objects: persistedCanvasObjects, placements: storedCanvasPlacements,
     zoom: pageReadingViewport?.zoom || 1, history: textHistoryHostRef,
-    boundary: () => wallBoundaryRef.current(), save: savePageFrameWalls,
+    boundary: () => !paperBusyRef.current && wallBoundaryRef.current(), save: savePageFrameWalls,
   });
   const skin = useNoteSkin(note, saveSkin, skinSaveError);
   const binding = useNoteBinding(note?.id, saveBindingSettings);
@@ -220,15 +226,33 @@ export function useNoteCanvasRuntimeController() {
   [saveDraftBlockPlacementRaw, coverLayout, noteId]);
   const persistBlockLayout: typeof persistBlockLayoutRaw = useCallback((block, layout) =>
     persistBlockLayoutRaw(block, coverLayout(layout)), [persistBlockLayoutRaw, coverLayout]);
-  const pageFrameCollection = walls.collection;
-  const persistedCanvasPlacements = walls.placements;
-
   const documentTypographyProfile = useMemo(() => resolveEffectiveDocumentTypographyProfile({
     surfaceMode,
     metadata: note?.metadata,
-    pageFrames: pageFrameCollection?.pageFrames,
+    pageFrames: walls.collection?.pageFrames,
     hydratedProfile: hydratedDocumentTypographyProfile,
-  }), [surfaceMode, note?.metadata, pageFrameCollection?.pageFrames, hydratedDocumentTypographyProfile]);
+  }), [surfaceMode, note?.metadata, walls.collection?.pageFrames, hydratedDocumentTypographyProfile]);
+
+  const paper = usePaperSize({
+    noteId, generation: textHistoryGeneration, enabled: !loading && !sourceProjectionPolicy.contentReadOnly
+      && coordinateContract === 'v2' && surfaceMode === 'page' && !walls.activeWall && !walls.saving,
+    layoutMode, coordinateContract, collection: walls.collection, blocks: sortedBlocks,
+    getCollection: () => {
+      const rendered = runtimePageFrameCollectionRef.current;
+      return rendered && rendered.noteId === noteId ? rendered.collection : storedPageFrameCollection;
+    },
+    getLayouts: () => paperLayoutsRef.current, objects: persistedCanvasObjects, placements: walls.placements,
+    typography: documentTypographyProfile, coverFrameId, textDrafts: blockTextDrafts, flowDrafts: blockTextFlowDrafts,
+    resolveTypography: (collection) => resolveEffectiveDocumentTypographyProfile({
+      surfaceMode, metadata: note?.metadata, pageFrames: collection.pageFrames,
+      hydratedProfile: hydratedDocumentTypographyProfile,
+    }),
+    zoom: pageReadingViewport?.zoom || 1, history: textHistoryHostRef,
+    boundary: () => paperBoundaryRef.current(), whenIdle, save: savePageFrameGeometry,
+  });
+  paperBusyRef.current = paper.busy;
+  const pageFrameCollection = paper.collection;
+  const persistedCanvasPlacements = paper.placements;
 
   const {
     blockTrashLoadFailed,
@@ -308,7 +332,7 @@ export function useNoteCanvasRuntimeController() {
   });
   const { plan: pageFlowPlan, layouts: blockLayouts, fullPlan: fullPageFlowPlan, fullLayouts: fullBlockLayouts } = useNotePageFlow({
     coverFrameId,
-    noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving
+    noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving && !paper.busy
       && !chapters.isMoving && !headingBusyRef.current(),
     coordinateContract, blocks: visibleBlocks, layouts: unpaginatedBlockLayouts,
     pageFrames, collection: pageFrameCollection, typography: documentTypographyProfile,
@@ -319,6 +343,7 @@ export function useNoteCanvasRuntimeController() {
   chapterMoveContext.current = { layouts: fullBlockLayouts, collection: fullPageFlowPlan?.collection || pageFrameCollection,
     plan: fullPageFlowPlan };
   const flowPageFrameCollection = pageFlowPlan?.collection || pageFrameCollection;
+  paperLayoutsRef.current = resolvePaperSizeEditLayouts(sortedBlocks, layoutDrafts, unpaginatedBlockLayouts);
   const defaultDraftLayout = useMemo(() => pageFlowPlan ? createDefaultDraftLayout({
     ...blockLayouts,
     ...Object.fromEntries(pageFlowPlan.fragments.map((fragment) => [fragment.id, fragment.layout])),
@@ -353,6 +378,7 @@ export function useNoteCanvasRuntimeController() {
   headingBusyRef.current = headingStructure.isBusy;
   chapterBoundaryRef.current = () => !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary();
   wallBoundaryRef.current = () => layoutMode && textHistory.boundary();
+  paperBoundaryRef.current = () => !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary();
   const rollbackBlockSlashSession = useSlashBlockRollbackController({
     applyBlockTextFlowEdit,
     blocks,
@@ -405,7 +431,7 @@ export function useNoteCanvasRuntimeController() {
   } = useRuntimeBlockOperationsController({
     noteId,
     generation: textHistoryGeneration,
-    beforeHistoryBoundary: () => !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
+    beforeHistoryBoundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
     beforeTextStructure: textHistory.boundary,
     onHeadingStructure: headingStructure.onHeadingStructure,
     canUseHeading: (block) => block ? headingStructure.canUseHeading(block)
@@ -507,6 +533,7 @@ export function useNoteCanvasRuntimeController() {
   const { layerProps, runtimePageFrameCollection } = useRuntimePresentationController({
     pageFlowPlan,
     onPageFrameWallPointerDown: walls.begin,
+    onPagePaperResizePointerDown: paper.begin,
     activePageFrameWall: walls.activeWall,
     hostMode,
     trackPendingWrite: hostMode === 'modal' ? trackPendingWrite : undefined,
@@ -635,7 +662,7 @@ export function useNoteCanvasRuntimeController() {
     onFocusPageFrame: (pageFrame, world) => focusViewportOnRect(pageFrame, world),
     onReleaseTextFocus: releaseTextFocus,
     onFloatingPanelFocusBlock: setFocusBlockId,
-    onMeasuredBlockHeight: (...args) => { if (!walls.activeWall && !walls.saving) handleMeasuredBlockHeight(...args); },
+    onMeasuredBlockHeight: (...args) => { if (!walls.activeWall && !walls.saving && !paper.busy) handleMeasuredBlockHeight(...args); },
     onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
     onPersistDraft: (text, options) => persistDraft(text, undefined, options),
     onResizeDraftFromTextarea: resizeDraftFromTextarea,
@@ -720,6 +747,8 @@ export function useNoteCanvasRuntimeController() {
   }, [saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
 
   return {
+    paper,
+    layoutMode,
     skin,
     showAppearancePanel,
     toggleAppearancePanel,

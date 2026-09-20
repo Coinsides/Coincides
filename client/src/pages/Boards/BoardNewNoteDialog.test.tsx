@@ -82,27 +82,20 @@ describe('Board New note ceremony', () => {
     expect(screen.queryByRole('textbox', { name: 'Project name' })).toBeNull();
   });
 
-  it.each([
-    { preset: 'a4_portrait', label: 'A4', pageSize: 'A4', width: 904, height: 1278,
-      contentInset: { top: 0, right: 72, bottom: 96, left: 72 } },
-    { preset: 'letter_portrait', label: 'Letter', pageSize: 'Letter', width: 904, height: 1170,
-      contentInset: { top: 0, right: 72, bottom: 96, left: 72 } },
-    { preset: 'screen_note', label: 'Web long page', pageSize: 'Custom', width: 1120, height: 720,
-      contentInset: { top: 48, right: 64, bottom: 64, left: 64 } },
-  ])('creates $label with the selected persisted preset and one correctly sized seed frame', async ({ preset, pageSize, width, height, contentInset }) => {
+  it('creates one default A4 portrait seed frame without a paper picker', async () => {
     const { onCreated } = openDialog('project-first');
     await waitFor(() => expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('project-first'));
-    const paper = screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement;
-    expect(paper.value).toBe('a4_portrait');
-    expect(Array.from(paper.options, (option) => option.textContent)).toEqual(['A4', 'Letter', 'Web long page']);
-    fireEvent.change(paper, { target: { value: preset } });
+    expect(screen.queryByRole('combobox', { name: 'Paper size' })).toBeNull();
+    expect(screen.queryByText('Web long page')).toBeNull();
+    expect(screen.getAllByRole('combobox')).toHaveLength(1);
     fillTitle();
     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
     expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
-      project_id: 'project-first', title: 'Trade routes', page_format: preset,
+      project_id: 'project-first', title: 'Trade routes', page_format: 'a4_portrait',
       collection: expect.objectContaining({ pageFrames: [expect.objectContaining({
-        templateId: preset, pageSize, width, height, contentInset,
+        templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
+        contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
       })], pageStacks: [expect.objectContaining({ frameIds: [expect.any(String)] })] }),
     });
     expect(http.put).not.toHaveBeenCalled();
@@ -114,14 +107,13 @@ describe('Board New note ceremony', () => {
     const { onCreated } = openDialog();
     await chooseNewProject();
     fillTitle();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Paper size' }), { target: { value: 'letter_portrait' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
     expect((await screen.findByRole('alert')).textContent).toContain('Your entries are kept');
     expect(onCreated).not.toHaveBeenCalled();
     expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('__new_project__');
     expect((screen.getByRole('textbox', { name: 'Project name' }) as HTMLInputElement).value).toBe('  Chinese history  ');
     expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLInputElement).value).toBe('  Trade routes  ');
-    expect((screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement).value).toBe('letter_portrait');
+    expect(screen.queryByRole('combobox', { name: 'Paper size' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Retry creating note' }));
     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-retried'));
     expect(http.post.mock.calls.map(([path]) => path)).toEqual(['/boards/board/ceremony-note', '/boards/board/ceremony-note']);
@@ -188,7 +180,7 @@ describe('Board New note ceremony', () => {
     expect(http.post).toHaveBeenCalledOnce();
     expect(onCancel).not.toHaveBeenCalled();
     expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement).disabled).toBe(true);
+    expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).disabled).toBe(true);
     unmount();
     await act(async () => { ceremony.resolve({ data: { note: { id: 'note-new' } } }); await ceremony.promise; });
     expect(http.post).toHaveBeenCalledOnce();

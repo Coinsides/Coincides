@@ -72,6 +72,7 @@ export function useRuntimePresentationController(
     runtimePageFrameCollection,
   } = useRuntimeFrameModelController(options);
   const currentPageFrameCollection: PageFrameCollectionModel = {
+    ...(options.pageFrameCollection?.paperDefault ? { paperDefault: options.pageFrameCollection.paperDefault } : {}),
     pageFrames: noteCanvasRuntime.pageFrames,
     pageStacks: options.pageFrameCollection?.pageStacks || noteCanvasRuntime.pageStacks,
     primaryFrameId: noteCanvasRuntime.primaryPageFrame?.id || null,

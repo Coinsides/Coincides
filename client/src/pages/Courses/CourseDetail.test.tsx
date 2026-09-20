@@ -51,29 +51,25 @@ describe('ProjectNotesSection lifecycle actions', () => {
     mocks.post.mockResolvedValue({ data: { message: 'Note restored' } });
   });
 
-  it('uses A4 by default when creating a project note', () => {
+  it('creates a project note as A4 without a paper picker', () => {
     const onCreateNote = vi.fn();
     render(<ProjectNotesSection notes={[note]} status="active" onStatusChange={vi.fn()}
       onCreateNote={onCreateNote} onOpenNote={vi.fn()} refreshNotes={vi.fn()} addToast={vi.fn()} />);
-    const paper = screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement;
-    expect(paper.value).toBe('a4_portrait');
-    expect(Array.from(paper.options, (option) => option.textContent)).toEqual(['A4', 'Letter', 'Web long page']);
+    expect(screen.queryByRole('combobox', { name: 'Paper size' })).toBeNull();
+    expect(screen.queryByText('Web long page')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'New Note' }));
     expect(onCreateNote).toHaveBeenCalledExactlyOnceWith('a4_portrait');
   });
 
-  it.each(['letter_portrait', 'screen_note'] as const)('passes selected %s only when creating a new project note', (preset) => {
+  it('opens an existing note without creating or changing its paper', () => {
     const onCreateNote = vi.fn();
     const onOpenNote = vi.fn();
     render(<ProjectNotesSection notes={[note]} status="active" onStatusChange={vi.fn()}
       onCreateNote={onCreateNote} onOpenNote={onOpenNote} refreshNotes={vi.fn()} addToast={vi.fn()} />);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Paper size' }), { target: { value: preset } });
     expect(onCreateNote).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Open note Project note' }));
     expect(onOpenNote).toHaveBeenCalledExactlyOnceWith('note-project-entry');
     expect(onCreateNote).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'New Note' }));
-    expect(onCreateNote).toHaveBeenCalledExactlyOnceWith(preset);
     expect(mocks.post).not.toHaveBeenCalled();
   });
 

@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import api from '@/services/api';
 import type { Course } from '@shared/types';
 import type { Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
-import { createNotePagePresetSeed, DEFAULT_NOTE_PAGE_PRESET, type NotePagePreset } from '@/pages/Notes/canvasEngine/notePagePresetService';
-import { NotePagePresetSelect } from '@/pages/Notes/NotePagePresetSelect';
+import { createNotePagePresetSeed, DEFAULT_NOTE_PAGE_PRESET } from '@/pages/Notes/canvasEngine/notePagePresetService';
 import boardStyles from './Boards.module.css';
 import styles from './BoardNewNoteDialog.module.css';
 
@@ -23,7 +22,6 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
   const [projectId, setProjectId] = useState('');
   const [projectName, setProjectName] = useState('');
   const [title, setTitle] = useState('');
-  const [pagePreset, setPagePreset] = useState<NotePagePreset>(DEFAULT_NOTE_PAGE_PRESET);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -62,8 +60,8 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
       const { data } = await api.post<{ note: Note }>(`/boards/${encodeURIComponent(boardId)}/ceremony-note`, {
         ...(creatingProject ? { project: { name: projectName.trim() } } : { project_id: projectId }),
         title: title.trim(),
-        page_format: pagePreset,
-        collection: createNotePagePresetSeed(pagePreset),
+        page_format: DEFAULT_NOTE_PAGE_PRESET,
+        collection: createNotePagePresetSeed(DEFAULT_NOTE_PAGE_PRESET),
       });
       if (alive.current) onCreated(data.note.id);
     } catch {
@@ -100,7 +98,6 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
       <label htmlFor="board-new-note-name">Note title</label>
       <input id="board-new-note-name" value={title} required maxLength={300} disabled={busy}
         onChange={(event) => setTitle(event.currentTarget.value)} />
-      <NotePagePresetSelect value={pagePreset} onChange={setPagePreset} disabled={busy} />
       {error && <p role="alert">{error}</p>}
       <div className={boardStyles.dialogActions}>
         <button type="button" className={boardStyles.button} disabled={busy} onClick={onCancel}>Cancel</button>

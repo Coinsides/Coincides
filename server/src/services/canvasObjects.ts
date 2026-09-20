@@ -1573,6 +1573,9 @@ function hydratePageFrameCollection(
         };
       return {
         id: row.frame_id,
+        ...(metadata.paperSizeOverride === true ? { paperSizeOverride: true } : {}),
+        ...(typeof metadata.paperSizeReferenceWidth === 'number'
+          ? { paperSizeReferenceWidth: metadata.paperSizeReferenceWidth } : {}),
         role: row.frame_id === collection?.primary_frame_id ? 'primary_page_frame' : 'secondary_page_frame',
         templateId: row.template_id || undefined,
         pageSize: row.page_size || undefined,
@@ -1593,6 +1596,8 @@ function hydratePageFrameCollection(
     });
 
   return {
+    ...(isRecord(parseJson<Record<string, unknown>>(collection?.metadata, {}).paperDefault)
+      ? { paperDefault: parseJson<Record<string, unknown>>(collection?.metadata, {}).paperDefault } : {}),
     pageFrames,
     pageStacks: parseJson<unknown[]>(collection?.page_stacks_json, []),
     primaryFrameId: collection?.primary_frame_id || pageFrames[0]?.id || null,
@@ -1846,7 +1851,8 @@ export function savePageFrameCollection(
       primary_stack_id: optionalText(collectionInput.primaryStackId),
       selected_stack_id: optionalText(collectionInput.selectedStackId),
       page_stacks_json: stringifyJson(pageStacks, []),
-      metadata: stringifyJson({ source: 'entity' }, {}),
+      metadata: stringifyJson({ source: 'entity', ...(isRecord(collectionInput.paperDefault)
+        ? { paperDefault: collectionInput.paperDefault } : {}) }, {}),
     });
 
     const stackByFrame = new Map<string, { stackId: string; index: number }>();
@@ -1901,9 +1907,18 @@ export function savePageFrameCollection(
       const frameId = cleanText(frame.id, `page-frame-${index + 1}`);
       const objectId = pageFrameObjectId(note.id, frameId);
       const stackInfo = stackByFrame.get(frameId);
-      const extensionMetadata = isRecord(frame.metadata)
+      const extensionMetadata: Record<string, unknown> = isRecord(frame.metadata)
         ? { ...frame.metadata, role: optionalText(frame.role) }
         : { role: optionalText(frame.role) };
+      // A5 owns these metadata fields; clearing an override removes stale values too.
+      delete extensionMetadata.paperSizeOverride;
+      delete extensionMetadata.paperSizeReferenceWidth;
+      if (frame.paperSizeOverride === true) {
+        extensionMetadata.paperSizeOverride = true;
+      }
+      if (typeof frame.paperSizeReferenceWidth === 'number') {
+        extensionMetadata.paperSizeReferenceWidth = frame.paperSizeReferenceWidth;
+      }
       insertObject.run({
         id: objectId,
         user_id: userId,

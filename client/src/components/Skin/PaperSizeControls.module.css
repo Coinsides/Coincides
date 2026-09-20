@@ -1,0 +1,22 @@
+.section { min-width: 0; padding: 10px 0; border-top: 1px solid var(--border-default); }
+.heading, .pageHeading, .pageActions { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.heading { margin-bottom: 8px; }
+.heading h3 { margin: 0; font-size: 12px; font-weight: 600; }
+.unit { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.unitLabel, .hint, .pageHeading > span { color: var(--text-secondary); font-size: 11px; }
+.section select, .section input { min-width: 0; max-width: 100%; border: 1px solid var(--border-default); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font: inherit; padding: 4px 6px; }
+.section select:focus-visible, .section input:focus-visible, .section button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.section :is(select, input, button):disabled { opacity: .5; cursor: default; }
+.preset { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.readout { display: flex; flex-direction: column; gap: 2px; margin: 8px 0; font-variant-numeric: tabular-nums; }
+.readout > span { color: var(--text-secondary); font-size: 11px; }
+.hint { margin: 6px 0 0; }
+.page { border-top: 1px solid var(--border-default); margin-top: 10px; padding-top: 8px; }
+.pageHeading strong { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.dimensions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.dimensions label { display: flex; min-width: 0; flex-direction: column; gap: 4px; font-size: 11px; }
+.dimensions input { width: 100%; box-sizing: border-box; font-size: 12px; }
+.pageActions > .hint { margin: 0; }
+.pageActions button { border: 1px solid var(--border-default); border-radius: 4px; color: inherit; background: transparent; font: inherit; min-height: 28px; padding: 4px 6px; cursor: pointer; }
+.pageActions button:hover:not(:disabled) { background: var(--bg-hover); }
+.error { margin: 8px 0 0; color: var(--text-primary); font-size: 11px; overflow-wrap: anywhere; }

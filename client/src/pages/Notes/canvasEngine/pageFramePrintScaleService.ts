@@ -23,7 +23,25 @@ const DEFAULT_CONTENT_WIDTH = 760;
 const DEFAULT_HORIZONTAL_MARGIN = 72;
 const DEFAULT_BOTTOM_MARGIN = 96;
 
+export const PAPER_PHYSICAL_SIZES_MM = {
+  A5: { width: 148, height: 210 },
+  A4: { width: 210, height: 297 },
+  A3: { width: 297, height: 420 },
+  Letter: { width: 215.9, height: 279.4 },
+  Legal: { width: 215.9, height: 355.6 },
+} as const;
+
+function additionalPrintPreset(pageSize: 'A5' | 'A3' | 'Legal') {
+  const physical = PAPER_PHYSICAL_SIZES_MM[pageSize];
+  const pixelsPerMm = A4_PAGE_GEOMETRY.width / (pageSize === 'Legal' ? 215.9 : 210);
+  const width = physical.width * pixelsPerMm;
+  const height = physical.height * pixelsPerMm;
+  return { pageSize, width, height, contentInset: { ...A4_PAGE_GEOMETRY.contentInset },
+    contentWidth: width - DEFAULT_HORIZONTAL_MARGIN * 2, contentHeight: height - DEFAULT_BOTTOM_MARGIN };
+}
+
 export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom'>, Omit<PageFramePrintProfile, 'documentTypography' | 'physicalWidthMm' | 'physicalScale'>> = {
+  A5: additionalPrintPreset('A5'),
   A4: {
     pageSize: 'A4',
     width: A4_PAGE_GEOMETRY.width,
@@ -46,22 +64,30 @@ export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom
     contentHeight: Math.round((DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2) * (11 / 8.5))
       - DEFAULT_BOTTOM_MARGIN,
   },
+  A3: additionalPrintPreset('A3'),
+  Legal: additionalPrintPreset('Legal'),
 };
 
 export function getPageFramePhysicalMapping(
   pageSize: PageFramePageSize,
   internalWidth: number,
   templateId?: PageFrameTemplateId,
+  referenceWidth?: number,
 ): Pick<PageFramePrintProfile, 'physicalWidthMm' | 'physicalScale'> {
-  const physicalWidthMm = pageSize === 'Custom'
+  const physical = pageSize === 'Custom' ? null : PAPER_PHYSICAL_SIZES_MM[pageSize];
+  const nominalWidthMm = pageSize === 'Custom'
     ? null
-    : pageSize === 'Letter' ? 215.9 : 210;
+    : templateId?.endsWith('_landscape') ? physical!.height : physical!.width;
+  const anchoredWidth = referenceWidth && Number.isFinite(referenceWidth) && referenceWidth > 0
+    ? referenceWidth : internalWidth;
+  const physicalWidthMm = nominalWidthMm === null ? null : anchoredWidth === internalWidth
+    ? nominalWidthMm : nominalWidthMm * internalWidth / anchoredWidth;
   return {
     physicalWidthMm,
     // Continuous presentation scale: only derived typography is quantized.
     physicalScale: physicalWidthMm === null || templateId === 'screen_note'
       ? 1
-      : (physicalWidthMm / 25.4 * 96) / internalWidth,
+      : (nominalWidthMm! / 25.4 * 96) / anchoredWidth,
   };
 }
 

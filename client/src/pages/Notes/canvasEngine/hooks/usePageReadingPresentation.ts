@@ -29,7 +29,7 @@ export function usePageReadingPresentation({
     ...pageFrames.map((frame) => frame.y + frame.height));
   const layoutWidth = Math.max(1, paperWidth - inset.left - inset.right);
   const physicalScale = getPageFramePhysicalMapping(
-    pageFrame?.pageSize || 'A4', paperWidth, pageFrame?.templateId,
+    pageFrame?.pageSize || 'A4', paperWidth, pageFrame?.templateId, pageFrame?.paperSizeReferenceWidth,
   ).physicalScale;
   const reading = useMemo(() => derivePageReadingViewport({
     viewState, availableWidth: available.width, availableHeight: available.height,

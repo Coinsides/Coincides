@@ -104,6 +104,8 @@ import {
 } from '../pageFrameCollectionService';
 import { sourceProjectionPolicyForNote } from '../sourceProjectionPolicy';
 import { projectWallPlacements, type PageFrameWallSnapshot } from '../pageFrameWallService';
+import { reconcilePaperSizeSnapshot, type PaperSizeSnapshot } from '../paperSizeEditService';
+import { getNoteBindingCoverPage } from '../../../../../../shared/types/noteBinding';
 import {
   createDefaultDocumentTypographyProfile,
   typographyProfileFromMetadata,
@@ -477,6 +479,8 @@ export function useNoteCanvasDataAdapter({
   const currentCanvasObjectsRef = useRef(persistedCanvasObjects);
   currentCanvasObjectsRef.current = persistedCanvasObjects;
   const [persistedCanvasPlacements, setPersistedCanvasPlacements] = useState<CanvasPlacement[]>([]);
+  const paperPlacementsRef = useRef(persistedCanvasPlacements);
+  paperPlacementsRef.current = persistedCanvasPlacements;
   const [persistedContentMounts, setPersistedContentMounts] = useState<ContentMount[]>([]);
   const [persistedVisualConnectors, setPersistedVisualConnectors] = useState<VisualConnector[]>([]);
   const [persistedImageObjects, setPersistedImageObjects] = useState<ImageCanvasObject[]>([]);
@@ -1229,6 +1233,54 @@ export function useNoteCanvasDataAdapter({
       return false;
     }
   }), [writeRegistry, note, noteId, allowSourceContentMutation, frameHealing, coordinateContract, clearLayoutDraftForBlock, addToast]);
+
+  const savePageFrameGeometry = useCallback(writeRegistry.hold('savePageFrameGeometry', async (snapshot: PaperSizeSnapshot): Promise<boolean> => {
+    const currentNote = noteRef.current;
+    if (!currentNote || currentNote.id !== noteId || !allowSourceContentMutation()) return false;
+    const requestGeneration = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const saveGeneration = ++pageFrameSaveGenerationRef.current;
+    try {
+      const saved = await writeRegistry.track('page-frames:' + currentNote.id, async () => {
+        if (frameHealing.pending) await frameHealing.pending;
+        const current = currentPageFrameCollectionRef.current || frameHealing.collection;
+        const updates = new Map(snapshot.layoutUpdates.map(({ block, layout }) => [block.id, layout]));
+        const occupied = new Set(mediaInsertionBlocksRef.current.flatMap((block) => {
+          const layout = updates.get(block.id) || block.canvas_layout;
+          return typeof layout?.frame_id === 'string' ? [layout.frame_id] : [];
+        }));
+        for (const placement of paperPlacementsRef.current) {
+          const kind = currentCanvasObjectsRef.current.find((object) => object.objectId === placement.objectId)?.kind;
+          if (placement.frameId && kind !== 'page_frame' && kind !== 'paragraph_block_projection') occupied.add(placement.frameId);
+        }
+        const next = current ? reconcilePaperSizeSnapshot(current, { ...snapshot,
+          coverFrameId: getNoteBindingCoverPage(noteRef.current?.binding_settings).frameId,
+        }, occupied) : snapshot;
+        return savePageFrameCollectionForNote({ noteId: currentNote.id, ...next, coordinateContract });
+      });
+      if (!adapterMountActiveRef.current || routeNoteIdRef.current !== currentNote.id || noteRef.current?.id !== currentNote.id
+        || routeRequestGenerationRef.current !== requestGeneration || successfulHydrationEpochRef.current !== hydrationEpoch
+        || pageFrameSaveGenerationRef.current !== saveGeneration) return false;
+      const previous = currentPageFrameCollectionRef.current || frameHealing.collection;
+      if (previous) setPersistedCanvasPlacements((placements) => projectWallPlacements(
+        placements, currentCanvasObjectsRef.current, previous, saved, coordinateContract, snapshot.objectLayoutUpdates,
+      ));
+      currentPageFrameCollectionRef.current = saved;
+      frameHealing.collection = saved;
+      setPageFrameCollection(saved);
+      const updates = new Map(snapshot.layoutUpdates.map(({ block, layout }) => [block.placement_id, layout]));
+      setBlocks((current) => current.map((block) => {
+        const layout = updates.get(block.placement_id);
+        return layout ? { ...block, canvas_layout: { ...layout } } : block;
+      }));
+      snapshot.layoutUpdates.forEach(({ block }) => clearLayoutDraftForBlock?.(block.id));
+      return true;
+    } catch (error) {
+      console.error('Failed to save paper size:', error);
+      addToast('error', 'Paper size could not be saved. Try again.');
+      return false;
+    }
+  }), [writeRegistry, noteId, allowSourceContentMutation, frameHealing, coordinateContract, clearLayoutDraftForBlock, addToast]);
 
   // Other metadata responses own their existing fields, but cannot roll back a newer skin intent.
   const publishNonSkinNote = useCallback((updated: Note) => {
@@ -2981,6 +3033,7 @@ export function useNoteCanvasDataAdapter({
     saveGroupFolders,
     savePageFrameCollection,
     savePageFrameWalls,
+    savePageFrameGeometry,
     persistCanvasObject,
     deleteCanvasObject,
     saveDocumentTypographyProfile,

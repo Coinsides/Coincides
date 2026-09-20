@@ -2,6 +2,7 @@ import {
   DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
   DEFAULT_PAGE_FRAME_PAGE_SIZE,
   createPageFramePrintProfile,
+  PAPER_PHYSICAL_SIZES_MM,
 } from './pageFramePrintScaleService';
 import type {
   CanvasInset,
@@ -57,18 +58,23 @@ function createPrintTemplate({
   templateId,
   label,
   pageSize,
+  landscape = false,
 }: {
   templateId: PageFrameTemplateId;
   label: string;
   pageSize: Exclude<PageFramePageSize, 'Custom'>;
+  landscape?: boolean;
 }): PageFrameTemplate {
   const profile = createPageFramePrintProfile(pageSize);
+  const physical = PAPER_PHYSICAL_SIZES_MM[pageSize];
+  const width = landscape ? profile.width * physical.height / physical.width : profile.width;
+  const height = landscape ? profile.width : profile.height;
   return {
     templateId,
     label,
     pageSize: profile.pageSize,
-    width: profile.width,
-    height: profile.height,
+    width,
+    height,
     contentInset: cloneInset(profile.contentInset),
     background: cloneBackground(DEFAULT_PAPER_BACKGROUND),
     exportable: true,
@@ -84,16 +90,22 @@ const SCREEN_NOTE_CONTENT_INSET: CanvasInset = {
 };
 
 export const PAGE_FRAME_TEMPLATE_PRESETS: PageFrameTemplate[] = [
+  createPrintTemplate({ templateId: 'a5_portrait', label: 'A5 portrait', pageSize: 'A5' }),
+  createPrintTemplate({ templateId: 'a5_landscape', label: 'A5 landscape', pageSize: 'A5', landscape: true }),
   createPrintTemplate({
     templateId: 'a4_portrait',
     label: 'A4 portrait',
     pageSize: 'A4',
   }),
+  createPrintTemplate({ templateId: 'a4_landscape', label: 'A4 landscape', pageSize: 'A4', landscape: true }),
+  createPrintTemplate({ templateId: 'a3_portrait', label: 'A3 portrait', pageSize: 'A3' }),
+  createPrintTemplate({ templateId: 'a3_landscape', label: 'A3 landscape', pageSize: 'A3', landscape: true }),
   createPrintTemplate({
     templateId: 'letter_portrait',
     label: 'Letter portrait',
     pageSize: 'Letter',
   }),
+  createPrintTemplate({ templateId: 'legal_portrait', label: 'Legal portrait', pageSize: 'Legal' }),
   {
     templateId: 'screen_note',
     label: 'Screen note',
@@ -123,7 +135,10 @@ const PAGE_FRAME_TEMPLATE_BY_ID = new Map(
 );
 
 export function inferPageFrameTemplateId(pageSize?: PageFramePageSize): PageFrameTemplateId {
+  if (pageSize === 'A5') return 'a5_portrait';
+  if (pageSize === 'A3') return 'a3_portrait';
   if (pageSize === 'Letter') return 'letter_portrait';
+  if (pageSize === 'Legal') return 'legal_portrait';
   if (pageSize === 'Custom') return 'custom';
   return DEFAULT_PAGE_FRAME_TEMPLATE_ID;
 }

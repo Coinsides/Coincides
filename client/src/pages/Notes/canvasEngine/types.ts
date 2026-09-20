@@ -54,11 +54,17 @@ export interface CanvasInset {
   left: number;
 }
 
-export type PageFramePageSize = 'A4' | 'Letter' | 'Custom';
+export type PageFramePageSize = 'A5' | 'A4' | 'A3' | 'Letter' | 'Legal' | 'Custom';
 
 export type PageFrameTemplateId =
+  | 'a5_portrait'
+  | 'a5_landscape'
   | 'a4_portrait'
+  | 'a4_landscape'
+  | 'a3_portrait'
+  | 'a3_landscape'
   | 'letter_portrait'
+  | 'legal_portrait'
   | 'screen_note'
   | 'custom';
 
@@ -150,6 +156,17 @@ export interface PageFrameModel extends CanvasRect {
   background?: PageFrameBackgroundStyle;
   exportable: boolean;
   contentInset: CanvasInset;
+  /** Explicit A5 single-page geometry; content coordinates are unchanged. */
+  paperSizeOverride?: boolean;
+  /** Internal-pixel width anchoring the physical scale before a single-page edit. */
+  paperSizeReferenceWidth?: number;
+}
+
+export interface NotebookPaperDefault {
+  templateId: PageFrameTemplateId;
+  pageSize: PageFramePageSize;
+  width: number;
+  height: number;
 }
 
 export type PageStackCreatedFrom =
@@ -182,6 +199,8 @@ export interface PageStackModel {
 }
 
 export interface PageFrameCollectionModel {
+  /** Notebook geometry, independent of whichever frame is primary or selected. */
+  paperDefault?: NotebookPaperDefault;
   pageFrames: PageFrameModel[];
   pageStacks?: PageStackModel[];
   primaryFrameId: string | null;

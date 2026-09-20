@@ -20,7 +20,10 @@
 
 - **UI**:打开笔记→双击纸面开始写;
 - **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:1, units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
-- 建笔记:`POST /api/notes {course_id, title, description?, page_format:'a4_portrait'}`;
+- **建笔记(A5,2026-09-19)**:Project 的「New Note」或 Board 的「New note」直接新建 A4 纵向纸;建纸流程没有纸型选择。API 仍为 `POST /api/notes {course_id, title, description?, page_format:'a4_portrait'}`,页帧使用既有 A4 默认种子;Board 建纸沿用 ceremony-note 原子入口。
+- **纸型调节(A5)**:打开笔记→「笔记外观」浮卡→「纸型」,可选 A5/A4/A3 各纵向或横向、Letter 纵向、Legal 纵向,共 8 项。直接看当前纸面调整,没有另一张预览纸。尺寸读数与输入使用厘米(cm)或毫米(mm),可切换单位。选纸型作用于整本笔记的全部页帧,A1 按新纸面与版心自动重排跨页正文,一次撤销/重做恢复整次换型。
+- **单页异形(A5)**:进入 Layout 态,选中要调整的页,输入物理宽高或拖纸角调尺寸,只覆写该页几何;平时纸角没有编辑命中。「恢复默认」清除该页覆写,回到笔记默认纸型;以后新建页也使用笔记默认,不沿袭邻页异形。单页调节与恢复进入撤销栈,装订段、页码与封面仍按当前页身份共处。
+- **纸型存储与 Web 边界(A5)**:调节经既有页帧集合保存,物理单位在界面换算,存储仍为像素;既有 `page_format` 数据保持原值,不迁移。Web 长页保持独立的单帧向下生长模式,不列入上述纸型族,不提供转为分页纸或单页异形的操作。
 - **标题与章节(A4,2026-09-19)**:正文行首输入 `# `、`## `、`### ` 建一/二/三级标题;在既有段落输入 `/h1`、`/h2`、`/h3` 可升降级,`/body` 还原正文。标题仍是普通 text 块里的 unit `writing_role:'heading_1'|'heading_2'|'heading_3'`,没有 heading 块型。标题占一条硬行、独立成块;Enter/Shift+Enter 在后面续正文块,长标题视觉换行不另造单位。改字号/行高时标题随 Typography 同步。
 - **章操作**:章由标题和后续块序派生,截止下一个同级或更高层标题。删标题块只解散章,不删后文;拖标题旁的章把手搬整章,一次撤销/重做覆盖整批。标题前的文字是前言,缺级不造虚拟章。折叠箭头只改变本次阅读呈现,不存章节归属或折叠字段;隐藏正文不参与阅读分页,展开恢复。已有空页保留;打印仍包含完整正文。
 - **标题导航**:左侧 Navigation→Headings（标题树）,点击标题跳到章锚,阅读位置变化时当前章高亮;隐藏目标先展开再跳。标题与层级随编辑刷新,无需重载。Chapter numbers 开关控制派生编号,不改正文。agenda 是同一标题投影的接口,目录页未实装。
