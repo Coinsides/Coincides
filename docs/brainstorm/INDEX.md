@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-16
+> **日期 (Updated)**: 2026-09-20
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 169 份文档。
+共 170 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -180,4 +180,5 @@
 | [产品完善/会议记录/2026-09-12-Design-Planning-Rounds-Meeting-Notes.md](产品完善/会议记录/2026-09-12-Design-Planning-Rounds-Meeting-Notes.md) | 2026-09-12 Coincides:设计规划场——外观体系下半场、纸型自由化、导航窗格 | `draft` | 2026-09-12 | — |
 | [产品完善/会议记录/2026-09-14-Card-Item-Genealogy-And-Forgetting-Meeting-Notes.md](产品完善/会议记录/2026-09-14-Card-Item-Genealogy-And-Forgetting-Meeting-Notes.md) | 2026-09-14 Coincides:卡片五波谈——降采样、平级衍生、item 家谱与系统遗忘 | `(缺状态头)` | — | — |
 | [产品完善/会议记录/2026-09-16-Agent-Scope-Four-Walls-And-External-Harness-Meeting-Notes.md](产品完善/会议记录/2026-09-16-Agent-Scope-Four-Walls-And-External-Harness-Meeting-Notes.md) | Agent 射程四堵墙与外部 Harness 挂靠 · 会议记录 | `进行中(会议未散;已拍段落如实标注,五点商量候 Henry 逐条答复)` | 2026-09-16(会议跨 09-15/09-16 两日) | — |
+| [产品完善/会议记录/2026-09-20-Live-Design-Capability-And-Note-Manifest-Meeting-Notes.md](产品完善/会议记录/2026-09-20-Live-Design-Capability-And-Note-Manifest-Meeting-Notes.md) | 现场设计能力与笔记元素清单 · 讨论记录 | `思考中 ⛔已拍(全文皆为讨论记录,零裁定;引用的既有裁定各自照旧)` | 2026-09-20 | — |
 | [产品完善/工程日记/2026-09-04-Expression-Family-And-Continuous-Distillation-Engineering-Diary.md](产品完善/工程日记/2026-09-04-Expression-Family-And-Continuous-Distillation-Engineering-Diary.md) | 2026-09-04 工程日记 · 表达族与持续蒸馏(Henry × Fable 灵感爆发日) | `active` | 2026-09-04 | — |
