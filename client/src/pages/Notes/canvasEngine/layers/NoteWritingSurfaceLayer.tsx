@@ -3,6 +3,7 @@ import { pasteMediaBlock } from '../mediaBlockPasteService';
 import { TableBlockEditor } from '../blocks/TableBlockEditor';
 import { createDefaultTableBlockPayload, type TableBlockPayload } from '../tableBlockService';
 import { ComponentBlockEditor } from '../blocks/ComponentBlockEditor';
+import type { MediaImageEditV1 } from '@shared/types';
 import { createDefaultComponentBlockPayload, type ComponentBlockPayload, type BuiltinComponentKind } from '../componentBlockService';
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
@@ -246,6 +247,7 @@ export interface NoteWritingSurfaceLayerProps {
   onSaveTable?: (block: NoteBlock, payload: TableBlockPayload) => Promise<boolean>;
   onCreateComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
   onSaveComponent?: (block: NoteBlock, payload: ComponentBlockPayload) => Promise<boolean>;
+  onSaveMediaImage?: (block: NoteBlock, edit: MediaImageEditV1 | null) => Promise<boolean>;
   onCreateBlock: (
     template: TemplateOption,
     text: string,
@@ -414,6 +416,7 @@ export function NoteWritingSurfaceLayer({
   onSaveTable,
   onCreateComponent,
   onSaveComponent,
+  onSaveMediaImage,
   onPersistCanvasObject,
   onDeleteCanvasObject,
   onSaveAnnotationTruths,
@@ -1842,6 +1845,7 @@ export function NoteWritingSurfaceLayer({
               onFieldDraftChange={(fieldValues) => onFieldDraftChange(block, text, fieldValues)}
               onSaveTable={onSaveTable ? (payload) => onSaveTable(block, payload) : undefined}
               onSaveComponent={onSaveComponent ? (payload) => onSaveComponent(block, payload) : undefined}
+              onSaveMediaImage={onSaveMediaImage ? (edit) => onSaveMediaImage(block, edit) : undefined}
               onSave={async (silent, fieldValues, textFlow) => {
                 const save = blockSaveTextAndFlow(block, text, fieldValues, textFlow);
                 return onSaveBlock(block, save.text, {

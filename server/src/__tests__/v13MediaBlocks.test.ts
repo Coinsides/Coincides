@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
 import type { Server } from 'node:http';
@@ -18,6 +18,7 @@ import { restoreNoteBlockForCanvasLifecycle } from '../services/canvasObjects.js
 import { finalizeCanvasAssetCleanup, releaseAssetReference, releaseCourseCanvasAssets, releaseNoteCanvasAssets } from '../services/canvasAssets.js';
 import { drainManagedFileCleanupJobs } from '../services/managedFileCleanup.js';
 import { createBoard } from '../services/boards.js';
+import { mediaBlockAssetId, mediaImageEditSchema } from '../services/mediaBlocks.js';
 
 async function fixture() {
   // Every database is explicitly in memory; the runner must select an isolated
@@ -91,6 +92,76 @@ test('media create stores metadata in a NoteBlock, replays its receipt, and disc
     assert.equal(discardClientNoteBlockCreate(f.db, f.userId, f.noteId, f.courseId, block.key).discarded, true);
     assert.equal(f.db.prepare('SELECT id FROM canvas_assets WHERE id = ?').get(asset.assetId), undefined);
     assert.equal(existsSync(asset.path), false);
+  } finally { closeDb(); }
+});
+
+test('image edit parameter validation matches the shared crop, zoom and quarter-turn contract', async () => {
+  const { isMediaImageEditV1 } = await import(new URL('../../../shared/types/mediaImageEdit.ts', import.meta.url).href);
+  const full = { crop: { x: 0, y: 0, w: 100, h: 100 }, zoom: 1, rotation: 0 };
+  const valid = [
+    ...[0, 90, 180, 270].map((rotation) => ({ ...full, rotation })),
+    { crop: null, zoom: null, rotation: 90 },
+    { crop: null, zoom: 3, rotation: 0 },
+    { crop: { x: 25, y: 10, w: 50, h: 80 }, zoom: 2, rotation: 270 },
+    { crop: { x: 100 / 3, y: 0, w: 200 / 3, h: 100 }, zoom: null, rotation: 0 },
+  ];
+  const invalid = [
+    {}, { crop: null, zoom: null }, { crop: null, rotation: 0 }, { zoom: 1, rotation: 0 },
+    { ...full, rotation: 45 }, { ...full, rotation: 360 }, { ...full, rotation: '90' },
+    { ...full, zoom: 0.5 }, { ...full, zoom: 3.1 }, { ...full, zoom: Number.NaN },
+    { ...full, crop: { ...full.crop, x: -1 } }, { ...full, crop: { ...full.crop, y: 1 } },
+    { ...full, crop: { ...full.crop, w: 0 } }, { ...full, crop: { ...full.crop, h: 101 } },
+    { ...full, crop: { ...full.crop, w: Number.POSITIVE_INFINITY } },
+  ];
+  for (const edit of valid) {
+    assert.equal(mediaImageEditSchema.safeParse(edit).success, true, JSON.stringify(edit));
+    assert.equal(isMediaImageEditV1(edit), true, JSON.stringify(edit));
+  }
+  for (const edit of invalid) {
+    assert.equal(mediaImageEditSchema.safeParse(edit).success, false, JSON.stringify(edit));
+    assert.equal(isMediaImageEditV1(edit), false, JSON.stringify(edit));
+  }
+});
+
+test('image edits round-trip through the existing metadata save door without changing the asset', async () => {
+  const f = await fixture();
+  try {
+    const asset = f.seedAsset();
+    const block = f.create(asset.assetId);
+    const originalAsset = f.db.prepare('SELECT * FROM canvas_assets WHERE id = ?').get(asset.assetId);
+    const originalBytes = readFileSync(asset.path);
+    const stored = () => JSON.parse(String(f.db.prepare('SELECT metadata FROM note_blocks WHERE id = ?').pluck().get(block.blockId)));
+    assert.equal(Object.prototype.hasOwnProperty.call(stored().media, 'edit_v1'), false, 'legacy creation does not materialize a default edit');
+    updateNoteBlockContent(f.db, f.userId, block.blockId, { title: 'Original image' });
+    assert.equal(Object.prototype.hasOwnProperty.call(stored().media, 'edit_v1'), false, 'unrelated saves need no migration');
+    for (const rotation of [0, 90, 180, 270]) {
+      const edit = { crop: { x: 25, y: 10, w: 50, h: 80 }, zoom: 2, rotation };
+      const saved = updateNoteBlockContent(f.db, f.userId, block.blockId, {
+        metadata: { ...f.metadata(asset.assetId), media: { ...f.metadata(asset.assetId).media, edit_v1: edit } },
+      });
+      assert.deepEqual(saved.metadata.media.edit_v1, edit);
+      assert.deepEqual(stored().media.edit_v1, edit);
+      assert.equal(mediaBlockAssetId('media', stored()), asset.assetId);
+      assert.deepEqual(f.db.prepare('SELECT * FROM canvas_assets WHERE id = ?').get(asset.assetId), originalAsset);
+      assert.deepEqual(readFileSync(asset.path), originalBytes);
+    }
+    const edited = stored();
+    assert.throws(() => updateNoteBlockContent(f.db, f.userId, block.blockId, {
+      metadata: { media: { ...edited.media, edit_v1: { crop: null, zoom: 2, rotation: 45 } } },
+    }), /Invalid image editing parameters/);
+    assert.deepEqual(stored(), edited, 'invalid parameters leave the prior edit intact');
+    assert.throws(() => createClientNoteBlock(f.db, f.userId, f.noteId, f.courseId, {
+      client_create_key: randomUUID(), block_type: 'media',
+      metadata: { media: { ...f.metadata(asset.assetId).media, edit_v1: { crop: null, zoom: 0, rotation: 0 } } },
+    }), /Invalid image editing parameters/);
+    updateNoteBlockContent(f.db, f.userId, block.blockId, {
+      metadata: { media: { ...f.metadata(asset.assetId).media, edit_v1: null } },
+    });
+    assert.equal(stored().media.edit_v1, null);
+    assert.equal(mediaBlockAssetId('media', stored()), asset.assetId);
+    assert.deepEqual(f.db.prepare('SELECT * FROM canvas_assets WHERE id = ?').get(asset.assetId), originalAsset);
+    assert.deepEqual(readFileSync(asset.path), originalBytes);
+    assert.deepEqual(f.db.prepare('SELECT COUNT(*) AS count FROM managed_file_cleanup_jobs').get(), { count: 0 });
   } finally { closeDb(); }
 });
 
@@ -249,7 +320,7 @@ test('media physical cleanup failure leaves a retryable managed job after the da
   } finally { closeDb(); }
 });
 
-test('ordinary HTTP media create, reopen and delete use NoteBlock routes and reclaim the blob', async () => {
+test('ordinary HTTP media create, edit, reopen, reset and delete use NoteBlock routes and reclaim the blob', async () => {
   const f = await fixture();
   let server: Server | undefined;
   try {
@@ -276,6 +347,20 @@ test('ordinary HTTP media create, reopen and delete use NoteBlock routes and rec
     const reopened = await request('GET', `/notes/${f.noteId}/blocks`);
     assert.equal(reopened[0].id, block.id);
     assert.equal(reopened[0].metadata.media.asset_id, asset.assetId);
+    assert.equal(Object.prototype.hasOwnProperty.call(reopened[0].metadata.media, 'edit_v1'), false);
+    const edit = { crop: { x: 20, y: 10, w: 60, h: 80 }, zoom: 1.5, rotation: 90 };
+    const edited = await request('PUT', `/note-blocks/${block.id}`, {
+      metadata: { media: { ...f.metadata(asset.assetId).media, edit_v1: edit } },
+    });
+    assert.deepEqual(edited.metadata.media.edit_v1, edit);
+    assert.deepEqual((await request('GET', `/notes/${f.noteId}/blocks`))[0].metadata.media.edit_v1, edit);
+    assert.equal(existsSync(asset.path), true);
+    await request('PUT', `/note-blocks/${block.id}`, {
+      metadata: { media: { ...f.metadata(asset.assetId).media, edit_v1: null } },
+    });
+    const reset = (await request('GET', `/notes/${f.noteId}/blocks`))[0].metadata.media;
+    assert.equal(reset.edit_v1, null);
+    assert.equal(reset.asset_id, asset.assetId);
     await request('DELETE', `/note-blocks/${block.id}`);
     assert.deepEqual(await request('GET', `/notes/${f.noteId}/blocks`), []);
     assert.equal(existsSync(asset.path), false);

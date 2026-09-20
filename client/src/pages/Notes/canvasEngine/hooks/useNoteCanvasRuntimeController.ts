@@ -18,6 +18,7 @@ import { usePaperInkCommands } from './usePaperInkCommands';
 import { useTableBlockHistory } from './useTableBlockHistory';
 import { useParagraphFurnitureHistory } from './useParagraphFurnitureHistory';
 import { useComponentBlockHistory } from './useComponentBlockHistory';
+import { useMediaImageHistory } from './useMediaImageHistory';
 import { STATIC_TEMPLATE_OPTIONS } from '@/services/templateOptions';
 import { usePageFrameWalls } from './usePageFrameWalls';
 import { usePaperSize } from './usePaperSize';
@@ -181,6 +182,7 @@ export function useNoteCanvasRuntimeController() {
     saveTableBlock,
     saveParagraphFurniture,
     saveComponentBlock,
+    saveMediaImageEdit,
     applyBlockEditRecovery,
     inspectBlockEditRecovery,
     replayBlockEditRecovery,
@@ -504,6 +506,10 @@ export function useNoteCanvasRuntimeController() {
   });
   textHistoryHostRef.current = { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle, isReplaying: isRuntimeHistoryReplaying };
 
+  const mediaImageHistory = useMediaImageHistory({ noteId, generation: textHistoryGeneration, blocks, saveMediaImageEdit,
+    boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
+    history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
+
   const tableHistory = useTableBlockHistory({ noteId, generation: textHistoryGeneration, blocks, saveTableBlock,
     boundary: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
     history: { pushHistoryEntry, enqueueRuntimeHistoryOperation } });
@@ -644,6 +650,7 @@ export function useNoteCanvasRuntimeController() {
     onCreateBlock: createBlock,
     onSaveTable: tableHistory.save,
     onSaveComponent: componentHistory.save,
+    onSaveMediaImage: mediaImageHistory.save,
     onCreateComponent: (payload) => {
       if (sourceProjectionPolicy.contentReadOnly || !textHistory.boundary()) return Promise.resolve(false);
       return enqueueRuntimeHistoryOperation(async () => {

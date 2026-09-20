@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 408 份文档。
+共 409 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -395,7 +395,8 @@
 | [handoffs/2026-09-19-v14-a5-paper-freedom-order.md](handoffs/2026-09-19-v14-a5-paper-freedom-order.md) | A5 · 纸型自由化束 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 204 文件 2066/2066 亲跑定案;git diff --check+secrets(59 文件)双门绿;server 余 2 红=Python/MinerU 环境基线;纸面线五砖至此封顶)` | — | — |
 | [handoffs/2026-09-20-v14-b1-table-block-order.md](handoffs/2026-09-20-v14-b1-table-block-order.md) | B1 · 表格块 v1 | `done(builder 二轮施工交工作树；client 209 文件 2109/2109；非 git/secrets 23 组件分次验证；server 两项 Python 环境红、HQ 双门与放行待收口)` | — | — |
 | [handoffs/2026-09-20-v14-b2-timeline-chart-order.md](handoffs/2026-09-20-v14-b2-timeline-chart-order.md) | B2 · 时间线件+图表件 v1 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 214 文件 2181/2181 亲跑定案;git diff --check+secrets(58 文件)双门绿;server 余 2 红=Python/MinerU 环境基线)` | — | — |
-| [handoffs/2026-09-20-v14-b3-furniture-skin-order.md](handoffs/2026-09-20-v14-b3-furniture-skin-order.md) | B3 · 部件三件+绢本皮+去盒卫生 | `done(builder 已交工作树;server 全量未绿,放行及 git/secrets 留 HQ)` | — | — |
+| [handoffs/2026-09-20-v14-b3-furniture-skin-order.md](handoffs/2026-09-20-v14-b3-furniture-skin-order.md) | B3 · 部件三件+绢本皮+去盒卫生 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 215 文件 2210/2210 亲跑定案(含 HQ 的 headrule token 改名);git diff --check+secrets 双门绿(sk- 长串假阳性以改名根治,⛔放宽扫描器);server 余 2=Python/MinerU 基线,wilderness 27/27 复跑恢复)` | — | — |
+| [handoffs/2026-09-20-v14-b5-image-editing-order.md](handoffs/2026-09-20-v14-b5-image-editing-order.md) | B5 · 图片编辑 v1 | `done(builder 二轮施工交工作树；非 git/secrets 23 组件最终通过；server 两项 Python 环境红、HQ 双门与放行待收口；行内媒体仍属 F2 候裁)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

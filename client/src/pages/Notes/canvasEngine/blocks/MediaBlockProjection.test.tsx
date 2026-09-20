@@ -76,4 +76,29 @@ describe('MediaBlockProjection', () => {
     expect(placeholder.textContent).toBe('Lecture diagram');
     expect(load).not.toHaveBeenCalled();
   });
+
+  it.each([0, 90, 180, 270] as const)('renders the shared %d° crop and clips its window independently from the block aspect ratio', async (rotation) => {
+    load.mockResolvedValue('blob:edited-image');
+    const edit = { crop: { x: 10, y: 20, w: 50, h: 40 }, zoom: 2, rotation };
+    const edited = { ...block, metadata: { media: {
+      asset_id: 'asset-one', naturalWidth: 1200, naturalHeight: 800, alt: 'Lecture diagram', edit_v1: edit,
+    } } };
+    const view = render(<div style={{ width: 500, height: 80 }}><MediaBlockProjection block={edited} /></div>);
+    const image = await screen.findByRole('img', { name: 'Lecture diagram' });
+    const viewBox = rotation === 90 || rotation === 270 ? '80 240 400 480' : '120 160 600 320';
+    expect(image.tagName.toLowerCase()).toBe('svg');
+    expect(image.getAttribute('viewBox')).toBe(viewBox);
+    expect(image.getAttribute('preserveAspectRatio')).toBe('xMidYMid meet');
+    const clip = view.container.querySelector('clipPath')!;
+    const rect = clip.querySelector('rect')!;
+    expect(clip.getAttribute('clipPathUnits')).toBe('userSpaceOnUse');
+    expect(['x', 'y', 'width', 'height'].map((name) => rect.getAttribute(name)).join(' ')).toBe(viewBox);
+    expect(view.container.querySelector('g')?.getAttribute('clip-path')).toBe(`url(#${clip.id})`);
+    const source = view.container.querySelector('image')!;
+    expect(source.getAttribute('href')).toBe('blob:edited-image');
+    expect(source.getAttribute('width')).toBe('1200');
+    expect(source.getAttribute('height')).toBe('800');
+    const transforms = { 0: null, 90: 'translate(800 0) rotate(90)', 180: 'translate(1200 800) rotate(180)', 270: 'translate(0 1200) rotate(270)' };
+    expect(source.getAttribute('transform')).toBe(transforms[rotation]);
+  });
 });

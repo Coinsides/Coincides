@@ -132,6 +132,31 @@ function getBlockToolbar(): HTMLElement {
 }
 
 describe('BlockEditorLayer K-4 affiliation controls', () => {
+  it('B5 opens the image editor from the selected block control bar and Escape cancels', async () => {
+    vi.stubGlobal('URL', class extends URL { static revokeObjectURL = vi.fn(); });
+    vi.mocked(loadCanvasImageAssetBlobUrl).mockResolvedValue('blob:b5-image');
+    const save = vi.fn(async () => true);
+    renderSubject({ block: { id: 'image-b5', placement_id: 'place-b5', block_type: 'media', title: null,
+      plain_text: '', content_json: {}, order_index: 0, source_references: [], display_overrides_json: {},
+      metadata: { media: { asset_id: 'asset-b5', naturalWidth: 800, naturalHeight: 400 } } }, onSaveMediaImage: save });
+    fireEvent.click(screen.getByRole('button', { name: '编辑图片' }));
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it.each([{ contentReadOnly: true }, { mediaPlaceholder: true }, { active: false }])(
+    'B5 has no image edit entry for unavailable surface %j', (overrides) => {
+      vi.mocked(loadCanvasImageAssetBlobUrl).mockResolvedValue('blob:b5-image');
+      renderSubject({ block: { id: 'image-b5', placement_id: 'place-b5', block_type: 'media', title: null,
+        plain_text: '', content_json: {}, order_index: 0, source_references: [], display_overrides_json: {},
+        metadata: { media: { asset_id: 'asset-b5', naturalWidth: 800, naturalHeight: 400 } } },
+        onSaveMediaImage: vi.fn(async () => true), ...overrides });
+      expect(screen.queryByRole('button', { name: '编辑图片' })).toBeNull();
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
   it('dispatches media as a selectable, movable read-only block without text measurement or insert-unit controls', async () => {
     vi.stubGlobal('URL', class extends URL { static revokeObjectURL = vi.fn(); });
     vi.mocked(loadCanvasImageAssetBlobUrl).mockResolvedValueOnce('blob:short-media');

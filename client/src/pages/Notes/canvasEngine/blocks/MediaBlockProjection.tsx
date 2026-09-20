@@ -1,12 +1,15 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useState, type CSSProperties } from 'react';
 import type { NoteBlock } from '../runtimeDataTypes';
 import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';
 import { mediaBlockAlt, readMediaBlockMetadata } from '../mediaBlockService';
+import { mediaImageGeometry } from '../mediaImageEdit';
 import styles from './MediaBlockProjection.module.css';
 
 /** Media owns its stored rectangle; it never participates in text measurement. */
 export function MediaBlockProjection({ block }: { block: NoteBlock }) {
-  const assetId = readMediaBlockMetadata(block)?.asset_id ?? '';
+  const clipId = useId();
+  const metadata = readMediaBlockMetadata(block);
+  const assetId = metadata?.asset_id ?? '';
   const alt = mediaBlockAlt(block);
   const [read, setRead] = useState<{ assetId: string; url?: string; failed?: boolean } | null>(null);
   useEffect(() => {
@@ -35,6 +38,19 @@ export function MediaBlockProjection({ block }: { block: NoteBlock }) {
     const message = failed ? `${alt}: Image could not be loaded. Reopen the note to retry.` : `Loading ${alt}…`;
     return <div className={styles.status} role="status" title={message}
       data-media-block-state={failed ? 'failed' : 'loading'}><span>{message}</span></div>;
+  }
+  const edit = metadata?.edit_v1;
+  if (metadata && edit && (edit.rotation !== 0 || edit.crop !== null || edit.zoom !== null)) {
+    const geometry = mediaImageGeometry(edit, { width: metadata.naturalWidth, height: metadata.naturalHeight });
+    return <svg className={styles.media} role="img" aria-label={alt} viewBox={geometry.viewBox}
+      preserveAspectRatio="xMidYMid meet" data-media-block-state="loaded" data-media-block-asset={assetId}
+      data-media-image-rotation={edit.rotation}>
+      <defs><clipPath id={clipId} clipPathUnits="userSpaceOnUse"><rect {...geometry.window} /></clipPath></defs>
+      <g clipPath={`url(#${clipId})`}>
+        <image href={loaded.url} width={metadata.naturalWidth} height={metadata.naturalHeight}
+          transform={geometry.transform || undefined} onError={() => setRead({ assetId, failed: true })} />
+      </g>
+    </svg>;
   }
   return <img className={styles.media} src={loaded.url} alt={alt} draggable={false}
     data-media-block-state="loaded" data-media-block-asset={assetId}

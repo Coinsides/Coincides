@@ -70,6 +70,8 @@ import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { NoteRefBlockProjection } from '../blocks/NoteRefBlockProjection';
 import { MediaBlockProjection, MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
+import { MediaImageEditor } from '../blocks/MediaImageEditor';
+import type { MediaImageEditV1 } from '@shared/types';
 import { TableBlockProjection } from '../blocks/TableBlockProjection';
 import { TableBlockEditor } from '../blocks/TableBlockEditor';
 import { readTableBlockPayload, type TableBlockPayload } from '../tableBlockService';
@@ -100,6 +102,7 @@ interface BlockEditorLayerProps {
   block: NoteBlock;
   contentReadOnly: boolean;
   mediaPlaceholder?: boolean;
+  onSaveMediaImage?: (edit: MediaImageEditV1 | null) => Promise<boolean>;
   tablePrint?: boolean;
   onSaveTable?: (payload: TableBlockPayload) => Promise<boolean>;
   componentPrint?: boolean;
@@ -183,6 +186,7 @@ export function BlockEditorLayer({
   textUnitGutterLaneX,
   contentReadOnly,
   mediaPlaceholder = false,
+  onSaveMediaImage,
   tablePrint = false,
   onSaveTable,
   componentPrint = false,
@@ -276,6 +280,7 @@ export function BlockEditorLayer({
   const itemReference = block.block_type === 'item_ref';
   const noteReference = block.block_type === 'note_ref';
   const mediaBlock = block.block_type === 'media';
+  const [editingImage, setEditingImage] = useState(false);
   const tableBlock = block.block_type === 'table';
   const [editingTable, setEditingTable] = useState(false);
   const tablePayload = tableBlock ? readTableBlockPayload(block) : null;
@@ -529,6 +534,8 @@ export function BlockEditorLayer({
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
         bodyReadOnly={itemReference || noteReference || mediaBlock || tableBlock || componentBlock}
+        onEditImage={mediaBlock && !contentReadOnly && !mediaPlaceholder && onSaveMediaImage
+          ? () => setEditingImage(true) : undefined}
         paragraphStyleControl={!contentReadOnly && canStyleParagraph(block) && onSaveParagraphFurniture
           ? <ParagraphFurnitureControl value={paragraphFurniture} onSave={onSaveParagraphFurniture} /> : undefined}
         onBeginMove={onBeginMove}
@@ -668,6 +675,13 @@ export function BlockEditorLayer({
         </div>}
       </div>
 
+      {editingImage && mediaBlock && onSaveMediaImage && !contentReadOnly && !mediaPlaceholder && <MediaImageEditor
+        key={block.id} block={block} aspectRatio={layout.width / layout.height}
+        onCancel={() => setEditingImage(false)} onSave={async (edit) => {
+          const saved = await onSaveMediaImage(edit);
+          if (saved) setEditingImage(false);
+          return saved;
+        }} />}
       {editingComponent && componentPayload && onSaveComponent && !contentReadOnly && <ComponentBlockEditor
         initialPayload={componentPayload} onCancel={() => setEditingComponent(false)} onSave={async (payload) => {
           if (!await onSaveComponent(payload)) throw new Error('Component could not be saved. Please retry.');

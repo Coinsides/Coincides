@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
+import { isMediaImageEditV1, type MediaImageEditV1 } from '@shared/types';
+import { readMediaBlockMetadata } from '../mediaBlockService';
 import { canStyleParagraph, writeParagraphFurniture, type ParagraphFurniture } from '../paragraphFurniture';
 import { tableBlockValidationError, type TableBlockPayload } from '../tableBlockService';
 import { componentBlockValidationError, type ComponentBlockPayload } from '../componentBlockService';
@@ -1794,6 +1796,36 @@ export function useNoteCanvasDataAdapter({
     }
   }), [writeRegistry, allowSourceContentMutation, addToast]);
 
+  const saveMediaImageEdit = useCallback(writeRegistry.hold('saveMediaImageEdit', async (
+    block: NoteBlock, edit: MediaImageEditV1 | null | undefined,
+  ): Promise<boolean> => {
+    if (block.block_type !== 'media' || (edit != null && !isMediaImageEditV1(edit)) || !allowSourceContentMutation()) return false;
+    const liveBlock = mediaInsertionBlocksRef.current.find((entry) => entry.id === block.id);
+    if (!liveBlock || readMediaBlockMetadata(liveBlock)?.asset_id !== readMediaBlockMetadata(block)?.asset_id
+      || !readMediaBlockMetadata(liveBlock)) return false;
+    const requestedNoteId = noteRef.current?.id;
+    const generation = routeRequestGenerationRef.current;
+    if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) return false;
+    const current = () => adapterMountActiveRef.current && noteRef.current?.id === requestedNoteId
+      && routeNoteIdRef.current === requestedNoteId && routeRequestGenerationRef.current === generation;
+    // Preserve every media/metadata sibling; undo of a legacy block removes only edit_v1.
+    const media = { ...(liveBlock.metadata.media as Record<string, unknown>) };
+    if (edit === undefined) delete media.edit_v1;
+    else media.edit_v1 = structuredClone(edit);
+    const metadata = { ...liveBlock.metadata, media };
+    try {
+      const response = await writeRegistry.track('media-edit:' + block.id, () =>
+        api.put(`/note-blocks/${block.id}`, { metadata }));
+      if (!current()) return false;
+      const saved = hydrateClientBlock({ ...liveBlock, ...response.data });
+      setBlocks((existing) => existing.map((entry) => entry.id === block.id ? { ...entry, metadata: saved.metadata } : entry));
+      return true;
+    } catch {
+      if (current()) addToast('error', '图片未能保存，请重试。');
+      return false;
+    }
+  }), [writeRegistry, allowSourceContentMutation, addToast]);
+
   const saveTableBlock = useCallback(writeRegistry.hold('saveTableBlock', async (
     block: NoteBlock, payload: TableBlockPayload,
   ): Promise<boolean> => {
@@ -3125,6 +3157,7 @@ export function useNoteCanvasDataAdapter({
     finalizeDraftBlock,
     saveBlock,
     saveTableBlock,
+    saveMediaImageEdit,
     saveParagraphFurniture,
     saveComponentBlock,
     applyBlockEditRecovery,

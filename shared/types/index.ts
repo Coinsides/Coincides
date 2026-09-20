@@ -8,6 +8,7 @@ export * from './palette.js';
 export * from './noteCover.js';
 export * from './noteRef.js';
 export * from './noteBinding.js';
+export * from './mediaImageEdit.js';
 export type * from './agentContextHint.js';
 
 // --- Enums ---

@@ -388,6 +388,27 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  it('B5 saves only image edit metadata through the current block PUT, retaining siblings and restoring legacy absence', async () => {
+    const original = { receipt: 'keep', media: { asset_id: 'asset-b5', naturalWidth: 800, naturalHeight: 400, alt: 'Example', caption: 'keep' } };
+    const media = { ...serverBlock('', false), block_type: 'media', content_json: {}, plain_text: '', metadata: original };
+    durableBlocks = [media];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const edit = { crop: { x: 25, y: 10, w: 50, h: 50 }, zoom: 2, rotation: 90 as const };
+    await act(async () => { expect(await subject.result.current.saveMediaImageEdit(media, edit)).toBe(true); });
+    const metadata = { ...original, media: { ...original.media, edit_v1: edit } };
+    expect(mocks.put).toHaveBeenLastCalledWith(`/note-blocks/${media.id}`, { metadata });
+    expect(subject.result.current.blocks[0].metadata).toEqual(metadata);
+    expect(subject.result.current.blocks[0].content_json).toEqual({});
+    expect(mocks.atomicPut).not.toHaveBeenCalled();
+    mocks.put.mockRejectedValueOnce(new Error('Connection interrupted'));
+    await act(async () => { expect(await subject.result.current.saveMediaImageEdit(subject.result.current.blocks[0], null)).toBe(false); });
+    expect(subject.result.current.blocks[0].metadata).toEqual(metadata);
+    await act(async () => { expect(await subject.result.current.saveMediaImageEdit(subject.result.current.blocks[0], undefined)).toBe(true); });
+    expect(mocks.put).toHaveBeenLastCalledWith(`/note-blocks/${media.id}`, { metadata: original });
+    expect(subject.result.current.blocks[0].metadata).toEqual(original);
+  });
+
   it('B1 creates and saves a pure table payload, with no TextFlow body flush', async () => {
     const payload = { caption: '熙宁新法表', headers: ['新法', '措施', '目的'], rows: [['青苗法', '春贷秋还', '缓解借贷']] };
     const table = { ...serverBlock('', false), block_type: 'table', content_json: payload, plain_text: '' };

@@ -1,5 +1,6 @@
 import {
   Eye,
+  Crop,
   FileText,
   GripVertical,
   Plus,
@@ -35,6 +36,7 @@ interface BlockControlBarLayerProps {
   allowSaveRecovery?: boolean;
   bodyReadOnly?: boolean;
   paragraphStyleControl?: ReactNode;
+  onEditImage?: () => void;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
   onInsertTextUnitBelow?: () => void;
   onToggleExportRole: () => void;
@@ -55,6 +57,7 @@ export function BlockControlBarLayer({
   allowSaveRecovery = false,
   bodyReadOnly = false,
   paragraphStyleControl,
+  onEditImage,
   onBeginMove,
   onInsertTextUnitBelow,
   onToggleExportRole,
@@ -101,6 +104,10 @@ export function BlockControlBarLayer({
       >
         <div className={styles.blockActions}>
           {paragraphStyleControl}
+          {!contentReadOnly && onEditImage && <button type="button" className={styles.iconBtn}
+            onClick={onEditImage} disabled={saving} title="编辑图片" aria-label="编辑图片">
+            <Crop size={15} />
+          </button>}
           <button
             className={`${styles.iconBtn} ${styles.dragHandle}`}
             onPointerDown={onBeginMove}
