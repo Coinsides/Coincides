@@ -1,4 +1,6 @@
 import { AppError } from '../middleware/errorHandler.js';
+import { BOARD_ACTION_TOOLS } from '../toolFace/boardActions.js';
+import { revertBoardAction } from './boardActionRevert.js';
 import { createHash } from 'node:crypto';
 import type Database from 'better-sqlite3';
 import { getDb } from '../db/init.js';
@@ -297,6 +299,7 @@ function revertCompletedTask(input: RevertTrashNotesReceiptInput): ToolFaceRecei
 
 // Admission and dispatch share the same executable coverage inventory.
 const agentActionReverts = new Map<string, typeof revertCreatedGoalReceipt>([
+  ...BOARD_ACTION_TOOLS.map(tool => [tool.name, revertBoardAction] as [string, typeof revertBoardAction]),
   ['create_goal', revertCreatedGoalReceipt],
   ['create_sub_goal', revertCreatedGoalReceipt],
   ['create_task', revertCreatedResources],

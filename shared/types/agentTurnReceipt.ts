@@ -5,6 +5,7 @@ export interface AgentReceiptCall {
 
 /** Read-time projection of persisted calls/results; never stored in a new column. */
 export interface AgentTurnReceipt {
+  board_layout_reports?: import('./boardAgentReceipt.js').BoardAgentLayoutReceipt[];
   write_calls: AgentReceiptCall[];
   read_calls: AgentReceiptCall[];
   write_ok_count: number;

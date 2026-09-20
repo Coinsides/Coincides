@@ -116,6 +116,7 @@ export const updateBoardEdgeSchema = edgeFields.superRefine(unambiguousEndpoints
   .refine((value) => Object.keys(value).length > 0, 'No edge changes provided');
 
 const stickyFields = {
+  placed: z.boolean().optional(),
   text: z.string().max(12000).optional(),
   x: finiteNumber.optional(), y: finiteNumber.optional(),
   w: z.union([z.literal(240), z.literal(416)]).optional(),

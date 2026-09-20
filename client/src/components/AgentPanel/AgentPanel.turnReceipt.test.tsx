@@ -6,6 +6,7 @@ import { useAgentStore } from '@/stores/agentStore';
 import { useUIStore } from '@/stores/uiStore';
 import AgentPanel from './AgentPanel';
 import MessageBubble from './MessageBubble';
+import { subscribeBoardChanges } from '@/pages/Boards/boardEvents';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }));
 vi.mock('@/services/api', () => ({ default: http, getToken: () => null, API_BASE: '/api' }));
@@ -48,6 +49,35 @@ function streamResponse() {
 }
 
 describe('AgentPanel turn receipts from server projections', () => {
+  it('shows the structured board diagnostic and refreshes its board once on the live receipt', async () => {
+    const receipt: AgentTurnReceipt = { ...emptyReceipt(), write_calls: [{ name: 'board_create_sticky', ok: true }], write_ok_count: 1,
+      board_layout_reports: [{ board_id: 'board-c1', batch_id: 'session-c1', report: { counts: { 'card-card-overlap': 1 },
+        issues: [{ kind: 'card-card-overlap', severity: 'warning', itemIds: ['sticky:a', 'sticky:b'],
+          coordinate: { x: 12.4, y: 30.1 }, bounds: { x: 0, y: 0, w: 24, h: 60 } }] } }] };
+    const changes = vi.fn(), unsubscribe = subscribeBoardChanges(changes);
+    try {
+      const stream = streamResponse();
+      render(<AgentPanel />);
+      let sending!: Promise<void>;
+      await act(async () => { sending = useAgentStore.getState().sendMessage('铺概念图'); });
+      await act(async () => { stream.push(event('text', { content: '已创建便签。' }) + event('turn_receipt', receipt)); });
+      expect(changes).toHaveBeenCalledExactlyOnceWith('board-c1');
+      expect(screen.getByText('板排版体检：1 项提示')).toBeTruthy();
+      expect(screen.getByText('卡片重叠 (12, 30)')).toBeTruthy();
+      await act(async () => { stream.push(event('done', {})); stream.close(); await sending; });
+      expect(useAgentStore.getState().messages.slice(-1)[0]?.turn_receipt).toEqual(receipt);
+      expect(screen.getAllByText('板排版体检：1 项提示')).toHaveLength(1);
+    } finally { unsubscribe(); }
+  });
+
+  it('keeps a successful board write visible when its diagnostic is unavailable', () => {
+    render(<MessageBubble message={message('已创建便签。', { ...emptyReceipt(), write_ok_count: 1,
+      write_calls: [{ name: 'board_create_sticky', ok: true }],
+      board_layout_reports: [{ board_id: 'board-c1', batch_id: 'session-c1', report: null, diagnostic_error: 'layout_diagnostic_unavailable' }] })} />);
+    expect(screen.getByText('板排版体检：暂不可用')).toBeTruthy();
+    expect(screen.getByLabelText('成功 board_create_sticky')).toBeTruthy();
+  });
+
   it('reads historical summaries and lists successful/failed writes beside the unchanged claim', async () => {
     const receipt = writtenReceipt();
     http.get.mockImplementation(async (url: string) => ({ data: url.endsWith('/messages') ? [message('已保存偏好。', receipt)] : [] }));

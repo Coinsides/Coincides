@@ -1,0 +1,2023 @@
+{
+  "status": "builder-evidence-not-release",
+  "scope": "All discovered server/src and server/scripts .test.ts files; final attempt per file; no exclusions.",
+  "fullServerGreen": false,
+  "server": {
+    "files": 102,
+    "passedFiles": 99,
+    "failedFiles": 3,
+    "tapCounts": {
+      "tests": 1014,
+      "suites": 0,
+      "pass": 1011,
+      "fail": 2,
+      "cancelled": 1,
+      "skipped": 0,
+      "todo": 0,
+      "flaky-retries": 0
+    },
+    "countsCaveat": "Includes one file that failed during loading and one file-level timeout; not all contained test cases were enumerated.",
+    "results": [
+      {
+        "file": "server/src/agent/providers/index.test.ts",
+        "label": "server-file-index",
+        "log": "server-file-index.log",
+        "exit": 0,
+        "duration_ms": 405,
+        "counts": {
+          "tests": 49,
+          "suites": 0,
+          "pass": 49,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/toolFace/registry.test.ts",
+        "label": "server-file-registry",
+        "log": "server-file-registry.log",
+        "exit": 0,
+        "duration_ms": 301,
+        "counts": {
+          "tests": 5,
+          "suites": 0,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/providerCredentials.test.ts",
+        "label": "server-file-providerCredentials",
+        "log": "server-file-providerCredentials.log",
+        "exit": 0,
+        "duration_ms": 590,
+        "counts": {
+          "tests": 5,
+          "suites": 0,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/textFlowIdentityContract.test.ts",
+        "label": "server-file-textFlowIdentityContract",
+        "log": "server-file-textFlowIdentityContract.log",
+        "exit": 0,
+        "duration_ms": 2489,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13AgentMemories.test.ts",
+        "label": "server-file-v13AgentMemories",
+        "log": "server-file-v13AgentMemories.log",
+        "exit": 0,
+        "duration_ms": 654,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13AtomicTextSave.test.ts",
+        "label": "server-file-v13AtomicTextSave",
+        "log": "server-file-v13AtomicTextSave.log",
+        "exit": 0,
+        "duration_ms": 10751,
+        "counts": {
+          "tests": 26,
+          "suites": 0,
+          "pass": 26,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13AtomicTextSaveMigration.test.ts",
+        "label": "server-file-v13AtomicTextSaveMigration",
+        "log": "server-file-v13AtomicTextSaveMigration.log",
+        "exit": 0,
+        "duration_ms": 1236,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardCeremonyNote.test.ts",
+        "label": "server-file-v13BoardCeremonyNote",
+        "log": "server-file-v13BoardCeremonyNote.log",
+        "exit": 0,
+        "duration_ms": 988,
+        "counts": {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardChalk.test.ts",
+        "label": "server-file-v13BoardChalk",
+        "log": "server-file-v13BoardChalk.log",
+        "exit": 0,
+        "duration_ms": 1016,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardIdentity.test.ts",
+        "label": "server-file-v13BoardIdentity",
+        "log": "server-file-v13BoardIdentity.log",
+        "exit": 0,
+        "duration_ms": 1929,
+        "counts": {
+          "tests": 10,
+          "suites": 0,
+          "pass": 10,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardRoutes.test.ts",
+        "label": "server-file-v13BoardRoutes",
+        "log": "server-file-v13BoardRoutes.log",
+        "exit": 0,
+        "duration_ms": 823,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardSchema.test.ts",
+        "label": "server-file-v13BoardSchema",
+        "log": "server-file-v13BoardSchema.log",
+        "exit": 0,
+        "duration_ms": 864,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardServices.test.ts",
+        "label": "server-file-v13BoardServices",
+        "log": "server-file-v13BoardServices.log",
+        "exit": 0,
+        "duration_ms": 896,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardStaging.test.ts",
+        "label": "server-file-v13BoardStaging",
+        "log": "server-file-v13BoardStaging.log",
+        "exit": 0,
+        "duration_ms": 869,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardTextRanges.test.ts",
+        "label": "server-file-v13BoardTextRanges",
+        "log": "server-file-v13BoardTextRanges.log",
+        "exit": 0,
+        "duration_ms": 1483,
+        "counts": {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardTrayRelocation.test.ts",
+        "label": "server-file-v13BoardTrayRelocation",
+        "log": "server-file-v13BoardTrayRelocation.log",
+        "exit": 0,
+        "duration_ms": 1769,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+        "label": "server-file-v13BoardViewportBookmarks",
+        "log": "server-file-v13BoardViewportBookmarks.log",
+        "exit": 0,
+        "duration_ms": 1559,
+        "counts": {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13BoardWave1.test.ts",
+        "label": "server-file-v13BoardWave1",
+        "log": "server-file-v13BoardWave1.log",
+        "exit": 0,
+        "duration_ms": 708,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13CanvasRetirement.test.ts",
+        "label": "server-file-v13CanvasRetirement",
+        "log": "server-file-v13CanvasRetirement.log",
+        "exit": 0,
+        "duration_ms": 684,
+        "counts": {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13CoordinateContract.test.ts",
+        "label": "server-file-v13CoordinateContract",
+        "log": "server-file-v13CoordinateContract.log",
+        "exit": 0,
+        "duration_ms": 1346,
+        "counts": {
+          "tests": 5,
+          "suites": 0,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13EventsLedger.test.ts",
+        "label": "server-file-v13EventsLedger",
+        "log": "server-file-v13EventsLedger.log",
+        "exit": 0,
+        "duration_ms": 836,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13GraphemeTextRanges.test.ts",
+        "label": "server-file-v13GraphemeTextRanges",
+        "log": "server-file-v13GraphemeTextRanges.log",
+        "exit": 0,
+        "duration_ms": 495,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13ItemFloor.test.ts",
+        "label": "server-file-v13ItemFloor",
+        "log": "server-file-v13ItemFloor.log",
+        "exit": 0,
+        "duration_ms": 704,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13ItemRefBlocks.test.ts",
+        "label": "server-file-v13ItemRefBlocks",
+        "log": "server-file-v13ItemRefBlocks.log",
+        "exit": 0,
+        "duration_ms": 740,
+        "counts": {
+          "tests": 5,
+          "suites": 0,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13MediaBlocks.test.ts",
+        "label": "server-file-v13MediaBlocks",
+        "log": "server-file-v13MediaBlocks.log",
+        "exit": 0,
+        "duration_ms": 2070,
+        "counts": {
+          "tests": 13,
+          "suites": 0,
+          "pass": 13,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13NoteMetadata.test.ts",
+        "label": "server-file-v13NoteMetadata",
+        "log": "server-file-v13NoteMetadata.log",
+        "exit": 0,
+        "duration_ms": 1459,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13PagePresets.test.ts",
+        "label": "server-file-v13PagePresets",
+        "log": "server-file-v13PagePresets.log",
+        "exit": 0,
+        "duration_ms": 982,
+        "counts": {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13PaperInk.test.ts",
+        "label": "server-file-v13PaperInk",
+        "log": "server-file-v13PaperInk.log",
+        "exit": 0,
+        "duration_ms": 816,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13PaperSkin.test.ts",
+        "label": "server-file-v13PaperSkin",
+        "log": "server-file-v13PaperSkin.log",
+        "exit": 0,
+        "duration_ms": 2265,
+        "counts": {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13ProjectDeletionReferences.test.ts",
+        "label": "server-file-v13ProjectDeletionReferences",
+        "log": "server-file-v13ProjectDeletionReferences.log",
+        "exit": 0,
+        "duration_ms": 987,
+        "counts": {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13RecordedAction.test.ts",
+        "label": "server-file-v13RecordedAction",
+        "log": "server-file-v13RecordedAction.log",
+        "exit": 0,
+        "duration_ms": 278,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+        "label": "server-file-v13SourceProjectionRepair",
+        "log": "server-file-v13SourceProjectionRepair.log",
+        "exit": 0,
+        "duration_ms": 1431,
+        "counts": {
+          "tests": 10,
+          "suites": 0,
+          "pass": 10,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13SourceReprojection.test.ts",
+        "label": "server-file-v13SourceReprojection",
+        "log": "server-file-v13SourceReprojection.log",
+        "exit": 0,
+        "duration_ms": 1969,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13Tray.test.ts",
+        "label": "server-file-v13Tray",
+        "log": "server-file-v13Tray.log",
+        "exit": 0,
+        "duration_ms": 772,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13TrayOrder.test.ts",
+        "label": "server-file-v13TrayOrder",
+        "log": "server-file-v13TrayOrder.log",
+        "exit": 0,
+        "duration_ms": 890,
+        "counts": {
+          "tests": 5,
+          "suites": 0,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v13WallCollectionBatch.test.ts",
+        "label": "server-file-v13WallCollectionBatch",
+        "log": "server-file-v13WallCollectionBatch.log",
+        "exit": 0,
+        "duration_ms": 307,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14AgentKnowledgeProjection.test.ts",
+        "label": "server-file-v14AgentKnowledgeProjection",
+        "log": "server-file-v14AgentKnowledgeProjection.log",
+        "exit": 0,
+        "duration_ms": 318,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14AgentRouteLifecycle.test.ts",
+        "label": "server-file-v14AgentRouteLifecycle",
+        "log": "server-file-v14AgentRouteLifecycle.log",
+        "exit": 0,
+        "duration_ms": 1965,
+        "counts": {
+          "tests": 10,
+          "suites": 0,
+          "pass": 10,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14AgentVerbTransfer.test.ts",
+        "label": "server-file-v14AgentVerbTransfer",
+        "log": "server-file-v14AgentVerbTransfer.log",
+        "exit": 0,
+        "duration_ms": 25721,
+        "counts": {
+          "tests": 50,
+          "suites": 0,
+          "pass": 50,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14AgentWriteDoor.test.ts",
+        "label": "server-file-v14AgentWriteDoor",
+        "log": "server-file-v14AgentWriteDoor.log",
+        "exit": 0,
+        "duration_ms": 1303,
+        "counts": {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14BoardLayoutInspector.test.ts",
+        "label": "server-file-v14BoardLayoutInspector",
+        "log": "server-file-v14BoardLayoutInspector.log",
+        "exit": 0,
+        "duration_ms": 251,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14BoardSandbox.test.ts",
+        "label": "server-file-v14BoardSandbox",
+        "log": "server-file-v14BoardSandbox.log",
+        "exit": 0,
+        "duration_ms": 2417,
+        "counts": {
+          "tests": 15,
+          "suites": 0,
+          "pass": 15,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14BoardVisual.test.ts",
+        "label": "server-file-v14BoardVisual",
+        "log": "server-file-v14BoardVisual.log",
+        "exit": 0,
+        "duration_ms": 2125,
+        "counts": {
+          "tests": 12,
+          "suites": 0,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14BoardVisualGeometry.test.ts",
+        "label": "server-file-v14BoardVisualGeometry",
+        "log": "server-file-v14BoardVisualGeometry.log",
+        "exit": 0,
+        "duration_ms": 253,
+        "counts": {
+          "tests": 19,
+          "suites": 0,
+          "pass": 19,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14CardCover.test.ts",
+        "label": "server-file-v14CardCover",
+        "log": "server-file-v14CardCover.log",
+        "exit": 0,
+        "duration_ms": 1219,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ClaimObservation.test.ts",
+        "label": "server-file-v14ClaimObservation",
+        "log": "server-file-v14ClaimObservation.log",
+        "exit": 0,
+        "duration_ms": 297,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ClaimReceipt.test.ts",
+        "label": "server-file-v14ClaimReceipt",
+        "log": "server-file-v14ClaimReceipt.log",
+        "exit": 0,
+        "duration_ms": 2541,
+        "counts": {
+          "tests": 26,
+          "suites": 0,
+          "pass": 26,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ComponentBlocks.test.ts",
+        "label": "server-file-v14ComponentBlocks",
+        "log": "server-file-v14ComponentBlocks.log",
+        "exit": 0,
+        "duration_ms": 1091,
+        "counts": {
+          "tests": 11,
+          "suites": 0,
+          "pass": 11,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ContextHint.test.ts",
+        "label": "server-file-v14ContextHint",
+        "log": "server-file-v14ContextHint.log",
+        "exit": 0,
+        "duration_ms": 3064,
+        "counts": {
+          "tests": 34,
+          "suites": 0,
+          "pass": 34,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14CoverPage.test.ts",
+        "label": "server-file-v14CoverPage",
+        "log": "server-file-v14CoverPage.log",
+        "exit": 0,
+        "duration_ms": 1728,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14DeleteCeremony.test.ts",
+        "label": "server-file-v14DeleteCeremony",
+        "log": "server-file-v14DeleteCeremony.log",
+        "exit": 0,
+        "duration_ms": 2518,
+        "counts": {
+          "tests": 16,
+          "suites": 0,
+          "pass": 16,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14LoopRobustness.test.ts",
+        "label": "server-file-v14LoopRobustness",
+        "log": "server-file-v14LoopRobustness.log",
+        "exit": 0,
+        "duration_ms": 2252,
+        "counts": {
+          "tests": 14,
+          "suites": 0,
+          "pass": 14,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14MemoryQuickwins.test.ts",
+        "label": "server-file-v14MemoryQuickwins",
+        "log": "server-file-v14MemoryQuickwins.log",
+        "exit": 0,
+        "duration_ms": 2788,
+        "counts": {
+          "tests": 17,
+          "suites": 0,
+          "pass": 17,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14NoteBinding.test.ts",
+        "label": "server-file-v14NoteBinding",
+        "log": "server-file-v14NoteBinding.log",
+        "exit": 0,
+        "duration_ms": 1092,
+        "counts": {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14PaletteColors.test.ts",
+        "label": "server-file-v14PaletteColors",
+        "log": "server-file-v14PaletteColors.log",
+        "exit": 0,
+        "duration_ms": 716,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14PaperFreedom.test.ts",
+        "label": "server-file-v14PaperFreedom",
+        "log": "server-file-v14PaperFreedom.log",
+        "exit": 0,
+        "duration_ms": 528,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ParagraphFurniture.test.ts",
+        "label": "server-file-v14ParagraphFurniture",
+        "log": "server-file-v14ParagraphFurniture.log",
+        "exit": 0,
+        "duration_ms": 1620,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ProposalUnification.test.ts",
+        "label": "server-file-v14ProposalUnification",
+        "log": "server-file-v14ProposalUnification.log",
+        "exit": 0,
+        "duration_ms": 2646,
+        "counts": {
+          "tests": 16,
+          "suites": 0,
+          "pass": 16,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14ReadTools.test.ts",
+        "label": "server-file-v14ReadTools",
+        "log": "server-file-v14ReadTools.log",
+        "exit": 0,
+        "duration_ms": 2914,
+        "counts": {
+          "tests": 11,
+          "suites": 0,
+          "pass": 11,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14SkinSuites.test.ts",
+        "label": "server-file-v14SkinSuites",
+        "log": "server-file-v14SkinSuites.log",
+        "exit": 0,
+        "duration_ms": 733,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14TableBlocks.test.ts",
+        "label": "server-file-v14TableBlocks",
+        "log": "server-file-v14TableBlocks.log",
+        "exit": 0,
+        "duration_ms": 1092,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v14TurnIdentity.test.ts",
+        "label": "server-file-v14TurnIdentity",
+        "log": "server-file-v14TurnIdentity.log",
+        "exit": 0,
+        "duration_ms": 827,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2BlockRestoreDoor.test.ts",
+        "label": "server-file-v2BlockRestoreDoor",
+        "log": "server-file-v2BlockRestoreDoor.log",
+        "exit": 0,
+        "duration_ms": 1040,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2CanvasPersistenceCutover.test.ts",
+        "label": "server-file-v2CanvasPersistenceCutover",
+        "log": "server-file-v2CanvasPersistenceCutover.log",
+        "exit": 0,
+        "duration_ms": 25026,
+        "counts": {
+          "tests": 49,
+          "suites": 0,
+          "pass": 49,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2ContentGroups.test.ts",
+        "label": "server-file-v2ContentGroups",
+        "log": "server-file-v2ContentGroups.log",
+        "exit": 0,
+        "duration_ms": 2215,
+        "counts": {
+          "tests": 12,
+          "suites": 0,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2DevQuickLogin.test.ts",
+        "label": "server-file-v2DevQuickLogin",
+        "log": "server-file-v2DevQuickLogin.log",
+        "exit": 0,
+        "duration_ms": 19576,
+        "counts": {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2DocumentParserPdf.test.ts",
+        "label": "server-file-v2DocumentParserPdf",
+        "log": "server-file-v2DocumentParserPdf.log",
+        "exit": 0,
+        "duration_ms": 1588,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2GroupFolders.test.ts",
+        "label": "server-file-v2GroupFolders",
+        "log": "server-file-v2GroupFolders.log",
+        "exit": 0,
+        "duration_ms": 1630,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2ImprintCitations.test.ts",
+        "label": "server-file-v2ImprintCitations",
+        "log": "server-file-v2ImprintCitations.log",
+        "exit": 0,
+        "duration_ms": 525,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2ImprintEmbedding.test.ts",
+        "label": "server-file-v2ImprintEmbedding",
+        "log": "server-file-v2ImprintEmbedding.log",
+        "exit": 0,
+        "duration_ms": 297,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2ImprintRetrieval.test.ts",
+        "label": "server-file-v2ImprintRetrieval",
+        "log": "server-file-v2ImprintRetrieval.log",
+        "exit": 0,
+        "duration_ms": 515,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2ItemRelationFloor.test.ts",
+        "label": "server-file-v2ItemRelationFloor",
+        "log": "server-file-v2ItemRelationFloor.log",
+        "exit": 0,
+        "duration_ms": 1856,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2Items.test.ts",
+        "label": "server-file-v2Items",
+        "log": "server-file-v2Items.log",
+        "exit": 0,
+        "duration_ms": 1580,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2MaterialLibrary.test.ts",
+        "label": "server-file-v2MaterialLibrary",
+        "log": "server-file-v2MaterialLibrary.log",
+        "exit": 0,
+        "duration_ms": 44072,
+        "counts": {
+          "tests": 59,
+          "suites": 0,
+          "pass": 59,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2McpArtifact.test.ts",
+        "label": "server-file-v2McpArtifact",
+        "log": "server-file-v2McpArtifact.log",
+        "exit": 0,
+        "duration_ms": 53735,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2McpTransport.test.ts",
+        "label": "server-file-v2McpTransport",
+        "log": "server-file-v2McpTransport.log",
+        "exit": 0,
+        "duration_ms": 42175,
+        "counts": {
+          "tests": 49,
+          "suites": 0,
+          "pass": 49,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2NoteBlockLifecycle.test.ts",
+        "label": "server-file-v2NoteBlockLifecycle",
+        "log": "server-file-v2NoteBlockLifecycle.log",
+        "exit": 0,
+        "duration_ms": 7065,
+        "counts": {
+          "tests": 25,
+          "suites": 0,
+          "pass": 25,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2NoteFoundation.test.ts",
+        "label": "server-file-v2NoteFoundation",
+        "log": "server-file-v2NoteFoundation.log",
+        "exit": 0,
+        "duration_ms": 716,
+        "counts": {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2NotesLifecycle.test.ts",
+        "label": "server-file-v2NotesLifecycle",
+        "log": "server-file-v2NotesLifecycle.log",
+        "exit": 0,
+        "duration_ms": 1798,
+        "counts": {
+          "tests": 13,
+          "suites": 0,
+          "pass": 13,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2NotesListService.test.ts",
+        "label": "server-file-v2NotesListService",
+        "log": "server-file-v2NotesListService.log",
+        "exit": 0,
+        "duration_ms": 21742,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2Purposes.test.ts",
+        "label": "server-file-v2Purposes",
+        "log": "server-file-v2Purposes.log",
+        "exit": 0,
+        "duration_ms": 369,
+        "counts": {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2RelationLifecycleClosure.test.ts",
+        "label": "server-file-v2RelationLifecycleClosure",
+        "log": "server-file-v2RelationLifecycleClosure.log",
+        "exit": 0,
+        "duration_ms": 918,
+        "counts": {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2Relations.test.ts",
+        "label": "server-file-v2Relations",
+        "log": "server-file-v2Relations.log",
+        "exit": 0,
+        "duration_ms": 1368,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceContainerIntake.test.ts",
+        "label": "server-file-v2SourceContainerIntake",
+        "log": "server-file-v2SourceContainerIntake.log",
+        "exit": 0,
+        "duration_ms": 2149,
+        "counts": {
+          "tests": 14,
+          "suites": 0,
+          "pass": 14,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceFileIntake.test.ts",
+        "label": "server-file-v2SourceFileIntake",
+        "log": "server-file-v2SourceFileIntake.log",
+        "exit": 0,
+        "duration_ms": 2988,
+        "counts": {
+          "tests": 12,
+          "suites": 0,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceIdentityFloor.test.ts",
+        "label": "server-file-v2SourceIdentityFloor",
+        "log": "server-file-v2SourceIdentityFloor.log",
+        "exit": 0,
+        "duration_ms": 1562,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceImprints.test.ts",
+        "label": "server-file-v2SourceImprints",
+        "log": "server-file-v2SourceImprints.log",
+        "exit": 0,
+        "duration_ms": 10019,
+        "counts": {
+          "tests": 12,
+          "suites": 0,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceLifecycleClosure.test.ts",
+        "label": "server-file-v2SourceLifecycleClosure",
+        "log": "server-file-v2SourceLifecycleClosure.log",
+        "exit": 0,
+        "duration_ms": 1815,
+        "counts": {
+          "tests": 8,
+          "suites": 0,
+          "pass": 8,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceMaterialization.test.ts",
+        "label": "server-file-v2SourceMaterialization",
+        "log": "server-file-v2SourceMaterialization.log",
+        "exit": 0,
+        "duration_ms": 2919,
+        "counts": {
+          "tests": 11,
+          "suites": 0,
+          "pass": 11,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceMineruWiring.test.ts",
+        "label": "server-file-v2SourceMineruWiring",
+        "log": "server-file-v2SourceMineruWiring.log",
+        "exit": 1,
+        "duration_ms": 774,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 0,
+          "fail": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceNeverReject.test.ts",
+        "label": "server-file-v2SourceNeverReject",
+        "log": "server-file-v2SourceNeverReject.log",
+        "exit": 0,
+        "duration_ms": 2368,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceRegionCells.test.ts",
+        "label": "server-file-v2SourceRegionCells",
+        "log": "server-file-v2SourceRegionCells.log",
+        "exit": 1,
+        "duration_ms": 2576,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 0,
+          "fail": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceT0Alignment.test.ts",
+        "label": "server-file-v2SourceT0Alignment",
+        "log": "server-file-v2SourceT0Alignment.log",
+        "exit": 0,
+        "duration_ms": 2068,
+        "counts": {
+          "tests": 10,
+          "suites": 0,
+          "pass": 10,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+        "label": "server-file-v2SourceTranscriberFingerprint",
+        "log": "server-file-v2SourceTranscriberFingerprint.log",
+        "exit": 0,
+        "duration_ms": 1572,
+        "counts": {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2TemplateStudioDecommission.test.ts",
+        "label": "server-file-v2TemplateStudioDecommission",
+        "log": "server-file-v2TemplateStudioDecommission.log",
+        "exit": 0,
+        "duration_ms": 540,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2TestV2ManifestHook.test.ts",
+        "label": "server-file-v2TestV2ManifestHook",
+        "log": "server-file-v2TestV2ManifestHook-1789893790740.log",
+        "exit": 0,
+        "duration_ms": 421,
+        "counts": {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/src/__tests__/v2TrashNotesTool.test.ts",
+        "label": "server-file-v2TrashNotesTool",
+        "log": "server-file-v2TrashNotesTool.log",
+        "exit": 0,
+        "duration_ms": 10518,
+        "counts": {
+          "tests": 23,
+          "suites": 0,
+          "pass": 23,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/scripts/agent-eval/harness.test.ts",
+        "label": "server-file-harness",
+        "log": "server-file-harness.log",
+        "exit": 0,
+        "duration_ms": 1080,
+        "counts": {
+          "tests": 14,
+          "suites": 0,
+          "pass": 14,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/scripts/v13WildernessExecute.test.ts",
+        "label": "server-file-v13WildernessExecute",
+        "log": "server-file-v13WildernessExecute.log",
+        "exit": 1,
+        "duration_ms": 120137,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 0,
+          "fail": 0,
+          "cancelled": 1,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/scripts/v13WildernessShadowRun.test.ts",
+        "label": "server-file-v13WildernessShadowRun",
+        "log": "server-file-v13WildernessShadowRun.log",
+        "exit": 0,
+        "duration_ms": 1885,
+        "counts": {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/scripts/v2Bn12LifecycleMigration.test.ts",
+        "label": "server-file-v2Bn12LifecycleMigration",
+        "log": "server-file-v2Bn12LifecycleMigration.log",
+        "exit": 0,
+        "duration_ms": 269,
+        "counts": {
+          "tests": 5,
+          "suites": 0,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      },
+      {
+        "file": "server/scripts/v2OperationBatchTimestampMigration.test.ts",
+        "label": "server-file-v2OperationBatchTimestampMigration",
+        "log": "server-file-v2OperationBatchTimestampMigration.log",
+        "exit": 0,
+        "duration_ms": 480,
+        "counts": {
+          "tests": 1,
+          "suites": 0,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "flaky-retries": 0
+        }
+      }
+    ]
+  },
+  "runtimeGate": {
+    "passed": 23,
+    "components": [
+      {
+        "script": "check:test-wiring",
+        "label": "gate-check-test-wiring",
+        "log": "gate-check-test-wiring.log",
+        "exit": 0,
+        "duration_ms": 259
+      },
+      {
+        "script": "test:agent-knowledge",
+        "label": "knowledge-rerun",
+        "log": "knowledge-rerun.log",
+        "exit": 0,
+        "duration_ms": 3168
+      },
+      {
+        "script": "check:agent-knowledge",
+        "label": "gate-check-agent-knowledge",
+        "log": "gate-check-agent-knowledge.log",
+        "exit": 0,
+        "duration_ms": 528
+      },
+      {
+        "script": "check:tech-debt-table",
+        "label": "gate-check-tech-debt-table",
+        "log": "gate-check-tech-debt-table.log",
+        "exit": 0,
+        "duration_ms": 281
+      },
+      {
+        "script": "test:unit",
+        "label": "client-full-final",
+        "log": "client-full-final.log",
+        "exit": 0,
+        "duration_ms": 139066
+      },
+      {
+        "script": "test:tool-face-registry",
+        "label": "gate-test-tool-face-registry",
+        "log": "gate-test-tool-face-registry.log",
+        "exit": 0,
+        "duration_ms": 621
+      },
+      {
+        "script": "test:tool-face-manifest",
+        "label": "gate-test-tool-face-manifest",
+        "log": "gate-test-tool-face-manifest.log",
+        "exit": 0,
+        "duration_ms": 3636
+      },
+      {
+        "script": "check:tool-face-manifest",
+        "label": "gate-check-tool-face-manifest",
+        "log": "gate-check-tool-face-manifest.log",
+        "exit": 0,
+        "duration_ms": 581
+      },
+      {
+        "script": "test:tool-face-parity",
+        "label": "gate-test-tool-face-parity",
+        "log": "gate-test-tool-face-parity.log",
+        "exit": 0,
+        "duration_ms": 5328
+      },
+      {
+        "script": "check:tool-face-parity",
+        "label": "gate-check-tool-face-parity",
+        "log": "gate-check-tool-face-parity.log",
+        "exit": 0,
+        "duration_ms": 530
+      },
+      {
+        "script": "check:server-shared-runtime-import",
+        "label": "gate-check-server-shared-runtime-import",
+        "log": "gate-check-server-shared-runtime-import.log",
+        "exit": 0,
+        "duration_ms": 570
+      },
+      {
+        "script": "check:canvas-runtime-boundary",
+        "label": "gate-check-canvas-runtime-boundary",
+        "log": "gate-check-canvas-runtime-boundary.log",
+        "exit": 0,
+        "duration_ms": 459
+      },
+      {
+        "script": "check:group-gallery-shell",
+        "label": "gate-check-group-gallery-shell",
+        "log": "gate-check-group-gallery-shell.log",
+        "exit": 0,
+        "duration_ms": 433
+      },
+      {
+        "script": "check:groups-rail-shell",
+        "label": "gate-check-groups-rail-shell",
+        "log": "gate-check-groups-rail-shell.log",
+        "exit": 0,
+        "duration_ms": 475
+      },
+      {
+        "script": "check:single-editor-shell",
+        "label": "gate-check-single-editor-shell",
+        "log": "gate-check-single-editor-shell.log",
+        "exit": 0,
+        "duration_ms": 431
+      },
+      {
+        "script": "check:source-experience",
+        "label": "gate-check-source-experience",
+        "log": "gate-check-source-experience.log",
+        "exit": 0,
+        "duration_ms": 923
+      },
+      {
+        "script": "check:v2-bn11-legacy-shutdown",
+        "label": "gate-check-v2-bn11-legacy-shutdown",
+        "log": "gate-check-v2-bn11-legacy-shutdown.log",
+        "exit": 0,
+        "duration_ms": 425
+      },
+      {
+        "script": "check:v2-bn11-relation-freshness",
+        "label": "gate-check-v2-bn11-relation-freshness",
+        "log": "gate-check-v2-bn11-relation-freshness.log",
+        "exit": 0,
+        "duration_ms": 426
+      },
+      {
+        "script": "smoke:canvas-engine-model-contract",
+        "label": "gate-smoke-canvas-engine-model-contract",
+        "log": "gate-smoke-canvas-engine-model-contract.log",
+        "exit": 0,
+        "duration_ms": 1971
+      },
+      {
+        "script": "build:client",
+        "label": "client-build-final",
+        "log": "client-build-final.log",
+        "exit": 0,
+        "duration_ms": 49697
+      },
+      {
+        "script": "build",
+        "label": "server-build-last",
+        "log": "server-build-last.log",
+        "exit": 0,
+        "duration_ms": 28436
+      },
+      {
+        "script": "smoke:canvas-engine-performance",
+        "label": "gate-smoke-canvas-engine-performance",
+        "log": "gate-smoke-canvas-engine-performance.log",
+        "exit": 0,
+        "duration_ms": 1342
+      },
+      {
+        "script": "docs:check",
+        "label": "docs-check-delivery",
+        "log": "docs-check-delivery.log",
+        "exit": 0,
+        "duration_ms": 558
+      }
+    ],
+    "omittedPerOrder": [
+      "git diff --check",
+      "check:changed-file-secrets"
+    ],
+    "monolithicVerifyRun": false
+  },
+  "evaluation": {
+    "schemaVersion": 1,
+    "runId": "2026-09-20T08-25-09-047Z-8fddb898",
+    "scenarios": [
+      {
+        "name": "07-board-concept-map",
+        "dimensions": [
+          "task_completion",
+          "claim_without_receipt",
+          "tool_misuse",
+          "turns_and_duration"
+        ],
+        "mode": "scripted",
+        "scenarioAssertionsEvaluated": true,
+        "taskCompletion": {
+          "passed": 9,
+          "total": 9,
+          "rate": 1
+        },
+        "claimWithoutReceiptCount": 0,
+        "toolMisuse": {
+          "count": 0,
+          "byTool": {}
+        },
+        "timing": {
+          "userTurns": 2,
+          "toolRounds": 2,
+          "durationMs": 703.0293,
+          "turns": [
+            {
+              "durationMs": 15.001800000000003,
+              "toolRounds": 1
+            },
+            {
+              "durationMs": 189.98490000000004,
+              "toolRounds": 1
+            }
+          ]
+        },
+        "failures": []
+      },
+      {
+        "name": "08-board-batch-revert",
+        "dimensions": [
+          "task_completion",
+          "claim_without_receipt",
+          "tool_misuse",
+          "turns_and_duration"
+        ],
+        "mode": "scripted",
+        "scenarioAssertionsEvaluated": true,
+        "taskCompletion": {
+          "passed": 12,
+          "total": 12,
+          "rate": 1
+        },
+        "claimWithoutReceiptCount": 0,
+        "toolMisuse": {
+          "count": 0,
+          "byTool": {}
+        },
+        "timing": {
+          "userTurns": 2,
+          "toolRounds": 2,
+          "durationMs": 705.588,
+          "turns": [
+            {
+              "durationMs": 14.775800000000004,
+              "toolRounds": 1
+            },
+            {
+              "durationMs": 190.7514,
+              "toolRounds": 1
+            }
+          ]
+        },
+        "failures": []
+      }
+    ],
+    "taskCompletion": {
+      "passed": 21,
+      "total": 21,
+      "rate": 1
+    },
+    "claimWithoutReceiptCount": 0,
+    "toolMisuse": {
+      "count": 0,
+      "byTool": {}
+    },
+    "timing": {
+      "userTurns": 4,
+      "toolRounds": 4,
+      "durationMs": 1408.6173
+    }
+  }
+}

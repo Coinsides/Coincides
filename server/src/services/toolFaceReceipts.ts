@@ -15,7 +15,7 @@ export type ToolFaceReceiptResource = Record<string, unknown>;
 
 export interface WriteToolFaceReceiptInput {
   sourceType?: ReceiptSource;
-  agentContext?: { actor: 'agent'; channel: 'chat'; conversation_id: string; event_seq: number };
+  agentContext?: { actor: 'agent'; channel: 'chat'; conversation_id: string; event_seq: number; batch_id?: string; board_id?: string };
   userId: string;
   courseId?: string | null;
   callId: string;

@@ -24,6 +24,8 @@ import type {
 interface BoardScope {
   boardId: string | undefined;
   history: BoardCommandHistory;
+  agentBatchId?: string;
+  agentBatchReverted?: boolean;
 }
 
 interface BoardState {
@@ -124,8 +126,12 @@ export function useBoard(boardId: string | undefined) {
 
   const reload = useCallback(() => load(scope), [load, scope]);
   useEffect(() => subscribeBoardChanges((changedBoardId) => {
-    if (changedBoardId === boardId) void reload();
-  }), [boardId, reload]);
+    if (changedBoardId === boardId) {
+      scope.agentBatchId = undefined;
+      scope.agentBatchReverted = false;
+      void reload();
+    }
+  }), [boardId, reload, scope]);
   const clearError = useCallback(() => {
     if (!isCurrent(scope)) return;
     saveFailure.current = null;
@@ -288,6 +294,20 @@ export function useBoard(boardId: string | undefined) {
   const redo = useCallback(() => enqueue(
     (id) => scope.history.redo(id), (detail) => detail, 'write', scope,
   ), [enqueue, scope]);
+  const revertAgentBatch = useCallback(() => enqueue(async (id) => {
+    if (!scope.agentBatchId) {
+      const batch = await boardRepository.getAgentBatch(id);
+      if (!batch || !batch.receipt_count) throw new Error('此板没有待撤销的 Agent 批次');
+      scope.agentBatchId = batch.batch_id;
+    }
+    // Keep the exact target across failures/retries; never fall back to an older conversation.
+    await boardRepository.revertAgentBatch(id, scope.agentBatchId);
+    scope.agentBatchReverted = true;
+    return boardRepository.get(id);
+  }, (_detail, value) => {
+    scope.history.reset(value);
+    return value;
+  }, 'write', scope), [enqueue, scope]);
 
   const flush = useCallback(async () => {
     let pending: Promise<void>;
@@ -308,9 +328,10 @@ export function useBoard(boardId: string | undefined) {
     pending: current && state.pendingCount > 0,
     canUndo: current && scope.history.canUndo,
     canRedo: current && scope.history.canRedo,
+    agentBatchReverted: current && Boolean(scope.agentBatchReverted),
     reload, updateBoard, mount, mountTextRange, updateMember, unmount, addEdge, removeEdge,
     addVisual, removeVisual, updateVisual, castVisual, updateEdge, clearError, flush,
-    updateGeometryBatch, removeSelection, removeVisuals, undo, redo,
+    updateGeometryBatch, removeSelection, removeVisuals, undo, redo, revertAgentBatch,
     createLayer, updateLayer, reorderLayers, deleteLayer, moveSelectionToLayer,
     addSticky, updateSticky, removeSticky, rerouteEdge,
   };

@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 409 份文档。
+共 410 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -140,7 +140,7 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v1 | `active` | — | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v1 | `active` | 2026-09-20 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
@@ -397,6 +397,7 @@
 | [handoffs/2026-09-20-v14-b2-timeline-chart-order.md](handoffs/2026-09-20-v14-b2-timeline-chart-order.md) | B2 · 时间线件+图表件 v1 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 214 文件 2181/2181 亲跑定案;git diff --check+secrets(58 文件)双门绿;server 余 2 红=Python/MinerU 环境基线)` | — | — |
 | [handoffs/2026-09-20-v14-b3-furniture-skin-order.md](handoffs/2026-09-20-v14-b3-furniture-skin-order.md) | B3 · 部件三件+绢本皮+去盒卫生 | `done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 215 文件 2210/2210 亲跑定案(含 HQ 的 headrule token 改名);git diff --check+secrets 双门绿(sk- 长串假阳性以改名根治,⛔放宽扫描器);server 余 2=Python/MinerU 基线,wilderness 27/27 复跑恢复)` | — | — |
 | [handoffs/2026-09-20-v14-b5-image-editing-order.md](handoffs/2026-09-20-v14-b5-image-editing-order.md) | B5 · 图片编辑 v1 | `done(builder 二轮施工交工作树；非 git/secrets 23 组件最终通过；server 两项 Python 环境红、HQ 双门与放行待收口；行内媒体仍属 F2 候裁)` | — | — |
+| [handoffs/2026-09-20-v14-c1-board-sandbox-order.md](handoffs/2026-09-20-v14-c1-board-sandbox-order.md) | C1 · 板沙箱(Agent 的手) | `done（builder 工作树交付；server 全量三项未过，待 HQ 复核，非放行）` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

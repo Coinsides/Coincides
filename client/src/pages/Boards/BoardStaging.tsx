@@ -1,5 +1,5 @@
 import { FileText, Layers, Quote, Square, X } from 'lucide-react';
-import type { BoardCandidate, BoardMember } from './boardTypes';
+import type { BoardCandidate, BoardMember, BoardSticky } from './boardTypes';
 import styles from './BoardStaging.module.css';
 import { BoardReferenceTag } from './BoardReferenceTag';
 import { BOARD_STAGING_MIME } from './boardStagingDrag';
@@ -16,6 +16,9 @@ const kinds = {
 interface BoardStagingProps {
   boardId: string;
   members: BoardMember[];
+  stickies?: BoardSticky[];
+  onPlaceSticky?: (sticky: BoardSticky) => void;
+  onRemoveSticky?: (sticky: BoardSticky) => void;
   candidates: BoardCandidate[];
   busy: boolean;
   onClose: () => void;
@@ -23,18 +26,18 @@ interface BoardStagingProps {
   onRemove: (member: BoardMember) => void;
 }
 
-export function BoardStaging({ boardId, members, candidates, busy, onClose, onPlace, onRemove }: BoardStagingProps) {
+export function BoardStaging({ boardId, members, stickies = [], candidates, busy, onClose, onPlace, onRemove, onPlaceSticky, onRemoveSticky }: BoardStagingProps) {
   const notes = new Map(candidates.filter((candidate) => candidate.member_kind === 'note')
     .map((candidate) => [candidate.member_id, candidate.title]));
   const candidateById = new Map(candidates.map((candidate) => [`${candidate.member_kind}:${candidate.member_id}`, candidate]));
 
   return <aside id="board-staging" data-board-staging="true" className={styles.staging} aria-label="Staging">
     <header className={styles.header}>
-      <h2>Staging <span>({members.length})</span></h2>
+      <h2>Staging <span>({members.length + stickies.length})</span></h2>
       <button type="button" aria-label="Close staging" onClick={onClose}><X size={16} /></button>
     </header>
     <p className={styles.hint}>Drag a row onto the board, or choose Place. Drag items into an open note to reference them.</p>
-    {members.length === 0 ? <p className={styles.empty}>Nothing in staging. Stage something from the picker or an open note.</p>
+    {members.length === 0 && stickies.length === 0 ? <p className={styles.empty}>Nothing in staging. Stage something from the picker or an open note.</p>
       : <ul className={styles.list}>{members.map((member) => {
         const { label, Icon } = kinds[member.member_kind];
         const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
@@ -66,5 +69,20 @@ export function BoardStaging({ boardId, members, candidates, busy, onClose, onPl
           </div>
         </li>;
       })}</ul>}
+    {stickies.length > 0 && <ul className={styles.list}>{stickies.map(sticky => <li key={sticky.id}
+      data-testid={`staging-sticky-${sticky.id}`} className={styles.row} draggable={!busy}
+      onDragStart={event => {
+        if (busy) { event.preventDefault(); return; }
+        event.stopPropagation();
+        event.dataTransfer.setData(BOARD_STAGING_MIME, JSON.stringify({ boardId, stickyId: sticky.id }));
+        event.dataTransfer.effectAllowed = 'move';
+      }}>
+      <p className={styles.referenceBody}>{sticky.text || 'Empty sticky'}</p>
+      <div className={styles.source}>Sticky {sticky.mounted_actor !== 'human' && sticky.mounted_actor}</div>
+      <div className={styles.actions}>
+        <button type="button" disabled={busy} onClick={() => onPlaceSticky?.(sticky)}>Place on board</button>
+        <button type="button" disabled={busy} onClick={() => onRemoveSticky?.(sticky)}>Remove</button>
+      </div>
+    </li>)}</ul>}
   </aside>;
 }

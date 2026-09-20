@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import BoardPage from './BoardPage';
 import { BOARD_STAGING_MIME } from './BoardStaging';
-import type { BoardDetail, BoardMember, MountBoardMemberInput, PatchBoardMemberInput } from './boardTypes';
+import type { BoardDetail, BoardMember, BoardSticky, MountBoardMemberInput, PatchBoardMemberInput } from './boardTypes';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
 vi.mock('@/services/api', async (importOriginal) => ({
@@ -57,6 +57,7 @@ beforeEach(() => {
   http.get.mockImplementation(async (url: string) => {
     if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
     if (url === '/boards/board') return clone(detail);
+    if (url === '/boards/board/agent-batch') return clone({ batch: { batch_id: 'agent-session', receipt_count: 2, board_ids: ['board'] } });
     if (url === '/boards/board/viewport-bookmarks') return clone({ bookmarks: [] });
     if (url === '/courses') return clone([{ id: 'project', name: 'Synthetic project' }]);
     if (url === '/notes') return clone([{ id: 'note', title: 'Source note', course_id: 'project', status: 'active' }]);
@@ -78,6 +79,8 @@ beforeEach(() => {
     return clone({ member: created, created: true });
   });
   http.patch.mockImplementation(async (url: string, input: PatchBoardMemberInput) => {
+    const sticky = detail.stickies?.find(({ id }) => url === `/boards/board/stickies/${id}`);
+    if (sticky) { Object.assign(sticky, input); return clone({ sticky }); }
     const current = detail.members.find(({ id }) => url === `/boards/board/members/${id}`);
     if (!current) throw new Error('Unexpected synthetic patch');
     Object.assign(current, input);
@@ -90,6 +93,79 @@ beforeEach(() => {
 });
 
 describe('board staging dock', () => {
+  const sticky = (id: string): BoardSticky => ({ id, board_id: 'board', text: `Agent ${id}`, placed: false,
+    mounted_actor: 'agent', x: 900, y: 700, w: 240, h: 240, scale: 1, weight: 1, color_index: null,
+    pinned: false, z_index: 0, layer_id: null, created_at: at, updated_at: at });
+
+  it('keeps Agent stickies and their edges in Staging until the human drags them onto the board', async () => {
+    detail.stickies = [sticky('s1')];
+    detail.edges = [{ id: 'e1', board_id: 'board', from_member_id: null, to_member_id: null, from: { kind: 'sticky', id: 's1', anchor: 'e' },
+      to: { kind: 'point', x: 700, y: 400 }, bend: 0, visual_version: 1, label: null, style: {}, created_at: at }];
+    openBoard();
+    fireEvent.click(await screen.findByRole('button', { name: 'Staging (1)' }));
+    const row = screen.getByTestId('staging-sticky-s1');
+    expect(screen.queryByTestId('board-sticky-s1')).toBeNull();
+    expect(screen.queryByTestId('board-edge-e1')).toBeNull();
+    const surface = screen.getByTestId('board-surface');
+    vi.spyOn(surface, 'getBoundingClientRect').mockReturnValue({ left: 100, top: 150, width: 1000, height: 700,
+      right: 1100, bottom: 850, x: 100, y: 150, toJSON() {} });
+    const data = new Map<string, string>();
+    const transfer = { types: [BOARD_STAGING_MIME], effectAllowed: '', dropEffect: '',
+      setData: (type: string, value: string) => data.set(type, value), getData: (type: string) => data.get(type) || '' };
+    fireEvent.dragStart(row, { dataTransfer: transfer });
+    expect(JSON.parse(transfer.getData(BOARD_STAGING_MIME))).toEqual({ boardId: 'board', stickyId: 's1' });
+    const drop = new Event('drop', { bubbles: true, cancelable: true });
+    Object.assign(drop, { dataTransfer: transfer, clientX: 530, clientY: 350 });
+    fireEvent(surface, drop);
+    await screen.findByTestId('board-sticky-s1');
+    expect(http.patch).toHaveBeenCalledWith('/boards/board/stickies/s1',
+      { placed: true, x: 200, y: 110, pinned: false, z_index: 1, layer_id: null });
+    expect(screen.queryByTestId('staging-sticky-s1')).toBeNull();
+    expect(screen.getByTestId('board-edge-e1')).toBeTruthy();
+    expect(http.post).not.toHaveBeenCalled();
+  });
+
+  it('places successive staged stickies at distinct default positions and z indices', async () => {
+    detail.stickies = [sticky('s1'), sticky('s2')];
+    openBoard();
+    fireEvent.click(await screen.findByRole('button', { name: 'Staging (2)' }));
+    fireEvent.click(within(screen.getByTestId('staging-sticky-s1')).getByRole('button', { name: 'Place on board' }));
+    await screen.findByTestId('board-sticky-s1');
+    fireEvent.click(within(screen.getByTestId('staging-sticky-s2')).getByRole('button', { name: 'Place on board' }));
+    await screen.findByTestId('board-sticky-s2');
+    expect(detail.stickies[0]).toMatchObject({ x: 25, y: 45, z_index: 1, placed: true });
+    expect(detail.stickies[1]).toMatchObject({ x: 175, y: 45, z_index: 2, placed: true });
+  });
+
+  it('reverts the fixed Agent batch from the toolbar, reloads the board, and disables repeated clicks', async () => {
+    detail.stickies = [sticky('s1')];
+    http.post.mockImplementation(async (url: string) => {
+      expect(url).toBe('/boards/board/agent-batches/agent-session/revert');
+      detail.stickies = [];
+      return clone({ status: 'reverted', batch_id: 'agent-session', receipt_ids: ['r1'] });
+    });
+    openBoard();
+    fireEvent.click(await screen.findByRole('button', { name: '撤销 Agent 本批' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Staging (0)' })).toBeTruthy());
+    expect((screen.getByRole('button', { name: '撤销 Agent 本批' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: '撤销 Agent 本批' }));
+    expect(http.post).toHaveBeenCalledTimes(1);
+    expect(http.get.mock.calls.filter(([url]) => url === '/boards/board')).toHaveLength(2);
+  });
+
+  it('retries a failed batch with its original ID even if the latest batch lookup would change', async () => {
+    http.post.mockRejectedValueOnce(new Error('Synthetic offline failure')).mockResolvedValueOnce(clone({ status: 'reverted' }));
+    openBoard();
+    fireEvent.click(await screen.findByRole('button', { name: '撤销 Agent 本批' }));
+    await screen.findByRole('alert');
+    await waitFor(() => expect((screen.getByRole('button', { name: '撤销 Agent 本批' }) as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(screen.getByRole('button', { name: '撤销 Agent 本批' }));
+    await waitFor(() => expect(http.post).toHaveBeenCalledTimes(2));
+    expect(http.post.mock.calls.map(([url]) => url)).toEqual([
+      '/boards/board/agent-batches/agent-session/revert', '/boards/board/agent-batches/agent-session/revert']);
+    expect(http.get.mock.calls.filter(([url]) => url === '/boards/board/agent-batch')).toHaveLength(1);
+  });
+
   it.each(['Claim', 'Source note', 'Study group'])('Stages %s once, leaves it off canvas and reads it back on reopening', async (title) => {
     const view = openBoard();
     expect(screen.queryByRole('complementary', { name: 'Staging' })).toBeNull();

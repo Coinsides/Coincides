@@ -115,6 +115,8 @@ export interface BoardEdge extends BoardEdgeVisualProperties {
 
 /** Board-owned text, independent of notes, items and legacy chalk visuals. */
 export interface BoardSticky extends BoardGeometry {
+  placed?: boolean;
+  mounted_actor?: string;
   id: string;
   board_id: string;
   text: string;
@@ -225,6 +227,7 @@ export interface CreateBoardEdgeInput extends BoardEdgeVisualProperties {
 export type PatchBoardEdgeInput = Partial<CreateBoardEdgeInput>;
 
 export interface CreateBoardStickyInput extends Partial<Omit<BoardGeometry, 'scale' | 'w'>> {
+  placed?: boolean;
   text?: string;
   w?: 240 | 416;
   color_index?: 1 | null;

@@ -1,9 +1,16 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256",
-  "hash": "1b760ef2f84ce745d7e684f7ea99f458095ba2a0a5a29a0b93546d94204c5668",
+  "hash": "6b15e1be7ac79342203c14d32bd9ab2900bf6be8d4c337e9f97718f0193ce816",
   "facts": {
     "registryNames": [
+      "board_create_edge",
+      "board_create_sticky",
+      "board_mount_member",
+      "board_move_member",
+      "board_patch_visual",
+      "board_set_member_layer",
+      "board_update_sticky",
       "complete_task",
       "create_deck",
       "create_goal",
@@ -35,6 +42,13 @@
     ],
     "effects": {
       "doorWrite": [
+        "board_create_edge",
+        "board_create_sticky",
+        "board_mount_member",
+        "board_move_member",
+        "board_patch_visual",
+        "board_set_member_layer",
+        "board_update_sticky",
         "complete_task",
         "create_deck",
         "create_goal",
@@ -76,6 +90,13 @@
       ]
     },
     "toolDefinitionNames": [
+      "board_create_edge",
+      "board_create_sticky",
+      "board_mount_member",
+      "board_move_member",
+      "board_patch_visual",
+      "board_set_member_layer",
+      "board_update_sticky",
       "collect_preferences",
       "complete_task",
       "create_deck",
@@ -115,6 +136,6 @@
   "manual": {
     "path": "docs/agent-ops/current-state/app-operating-manual.md",
     "version": "v1",
-    "updated": "2026-09-14"
+    "updated": "2026-09-20"
   }
 }

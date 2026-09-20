@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { BOARD_ACTION_TOOLS } from '../../toolFace/boardActions.js';
+import { executeAgentBoardAction } from '../../services/agentBoardActions.js';
 import { getDb } from '../../db/init.js';
 import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
@@ -35,6 +37,9 @@ export async function executeTool(
 ): Promise<string> {
   const db = getDb();
   const today = new Date().toISOString().split('T')[0];
+  if (BOARD_ACTION_TOOLS.some(tool => tool.name === toolName)) {
+    return JSON.stringify(executeAgentBoardAction(db, toolName, args, userId, context));
+  }
 
   const readTool = AGENT_READ_TOOLS.find((tool) => tool.name === toolName);
   if (readTool) {

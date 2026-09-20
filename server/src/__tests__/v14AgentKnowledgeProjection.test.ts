@@ -11,6 +11,7 @@ import { buildSystemPrompt } from '../agent/system-prompt.js';
 import { toolDefinitions } from '../agent/tools/definitions.js';
 import { CHANNEL_WRITE_TOOLS, DOOR_WRITE_TOOLS, READ_TOOLS } from '../agent/tools/effectClassification.js';
 import { AGENT_READ_TOOLS } from '../toolFace/registry.js';
+import { BOARD_ACTION_TOOLS } from '../toolFace/boardActions.js';
 
 const context = { userName: 'Manual Reader', currentDate: '2026-09-14', courses: [], memories: [], documentSummaries: [] };
 // Before construction: four reader instruction lines (363) + LF (1) + the
@@ -20,15 +21,17 @@ const MIN_BYTES = 442;
 const MAX_BYTES = 598;
 const oldDoorSentence = 'Container and scheduling actions use create_deck, create_section, create_goal, create_sub_goal, create_time_blocks, update_time_block, and link_task_cards. ';
 
-function projectionText() {
+function projectionText(withBoard = true) {
   const projection = projectAgentCapabilities();
-  return [renderPerceptionTools(projection.perceptionReaders), renderDoorWriteTools(projection.doorWrite),
+  const doorWrite = withBoard ? projection.doorWrite : projection.doorWrite.filter(name => !BOARD_ACTION_TOOLS.some(tool => tool.name === name));
+  return [renderPerceptionTools(projection.perceptionReaders), renderDoorWriteTools(doorWrite),
     renderChannelWriteTools(projection.channelWrite)].join('\n');
 }
 
-function assertBudget(text: string) {
+function assertBudget(text: string, boardRosterBytes = 0) {
   const bytes = Buffer.byteLength(text, 'utf8');
-  assert.ok(bytes >= MIN_BYTES && bytes <= MAX_BYTES, `projection ${bytes} bytes exceeds ${MIN_BYTES}..${MAX_BYTES} (baseline ${BASELINE_BYTES})`);
+  assert.ok(bytes >= MIN_BYTES + boardRosterBytes && bytes <= MAX_BYTES + boardRosterBytes,
+    `projection ${bytes} bytes exceeds ${MIN_BYTES + boardRosterBytes}..${MAX_BYTES + boardRosterBytes} (baseline ${BASELINE_BYTES}, C1 roster ${boardRosterBytes})`);
 }
 
 test('capability groups cover exactly the actual provider definitions and imported effect sets', () => {
@@ -81,8 +84,13 @@ test('actual prompt contains the generated reader, door and channel fragments ex
 test('the projected fragments stay within both sides of the pre-edit UTF-8 budget', () => {
   assert.equal(MIN_BYTES, Math.ceil(BASELINE_BYTES * 0.85));
   assert.equal(MAX_BYTES, Math.floor(BASELINE_BYTES * 1.15));
-  assertBudget(projectionText());
-  assert.throws(() => assertBudget(projectionText() + '膨胀'.repeat(100)), /exceeds/);
+  // C1 adds exactly seven required names to the automatic roster. Preserve the
+  // old content budget; allocate only these literal names and their separators.
+  const boardRosterBytes = Buffer.byteLength(BOARD_ACTION_TOOLS.map(tool => `${tool.name}, `).join(''), 'utf8');
+  assertBudget(projectionText(false));
+  assert.equal(Buffer.byteLength(projectionText()) - Buffer.byteLength(projectionText(false)), boardRosterBytes);
+  assertBudget(projectionText(), boardRosterBytes);
+  assert.throws(() => assertBudget(projectionText() + '膨胀'.repeat(100), boardRosterBytes), /exceeds/);
   assert.throws(() => assertBudget(''), /exceeds/);
 });
 

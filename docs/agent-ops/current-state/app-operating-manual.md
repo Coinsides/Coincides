@@ -1,5 +1,6 @@
 > **状态 (Status)**: active(v1,2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
 > **层 (Layer)**: 现状 / 应用操作说明书
+> **日期 (Updated)**: 2026-09-20
 > **防腐条款**: 交付新面的工单,申报义务含"说明书条目已更新/无涉";每版段收口过一遍 diff。发现缺条错条=当场补(steward: Fable)。
 
 # Coincides 应用操作说明书 v1
@@ -87,13 +88,30 @@
 - **线样式**:Line dash=Solid/Dashed,Line weight=1/2/3,Start cap/End cap 各 None/Arrow/Dot。中性线三档分别用 `--board-line-1/2/3`(border-subtle/text-muted/text-secondary),线宽 1.5/2.25/3.375,粗线也更深,端点色随线色;新线沿用当前会话上一条线的样式。新建时只计算一次避让(非端点卡+16px呼吸边距),无挡默认微弯;移动卡后不自动重算,「Reroute」显式重算一次;
 - **连线 API**:`POST /api/boards/:id/edges {from:{kind:'member'|'sticky',id,anchor:'auto'|'n'|'e'|'s'|'w'},to:{kind:'member'|'sticky',id,anchor:'auto'|'n'|'e'|'s'|'w'},label?,bend?,dash?,weight?,cap_start?,cap_end?,color_index?,label_position?}`。自由端为 `{kind:'point',x,y}`。旧 `{from_member_id,to_member_id,label}` 请求仍可用。更新/删除=`PATCH/DELETE /edges/:edgeId`;重新取道=`POST /edges/:edgeId/reroute`。`GET /boards/:id` 含 `stickies`。新边 `visual_version=1`;迁移旧边 `visual_version=0,bend=0` 保持原直线、原方向及样式,显式改新视觉轴/端点/取道才升级;
 - **标签**:双击线身即建/即编,纯文本可换行、约120px折行、水平显示;Ctrl+Enter/「Save label」保存。拖标签沿弧滑动,近中点吸回;存储 `label_position` 为 0–1,默认0.5。新线绘制跳过标签矩形内线段,不垫底色;
-- **排版体检器**:内部纯函数 `inspectBoardLayout({cards,edges})` 接收板坐标下的卡矩形、线折线采样与标签矩形,报告标签×卡、标签×标签、线穿非端点卡、超阈值卡×卡、近平行线重叠及坐标/严重度。只诊断不阻断操作,本单未接 UI/Agent 消费者;画面仍需人工检查。固定端点被其他卡覆盖时,单圆弧可能没有可避开的路径;
+- **排版体检器(C1 消费)**:内部纯函数 `inspectBoardLayout({cards,edges})` 接收板坐标下的卡矩形、线折线采样与标签矩形,报告标签×卡、标签×标签、线穿非端点卡、超阈值卡×卡、近平行线重叠及坐标/严重度。Agent 板写后自动体检,本轮每板最后一份报告随收据呈现,历史回读同值。检查含装卸区产出的候选坐标,忽略隐藏层;标签用估算矩形,画面仍需人工检查。诊断不阻断写入,体检失败显示「暂不可用」;固定端点被其他卡覆盖时,单圆弧可能没有可避开的路径;
 - 装饰 `POST /api/boards/:id/visuals {visual_kind:'shape', w,h, data:{}}`;
-- 边界:板摆放不改来源正文;便签正文与视觉线仅属板域,不携存储语义关系、不接 `relations`。Agent 的板写动词和新版 `read_board` 消费面不在此版接入范围。
+- **Agent 装卸区(C1)**:Agent 的 `board_mount_member` 与 `board_create_sticky` 强制 `placed:false,mounted_actor:agent`,先落既有 Staging。工具栏「Staging (N)」打开装卸区;人拖便签/引用上板或点「Place on board」采纳,沿用人类 PATCH 门。便签及绑定它的线在采纳前不进入画布,便签不会变成笔记或 Item。便签的宽/色/重量保留;成员沿现役采纳规则分配完整几何。人的普通创建仍直接上板。
+- **Agent 批次撤销(C1)**:每个 Agent 会话的全部板写共享 `batch_id=conversation_id`,跨轮次、跨板。板工具栏「撤销 Agent 本批」撤此板最近会话的全部板写(含该会话涉及的其他板),成功后刷新画面并清空本板的本地 Undo/Redo。`GET /api/boards/:id/agent-batch` 给最近批次与待撤数;`POST /api/boards/:id/agent-batches/:batchId/revert {}` 按固定批次逆序原子撤销,二次请求 409,不自动退到旧会话。单条仍走 `POST /api/tool-receipts/:receiptId/revert`。
+- **撤销冲突**:沿现役收据的后改保护,目标后续被人编辑、采纳或被外部新线引用时拒绝覆盖;整批任何一条冲突则全部不撤,保留人后改与所有收据。可从现役收据面逐条撤销无冲突项。未采纳的概念图批次可完整撤回,已采纳对象上的 Agent 整理也可撤回到整理前;不能将未后改时的可撤解释为可以抹掉后续人的修改。
+- 边界:板摆放不改来源正文;便签正文与视觉线仅属板域,不携存储语义关系、不接 `relations`。C1 未新增 Agent 读器或改变 `read_board` 输出。
 
 ## 五 · Agent 能力边界表(给 Agent 的自我说明,也给操作者预期管理)
 
 **能(域写过写门:同事务史记+收据+可撤;发提案/存记忆为信道写)**:建目标/子目标/任务/卡组/分区/时间块×批;改时间块;标任务完成(**必须携用户原话锚**——用户没亲口说完成就是不能标);删时间块(**两段复述确认仪式**);发提案(八型,含 organized_note);存/搜自己的记忆;读:read_note/read_board/read_content_groups/read_annotations_relations+search_documents/get_document_content(⚠️只见材料库)。
+
+**板写七动词(C1)**:全部为 `door_write`,复用人类板服务并同事务写 `actor=agent` 史记与可撤收据。统一输入 `{board_id,input:{...}}`,更新另携对应 `member_id/sticky_id/visual_id`。
+
+| 动词 | 边界 |
+|---|---|
+| `board_mount_member` | 上已有 note/content_group/item 到 Staging;不支持 text_range |
+| `board_move_member` | 已有成员 x/y/w/h,可整理已采纳成员,不改变采纳状态 |
+| `board_set_member_layer` | 已有 layer_id(或 null Base)及整数 z_index |
+| `board_create_edge` | v1 member/sticky/point 两端,auto/n/e/s/w 锚,bend/dash/weight/caps/label 等全款纯视觉 API |
+| `board_create_sticky` | text/x/y/w/weight/color_index;强制落 Staging |
+| `board_update_sticky` | 同上六字段,宽240/416、重量1/2/3、颜色null/1;不代人采纳 |
+| `board_patch_visual` | 更新现役 sticky(旧粉笔)/shape/freehand 装饰 API;不含其他视觉种类 |
+
+板域不注册删除动词、建板、改 soul/板题或笔记写权,「直接放上去」显式授权通道仍未开放。七动词均在收据条逐项显示,批次与撤销入口见§四。
 
 **不能(宪法四禁令+现状)**:写/改笔记正文(③);直建卡片(提案唯一);碰判断域(relation confirm 族);任何不可逆删除无仪式;模拟 UI(④);检索 Source Library(现状缺口);代用户 apply/discard 提案。用户可在 Agent 收件箱处理提案,但 chat 回复确认不等于已应用。
 

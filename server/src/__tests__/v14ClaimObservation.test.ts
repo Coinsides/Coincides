@@ -38,8 +38,11 @@ function events(db: Database.Database) {
 }
 
 test('claim vocabulary stays narrow and English matching uses case-insensitive word boundaries', () => {
-  assert.ok(CLAIM_TERMS_ZH.length <= 10);
-  assert.ok(CLAIM_TERMS_EN.length <= 10);
+  // C1 adds only these literal board claims; the original seven remain intact.
+  assert.equal(CLAIM_TERMS_ZH.length, 12);
+  assert.equal(CLAIM_TERMS_EN.length, 11);
+  assert.deepEqual(CLAIM_TERMS_ZH.slice(7), ['已上件', '已移位', '已连线', '已摆放', '已调整图层']);
+  assert.deepEqual(CLAIM_TERMS_EN.slice(7), ['mounted', 'moved', 'connected', 'arranged']);
   assert.deepEqual(matchClaimTerms(CLAIM_TERMS_ZH.join('，')), [...CLAIM_TERMS_ZH]);
   assert.deepEqual(matchClaimTerms(CLAIM_TERMS_EN.join(' ').toUpperCase()), [...CLAIM_TERMS_EN]);
   assert.deepEqual(matchClaimTerms('unsaved recreated unremembered prerecorded notupdated undeleted uncompleted'), []);

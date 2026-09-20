@@ -18,9 +18,9 @@ import agentRouter from '../routes/agent.js';
 import { runAgent } from '../agent/orchestrator.js';
 import { MemoryManager } from '../agent/memory/manager.js';
 
-test('effect coverage: every exposed definition belongs to exactly one class (34/34)', () => {
+test('effect coverage: every exposed definition belongs to exactly one class (41/41 including C1)', () => {
   assertToolEffectCoverage(toolDefinitions);
-  assert.equal(toolDefinitions.length, 34);
+  assert.equal(toolDefinitions.length, 41);
   assert.deepEqual([...DOOR_WRITE_TOOLS], AGENT_ACTION_TOOLS.map(tool => tool.name));
   assert.equal(CHANNEL_WRITE_TOOLS.size, 2);
   assert.equal(READ_TOOLS.size, 22);

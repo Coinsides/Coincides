@@ -1,4 +1,5 @@
 import { z, type ZodTypeAny } from 'zod';
+import { BOARD_ACTION_TOOLS } from './boardActions.js';
 import {
   createGoalSchema,
   createTaskSchema,
@@ -812,6 +813,7 @@ export const COMPLETE_TASK_TOOL: ToolRegistryEntry = {
 
 /** Chat provider definitions project these registered writes from the manifest. */
 export const AGENT_ACTION_TOOLS = [
+  ...BOARD_ACTION_TOOLS,
   CREATE_GOAL_TOOL, CREATE_SUB_GOAL_TOOL, CREATE_TASK_TOOL, CREATE_DECK_TOOL,
   CREATE_SECTION_TOOL, CREATE_TIME_BLOCKS_TOOL, UPDATE_TIME_BLOCK_TOOL, DELETE_TIME_BLOCK_TOOL,
   LINK_TASK_CARDS_TOOL, COMPLETE_TASK_TOOL,

@@ -4744,6 +4744,1833 @@
     ]
   },
   {
+    "name": "board_mount_member",
+    "description": "Mount an existing note, content_group or item into board Staging. A human places it on the board; this never writes source content.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "member_kind": {
+              "type": "string",
+              "enum": [
+                "note",
+                "content_group",
+                "item"
+              ]
+            },
+            "member_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "h": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "member_kind",
+            "member_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "POST /api/boards/:boardId/members",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.mount"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
+    "name": "board_move_member",
+    "description": "Move or resize an existing board member. Adopted members may be arranged; Staging membership stays unchanged.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "member_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "h": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "member_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "PATCH /api/boards/:boardId/members/:memberId",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.updateMember"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
+    "name": "board_set_member_layer",
+    "description": "Set an existing member layer and/or integer z_index. Null layer is Base.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "member_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "layer_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "z_index": {
+              "type": "integer"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "member_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "PATCH /api/boards/:boardId/members/:memberId",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.updateMember"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
+    "name": "board_create_edge",
+    "description": "Create a purely visual board edge between member, sticky or point endpoints. Supports v1 anchors, bend, dash, weight, caps and label. Does not create a Relation.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "from_member_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "to_member_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "from": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "member"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 180
+                    },
+                    "anchor": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "n",
+                        "e",
+                        "s",
+                        "w"
+                      ],
+                      "default": "auto"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "sticky"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 180
+                    },
+                    "anchor": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "n",
+                        "e",
+                        "s",
+                        "w"
+                      ],
+                      "default": "auto"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "point"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "to": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "member"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 180
+                    },
+                    "anchor": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "n",
+                        "e",
+                        "s",
+                        "w"
+                      ],
+                      "default": "auto"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "sticky"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 180
+                    },
+                    "anchor": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "n",
+                        "e",
+                        "s",
+                        "w"
+                      ],
+                      "default": "auto"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "point"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "bend": {
+              "type": "number"
+            },
+            "dash": {
+              "type": "string",
+              "enum": [
+                "solid",
+                "dashed"
+              ]
+            },
+            "weight": {
+              "type": "number",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            },
+            "cap_start": {
+              "type": "string",
+              "enum": [
+                "none",
+                "arrow",
+                "dot"
+              ]
+            },
+            "cap_end": {
+              "type": "string",
+              "enum": [
+                "none",
+                "arrow",
+                "dot"
+              ]
+            },
+            "color_index": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "const": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "label_position": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "visual_version": {
+              "type": "number",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "style": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "label": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "POST /api/boards/:boardId/edges",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.createEdge"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
+    "name": "board_create_sticky",
+    "description": "Create plain board text in Staging, using v1 sticky width, weight and color. A human drags it onto the board to adopt it.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 12000
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "enum": [
+                240,
+                416
+              ]
+            },
+            "weight": {
+              "type": "number",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            },
+            "color_index": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "const": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "POST /api/boards/:boardId/stickies",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.createSticky"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
+    "name": "board_update_sticky",
+    "description": "Update board sticky text or geometry/style with a reversible receipt. Does not adopt a Staging sticky.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "sticky_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 12000
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "enum": [
+                240,
+                416
+              ]
+            },
+            "weight": {
+              "type": "number",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            },
+            "color_index": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "const": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "sticky_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "PATCH /api/boards/:boardId/stickies/:stickyId",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.updateSticky"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
+    "name": "board_patch_visual",
+    "description": "Patch an existing board chalk, shape or freehand decoration through the human visual API, with reversible history.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "visual_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "layer_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "h": {
+              "type": "number",
+              "minimum": 0
+            },
+            "scale": {
+              "type": "number",
+              "minimum": 5e-324
+            },
+            "z_index": {
+              "type": "integer"
+            },
+            "pinned": {
+              "type": "boolean"
+            },
+            "rotation": {
+              "type": "number"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "board_id",
+        "visual_id",
+        "input"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "board_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "message": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "layout_report": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "report": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "error"
+                            ]
+                          },
+                          "itemIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coordinate": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bounds": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "w": {
+                                "type": "number"
+                              },
+                              "h": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "w",
+                              "h"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "severity",
+                          "itemIds",
+                          "coordinate",
+                          "bounds"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "issues",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diagnostic_error": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "board_id",
+            "batch_id",
+            "report"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "board_id",
+        "batch_id",
+        "receipt_id",
+        "message",
+        "entity",
+        "layout_report"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "spatial",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "PATCH /api/boards/:boardId/visuals/:visualId",
+      "client_call_site": "client/src/pages/Boards/boardRepository.ts#boardRepository.updateVisual"
+    },
+    "exposure": "internal",
+    "scopes": [
+      "boards:write"
+    ]
+  },
+  {
     "name": "create_goal",
     "description": "Create a new goal for a course.",
     "input_schema": {

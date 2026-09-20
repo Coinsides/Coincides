@@ -388,6 +388,7 @@ export default function BoardPage() {
   }
 
   const stagedMembers = (detail?.members || []).filter((member) => member.placed === false);
+  const stagedStickies = (detail?.stickies || []).filter(sticky => sticky.placed === false);
   const scene = boardLayerScene(detail,
     (detail?.members || []).map((member) => (groupDrafts.get(member.id) as BoardMember | undefined) || (objectDraft?.id === member.id && 'member_kind' in objectDraft ? objectDraft : member)),
     (detail?.visuals || []).map((visual) => (groupDrafts.get(visual.id) as BoardVisual | undefined) || (objectDraft?.id === visual.id && 'visual_kind' in objectDraft ? objectDraft : visual)),
@@ -502,12 +503,14 @@ export default function BoardPage() {
   }
 
   function defaultMemberPosition() {
-    return toBoardPoint({ x: 80 + (visibleMembers.length % 3) * 300,
-      y: 70 + Math.floor(visibleMembers.length / 3) * 200 }, viewportRef.current || detail!.board.viewport);
+    const count = visibleMembers.length + visibleStickies.length;
+    return toBoardPoint({ x: 80 + (count % 3) * 300,
+      y: 70 + Math.floor(count / 3) * 200 }, viewportRef.current || detail!.board.viewport);
   }
 
   function nextMemberZ() {
-    return Math.max(0, ...visibleMembers.map((member) => member.z_index), ...visibleVisuals.map((visual) => visual.z_index)) + 1;
+    return Math.max(0, ...visibleMembers.map((member) => member.z_index), ...visibleVisuals.map((visual) => visual.z_index),
+      ...visibleStickies.map(sticky => sticky.z_index)) + 1;
   }
 
   async function stageCandidate(candidate: BoardCandidate) {
@@ -539,14 +542,28 @@ export default function BoardPage() {
     }
   }
 
+  async function placeSticky(sticky: BoardSticky, point = defaultMemberPosition()) {
+    if (board.pending || chalkDraft || stickyEditor || !detail?.stickies?.some(current => current.id === sticky.id && current.placed === false)) return;
+    const visit = visitRevision.current;
+    const saved = await board.updateSticky(sticky.id, { placed: true, x: point.x, y: point.y,
+      pinned: false, z_index: nextMemberZ(), layer_id: activeLayerId });
+    if (saved && visit === visitRevision.current) setSelection({ kind: 'sticky', id: sticky.id });
+  }
+
   function dropStagedMember(event: React.DragEvent<HTMLDivElement>) {
     if (!event.dataTransfer.types.includes(BOARD_STAGING_MIME)) return;
     event.preventDefault();
     event.stopPropagation();
-    let payload: { boardId?: unknown; memberId?: unknown };
+    let payload: { boardId?: unknown; memberId?: unknown; stickyId?: unknown };
     try { payload = JSON.parse(event.dataTransfer.getData(BOARD_STAGING_MIME)); }
     catch { return; }
-    if (!payload || payload.boardId !== boardId || typeof payload.memberId !== 'string') return;
+    if (!payload || payload.boardId !== boardId) return;
+    if (typeof payload.stickyId === 'string') {
+      const sticky = stagedStickies.find(current => current.id === payload.stickyId);
+      if (sticky) void placeSticky(sticky, toBoardPoint(localPoint(event), viewportRef.current || detail!.board.viewport));
+      return;
+    }
+    if (typeof payload.memberId !== 'string') return;
     const member = stagedMembers.find((current) => current.id === payload.memberId);
     if (member) void placeMember(member, toBoardPoint(localPoint(event), viewportRef.current || detail!.board.viewport));
   }
@@ -1085,7 +1102,7 @@ export default function BoardPage() {
         onClick={() => pickerOpen ? closePicker() : openPicker()}><Plus size={16} />Add notes and items</button>
       <button ref={stagingToggle} className={`${styles.button} ${styles.stagingToggle}`} data-board-staging-control="true"
         aria-expanded={stagingOpen} aria-controls="board-staging" onClick={() => stagingOpen ? closeStaging() : openStaging()}>
-        <Inbox size={16} />Staging ({stagedMembers.length})
+        <Inbox size={16} />Staging ({stagedMembers.length + stagedStickies.length})
       </button>
       <button ref={layersToggle} className={styles.button} aria-expanded={layersOpen} aria-controls="board-layers"
         disabled={Boolean(chalkDraft || stickyEditor) || Boolean(deleteKeys)} onClick={() => layersOpen ? closeLayers() : setLayersOpen(true)}>
@@ -1132,6 +1149,14 @@ export default function BoardPage() {
       <button className={styles.button} disabled={board.pending || Boolean(chalkDraft || stickyEditor)} onClick={() => { void createSticky(); }}><Plus size={16} />Add sticky</button>
       <button className={styles.button} aria-label="Undo board action" disabled={!board.canUndo || Boolean(chalkDraft || stickyEditor) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.undo(); }}><Undo2 size={16} />Undo</button>
       <button className={styles.button} aria-label="Redo board action" disabled={!board.canRedo || Boolean(chalkDraft || stickyEditor) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.redo(); }}><Redo2 size={16} />Redo</button>
+      <button className={styles.button} disabled={board.pending || board.agentBatchReverted || Boolean(chalkDraft || stickyEditor || deleteKeys)}
+        title="撤销此板最近一次 Agent 会话的全部板写入（含该会话涉及的其他板）"
+        onClick={() => {
+          const visit = visitRevision.current;
+          void board.revertAgentBatch().then(saved => {
+            if (saved && visit === visitRevision.current) { setSelection(null); setSelectionNotice('已撤销 Agent 本批'); }
+          });
+        }}><Undo2 size={16} />撤销 Agent 本批</button>
       <span className={styles.toolHint}>{tool === 'connect' ? (connectFrom ? 'Choose the next card' : 'Choose two cards to connect')
         : tool === 'pen' ? 'Draw on the board' : tool === 'eraser' ? 'Sweep to erase whole pen strokes'
           : 'Drag blank space to select · Ctrl-drag to add · Alt-drag to subtract · Ctrl/Shift-click to toggle · Hold Shift after starting an object drag to ignore snapping · Esc to clear · Space-drag to pan'}</span>
@@ -1336,6 +1361,8 @@ export default function BoardPage() {
         </div>}
       </div>
       {stagingOpen && <BoardStaging boardId={detail.board.id} members={stagedMembers} candidates={candidates}
+        stickies={stagedStickies} onPlaceSticky={sticky => { void placeSticky(sticky); }}
+        onRemoveSticky={sticky => { void board.removeSticky(sticky.id); }}
         busy={board.pending || Boolean(chalkDraft || stickyEditor)} onClose={closeStaging}
         onPlace={(member) => { void placeMember(member); }}
         onRemove={(member) => { void board.unmount(member.id); }} />}

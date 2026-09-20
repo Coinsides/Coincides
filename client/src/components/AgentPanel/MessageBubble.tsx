@@ -120,6 +120,16 @@ function TurnReceipt({ receipt, text }: { receipt?: AgentTurnReceipt | null; tex
       ))}
       {unclassified.map((call, index) => <span key={`unknown-${index}`}>未分类工具：{call.name}</span>)}
       {!receipt.write_calls.length && !unclassified.length && label}
+      {receipt.board_layout_reports?.map(layout => <details key={layout.board_id}>
+        <summary>板排版体检：{layout.report ? `${layout.report.issues.length} 项提示` : '暂不可用'}</summary>
+        <p>含装卸区的候选布局；仅诊断，不阻断写入。</p>
+        {layout.report?.issues.map((issue, index) => <p key={index}>
+          {({ 'label-card-overlap': '标签与卡片重叠', 'label-label-overlap': '标签重叠',
+            'edge-through-card': '连线穿过卡片', 'card-card-overlap': '卡片重叠',
+            'near-parallel-edges': '近平行连线重叠' } as Record<string, string>)[issue.kind] ?? issue.kind}
+          {' '}({Math.round(issue.coordinate.x)}, {Math.round(issue.coordinate.y)})
+        </p>)}
+      </details>)}
     </div>
   );
 }

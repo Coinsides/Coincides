@@ -33,7 +33,7 @@ export type BoardLayerSelection = Pick<BoardRemovalSelection, 'memberIds' | 'vis
 
 const geometryFields = ['x', 'y', 'w', 'h', 'scale', 'z_index', 'pinned'];
 const visualFields = [...geometryFields, 'layer_id', 'visual_kind', 'rotation', 'data', 'metadata'];
-const stickyFields = ['text', 'x', 'y', 'w', 'h', 'z_index', 'pinned', 'layer_id', 'color_index', 'weight'];
+const stickyFields = ['text', 'x', 'y', 'w', 'h', 'z_index', 'pinned', 'layer_id', 'color_index', 'weight', 'placed'];
 const edgeFields = ['from_member_id', 'to_member_id', 'from', 'to', 'style', 'label', 'bend', 'dash', 'weight',
   'cap_start', 'cap_end', 'color_index', 'label_position', 'visual_version'];
 const newEdgeFields = ['from', 'to', 'from_member_id', 'to_member_id', 'bend', 'dash', 'weight', 'cap_start', 'cap_end', 'color_index'];
@@ -219,8 +219,10 @@ export class BoardCommandHistory {
   async patch(boardId: string, kind: Kind, id: string, input: Patch) {
     const operation = this.patchOperation(kind, id, input);
     // Staging placement is a membership action, not an undoable geometry field.
-    if (kind === 'member' && 'placed' in input) {
-      const saved = await boardRepository.updateMember(boardId, this.resolve(kind, id), input as PatchBoardMemberInput);
+    if ((kind === 'member' || kind === 'sticky') && 'placed' in input) {
+      const saved = kind === 'member'
+        ? await boardRepository.updateMember(boardId, this.resolve(kind, id), input as PatchBoardMemberInput)
+        : await boardRepository.updateSticky(boardId, this.resolve(kind, id), input as PatchBoardStickyInput);
       this.replace(kind, saved.id, saved);
       this.newEdit();
       if (operation) {

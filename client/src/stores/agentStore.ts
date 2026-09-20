@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { notifyBoardChanged } from '@/pages/Boards/boardEvents';
 import api, { getToken, API_BASE } from '@/services/api';
 import type { AgentContextHint, AgentConversation, AgentMessage, AgentTurnReceipt } from '@shared/types';
 
@@ -227,6 +228,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                   if (isTurnReceipt(parsed)) {
                     turnReceipt = parsed;
                     set({ streamingReceipt: turnReceipt });
+                    for (const report of turnReceipt.board_layout_reports ?? []) notifyBoardChanged(report.board_id);
                   }
                 } catch { /* A missing/invalid receipt stays unknown. */ }
                 break;

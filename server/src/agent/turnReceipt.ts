@@ -1,5 +1,6 @@
 import type { AgentTurnReceipt } from '../../../shared/types/agentTurnReceipt.js';
 import { classifyToolEffect } from './tools/effectClassification.js';
+import { BOARD_ACTION_TOOLS } from '../toolFace/boardActions.js';
 
 export interface PersistedAgentMessage {
   id: string;
@@ -55,6 +56,19 @@ export function projectTurnReceipt(messages: readonly PersistedAgentMessage[]): 
         receipt.write_calls.push(entry);
         if (entry.ok) receipt.write_ok_count++;
         else receipt.write_fail_count++;
+        if (entry.ok && BOARD_ACTION_TOOLS.some(tool => tool.name === call.name) && object(matches[0])) {
+          try {
+            const saved = JSON.parse(matches[0].content as string);
+            if (saved.layout_report?.board_id && saved.layout_report?.batch_id) {
+              // The last saved board write is the batch's report at this turn's
+              // tail. Historical and live receipts project the same evidence.
+              const reports = receipt.board_layout_reports ??= [];
+              const index = reports.findIndex(report => report.board_id === saved.layout_report.board_id);
+              if (index < 0) reports.push(saved.layout_report);
+              else reports[index] = saved.layout_report;
+            }
+          } catch { /* An old result without layout evidence stays unchanged. */ }
+        }
       }
     }
   }

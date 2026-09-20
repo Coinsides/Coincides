@@ -27,6 +27,13 @@ const childPath = (boardId: string, kind: string, id: string) => `${boardPath(bo
 
 /** The S1 HTTP contract is the only board persistence path. Failures reach the caller. */
 export const boardRepository = {
+  async getAgentBatch(boardId: string): Promise<{ batch_id: string; receipt_count: number; board_ids: string[] } | null> {
+    const { data } = await api.get(`${boardPath(boardId)}/agent-batch`);
+    return data.batch;
+  },
+  async revertAgentBatch(boardId: string, batchId: string): Promise<void> {
+    await api.post(`${boardPath(boardId)}/agent-batches/${encodeURIComponent(batchId)}/revert`, {});
+  },
   async list(): Promise<Board[]> {
     const { data } = await api.get<{ boards: Board[] }>('/boards');
     return data.boards;
@@ -236,6 +243,11 @@ export function boardErrorMessage(error: unknown): string {
     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
     : undefined;
   switch (response?.data?.error) {
+    case 'board_agent_batch_not_applied':
+      return 'This board has no Agent batch left to undo.';
+    case 'board_action_target_changed':
+    case 'board_action_target_has_edges':
+      return 'Objects in this Agent batch have later changes. The whole batch was kept; no partial undo was applied.';
     case 'board_viewport_bookmark_limit_reached':
       return 'All 24 bookmarks are in use. Delete a bookmark to save another view.';
     case 'board_viewport_bookmark_not_found':

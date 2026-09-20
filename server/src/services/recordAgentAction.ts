@@ -16,6 +16,7 @@ export interface AgentActionContext {
 }
 
 interface AgentAction<T> {
+  boardBatch?: { batch_id: string; board_id: string };
   tool: ToolRegistryEntry;
   input: Record<string, unknown>;
   verb: EventVerb;
@@ -55,7 +56,7 @@ export function recordAgentAction<T>(
       verb: action.verb,
       objects: resources.map((resource) => ({ kind: resource.kind as string, id: resource.id as string })),
       summary: action.summary,
-      meta: { conversation_id: context.conversationId, tool: action.tool.name },
+      meta: { conversation_id: context.conversationId, tool: action.tool.name, ...action.boardBatch },
     });
     const receipt = writeToolFaceReceipt({
       userId,
@@ -70,7 +71,7 @@ export function recordAgentAction<T>(
       resources,
       agentContext: {
         actor: context.actor, channel: context.channel,
-        conversation_id: context.conversationId, event_seq: Number(eventSeq),
+        conversation_id: context.conversationId, event_seq: Number(eventSeq), ...action.boardBatch,
       },
     }, db);
     return { result, receipt };

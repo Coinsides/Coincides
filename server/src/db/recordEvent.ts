@@ -8,6 +8,7 @@ export const EVENT_VERBS = [
   'note_created',
   'board_created',
   'board_deleted',
+  'board_changed',
   'goal_created',
   'task_created',
   'deck_created',

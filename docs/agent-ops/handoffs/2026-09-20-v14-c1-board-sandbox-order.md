@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(HQ 按代理权翻牌;上游全拍)
+> **状态 (Status)**: done(builder 一轮交付+HQ 收口全绿,2026-09-20:client 219 文件 2254/2254 亲跑定案;wilderness 超时红=builder 隔离跑法 120s 帽,HQ 600s 复跑 27/27(460.8s)恢复;git diff --check+secrets(62 文件)双门绿;余 2=Python/MinerU 环境基线)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-20
 > **单号**: V14 Agent 墙 · C1 板沙箱(14.3,Agent 首个写权域)
@@ -45,3 +45,50 @@
 3. **说明书义务**:`current-state/app-operating-manual.md` §四/§五 补板写动词与装卸区条目;
 4. 证据落 `docs/audits/2026-09-20-c1-board-sandbox-builder/`(蒸馏件),原始日志留 `.codex-tmp/c1-board/`;
 5. **禁区(全部带射程)**:⛔一切 git 写操作(add/commit/push/reset/改 `.git` 目录);**只读 git 子命令明文允许**(含验证门脚本内部调用);`verify:v2-bn8-runtime` 的 git 检查+secrets 扫描两组件留 HQ 收口,其余组件照跑按「非 git/secrets 的 N 组件」申报;**注册表/写门/prompt 投影仅限本单七动词及其义务面**(⛔动既有动词语义⛔新读器⛔note_patch/意图路由——归 14.4);⛔碰 Relation 域/判断域;⛔笔记写权;⛔动 TextFlow 真相 schema;⛔坐标契约九条;⛔新依赖;⛔真实模型调用(eval 场景=scripted);⛔用户库;⛔新设计安全对抗类用例(既有功能回归全库整跑明文允许零排除);合成凭据形值 ≤20 字符(域数据不在射程);新 `--sk-` token 后段 ≤18 字符。Result:动词注册申报(注册表 diff+分类+指纹)+batch 存法申报+逐件行号+两场景断言表+测试数字+说明书申报+未做项。冲突停线举证。
+
+## Result
+
+2026-09-20 · Codex builder。**实现与证据已交工作树；C1 定向、两场景和 23 非 git/secrets 组件通过，server 全量仍有三项未过，未作放行结论。** 未执行 git 写操作或 commit。审计入口：[C1 builder 证据](../../audits/2026-09-20-c1-board-sandbox-builder/README.md)；[逐件文件与行号](../../audits/2026-09-20-c1-board-sandbox-builder/delivery-map.md)；[验证明细](../../audits/2026-09-20-c1-board-sandbox-builder/validation.md)；[逐文件/逐门机器收据](../../audits/2026-09-20-c1-board-sandbox-builder/test-results.json)。原始日志与隔离 runner 留 `.codex-tmp/c1-board/`。
+
+### 注册与同门同钥申报
+
+注册表只新增 `board_mount_member`、`board_move_member`、`board_set_member_layer`、`board_create_edge`、`board_create_sticky`、`board_update_sticky`、`board_patch_visual` 七项，全部归 `door_write`；`AGENT_ACTION_TOOLS` 接现役 executor，未新增 reader、channel 或旧动词语义。tool-face 条目 28→35（public 仍 14），provider tools 34→41，收据分类 41/41。知识指纹经 `--update` 更新：`6b15e1be7ac79342203c14d32bd9ab2900bf6be8d4c337e9f97718f0193ce816`；知识测试只给七个新增名称及分隔符增加预算，原 prompt 还原哈希继续锁住。
+
+| 动词 | 既有人门 / 现役单撤逆操作 |
+|---|---|
+| mount_member | mountBoardMember / unmountBoardMember |
+| move_member | updateBoardMember / 恢复 before |
+| set_member_layer | updateBoardMember / 恢复 before |
+| create_edge | createBoardEdge / deleteBoardEdge |
+| create_sticky | createBoardSticky / deleteBoardSticky |
+| update_sticky | updateBoardSticky / 恢复 before |
+| patch_visual | updateBoardVisual / 恢复 before |
+
+七动词均由人类 validator/service 薄适配完成；executor/适配层不写 SQL。现役 `recordAgentAction` 外层事务覆盖域写、agent/chat 史记及 agent_chat 收据。mount 记 mounted，其余记 board_changed；新增事件枚举用迁移 081 沿现役 append-only 表重建先例扩展。七项均注册单撤，失败回滚、before/after 对账及整批原子性有定向锁。
+
+### Staging、批次与体检申报
+
+Agent mount/sticky 强制 placed=false、mounted_actor=agent；迁移 081 扩展便签 Staging 字段，旧便签默认已采纳。沿 BoardStaging、既有拖拽 MIME、repository/PATCH/history 实现人拖/Place 采纳，画布与附着边隐藏未采纳物。便签采纳保留原宽/重/色，并分配位置/z；未增第二套采纳机关。
+
+`batch_id=conversation_id`，跨回合/跨板共享，挂现役 `operation_batches.metadata.agent_context` 和 resource，史记 meta 同记 batch_id/board_id；无新真相表。固定 API `POST /api/boards/:boardId/agent-batches/:batchId/revert {}` 逆 event_seq 调原 receipt revert，外层 immediate 事务，已单撤项跳过，二次同批请求 409 且零变更。工具栏「撤销 Agent 本批」锁住该 ID 重试；最近批已撤完也不倒退到更早会话。
+
+**边界明确**：人后改/采纳或外部边引用造成快照冲突时，单撤拒绝覆盖，整批原子拒绝；没有宣称可以无条件抹去人后续工作。未采纳概念图可完整撤回，Agent 整理既有已采纳物可还原整理前状态，均有测试。每次板写成功后跑原 inspectBoardLayout，尾回执按每板保留最终报告，live/history 同源；诊断失败只显示暂不可用，不反转提交。标签 bounds 为估算，主观视觉验收留 HQ。
+
+### 随单场景与验证数字
+
+仅加两个场景文件并在 README 加两行，无 harness/discovery 修改，全部 scripted。
+
+| 场景 | 断言 | 结果 |
+|---|---|---|
+| 07-board-concept-map | 自铸 9 便签 + 13 边，两轮 Staging/actor/几何/端点锚样式；SSE/历史/event/receipt/batch 对账；体检报告同值；note/Relation 不变 | 9/9 |
+| 08-board-batch-revert | 复用概念图；固定批撤 22 件；原有人便签保留、板域恢复；22 reverted 收据与 human rolled_back 对账；二次 409、零变更 | 12/12 |
+
+定向 15/15；Agent 族 16 文件/289 测试；client 全库 219 文件/2254 测试；eval harness 14/14；eval typecheck 与 client/server build 通过。按原链执行 **23 非 git/secrets 组件，最终 23/23**（首轮 19 通过，四项修复/重跑成功；逐项映射见机器收据），不申报完整 verify 总门。
+
+**server 全量未绿**：发现清单 102 文件全部执行，最终 99 通过、3 未过。末次 TAP 合计 1014 项＝1011 pass + 2 fail + 1 cancelled，0 skipped；加载失败/文件超时使其内部用例未完整枚举。保留三项：`v2SourceMineruWiring` 缺 python.exe；`v2SourceRegionCells` 的旧 uv Python 进程无法创建；`v13WildernessExecute` 120 秒超时（根因未定）。没有排除测试、改旧测试语义或将限制判绿。
+
+### 说明书与未做项
+
+说明书 §四补装卸区、采纳、固定批次 API/工具栏、单撤冲突边界与体检报告；§五补七动词能力边界表，指纹与文档索引同步。完整行号见逐件表。
+
+未做真实模型调用、用户库/用户凭据读取、Relation/判断域施工、笔记写权、新读器、14.4 意图路由、坐标契约/TextFlow 真相 schema 改动、新依赖或主观验收。未运行 git 检查与 secrets 扫描两组件，依工单留 HQ；无 git 写/commit，原有未跟踪文件未改动。三项 server 红灯随工作树交 HQ 复核。

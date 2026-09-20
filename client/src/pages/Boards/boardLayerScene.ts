@@ -13,7 +13,7 @@ export function boardLayerScene(detail: BoardDetail | null, members: BoardMember
   const visibleIds = new Set(layers.filter((layer) => layer.visible).map((layer) => layer.id));
   const visibleMembers = members.filter((member) => member.placed !== false && visibleIds.has(layerIdOf(member)));
   const visibleVisuals = visuals.filter((visual) => visibleIds.has(layerIdOf(visual)));
-  const visibleStickies = stickies.filter((sticky) => visibleIds.has(layerIdOf(sticky)));
+  const visibleStickies = stickies.filter((sticky) => sticky.placed !== false && visibleIds.has(layerIdOf(sticky)));
   const endpointDetail = { members: visibleMembers, stickies: visibleStickies };
   const candidates = (detail?.edges || []).filter((edge) => [boardEndpoint(edge, 'from'), boardEndpoint(edge, 'to')].every((endpoint) =>
     endpoint && (endpoint.kind === 'point' || boardEndpointObject(endpoint, endpointDetail))));

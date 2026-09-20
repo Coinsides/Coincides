@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { Router, type RequestHandler, type Response } from 'express';
 import { z, ZodError } from 'zod';
 import { getDb } from '../db/init.js';
+import { latestBoardAgentBatch, revertBoardAgentBatch } from '../services/boardAgentBatches.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { runRecordedAction, type RecordedActionEvent } from '../middleware/recordedAction.js';
 import {
@@ -58,6 +59,14 @@ function handle(action: (req: AuthRequest, res: Response) => void): RequestHandl
 /** Database injection is for isolated fixtures; production is mounted after authMiddleware. */
 export function createBoardRouter(database: () => Database.Database = getDb): Router {
   const router = Router();
+
+  router.get('/:boardId/agent-batch', handle((req, res) => {
+    res.json({ batch: latestBoardAgentBatch(req.userId!, String(req.params.boardId)) });
+  }));
+  router.post('/:boardId/agent-batches/:batchId/revert', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    res.json(revertBoardAgentBatch(req.userId!, String(req.params.boardId), String(req.params.batchId)));
+  }));
 
   router.get('/', handle((req, res) => {
     res.json({ boards: listBoards(database(), req.userId!, listBoardsQuery.parse(req.query)) });

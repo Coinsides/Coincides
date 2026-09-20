@@ -5,9 +5,11 @@ import { recordEvent } from '../db/recordEvent.js';
 // A small, deliberately literal observation vocabulary, not a semantic verdict.
 export const CLAIM_TERMS_ZH = [
   '已保存', '已创建', '已记住', '已记录', '已更新', '已删除', '已完成',
+  '已上件', '已移位', '已连线', '已摆放', '已调整图层',
 ] as const;
 export const CLAIM_TERMS_EN = [
   'saved', 'created', 'remembered', 'recorded', 'updated', 'deleted', 'completed',
+  'mounted', 'moved', 'connected', 'arranged',
 ] as const;
 
 const englishPatterns = CLAIM_TERMS_EN.map((term) => ({ term, pattern: new RegExp(`\\b${term}\\b`, 'i') }));
