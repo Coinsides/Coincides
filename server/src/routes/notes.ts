@@ -36,6 +36,7 @@ import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
 import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
 import { assertMediaBlockAsset } from '../services/mediaBlocks.js';
 import { createNoteMetadataRouter } from './noteMetadata.js';
+import { createNoteBindingRouter } from './noteBinding.js';
 import { mergeNoteSkin } from '../services/skin.js';
 import { assertNoteCoverAsset, mergeNoteCoverBinding } from '../services/noteCover.js';
 
@@ -43,6 +44,7 @@ export { hydrateNote };
 
 const router = Router();
 router.use(createNoteMetadataRouter());
+router.use(createNoteBindingRouter());
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
 
 function stringifyJson(value: unknown, fallback: unknown): string {

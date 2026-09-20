@@ -19,6 +19,20 @@ function ViewFixture({ disabled = false }: { disabled?: boolean }) {
 }
 
 describe('page view options menu', () => {
+  it('exposes the optional gap checkbox in keyboard order and reports its next state', () => {
+    const change = vi.fn();
+    const close = vi.fn();
+    const view = render(<ViewOptionsMenu open activeGear="fit_width" onToggle={vi.fn()} onClose={close}
+      onSelect={vi.fn()} pageGapsFolded onPageGapsFoldedChange={change} />);
+    const checkbox = view.getByRole('menuitemcheckbox', { name: 'Fold page gaps' });
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    fireEvent.keyDown(view.getByRole('menu'), { key: 'End' });
+    expect(document.activeElement).toBe(checkbox);
+    fireEvent.click(checkbox);
+    expect(change).toHaveBeenCalledWith(false);
+    expect(close).toHaveBeenCalled();
+  });
+
   it('collapses the three labels behind one named icon and applies each existing reading gear with a check', () => {
     const view = render(<ViewFixture />);
     const trigger = view.getByRole('button', { name: 'View options' });

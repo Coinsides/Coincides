@@ -4,6 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
+import { resolveDocumentPageFlowPlan } from '../documentPageFlowService';
+import { noteBlocksToPageFlow, pageFlowFirstLayouts, pageFlowFragmentProjections } from '../notePageFlowService';
+import { createPageGapPresentation } from '../pageFramePresentationService';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import type { PageReadingGear } from '../pageReadingViewportService';
 import { createPageStackFromFrame } from '../pageStackCollectionService';
@@ -125,6 +128,169 @@ function WritingSurfaceThroughLayerProps({ surfaceProps }: { surfaceProps: NoteW
   const layers = useNoteCanvasLayerProps(input);
   return layers ? <NoteWritingSurfaceLayer {...layers.documentLayerProps.writingSurfaceProps} /> : null;
 }
+
+function bindingGapProps(paginatedText = false) {
+  const first = { ...frame(0), id: 'a2-first', height: 600,
+    contentInset: { left: 72, right: 72, top: 40, bottom: 60 } };
+  const second = { ...first, id: 'a2-second', role: 'secondary_page_frame' as const, y: 680 };
+  const props = propsFor(first, 'page');
+  const flow = createTextBlockContentV1(Array.from({ length: 35 }, (_, i) => `Paragraph ${i}: ${'Writing on paper. '.repeat(10)}`).join('\n'));
+  const block = { ...props.visibleBlocks[0], ...(paginatedText
+    ? { plain_text: flow.units.map((unit) => unit.text).join('\n'), content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } } : {}) };
+  const layout: BlockBoxLayout = { ...props.blockLayouts[block.id], x: paginatedText ? 0 : 20, y: paginatedText ? 0 : 50,
+    width: paginatedText ? 760 : 300, width_mode: paginatedText ? 'auto' : 'manual', frame_id: paginatedText ? first.id : second.id };
+  const stack = { ...createPageStackFromFrame(first), frameIds: [first.id, second.id] };
+  const plan = resolveDocumentPageFlowPlan({ collection: { pageFrames: [first, second], primaryFrameId: first.id, pageStacks: [stack] },
+    blocks: noteBlocksToPageFlow([block], { [block.id]: layout }, {}, {}), documentTypography: props.documentTypographyProfile });
+  const layouts = pageFlowFirstLayouts(plan, { [block.id]: layout });
+  const ink = createPaperFreehand({ frame: second, canvasId: 'a2-canvas', objectId: 'a2-ink',
+    points: [{ x: 100, y: 100 }, { x: 200, y: 120 }], zIndex: 1 });
+  const runtime = buildNoteCanvasRuntimeModel({ mode: 'page', primaryPageFrame: first,
+    pageFrames: plan.collection.pageFrames, pageStacks: plan.collection.pageStacks,
+    viewport: props.viewportTransform, documentTypography: props.documentTypographyProfile,
+    blockPlacements: [buildRuntimeBlockPlacement({ block, canvasId: 'a2-canvas', layout: layouts[block.id],
+      pageOffsetX: props.pageOffsetX, pageFrame: first, pageFrames: plan.collection.pageFrames, contract: 'v2', zIndex: 0 })],
+    genericCanvasObjects: [ink.canvasObject], genericCanvasPlacements: [ink.placement] });
+  return { ...props, allBlocks: [block], visibleBlocks: [block], blockLayouts: layouts,
+    pageContentHeight: plan.collection.pageFrames[plan.collection.pageFrames.length - 1].y + 600, contentReadOnly: false, layoutMode: false,
+    noteCanvasRuntime: { ...runtime, coordinateContract: 'v2' as const, pageFlowPlan: plan,
+      blockFragmentProjections: paginatedText ? pageFlowFragmentProjections(plan) : runtime.blockFragmentProjections } };
+}
+
+describe('A2 foldable page gaps', () => {
+  it('supplies a canonical drag mapper and displays a manual box beyond its affiliated frame at the folded destination', () => {
+    const props = bindingGapProps();
+    const block = props.visibleBlocks[0];
+    const beginMove = vi.fn();
+    const view = render(<NoteWritingSurfaceLayer {...props} pageGapsFolded selectedBlockId={block.id} onBeginMoveBlock={beginMove} />);
+    const blockList = props.blockListRef.current!;
+    const scale = Number(blockList.closest<HTMLElement>('[data-page-display-scale]')!.dataset.pageDisplayScale);
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue({ top: 200, left: 100,
+      width: 760 * scale, height: 1200 * scale } as DOMRect);
+    fireEvent.pointerDown(view.getByRole('button', { name: 'Move block' }));
+    expect(beginMove).toHaveBeenCalledTimes(1);
+    const map = beginMove.mock.calls[0][3] as (clientY: number) => number;
+    expect((map(200 + 730 * scale) - map(200 + 440 * scale)) / scale).toBeCloseTo(370);
+    // The saved box still uses page 1's content origin, exactly as the existing
+    // drag contract allows. Its canonical top is now 810, displayed at 730.
+    const saved = { ...props.blockLayouts[block.id], frame_id: 'a2-first', y: 770 };
+    view.rerender(<NoteWritingSurfaceLayer {...props} pageGapsFolded blockLayouts={{ [block.id]: saved }} />);
+    const shell = view.container.querySelector<HTMLElement>('[data-note-block-shell]')!;
+    expect(Number.parseFloat(shell.style.top)).toBe(730);
+    expect(saved.frame_id).toBe('a2-first');
+    expect(saved.y).toBe(770);
+  });
+
+  it('saves ink using the original frame after drawing on a folded page and clips captured motion at that page edge', async () => {
+    const props = bindingGapProps();
+    const persist = vi.fn(async (_input: Parameters<NoteWritingSurfaceLayerProps['onPersistCanvasObject']>[0]) => true);
+    const view = render(<NoteWritingSurfaceLayer {...props} pageGapsFolded onPersistCanvasObject={persist} />);
+    fireEvent.click(view.getByRole('button', { name: 'Pen' }));
+    const ink = view.container.querySelector<HTMLElement>('[data-paper-ink-layer="a2-second"]')!;
+    const scale = Number(ink.closest<HTMLElement>('[data-page-display-scale]')!.dataset.pageDisplayScale);
+    const top = 100 + 600 * scale;
+    vi.spyOn(ink, 'getBoundingClientRect').mockReturnValue({ top, left: 50,
+      width: 904 * scale, height: 600 * scale, right: 50 + 904 * scale, bottom: top + 600 * scale } as DOMRect);
+    const pointer = (type: string, x: number, y: number) => {
+      const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0,
+        clientX: 50 + x * scale, clientY: top + y * scale });
+      Object.defineProperties(event, { pointerId: { value: 11 }, isPrimary: { value: true } });
+      fireEvent(ink, event);
+    };
+    await act(async () => { pointer('pointerdown', 100, 100); pointer('pointermove', 140, 700); pointer('pointerup', 140, 700); });
+    expect(persist).toHaveBeenCalledTimes(1);
+    const placement = persist.mock.calls[0][0].placement;
+    expect(placement.frameId).toBe('a2-second');
+    expect(placement.y).toBeCloseTo(780);
+    expect(placement.height).toBeCloseTo(500);
+    expect(props.noteCanvasRuntime.pageFrames[1].y).toBe(680);
+  });
+
+  it('folds and reopens the page-gap control while manual boxes, walls and ink retain their local geometry', () => {
+    const props = bindingGapProps();
+    const before = JSON.stringify({ runtime: props.noteCanvasRuntime, layouts: props.blockLayouts });
+    const view = render(<NoteWritingSurfaceLayer {...props} />);
+    const manual = view.container.querySelector<HTMLElement>('[data-note-block-shell]')!;
+    const paper = view.container.querySelector<HTMLElement>('[data-flow-page-paper="a2-second"]')!;
+    const ink = view.container.querySelector<HTMLElement>('[data-paper-ink-layer="a2-second"]')!;
+    const path = ink.querySelector('[data-paper-ink-id="a2-ink"]')!;
+    const pathBefore = path.getAttribute('transform');
+    const manualBefore = Number.parseFloat(manual.style.top);
+    const paperBefore = Number.parseFloat(paper.style.top);
+    const inkBefore = Number.parseFloat(ink.style.top);
+    fireEvent.click(view.getByRole('button', { name: 'Fold page gaps' }));
+    expect(Number.parseFloat(manual.style.top)).toBe(manualBefore - 80);
+    expect(Number.parseFloat(paper.style.top)).toBe(paperBefore - 80);
+    expect(Number.parseFloat(ink.style.top)).toBe(inkBefore - 80);
+    expect(manual.style.width).toBe('300px');
+    expect(ink.style.height).toBe('600px');
+    expect(path.getAttribute('transform')).toBe(pathBefore);
+    expect(view.container.querySelector('[data-page-gaps-folded="true"]')).not.toBeNull();
+    fireEvent.click(view.getByRole('button', { name: 'Show page gaps' }));
+    expect(Number.parseFloat(manual.style.top)).toBe(manualBefore);
+    expect(JSON.stringify({ runtime: props.noteCanvasRuntime, layouts: props.blockLayouts })).toBe(before);
+    expect(props.onPersistCanvasObject).not.toHaveBeenCalled();
+  });
+
+  it('maps folded blank drops and double clicks back into the original second-page coordinates', () => {
+    const props = bindingGapProps();
+    const onDropTrayBlock = vi.fn(async (_id: string, _layout: BlockBoxLayout) => undefined);
+    const doubleClick = vi.fn();
+    const view = render(<NoteWritingSurfaceLayer {...props} pageGapsFolded onDropTrayBlock={onDropTrayBlock}
+      onPageSpaceDoubleClick={doubleClick} />);
+    const blockList = props.blockListRef.current!;
+    const scale = Number(blockList.closest<HTMLElement>('[data-page-display-scale]')!.dataset.pageDisplayScale);
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue({ left: 100, top: 200, width: 760 * scale,
+      height: 1200 * scale, right: 100 + 760 * scale, bottom: 200 + 1200 * scale } as DOMRect);
+    const displayY = 600 + 40 + 90;
+    const drop = new Event('drop', { bubbles: true, cancelable: true });
+    Object.assign(drop, { clientX: 160, clientY: 200 + displayY * scale,
+      dataTransfer: { types: ['application/x-coincides-tray-placement'], getData: () => 'a2-tray' } });
+    fireEvent(blockList, drop);
+    expect(onDropTrayBlock).toHaveBeenCalledWith('a2-tray', expect.objectContaining({
+      frame_id: 'a2-second', coordinate_space: 'page_frame_local',
+    }));
+    expect(onDropTrayBlock.mock.calls[0][1].y).toBeCloseTo(90);
+    fireEvent.doubleClick(blockList, { clientX: 160, clientY: 200 + displayY * scale });
+    expect(doubleClick).toHaveBeenCalledTimes(1);
+    expect(doubleClick.mock.calls[0][0].clientY).toBeCloseTo(200 + (displayY + 80) * scale);
+    expect(props.noteCanvasRuntime.pageFrames[1].y).toBe(680);
+  });
+
+  it('moves A1 text fragments only on screen and keeps print and Overview projections unchanged', () => {
+    const props = bindingGapProps(true);
+    const before = JSON.stringify(props.noteCanvasRuntime.pageFlowPlan);
+    const displayed = createPageGapPresentation(props.noteCanvasRuntime.pageFrames, true);
+    const view = render(<><NoteWritingSurfaceLayer {...props} /><NotePrintLayer {...props} />
+      <NoteOverviewLayer writingSurfaceProps={props} onSelectPage={vi.fn()} onClose={vi.fn()} /></>);
+    const writing = view.container.querySelector('[data-text-unit-move-scope]')!;
+    const rows = Array.from(writing.querySelectorAll<HTMLElement>('[data-page-flow-fragment-id]'));
+    expect(props.noteCanvasRuntime.pageFrames.length).toBeGreaterThan(2);
+    const tops = rows.map((row) => Number.parseFloat(row.style.top));
+    const overviewBefore = view.container.querySelector('[data-note-overview]')!.innerHTML;
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    const printBefore = document.querySelector('[data-note-print-root]')!.innerHTML;
+    act(() => window.dispatchEvent(new Event('afterprint')));
+    fireEvent.click(view.getAllByRole('button', { name: 'Fold page gaps' })[0]);
+    rows.forEach((row, index) => expect(Number.parseFloat(row.style.top))
+      .toBe(tops[index] + (displayed.offsetByFrameId.get(row.dataset.pageFlowFrameId!) || 0)));
+    expect(view.container.querySelector('[data-note-overview]')!.innerHTML).toBe(overviewBefore);
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    expect(document.querySelector('[data-note-print-root]')!.innerHTML).toBe(printBefore);
+    act(() => window.dispatchEvent(new Event('afterprint')));
+    expect(JSON.stringify(props.noteCanvasRuntime.pageFlowPlan)).toBe(before);
+  });
+
+  it('hides folding for a Web long page even if the preference is set', () => {
+    const web = { ...frame(0), templateId: 'screen_note' as const, height: 7000 };
+    const props = propsFor(web, 'page');
+    const view = render(<NoteWritingSurfaceLayer {...props} pageGapsFolded showViewOptions />);
+    expect(view.queryByRole('menuitemcheckbox', { name: 'Fold page gaps' })).toBeNull();
+    expect(view.container.querySelector('[data-note-page-gap]')).toBeNull();
+    expect(view.container.querySelector('[data-page-gaps-folded="false"]')).not.toBeNull();
+    expect(props.noteCanvasRuntime.pageFrames[0].height).toBe(7000);
+  });
+});
 
 function alignment(frameX: number, mode: SurfaceMode, options: {
   gear?: PageReadingGear; stepFactor?: number; frameOverrides?: Partial<PageFrameModel>;

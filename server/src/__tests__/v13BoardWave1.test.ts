@@ -152,8 +152,8 @@ test('13.4 wave 1 synthetic HTTP lifecycle smoke', async (t) => {
       assert.equal(receipt.actor_kind, 'human');
       assert.equal(receipt.channel, 'DELETE /api/boards/:boardId');
       assert.deepEqual(JSON.parse(receipt.objects), [{ kind: 'board', id: board.id }]);
-      assert.equal(receipt.summary, 'Board "Renamed board" deleted: 2 members, 1 edges, 2 visuals');
-      assert.deepEqual(JSON.parse(receipt.meta), { title: 'Renamed board', member_count: 2, edge_count: 1, visual_count: 2 });
+      assert.equal(receipt.summary, 'Board "Renamed board" deleted: 2 members, 1 edges, 2 visuals, 0 stickies');
+      assert.deepEqual(JSON.parse(receipt.meta), { title: 'Renamed board', member_count: 2, edge_count: 1, visual_count: 2, sticky_count: 0 });
       const { board: replacement } = await request('POST', '/api/boards', { title: 'Same soul, new board', soul_id: board.soul_id }, 201);
       assert.notEqual(replacement.id, board.id);
       assert.equal(replacement.soul_id, board.soul_id);

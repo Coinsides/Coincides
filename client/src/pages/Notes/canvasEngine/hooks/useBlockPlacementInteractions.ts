@@ -147,6 +147,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     event: ReactPointerEvent<HTMLElement>,
     block: TBlock,
     layout: BlockBoxLayout,
+    toCanonicalClientY?: (clientY: number) => number,
   ) => {
     event.preventDefault();
     event.stopPropagation();
@@ -154,7 +155,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     setInteractionState(draggingBlockInteraction(block.id));
     beginTemporaryLayoutMode();
     const startClientX = event.clientX;
-    const startClientY = event.clientY;
+    const startClientY = toCanonicalClientY?.(event.clientY) ?? event.clientY;
     const startLayouts = { ...blockLayouts, [block.id]: layout };
     let latestLayouts: Record<string, BlockBoxLayout> = startLayouts;
     movingBlockIdRef.current = block.id;
@@ -162,7 +163,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const zoom = viewportTransform.zoom;
       const deltaX = (moveEvent.clientX - startClientX) / zoom;
-      const deltaY = (moveEvent.clientY - startClientY) / zoom;
+      const deltaY = ((toCanonicalClientY?.(moveEvent.clientY) ?? moveEvent.clientY) - startClientY) / zoom;
       const result = calculateDraggedBlockLayouts({
         coordinateContract,
         blockId: block.id,

@@ -408,6 +408,7 @@ CREATE TABLE IF NOT EXISTS notes (
   status TEXT NOT NULL DEFAULT 'active',
   source_kind TEXT NOT NULL DEFAULT 'manual',
   page_format TEXT NOT NULL DEFAULT 'flow',
+  binding_settings_json TEXT DEFAULT NULL,
   metadata TEXT NOT NULL DEFAULT '{}',
   operation_batch_id TEXT REFERENCES operation_batches(id) ON DELETE SET NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

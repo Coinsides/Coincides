@@ -907,6 +907,32 @@ export function useNoteCanvasDataAdapter({
     finally { if (skinSaveTails.current.get(current.id) === settled) skinSaveTails.current.delete(current.id); }
   }), [writeRegistry, addToast]);
 
+  const bindingSaveTails = useRef(new Map<string, Promise<unknown>>());
+  const saveBindingSettings = useCallback(writeRegistry.hold('saveBindingSettings', async (
+    bindingSettings: import('@shared/types/noteBinding').NoteBindingSettings,
+  ) => {
+    const current = noteRef.current;
+    if (!current || current.id !== routeNoteIdRef.current) throw new Error('Note is not loaded');
+    const generation = routeRequestGenerationRef.current;
+    const epoch = successfulHydrationEpochRef.current;
+    const previous = bindingSaveTails.current.get(current.id) || Promise.resolve();
+    const write = previous.then(() => api.put<Note>(`/notes/${current.id}/binding-settings`, { binding_settings: bindingSettings }));
+    const settled = write.catch(() => undefined);
+    bindingSaveTails.current.set(current.id, settled);
+    try {
+      const response = await write;
+      if (bindingSaveTails.current.get(current.id) === settled && adapterMountActiveRef.current
+        && routeNoteIdRef.current === current.id && routeRequestGenerationRef.current === generation
+        && successfulHydrationEpochRef.current === epoch) {
+        const saved = response.data.binding_settings ?? null;
+        if (noteRef.current?.id === current.id) noteRef.current = { ...noteRef.current, binding_settings: saved };
+        setNote((latest) => latest?.id === current.id ? { ...latest, binding_settings: saved } : latest);
+      }
+    } finally {
+      if (bindingSaveTails.current.get(current.id) === settled) bindingSaveTails.current.delete(current.id);
+    }
+  }), [writeRegistry]);
+
   const saveAnnotationTruthsOutcome = useCallback(writeRegistry.hold('saveAnnotationTruths', async (
     nextAnnotations: AnnotationTruthV1[], options: { preserveDrafts?: boolean } = {},
   ): Promise<boolean> => {
@@ -2902,6 +2928,7 @@ export function useNoteCanvasDataAdapter({
     saveDescription,
     saveHeaderMetadata,
     saveSkin,
+    saveBindingSettings,
     skinSaveError: skinWriteFailure === note?.id,
     saveAnnotationTruths,
     saveContentGroups,

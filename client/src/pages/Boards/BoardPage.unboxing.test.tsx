@@ -139,6 +139,7 @@ beforeEach(() => {
       canvasObjects: [], canvasPlacements: [], contentMounts: [], visualConnectors: [], imageObjects: [], structuredObjects: [] });
     if (url === '/notes/new-note') return response(notes[0]);
     if (url === '/notes/new-note/blocks') return response(blocks);
+    if (url === '/notes/new-note/binding-settings') return response({ binding_settings: null });
     // E5 cover chips and metadata load when the note runtime mounts.
     if (url === '/notes/new-note/tags') return response({ tags: [] });
     if (url === '/notes/new-note/metadata') return response({

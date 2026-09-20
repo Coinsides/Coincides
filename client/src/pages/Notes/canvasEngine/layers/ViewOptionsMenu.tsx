@@ -12,6 +12,8 @@ export interface ViewOptionsMenuProps {
   onToggle: () => void;
   onClose: () => void;
   onSelect: (gear: PageReadingGear) => void;
+  pageGapsFolded?: boolean;
+  onPageGapsFoldedChange?: (folded: boolean) => void;
 }
 
 const OPTIONS = [
@@ -20,7 +22,8 @@ const OPTIONS = [
   ['physical', '100% physical'],
 ] as const;
 
-export function ViewOptionsMenu({ open, disabled = false, activeGear, onToggle, onClose, onSelect }: ViewOptionsMenuProps) {
+export function ViewOptionsMenu({ open, disabled = false, activeGear, onToggle, onClose, onSelect,
+  pageGapsFolded = false, onPageGapsFoldedChange }: ViewOptionsMenuProps) {
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -76,7 +79,7 @@ export function ViewOptionsMenu({ open, disabled = false, activeGear, onToggle, 
     }
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
-    const items = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') || []);
+    const items = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"], [role="menuitemcheckbox"]') || []);
     const index = items.indexOf(document.activeElement as HTMLButtonElement);
     const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
       : (index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
@@ -113,6 +116,12 @@ export function ViewOptionsMenu({ open, disabled = false, activeGear, onToggle, 
           <span className={styles.check} aria-hidden="true">{activeGear === gear && <Check size={14} />}</span>
           <span>{label}</span>
         </button>)}
+        {onPageGapsFoldedChange && <button type="button" className={styles.option}
+          role="menuitemcheckbox" aria-checked={pageGapsFolded} data-page-gap-toggle="true"
+          onClick={() => { onPageGapsFoldedChange(!pageGapsFolded); closeAndFocusTrigger(); }}>
+          <span className={styles.check} aria-hidden="true">{pageGapsFolded && <Check size={14} />}</span>
+          <span>Fold page gaps</span>
+        </button>}
       </div>
     </FloatingOverlayLayer>
   </>;

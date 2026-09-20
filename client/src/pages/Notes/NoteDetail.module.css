@@ -3410,8 +3410,8 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  color: color-mix(in srgb, var(--text-muted) 82%, transparent);
-  font-family: var(--document-font-family, Aptos, Calibri, "Segoe UI", Arial, sans-serif);
+  color: var(--sk-ink-muted, var(--text-muted));
+  font-family: var(--sk-label-font, var(--document-font-family, sans-serif));
   font-size: 12px;
   line-height: 1;
 }

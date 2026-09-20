@@ -8,8 +8,10 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
 }
 
 export function hydrateNote(row: any) {
+  // Binding uses its own human subresource; preserve the existing Note response contract.
+  const { binding_settings_json: _bindingSettings, ...note } = row;
   return {
-    ...row,
+    ...note,
     metadata: parseJson(row.metadata, {}),
   };
 }

@@ -36,6 +36,7 @@ import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 import { usePaperSkin } from '../PaperSkinContext';
 import { SkinFloatCard } from '@/components/Skin/SkinFloatCard';
+import { NoteBindingPanel } from './NoteBindingPanel';
 
 export interface SurfacePolicyView {
   label: string;
@@ -43,6 +44,9 @@ export interface SurfacePolicyView {
 }
 
 export interface NoteChromeLayerProps {
+  bindingError?: string | null;
+  onRetryBinding?: () => void;
+  onSaveBindingSettings?: (value: import('@shared/types/noteBinding').NoteBindingSettings) => Promise<void>;
   appearanceAnchorRef?: RefObject<HTMLButtonElement>;
   mountAppearanceCard?: boolean;
   hostMode?: 'page' | 'modal';
@@ -101,6 +105,9 @@ export interface NoteChromeLayerProps {
 }
 
 export function NoteChromeLayer({
+  bindingError,
+  onRetryBinding,
+  onSaveBindingSettings,
   appearanceAnchorRef,
   mountAppearanceCard = true,
   hostMode = 'page',
@@ -156,6 +163,8 @@ export function NoteChromeLayer({
   onTogglePreviewLabelOverlay,
 }: NoteChromeLayerProps) {
   const skin = usePaperSkin();
+  const [bindingOpen, setBindingOpen] = useState(false);
+  useEffect(() => setBindingOpen(false), [note.id]);
   const continuousWeb = note.page_format === 'screen_note';
   const toolbarRef = useRef<HTMLDivElement>(null);
   const localAppearanceButtonRef = useRef<HTMLButtonElement>(null);
@@ -395,6 +404,7 @@ export function NoteChromeLayer({
 
   return (
     <div ref={toolbarRef} className={styles.noteToolbarActions} data-note-toolbar-actions="true">
+          {bindingError && <span role="alert">{bindingError}<button type="button" onClick={onRetryBinding}>重试装订</button></span>}
           {contentReadOnly && <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
             <LockKeyhole size={13} /> Source locked
           </span>}
@@ -435,6 +445,9 @@ export function NoteChromeLayer({
               <Palette size={15} />
               外观
             </button>
+            {onSaveBindingSettings && <button type="button" className={styles.modePill}
+              aria-expanded={bindingOpen} disabled={contentReadOnly}
+              onClick={() => setBindingOpen((open) => !open)}>装订</button>}
             <button
               className={styles.iconBtn}
               onClick={onToggleMoreActions}
@@ -742,6 +755,10 @@ export function NoteChromeLayer({
             )}
             </div>
           </FloatingOverlayLayer>
+      <FloatingOverlayLayer open={bindingOpen}>
+        {onSaveBindingSettings && <NoteBindingPanel key={note.id} value={note.binding_settings}
+          pageCount={pageFrames.length} onSave={onSaveBindingSettings} onClose={() => setBindingOpen(false)} />}
+      </FloatingOverlayLayer>
       {mountAppearanceCard && skin && <SkinFloatCard noteId={note.id} skin={skin} open={showAppearancePanel}
         onClose={onToggleAppearancePanel} anchorRef={appearanceButtonRef} />}
       <dialog

@@ -3,11 +3,12 @@ import { pasteMediaBlock } from '../mediaBlockPasteService';
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
-import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
+import { createPageGapPresentation, projectPageFrameToReadingSurface } from '../pageFramePresentationService';
 import { Boxes, MousePointer2, Pencil, Eraser, PanelLeft } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
 import { ViewOptionsMenu } from './ViewOptionsMenu';
+import { NotePageGapLayer } from './NotePageGapLayer';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
@@ -138,6 +139,8 @@ import { useBoardStagingSelection } from '../hooks/useBoardStagingSelection';
 import { SlashMenuLayer } from './SlashMenuLayer';
 
 import styles from '../../NoteDetail.module.css';
+import { mapPageFrameSlots } from '../pageFrameSlotService';
+import { PageFrameSlotsLayer } from './PageFrameSlotsLayer';
 import { TRAY_DRAG_TYPE } from '../trayService';
 import type { DraftBlockLifecyclePhase } from '../draftBlockLifecycleReducer';
 import {
@@ -212,6 +215,8 @@ export interface NoteWritingSurfaceLayerProps {
   showViewOptions?: boolean;
   onToggleViewOptions?: () => void;
   onCloseViewOptions?: () => void;
+  pageGapsFolded?: boolean;
+  onPageGapsFoldedChange?: (folded: boolean) => void;
   onPageFrameWallPointerDown?: (event: ReactPointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
   activePageFrameWall?: ActivePageFrameWall | null;
   overviewOpen?: boolean;
@@ -246,7 +251,8 @@ export interface NoteWritingSurfaceLayerProps {
   onSaveDocumentTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onSaveGroupFolders: (folders: GroupFolderV1[]) => Promise<void>;
   onActivateDraft: (layout?: BlockBoxLayout) => void;
-  onBeginMoveBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, layout: BlockBoxLayout) => void;
+  onBeginMoveBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, layout: BlockBoxLayout,
+    toCanonicalClientY?: (clientY: number) => number) => void;
   onBeginResizeBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, text: string, layout: BlockBoxLayout) => void;
   onBlockKeyDown: (block: NoteBlock, text: string, event: KeyboardEvent<HTMLTextAreaElement>) => void;
   onBlockListMouseDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
@@ -368,6 +374,8 @@ export function NoteWritingSurfaceLayer({
   showViewOptions = false,
   onToggleViewOptions,
   onCloseViewOptions,
+  pageGapsFolded: controlledPageGapsFolded,
+  onPageGapsFoldedChange,
   onPageFrameWallPointerDown,
   activePageFrameWall,
   overviewOpen = false,
@@ -451,6 +459,27 @@ export function NoteWritingSurfaceLayer({
   const [, setOverlayPositionRevision] = useState(0);
   const selectedAnnotationId = selectedAnnotationIds[0] || null;
   const primaryPageFrame = noteCanvasRuntime.primaryPageFrame;
+  const [gapPreference, setGapPreference] = useState({ noteId, folded: false });
+  const pageGapsFolded = controlledPageGapsFolded ?? (gapPreference.noteId === noteId && gapPreference.folded);
+  const setPageGapsFolded = (folded: boolean) => {
+    setGapPreference({ noteId, folded });
+    onPageGapsFoldedChange?.(folded);
+  };
+  const pageGapPresentation = useMemo(() => createPageGapPresentation(noteCanvasRuntime.pageFrames,
+    surfaceMode === 'page' && pageGapsFolded), [noteCanvasRuntime.pageFrames, surfaceMode, pageGapsFolded]);
+  const readingPageFrames = pageGapPresentation.pageFrames;
+  const readingPageFrameById = useMemo(() => new Map(readingPageFrames.map((frame) => [frame.id, frame])), [readingPageFrames]);
+  const displayFrame = (frame: PageFrameModel) => projectPageFrameToReadingSurface(
+    readingPageFrameById.get(frame.id) || frame,
+    noteCanvasRuntime.coordinateContract, pageOffsetX);
+  const displayPlacementFrame = (layout: BlockBoxLayout) => {
+    const frame = selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
+    if (!frame || !pageGapsFolded || !pageGapPresentation.enabled) return frame;
+    // A manual box can extend beyond its affiliated frame. Fold its actual world
+    // position, retaining the same frame-local origin and stored coordinates.
+    const worldY = resolveScreenRect(layout, frame, noteCanvasRuntime.coordinateContract, pageOffsetX).y;
+    return { ...frame, y: frame.y + pageGapPresentation.toDisplayY(worldY) - worldY };
+  };
   const primaryPageFrameId = primaryPageFrame?.id || 'none';
   const primaryPageFrameRole = primaryPageFrame?.role || 'none';
   const primaryPageFramePrimary = primaryPageFrame ? 'true' : 'false';
@@ -467,18 +496,19 @@ export function NoteWritingSurfaceLayer({
   const displayHeaderHeight = paperHeader ? headerHeight : 0;
   const pageReading = usePageReadingPresentation({
     enabled: surfaceMode === 'page' && !overviewOpen, noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
-    pageFrames: noteCanvasRuntime.pageFrames,
-    pageContentHeight, displayHeaderHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
+    pageFrames: readingPageFrames,
+    pageContentHeight: pageGapPresentation.toDisplayY(pageContentHeight),
+    displayHeaderHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
   });
   const snapGuideLayout = blockLayouts[selectedBlockId || ''] || draftLayout || defaultDraftLayout;
   const screenSnapGuide = resolveScreenRect(
     { ...snapGuideLayout, x: snapGuide?.x || 0, y: snapGuide?.y || 0 },
-    selectPlacementFrame(snapGuideLayout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract),
+    displayPlacementFrame(snapGuideLayout),
     noteCanvasRuntime.coordinateContract,
     pageOffsetX,
   );
   const pageDisplayBounds = useMemo(() => {
-    const screen = (layout: BlockBoxLayout) => resolveScreenRect(layout, selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract), noteCanvasRuntime.coordinateContract);
+    const screen = (layout: BlockBoxLayout) => resolveScreenRect(layout, displayPlacementFrame(layout), noteCanvasRuntime.coordinateContract);
     const layouts = visibleBlocks.map((block) => blockLayouts[block.id]).filter(Boolean).map(screen);
     noteCanvasRuntime.pageFlowPlan?.fragments.forEach((fragment) => layouts.push(screen(fragment.layout)));
     if (draftActive) layouts.push(screen(draftLayout || defaultDraftLayout));
@@ -487,7 +517,7 @@ export function NoteWritingSurfaceLayer({
     const right = Math.max(pageReading.paperWidth, ...layouts.map((layout) => pageReading.inset.left + layout.x + layout.width));
     const bottom = Math.max(pageReading.paperHeight, ...layouts.map((layout) => pageReading.inset.top + layout.y + layout.height));
     return { left, top, width: right - left, height: bottom - top };
-  }, [noteCanvasRuntime, visibleBlocks, blockLayouts, draftActive, draftLayout, defaultDraftLayout,
+  }, [noteCanvasRuntime, readingPageFrames, visibleBlocks, blockLayouts, draftActive, draftLayout, defaultDraftLayout,
     pageReading.inset.left, pageReading.inset.top, pageReading.paperWidth, pageReading.paperHeight]);
   const pageFrameGuideVisibility = shouldShowPageFrameGuides({
     surfaceMode,
@@ -500,6 +530,8 @@ export function NoteWritingSurfaceLayer({
   const blockPlacementByBlockId = useMemo(() => (
     new Map(noteCanvasRuntime.blockPlacements.map((placement) => [placement.blockId, placement]))
   ), [noteCanvasRuntime.blockPlacements]);
+  // Folding is monotonic, so canonical placement order also covers manual boxes
+  // that extend past their affiliated frame into a later page.
   const navigationLayout = { blockLayouts, pageFrames: noteCanvasRuntime.pageFrames,
     coordinateContract: noteCanvasRuntime.coordinateContract, pageOffsetX };
   const documentTextSelection = useDocumentTextFlowSelection({ noteId, visibleBlocks, ...navigationLayout,
@@ -512,16 +544,22 @@ export function NoteWritingSurfaceLayer({
   ), [noteCanvasRuntime.pageFrameExtensions]);
   const pageFrameGuides = useMemo(() => (
     visiblePageFrames.map((frame) => createPageFrameGuides(
-      projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)))
-  ), [visiblePageFrames, noteCanvasRuntime.coordinateContract, pageOffsetX]);
+      displayFrame(frame)))
+  ), [visiblePageFrames, readingPageFrames, noteCanvasRuntime.coordinateContract, pageOffsetX]);
   const blockFragmentsByBlockId = useMemo(() => {
     const next = new Map<string, PageStackBlockFragmentProjection[]>();
     noteCanvasRuntime.blockFragmentProjections.forEach((fragment) => {
       const existing = next.get(fragment.blockId) || [];
-      next.set(fragment.blockId, [...existing, fragment]);
+      const offsetY = pageGapPresentation.offsetByFrameId.get(fragment.pageFrameId) || 0;
+      const displayedFragment = offsetY ? { ...fragment,
+        blockRect: { ...fragment.blockRect, y: fragment.blockRect.y + offsetY },
+        visibleRect: { ...fragment.visibleRect, y: fragment.visibleRect.y + offsetY },
+        pageContentRect: { ...fragment.pageContentRect, y: fragment.pageContentRect.y + offsetY },
+      } : fragment;
+      next.set(fragment.blockId, [...existing, displayedFragment]);
     });
     return next;
-  }, [noteCanvasRuntime.blockFragmentProjections]);
+  }, [noteCanvasRuntime.blockFragmentProjections, pageGapPresentation]);
   const pageFrameSlotEntries = useMemo(() => (
     visiblePageFrames
       .map((pageFrame) => {
@@ -534,27 +572,22 @@ export function NoteWritingSurfaceLayer({
           && extension.pageStackPageIndex >= collapsedPreviewPages,
         );
         if (hiddenByCollapsedStack || !extension?.slots) return null;
-        const displayedFrame = projectPageFrameToReadingSurface(pageFrame, noteCanvasRuntime.coordinateContract, pageOffsetX);
+        const displayedFrame = displayFrame(pageFrame);
         // Slots are world rectangles. Follow the same reading-column translation
         // as the frame and guides while preserving their text and local geometry.
         const slotOffsetX = displayedFrame.x - pageFrame.x;
-        const projectSlot = (slot: PageFrameSlot | undefined) => slot
-          ? { ...slot, rect: { ...slot.rect, x: slot.rect.x + slotOffsetX } }
-          : undefined;
+        const slotOffsetY = displayedFrame.y - pageFrame.y;
+        const projectSlot = (slot: PageFrameSlot) => ({ ...slot,
+          rect: { ...slot.rect, x: slot.rect.x + slotOffsetX, y: slot.rect.y + slotOffsetY } });
         return {
           frameId: pageFrame.id,
           headerFooterEnabled: extension.headerFooterEnabled,
           pageNumberEnabled: extension.pageNumberEnabled,
-          slots: {
-            ...extension.slots,
-            header: projectSlot(extension.slots.header),
-            footer: projectSlot(extension.slots.footer),
-            pageNumber: projectSlot(extension.slots.pageNumber),
-          },
+          slots: mapPageFrameSlots(extension.slots, projectSlot),
         };
       })
       .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
-  ), [pageFrameExtensionByFrameId, visiblePageFrames, surfaceMode, noteCanvasRuntime.coordinateContract, pageOffsetX]);
+  ), [pageFrameExtensionByFrameId, visiblePageFrames, readingPageFrames, surfaceMode, noteCanvasRuntime.coordinateContract, pageOffsetX]);
   const noteRootGroupFolderId = useMemo(() => systemGroupFolderId({
     kind: 'note',
     project_id: projectId,
@@ -1222,7 +1255,7 @@ export function NoteWritingSurfaceLayer({
   };
 
   const getBlockControlAnchorForLayout = (layout: BlockBoxLayout) => {
-    const worldRect = resolveScreenRect(layout, selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract), noteCanvasRuntime.coordinateContract, pageOffsetX);
+    const worldRect = resolveScreenRect(layout, displayPlacementFrame(layout), noteCanvasRuntime.coordinateContract, pageOffsetX);
 
     const blockListRect = blockListRef.current?.getBoundingClientRect();
     if (!blockListRect) return null;
@@ -1296,7 +1329,25 @@ export function NoteWritingSurfaceLayer({
       y: Math.max(0, (event.clientY - blockListRect.top) / pageReading.displayScale),
       height,
       surface: 'formal_page',
-    }, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
+    }, readingPageFrames, noteCanvasRuntime.coordinateContract);
+  };
+
+  const handlePageSpaceDoubleClick = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!pageGapsFolded || !pageGapPresentation.enabled) { onPageSpaceDoubleClick(event); return; }
+    const rect = event.currentTarget.getBoundingClientRect();
+    const displayY = (event.clientY - rect.top) / pageReading.displayScale;
+    // The existing controller still receives canonical screen coordinates and
+    // performs its ordinary frame-local conversion and draft policy.
+    onPageSpaceDoubleClick({ ...event,
+      clientY: rect.top + pageGapPresentation.toWorldY(displayY) * pageReading.displayScale });
+  };
+
+  const handleBeginMoveBlock = (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, layout: BlockBoxLayout) => {
+    const rect = blockListRef.current?.getBoundingClientRect();
+    if (!rect || !pageGapsFolded || !pageGapPresentation.enabled) { onBeginMoveBlock(event, block, layout); return; }
+    const scale = pageReading.displayScale;
+    onBeginMoveBlock(event, block, layout,
+      (clientY) => rect.top + pageGapPresentation.toWorldY((clientY - rect.top) / scale) * scale);
   };
 
   const handleExtractTextUnit = (block: NoteBlock, unitId: string, point: CanvasPoint) => {
@@ -1322,7 +1373,7 @@ export function NoteWritingSurfaceLayer({
       // engine supplies available width; its edge-clamped points are rejected.
       if (Math.abs(placed.x - x) > 0.001 || Math.abs(placed.y - y) > 0.001) return null;
       return screenLayoutToLocal({ ...defaultDraftLayout, ...placed, surface: 'formal_page' },
-        noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
+        readingPageFrames, noteCanvasRuntime.coordinateContract);
     };
     if (surfaceMode === 'page') {
       const rect = blockListRef.current?.getBoundingClientRect();
@@ -1443,6 +1494,7 @@ export function NoteWritingSurfaceLayer({
       className={`${styles.writingSurface} ${styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''}`}
       data-page-frame-template={primaryPageFrameExtension?.templateId || primaryPageFrame?.templateId || 'none'}
       data-page-frame-background={primaryPageFrameExtension?.background.kind || primaryPageFrame?.background?.kind || 'none'}
+      data-page-gaps-folded={pageGapsFolded && pageGapPresentation.enabled ? 'true' : 'false'}
       style={surfaceMode === 'page' ? primaryPageFrameTemplateStyle as CSSProperties & Record<string, string> : undefined}
     >
       {hostMode === 'modal' && !hasMeaningfulRenderableContent && (
@@ -1533,7 +1585,7 @@ export function NoteWritingSurfaceLayer({
           '--formal-page-width': `${primaryPageFrameWidth}px`,
         } as CSSProperties & Record<string, string | number>}
         onMouseDown={contentReadOnly ? undefined : handleBlockListMouseDownForDraft}
-        onDoubleClick={contentReadOnly ? undefined : onPageSpaceDoubleClick}
+        onDoubleClick={contentReadOnly ? undefined : handlePageSpaceDoubleClick}
         onDragOver={contentReadOnly ? undefined : handleBlankSurfaceDragOver}
         onDrop={contentReadOnly ? undefined : handleBlankSurfaceDrop}
         onDragOverCapture={handleStagingDragOver}
@@ -1541,7 +1593,7 @@ export function NoteWritingSurfaceLayer({
       >
         {surfaceMode === 'page' && noteCanvasRuntime.pageFlowPlan && visiblePageFrames.map((frame) => {
           if (paperHeader && frame.id === primaryPageFrameId) return null;
-          const display = projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX);
+          const display = displayFrame(frame);
           const extension = pageFrameExtensionByFrameId.get(frame.id);
           return <div key={`${frame.id}:paper`} data-flow-page-paper={frame.id}
             aria-hidden="true" style={{ ...pageFrameTemplateToCssVars(extension?.background || frame.background),
@@ -1554,73 +1606,21 @@ export function NoteWritingSurfaceLayer({
         {surfaceMode === 'page' && !overviewOpen && noteCanvasRuntime.coordinateContract === 'v2'
           && visiblePageFrames.map((frame) => (
             <PageFrameWallLayer key={`${frame.id}:walls`}
-              frame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
+              frame={displayFrame(frame)}
               idleHeaderHeight={frame.id === primaryPageFrameId ? displayHeaderHeight : 0}
               interactive={layoutMode && !contentReadOnly && Boolean(onPageFrameWallPointerDown)}
               activeWall={activePageFrameWall} onPointerDown={onPageFrameWallPointerDown} />
           ))}
         {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (
           <PaperInkLayer key={frame.id} frame={frame}
-            displayFrame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
+            displayFrame={displayFrame(frame)}
             objects={noteCanvasRuntime.canvasObjects} placements={noteCanvasRuntime.canvasPlacements}
             canvasId={noteCanvasRuntime.canvasObjects[0]?.canvasId || 'primary-note-canvas'} tool={paperInkEnabled ? paperInkTool : 'selection'}
             enabled={paperInkEnabled} selectedObjectId={selectedCanvasObjectId} onSelect={setSelectedCanvasObjectId}
             onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject} />
         ))}
-        {pageFrameSlotEntries.map(({ frameId, headerFooterEnabled, pageNumberEnabled, slots }) => (
-          <div key={`${frameId}:slots`}>
-            {headerFooterEnabled && slots.header && (
-              <div
-                className={`${styles.pageFrameSlot} ${styles.pageFrameHeaderSlot}`}
-                data-page-frame-slot="header"
-                data-page-frame-slot-frame={frameId}
-                data-page-frame-slot-source={slots.header.textSource}
-                data-page-frame-slot-enabled={slots.header.enabled ? 'true' : 'false'}
-                style={{
-                  left: slots.header.rect.x,
-                  top: slots.header.rect.y,
-                  width: slots.header.rect.width,
-                  height: slots.header.rect.height,
-                }}
-              >
-                {slots.header.text ? <span>{slots.header.text}</span> : null}
-              </div>
-            )}
-            {headerFooterEnabled && slots.footer && (
-              <div
-                className={`${styles.pageFrameSlot} ${styles.pageFrameFooterSlot}`}
-                data-page-frame-slot="footer"
-                data-page-frame-slot-frame={frameId}
-                data-page-frame-slot-source={slots.footer.textSource}
-                data-page-frame-slot-enabled={slots.footer.enabled ? 'true' : 'false'}
-                style={{
-                  left: slots.footer.rect.x,
-                  top: slots.footer.rect.y,
-                  width: slots.footer.rect.width,
-                  height: slots.footer.rect.height,
-                }}
-              >
-                {slots.footer.text ? <span>{slots.footer.text}</span> : null}
-              </div>
-            )}
-            {pageNumberEnabled && slots.pageNumber && (
-              <div
-                className={`${styles.pageFrameSlot} ${styles.pageFramePageNumberSlot}`}
-                data-page-frame-slot="page-number"
-                data-page-frame-slot-frame={frameId}
-                data-page-frame-slot-source={slots.pageNumber.textSource}
-                data-page-frame-slot-enabled={slots.pageNumber.enabled ? 'true' : 'false'}
-                style={{
-                  left: slots.pageNumber.rect.x,
-                  top: slots.pageNumber.rect.y,
-                  width: slots.pageNumber.rect.width,
-                  height: slots.pageNumber.rect.height,
-                }}
-              >
-                <span>{slots.pageNumber.text}</span>
-              </div>
-            )}
-          </div>
+        {pageFrameSlotEntries.map(({ frameId, slots }) => (
+          <PageFrameSlotsLayer key={frameId} slots={slots} />
         ))}
         {pageFrameGuides.map((guides) => (
           <div key={`${guides.frameId}:guides`}>
@@ -1680,7 +1680,7 @@ export function NoteWritingSurfaceLayer({
         {noteCanvasRuntime.pageFlowPlan?.overflows.map((overflow) => {
           const fragment = noteCanvasRuntime.pageFlowPlan!.fragments.find((entry) => entry.id === overflow.fragmentId)!;
           const rect = resolveScreenRect(fragment.layout,
-            noteCanvasRuntime.pageFrames.find((frame) => frame.id === fragment.frameId), 'v2', pageOffsetX);
+            readingPageFrames.find((frame) => frame.id === fragment.frameId), 'v2', pageOffsetX);
           return <small key={overflow.fragmentId} role="status" data-page-flow-overflow={overflow.kind}
             style={{ position: 'absolute', left: rect.x, top: rect.y - 22 }}>
             Content exceeds this page by {Math.ceil(overflow.overflowPx)} px.
@@ -1706,7 +1706,7 @@ export function NoteWritingSurfaceLayer({
               block={block}
               onPasteImage={(file) => handlePasteImage(block, file)}
               coordinateContract={noteCanvasRuntime.coordinateContract}
-              pageFrame={selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
+              pageFrame={displayPlacementFrame(layout)}
               textUnitGutterLaneX={surfaceMode === 'page' && layout.surface === 'formal_page' ? pageOffsetX : undefined}
               contentReadOnly={contentReadOnly}
               allowSaveRecovery={recoveryBlockIds.includes(block.id)}
@@ -1786,7 +1786,7 @@ export function NoteWritingSurfaceLayer({
               }}
               onTrash={() => onTrashBlock(block.id)}
               onSelect={() => { setSelectedCanvasObjectId(null); onSelectBlock(block.id); }}
-              onBeginMove={(event) => onBeginMoveBlock(event, block, layout)}
+              onBeginMove={(event) => handleBeginMoveBlock(event, block, layout)}
               onBeginResize={(event) => onBeginResizeBlock(event, block, text, layout)}
               onToggleExportRole={() => onToggleExportRole(block, layout)}
               onToggleAIVisibility={() => onToggleAIVisibility(block, layout)}
@@ -1807,7 +1807,7 @@ export function NoteWritingSurfaceLayer({
 
         <DraftWritingEntryLayer
           coordinateContract={noteCanvasRuntime.coordinateContract}
-          pageFrame={selectPlacementFrame(draftLayout || defaultDraftLayout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
+          pageFrame={displayPlacementFrame(draftLayout || defaultDraftLayout)}
           contentReadOnly={contentReadOnly}
           creating={creatingDraft}
           draftActive={draftActive}
@@ -1831,6 +1831,14 @@ export function NoteWritingSurfaceLayer({
           onPersist={(text) => onPersistDraft(text)}
           onResize={onResizeDraftFromTextarea}
         />
+
+        {surfaceMode === 'page' && !overviewOpen && pageGapPresentation.enabled
+          && pageGapPresentation.gaps.map((gap) => {
+            const frame = readingPageFrames.find((candidate) => candidate.id === gap.afterFrameId)!;
+            const display = displayFrame(frame);
+            return <NotePageGapLayer key={`${gap.afterFrameId}:gap`} gap={gap} folded={pageGapsFolded}
+              left={display.x} width={display.width} onToggle={() => setPageGapsFolded(!pageGapsFolded)} />;
+          })}
 
         {slashTarget && (
           <SlashMenuLayer
@@ -1856,6 +1864,8 @@ export function NoteWritingSurfaceLayer({
             </button>
           ))}
           <ViewOptionsMenu open={showViewOptions} disabled={overviewOpen}
+            pageGapsFolded={pageGapsFolded}
+            onPageGapsFoldedChange={pageGapPresentation.enabled ? setPageGapsFolded : undefined}
             activeGear={readingViewState.gear}
             onToggle={() => onToggleViewOptions?.()}
             onClose={() => onCloseViewOptions?.()}

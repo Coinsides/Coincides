@@ -15,6 +15,7 @@ import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
 import { usePageFrameWalls } from './usePageFrameWalls';
 import { useNoteSkin } from './useNoteSkin';
+import { useNoteBinding } from './useNoteBinding';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
@@ -93,6 +94,7 @@ export function useNoteCanvasRuntimeController() {
     trackPendingWrite,
     note,
     saveSkin,
+    saveBindingSettings,
     skinSaveError,
     sourceProjectionPolicy,
     coordinateContract,
@@ -198,6 +200,7 @@ export function useNoteCanvasRuntimeController() {
     boundary: () => wallBoundaryRef.current(), save: savePageFrameWalls,
   });
   const skin = useNoteSkin(note, saveSkin, skinSaveError);
+  const binding = useNoteBinding(note?.id, saveBindingSettings);
   const pageFrameCollection = walls.collection;
   const persistedCanvasPlacements = walls.placements;
 
@@ -491,7 +494,7 @@ export function useNoteCanvasRuntimeController() {
     interactionState,
     layoutMode,
     layoutModeKind,
-    note,
+    note: note ? { ...note, binding_settings: binding.value } : null,
     pageOffsetX,
     pageFrameCollection,
     placementPending,
@@ -590,6 +593,9 @@ export function useNoteCanvasRuntimeController() {
     onPersistCanvasObject: inkCommands.persistCanvasObject,
     onDeleteCanvasObject: inkCommands.deleteCanvasObject,
     onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
+    onSaveBindingSettings: binding.loading || binding.error ? undefined : binding.save,
+    bindingError: binding.error,
+    onRetryBinding: binding.retry,
     onSelectBlock: markBlockSelected,
     onClearBlockSelection: clearBlockSelection,
     onSelectSlashCommand: handleSelectSlashCommand,

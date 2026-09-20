@@ -1,0 +1,25 @@
+.gap {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.gap span {
+  opacity: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 16px;
+  background: var(--bg-primary);
+}
+
+.gap:hover span,
+.gap:focus-visible span { opacity: 1; }
+.gap:focus-visible { outline: 1px solid var(--border-default); }
+
+@media print { .gap { display: none; } }

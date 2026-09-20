@@ -1,3 +1,5 @@
+import type { NoteBindingSlotName, NoteBindingSlotStyle } from '../../../../../shared/types/noteBinding';
+
 export type NoteCanvasMode = 'page' | 'canvas';
 
 export type CanvasSurface = 'formal_page' | 'canvas_workspace' | 'tray';
@@ -117,9 +119,18 @@ export interface PageFrameSlot {
   text: string;
   textSource: PageFrameSlotTextSource;
   align: 'left' | 'center' | 'right';
+  /** A2 extends the existing slot family; geometry stays a read-side projection. */
+  position?: NoteBindingSlotName;
+  offset?: CanvasPoint;
+  style?: NoteBindingSlotStyle;
+  bindingSectionId?: string;
+  mechanicalPageNumber?: number;
+  displayPageNumber?: number;
 }
 
 export interface PageFrameSlots {
+  /** When present, these six positions are authoritative. Aliases never add slots. */
+  entries?: Partial<Record<NoteBindingSlotName, PageFrameSlot>>;
   header?: PageFrameSlot;
   footer?: PageFrameSlot;
   pageNumber?: PageFrameSlot;

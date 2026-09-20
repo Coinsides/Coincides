@@ -49,6 +49,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
         >
           <NoteReadOnlyPageContent
             frame={frame}
+            slots={input.noteCanvasRuntime.pageFrameExtensions.find((entry) => entry.frameId === frame.id)?.slots}
             documentTypography={input.documentTypographyProfile}
             fragments={input.continuousWeb && frame.templateId === 'screen_note'
               ? input.noteCanvasRuntime.blockFragmentProjections.filter((fragment) => (

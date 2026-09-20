@@ -1,3 +1,12 @@
+import {
+  createDefaultNoteBindingSection,
+  createDefaultNoteBindingSettings,
+  NOTE_BINDING_SLOT_NAMES,
+  type NoteBindingNumberFormat,
+  type NoteBindingSection,
+  type NoteBindingSettings,
+  type NoteBindingSlotName,
+} from '../../../../../shared/types/noteBinding';
 import type {
   CanvasRect,
   PageFrameModel,
@@ -20,6 +29,15 @@ export interface FormatPageNumberInput {
   totalPages?: number;
 }
 
+export interface CreateBindingPageFrameSlotsInput {
+  pageFrame: PageFrameModel;
+  /** One-based system page ordinal, never the editable display counter. */
+  mechanicalPageNumber: number;
+  bindingSettings?: NoteBindingSettings | null;
+  /** A3 may identify a cover without creating or storing a separate slot family. */
+  isCover?: boolean;
+}
+
 export interface PageFrameSlotRects {
   header: CanvasRect;
   footer: CanvasRect;
@@ -33,8 +51,37 @@ const FOOTER_SLOT_HEIGHT = 28;
 const PAGE_NUMBER_SLOT_BOTTOM_INSET = 38;
 const PAGE_NUMBER_SLOT_HEIGHT = 22;
 
-function slotId(frameId: string, kind: PageFrameSlot['kind']): string {
+function slotId(frameId: string, kind: PageFrameSlot['kind'] | NoteBindingSlotName): string {
   return `${frameId}:slot:${kind}`;
+}
+
+/** Display counters have no bearing on frame IDs, order, or pagination. */
+export function formatBindingCounter(value: number, format: NoteBindingNumberFormat): string {
+  const number = Math.max(1, Number.isFinite(value) ? Math.floor(value) : 1);
+  if (format === 'arabic') return String(number);
+  const numerals: Array<[number, string]> = [
+    [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+    [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+    [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+  ];
+  let remaining = number;
+  let text = '';
+  for (const [unit, numeral] of numerals) {
+    const count = Math.floor(remaining / unit);
+    text += numeral.repeat(count);
+    remaining %= unit;
+  }
+  return format === 'roman-lower' ? text.toLowerCase() : text;
+}
+
+/** A section includes its start and ends immediately before the next start. */
+export function resolveBindingSection(settings: NoteBindingSettings, mechanicalPageNumber: number): NoteBindingSection {
+  let section: NoteBindingSection | undefined;
+  for (const candidate of settings.sections) {
+    if (candidate.startPage <= mechanicalPageNumber
+      && (!section || candidate.startPage > section.startPage)) section = candidate;
+  }
+  return section || createDefaultNoteBindingSection();
 }
 
 export function formatPageNumber({
@@ -140,9 +187,97 @@ export function createDefaultPageFrameSlots({
   };
 }
 
+/** Project note-owned binding into the existing slot model. No per-page storage. */
+export function createBindingPageFrameSlots({
+  pageFrame,
+  mechanicalPageNumber,
+  bindingSettings,
+  isCover = false,
+}: CreateBindingPageFrameSlotsInput): PageFrameSlots {
+  const settings = bindingSettings || createDefaultNoteBindingSettings();
+  const ordinal = Math.max(1, Number.isFinite(mechanicalPageNumber) ? Math.floor(mechanicalPageNumber) : 1);
+  const section = resolveBindingSection(settings, ordinal);
+  const displayPageNumber = section.pageNumber.startAt + ordinal - section.startPage;
+  const silent = !settings.enabled || (settings.dropFolioOnCover && (isCover || mechanicalPageNumber === 0));
+  const rects = resolvePageFrameSlotRects(pageFrame);
+  const entries: NonNullable<PageFrameSlots['entries']> = {};
+  for (const position of NOTE_BINDING_SLOT_NAMES) {
+    const [row, align] = position.split('-') as ['header' | 'footer', PageFrameSlot['align']];
+    const settingsForSlot = section.slots[position];
+    const isPageNumber = section.pageNumber.enabled && section.pageNumber.slot === position;
+    // Footer positions use the existing folio baseline; the footer-center
+    // default therefore stays at the pre-A2 page-number position.
+    const rowRect = row === 'header' ? rects.header : rects.pageNumber;
+    const width = rowRect.width / 3;
+    const column = align === 'left' ? 0 : align === 'center' ? 1 : 2;
+    const text = isPageNumber
+      ? section.pageNumber.prefix + formatBindingCounter(displayPageNumber, section.pageNumber.format) + section.pageNumber.suffix
+      : settingsForSlot.text;
+    entries[position] = {
+      ...createSlot({
+        pageFrame,
+        kind: isPageNumber ? 'page_number' : row,
+        rect: {
+          x: rowRect.x + width * column + settingsForSlot.offsetX,
+          y: rowRect.y + settingsForSlot.offsetY,
+          width,
+          height: rowRect.height,
+        },
+        enabled: !silent && (isPageNumber || section.headerFooterEnabled),
+        text,
+        textSource: isPageNumber ? 'generated' : text.trim() ? 'metadata_text' : 'empty',
+      }),
+      slotId: slotId(pageFrame.id, position),
+      position,
+      align,
+      offset: { x: settingsForSlot.offsetX, y: settingsForSlot.offsetY },
+      style: { ...settingsForSlot.style },
+      bindingSectionId: section.id,
+      mechanicalPageNumber,
+      ...(isPageNumber ? { displayPageNumber } : {}),
+    };
+  }
+  return {
+    entries,
+    header: entries['header-center'],
+    footer: entries['footer-center'],
+    pageNumber: section.pageNumber.enabled ? entries[section.pageNumber.slot] : undefined,
+  };
+}
+
+/** All consumers enumerate here so compatibility aliases never double-render. */
+export function listPageFrameSlots(slots: PageFrameSlots = {}): PageFrameSlot[] {
+  const candidates = slots.entries
+    ? NOTE_BINDING_SLOT_NAMES.map((position) => slots.entries![position])
+    : [slots.header, slots.footer, slots.pageNumber];
+  const seen = new Set<string>();
+  return candidates.filter((slot): slot is PageFrameSlot => {
+    if (!slot || seen.has(slot.slotId)) return false;
+    seen.add(slot.slotId);
+    return true;
+  });
+}
+
+/** Apply presentation geometry once, preserving aliases to the projected slots. */
+export function mapPageFrameSlots(slots: PageFrameSlots, project: (slot: PageFrameSlot) => PageFrameSlot): PageFrameSlots {
+  const mapped = new Map<string, PageFrameSlot>();
+  const entries: NonNullable<PageFrameSlots['entries']> = {};
+  for (const slot of listPageFrameSlots(slots)) {
+    const result = project(slot);
+    mapped.set(slot.slotId, result);
+    if (slot.position) entries[slot.position] = result;
+  }
+  const alias = (slot?: PageFrameSlot) => slot && mapped.get(slot.slotId);
+  return {
+    ...(slots.entries ? { entries } : {}),
+    header: alias(slots.header),
+    footer: alias(slots.footer),
+    pageNumber: alias(slots.pageNumber),
+  };
+}
+
 export function summarizePageFrameSlotsForAI(slots: PageFrameSlots = {}): string[] {
-  return [slots.header, slots.footer, slots.pageNumber]
-    .filter((slot): slot is PageFrameSlot => Boolean(slot))
+  return listPageFrameSlots(slots)
     .map((slot) => {
       const state = slot.enabled ? 'enabled' : 'disabled';
       const text = slot.text || slot.textSource;

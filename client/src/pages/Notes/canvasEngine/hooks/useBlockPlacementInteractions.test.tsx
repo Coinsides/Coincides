@@ -6,6 +6,7 @@ import {
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { createSurfaceModePolicy } from '../modePolicyService';
+import { createPageGapPresentation } from '../pageFramePresentationService';
 import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
 import { estimateTextBlockHeight } from '../measurementService';
 import { normalizeBlockLayoutForSave, resolveScreenRect, type CoordinateContract } from '../placementContractService';
@@ -152,6 +153,45 @@ function persistedLayout(persistChangedBlockLayouts: ReturnType<typeof vi.fn>): 
   const layouts = persistChangedBlockLayouts.mock.calls[0]?.[0] as Record<string, BlockBoxLayout>;
   return layouts[BLOCK.id];
 }
+
+describe('A2 folded-page placement gestures', () => {
+  const frames = [0, 420, 840].map((y, index) => ({ ...PAGE_FRAME, id: `a2-${index}`, y }));
+  const local: BlockBoxLayout = { x: 20, y: 20, width: 180, height: 60,
+    coordinate_space: 'page_frame_local', frame_id: frames[1].id, width_mode: 'manual', surface: 'formal_page' };
+
+  it('restores the removed gap before persisting a drag across the folded seam', () => {
+    const folded = createPageGapPresentation(frames, true);
+    const scale = 0.5;
+    const surfaceTop = 100;
+    const startDisplayY = 380;
+    const endDisplayY = 750;
+    const runtime = renderPlacementSubject({ initialLayout: local, pageFrames: frames, snapEnabled: false,
+      coordinateContract: 'v2', surfaceMode: 'page', displayScale: scale });
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, surfaceTop + startDisplayY * scale), BLOCK, local,
+      (clientY) => surfaceTop + folded.toWorldY((clientY - surfaceTop) / scale) * scale));
+    act(() => dispatchWindowPointer('pointermove', 100, surfaceTop + endDisplayY * scale));
+    act(() => dispatchWindowPointer('pointerup', 100, surfaceTop + endDisplayY * scale));
+    const saved = persistedLayout(runtime.persistChangedBlockLayouts);
+    expect(saved).toMatchObject({ frame_id: frames[1].id, coordinate_space: 'page_frame_local', y: 470 });
+    const canonical = resolveScreenRect(saved, frames[1], 'v2');
+    expect(canonical.y).toBe(910);
+    expect(folded.toDisplayY(canonical.y)).toBe(endDisplayY);
+    expect(runtime.pushLayoutHistory.mock.calls[0][0][BLOCK.id]).toEqual(local);
+    runtime.subject.unmount();
+  });
+
+  it('keeps resizing horizontal even when the pointer y crosses a seam', () => {
+    const runtime = renderPlacementSubject({ initialLayout: local, pageFrames: frames, snapEnabled: false,
+      coordinateContract: 'v2', surfaceMode: 'page', displayScale: 0.5 });
+    act(() => runtime.subject.result.current.beginResizeBlock(pointerStart(100, 290), BLOCK, 'Text', local));
+    act(() => dispatchWindowPointer('pointermove', 150, 475));
+    act(() => dispatchWindowPointer('pointerup', 150, 475));
+    expect(persistedLayout(runtime.persistChangedBlockLayouts)).toMatchObject({
+      frame_id: frames[1].id, coordinate_space: 'page_frame_local', y: 20, width: 280,
+    });
+    runtime.subject.unmount();
+  });
+});
 
 describe('useBlockPlacementInteractions staging gesture', () => {
   const initialLayout: BlockBoxLayout = { x: 100, y: 20, width: 180, height: 60, surface: 'formal_page' };

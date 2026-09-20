@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 400 份文档。
+共 402 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -388,7 +388,8 @@
 | [handoffs/2026-09-14-v14-proposal-inbox-order.md](handoffs/2026-09-14-v14-proposal-inbox-order.md) | 针二 · 提案收件箱 | `done` | — | — |
 | [handoffs/2026-09-14-v14-toolstream-repair-order.md](handoffs/2026-09-14-v14-toolstream-repair-order.md) | 工具流修复单 | `done` | — | — |
 | [handoffs/2026-09-16-v14-board-visual-v1-order.md](handoffs/2026-09-16-v14-board-visual-v1-order.md) | 板视觉 v1 | `done(HQ 机补验+应用内实测通过,2026-09-16)` | — | — |
-| [handoffs/2026-09-19-v14-a1-pagination-order.md](handoffs/2026-09-19-v14-a1-pagination-order.md) | A1 · 自动分页+断块 | `done(builder 二轮施工交付；HQ 验收与完整门收口未代行)` | — | — |
+| [handoffs/2026-09-19-v14-a1-pagination-order.md](handoffs/2026-09-19-v14-a1-pagination-order.md) | A1 · 自动分页+断块 | `done(二轮施工;一轮停线=验证门×Git 禁令边界,HQ 补遗一裁定后续派;HQ 收口:client 全库 183 文件 1853/1853 亲跑定案+git diff --check/secrets 双门绿;本单服务端零 diff,builder 全量中两项既有 Python/MinerU 环境红为基线复现;2026-09-19)` | — | — |
+| [handoffs/2026-09-19-v14-a2-binding-order.md](handoffs/2026-09-19-v14-a2-binding-order.md) | A2 · 装订面三件套+折缝 | `done(builder 实现与验证回执已交;验收未全绿,待 HQ 收口;原 ready 由 HQ 按代理权翻牌)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
@@ -405,6 +406,7 @@
 | [handoffs/plans/v13-5-b1-skin-token-spec.md](handoffs/plans/v13-5-b1-skin-token-spec.md) | B1 · 皮 Token 表设计稿 | `draft` | 2026-09-11 | — |
 | [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `active` | 2026-09-11 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
+| [handoffs/plans/v14-adjudication-queue.md](handoffs/plans/v14-adjudication-queue.md) | V14 自动化推进 · 候拍攒单 | `active` | — | — |
 | [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `active` | 2026-09-09 | — |
 | [handoffs/plans/v14-eve-design-package.md](handoffs/plans/v14-eve-design-package.md) | V14 前夜设计包 | `draft` | 2026-09-13 | — |
 | [handoffs/plans/v14-remainder-roadmap.md](handoffs/plans/v14-remainder-roadmap.md) | V14 余部 Roadmap(以《宋史手册》为齐平基准) | `active` | — | — |

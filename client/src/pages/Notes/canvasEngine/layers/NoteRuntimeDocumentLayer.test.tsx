@@ -523,6 +523,26 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
   });
 
+  it('A2 navigation and Overview return to folded reading destinations without changing their page models', async () => {
+    const props = overviewProps(3);
+    props.noteCanvasRuntime = { ...props.noteCanvasRuntime, coordinateContract: 'v2' };
+    const original = JSON.stringify(props.noteCanvasRuntime);
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container, rerender } = render(documentFor(props));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Fold page gaps' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Navigation pane' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Read page 3' }));
+    expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current,
+      expect.objectContaining({ id: 'overview-page-3', y: 2556, height: 1278 }));
+    fireEvent.click(screen.getByRole('button', { name: 'Page overview' }));
+    fireEvent.click(container.querySelector('[data-note-overview-page][data-page-frame-id="overview-page-2"]')!);
+    await waitFor(() => expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current,
+      expect.objectContaining({ id: 'overview-page-2', y: 1278, height: 1278 })));
+    expect(JSON.stringify(props.noteCanvasRuntime)).toBe(original);
+    rerender(documentFor({ ...props, noteId: 'a2-other-note' }));
+    expect(container.querySelector('[data-page-gaps-folded="false"]')).not.toBeNull();
+  });
+
   it('navigation debounces search, highlights the matching words and temporarily marks the jumped block', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const props = searchableProps();

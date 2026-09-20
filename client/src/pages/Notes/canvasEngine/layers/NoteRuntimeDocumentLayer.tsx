@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, type PointerEvent as ReactPointerEvent } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Inbox } from 'lucide-react';
 import {
   NoteFloatingPanelLayer,
@@ -12,6 +12,7 @@ import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
 import type { NoteBlock } from '../runtimeDataTypes';
 import { BlockEditRecoveryQueue } from './BlockEditRecoveryQueue';
 import { NotePrintLayer } from './NotePrintLayer';
+import { createPageGapPresentation } from '../pageFramePresentationService';
 import { NoteOverviewLayer } from './NoteOverviewLayer';
 import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
 import { useNoteNavigationController } from '../hooks/useNoteNavigationController';
@@ -53,17 +54,21 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   templateWarning,
   writingSurfaceProps,
 }, ref) {
+  const [gapPreference, setGapPreference] = useState({ noteId: writingSurfaceProps.noteId, folded: false });
+  const pageGapsFolded = gapPreference.noteId === writingSurfaceProps.noteId && gapPreference.folded;
+  const pageGapPresentation = useMemo(() => createPageGapPresentation(writingSurfaceProps.noteCanvasRuntime.pageFrames,
+    surfaceMode === 'page' && pageGapsFolded), [writingSurfaceProps.noteCanvasRuntime.pageFrames, surfaceMode, pageGapsFolded]);
   const overview = useNoteOverviewController({
     noteId: writingSurfaceProps.noteId,
     surfaceMode,
     blockListRef: writingSurfaceProps.blockListRef,
-    pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
+    pageFrames: pageGapPresentation.pageFrames,
   });
   const navigation = useNoteNavigationController({
     noteId: writingSurfaceProps.noteId,
     enabled: surfaceMode === 'page' && !overview.open,
     blockListRef: writingSurfaceProps.blockListRef,
-    pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
+    pageFrames: pageGapPresentation.pageFrames,
   });
   useNoteAmbientAgentContextHint({
     noteId: writingSurfaceProps.noteId,
@@ -91,6 +96,8 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
         currentPageFrameId={overview.currentFrameId}
         onSelectPage={overview.selectPage} onClose={overview.close} />}
       <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open} onToggleOverview={overview.toggle}
+        pageGapsFolded={pageGapsFolded}
+        onPageGapsFoldedChange={(folded) => setGapPreference({ noteId: writingSurfaceProps.noteId, folded })}
         navigationOpen={navigation.open} onToggleNavigation={navigation.toggle} />
       <NotePrintLayer {...writingSurfaceProps} />
     </div>
@@ -100,7 +107,9 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     {navigation.open && <NoteNavigationPane writingSurfaceProps={writingSurfaceProps}
       tab={navigation.tab} onTabChange={navigation.setTab} currentPageFrameId={navigation.currentFrameId}
       onSelectPage={navigation.selectPage}
-      onSelectResult={(result) => navigation.selectResult(result.blockId, result.frameId, result.rect)}
+      onSelectResult={(result) => navigation.selectResult(result.blockId, result.frameId, {
+        ...result.rect, y: result.rect.y + (pageGapPresentation.offsetByFrameId.get(result.frameId) || 0),
+      })}
       onClose={() => navigation.setOpen(false)} />}
     {document}
   </div> : document;

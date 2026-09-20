@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SkinSelection } from '@shared/types';
+import { createDefaultNoteBindingSettings } from '../../../../../../shared/types/noteBinding';
 import type { Note } from '../runtimeDataTypes';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, writeTypographyProfileMetadata } from '../typographyProfileService';
@@ -68,6 +69,24 @@ describe('B1a adapter paper skin write intent', () => {
       storedNotes[id] = { ...storedNotes[id], metadata: { ...storedNotes[id].metadata, skin: payload.skin } };
       return { data: structuredClone(storedNotes[id]) };
     });
+  });
+
+  it('serializes binding settings through the existing save boundary and retains the latest note setting', async () => {
+    const first = deferred<{ data: Note }>(), second = deferred<{ data: Note }>();
+    mocks.put.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const subject = renderAdapter(); await loaded(subject);
+    const a = createDefaultNoteBindingSettings(), b = createDefaultNoteBindingSettings();
+    b.enabled = false;
+    let firstSave!: Promise<void>, secondSave!: Promise<void>;
+    act(() => { firstSave = subject.result.current.saveBindingSettings(a); secondSave = subject.result.current.saveBindingSettings(b); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    expect(mocks.put).toHaveBeenLastCalledWith('/notes/paper-a/binding-settings', { binding_settings: a });
+    await act(async () => { first.resolve({ data: { ...storedNotes['paper-a'], binding_settings: a } }); await firstSave; });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(2));
+    expect(mocks.put).toHaveBeenLastCalledWith('/notes/paper-a/binding-settings', { binding_settings: b });
+    await act(async () => { second.resolve({ data: { ...storedNotes['paper-a'], binding_settings: b } }); await secondSave; });
+    expect(subject.result.current.note?.binding_settings).toEqual(b);
+    expect(subject.result.current.note?.metadata).toEqual(storedNotes['paper-a'].metadata);
   });
 
   it('publishes successive choices immediately, sends them serially and drains the entire queued intent', async () => {

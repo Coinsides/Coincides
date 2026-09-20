@@ -1,4 +1,5 @@
 export interface Note {
+  binding_settings?: import('@shared/types/noteBinding').NoteBindingSettings | null;
   id: string;
   course_id: string;
   title: string;

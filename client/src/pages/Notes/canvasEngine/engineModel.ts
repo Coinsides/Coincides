@@ -31,7 +31,9 @@ import {
 } from './typographyProfileService';
 import {
   createDefaultPageFrameSlots,
+  createBindingPageFrameSlots,
 } from './pageFrameSlotService';
+import type { NoteBindingSettings } from '@shared/types/noteBinding';
 import {
   DEFAULT_PAGE_FRAME_TEMPLATE_ID,
   applyPageFrameTemplate,
@@ -149,6 +151,8 @@ function buildPageFrameExtension(
   pageFrame: PageFrameModel,
   pageStackContext: PageStackContext | null = null,
   documentTypography = createDefaultDocumentTypographyProfile(),
+  bindingSettings?: NoteBindingSettings | null,
+  mechanicalPageNumber = 1,
 ): PageFrameExtension {
   const normalizedFrame = normalizePageFramePrintBaseline(pageFrame);
   const template = resolvePageFrameTemplate(normalizedFrame);
@@ -188,7 +192,9 @@ function buildPageFrameExtension(
     snapEnabled: true,
     headerFooterEnabled: true,
     pageNumberEnabled: true,
-    slots: normalizedSlots,
+    slots: bindingSettings === undefined ? normalizedSlots : createBindingPageFrameSlots({
+      pageFrame: normalizedFrame, mechanicalPageNumber, bindingSettings,
+    }),
     exportable: normalizedFrame.exportable,
   };
 }
@@ -290,6 +296,7 @@ export function buildNoteCanvasRuntimeModel({
   viewport,
   blockPlacements: inputBlockPlacements,
   documentTypography = createDefaultDocumentTypographyProfile(),
+  bindingSettings,
   relationEndpointReserve = [],
   genericCanvasObjects = [],
   genericCanvasPlacements = [],
@@ -307,6 +314,7 @@ export function buildNoteCanvasRuntimeModel({
   viewport: CanvasViewport;
   blockPlacements: BlockPlacementModel[];
   documentTypography?: DocumentTypographyProfile;
+  bindingSettings?: NoteBindingSettings | null;
   relationEndpointReserve?: RelationEndpointReserve[];
   genericCanvasObjects?: CanvasObject[];
   genericCanvasPlacements?: CanvasPlacement[];
@@ -348,10 +356,12 @@ export function buildNoteCanvasRuntimeModel({
   const pageFrameObjects = runtimePageFrames.map((pageFrame) => buildPageFrameObject(pageFrame, canvasId));
   const pageFramePlacements = runtimePageFrames.map((pageFrame) => buildPageFramePlacement(pageFrame, canvasId));
   const activeDocumentTypography = normalizeDocumentTypographyProfile(documentTypography);
-  const pageFrameExtensions = runtimePageFrames.map((pageFrame) => buildPageFrameExtension(
+  const pageFrameExtensions = runtimePageFrames.map((pageFrame, index) => buildPageFrameExtension(
     pageFrame,
     resolvePageStackContext(pageStackCollectionContext, pageFrame.id),
     activeDocumentTypography,
+    bindingSettings,
+    index + 1,
   ));
   const blockCanvasObjects = blockPlacements.map(buildBlockCanvasObject);
   const blockCanvasPlacements = blockPlacements.map(buildCanvasPlacementFromBlockPlacement);

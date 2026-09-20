@@ -6,6 +6,7 @@ import type { SkinSelection } from './skin.js';
 export * from './skin.js';
 export * from './palette.js';
 export * from './noteCover.js';
+export * from './noteBinding.js';
 export type * from './agentContextHint.js';
 
 // --- Enums ---

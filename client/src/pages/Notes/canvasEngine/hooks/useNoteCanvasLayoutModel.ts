@@ -65,6 +65,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 }
 
 export interface UseNoteCanvasFrameModelOptions {
+  bindingSettings?: import('@shared/types/noteBinding').NoteBindingSettings | null;
   pageFlowPlan?: import('../documentPageFlowService').DocumentPageFlowPlan;
   notePagePreset?: string;
   coordinateContract?: CoordinateContract;
@@ -179,6 +180,7 @@ export function useNoteCanvasResolvedLayoutModel({
 }
 
 export function useNoteCanvasFrameModel({
+  bindingSettings,
   pageFlowPlan,
   notePagePreset,
   blockLayouts,
@@ -287,6 +289,7 @@ export function useNoteCanvasFrameModel({
       : seedViewport;
 
     const runtime = buildNoteCanvasRuntimeModel({
+      bindingSettings,
       mode: surfaceMode,
       world: createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {
         pageFrames: runtimePageFrameCollection.pageFrames,
@@ -317,6 +320,7 @@ export function useNoteCanvasFrameModel({
     return { ...runtime, coordinateContract, pageFlowPlan };
   }, [
     pageFlowPlan,
+    bindingSettings,
     canvasBlockPlacements,
     coordinateContract,
     contentLookupBlocks,

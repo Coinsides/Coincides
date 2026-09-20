@@ -1639,7 +1639,9 @@ function testPageFramePrintScaleAndTypographyBaseline(): void {
     height: 400,
   });
   assertEqual(shortFrame.pageSize, 'A4', 'runtime PageFrame carries page size');
-  assertEqual(shortFrame.height, DEFAULT_PAGE_FRAME_HEIGHT, 'runtime PageFrame clamps short requests to the print baseline height');
+  // A1 pagination law (09-12 每页可异形, Henry 拍): A4/Letter name the paper
+  // family, not a minimum height — explicit per-frame geometry is truth.
+  assertEqual(shortFrame.height, 400, 'runtime PageFrame preserves explicit short per-frame geometry (irregular pages are truth)');
 
   const legacyFrame = {
     ...shortFrame,

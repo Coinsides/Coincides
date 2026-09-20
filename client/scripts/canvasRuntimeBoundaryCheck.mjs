@@ -992,6 +992,11 @@ assertContainsAll("Writing surface exposes Page template background and style ma
 ]);
 assertContainsAll('Writing surface renders PageFrame slot markers', writingSurfaceLayer, [
   'pageFrameSlotEntries',
+  'PageFrameSlotsLayer',
+  'mapPageFrameSlots',
+]);
+const pageFrameSlotsLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/PageFrameSlotsLayer.tsx');
+assertContainsAll('Shared reading, thumbnail and print renderer exposes PageFrame slot markers', pageFrameSlotsLayer, [
   'data-page-frame-slot',
   'data-page-frame-slot-frame',
   'data-page-frame-slot-source',
