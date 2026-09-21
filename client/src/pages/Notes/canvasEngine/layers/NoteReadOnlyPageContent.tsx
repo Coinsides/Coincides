@@ -67,7 +67,6 @@ export function NoteReadOnlyPageContent({
             blockFragments={fragment.flowFragment ? [fragment] : undefined}
             documentTypography={documentTypography}
             contentReadOnly
-            mediaPlaceholder={print}
             tablePrint={print}
             componentPrint={print}
             tocPrint={print}

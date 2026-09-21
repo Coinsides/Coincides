@@ -11,6 +11,7 @@ import { deriveChapterProjection } from '../chapterProjectionService';
 import { TocProjectionProvider } from '../TocProjectionContext';
 import { tocPageNumbers } from '../tocProjectionService';
 import { readStoredLayout } from '../placementService';
+import { MediaBlockProjection } from '../blocks/MediaBlockProjection';
 
 export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
@@ -21,6 +22,21 @@ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
     /** Creation-time Web preset only; never inferred from a historical template. */
     continuousWeb?: boolean;
   };
+
+/** beforeprint cannot await IO. Prepare the same media projections ahead of it,
+ * including offscreen pages; their shared asset reads stay alive through the job. */
+function PrintMediaPreparation({ input }: { input: NotePrintInput }) {
+  const excludedFrames = new Set(input.noteCanvasRuntime.pageFrameExtensions
+    .filter((extension) => extension.isCover && extension.coverExportIncluded === false)
+    .map((extension) => extension.frameId));
+  const printedBlocks = new Set(input.noteCanvasRuntime.blockFragmentProjections
+    .filter((fragment) => !excludedFrames.has(fragment.pageFrameId)).map((fragment) => fragment.blockId));
+  const media = input.visibleBlocks.filter((block) => block.block_type === 'media'
+    && printedBlocks.has(block.id) && readStoredLayout(block)?.surface !== 'tray');
+  return media.length ? <div hidden aria-hidden="true" data-note-print-media-preload="true">
+    {media.map((block) => <MediaBlockProjection key={block.id} block={block} />)}
+  </div> : null;
+}
 
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
@@ -152,7 +168,10 @@ export function NotePrintLayer(input: NotePrintInput) {
     };
   }, [input.noteId, input.surfaceMode]);
 
-  return printing && printing.noteId === input.noteId && input.surfaceMode === 'page'
-    ? createPortal(<PrintPages input={printing} />, document.body)
-    : null;
+  if (input.surfaceMode !== 'page') return null;
+  const job = printing?.noteId === input.noteId ? printing : null;
+  return <>
+    <PrintMediaPreparation input={job ?? input} />
+    {job && createPortal(<PrintPages input={job} />, document.body)}
+  </>;
 }

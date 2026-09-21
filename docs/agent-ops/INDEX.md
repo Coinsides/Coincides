@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 423 份文档。
+共 426 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -410,7 +410,10 @@
 | [handoffs/2026-09-21-v14-t1-toc-block-order.md](handoffs/2026-09-21-v14-t1-toc-block-order.md) | T1 · 目录块(agenda 投影的块化消费者) | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿含该两文件;client 2339/2339 逐字对上;docs 索引收口后 25 组件门全绿;双门绿)` | — | — |
 | [handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md](handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md) | T2 · 富块提案管线(Agent 产出样张级笔记的正门) | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿含该两文件;client 2341/2341 逐字对上;双门绿。Agent 产样张级笔记的正门自此开通)` | — | — |
 | [handoffs/2026-09-21-v14-t3-typography-alignment-order.md](handoffs/2026-09-21-v14-t3-typography-alignment-order.md) | T3 · 排印对齐批 | `done(2026-09-21 HQ 收官:两轮——一轮双停线拦下 HQ 测量混尺度+禁令无射程,补遗一双裁后二轮落靶;builder 环境两红=Python/EPERM 沙箱病,HQ 机 server 主集真全绿;client 2368/2368 逐字对上;双门绿)` | — | — |
-| [handoffs/2026-09-21-v14-t4-bloodline-audit-order.md](handoffs/2026-09-21-v14-t4-bloodline-audit-order.md) | T4 · 血统检查(色与字族两项,纸面公民射程) | `ready(HQ 按代理权翻牌;Henry 2026-09-21 拍的收尾批加料件②)` | — | — |
+| [handoffs/2026-09-21-v14-t4-bloodline-audit-order.md](handoffs/2026-09-21-v14-t4-bloodline-audit-order.md) | T4 · 血统检查(色与字族两项,纸面公民射程) | `done(2026-09-21 HQ 收官:普查 310 文件零遗漏,🅰 违约=0——血统法全线本already守;🅲 4 处候「代码等宽字体角色」设计;停线项=docs 索引,HQ 重生成后 docs:check 绿;**零代码改动⇒server 全量沿 T3 收口同树真全绿,数字不作废**;client 由 builder 实跑 2368/2368;双门绿)` | — | — |
+| [handoffs/2026-09-21-v14-t5-print-rich-blocks-order.md](handoffs/2026-09-21-v14-t5-print-rich-blocks-order.md) | T5 · 打印/导出富块真渲染 | `done(Codex builder 第二轮施工完成;server 环境阻断待 HQ 机复验;非 HQ 验收放行)` | — | — |
+| [handoffs/2026-09-21-v14-t6-inline-link-order.md](handoffs/2026-09-21-v14-t6-inline-link-order.md) | T6 · 行内链接(inline_link 激活,三靶) | `ready(HQ 按代理权翻牌;**派发排 T5 之后**,单 builder 串行)` | — | — |
+| [handoffs/2026-09-21-v14-t7-cover-binding-presets-order.md](handoffs/2026-09-21-v14-t7-cover-binding-presets-order.md) | T7 · 封面版式预设 + 装订预设(设计室模板抽屉开张) | `ready(HQ 按代理权翻牌;**派发排 T6 之后**,单 builder 串行;收尾批末单候补)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

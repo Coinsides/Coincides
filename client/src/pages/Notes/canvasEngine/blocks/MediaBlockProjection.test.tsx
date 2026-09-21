@@ -32,7 +32,7 @@ describe('MediaBlockProjection', () => {
     expect(image.src).toBe('blob:media-one');
     expect(image.draggable).toBe(false);
     expect(revoke).not.toHaveBeenCalled();
-    view.unmount();
+    await act(async () => view.unmount());
     expect(revoke).toHaveBeenCalledExactlyOnceWith('blob:media-one');
   });
 
@@ -41,7 +41,7 @@ describe('MediaBlockProjection', () => {
     const view = render(<MediaBlockProjection block={block} />);
     await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Image could not be loaded'));
     expect(view.container.querySelector('textarea')).toBeNull();
-    view.unmount();
+    await act(async () => view.unmount());
     load.mockResolvedValueOnce('blob:bad-image');
     render(<MediaBlockProjection block={block} />);
     const image = await screen.findByRole('img');
@@ -60,7 +60,7 @@ describe('MediaBlockProjection', () => {
     await act(async () => { finish('blob:media-one'); });
     expect(revoke).toHaveBeenCalledWith('blob:media-one');
     expect(screen.getByRole('img').getAttribute('src')).toBe('blob:media-two');
-    view.unmount();
+    await act(async () => view.unmount());
     expect(revoke.mock.calls).toEqual([['blob:media-one'], ['blob:media-two']]);
   });
 

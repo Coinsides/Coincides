@@ -17,7 +17,7 @@ import {
   type PageFrameExportPreview,
 } from '../exportPreviewService';
 import styles from '../../NoteDetail.module.css';
-import { MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
+import { MediaBlockProjection } from '../blocks/MediaBlockProjection';
 import { TableBlockProjection } from '../blocks/TableBlockProjection';
 import { ComponentBlockProjection } from '../blocks/ComponentBlockProjection';
 import mediaStyles from '../blocks/MediaBlockProjection.module.css';
@@ -42,7 +42,9 @@ function ExportPreviewMedia({ row }: { row: ExportPreviewRow }) {
   const rect = row.layout ?? row.placement;
   if (!rect) return null;
   return <div className={mediaStyles.exportScroll}>
-    <MediaBlockPlaceholder block={row.block} style={{ width: rect.width, height: rect.height }} />
+    <div style={{ width: rect.width, height: rect.height }} data-export-preview-media={row.block.id}>
+      <MediaBlockProjection block={row.block} />
+    </div>
   </div>;
 }
 

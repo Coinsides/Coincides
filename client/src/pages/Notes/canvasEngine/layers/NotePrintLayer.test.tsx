@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 // @ts-expect-error Vitest runs in Node; this browser client intentionally has no @types/node dependency.
 import { readFileSync } from 'node:fs';
 // @ts-expect-error Use Node's file URL conversion without adding a dependency to the client.
@@ -118,6 +118,8 @@ function changePrintMedia(matches: boolean) {
 }
 
 beforeEach(() => {
+  vi.mocked(loadCanvasImageAssetBlobUrl).mockReset().mockResolvedValue('blob:print-media');
+  vi.stubGlobal('URL', class extends URL { static revokeObjectURL = vi.fn(); });
   mediaListeners = new Set();
   printMedia = {
     matches: false, media: 'print', onchange: null,
@@ -267,20 +269,23 @@ describe('NotePrintLayer lifecycle and frozen print snapshot', () => {
 });
 
 describe('NotePrintLayer physical pages and fragment projection', () => {
-  it('prints media as an alt-labelled placeholder at the exact block rect without fetching a blob', () => {
+  it('prints the prepared image synchronously at the exact block rect without another asset read', async () => {
     const media: NoteBlock = { ...block('media', ''), block_type: 'media', metadata: {
       media: { asset_id: 'print-media', naturalWidth: 400, naturalHeight: 20, alt: 'Synthetic lecture image' },
     } };
     render(<NotePrintLayer {...inputFor({ blocks: [media], placements: [placement('media', { width: 400, height: 20 })] })} />);
+    await waitFor(() => expect(document.querySelector('[data-note-print-media-preload] img')).not.toBeNull());
+    expect(document.querySelector(ROOT)).toBeNull();
     printEvent('beforeprint');
-    const placeholder = document.querySelector<HTMLElement>(`${ROOT} [data-media-block-placeholder]`)!;
-    expect(placeholder.textContent).toBe('Synthetic lecture image');
-    const article = placeholder.closest('article')!;
+    const image = document.querySelector<HTMLImageElement>(`${ROOT} img`)!;
+    expect(image.alt).toBe('Synthetic lecture image');
+    expect(image.src).toBe('blob:print-media');
+    const article = image.closest('article')!;
     expect(article.style.width).toBe('400px');
     expect(article.style.height).toBe('20px');
     expect(article.querySelector('textarea')).toBeNull();
-    expect(article.querySelector('img')).toBeNull();
-    expect(loadCanvasImageAssetBlobUrl).not.toHaveBeenCalled();
+    expect(article.querySelector('[data-media-block-placeholder]')).toBeNull();
+    expect(loadCanvasImageAssetBlobUrl).toHaveBeenCalledExactlyOnceWith('print-media');
   });
 
   it('uses independent A4/Letter millimetres, one fixed page per frame, and frozen internal widths', () => {

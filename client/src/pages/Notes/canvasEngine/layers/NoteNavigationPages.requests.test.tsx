@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ItemSummary } from '@shared/types/itemSummary';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
@@ -96,7 +96,7 @@ beforeEach(() => {
   });
 });
 
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+afterEach(async () => { await act(async () => cleanup()); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('navigation thumbnails existing mount-time reads', () => {
   it('uses the existing asset and ItemSummary readers once per visible projection mount, including lazy remounts', async () => {
@@ -115,7 +115,7 @@ describe('navigation thumbnails existing mount-time reads', () => {
     expect(selectPage).toHaveBeenCalledExactlyOnceWith('page-1');
     expect(http.get).toHaveBeenCalledTimes(1);
     expect(http.post).toHaveBeenCalledTimes(1);
-    fireEvent.scroll(viewport, { target: { scrollTop: 3500 } });
+    await act(async () => { fireEvent.scroll(viewport, { target: { scrollTop: 3500 } }); });
     expect(container.querySelector('[data-media-block-state="loaded"]')).toBeNull();
     expect(revoke).toHaveBeenCalledExactlyOnceWith(BLOB);
     fireEvent.scroll(viewport, { target: { scrollTop: 0 } });
@@ -123,7 +123,7 @@ describe('navigation thumbnails existing mount-time reads', () => {
     await waitFor(() => expect(container.querySelector('[data-item-ref]')?.textContent).toContain(item.plain_text));
     expect(http.get.mock.calls).toEqual(Array.from({ length: 2 }, () => [`/canvas-assets/${ASSET}/blob`, { responseType: 'blob' }]));
     expect(http.post.mock.calls).toEqual(Array.from({ length: 2 }, () => ['/items/summaries', { item_ids: [ITEM] }]));
-    unmount();
+    await act(async () => unmount());
     expect(revoke.mock.calls).toEqual([[BLOB], [BLOB]]);
   });
 

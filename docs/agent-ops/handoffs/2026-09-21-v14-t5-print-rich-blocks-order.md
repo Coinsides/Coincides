@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(HQ 按代理权翻牌;收尾批第五单;Henry 2026-09-21 晨令「先继续」)
+> **状态 (Status)**: done(2026-09-21 HQ 收官:一轮环境红停线→补遗一立环境红处置条款→二轮交齐;builder 环境两红=Python 系,HQ 机 server 主集真全绿;client 2380/2380 逐字对上;双门绿)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-21
 > **单号**: V14 收尾批 · T5 打印/导出富块真渲染(G4)
@@ -72,3 +72,48 @@
 ### 出生公约自查
 
 本单未新增 CSS、字面 hex、硬编码字体、色板或 `--sk-` token；不引入灰度策略，复用现役 token 与投影。未新增依赖/表列/schema/产品工具/prompt/Relation/判定域代码、合成凭据或安全对抗用例。未操作用户库或启用真实远程模型调用；未做 git 写操作；未改 agent 权限/指令。操作说明书/current-state 尚未更新，待恢复验收后由守门同步。
+
+## Result 第二轮
+
+**2026-09-21 · Codex builder：施工完成，可交 HQ 复核；server 仍有两项已知环境阻断，非全绿、非验收放行。** 按补遗一继续完成实现与全部指定验证，不再以 Python 环境红停线。header 翻 done 仅表示 builder 本轮任务完成；第一轮 Result 原文保留。完整证据：[第二轮施工回执](../../audits/2026-09-21-t5-print-builder/round2.md)、[server 第二轮](../../audits/2026-09-21-t5-print-builder/server-round2.md)；原始日志 `.codex-tmp/t5-print/round2-*`。
+
+### 逐族结论
+
+- **媒体完成**：纸面/打印/导出预览共用 `MediaBlockProjection` 与原 `edit_v1` 几何。资产读取共享，在同一个 Blob URL 上完成 decode 后才发布 loaded；隐藏同源投影提前准备未显示页。真实 beforeprint portal 同步消费准备好的图像，保留原矩形、crop/zoom/rotation。409、缺元数据、解码失败均走可读失败态。
+- **表格完成**：开工现物已使用共享 `TableBlockProjection`；验证了真实 caption/headers/rows、T3 收身居中和 0.85 字号比例、print clip。本轮没有另建渲染。
+- **组件完成**：开工现物已使用共享 `ComponentBlockProjection`；timeline/chart_bar/chart_line 真渲染与未知 kind 占位均通过。时间线仍初始折叠；图表按原 print 变体缩放。图表缩放高度与纸面滚动高度、时间线展开后的预留高度可能有既有差异，照单申报，未顺手改分页。
+- **分页零变已断言**：三种封面组合、多页真实 flow plan；逐块纸面/print clip 和 article 矩形相同，预览指向同一 flowFragment；blocks/plan/fragments/preview 快照零修改。分页算法、切片、904/1278/760 坐标契约与 TextFlow schema 未动。
+- **预览重复计数已校准**：各 PageFrame/export/AI 分组按各自 rows 验证 0/1 份，再核对 overlay 总数；每份 bar=6 柱，line=2 线/6 点，删除草稿的全局乘 3 断言。
+
+### 逐件最终行号（相对仓根）
+
+| 文件 | 位置 / 作用 |
+| --- | --- |
+| `client/src/pages/Notes/canvasEngine/hooks/useMediaImageAsset.ts` | 11 共享订阅；24 decode；45 末订阅微任务回收；53 同步 snapshot |
+| `client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.tsx` | 14 同源资产读取，原 edit_v1/失败态复用 |
+| `client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx` | 28 媒体预热；144 冻结任务；174 预热/portal 资源交接 |
+| `client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx` | 70 附近撤销媒体强制占位，table/component/toc print 变体保留 |
+| `client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx` | 38/46 三族共享组件与媒体原矩形 |
+| `client/src/pages/Notes/canvasEngine/layers/RichBlocksPrint.test.tsx` | 128/135 分组计数；179 三封面组合；218 同矩形；239 edit_v1；295 零变；299 预热；320 降级 |
+| `client/src/pages/Notes/canvasEngine/blocks/MediaImageConsumption.test.tsx` | 66/93 同源纸面与打印；109/133 decode/失败；149/165 引用/回收；179/198 切 note 与冻结资产 |
+| `client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.test.tsx` | 24/39/52 回收断言等待已声明微任务边界 |
+| `client/src/pages/Notes/canvasEngine/layers/NoteNavigationPages.requests.test.tsx` | 99/118/125 teardown、懒卸载、最终回收断言校准，HTTP/重挂载数量断言保留 |
+| `client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx` | 272 同步真图、原矩形、单次读取 |
+| `client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx` | 13 预览真图与共享读取 |
+| `docs/agent-ops/INDEX.md` | 现役生成器同步 426 条工单索引，补既存 T4 状态及 T5/T6/T7 缺项 |
+
+### 测试数字与基建分账
+
+- **定向 7 文件、49 个不同用例通过**：媒体投影 8、跨消费/生命周期 8、NotePrintLayer 20、ExportPreview.media 1、TocPrint 4、RichBlocksPrint 6、Navigation requests 2。
+- **client 全库最终 232 文件、2380/2380 通过，146.99s，零排除**。首跑 2366 pass / 14 fail 原日志保留：10 超时、3 元素等待失败、1 导航旧同步回收断言。校准最后一项后仅以 `--maxWorkers=2` 完整复跑；未放宽默认 5000ms 超时、未修改其余 13 项测试/产品码，全部通过。
+- **非 git/secrets 25 组件最终均有通过证据**：首遍 23/25，client 全库和 docs:check 失败；完整 client 复跑、现役索引生成后的 docs:check 均通过。不是单次首跑全绿，也不冒称完整 27 组件门；git 检查和 secrets 两组件留 HQ。25 项逐项账见第二轮施工回执。
+- **server 全量已完整重跑但未全绿**：111 文件、零排除，含 v13WildernessExecute 与真实 OCR；600000ms/文件，1118 tests / 1116 pass / 2 fail / 0 skipped / 0 cancelled / 0 flaky retries，214636.1826ms。两败为 `v2SourceMineruWiring` 的 `python.exe ENOENT`（stdout 61783/61806）和 `v2SourceRegionCells` 的 pinned Python **101**（62652），均待 HQ 机复验，没有豁免或隐藏。
+- **测试基建分账**：仅私有 `.codex-tmp/t5-print/round2-server-runner.mjs` 显式传 `npm_execpath`、临时数据/空 dotenv 出仓至系统 Temp；未改 server 产品码或共享启动器。旧 `v2TestV2ManifestHook` 失败本轮已 PASS（stdout 63715–63726）。25 门也通过私有 runner 逐组件保存原始日志和退出码，未修改现役门来绕过断言。
+
+### 出生公约、未做项与交接边界
+
+没有新增 CSS/hex/硬编码字体/色板/`--sk-` token/灰度策略；没有新增依赖、表列、schema、工具、prompt、Relation/判定域代码、安全对抗用例或合成凭据；没有用户库、真实远程模型调用、git 写操作或 agent 权限/指令修改。只更新生成索引和本单收据，未触开工无关改动。
+
+`beforeprint` 不能等待尚未完成的 IO/decode：提前打印仍显示 Loading，准备完成后重开打印显示真图；无 decode API 的宿主保留兼容路径。本轮没有真实系统打印/PDF 栅格/主观视觉验收，不用 jsdom 冒充实物成品。表格宽裁切、timeline 初始折叠、图表 print 缩放沿用现役边界。server Python 环境与 git/secrets 两组件交 HQ 收口。
+
+**说明书同步交接**：`current-state/app-operating-manual.md:43` 仍有「打印与导出预览是媒体占位」旧句，现已与本轮实现不符；准确替换措辞和 Loading/失败边界已写入审计回执，交 current-state 守门 Fable 同步。本单未新增 UI 入口/API，未擅改 agent 操作说明书。未发现需按工单停线的新冲突。

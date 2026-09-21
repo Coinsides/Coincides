@@ -64,3 +64,7 @@
 - `impeccable-context.log`：界面技能的本地项目上下文读取；项目内技能脚本路径不存在后，使用已安装技能绝对路径读取。未执行技能更新。
 
 开工使用 CodeGraph 优先路由，但 MCP 无此工具、CLI `codegraph` 不存在；`rg` 也不在 PATH，随后用限定仓内路径的 PowerShell 读取。以上是会话操作记录，不是测试通过证据。
+
+## 第二轮回执入口（2026-09-21 追加）
+
+上文为第一轮停线时的历史收据，原文保留。HQ 补遗一后已继续完成施工与可执行验证：见 [第二轮施工回执](round2.md) 与 [server 第二轮](server-round2.md)。client 全库 232 文件/2380 测试通过；非 git/secrets 25 组件均取得通过证据；server 111 文件完整跑完，1116 pass / 2 fail，两项 Python 环境阻断交 HQ 复验。完整工单已追加 `Result 第二轮`，不沿用本页第一轮的 incomplete 结论。

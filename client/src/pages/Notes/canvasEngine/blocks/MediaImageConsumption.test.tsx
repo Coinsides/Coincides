@@ -1,5 +1,7 @@
 import { act, cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StrictMode } from 'react';
+import { MediaBlockProjection } from './MediaBlockProjection';
 import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';
 import { buildNoteCanvasRuntimeModel, createPrimaryPageFrame } from '../engineModel';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
@@ -13,6 +15,20 @@ import type { NoteBlock } from '../runtimeDataTypes';
 // Leave every consuming layer and projection real; only the asset transport is stubbed.
 vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));
 const load = vi.mocked(loadCanvasImageAssetBlobUrl);
+const revoke = vi.fn();
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: Error) => void;
+  const promise = new Promise<T>((ok, fail) => { resolve = ok; reject = fail; });
+  return { promise, resolve, reject };
+}
+
+function withAsset(source: NoteBlock, assetId: string): NoteBlock {
+  return { ...source, metadata: { media: {
+    asset_id: assetId, naturalWidth: 400, naturalHeight: 200, alt: assetId,
+  } } };
+}
 
 function fixture() {
   const frame = createPrimaryPageFrame({ id: 'image-page' });
@@ -39,11 +55,12 @@ function fixture() {
 
 beforeEach(() => {
   load.mockReset().mockResolvedValue('blob:shared-image');
+  revoke.mockClear();
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
-  vi.stubGlobal('URL', class extends URL { static revokeObjectURL = vi.fn(); });
+  vi.stubGlobal('URL', class extends URL { static revokeObjectURL = revoke; });
   vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
 });
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(async () => { await act(async () => cleanup()); vi.unstubAllGlobals(); });
 
 describe('media edit consumption through actual page layers', () => {
   it('shares the same rotated crop in paper, Overview and standalone thumbnails without editor entry points', async () => {
@@ -69,20 +86,130 @@ describe('media edit consumption through actual page layers', () => {
       expect(host.querySelector('button[aria-label="编辑图片"]')).toBeNull();
       expect(host.querySelector('[role="dialog"]')).toBeNull();
     }
-    expect(load.mock.calls).toEqual([['shared-image'], ['shared-image'], ['shared-image']]);
+    expect(load.mock.calls).toEqual([['shared-image']]);
     expect(source).toEqual(before);
   });
 
-  it('keeps real beforeprint rendering as an accessible placeholder without fetching the original', () => {
+  it('prints the same prepared rotated crop synchronously without a second asset read', async () => {
     const { input } = fixture();
     render(<NotePrintLayer {...input} surfaceMode="page" />);
+    await waitFor(() => expect(document.querySelector('[data-note-print-media-preload] svg')).not.toBeNull());
     act(() => window.dispatchEvent(new Event('beforeprint')));
     const printed = document.querySelector('[data-note-print-root]')!;
-    const placeholder = printed.querySelector('[data-media-block-placeholder="true"]');
-    expect(placeholder?.getAttribute('aria-label')).toBe('Shared edited image');
-    expect(printed.querySelector('svg[data-media-block-asset]')).toBeNull();
+    const image = printed.querySelector('svg[data-media-block-asset]')!;
+    expect(image.getAttribute('aria-label')).toBe('Shared edited image');
+    expect(image.getAttribute('viewBox')).toBe('80 240 400 480');
+    expect(image.querySelector('image')?.getAttribute('transform')).toBe('translate(800 0) rotate(90)');
+    expect(printed.querySelector('[data-media-block-placeholder]')).toBeNull();
     expect(printed.querySelector('button[aria-label="编辑图片"]')).toBeNull();
-    expect(load).not.toHaveBeenCalled();
+    expect(load).toHaveBeenCalledExactlyOnceWith('shared-image');
     act(() => window.dispatchEvent(new Event('afterprint')));
+  });
+
+  it('keeps early printing in a loading state and prepares one decoded resource for the next synchronous job', async () => {
+    const decoding = deferred<void>();
+    const decode = vi.fn(() => decoding.promise);
+    const resources: { src: string }[] = [];
+    vi.stubGlobal('Image', class {
+      src = '';
+      decode = decode;
+      constructor() { resources.push(this); }
+    });
+    const { input } = fixture();
+    render(<NotePrintLayer {...input} surfaceMode="page" />);
+    await waitFor(() => expect(decode).toHaveBeenCalledTimes(1));
+    expect(resources.map((resource) => resource.src)).toEqual(['blob:shared-image']);
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    expect(document.querySelector('[data-note-print-root] [data-media-block-state="loading"]')).not.toBeNull();
+    expect(document.querySelector('[data-note-print-root] [data-media-block-state="loaded"]')).toBeNull();
+    act(() => window.dispatchEvent(new Event('afterprint')));
+    await act(async () => decoding.resolve());
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    expect(document.querySelector('[data-note-print-root] svg image')?.getAttribute('href')).toBe('blob:shared-image');
+    expect(load).toHaveBeenCalledExactlyOnceWith('shared-image');
+    expect(decode).toHaveBeenCalledTimes(1);
+  });
+
+  it('shares decode failures with the real print portal and releases the failed resource once', async () => {
+    const decoding = deferred<void>();
+    const decode = vi.fn(() => decoding.promise);
+    vi.stubGlobal('Image', class { src = ''; decode = decode; });
+    const { input } = fixture();
+    const view = render(<NotePrintLayer {...input} surfaceMode="page" />);
+    await waitFor(() => expect(decode).toHaveBeenCalledTimes(1));
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    await act(async () => decoding.reject(new Error('Synthetic image decode failure')));
+    expect(document.querySelectorAll('[data-media-block-state="failed"]')).toHaveLength(2);
+    expect(document.querySelector('[data-note-print-root] [role="status"]')?.textContent).toContain('Image could not be loaded');
+    expect(load).toHaveBeenCalledTimes(1);
+    await act(async () => view.unmount());
+    expect(revoke.mock.calls).toEqual([['blob:shared-image']]);
+  });
+
+  it('retains one shared read through StrictMode and a consumer handoff, then releases the last owner', async () => {
+    const { source } = fixture();
+    const tree = (paper: boolean) => <StrictMode>
+      {paper && <MediaBlockProjection key="paper" block={source} />}
+      <MediaBlockProjection key="preview" block={source} />
+    </StrictMode>;
+    const view = render(tree(true));
+    await waitFor(() => expect(view.container.querySelectorAll('svg')).toHaveLength(2));
+    expect(load).toHaveBeenCalledExactlyOnceWith('shared-image');
+    await act(async () => view.rerender(tree(false)));
+    expect(view.container.querySelectorAll('svg')).toHaveLength(1);
+    expect(revoke).not.toHaveBeenCalled();
+    await act(async () => view.unmount());
+    expect(revoke.mock.calls).toEqual([['blob:shared-image']]);
+  });
+
+  it('releases a resource unmounted during decode exactly once even when decode settles later', async () => {
+    const decoding = deferred<void>();
+    const decode = vi.fn(() => decoding.promise);
+    vi.stubGlobal('Image', class { src = ''; decode = decode; });
+    const { source } = fixture();
+    const view = render(<MediaBlockProjection block={source} />);
+    await waitFor(() => expect(decode).toHaveBeenCalledTimes(1));
+    await act(async () => view.unmount());
+    expect(revoke.mock.calls).toEqual([['blob:shared-image']]);
+    await act(async () => decoding.resolve());
+    expect(revoke.mock.calls).toEqual([['blob:shared-image']]);
+    expect(document.querySelector('[data-media-block-state]')).toBeNull();
+  });
+
+  it('discards an old note job and releases its late asset without exposing it in the new note', async () => {
+    const pending = deferred<string>();
+    load.mockReturnValueOnce(pending.promise).mockResolvedValueOnce('blob:new-image');
+    const { input, source } = fixture();
+    const view = render(<NotePrintLayer {...input} surfaceMode="page" />);
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    view.rerender(<NotePrintLayer {...input} noteId="new-note" surfaceMode="page"
+      visibleBlocks={[withAsset(source, 'new-image')]} />);
+    expect(document.querySelector('[data-note-print-root]')).toBeNull();
+    await waitFor(() => expect(document.querySelector('[data-note-print-media-preload] img')?.getAttribute('src')).toBe('blob:new-image'));
+    await act(async () => pending.resolve('blob:old-image'));
+    expect(revoke.mock.calls).toEqual([['blob:old-image']]);
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    expect(document.querySelector('[data-note-print-root] img')?.getAttribute('src')).toBe('blob:new-image');
+    expect(document.querySelector('[data-media-block-asset="shared-image"]')).toBeNull();
+    await act(async () => view.unmount());
+    expect(revoke.mock.calls).toEqual([['blob:old-image'], ['blob:new-image']]);
+  });
+
+  it('retains the frozen job asset across an edit and prepares the replacement only after printing ends', async () => {
+    load.mockImplementation(async (assetId) => `blob:${assetId}`);
+    const { input, source } = fixture();
+    const view = render(<NotePrintLayer {...input} surfaceMode="page" />);
+    await waitFor(() => expect(document.querySelector('[data-note-print-media-preload] svg')).not.toBeNull());
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    view.rerender(<NotePrintLayer {...input} surfaceMode="page" visibleBlocks={[withAsset(source, 'replacement')]} />);
+    expect(document.querySelector('[data-note-print-root] svg image')?.getAttribute('href')).toBe('blob:shared-image');
+    expect(load).toHaveBeenCalledExactlyOnceWith('shared-image');
+    expect(revoke).not.toHaveBeenCalled();
+    act(() => window.dispatchEvent(new Event('afterprint')));
+    await waitFor(() => expect(document.querySelector('[data-note-print-media-preload] img')?.getAttribute('src')).toBe('blob:replacement'));
+    expect(revoke.mock.calls).toEqual([['blob:shared-image']]);
+    act(() => window.dispatchEvent(new Event('beforeprint')));
+    expect(document.querySelector('[data-note-print-root] img')?.getAttribute('src')).toBe('blob:replacement');
+    expect(load.mock.calls).toEqual([['shared-image'], ['replacement']]);
   });
 });
