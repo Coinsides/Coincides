@@ -1,0 +1,442 @@
+[
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ComponentBlockEditor.module.css",
+    "line": 21,
+    "text": "color: var(--text-primary); background: transparent; font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ComponentBlockEditor.module.css",
+    "line": 26,
+    "text": "color: var(--text-primary); background: transparent; font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ComponentBlockProjection.module.css",
+    "line": 7,
+    "text": "font-family: var(--document-font-family, inherit);"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ComponentBlockProjection.module.css",
+    "line": 11,
+    "text": ".title { margin: 0 0 16px; font: inherit; font-weight: 600; overflow-wrap: anywhere; white-space: pre-wrap; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ComponentBlockProjection.module.css",
+    "line": 25,
+    "text": ".chart { display: block; max-width: none; font: inherit; font-size: 12px; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.module.css",
+    "line": 22,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/NoteRefBlockProjection.module.css",
+    "line": 13,
+    "text": "font-family: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ParagraphFurniture.module.css",
+    "line": 5,
+    "text": "color: var(--sk-danger); border: 1px solid currentColor; font-family: var(--sk-title-font, serif); font-size: 14px; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ParagraphFurniture.module.css",
+    "line": 9,
+    "text": "font: 13px/20px Aptos, Calibri, \"Segoe UI\", Arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/ParagraphFurniture.module.css",
+    "line": 14,
+    "text": "background: transparent; color: inherit; border: 0; border-bottom: 1px solid var(--border-subtle); font: inherit; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockEditor.module.css",
+    "line": 40,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockEditor.module.css",
+    "line": 46,
+    "text": ".dialog button { padding: 7px 11px; border: 0; border-radius: 0; color: var(--text-primary); background: transparent; font: inherit; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css",
+    "line": 9,
+    "text": "font-family: var(--document-font-family, inherit);"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css",
+    "line": 20,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css",
+    "line": 27,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx",
+    "line": 393,
+    "text": "mirror.style.fontFamily = computed.fontFamily;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx",
+    "line": 431,
+    "text": "mirror.style.fontFamily = computed.fontFamily;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TocBlockProjection.module.css",
+    "line": 8,
+    "text": "font-family: var(--sk-title-font);"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TocBlockProjection.module.css",
+    "line": 21,
+    "text": ".chapter { font-family: var(--sk-title-font); overflow-wrap: anywhere; white-space: pre-wrap; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TocBlockProjection.module.css",
+    "line": 22,
+    "text": ".page, .empty { font-family: var(--sk-label-font); color: var(--sk-ink-muted); }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/canvasAiTreeService.ts",
+    "line": 69,
+    "text": "fontFamily: profile.fontFamily,"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/exportPreviewService.ts",
+    "line": 62,
+    "text": "fontFamily: string;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.module.css",
+    "line": 85,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteAppearance.module.css",
+    "line": 14,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteBindingPanel.tsx",
+    "line": 84,
+    "text": "<label>字族<select value={slot.style.fontFamily ?? 'skin'} onChange={(event) => patch({ style: { ...slot.style, fontFamily: event.target.value as typeof slot.style.fontFamily } })}>"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteBindingPanel.tsx",
+    "line": 85,
+    "text": "<option value=\"skin\">跟随皮</option><option value=\"serif\">衬线</option><option value=\"sans\">无衬线</option><option value=\"mono\">等宽</option>"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+    "line": 253,
+    "text": "fontFamily: event.target.value,"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+    "line": 633,
+    "text": "value={documentTypographyProfile.fontFamily}"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+    "line": 636,
+    "text": "data-typography-font-family=\"true\""
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationHeadings.css",
+    "line": 4,
+    "text": ".noteNavigationHeading { display: flex; gap: 8px; width: 100%; border: 0; border-radius: 0; padding: 9px 8px; text-align: left; font: inherit; font-size: 13px; line-height: 1.5; color: var(--text-primary); background: transparent; cursor: pointer; overflow-wrap: anywhere; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationHeadings.css",
+    "line": 8,
+    "text": ".noteNavigationHeadingNumbers { align-self: flex-start; margin: 8px 12px 0; padding: 6px 8px; border: 0; border-radius: 0; color: var(--text-secondary); background: transparent; font: inherit; font-size: 12px; cursor: pointer; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPane.css",
+    "line": 38,
+    "text": ".noteNavigationTabs button { flex: 1; min-width: 0; padding: 8px 4px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPane.css",
+    "line": 45,
+    "text": ".noteNavigationSearch input { box-sizing: border-box; width: 100%; min-width: 0; height: 34px; padding: 6px 8px; border: 0; border-bottom: 1px solid var(--border-subtle); border-radius: 0; background: transparent; color: var(--text-primary); font: inherit; font-size: 13px; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteNavigationPane.css",
+    "line": 48,
+    "text": ".noteNavigationResult { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--border-default); padding: 12px 4px; background: transparent; color: var(--text-primary); font: inherit; font-size: 13px; line-height: 1.5; cursor: pointer; overflow-wrap: anywhere; }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NotePageThumbnail.css",
+    "line": 23,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+    "line": 23,
+    "text": "font-family: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+    "line": 28,
+    "text": ".title { height: 1.2em; max-height: 2.4em; font-size: var(--sk-paper-title-size, 34px); line-height: 1.2; font-weight: var(--sk-paper-title-weight, 650); letter-spacing: var(--sk-paper-title-spacing, normal); font-family: var(--sk-title-font, inherit); }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameSlotsLayer.tsx",
+    "line": 12,
+    "text": "const families = { skin: 'var(--sk-label-font, var(--document-font-family, sans-serif))',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameSlotsLayer.tsx",
+    "line": 13,
+    "text": "serif: 'Georgia, serif', sans: 'Arial, sans-serif', mono: 'monospace' };"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameSlotsLayer.tsx",
+    "line": 17,
+    "text": "fontFamily: families[override?.fontFamily ?? 'skin'],"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/SelectionTypographyToolbarLayer.tsx",
+    "line": 65,
+    "text": "savePatch({ fontFamily: event.currentTarget.value });"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/SelectionTypographyToolbarLayer.tsx",
+    "line": 146,
+    "text": "value={typographyProfile.fontFamily}"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/SelectionTypographyToolbarLayer.tsx",
+    "line": 149,
+    "text": "data-selection-typography-font-family=\"true\""
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/overlayService.ts",
+    "line": 66,
+    "text": "'fontFamily',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/textareaNavigation.ts",
+    "line": 31,
+    "text": "'font-family', 'font-size', 'font-weight', 'font-style', 'font-variant',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/types.ts",
+    "line": 83,
+    "text": "fontFamily: string;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 15,
+    "text": "function headingTypographyRatios(role: TextUnitWritingRole): { font: number; line: number } | null {"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 17,
+    "text": "return level === 1 ? { font: 1.4, line: 28.35 }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 18,
+    "text": ": level === 2 ? { font: 1.2, line: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx * 1.15 }"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 19,
+    "text": ": level === 3 ? { font: 1.1, line: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx * 1.05 } : null;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 40,
+    "text": "fontFamily: string;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 110,
+    "text": "fontFamily: role === 'code_line'"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 111,
+    "text": "? 'ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", Menlo, monospace' : profile.fontFamily,"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 112,
+    "text": "fontSizePx: headingRatios ? profile.fontSizePx * headingRatios.font : role === 'code_line' ? 14 * fontScale : profile.fontSizePx,"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+    "line": 127,
+    "text": "fontFamily: metrics.fontFamily,"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 21,
+    "text": "fontFamily: 'Aptos, Calibri, \"Segoe UI\", Arial, sans-serif',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 32,
+    "text": "value: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontFamily,"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 37,
+    "text": "value: 'Arial, sans-serif',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 41,
+    "text": "label: 'Georgia',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 42,
+    "text": "value: 'Georgia, serif',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 47,
+    "text": "value: '\"Times New Roman\", Times, serif',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 52,
+    "text": "value: 'Cambria, Georgia, serif',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 56,
+    "text": "label: 'Consolas',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 57,
+    "text": "value: 'Consolas, \"Courier New\", monospace',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 62,
+    "text": "value: 'Inter, \"Segoe UI\", Arial, sans-serif',"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 98,
+    "text": "if (typeof value !== 'string') return DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontFamily;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 100,
+    "text": "if (!trimmed) return DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontFamily;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 103,
+    "text": ": DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontFamily;"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 147,
+    "text": "fontFamily: normalizeFontFamily(rawProfile.fontFamily),"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "line": 221,
+    "text": "'--document-font-family': normalized.fontFamily,"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 214,
+    "text": "font-family: var(--sk-label-font, inherit);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 407,
+    "text": "font-family: var(--sk-label-font, inherit);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 418,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 951,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 1409,
+    "text": "font-family: var(--sk-label-font, inherit);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 1540,
+    "text": "font-family: var(--document-font-family, Aptos, Calibri, \"Segoe UI\", Arial, sans-serif);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 2064,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 3077,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 3258,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 3593,
+    "text": "font-family: var(--sk-label-font, var(--document-font-family, sans-serif));"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 3648,
+    "text": "font-family: var(--document-font-family, Aptos, Calibri, \"Segoe UI\", Arial, sans-serif);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 3790,
+    "text": "font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 3802,
+    "text": "font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 4571,
+    "text": "font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 4823,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 4900,
+    "text": "font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 4951,
+    "text": "font: inherit;"
+  },
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "line": 5234,
+    "text": "font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);"
+  }
+]

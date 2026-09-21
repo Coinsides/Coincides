@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 422 份文档。
+共 423 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -409,7 +409,8 @@
 | [handoffs/2026-09-20-v14-d4-three-smalls-order.md](handoffs/2026-09-20-v14-d4-three-smalls-order.md) | D4 · 小单三件 | `done(2026-09-20 HQ 收官:一轮冲突停线→补遗一裁定→二轮交齐;HQ 机 server 主集真全绿含 Python 系;双门绿)` | — | — |
 | [handoffs/2026-09-21-v14-t1-toc-block-order.md](handoffs/2026-09-21-v14-t1-toc-block-order.md) | T1 · 目录块(agenda 投影的块化消费者) | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿含该两文件;client 2339/2339 逐字对上;docs 索引收口后 25 组件门全绿;双门绿)` | — | — |
 | [handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md](handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md) | T2 · 富块提案管线(Agent 产出样张级笔记的正门) | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿含该两文件;client 2341/2341 逐字对上;双门绿。Agent 产样张级笔记的正门自此开通)` | — | — |
-| [handoffs/2026-09-21-v14-t3-typography-alignment-order.md](handoffs/2026-09-21-v14-t3-typography-alignment-order.md) | T3 · 排印对齐批 | `ready(HQ 按代理权翻牌;**派发排 T2 之后**,单 builder 串行)` | — | — |
+| [handoffs/2026-09-21-v14-t3-typography-alignment-order.md](handoffs/2026-09-21-v14-t3-typography-alignment-order.md) | T3 · 排印对齐批 | `done(2026-09-21 HQ 收官:两轮——一轮双停线拦下 HQ 测量混尺度+禁令无射程,补遗一双裁后二轮落靶;builder 环境两红=Python/EPERM 沙箱病,HQ 机 server 主集真全绿;client 2368/2368 逐字对上;双门绿)` | — | — |
+| [handoffs/2026-09-21-v14-t4-bloodline-audit-order.md](handoffs/2026-09-21-v14-t4-bloodline-audit-order.md) | T4 · 血统检查(色与字族两项,纸面公民射程) | `ready(HQ 按代理权翻牌;Henry 2026-09-21 拍的收尾批加料件②)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

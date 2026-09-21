@@ -1,0 +1,180 @@
+{
+  "scope": "non git/secrets 25 components",
+  "results": [
+    {
+      "component": 1,
+      "name": "check:test-wiring",
+      "exitCode": 0,
+      "durationMs": 189,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-01-check-test-wiring.log"
+    },
+    {
+      "component": 2,
+      "name": "test:agent-knowledge",
+      "exitCode": 0,
+      "durationMs": 3111,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-02-test-agent-knowledge.log"
+    },
+    {
+      "component": 3,
+      "name": "check:agent-knowledge",
+      "exitCode": 0,
+      "durationMs": 353,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-03-check-agent-knowledge.log"
+    },
+    {
+      "component": 4,
+      "name": "check:tech-debt-table",
+      "exitCode": 0,
+      "durationMs": 184,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-04-check-tech-debt-table.log"
+    },
+    {
+      "component": 5,
+      "name": "test:unit",
+      "exitCode": 0,
+      "durationMs": 34725,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-05-test-unit.log"
+    },
+    {
+      "component": 6,
+      "name": "test:tool-face-registry",
+      "exitCode": 0,
+      "durationMs": 609,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-06-test-tool-face-registry.log"
+    },
+    {
+      "component": 7,
+      "name": "test:tool-face-manifest",
+      "exitCode": 0,
+      "durationMs": 3521,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-07-test-tool-face-manifest.log"
+    },
+    {
+      "component": 8,
+      "name": "check:tool-face-manifest",
+      "exitCode": 0,
+      "durationMs": 584,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-08-check-tool-face-manifest.log"
+    },
+    {
+      "component": 9,
+      "name": "test:tool-face-parity",
+      "exitCode": 0,
+      "durationMs": 5105,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-09-test-tool-face-parity.log"
+    },
+    {
+      "component": 10,
+      "name": "check:tool-face-parity",
+      "exitCode": 0,
+      "durationMs": 509,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-10-check-tool-face-parity.log"
+    },
+    {
+      "component": 11,
+      "name": "check:server-shared-runtime-import",
+      "exitCode": 0,
+      "durationMs": 550,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-11-check-server-shared-runtime-import.log"
+    },
+    {
+      "component": 12,
+      "name": "check:owned-helper-contract",
+      "exitCode": 0,
+      "durationMs": 426,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-12-check-owned-helper-contract.log"
+    },
+    {
+      "component": 13,
+      "name": "test:owned-helper-contract",
+      "exitCode": 0,
+      "durationMs": 1152,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-13-test-owned-helper-contract.log"
+    },
+    {
+      "component": 14,
+      "name": "check:canvas-runtime-boundary",
+      "exitCode": 0,
+      "durationMs": 423,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-14-check-canvas-runtime-boundary.log"
+    },
+    {
+      "component": 15,
+      "name": "check:group-gallery-shell",
+      "exitCode": 0,
+      "durationMs": 407,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-15-check-group-gallery-shell.log"
+    },
+    {
+      "component": 16,
+      "name": "check:groups-rail-shell",
+      "exitCode": 0,
+      "durationMs": 417,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-16-check-groups-rail-shell.log"
+    },
+    {
+      "component": 17,
+      "name": "check:single-editor-shell",
+      "exitCode": 0,
+      "durationMs": 405,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-17-check-single-editor-shell.log"
+    },
+    {
+      "component": 18,
+      "name": "check:source-experience",
+      "exitCode": 0,
+      "durationMs": 897,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-18-check-source-experience.log"
+    },
+    {
+      "component": 19,
+      "name": "check:v2-bn11-legacy-shutdown",
+      "exitCode": 0,
+      "durationMs": 411,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-19-check-v2-bn11-legacy-shutdown.log"
+    },
+    {
+      "component": 20,
+      "name": "check:v2-bn11-relation-freshness",
+      "exitCode": 0,
+      "durationMs": 420,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-20-check-v2-bn11-relation-freshness.log"
+    },
+    {
+      "component": 21,
+      "name": "smoke:canvas-engine-model-contract",
+      "exitCode": 0,
+      "durationMs": 1932,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-21-smoke-canvas-engine-model-contract.log"
+    },
+    {
+      "component": 22,
+      "name": "build:client",
+      "exitCode": 0,
+      "durationMs": 14647,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-22-build-client.log"
+    },
+    {
+      "component": 23,
+      "name": "build",
+      "exitCode": 0,
+      "durationMs": 1193,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-23-build.log"
+    },
+    {
+      "component": 24,
+      "name": "smoke:canvas-engine-performance",
+      "exitCode": 0,
+      "durationMs": 1321,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-24-smoke-canvas-engine-performance.log"
+    },
+    {
+      "component": 25,
+      "name": "docs:check",
+      "exitCode": 1,
+      "durationMs": 272,
+      "log": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t4-bloodline\\gate-25-docs-check.log"
+    }
+  ]
+}
