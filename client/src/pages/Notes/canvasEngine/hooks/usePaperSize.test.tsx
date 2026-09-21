@@ -93,7 +93,7 @@ describe('A5 paper size shared history and Layout gestures', () => {
       surfaceMode: 'page', metadata, pageFrames: target.pageFrames, hydratedProfile: typography,
     }));
     const block: NoteBlock = { id: 'text', placement_id: 'placement:text', block_type: 'paragraph', title: null,
-      plain_text: 'a'.repeat(3975), content_json: {}, metadata: {}, order_index: 0,
+      plain_text: 'a'.repeat(3800), content_json: {}, metadata: {}, order_index: 0,
       source_references: [], display_overrides_json: {}, canvas_layout: {
         x: 0, y: 0, width: 760, height: 100, width_mode: 'auto', frame_id: 'paper-first',
         coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside',
@@ -102,8 +102,8 @@ describe('A5 paper size shared history and Layout gestures', () => {
     await act(async () => { expect(await subject.current.paper.setPreset('letter_portrait')).toBe(true); });
     expect(resolveTypography).toHaveBeenCalledTimes(1);
     expect(resolveTypography.mock.calls[0][0].pageFrames[0].templateId).toBe('letter_portrait');
-    // A4's old default adds an unnecessary continuation here; Letter's physical
-    // font metrics fit one page. An explicit A4-sized user profile still needs two.
+    // Straddle the paper-family pagination boundary with the 1.65 line rhythm:
+    // Letter's metrics fit one page; retaining the explicit A4 profile needs two.
     expect(subject.current.persisted.collection.pageFrames).toHaveLength(custom ? 2 : 1);
     expect(subject.current.persisted.blocks).toEqual([block]);
     const after = structuredClone(subject.current.persisted);

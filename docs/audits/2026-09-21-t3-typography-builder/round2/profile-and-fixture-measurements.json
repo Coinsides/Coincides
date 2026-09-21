@@ -1,0 +1,118 @@
+[
+  {
+    "pageSize": "A4",
+    "physicalScale": 0.8779875966831581,
+    "profile": {
+      "profileId": "paper-document",
+      "fontFamily": "Aptos, Calibri, \"Segoe UI\", Arial, sans-serif",
+      "fontSizePx": 16.3,
+      "lineHeightPx": 26.9,
+      "paragraphSpacingPx": 0,
+      "averageCharWidthPx": 7.8
+    },
+    "measurements": [
+      {
+        "length": 94,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 94,
+        "lineCount": 1,
+        "heightPx": 44,
+        "averageCharWidthPx": 7.8,
+        "lineHeightPx": 26.9,
+        "paragraphSpacingPx": 0
+      },
+      {
+        "length": 96,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 94,
+        "lineCount": 2,
+        "heightPx": 69.8,
+        "averageCharWidthPx": 7.8,
+        "lineHeightPx": 26.9,
+        "paragraphSpacingPx": 0
+      },
+      {
+        "length": 3800,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 94,
+        "lineCount": 41,
+        "heightPx": 1118.8999999999996,
+        "averageCharWidthPx": 7.8,
+        "lineHeightPx": 26.9,
+        "paragraphSpacingPx": 0
+      },
+      {
+        "length": 3975,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 94,
+        "lineCount": 43,
+        "heightPx": 1172.6999999999998,
+        "averageCharWidthPx": 7.8,
+        "lineHeightPx": 26.9,
+        "paragraphSpacingPx": 0
+      }
+    ]
+  },
+  {
+    "pageSize": "Letter",
+    "physicalScale": 0.9026548672566371,
+    "profile": {
+      "profileId": "paper-document",
+      "fontFamily": "Aptos, Calibri, \"Segoe UI\", Arial, sans-serif",
+      "fontSizePx": 15.9,
+      "lineHeightPx": 26.2,
+      "paragraphSpacingPx": 0,
+      "averageCharWidthPx": 7.6
+    },
+    "measurements": [
+      {
+        "length": 94,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 97,
+        "lineCount": 1,
+        "heightPx": 44,
+        "averageCharWidthPx": 7.6,
+        "lineHeightPx": 26.2,
+        "paragraphSpacingPx": 0
+      },
+      {
+        "length": 96,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 97,
+        "lineCount": 1,
+        "heightPx": 44,
+        "averageCharWidthPx": 7.6,
+        "lineHeightPx": 26.2,
+        "paragraphSpacingPx": 0
+      },
+      {
+        "length": 3800,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 97,
+        "lineCount": 40,
+        "heightPx": 1064.0000000000007,
+        "averageCharWidthPx": 7.6,
+        "lineHeightPx": 26.2,
+        "paragraphSpacingPx": 0
+      },
+      {
+        "length": 3975,
+        "width": 760,
+        "textWidth": 740,
+        "charsPerLine": 97,
+        "lineCount": 41,
+        "heightPx": 1090.2000000000007,
+        "averageCharWidthPx": 7.6,
+        "lineHeightPx": 26.2,
+        "paragraphSpacingPx": 0
+      }
+    ]
+  }
+]

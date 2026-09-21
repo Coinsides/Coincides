@@ -47,7 +47,7 @@ describe('page-frame typography families and physical baseline', () => {
   it.each([
     { pageSize: 'A4' as const, physicalWidthMm: 210 },
     { pageSize: 'Letter' as const, physicalWidthMm: 215.9 },
-  ])('$pageSize keeps full-precision mapping and quantizes derived 11pt metrics only', ({ pageSize, physicalWidthMm }) => {
+  ])('$pageSize keeps full-precision mapping and quantizes derived 10.75pt metrics only', ({ pageSize, physicalWidthMm }) => {
     const frame = frameFixture(pageSize);
     const geometryBefore = structuredClone(frame);
     const print = createPageFramePrintProfile(pageSize);
@@ -56,10 +56,10 @@ describe('page-frame typography families and physical baseline', () => {
     expect(print.physicalScale).toBe(scale);
 
     const profile = createPageFrameDefaultTypographyProfile(frame);
-    const exactFontSize = (11 * 96 / 72) / scale;
+    const exactFontSize = (10.75 * 96 / 72) / scale;
     const exactMetrics = {
       fontSizePx: exactFontSize,
-      lineHeightPx: exactFontSize * 22 / 15,
+      lineHeightPx: exactFontSize * 1.65,
       paragraphSpacingPx: 0,
       averageCharWidthPx: exactFontSize * 0.48,
     };
@@ -68,7 +68,7 @@ describe('page-frame typography families and physical baseline', () => {
       expect(Math.abs(profile[metric] - exactMetrics[metric])).toBeLessThanOrEqual(0.05 + Number.EPSILON * 32);
       expect(profile[metric]).toBe(Math.round(exactMetrics[metric] * 10) / 10);
     }
-    expect(Math.abs(profile.fontSizePx * scale * 72 / 96 - 11) / 11).toBeLessThanOrEqual(0.005);
+    expect(Math.abs(profile.fontSizePx * scale * 72 / 96 - 10.75) / 10.75).toBeLessThanOrEqual(0.005);
     expect(documentTypographyToCssVars(profile)['--document-font-size']).toBe(`${profile.fontSizePx}px`);
     expect(frame).toEqual(geometryBefore);
   });
@@ -79,7 +79,7 @@ describe('page-frame typography families and physical baseline', () => {
     const mapping = getPageFramePhysicalMapping('A4', frame.width, frame.templateId);
     expect(mapping.physicalScale).toBe((210 / 25.4 * 96) / 1000);
     const profile = createPageFrameDefaultTypographyProfile(frame);
-    expect(Math.abs(profile.fontSizePx - (11 * 96 / 72) / mapping.physicalScale)).toBeLessThanOrEqual(0.05);
+    expect(Math.abs(profile.fontSizePx - (10.75 * 96 / 72) / mapping.physicalScale)).toBeLessThanOrEqual(0.05);
     expect(frame).toEqual(geometryBefore);
   });
 

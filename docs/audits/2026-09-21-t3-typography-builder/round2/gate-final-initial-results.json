@@ -1,0 +1,159 @@
+{
+  "scope": "non-git/secrets 25 components",
+  "reservedForHQ": [
+    "git diff --check",
+    "npm run check:changed-file-secrets"
+  ],
+  "results": [
+    {
+      "command": "npm run check:test-wiring",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 198
+    },
+    {
+      "command": "npm run test:agent-knowledge",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 3133
+    },
+    {
+      "command": "npm run check:agent-knowledge",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 350
+    },
+    {
+      "command": "npm run check:tech-debt-table",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 176
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 35222
+    },
+    {
+      "command": "npm run test:tool-face-registry",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 604
+    },
+    {
+      "command": "npm run test:tool-face-manifest",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 3543
+    },
+    {
+      "command": "npm run check:tool-face-manifest",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 570
+    },
+    {
+      "command": "npm run test:tool-face-parity",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 5129
+    },
+    {
+      "command": "npm run check:tool-face-parity",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 518
+    },
+    {
+      "command": "npm run check:server-shared-runtime-import",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 546
+    },
+    {
+      "command": "npm run check:owned-helper-contract",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 427
+    },
+    {
+      "command": "npm run test:owned-helper-contract",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1148
+    },
+    {
+      "command": "npm run check:canvas-runtime-boundary",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 414
+    },
+    {
+      "command": "npm run check:group-gallery-shell",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 407
+    },
+    {
+      "command": "npm run check:groups-rail-shell",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 416
+    },
+    {
+      "command": "npm run check:single-editor-shell",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 414
+    },
+    {
+      "command": "npm run check:source-experience",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 901
+    },
+    {
+      "command": "npm run check:v2-bn11-legacy-shutdown",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 412
+    },
+    {
+      "command": "npm run check:v2-bn11-relation-freshness",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 409
+    },
+    {
+      "command": "npm run smoke:canvas-engine-model-contract",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1988
+    },
+    {
+      "command": "npm run build:client",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 14487
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1199
+    },
+    {
+      "command": "npm run smoke:canvas-engine-performance",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1338
+    },
+    {
+      "command": "npm run docs:check",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 591
+    }
+  ]
+}

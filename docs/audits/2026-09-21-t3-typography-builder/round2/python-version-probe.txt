@@ -1,0 +1,6 @@
+Transcript of direct terminal probe during round two (no configuration changes):
+Executable: C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe
+Argument: --version
+PowerShell result: 程序“python.exe”无法运行: 拒绝访问。
+CategoryInfo: ResourceUnavailable / ApplicationFailedException
+No interpreter output; no permission escalation attempted.

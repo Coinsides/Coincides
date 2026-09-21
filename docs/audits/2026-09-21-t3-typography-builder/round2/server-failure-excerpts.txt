@@ -1,0 +1,92 @@
+61781: #     result.error = new ErrnoException(result.error, 'spawnSync ' + options.file);
+61782: #                    ^
+61783: # <ref *1> Error: spawnSync python.exe EPERM
+61784: #     at Object.spawnSync (node:internal/child_process:1120:20)
+61785: #     at spawnSync (node:child_process:902:24)
+61786: #     at execFileSync (node:child_process:945:15)
+61787: #     at <anonymous> (D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:60:5)
+61788: #     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+61789: #     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+61790: #     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+61791: #   errno: -4048,
+61792: #   code: 'EPERM',
+61793: #   syscall: 'spawnSync python.exe',
+61794: #   path: 'python.exe',
+61795: #   spawnargs: [ '-c', 'import sys; print(sys.executable)' ],
+61796: #   error: [Circular *1],
+61797: #   status: null,
+61798: #   signal: null,
+61799: #   output: null,
+61800: #   pid: 0,
+61801: #   stdout: undefined,
+61802: #   stderr: undefined
+61803: # }
+61804: # Node.js v22.22.1
+61805: # Subtest: src\\__tests__\\v2SourceMineruWiring.test.ts
+61806: not ok 102 - src\\__tests__\\v2SourceMineruWiring.test.ts
+61807:   ---
+61808:   duration_ms: 725.7972
+61809:   type: 'test'
+61810:   location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:1:1'
+61811:   failureType: 'testCodeFailure'
+61812:   exitCode: 1
+61813:   signal: ~
+61814:   error: 'test failed'
+61815:   code: 'ERR_TEST_FAILURE'
+61816:   ...
+61817: # sqlite-vec loaded: vv0.1.7
+61818: # 📦 Running 83 pending migration(s)...
+61819: #   ✅ 001_baseline: Establish migration baseline for v1.0 schema
+61820: #   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks
+61821: #   ✅ 003_goal_nesting: Add parent_id to goals for nesting support
+61822: #   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking
+61823: #   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder
+61824: #   ✅ 006_onboarding: Add onboarding_completed flag to users
+61825: #   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system
+61826: #   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)
+61827: #   ✅ 009_task_time_block: Add time_block_id foreign key to tasks for explicit block association
+61828: #   ✅ 010_enforce_card_sections: Ensure all cards have a section_id: create "Unsorted" section per deck for orphaned cards
+61829: #   ✅ 011_task_cards: Create task_cards M:N association table for Task-Card linkage
+61830: #   ✅ 012_time_block_templates: Create time_block_template_sets and time_block_templates tables for template system
+62644:   ...
+62645: # Subtest: V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+62646: not ok 1009 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+62647:   ---
+62648:   duration_ms: 1937.3632
+62649:   type: 'test'
+62650:   location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceRegionCells.test.ts:28:2231'
+62651:   failureType: 'testCodeFailure'
+62652:   error: `MinerU exited abnormally (code 101): Unable to create process using '"C:\\Users\\70208\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none\\python.exe" -B C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-mineru-NEeS9E\\runner.py --input C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-source-region-cells-icei44\\listening-page-30.pdf --output C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-mineru-NEeS9E\\output --result C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-mineru-NEeS9E\\result.json --lang en'`
+62653:   code: 'parser_failure'
+62654:   name: 'SourceArtifactError'
+62655:   stack: |-
+62656:     parseSourceArtifact (D:\Coinsides\v2.x\Coincides\server\src\services\sourceArtifact.ts:452:13)
+62657:     async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceRegionCells.test.ts:203:22)
+62658:     async Test.run (node:internal/test_runner/test:1054:7)
+62659:     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+62660:   ...
+62661: # sqlite-vec loaded: vv0.1.7
+62662: # 📦 Running 83 pending migration(s)...
+62663: #   ✅ 001_baseline: Establish migration baseline for v1.0 schema
+62664: #   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks
+62665: #   ✅ 003_goal_nesting: Add parent_id to goals for nesting support
+62666: #   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking
+62667: #   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder
+62668: #   ✅ 006_onboarding: Add onboarding_completed flag to users
+62669: #   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system
+62670: #   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)
+65905:   ---
+65906:   duration_ms: 0.4253
+65907:   type: 'test'
+65908:   ...
+65909: 1..1106
+65910: # tests 1118
+65911: # suites 0
+65912: # pass 1116
+65913: # fail 2
+65914: # cancelled 0
+65915: # skipped 0
+65916: # todo 0
+65917: # duration_ms 101234.2582
+65918: # flaky-retries 0
+65919: 

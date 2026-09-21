@@ -7,13 +7,14 @@
   overscroll-behavior-x: contain;
   color: var(--sk-ink, var(--text-primary));
   font-family: var(--document-font-family, inherit);
-  font-size: calc(var(--document-font-size, 15px) - 2px);
-  line-height: calc(var(--document-line-height, 22px) - 2px);
+  font-size: calc(var(--document-font-size, 15px) * 0.85);
+  line-height: calc(var(--document-line-height, 22px) * 0.85);
 }
 
 .table {
-  width: max-content;
-  min-width: 100%;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
   table-layout: auto;
   border-collapse: collapse;
   font: inherit;
@@ -33,7 +34,7 @@
 .table th,
 .table td {
   box-sizing: border-box;
-  min-width: 8em;
+  min-width: 0;
   max-width: 24em;
   padding: 8px 10px;
   border-bottom: 1px solid var(--sk-hairline, var(--border-default));

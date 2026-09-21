@@ -1,0 +1,122 @@
+[
+  {
+    "file": ".codex-tmp/t3-typo/round2/server-all.log",
+    "sha256": "01ba85e25a9b406672a8950f742feaffbd86fde29243b7470a8842d3bd92ae18"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/server-rerun/server-all.log",
+    "sha256": "929ef4dac79e446e5c9c5e97328f064c4f91958d02b17a6610ef9ad30951cb68"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/client-targeted-final.log",
+    "sha256": "87b13322143bc0a8e3b08bfbdf7ca5e7c5ee1e5daa188895a3a5686eebcc5214"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/paper-size-targeted.log",
+    "sha256": "d80c5f87f1cebc5aa9fa79168e89eb8a65fa00fb976519837b8d343942db8cb0"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/client-final-full.log",
+    "sha256": "ac13f7656994fde74f0657090913c508ee6246fa04c4285cff7a6ec4bacefac7"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-build-client.log",
+    "sha256": "26474beeefdcfee194395336e7dc1953f34119e1b7382aa4172ac24993cd333c"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-build.log",
+    "sha256": "a6b2980cc54e8cb782030abd762b19a087951e7d59800faef0b69afe4b84eb0f"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-agent-knowledge.log",
+    "sha256": "bae1ab186f388a072a18fbf555ebb63b681d3a57e48d1d2b948403884190e03f"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-canvas-runtime-boundary.log",
+    "sha256": "90e9c65e13d62bcda75b6ee122af56bbd0e5a59c425d48c2eb711d86eb9dc759"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-group-gallery-shell.log",
+    "sha256": "a6d4d4c4a4e7c3d476f15e94cb531bb09618b54d68d50859fc4040bec85e6120"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-groups-rail-shell.log",
+    "sha256": "05f44df5eb579ca376c7c1813c81c131f5185eb8c5aabc5c714de2aece4cf5bf"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-owned-helper-contract.log",
+    "sha256": "8a01a619c9c7c39008f1eea6c38f58c22c13df8fab1b397801941d4f7c31cf68"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-server-shared-runtime-import.log",
+    "sha256": "4bca179b81560e53da76177e1e49fa56eaac06d659884b847fd95b90d0919247"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-single-editor-shell.log",
+    "sha256": "d13e63eced2c3e5251bf85f6212091a9c186ca132eb4bf01595dd1034da7ffb5"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-source-experience.log",
+    "sha256": "a372cce7133327a838c4d6a68fb350bc6002cfa9d2b05b376f6baf145a77ae03"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-tech-debt-table.log",
+    "sha256": "7b3e60c9a9031f2ceb875f98fde63b2b80f721876878fe297d87788641aa89ea"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-test-wiring.log",
+    "sha256": "79f9bd421cfe3e874aa44876c3751d2b0a604456847717c1e7c0bae32a8a37f6"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-tool-face-manifest.log",
+    "sha256": "821e60ee427fafe5d0e7a15b75be49be0801f8b98f09a573d68b14b57b6f61f5"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-tool-face-parity.log",
+    "sha256": "fc9039607a82dd7b6e20aa9cfde57ee207b2eae24fb8085d26d2e825b9d1b30f"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-v2-bn11-legacy-shutdown.log",
+    "sha256": "6110947274ac2096bf1f4c771b9f199896004e34241d32c77951ee1efcc2441b"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-check-v2-bn11-relation-freshness.log",
+    "sha256": "741a34652313e8224b1f46715ffdd6858fbebca4adba41b9786ead65745f5cca"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-docs-check.log",
+    "sha256": "f2d620656c8d5c67a006ee053dad5c464f7277df1f2ceca40a65aabe1e19ef55"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-smoke-canvas-engine-model-contract.log",
+    "sha256": "15f6b405087b821009b2b1fe0d685a2b39735bfb11473bae174f67e25b296b8a"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-smoke-canvas-engine-performance.log",
+    "sha256": "7cc1ee7ff0d9aef57fe536ffca258f532e7d7cb3995e98b25e245a0824a5a74f"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-test-agent-knowledge.log",
+    "sha256": "faea75b1eb973f0776ed8ddf3e9d98ec65781c85c024570e451acdfd5f03a689"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-test-owned-helper-contract.log",
+    "sha256": "4d61af9a0a87a3329cac0a05a3527f0180f91725a6368bf487b4137bbabf35a7"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-test-tool-face-manifest.log",
+    "sha256": "8fdb37b24e06008bc24580c033967c1a943682c80cd5acf22ebb2650b3f7e0e2"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-test-tool-face-parity.log",
+    "sha256": "c0dcdaceba2b2df404074532c01197f1bf207a99b2472ea6b3bf04a007cfe428"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-test-tool-face-registry.log",
+    "sha256": "5329cd62495689684b2a9b9d16839d66206fbf84296fe70763091f28e7131728"
+  },
+  {
+    "file": ".codex-tmp/t3-typo/round2/gate-final/gate-test-unit.log",
+    "sha256": "11c016bc0b31f9a96404cca13a4f1b2a547b922ddcca1d1040062361b77f1609"
+  }
+]

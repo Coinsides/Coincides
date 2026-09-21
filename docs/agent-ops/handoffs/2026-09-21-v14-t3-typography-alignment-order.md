@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(HQ 按代理权翻牌;**派发排 T2 之后**,单 builder 串行)
+> **状态 (Status)**: done(2026-09-21 HQ 收官:两轮——一轮双停线拦下 HQ 测量混尺度+禁令无射程,补遗一双裁后二轮落靶;builder 环境两红=Python/EPERM 沙箱病,HQ 机 server 主集真全绿;client 2368/2368 逐字对上;双门绿)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-21
 > **单号**: V14 收尾批 · T3 排印对齐批(Q3 字偏大 + G9 表格比例)
@@ -51,3 +51,15 @@
 4. **新旧断言申报**：现有排印/分页/对齐断言全部“旧值→原值”，零处更新；T3常驻标尺“无→未新增”，因公式冲突停线。临时DOM诊断不冒充常驻验收。没有弱化断言。
 5. **验证申报与未做项**：验证门盘点为“**非git/secrets 25组件，执行0/25（诊断停线）**”；git diff检查及secrets两组件留HQ。server全量盘点111文件=84主集+27补集，含v13WildernessExecute，恢复时预算须≥600000ms/文件。本轮未跑client全库、server全量或验证门；未申报绿。未完成默认参数修正、表格三修、常驻标尺与回归。
 6. **禁区射程**：本轮及只读辅助agent没有git写操作/改.git、用户库操作、heading补种、真实模型调用、新依赖/工具面/prompt/Relation判定改动、schema或content/metadata/display_overrides新键、分页/坐标机制修改、字族/颜色/新token、合成凭据或新设计安全对抗用例；904/1278/760不动。辅助agent零写零测试，单builder串行。仅新增诊断证据与本Result，原走查/工单正文未改。
+
+## Result 第二轮
+
+**2026-09-21 · Codex builder：施工完成；全量验收 BLOCKED（固定 Python/MinerU 路径执行被拒绝），needs: HQ 环境复验。header 保持 ready，不冒充 done。** 已重读全文、补遗一与原 Result；原正文及第一轮收据保留。完整逐处证据见 [第二轮施工与验收](../../audits/2026-09-21-t3-typography-builder/ROUND2.md)，机器结果见 [verification-summary.json](../../audits/2026-09-21-t3-typography-builder/round2/verification-summary.json)；原始日志 `.codex-tmp/t3-typo/round2/`。
+
+1. **构成与落点**：通用15/22不动；`pageFrameTypographyService.ts:38`纸张默认 **11pt→10.75pt**（四分点刻度），`:46`纸张行高 **22/15→1.65**；现有物理比例、指标一次归一、web与显式用户覆盖保持。A4比例仍`(210/25.4×96)/904=0.8779875966831581`，字号换算得到16.3px、行高26.9px；Letter15.9/26.2px。阅读档与纸面共同transform原样；采用补遗一 **computed÷904×900**，没有硬除1.41。
+2. **表格与装订**：`TableBlockProjection.module.css:10`、`:11`字号/行高由正文减2px→各自×0.85；`:15`至`:18`改fit-content、max-width100%、margin0 auto，撤满幅min-width；`:37`撤cell8em最小宽（改0，防多列抵消上限），原padding与anywhere换行保留。装订件`NoteDetail.module.css:3594`12px不动；无新内容/metadata/display_overrides键。
+3. **标尺实数与常驻断言**：A4正文同尺度 **16.227876**、行高比 **1.650307**；Letter **15.829646 / 1.647799**；cell比例均 **0.85**，装订件 **11.946903**。`paperTypographyRuler.test.tsx:50/:80/:103`新增27用例（双纸型×三阅读档×四步进24例、表格2例、装订1例）。jsdom只展开生产document变量，保留真实CSSOM calc/继承读取；表宽锁CSS声明，非伪造布局。另用Chrome未经展开CSS实测16组合：3列小表约101.578/100.547px、居中；8列长词表760px，最大溢出0，两侧空白差≤0.015654px。均为隔离合成DOM，不是原用户笔记重走。
+4. **既有断言逐处申报**（详细表及源码行号见上链）：`pageFrameTypographyService.test.ts:50/:59/:71/:82`的11pt→10.75pt，`:62`行高22/15→1.65，原0.05量化与0.005相对误差阈值不变；`useNoteCanvasRuntimeController.test.tsx:412/:480`物理刻度11→10.75，`:472/:473`字号16.7/16.2→16.3/15.9，`:435/:436`夹具94→96字，使新94/97字每行容量下仍2行>1行；`TableBlockProjection.test.tsx:45`减2px表达式→乘0.85；`usePaperSize.test.tsx:96`临界夹具3975→3800字，使新行高下仍Letter一页、显式A4覆盖两页（原`:107`的`custom ? 2 : 1`及undo/redo原样）。共4既有测试文件调整，零断言弱化，分页算法未改。
+5. **验收**：最终client全库 **231文件/2368测试通过**，零排除；定向64/64及分页夹具17/17通过。**非git/secrets 25组件均通过**：最终参数批次24项通过，client因上述分页夹具曾红一次，合法调整后全库复跑通过，原失败日志保留。git检查与secrets两组件仍留HQ。server **111文件=84+27，零排除**，两次均600000ms文件预算、并发4，含v13WildernessExecute及真OCR路径；最终 **1118测试、1116过、2失败、0跳过/取消/IPC重试**。初次13红中的仓内app-data拒绝及npm_execpath缺失等仅修临时runner后重跑，产品/回归用例未动。
+6. **停线证据与未做项**：最终`server-rerun/server-all.log:61783`为`v2SourceMineruWiring.test.ts:60`调用Python时 **EPERM**，模块内部用例无法开始；`:62646/:62652`为`v2SourceRegionCells.test.ts:203`真实解析调用约1937ms即失败，固定venv **code101，无法启动绑定的UV基础Python**。同一基础解释器直接`--version`亦“拒绝访问”。不是120s/600s超时；未改产品OCR预算、未换解释器/绑定、未mock/skip或提权。**server全量绿未实现**，需HQ在可执行该固定Python的环境复验；原用户库、heading补种、主观验收及git/secrets仍未做。
+7. **禁区**：无git写、.git/agent操作指令改动；无用户库操作、远程LLM/API与凭据消耗；无schema、新表列、工具面、prompt、Relation/判定域、依赖、内容键、坐标/分页机制、字族/颜色/新token或新安全对抗用例。904/1278/760不变；本地OCR按补遗一真实调度并保留失败，未以假路径冒充。辅助agent只读零写零测试，单builder串行施工；诊断标签与本轮临时HTTP服务已关闭。

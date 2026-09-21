@@ -35,15 +35,15 @@ export function createPageFrameDefaultTypographyProfile(
     frame?.templateId,
     frame?.paperSizeReferenceWidth,
   );
-  const fontSizePx = family === 'paper' ? (11 * 96 / 72) / physicalScale : 16;
-  // Keep the existing family's line/paragraph/character proportions. For paper,
-  // each measure is converted from the 11pt family before one normalization pass.
+  // Paper defaults use a quarter-point type scale and a more open reading rhythm.
+  // Physical mapping and the single normalization pass stay shared with print.
+  const fontSizePx = family === 'paper' ? (10.75 * 96 / 72) / physicalScale : 16;
   const ratio = fontSizePx / baseline.fontSizePx;
   return normalizeDocumentTypographyProfile({
     ...baseline,
     profileId: family === 'paper' ? 'paper-document' : 'web-document',
     fontSizePx,
-    lineHeightPx: baseline.lineHeightPx * ratio,
+    lineHeightPx: family === 'paper' ? fontSizePx * 1.65 : baseline.lineHeightPx * ratio,
     paragraphSpacingPx: baseline.paragraphSpacingPx * ratio,
     averageCharWidthPx: baseline.averageCharWidthPx * ratio,
   });

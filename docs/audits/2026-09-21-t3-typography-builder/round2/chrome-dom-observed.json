@@ -1,0 +1,13 @@
+{
+  "scope": "Transcribed from the final Chrome DOM #result; synthetic DOM using production CSS without substitution; no application or user data",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+  "caseCount": 16,
+  "matrix": { "paperSize": ["A4", "Letter"], "columns": [3, 8], "fitWidthSteps": [0.5, 1, 1.5, 2], "availableWidth": 665 },
+  "allCases": { "bodyEquivalentMin": 15.829646017699114, "bodyEquivalentMax": 16.227876106194692, "maximumCenterDifferencePx": 0.01565388079575314, "maximumTableOverflowPx": 0 },
+  "stepOneRows": [
+    { "paperSize": "A4", "columns": 3, "computedBody": 16.3, "bodyEquivalent": 16.227876106194692, "lineHeight": 26.9, "lineRatio": 1.6503067484662575, "computedCell": 13.855, "cellEquivalent": 13.793694690265488, "cellRatio": 0.85, "folioEquivalent": 11.946902654867257, "tableWidth": 101.57813619742717, "contentWidth": 760.0000058740602, "leftGap": 329.2031251835644, "rightGap": 329.21874449306864 },
+    { "paperSize": "A4", "columns": 8, "computedBody": 16.3, "bodyEquivalent": 16.227876106194692, "lineHeight": 26.9, "lineRatio": 1.6503067484662575, "computedCell": 13.855, "cellEquivalent": 13.793694690265488, "cellRatio": 0.85, "folioEquivalent": 11.946902654867257, "tableWidth": 760.0000058740602, "contentWidth": 760.0000058740602, "leftGap": 0, "rightGap": 0 },
+    { "paperSize": "Letter", "columns": 3, "computedBody": 15.9, "bodyEquivalent": 15.829646017699114, "lineHeight": 26.2, "lineRatio": 1.6477987421383646, "computedCell": 13.515, "cellEquivalent": 13.455199115044248, "cellRatio": 0.85, "folioEquivalent": 11.946902654867257, "tableWidth": 100.54688840019972, "contentWidth": 760.0000058740602, "leftGap": 329.71874908217814, "rightGap": 329.7343683916824 },
+    { "paperSize": "Letter", "columns": 8, "computedBody": 15.9, "bodyEquivalent": 15.829646017699114, "lineHeight": 26.2, "lineRatio": 1.6477987421383646, "computedCell": 13.515, "cellEquivalent": 13.455199115044248, "cellRatio": 0.85, "folioEquivalent": 11.946902654867257, "tableWidth": 760.0000058740602, "contentWidth": 760.0000058740602, "leftGap": 0, "rightGap": 0 }
+  ]
+}

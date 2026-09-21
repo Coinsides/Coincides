@@ -1,0 +1,30 @@
+[
+  {
+    "file": "client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts",
+    "sha256": "4385618560c4e2975d72086e7ef6d424a22ac676229a27e92def992d0b846d3b"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css",
+    "sha256": "a87ce60b4193235ed33fa6aff49147730bdf27e579e13874c4f74d8bee9e7d6a"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts",
+    "sha256": "23b19d34ba5b3c394489c264702d2b34f65f44a7eeb6811855ff397a943d326d"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx",
+    "sha256": "fbdca1c7210e4580ef18a32967cf1ccd146817ff7af7fb633fe2df46350419ce"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+    "sha256": "077b2d284c73f58faa4cacfac351e548f90a27d76c17a1705642f5d36f96368b"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx",
+    "sha256": "8649894f8b8dc810e117606507536e75c6a83f46ba4cac1a5d5dcef5df35fb7e"
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/paperTypographyRuler.test.tsx",
+    "sha256": "81c98f308d86611b1339980a2788afa8c1e44a35e037e1e2406895bc090b297c"
+  }
+]

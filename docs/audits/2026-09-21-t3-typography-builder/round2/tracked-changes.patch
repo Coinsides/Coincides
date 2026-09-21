@@ -1,0 +1,181 @@
+diff --git a/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css b/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css
+index 880533d9..f5f13fa1 100644
+--- a/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css
++++ b/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css
+@@ -7,13 +7,14 @@
+   overscroll-behavior-x: contain;
+   color: var(--sk-ink, var(--text-primary));
+   font-family: var(--document-font-family, inherit);
+-  font-size: calc(var(--document-font-size, 15px) - 2px);
+-  line-height: calc(var(--document-line-height, 22px) - 2px);
++  font-size: calc(var(--document-font-size, 15px) * 0.85);
++  line-height: calc(var(--document-line-height, 22px) * 0.85);
+ }
+ 
+ .table {
+-  width: max-content;
+-  min-width: 100%;
++  width: fit-content;
++  max-width: 100%;
++  margin: 0 auto;
+   table-layout: auto;
+   border-collapse: collapse;
+   font: inherit;
+@@ -33,7 +34,7 @@
+ .table th,
+ .table td {
+   box-sizing: border-box;
+-  min-width: 8em;
++  min-width: 0;
+   max-width: 24em;
+   padding: 8px 10px;
+   border-bottom: 1px solid var(--sk-hairline, var(--border-default));
+diff --git a/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx b/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx
+index 72a96340..f712d354 100644
+--- a/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx
+@@ -42,7 +42,7 @@ describe('table block projection', () => {
+     expect(css).toContain('max-width: 100%');
+     expect(css).toContain('.print { overflow: hidden; }');
+     expect(css).toContain('@media print');
+-    expect(css).toContain('var(--document-font-size, 15px) - 2px');
++    expect(css).toContain('var(--document-font-size, 15px) * 0.85');
+     expect(css).toContain('var(--sk-hairline');
+     expect(css).toContain('nth-child(even)');
+     expect(css).not.toMatch(/#[\da-f]{3,8}\b/i);
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx
+index 6ffcc9a8..bfbf9df6 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx
+@@ -409,7 +409,7 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
+     expect(previousBoundary()).toBe(false);
+   });
+ 
+-  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 11pt across repeated Page rerenders', () => {
++  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 10.75pt across repeated Page rerenders', () => {
+     const frameFor = (pageSize: 'A4' | 'Letter'): PageFrameModel => {
+       const print = createPageFramePrintProfile(pageSize);
+       return {
+@@ -431,8 +431,9 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
+     const specimen = {
+       ...formalPageSpecimen,
+       canvas_layout: undefined,
+-      plain_text: 'x'.repeat(94),
+-      content_json: { body: 'x'.repeat(94) },
++      // Straddle A4/Letter wrapping after the quarter-point paper default change.
++      plain_text: 'x'.repeat(96),
++      content_json: { body: 'x'.repeat(96) },
+     };
+     rootBridgeContract.blocks = [specimen];
+     const setFrame = (frame: PageFrameModel) => {
+@@ -468,15 +469,15 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
+     const letterPage = snapshot(letter);
+     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+     expect(rootBridgeContract.noteId).toBe(NOTE_ID);
+-    expect(a4Page.profile.fontSizePx).toBe(16.7);
+-    expect(letterPage.profile.fontSizePx).toBe(16.2);
++    expect(a4Page.profile.fontSizePx).toBe(16.3);
++    expect(letterPage.profile.fontSizePx).toBe(15.9);
+     expect(a4Page.measurement.lineCount).toBeGreaterThan(letterPage.measurement.lineCount);
+     expect(a4Page.layout.height).toBeGreaterThan(letterPage.layout.height);
+     expect(a4Page.layout.width).toBe(letterPage.layout.width);
+     for (const [pageSize, sample] of [['A4', a4Page], ['Letter', letterPage]] as const) {
+       const { physicalScale } = createPageFramePrintProfile(pageSize);
+       const physicalPt = sample.profile.fontSizePx * physicalScale * 72 / 96;
+-      expect(Math.abs(physicalPt - 11) / 11).toBeLessThanOrEqual(0.005);
++      expect(Math.abs(physicalPt - 10.75) / 10.75).toBeLessThanOrEqual(0.005);
+     }
+ 
+     rerender(<RootBridgeHarness />);
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx
+index a7ef6de5..aa59d5fb 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx
+@@ -93,7 +93,7 @@ describe('A5 paper size shared history and Layout gestures', () => {
+       surfaceMode: 'page', metadata, pageFrames: target.pageFrames, hydratedProfile: typography,
+     }));
+     const block: NoteBlock = { id: 'text', placement_id: 'placement:text', block_type: 'paragraph', title: null,
+-      plain_text: 'a'.repeat(3975), content_json: {}, metadata: {}, order_index: 0,
++      plain_text: 'a'.repeat(3800), content_json: {}, metadata: {}, order_index: 0,
+       source_references: [], display_overrides_json: {}, canvas_layout: {
+         x: 0, y: 0, width: 760, height: 100, width_mode: 'auto', frame_id: 'paper-first',
+         coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside',
+@@ -102,8 +102,8 @@ describe('A5 paper size shared history and Layout gestures', () => {
+     await act(async () => { expect(await subject.current.paper.setPreset('letter_portrait')).toBe(true); });
+     expect(resolveTypography).toHaveBeenCalledTimes(1);
+     expect(resolveTypography.mock.calls[0][0].pageFrames[0].templateId).toBe('letter_portrait');
+-    // A4's old default adds an unnecessary continuation here; Letter's physical
+-    // font metrics fit one page. An explicit A4-sized user profile still needs two.
++    // Straddle the paper-family pagination boundary with the 1.65 line rhythm:
++    // Letter's metrics fit one page; retaining the explicit A4 profile needs two.
+     expect(subject.current.persisted.collection.pageFrames).toHaveLength(custom ? 2 : 1);
+     expect(subject.current.persisted.blocks).toEqual([block]);
+     const after = structuredClone(subject.current.persisted);
+diff --git a/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts b/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts
+index b9b99d30..2fbab56a 100644
+--- a/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts
++++ b/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts
+@@ -47,7 +47,7 @@ describe('page-frame typography families and physical baseline', () => {
+   it.each([
+     { pageSize: 'A4' as const, physicalWidthMm: 210 },
+     { pageSize: 'Letter' as const, physicalWidthMm: 215.9 },
+-  ])('$pageSize keeps full-precision mapping and quantizes derived 11pt metrics only', ({ pageSize, physicalWidthMm }) => {
++  ])('$pageSize keeps full-precision mapping and quantizes derived 10.75pt metrics only', ({ pageSize, physicalWidthMm }) => {
+     const frame = frameFixture(pageSize);
+     const geometryBefore = structuredClone(frame);
+     const print = createPageFramePrintProfile(pageSize);
+@@ -56,10 +56,10 @@ describe('page-frame typography families and physical baseline', () => {
+     expect(print.physicalScale).toBe(scale);
+ 
+     const profile = createPageFrameDefaultTypographyProfile(frame);
+-    const exactFontSize = (11 * 96 / 72) / scale;
++    const exactFontSize = (10.75 * 96 / 72) / scale;
+     const exactMetrics = {
+       fontSizePx: exactFontSize,
+-      lineHeightPx: exactFontSize * 22 / 15,
++      lineHeightPx: exactFontSize * 1.65,
+       paragraphSpacingPx: 0,
+       averageCharWidthPx: exactFontSize * 0.48,
+     };
+@@ -68,7 +68,7 @@ describe('page-frame typography families and physical baseline', () => {
+       expect(Math.abs(profile[metric] - exactMetrics[metric])).toBeLessThanOrEqual(0.05 + Number.EPSILON * 32);
+       expect(profile[metric]).toBe(Math.round(exactMetrics[metric] * 10) / 10);
+     }
+-    expect(Math.abs(profile.fontSizePx * scale * 72 / 96 - 11) / 11).toBeLessThanOrEqual(0.005);
++    expect(Math.abs(profile.fontSizePx * scale * 72 / 96 - 10.75) / 10.75).toBeLessThanOrEqual(0.005);
+     expect(documentTypographyToCssVars(profile)['--document-font-size']).toBe(`${profile.fontSizePx}px`);
+     expect(frame).toEqual(geometryBefore);
+   });
+@@ -79,7 +79,7 @@ describe('page-frame typography families and physical baseline', () => {
+     const mapping = getPageFramePhysicalMapping('A4', frame.width, frame.templateId);
+     expect(mapping.physicalScale).toBe((210 / 25.4 * 96) / 1000);
+     const profile = createPageFrameDefaultTypographyProfile(frame);
+-    expect(Math.abs(profile.fontSizePx - (11 * 96 / 72) / mapping.physicalScale)).toBeLessThanOrEqual(0.05);
++    expect(Math.abs(profile.fontSizePx - (10.75 * 96 / 72) / mapping.physicalScale)).toBeLessThanOrEqual(0.05);
+     expect(frame).toEqual(geometryBefore);
+   });
+ 
+diff --git a/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts b/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts
+index 5da77cb8..04a8157e 100644
+--- a/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts
++++ b/client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts
+@@ -35,15 +35,15 @@ export function createPageFrameDefaultTypographyProfile(
+     frame?.templateId,
+     frame?.paperSizeReferenceWidth,
+   );
+-  const fontSizePx = family === 'paper' ? (11 * 96 / 72) / physicalScale : 16;
+-  // Keep the existing family's line/paragraph/character proportions. For paper,
+-  // each measure is converted from the 11pt family before one normalization pass.
++  // Paper defaults use a quarter-point type scale and a more open reading rhythm.
++  // Physical mapping and the single normalization pass stay shared with print.
++  const fontSizePx = family === 'paper' ? (10.75 * 96 / 72) / physicalScale : 16;
+   const ratio = fontSizePx / baseline.fontSizePx;
+   return normalizeDocumentTypographyProfile({
+     ...baseline,
+     profileId: family === 'paper' ? 'paper-document' : 'web-document',
+     fontSizePx,
+-    lineHeightPx: baseline.lineHeightPx * ratio,
++    lineHeightPx: family === 'paper' ? fontSizePx * 1.65 : baseline.lineHeightPx * ratio,
+     paragraphSpacingPx: baseline.paragraphSpacingPx * ratio,
+     averageCharWidthPx: baseline.averageCharWidthPx * ratio,
+   });

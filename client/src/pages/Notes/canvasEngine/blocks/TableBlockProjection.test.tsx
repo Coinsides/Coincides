@@ -42,7 +42,7 @@ describe('table block projection', () => {
     expect(css).toContain('max-width: 100%');
     expect(css).toContain('.print { overflow: hidden; }');
     expect(css).toContain('@media print');
-    expect(css).toContain('var(--document-font-size, 15px) - 2px');
+    expect(css).toContain('var(--document-font-size, 15px) * 0.85');
     expect(css).toContain('var(--sk-hairline');
     expect(css).toContain('nth-child(even)');
     expect(css).not.toMatch(/#[\da-f]{3,8}\b/i);

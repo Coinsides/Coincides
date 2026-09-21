@@ -1,0 +1,205 @@
+{
+  "status": "BLOCKED: two server Python execution failures; handoff remains ready",
+  "client": {
+    "files": 231,
+    "tests": 2368,
+    "passed": 2368,
+    "failed": 0,
+    "exitCode": 0,
+    "exclusions": [],
+    "log": ".codex-tmp/t3-typo/round2/client-final-full.log"
+  },
+  "gate": {
+    "scope": "non-git/secrets",
+    "components": 25,
+    "passed": 25,
+    "results": [
+      {
+        "command": "npm run check:test-wiring",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 198
+      },
+      {
+        "command": "npm run test:agent-knowledge",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 3133
+      },
+      {
+        "command": "npm run check:agent-knowledge",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 350
+      },
+      {
+        "command": "npm run check:tech-debt-table",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 176
+      },
+      {
+        "command": "npm run test:unit",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 35222,
+        "originalExitCode": 1,
+        "resolvedBy": ".codex-tmp/t3-typo/round2/client-final-full.log",
+        "reason": "Approved line-height change moved paper-size fixture boundary; preserved 2/1-page and undo/redo assertions with 3800 characters."
+      },
+      {
+        "command": "npm run test:tool-face-registry",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 604
+      },
+      {
+        "command": "npm run test:tool-face-manifest",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 3543
+      },
+      {
+        "command": "npm run check:tool-face-manifest",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 570
+      },
+      {
+        "command": "npm run test:tool-face-parity",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 5129
+      },
+      {
+        "command": "npm run check:tool-face-parity",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 518
+      },
+      {
+        "command": "npm run check:server-shared-runtime-import",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 546
+      },
+      {
+        "command": "npm run check:owned-helper-contract",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 427
+      },
+      {
+        "command": "npm run test:owned-helper-contract",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1148
+      },
+      {
+        "command": "npm run check:canvas-runtime-boundary",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 414
+      },
+      {
+        "command": "npm run check:group-gallery-shell",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 407
+      },
+      {
+        "command": "npm run check:groups-rail-shell",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 416
+      },
+      {
+        "command": "npm run check:single-editor-shell",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 414
+      },
+      {
+        "command": "npm run check:source-experience",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 901
+      },
+      {
+        "command": "npm run check:v2-bn11-legacy-shutdown",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 412
+      },
+      {
+        "command": "npm run check:v2-bn11-relation-freshness",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 409
+      },
+      {
+        "command": "npm run smoke:canvas-engine-model-contract",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1988
+      },
+      {
+        "command": "npm run build:client",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 14487
+      },
+      {
+        "command": "npm run build",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1199
+      },
+      {
+        "command": "npm run smoke:canvas-engine-performance",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1338
+      },
+      {
+        "command": "npm run docs:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 591
+      }
+    ],
+    "reservedForHQ": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ]
+  },
+  "server": {
+    "scheduledFiles": 111,
+    "main": 84,
+    "complement": 27,
+    "fileTimeoutMs": 600000,
+    "testConcurrency": 4,
+    "excludedFiles": [],
+    "tests": 1118,
+    "passed": 1116,
+    "failed": 2,
+    "skipped": 0,
+    "cancelled": 0,
+    "flakyRetries": 0,
+    "durationMs": 101234.2582,
+    "failures": [
+      "v2SourceMineruWiring.test.ts:60 module load: spawnSync python.exe EPERM (contained cases cannot start)",
+      "v2SourceRegionCells.test.ts:203 real OCR call: pinned venv launcher code 101, unable to create bound base Python process"
+    ],
+    "log": ".codex-tmp/t3-typo/round2/server-rerun/server-all.log"
+  },
+  "diagnosticOnly": {
+    "priorServerRun": {
+      "tests": 1118,
+      "passed": 1105,
+      "failed": 13,
+      "log": ".codex-tmp/t3-typo/round2/server-all.log"
+    },
+    "priorClientGate": ".codex-tmp/t3-typo/round2/gate-final/gate-test-unit.log"
+  }
+}

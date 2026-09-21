@@ -1,0 +1,1223 @@
+FILE client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts
+1: import {
+2:   createPageFramePrintProfile,
+3:   getPageFramePhysicalMapping,
+4: } from './pageFramePrintScaleService';
+5: import {
+6:   DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+7:   hasDocumentTypographyProfileOverride,
+8:   normalizeDocumentTypographyProfile,
+9: } from './typographyProfileService';
+10: import type {
+11:   DocumentTypographyProfile,
+12:   NoteCanvasMode,
+13:   PageFrameModel,
+14: } from './types';
+15: 
+16: export function getPageFrameTypographyFamily(
+17:   frame?: Pick<PageFrameModel, 'templateId' | 'pageSize'>,
+18: ): 'paper' | 'web' {
+19:   if (frame?.templateId === 'screen_note') return 'web';
+20:   if (frame?.templateId === 'a4_portrait' || frame?.templateId === 'letter_portrait') return 'paper';
+21:   return frame?.pageSize === 'Custom' ? 'web' : 'paper';
+22: }
+23: 
+24: export function createPageFrameDefaultTypographyProfile(
+25:   frame?: Partial<PageFrameModel>,
+26: ): DocumentTypographyProfile {
+27:   const family = getPageFrameTypographyFamily(frame);
+28:   const baseline = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE;
+29:   const pageSize = frame?.pageSize
+30:     ?? (frame?.templateId === 'letter_portrait' ? 'Letter' : 'A4');
+31:   const printProfile = createPageFramePrintProfile(pageSize);
+32:   const { physicalScale } = getPageFramePhysicalMapping(
+33:     pageSize,
+34:     frame?.width ?? printProfile.width,
+35:     frame?.templateId,
+36:     frame?.paperSizeReferenceWidth,
+37:   );
+38:   // Paper defaults use a quarter-point type scale and a more open reading rhythm.
+39:   // Physical mapping and the single normalization pass stay shared with print.
+40:   const fontSizePx = family === 'paper' ? (10.75 * 96 / 72) / physicalScale : 16;
+41:   const ratio = fontSizePx / baseline.fontSizePx;
+42:   return normalizeDocumentTypographyProfile({
+43:     ...baseline,
+44:     profileId: family === 'paper' ? 'paper-document' : 'web-document',
+45:     fontSizePx,
+46:     lineHeightPx: family === 'paper' ? fontSizePx * 1.65 : baseline.lineHeightPx * ratio,
+47:     paragraphSpacingPx: baseline.paragraphSpacingPx * ratio,
+48:     averageCharWidthPx: baseline.averageCharWidthPx * ratio,
+49:   });
+50: }
+51: 
+52: export function resolveEffectiveDocumentTypographyProfile({
+53:   metadata,
+54:   pageFrames,
+55:   hydratedProfile,
+56: }: {
+57:   surfaceMode: NoteCanvasMode;
+58:   metadata: Record<string, unknown> | null | undefined;
+59:   pageFrames: PageFrameModel[] | undefined;
+60:   hydratedProfile: DocumentTypographyProfile;
+61: }): DocumentTypographyProfile {
+62:   if (hasDocumentTypographyProfileOverride(metadata)) {
+63:     return hydratedProfile;
+64:   }
+65:   // A note has one effective profile: selection changes never change the family.
+66:   return createPageFrameDefaultTypographyProfile(pageFrames?.[0]);
+67: }
+68: 
+
+FILE client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css
+1: .viewport {
+2:   box-sizing: border-box;
+3:   width: 100%;
+4:   max-width: 100%;
+5:   min-width: 0;
+6:   overflow-x: auto;
+7:   overscroll-behavior-x: contain;
+8:   color: var(--sk-ink, var(--text-primary));
+9:   font-family: var(--document-font-family, inherit);
+10:   font-size: calc(var(--document-font-size, 15px) * 0.85);
+11:   line-height: calc(var(--document-line-height, 22px) * 0.85);
+12: }
+13: 
+14: .table {
+15:   width: fit-content;
+16:   max-width: 100%;
+17:   margin: 0 auto;
+18:   table-layout: auto;
+19:   border-collapse: collapse;
+20:   font: inherit;
+21:   text-align: left;
+22: }
+23: 
+24: .table caption {
+25:   padding: 0 0 10px;
+26:   color: var(--sk-ink-muted, var(--text-secondary));
+27:   font: inherit;
+28:   font-weight: 600;
+29:   text-align: left;
+30:   white-space: pre-wrap;
+31:   overflow-wrap: anywhere;
+32: }
+33: 
+34: .table th,
+35: .table td {
+36:   box-sizing: border-box;
+37:   min-width: 0;
+38:   max-width: 24em;
+39:   padding: 8px 10px;
+40:   border-bottom: 1px solid var(--sk-hairline, var(--border-default));
+41:   vertical-align: top;
+42:   white-space: pre-wrap;
+43:   overflow-wrap: anywhere;
+44: }
+45: 
+46: .table th {
+47:   font-weight: 600;
+48:   background: color-mix(in srgb, var(--sk-ink, var(--text-primary)) 9%, var(--sk-paper, var(--bg-primary)));
+49: }
+50: 
+51: .table tbody tr:nth-child(even) {
+52:   background: color-mix(in srgb, var(--sk-ink, var(--text-primary)) 3%, var(--sk-paper, var(--bg-primary)));
+53: }
+54: 
+55: .viewport:focus-visible { outline: 2px solid var(--sk-accent, var(--accent-primary)); outline-offset: 2px; }
+56: .invalid { color: var(--text-secondary); font-size: 13px; }
+57: .print { overflow: hidden; }
+58: 
+59: @media print {
+60:   .viewport { overflow: hidden; }
+61:   .table { break-inside: avoid; print-color-adjust: exact; }
+62: }
+63: 
+
+FILE client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts
+1: import { describe, expect, it } from 'vitest';
+2: import {
+3:   createPageFramePrintProfile,
+4:   getPageFramePhysicalMapping,
+5: } from './pageFramePrintScaleService';
+6: import {
+7:   createPageFrameDefaultTypographyProfile,
+8:   getPageFrameTypographyFamily,
+9:   resolveEffectiveDocumentTypographyProfile,
+10: } from './pageFrameTypographyService';
+11: import {
+12:   createDefaultDocumentTypographyProfile,
+13:   documentTypographyToCssVars,
+14:   writeTypographyProfileMetadata,
+15: } from './typographyProfileService';
+16: import type { PageFrameModel, PageFramePageSize, PageFrameTemplateId } from './types';
+17: 
+18: function frameFixture(pageSize: 'A4' | 'Letter'): PageFrameModel {
+19:   const print = createPageFramePrintProfile(pageSize);
+20:   return {
+21:     id: `frame-${pageSize}`,
+22:     role: 'primary_page_frame',
+23:     templateId: pageSize === 'A4' ? 'a4_portrait' : 'letter_portrait',
+24:     pageSize,
+25:     exportable: true,
+26:     x: 0,
+27:     y: 0,
+28:     width: print.width,
+29:     height: print.height,
+30:     contentInset: { ...print.contentInset },
+31:   };
+32: }
+33: 
+34: describe('page-frame typography families and physical baseline', () => {
+35:   const pageSizes: PageFramePageSize[] = ['A4', 'Letter', 'Custom'];
+36:   const templateIds: PageFrameTemplateId[] = ['a4_portrait', 'letter_portrait', 'screen_note', 'custom'];
+37: 
+38:   it.each(templateIds.flatMap((templateId) => pageSizes.map((pageSize) => ({
+39:     templateId,
+40:     pageSize,
+41:     expected: templateId === 'screen_note' || (templateId === 'custom' && pageSize === 'Custom')
+42:       ? 'web' : 'paper',
+43:   }))))('$templateId / $pageSize selects $expected by template identity', ({ templateId, pageSize, expected }) => {
+44:     expect(getPageFrameTypographyFamily({ templateId, pageSize })).toBe(expected);
+45:   });
+46: 
+47:   it.each([
+48:     { pageSize: 'A4' as const, physicalWidthMm: 210 },
+49:     { pageSize: 'Letter' as const, physicalWidthMm: 215.9 },
+50:   ])('$pageSize keeps full-precision mapping and quantizes derived 10.75pt metrics only', ({ pageSize, physicalWidthMm }) => {
+51:     const frame = frameFixture(pageSize);
+52:     const geometryBefore = structuredClone(frame);
+53:     const print = createPageFramePrintProfile(pageSize);
+54:     const scale = (physicalWidthMm / 25.4 * 96) / print.width;
+55:     expect(print.physicalWidthMm).toBe(physicalWidthMm);
+56:     expect(print.physicalScale).toBe(scale);
+57: 
+58:     const profile = createPageFrameDefaultTypographyProfile(frame);
+59:     const exactFontSize = (10.75 * 96 / 72) / scale;
+60:     const exactMetrics = {
+61:       fontSizePx: exactFontSize,
+62:       lineHeightPx: exactFontSize * 1.65,
+63:       paragraphSpacingPx: 0,
+64:       averageCharWidthPx: exactFontSize * 0.48,
+65:     };
+66:     for (const metric of Object.keys(exactMetrics) as Array<keyof typeof exactMetrics>) {
+67:       // Add only floating-point epsilon to the frozen single-rounding bound.
+68:       expect(Math.abs(profile[metric] - exactMetrics[metric])).toBeLessThanOrEqual(0.05 + Number.EPSILON * 32);
+69:       expect(profile[metric]).toBe(Math.round(exactMetrics[metric] * 10) / 10);
+70:     }
+71:     expect(Math.abs(profile.fontSizePx * scale * 72 / 96 - 10.75) / 10.75).toBeLessThanOrEqual(0.005);
+72:     expect(documentTypographyToCssVars(profile)['--document-font-size']).toBe(`${profile.fontSizePx}px`);
+73:     expect(frame).toEqual(geometryBefore);
+74:   });
+75: 
+76:   it('reads an existing frame width for mapping without replacing its geometry', () => {
+77:     const frame = { ...frameFixture('A4'), width: 1000 };
+78:     const geometryBefore = structuredClone(frame);
+79:     const mapping = getPageFramePhysicalMapping('A4', frame.width, frame.templateId);
+80:     expect(mapping.physicalScale).toBe((210 / 25.4 * 96) / 1000);
+81:     const profile = createPageFrameDefaultTypographyProfile(frame);
+82:     expect(Math.abs(profile.fontSizePx - (10.75 * 96 / 72) / mapping.physicalScale)).toBeLessThanOrEqual(0.05);
+83:     expect(frame).toEqual(geometryBefore);
+84:   });
+85: 
+86:   it('keeps Custom and screen-note physical scale at 1 and supplies the 16px web family', () => {
+87:     expect(createPageFramePrintProfile('Custom')).toMatchObject({ physicalWidthMm: null, physicalScale: 1 });
+88:     expect(getPageFramePhysicalMapping('A4', 1120, 'screen_note')).toEqual({ physicalWidthMm: 210, physicalScale: 1 });
+89:     for (const frame of [
+90:       { templateId: 'screen_note' as const, pageSize: 'A4' as const, width: 1120 },
+91:       { templateId: 'custom' as const, pageSize: 'Custom' as const, width: 904 },
+92:     ]) {
+93:       expect(createPageFrameDefaultTypographyProfile(frame)).toMatchObject({
+94:         fontSizePx: 16,
+95:         lineHeightPx: Math.round((16 * 22 / 15) * 10) / 10,
+96:         paragraphSpacingPx: 0,
+97:         averageCharWidthPx: Math.round((16 * 0.48) * 10) / 10,
+98:       });
+99:     }
+100:   });
+101: 
+102:   it('preserves active user overrides even when they reuse the legacy default profile ID', () => {
+103:     const hydratedProfile = createDefaultDocumentTypographyProfile({ fontSizePx: 20, lineHeightPx: 29 });
+104:     const metadata = writeTypographyProfileMetadata({}, hydratedProfile);
+105:     for (const surfaceMode of ['page'] as const) {
+106:       for (const pageSize of ['A4', 'Letter'] as const) {
+107:         expect(resolveEffectiveDocumentTypographyProfile({
+108:           surfaceMode,
+109:           metadata,
+110:           pageFrames: [frameFixture(pageSize)],
+111:           hydratedProfile,
+112:         })).toBe(hydratedProfile);
+113:       }
+114:     }
+115:   });
+116: 
+117:   it('uses the first frame only as the page default', () => {
+118:     const hydratedProfile = createDefaultDocumentTypographyProfile();
+119:     const a4 = frameFixture('A4');
+120:     const letter = frameFixture('Letter');
+121:     for (const pageFrames of [[a4, letter], [letter, a4]]) {
+122:       expect(resolveEffectiveDocumentTypographyProfile({
+123:         surfaceMode: 'page', metadata: {}, pageFrames, hydratedProfile,
+124:       })).toEqual(createPageFrameDefaultTypographyProfile(pageFrames[0]));
+125:     }
+126:     expect(hydratedProfile).toMatchObject({ fontSizePx: 15, lineHeightPx: 22, averageCharWidthPx: 7.2 });
+127:   });
+128: });
+129: 
+
+FILE client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx
+1: import { cleanup, render, screen, within } from '@testing-library/react';
+2: import { afterEach, describe, expect, it } from 'vitest';
+3: import { TableBlockProjection } from './TableBlockProjection';
+4: import { XINING_REFORMS_TABLE } from '../fixtures/xiningReformsTable';
+5: import css from './TableBlockProjection.module.css?raw';
+6: 
+7: afterEach(cleanup);
+8: const block = { block_type: 'table' as const, content_json: { ...XINING_REFORMS_TABLE } };
+9: 
+10: describe('table block projection', () => {
+11:   it('renders nine-by-three Chinese data rows plus a header without an editor', () => {
+12:     const view = render(<TableBlockProjection block={block} />);
+13:     const table = screen.getByRole('table', { name: '熙宁新法表' });
+14:     expect(within(table).getAllByRole('row')).toHaveLength(10);
+15:     expect(within(table).getAllByRole('columnheader')).toHaveLength(3);
+16:     expect(within(table).getAllByRole('cell')).toHaveLength(27);
+17:     expect(screen.getByText('青苗法')).toBeTruthy();
+18:     expect(screen.getByText('减少官养费用。', { exact: false })).toBeTruthy();
+19:     expect(view.container.querySelector('textarea')).toBeNull();
+20:     expect(screen.getByRole('region').tabIndex).toBe(0);
+21:   });
+22: 
+23:   it('keeps print content identical and marks it for clipping to block width', () => {
+24:     const view = render(<TableBlockProjection block={block} />);
+25:     const tableContent = screen.getByRole('table').innerHTML;
+26:     view.rerender(<TableBlockProjection block={block} print style={{ width: 240 }} />);
+27:     expect(screen.getByRole('table').innerHTML).toBe(tableContent);
+28:     const viewport = view.container.querySelector('[data-table-print-clip="true"]') as HTMLElement;
+29:     expect(viewport.style.width).toBe('240px');
+30:     expect(viewport.hasAttribute('tabindex')).toBe(false);
+31:   });
+32: 
+33:   it('preserves plain text and cell newlines with no implicit header', () => {
+34:     render(<TableBlockProjection block={{ block_type: 'table', content_json: { headers: [], rows: [['first\nsecond', '=A1+B1']] } }} />);
+35:     expect(screen.queryByRole('columnheader')).toBeNull();
+36:     expect(screen.getAllByRole('cell')[0].textContent).toBe('first\nsecond');
+37:     expect(screen.getAllByRole('cell')[1].textContent).toBe('=A1+B1');
+38:   });
+39: 
+40:   it('contains wide-table scrolling, print clipping and skin colours in the projection CSS', () => {
+41:     expect(css).toContain('overflow-x: auto');
+42:     expect(css).toContain('max-width: 100%');
+43:     expect(css).toContain('.print { overflow: hidden; }');
+44:     expect(css).toContain('@media print');
+45:     expect(css).toContain('var(--document-font-size, 15px) * 0.85');
+46:     expect(css).toContain('var(--sk-hairline');
+47:     expect(css).toContain('nth-child(even)');
+48:     expect(css).not.toMatch(/#[\da-f]{3,8}\b/i);
+49:   });
+50: 
+51:   it('reports unreadable content instead of rendering a broken grid', () => {
+52:     render(<TableBlockProjection block={{ block_type: 'table', content_json: {} }} />);
+53:     expect(screen.getByRole('status').textContent).toContain('could not be read');
+54:     expect(screen.queryByRole('table')).toBeNull();
+55:   });
+56: });
+57: 
+
+FILE client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx
+1: import { act, render, screen } from '@testing-library/react';
+2: import { beforeEach, describe, expect, it, vi } from 'vitest';
+3: import type { NoteBlock } from '../runtimeDataTypes';
+4: import type { UseRuntimePresentationControllerOptions } from './useRuntimePresentationController';
+5: import { DEFAULT_PAGE_CONTENT_WIDTH, type BlockBoxLayout } from '../runtimeLayout';
+6: import { createPageFramePrintProfile } from '../pageFramePrintScaleService';
+7: import { createDefaultDocumentTypographyProfile, documentTypographyToCssVars } from '../typographyProfileService';
+8: import { estimateTypographyTextBlockHeight } from '../typographyMeasurementService';
+9: import { buildExportPreviewModel } from '../exportPreviewService';
+10: import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from '../types';
+11: import { createDefaultNoteBindingSettings, type NoteBindingSettings } from '../../../../../../shared/types/noteBinding';
+12: import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
+13: import { addNoteCoverPage } from '../noteCoverPageCollection';
+14: import { createDefaultComponentBlockPayload } from '../componentBlockService';
+15: 
+16: vi.mock('@/services/api', () => ({
+17:   getToken: () => null, setToken: vi.fn(),
+18:   default: { get: vi.fn(async (url: string) => {
+19:     if (url === '/palette-colors' || url === '/skin-suites') return { data: [] };
+20:     throw new Error(`Unexpected synthetic GET: ${url}`);
+21:   }) },
+22: }));
+23: 
+24: const rootBridgeContract = vi.hoisted(() => ({
+25:   blocks: [] as NoteBlock[],
+26:   contentWidth: 0,
+27:   loading: true,
+28:   layoutMode: false,
+29:   contentReadOnly: false,
+30:   wallOptions: null as { enabled: boolean; boundary: () => boolean } | null,
+31:   note: undefined as { id: string; metadata?: Record<string, unknown> } | undefined,
+32:   noteId: undefined as string | undefined,
+33:   pageFrameCollection: null as PageFrameCollectionModel | null,
+34:   hydratedProfile: undefined as DocumentTypographyProfile | undefined,
+35:   dispatchedProfiles: {} as Record<string, DocumentTypographyProfile>,
+36:   blockLayouts: {} as Record<string, BlockBoxLayout>,
+37:   surfaceMode: 'page',
+38:   presentationOptions: null as UseRuntimePresentationControllerOptions | null,
+39:   bindingSettings: undefined as NoteBindingSettings | undefined,
+40:   coordinateContract: 'v1' as 'v1' | 'v2',
+41:   createBlock: vi.fn<(...args: unknown[]) => Promise<NoteBlock | null>>(),
+42:   pushHistoryEntry: vi.fn(() => true),
+43:   enqueueRuntimeHistoryOperation: vi.fn(async (operation: () => Promise<boolean>) => operation()),
+44:   markBlockSelected: vi.fn(),
+45:   setFocusBlockId: vi.fn(),
+46:   noop: () => undefined,
+47: }));
+48: 
+49: vi.mock('./useNoteCanvasRuntime', () => ({
+50:   useNoteCanvasRuntime: () => ({ noteId: rootBridgeContract.noteId }),
+51: }));
+52: 
+53: vi.mock('./useRuntimeSurfaceStateController', async () => {
+54:   const surfaceModule = await vi.importActual<typeof import('./useSurfaceModeController')>(
+55:     './useSurfaceModeController',
+56:   );
+57:   const blockListRef = { current: null };
+58:   const movingBlockIdRef = { current: null };
+59:   const suppressMeasuredReflowUntilRef = { current: 0 };
+60: 
+61:   return {
+62:     useRuntimeSurfaceStateController: () => {
+63:       const surface = surfaceModule.useSurfaceModeController();
+64: 
+65:       return new Proxy({
+66:         ...surface,
+67:         layoutMode: rootBridgeContract.layoutMode,
+68:         markBlockSelected: rootBridgeContract.markBlockSelected,
+69:         setFocusBlockId: rootBridgeContract.setFocusBlockId,
+70:         blockListRef,
+71:         movingBlockIdRef,
+72:         suppressMeasuredReflowUntilRef,
+73:       }, {
+74:         get(target, property, receiver) {
+75:           return Reflect.has(target, property)
+76:             ? Reflect.get(target, property, receiver)
+77:             : rootBridgeContract.noop;
+78:         },
+79:       });
+80:     },
+81:   };
+82: });
+83: 
+84: vi.mock('./useRuntimeDocumentDataController', () => ({
+85:   useRuntimeDocumentDataController: () => new Proxy({
+86:     blocks: rootBridgeContract.blocks,
+87:     loading: rootBridgeContract.loading,
+88:     note: rootBridgeContract.note,
+89:     pageFrameCollection: rootBridgeContract.pageFrameCollection,
+90:     documentTypographyProfile: rootBridgeContract.hydratedProfile,
+91:     sourceProjectionPolicy: { contentReadOnly: rootBridgeContract.contentReadOnly },
+92:     sourceReferenceCount: 0,
+93:     sortedBlocks: rootBridgeContract.blocks,
+94:     persistedCanvasObjects: [],
+95:     persistedCanvasPlacements: [],
+96:     persistedContentMounts: [],
+97:     coordinateContract: rootBridgeContract.coordinateContract,
+98:     createBlock: rootBridgeContract.createBlock,
+99:   }, {
+100:     get(target, property, receiver) {
+101:       return Reflect.has(target, property)
+102:         ? Reflect.get(target, property, receiver)
+103:         : rootBridgeContract.noop;
+104:     },
+105:   }),
+106: }));
+107: 
+108: vi.mock('./useNoteBinding', () => ({
+109:   useNoteBinding: () => ({ value: rootBridgeContract.bindingSettings, loading: false, error: null,
+110:     save: rootBridgeContract.noop, retry: rootBridgeContract.noop }),
+111: }));
+112: 
+113: vi.mock('./usePageFrameWalls', async () => {
+114:   const actual = await vi.importActual<typeof import('./usePageFrameWalls')>('./usePageFrameWalls');
+115:   return {
+116:     usePageFrameWalls: (options: Parameters<typeof actual.usePageFrameWalls>[0]) => {
+117:       rootBridgeContract.wallOptions = options;
+118:       return actual.usePageFrameWalls(options);
+119:     },
+120:   };
+121: });
+122: 
+123: vi.mock('./useRuntimeLayoutModelController', async () => {
+124:   const { useNoteCanvasResolvedLayoutModel } = await vi.importActual<typeof import('./useNoteCanvasLayoutModel')>(
+125:     './useNoteCanvasLayoutModel',
+126:   );
+127:   return {
+128:     useRuntimeLayoutModelController: (options: Parameters<typeof useNoteCanvasResolvedLayoutModel>[0]) => {
+129:       rootBridgeContract.dispatchedProfiles.layout = options.documentTypographyProfile;
+130:       const pageFrames = rootBridgeContract.pageFrameCollection?.pageFrames || [];
+131:       const resolved = useNoteCanvasResolvedLayoutModel({
+132:         ...options,
+133:         contentWidth: rootBridgeContract.contentWidth,
+134:         layoutDrafts: {},
+135:         pageFrames,
+136:       });
+137:       rootBridgeContract.blockLayouts = resolved.blockLayouts;
+138:       return {
+139:         ...resolved,
+140:         pageFrames,
+141:         contentWidth: rootBridgeContract.contentWidth,
+142:         persistChangedBlockLayouts: rootBridgeContract.noop,
+143:         persistLayoutSnapshot: rootBridgeContract.noop,
+144:       };
+145:     },
+146:   };
+147: });
+148: 
+149: vi.mock('./useRuntimeBlockOperationsController', () => ({
+150:   useRuntimeBlockOperationsController: ({ documentTypographyProfile }: { documentTypographyProfile: DocumentTypographyProfile }) => {
+151:     rootBridgeContract.dispatchedProfiles.operations = documentTypographyProfile;
+152:     return new Proxy({ pushHistoryEntry: rootBridgeContract.pushHistoryEntry,
+153:       enqueueRuntimeHistoryOperation: rootBridgeContract.enqueueRuntimeHistoryOperation,
+154:     }, { get: (target, property, receiver) => Reflect.has(target, property)
+155:       ? Reflect.get(target, property, receiver) : rootBridgeContract.noop });
+156:   },
+157: }));
+158: 
+159: vi.mock('./useRuntimePresentationController', () => ({
+160:   useRuntimePresentationController: (options: UseRuntimePresentationControllerOptions) => {
+161:     const { surfaceMode, documentTypographyProfile } = options;
+162:     rootBridgeContract.presentationOptions = options;
+163:     rootBridgeContract.surfaceMode = surfaceMode;
+164:     rootBridgeContract.dispatchedProfiles.presentation = documentTypographyProfile;
+165:     return { layerProps: { surfaceMode } };
+166:   },
+167: }));
+168: 
+169: vi.mock('./useBlockTextFlowEditController', () => ({
+170:   useBlockTextFlowEditController: () => rootBridgeContract.noop,
+171: }));
+172: 
+173: vi.mock('./useSlashBlockRollbackController', () => ({
+174:   useSlashBlockRollbackController: () => rootBridgeContract.noop,
+175: }));
+176: 
+177: vi.mock('../tableObjectService', () => ({
+178:   tableObjectSavePayload: rootBridgeContract.noop,
+179: }));
+180: 
+181: import { useNoteCanvasRuntimeController } from './useNoteCanvasRuntimeController';
+182: 
+183: const NOTE_ID = 'c2772c92-fdc1-468d-bb1b-root-bridge-note';
+184: 
+185: const canvasOnlySpecimen: NoteBlock = {
+186:   id: 'f59a15ac-56f6-4d82-a27d-root-canvas-specimen',
+187:   placement_id: 'root-canvas-only-placement',
+188:   display_overrides_json: {},
+189:   canvas_layout: {
+190:     x: 14,
+191:     y: 120,
+192:     width: 760,
+193:     height: 420,
+194:     surface: 'canvas_workspace',
+195:     boundary_role: 'crossing',
+196:     coordinate_space: 'canvas_world',
+197:     surface_authority: {
+198:       coordinateSpace: 'canvas_world',
+199:       pageBoundary: {
+200:         left: 72,
+201:         right: 832,
+202:         frameId: 'primary-page-frame',
+203:       },
+204:     },
+205:   },
+206:   block_type: 'text',
+207:   title: null,
+208:   content_json: {},
+209:   plain_text: 'Root canvas-only specimen',
+210:   metadata: {},
+211:   order_index: 2,
+212:   source_references: [],
+213: };
+214: 
+215: const formalPageSpecimen: NoteBlock = {
+216:   ...canvasOnlySpecimen,
+217:   id: '32df5515-8bfd-47c3-b787-root-formal-specimen',
+218:   placement_id: 'root-formal-page-placement',
+219:   canvas_layout: {
+220:     x: 72,
+221:     y: 24,
+222:     width: 760,
+223:     height: 180,
+224:     surface: 'formal_page',
+225:     boundary_role: 'inside',
+226:     coordinate_space: 'canvas_world',
+227:     surface_authority: {
+228:       coordinateSpace: 'canvas_world',
+229:       pageBoundary: {
+230:         left: 72,
+231:         right: 832,
+232:         frameId: 'primary-page-frame',
+233:       },
+234:     },
+235:   },
+236:   plain_text: 'Root formal Page specimen',
+237:   order_index: 1,
+238: };
+239: 
+240: function RootBridgeHarness() {
+241:   useNoteCanvasRuntimeController();
+242:   const surfaceMode = rootBridgeContract.surfaceMode;
+243: 
+244:   return <output data-testid="root-surface-mode">{surfaceMode}</output>;
+245: }
+246: 
+247: describe('useNoteCanvasRuntimeController Page runtime assembly after bridge removal', () => {
+248:   beforeEach(() => {
+249:     rootBridgeContract.blocks = [];
+250:     rootBridgeContract.contentWidth = DEFAULT_PAGE_CONTENT_WIDTH;
+251:     rootBridgeContract.loading = false;
+252:     rootBridgeContract.layoutMode = false;
+253:     rootBridgeContract.contentReadOnly = false;
+254:     rootBridgeContract.wallOptions = null;
+255:     rootBridgeContract.note = { id: NOTE_ID };
+256:     rootBridgeContract.noteId = NOTE_ID;
+257:     rootBridgeContract.pageFrameCollection = null;
+258:     rootBridgeContract.hydratedProfile = createDefaultDocumentTypographyProfile();
+259:     rootBridgeContract.dispatchedProfiles = {};
+260:     rootBridgeContract.blockLayouts = {};
+261:     rootBridgeContract.bindingSettings = undefined;
+262:     rootBridgeContract.coordinateContract = 'v1';
+263:     rootBridgeContract.createBlock.mockReset();
+264:     rootBridgeContract.pushHistoryEntry.mockClear();
+265:     rootBridgeContract.enqueueRuntimeHistoryOperation.mockClear();
+266:     rootBridgeContract.markBlockSelected.mockClear();
+267:     rootBridgeContract.setFocusBlockId.mockClear();
+268:   });
+269: 
+270:   it('assembles Page without a surface toggle prop', () => {
+271:     render(<RootBridgeHarness />);
+272:     expect(rootBridgeContract.presentationOptions).not.toBeNull();
+273:     expect(rootBridgeContract.presentationOptions).not.toHaveProperty('onToggleSurfaceMode');
+274:     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+275:   });
+276: 
+277:   it.each(['timeline', 'chart_bar', 'chart_line'] as const)('B2 creates %s through its existing block template and history lane', async (kind) => {
+278:     const payload = createDefaultComponentBlockPayload(kind);
+279:     const component = { ...formalPageSpecimen, id: `new-${kind}`, block_type: 'component', content_json: payload };
+280:     rootBridgeContract.createBlock.mockResolvedValue(component);
+281:     render(<RootBridgeHarness />);
+282:     const create = rootBridgeContract.presentationOptions?.onCreateComponent;
+283:     expect(create).toBeTypeOf('function');
+284:     await act(async () => { expect(await create!(payload)).toBe(true); });
+285:     expect(rootBridgeContract.createBlock).toHaveBeenCalledExactlyOnceWith(
+286:       expect.objectContaining({ template_key: `component.${kind}`, legacy_block_type: 'component' }), '',
+287:       expect.objectContaining({ contentJson: payload }),
+288:     );
+289:     expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith(component.id);
+290:     expect(rootBridgeContract.enqueueRuntimeHistoryOperation).toHaveBeenCalledOnce();
+291:     expect(rootBridgeContract.pushHistoryEntry).toHaveBeenCalledWith({ type: 'createdBlock', block: component }, { skipBoundary: true });
+292:   });
+293: 
+294:   it('T1 creates an empty toc block at the existing insertion layout and records its creation for undo', async () => {
+295:     const toc = { ...formalPageSpecimen, id: 'new-toc', block_type: 'toc', content_json: {}, plain_text: '' };
+296:     rootBridgeContract.createBlock.mockResolvedValue(toc);
+297:     render(<RootBridgeHarness />);
+298:     const create = rootBridgeContract.presentationOptions?.onCreateToc;
+299:     expect(create).toBeTypeOf('function');
+300:     await act(async () => { expect(await create!()).toBe(true); });
+301:     expect(rootBridgeContract.createBlock).toHaveBeenCalledExactlyOnceWith(
+302:       expect.objectContaining({ legacy_block_type: 'toc' }), '',
+303:       { contentJson: {}, layout: rootBridgeContract.presentationOptions!.defaultDraftLayout },
+304:     );
+305:     expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith(toc.id);
+306:     expect(rootBridgeContract.enqueueRuntimeHistoryOperation).toHaveBeenCalledOnce();
+307:     expect(rootBridgeContract.pushHistoryEntry).toHaveBeenCalledExactlyOnceWith(
+308:       { type: 'createdBlock', block: toc }, { skipBoundary: true },
+309:     );
+310:   });
+311: 
+312:   it('T1 leaves selection and history unchanged when toc creation does not finish', async () => {
+313:     rootBridgeContract.createBlock.mockResolvedValue(null);
+314:     render(<RootBridgeHarness />);
+315:     await act(async () => { expect(await rootBridgeContract.presentationOptions!.onCreateToc!()).toBe(false); });
+316:     expect(rootBridgeContract.createBlock).toHaveBeenCalledOnce();
+317:     expect(rootBridgeContract.markBlockSelected).not.toHaveBeenCalled();
+318:     expect(rootBridgeContract.pushHistoryEntry).not.toHaveBeenCalled();
+319:   });
+320: 
+321:   function coverBindingCase(field: 'title' | 'description') {
+322:     const content = createPageFrameCollectionSeed();
+323:     rootBridgeContract.pageFrameCollection = addNoteCoverPage(content, 'rebuilt-cover');
+324:     const settings = createDefaultNoteBindingSettings();
+325:     settings.coverPage.frameId = 'rebuilt-cover';
+326:     rootBridgeContract.bindingSettings = settings;
+327:     rootBridgeContract.coordinateContract = 'v2';
+328:     const projection = (id: string, frameId: string): NoteBlock => ({ ...formalPageSpecimen,
+329:       id, placement_id: `placement-${id}`, block_type: 'note_ref', content_json: { field }, plain_text: '',
+330:       canvas_layout: { x: 40, y: 80, width: 400, height: 100, width_mode: 'manual',
+331:         frame_id: frameId, coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
+332:     });
+333:     return { old: projection('retained-binding', content.primaryFrameId!),
+334:       current: projection('current-binding', 'rebuilt-cover') };
+335:   }
+336: 
+337:   it.each(['title', 'description'] as const)('focuses the current cover %s projection even when the content page retains an earlier one', async (field) => {
+338:     const specimens = coverBindingCase(field);
+339:     rootBridgeContract.blocks = [specimens.old, specimens.current];
+340:     render(<RootBridgeHarness />);
+341:     const add = rootBridgeContract.presentationOptions?.onAddNoteBinding;
+342:     expect(add).toBeTypeOf('function');
+343:     await act(async () => { await add!(field); });
+344:     expect(rootBridgeContract.createBlock).not.toHaveBeenCalled();
+345:     expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
+346:     expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
+347:   });
+348: 
+349:   it.each(['title', 'description'] as const)('creates a fresh cover %s projection after the former one was handed to the content page', async (field) => {
+350:     const specimens = coverBindingCase(field);
+351:     rootBridgeContract.blocks = [specimens.old];
+352:     rootBridgeContract.createBlock.mockResolvedValue(specimens.current);
+353:     const before = structuredClone(specimens.old);
+354:     render(<RootBridgeHarness />);
+355:     const add = rootBridgeContract.presentationOptions?.onAddNoteBinding;
+356:     expect(add).toBeTypeOf('function');
+357:     await act(async () => { await add!(field); });
+358:     expect(rootBridgeContract.createBlock).toHaveBeenCalledExactlyOnceWith(
+359:       expect.objectContaining({ legacy_block_type: 'note_ref' }), '',
+360:       expect.objectContaining({ contentJson: { field }, layout: expect.objectContaining({
+361:         frame_id: 'rebuilt-cover', width_mode: 'manual', coordinate_space: 'page_frame_local', surface: 'formal_page',
+362:       }) }),
+363:     );
+364:     expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
+365:     expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
+366:     expect(specimens.old).toEqual(before);
+367:   });
+368: 
+369:   it.each(['title', 'description'] as const)('creates a current-cover %s projection when an earlier one is in the tray with a retained frame id', async (field) => {
+370:     const specimens = coverBindingCase(field);
+371:     const tray = { ...specimens.current, id: 'tray-binding', placement_id: 'tray-placement',
+372:       canvas_layout: { ...specimens.current.canvas_layout, surface: 'tray' as const } };
+373:     rootBridgeContract.blocks = [tray];
+374:     rootBridgeContract.createBlock.mockResolvedValue(specimens.current);
+375:     render(<RootBridgeHarness />);
+376:     const add = rootBridgeContract.presentationOptions?.onAddNoteBinding;
+377:     expect(add).toBeTypeOf('function');
+378:     await act(async () => { await add!(field); });
+379:     expect(rootBridgeContract.createBlock).toHaveBeenCalledOnce();
+380:     expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
+381:     expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
+382:     expect(tray.canvas_layout).toMatchObject({ surface: 'tray', frame_id: 'rebuilt-cover' });
+383:   });
+384: 
+385:   it('gates both wall hook and runtime boundary with the current Layout state', () => {
+386:     const view = render(<RootBridgeHarness />);
+387:     expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+388:     expect(rootBridgeContract.wallOptions?.boundary()).toBe(false);
+389:     const previousBoundary = rootBridgeContract.wallOptions!.boundary;
+390: 
+391:     rootBridgeContract.layoutMode = true;
+392:     view.rerender(<RootBridgeHarness />);
+393:     expect(rootBridgeContract.wallOptions?.enabled).toBe(true);
+394:     expect(rootBridgeContract.wallOptions?.boundary()).toBe(true);
+395: 
+396:     rootBridgeContract.loading = true;
+397:     view.rerender(<RootBridgeHarness />);
+398:     expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+399:     rootBridgeContract.loading = false;
+400:     rootBridgeContract.contentReadOnly = true;
+401:     view.rerender(<RootBridgeHarness />);
+402:     expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+403: 
+404:     rootBridgeContract.contentReadOnly = false;
+405:     rootBridgeContract.layoutMode = false;
+406:     view.rerender(<RootBridgeHarness />);
+407:     expect(rootBridgeContract.wallOptions?.enabled).toBe(false);
+408:     expect(rootBridgeContract.wallOptions?.boundary()).toBe(false);
+409:     expect(previousBoundary()).toBe(false);
+410:   });
+411: 
+412:   it('13.1/S5 smoke: same-note A4 to Letter follows quantized 10.75pt across repeated Page rerenders', () => {
+413:     const frameFor = (pageSize: 'A4' | 'Letter'): PageFrameModel => {
+414:       const print = createPageFramePrintProfile(pageSize);
+415:       return {
+416:         id: 'same-note-paper-frame',
+417:         role: 'primary_page_frame',
+418:         templateId: pageSize === 'A4' ? 'a4_portrait' : 'letter_portrait',
+419:         pageSize,
+420:         exportable: true,
+421:         x: 0,
+422:         y: 0,
+423:         width: print.width,
+424:         height: print.height,
+425:         contentInset: { ...print.contentInset },
+426:       };
+427:     };
+428:     const a4 = frameFor('A4');
+429:     const letter = frameFor('Letter');
+430:     const framesBefore = structuredClone([a4, letter]);
+431:     const specimen = {
+432:       ...formalPageSpecimen,
+433:       canvas_layout: undefined,
+434:       // Straddle A4/Letter wrapping after the quarter-point paper default change.
+435:       plain_text: 'x'.repeat(96),
+436:       content_json: { body: 'x'.repeat(96) },
+437:     };
+438:     rootBridgeContract.blocks = [specimen];
+439:     const setFrame = (frame: PageFrameModel) => {
+440:       rootBridgeContract.pageFrameCollection = {
+441:         pageFrames: [frame], primaryFrameId: frame.id, selectedFrameId: frame.id,
+442:       };
+443:     };
+444:     setFrame(a4);
+445:     const { rerender } = render(<RootBridgeHarness />);
+446: 
+447:     const snapshot = (frame: PageFrameModel) => {
+448:       const profile = rootBridgeContract.dispatchedProfiles.layout;
+449:       expect(rootBridgeContract.dispatchedProfiles.operations).toBe(profile);
+450:       expect(rootBridgeContract.dispatchedProfiles.presentation).toBe(profile);
+451:       const layout = rootBridgeContract.blockLayouts[specimen.id];
+452:       const measurement = estimateTypographyTextBlockHeight({
+453:         text: specimen.plain_text,
+454:         width: layout.width,
+455:         typography: profile,
+456:       });
+457:       const preview = buildExportPreviewModel([specimen], { [specimen.id]: layout }, {
+458:         pageFrames: [frame], primaryPageFrameId: frame.id, documentTypography: profile,
+459:       });
+460:       expect(preview.pageFrames[0].documentTypography).toEqual(profile);
+461:       expect(documentTypographyToCssVars(profile)['--document-font-size']).toBe(`${profile.fontSizePx}px`);
+462:       expect(layout.height).toBe(measurement.heightPx);
+463:       return { profile, measurement, layout: { ...layout } };
+464:     };
+465: 
+466:     const a4Page = snapshot(a4);
+467:     setFrame(letter);
+468:     rerender(<RootBridgeHarness />);
+469:     const letterPage = snapshot(letter);
+470:     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+471:     expect(rootBridgeContract.noteId).toBe(NOTE_ID);
+472:     expect(a4Page.profile.fontSizePx).toBe(16.3);
+473:     expect(letterPage.profile.fontSizePx).toBe(15.9);
+474:     expect(a4Page.measurement.lineCount).toBeGreaterThan(letterPage.measurement.lineCount);
+475:     expect(a4Page.layout.height).toBeGreaterThan(letterPage.layout.height);
+476:     expect(a4Page.layout.width).toBe(letterPage.layout.width);
+477:     for (const [pageSize, sample] of [['A4', a4Page], ['Letter', letterPage]] as const) {
+478:       const { physicalScale } = createPageFramePrintProfile(pageSize);
+479:       const physicalPt = sample.profile.fontSizePx * physicalScale * 72 / 96;
+480:       expect(Math.abs(physicalPt - 10.75) / 10.75).toBeLessThanOrEqual(0.005);
+481:     }
+482: 
+483:     rerender(<RootBridgeHarness />);
+484:     const letterCanvas = snapshot(letter);
+485:     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+486:     setFrame(a4);
+487:     rerender(<RootBridgeHarness />);
+488:     const a4Canvas = snapshot(a4);
+489:     expect(a4Canvas.profile).toEqual(a4Page.profile);
+490:     expect(letterCanvas.profile).toEqual(letterPage.profile);
+491:     expect(a4Canvas.measurement).toEqual(a4Page.measurement);
+492:     expect(letterCanvas.layout).toEqual(letterPage.layout);
+493:     expect([a4, letter]).toEqual(framesBefore);
+494:   });
+495: });
+496: 
+
+FILE client/src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx
+1: import { useLayoutEffect, useRef, useState } from 'react';
+2: import { act, fireEvent, render } from '@testing-library/react';
+3: import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+4: import { createPrimaryPageFrame } from '../engineModel';
+5: import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
+6: import { appendPageFrameToStack } from '../pageStackCollectionService';
+7: import { getPagePaperDimensions, internalLengthToPaper } from '../paperSizeService';
+8: import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE, writeTypographyProfileMetadata } from '../typographyProfileService';
+9: import { createPageFrameDefaultTypographyProfile, resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
+10: import type { PageFrameWallSnapshot } from '../pageFrameWallService';
+11: import type { NoteBlock } from '../runtimeDataTypes';
+12: import type { DocumentTypographyProfile, PageFrameCollectionModel } from '../types';
+13: import { usePaperSize } from './usePaperSize';
+14: import { usePlacementHistory } from './usePlacementHistory';
+15: import type { TextFlowHistoryHost } from './useTextFlowHistory';
+16: 
+17: class PaperPointerEvent extends MouseEvent {
+18:   readonly pointerId: number;
+19:   constructor(type: string, init: PointerEventInit = {}) {
+20:     super(type, init);
+21:     this.pointerId = init.pointerId ?? 1;
+22:   }
+23: }
+24: beforeAll(() => vi.stubGlobal('PointerEvent', PaperPointerEvent));
+25: afterAll(() => vi.unstubAllGlobals());
+26: 
+27: function seed(web = false) {
+28:   const first = createPageFrameCollectionSeed(createPrimaryPageFrame({ id: 'paper-first', templateId: web ? 'screen_note' : 'a4_portrait' }));
+29:   return web ? first : appendPageFrameToStack(first, first.primaryStackId!, 'paper-first', { id: 'paper-second' });
+30: }
+31: interface PaperState { collection: PageFrameCollectionModel; blocks: NoteBlock[] }
+32: interface SubjectState {
+33:   paper: ReturnType<typeof usePaperSize>;
+34:   history: ReturnType<typeof usePlacementHistory>;
+35:   persisted: PaperState;
+36: }
+37: function mountPaper({ web = false, zoom = 1, initialLayout = true, outcome = async (_snapshot: PageFrameWallSnapshot) => true,
+38:   idle = async () => undefined, runtimeFeedback = false, initialState, typography = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+39:   resolveTypography }: { web?: boolean; zoom?: number; initialLayout?: boolean; runtimeFeedback?: boolean;
+40:     initialState?: PaperState; typography?: DocumentTypographyProfile;
+41:     resolveTypography?: (collection: PageFrameCollectionModel) => DocumentTypographyProfile;
+42:     outcome?: (snapshot: PageFrameWallSnapshot) => Promise<boolean>; idle?: () => Promise<unknown> } = {}) {
+43:   let api: SubjectState;
+44:   const save = vi.fn(outcome);
+45:   const boundary = vi.fn(() => true);
+46:   function Harness({ noteId = 'paper-note', layoutMode = initialLayout }: { noteId?: string; layoutMode?: boolean }) {
+47:     const [persisted, setPersisted] = useState<PaperState>(() => initialState || ({ collection: seed(web), blocks: [] }));
+48:     const live = useRef(persisted); live.current = persisted;
+49:     const renderedCollection = useRef(persisted.collection);
+50:     const history = usePlacementHistory({ noteId, coordinateContract: 'v2', target: null,
+51:       applyLayoutDrafts: () => undefined, persistLayoutSnapshot: async () => true });
+52:     const historyRef = useRef<TextFlowHistoryHost | null>(history); historyRef.current = history;
+53:     const paper = usePaperSize({ noteId, enabled: true, layoutMode, collection: persisted.collection,
+54:       getCollection: () => runtimeFeedback ? renderedCollection.current : live.current.collection, getLayouts: () => ({}), blocks: persisted.blocks,
+55:       objects: [], placements: [], layoutDrafts: {}, coordinateContract: 'v2',
+56:       typography, resolveTypography, history: historyRef, boundary, whenIdle: idle, zoom,
+57:       save: async (snapshot) => {
+58:         const saved = await save(snapshot);
+59:         if (saved) setPersisted((previous) => ({ collection: snapshot.collection,
+60:           blocks: previous.blocks.map((block) => {
+61:             const update = snapshot.layoutUpdates.find((entry) => entry.block.id === block.id);
+62:             return update ? { ...block, canvas_layout: { ...update.layout } } : block;
+63:           }) }));
+64:         return saved;
+65:       },
+66:     });
+67:     // The real runtime publishes its currently rendered collection, including a drag preview.
+68:     useLayoutEffect(() => { renderedCollection.current = paper.collection || persisted.collection; });
+69:     api = { paper, history, persisted };
+70:     return <button data-testid="paper-corner" onPointerDown={(event) => paper.begin(event, 'paper-first')}>尺寸</button>;
+71:   }
+72:   const view = render(<Harness />);
+73:   return { get current() { return api!; }, save, boundary, view,
+74:     setLayout: (layoutMode: boolean) => view.rerender(<Harness layoutMode={layoutMode} />),
+75:     navigate: (noteId: string) => view.rerender(<Harness noteId={noteId} />) };
+76: }
+77: function begin(subject: ReturnType<typeof mountPaper>, x = 100, y = 200) {
+78:   fireEvent.pointerDown(subject.view.getByTestId('paper-corner'), { pointerId: 9, button: 0, clientX: x, clientY: y });
+79: }
+80: function pointer(type: 'pointermove' | 'pointerup' | 'pointercancel', x: number, y: number) {
+81:   window.dispatchEvent(new PaperPointerEvent(type, { pointerId: 9, button: 0, clientX: x, clientY: y }));
+82: }
+83: async function finish(subject: ReturnType<typeof mountPaper>, x: number, y: number) {
+84:   await act(async () => { pointer('pointerup', x, y); await subject.current.history.whenHistoryIdle(); });
+85: }
+86: 
+87: describe('A5 paper size shared history and Layout gestures', () => {
+88:   it.each([false, true])('reflows with target paper typography while preserving an explicit override (%s)', async (custom) => {
+89:     const collection = createPageFrameCollectionSeed(createPrimaryPageFrame({ id: 'paper-first', templateId: 'a4_portrait' }));
+90:     const typography = createPageFrameDefaultTypographyProfile(collection.pageFrames[0]);
+91:     const metadata = custom ? writeTypographyProfileMetadata({}, typography) : undefined;
+92:     const resolveTypography = vi.fn((target: PageFrameCollectionModel) => resolveEffectiveDocumentTypographyProfile({
+93:       surfaceMode: 'page', metadata, pageFrames: target.pageFrames, hydratedProfile: typography,
+94:     }));
+95:     const block: NoteBlock = { id: 'text', placement_id: 'placement:text', block_type: 'paragraph', title: null,
+96:       plain_text: 'a'.repeat(3800), content_json: {}, metadata: {}, order_index: 0,
+97:       source_references: [], display_overrides_json: {}, canvas_layout: {
+98:         x: 0, y: 0, width: 760, height: 100, width_mode: 'auto', frame_id: 'paper-first',
+99:         coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside',
+100:       } };
+101:     const subject = mountPaper({ initialState: { collection, blocks: [block] }, typography, resolveTypography });
+102:     await act(async () => { expect(await subject.current.paper.setPreset('letter_portrait')).toBe(true); });
+103:     expect(resolveTypography).toHaveBeenCalledTimes(1);
+104:     expect(resolveTypography.mock.calls[0][0].pageFrames[0].templateId).toBe('letter_portrait');
+105:     // Straddle the paper-family pagination boundary with the 1.65 line rhythm:
+106:     // Letter's metrics fit one page; retaining the explicit A4 profile needs two.
+107:     expect(subject.current.persisted.collection.pageFrames).toHaveLength(custom ? 2 : 1);
+108:     expect(subject.current.persisted.blocks).toEqual([block]);
+109:     const after = structuredClone(subject.current.persisted);
+110:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+111:     expect(subject.current.persisted).toEqual({ collection, blocks: [block] });
+112:     await act(async () => { expect(await subject.current.history.redoRuntimeHistory()).toBe(true); });
+113:     expect(subject.current.persisted).toEqual(after);
+114:   });
+115: 
+116:   it('commits a drag against its original collection when the runtime ref contains the live preview', async () => {
+117:     const subject = mountPaper({ runtimeFeedback: true });
+118:     const before = structuredClone(subject.current.persisted);
+119:     begin(subject);
+120:     act(() => pointer('pointermove', 160, 280));
+121:     expect(subject.current.paper.collection!.pageFrames[0].width).toBeCloseTo(before.collection.pageFrames[0].width + 60, 8);
+122:     await finish(subject, 160, 280);
+123:     expect(subject.save).toHaveBeenCalledTimes(1);
+124:     const after = structuredClone(subject.current.persisted);
+125:     expect(after.collection.pageFrames[0].width).toBeCloseTo(before.collection.pageFrames[0].width + 60, 8);
+126:     expect(after.collection.pageFrames[0].paperSizeOverride).toBe(true);
+127:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+128:     expect(subject.current.persisted).toEqual(before);
+129:     await act(async () => { expect(await subject.current.history.redoRuntimeHistory()).toBe(true); });
+130:     expect(subject.current.persisted).toEqual(after);
+131:     expect(subject.save).toHaveBeenCalledTimes(3);
+132:   });
+133: 
+134:   it('changes every existing page with one save and one symmetric undo/redo entry', async () => {
+135:     const subject = mountPaper({ initialLayout: false });
+136:     const before = structuredClone(subject.current.persisted);
+137:     await act(async () => { expect(await subject.current.paper.setPreset('a3_landscape')).toBe(true); });
+138:     expect(subject.save).toHaveBeenCalledTimes(1);
+139:     expect(subject.current.persisted.collection.pageFrames.map((frame) => frame.templateId)).toEqual(['a3_landscape', 'a3_landscape']);
+140:     expect(subject.current.persisted.collection.paperDefault?.templateId).toBe('a3_landscape');
+141:     const after = structuredClone(subject.current.persisted);
+142:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+143:     expect(subject.current.persisted).toEqual(before);
+144:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(false); });
+145:     await act(async () => { expect(await subject.current.history.redoRuntimeHistory()).toBe(true); });
+146:     expect(subject.current.persisted).toEqual(after);
+147:     expect(subject.save).toHaveBeenCalledTimes(3);
+148:     await act(async () => { expect(await subject.current.history.redoRuntimeHistory()).toBe(false); });
+149:   });
+150: 
+151:   it('resizes only the selected page and restores its default through consecutive undo entries', async () => {
+152:     const subject = mountPaper();
+153:     const secondBefore = structuredClone(subject.current.persisted.collection.pageFrames[1]);
+154:     await act(async () => { expect(await subject.current.paper.resize('paper-first', 180, 240)).toBe(true); });
+155:     const resized = structuredClone(subject.current.persisted.collection);
+156:     expect(getPagePaperDimensions(resized.pageFrames[0]).width).toBeCloseTo(180, 8);
+157:     expect(getPagePaperDimensions(resized.pageFrames[0]).height).toBeCloseTo(240, 8);
+158:     expect(resized.pageFrames[0].paperSizeOverride).toBe(true);
+159:     expect(resized.pageFrames[1].width).toBe(secondBefore.width);
+160:     expect(resized.pageFrames[1].height).toBe(secondBefore.height);
+161:     expect(resized.pageFrames[1].paperSizeOverride).toBeUndefined();
+162:     await act(async () => { expect(await subject.current.paper.restore('paper-first')).toBe(true); });
+163:     expect(subject.current.persisted.collection.pageFrames[0].paperSizeOverride).toBeUndefined();
+164:     expect(subject.current.persisted.collection.pageFrames[0].width).toBe(secondBefore.width);
+165:     expect(subject.save).toHaveBeenCalledTimes(2);
+166:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+167:     expect(subject.current.persisted.collection).toEqual(resized);
+168:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+169:     expect(subject.current.persisted.collection).toEqual(seed());
+170:   });
+171: 
+172:   it('previews a zoom-adjusted drag without writes and saves once when released', async () => {
+173:     const subject = mountPaper({ zoom: 0.5 });
+174:     const before = structuredClone(subject.current.persisted);
+175:     const original = before.collection.pageFrames[0];
+176:     begin(subject);
+177:     act(() => pointer('pointermove', 130, 240));
+178:     expect(subject.current.paper.busy).toBe(true);
+179:     expect(subject.current.paper.selectedFrameId).toBe('paper-first');
+180:     expect(subject.current.paper.collection!.pageFrames[0].width).toBeCloseTo(original.width + 60, 8);
+181:     expect(subject.current.paper.collection!.pageFrames[0].height).toBeCloseTo(original.height + 80, 8);
+182:     expect(subject.current.persisted).toEqual(before);
+183:     expect(subject.save).not.toHaveBeenCalled();
+184:     await finish(subject, 130, 240);
+185:     expect(subject.save).toHaveBeenCalledTimes(1);
+186:     expect(subject.current.paper.busy).toBe(false);
+187:     expect(getPagePaperDimensions(subject.current.persisted.collection.pageFrames[0]).width)
+188:       .toBeCloseTo(getPagePaperDimensions(original).width + internalLengthToPaper(60, 'mm', original), 8);
+189:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+190:     expect(subject.current.persisted).toEqual(before);
+191:   });
+192: 
+193:   it('leaves a stationary resize gesture without saves, overrides or undo history', async () => {
+194:     const subject = mountPaper();
+195:     const before = structuredClone(subject.current.persisted);
+196:     begin(subject);
+197:     act(() => pointer('pointermove', 100, 200));
+198:     await finish(subject, 100, 200);
+199:     expect(subject.save).not.toHaveBeenCalled();
+200:     expect(subject.current.paper.busy).toBe(false);
+201:     expect(subject.current.persisted).toEqual(before);
+202:     expect(subject.current.paper.collection).toEqual(before.collection);
+203:     expect(subject.current.persisted.collection.pageFrames[0].paperSizeOverride).toBeUndefined();
+204:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(false); });
+205:   });
+206: 
+207:   it.each(['Escape', 'pointercancel', 'blur'] as const)('cancels %s without saving a preview or adding undo history', async (kind) => {
+208:     const subject = mountPaper();
+209:     const before = structuredClone(subject.current.persisted);
+210:     begin(subject);
+211:     act(() => pointer('pointermove', 150, 250));
+212:     act(() => {
+213:       if (kind === 'Escape') window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+214:       else if (kind === 'blur') window.dispatchEvent(new Event('blur'));
+215:       else pointer('pointercancel', 150, 250);
+216:     });
+217:     await finish(subject, 150, 250);
+218:     expect(subject.save).not.toHaveBeenCalled();
+219:     expect(subject.current.paper.busy).toBe(false);
+220:     expect(subject.current.paper.collection).toEqual(before.collection);
+221:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(false); });
+222:   });
+223: 
+224:   it.each(['layout', 'navigation'] as const)('drops the current preview when %s leaves its scope', async (kind) => {
+225:     const subject = mountPaper();
+226:     begin(subject);
+227:     act(() => pointer('pointermove', 140, 240));
+228:     if (kind === 'layout') subject.setLayout(false);
+229:     else subject.navigate('another-note');
+230:     await finish(subject, 150, 250);
+231:     expect(subject.save).not.toHaveBeenCalled();
+232:     expect(subject.current.paper.collection).toBe(subject.current.persisted.collection);
+233:     expect(subject.current.paper.busy).toBe(false);
+234:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(false); });
+235:   });
+236: 
+237:   it('keeps page resize and restore inert outside Layout', async () => {
+238:     const subject = mountPaper({ initialLayout: false });
+239:     begin(subject);
+240:     await finish(subject, 160, 260);
+241:     await act(async () => {
+242:       expect(await subject.current.paper.resize('paper-first', 180, 240)).toBe(false);
+243:       expect(await subject.current.paper.restore('paper-first')).toBe(false);
+244:     });
+245:     expect(subject.boundary).not.toHaveBeenCalled();
+246:     expect(subject.save).not.toHaveBeenCalled();
+247:   });
+248: 
+249:   it('keeps the Web growing page unchanged for preset, numeric and pointer actions', async () => {
+250:     const subject = mountPaper({ web: true });
+251:     const before = structuredClone(subject.current.persisted);
+252:     await act(async () => {
+253:       expect(await subject.current.paper.setPreset('a5_portrait')).toBe(false);
+254:       expect(await subject.current.paper.resize('paper-first', 180, 240)).toBe(false);
+255:       expect(await subject.current.paper.restore('paper-first')).toBe(false);
+256:     });
+257:     begin(subject);
+258:     await finish(subject, 150, 250);
+259:     expect(subject.save).not.toHaveBeenCalled();
+260:     expect(subject.current.persisted).toEqual(before);
+261:   });
+262: 
+263:   it.each(['false', 'throw'] as const)('reports a %s save failure without adding undo history', async (failure) => {
+264:     const subject = mountPaper({ outcome: async () => { if (failure === 'throw') throw new Error('Paper save failed'); return false; } });
+265:     const before = structuredClone(subject.current.persisted);
+266:     await act(async () => { expect(await subject.current.paper.setPreset('a5_portrait')).toBe(false); });
+267:     expect(subject.save).toHaveBeenCalledTimes(1);
+268:     expect(subject.current.paper.error).toBe('纸型未保存，请重试。');
+269:     expect(subject.current.paper.busy).toBe(false);
+270:     expect(subject.current.persisted).toEqual(before);
+271:     await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(false); });
+272:   });
+273: 
+274:   it('abandons an operation waiting for note saves when navigation changes its scope', async () => {
+275:     let release!: () => void;
+276:     const idle = new Promise<void>((resolve) => { release = resolve; });
+277:     const subject = mountPaper({ idle: () => idle });
+278:     let pending!: Promise<boolean>;
+279:     await act(async () => { pending = subject.current.paper.setPreset('a5_portrait'); await Promise.resolve(); });
+280:     expect(subject.current.paper.busy).toBe(true);
+281:     subject.navigate('another-note');
+282:     await act(async () => { release(); expect(await pending).toBe(false); });
+283:     expect(subject.save).not.toHaveBeenCalled();
+284:     expect(subject.current.paper.busy).toBe(false);
+285:   });
+286: });
+287: 
+
+FILE client/src/pages/Notes/canvasEngine/paperTypographyRuler.test.tsx
+1: import { cleanup, render } from '@testing-library/react';
+2: import { afterEach, describe, expect, it } from 'vitest';
+3: import { TableBlockProjection } from './blocks/TableBlockProjection';
+4: import tableCss from './blocks/TableBlockProjection.module.css?raw';
+5: import tableClasses from './blocks/TableBlockProjection.module.css';
+6: import noteCss from '../NoteDetail.module.css?raw';
+7: import { createPageFramePrintProfile } from './pageFramePrintScaleService';
+8: import { createPageFrameDefaultTypographyProfile } from './pageFrameTypographyService';
+9: import { derivePageReadingViewport, type PageReadingGear } from './pageReadingViewportService';
+10: import { documentTypographyToCssVars } from './typographyProfileService';
+11: import { typographyTextCssProperties, typographyTextMetrics } from './typographyMeasurementService';
+12: 
+13: const print = createPageFramePrintProfile('A4');
+14: const profile = createPageFrameDefaultTypographyProfile({ ...print, templateId: 'a4_portrait' });
+15: const variables = documentTypographyToCssVars(profile);
+16: let sheet: HTMLStyleElement | undefined;
+17: 
+18: afterEach(() => { cleanup(); sheet?.remove(); });
+19: 
+20: function mountProductionStyles() {
+21:   // jsdom 26 does not substitute custom properties. Expand only production
+22:   // document variables; its CSSOM still parses and simplifies the real calc().
+23:   // No expected font sizes, layout rectangles or getComputedStyle mocks.
+24:   let css = tableCss.replace(/var\((--document-[\w-]+)(?:,[^()]*)?\)/g,
+25:     (expression, key: string) => variables[key] ?? expression);
+26:   // Vitest's CSS module proxy exposes names on lookup, not enumeration.
+27:   for (const name of new Set([...tableCss.matchAll(/\.([a-zA-Z_][\w-]*)/g)].map(match => match[1]))) {
+28:     css = css.replace(new RegExp(`\\.${name}\\b`, 'g'), `.${tableClasses[name]}`);
+29:   }
+30:   const slot = noteCss.match(/\.pageFrameSlot\s*\{([^}]+)\}/);
+31:   expect(slot).not.toBeNull();
+32:   sheet = document.createElement('style');
+33:   sheet.textContent = `${css}\n.ruler-slot {${slot![1]}}`;
+34:   document.head.append(sheet);
+35: }
+36: 
+37: function inheritedFontPx(element: Element): number {
+38:   // jsdom leaves inherited table fonts and absolute calc(px) serialized.
+39:   // Walk the actual computed cascade, then unwrap only a reduced pixel value.
+40:   const value = getComputedStyle(element).fontSize;
+41:   if ((!value || value === 'inherit') && element.parentElement) {
+42:     return inheritedFontPx(element.parentElement);
+43:   }
+44:   const pixels = value.match(/^(?:calc\()?([\d.]+)px\)?$/);
+45:   expect(pixels, `computed font must resolve to pixels: ${value}`).not.toBeNull();
+46:   return Number(pixels![1]);
+47: }
+48: 
+49: describe('T3 paper typography ruler (same layout scale, computed / 904 * 900)', () => {
+50:   it.each((['A4', 'Letter'] as const).flatMap(pageSize =>
+51:     (['fit_width', 'fit_page', 'physical'] as PageReadingGear[])
+52:       .flatMap(gear => [0.5, 1, 1.5, 2].map(stepFactor => ({ pageSize, gear, stepFactor })))))(
+53:     '$pageSize / $gear at step $stepFactor keeps the body ruler and open line rhythm', ({ pageSize, gear, stepFactor }) => {
+54:       const print = createPageFramePrintProfile(pageSize);
+55:       const profile = createPageFrameDefaultTypographyProfile({ ...print,
+56:         templateId: pageSize === 'A4' ? 'a4_portrait' : 'letter_portrait' });
+57:       const reading = derivePageReadingViewport({
+58:         viewState: { gear, stepFactor }, availableWidth: 665, availableHeight: 720,
+59:         paperWidth: print.width, paperHeight: print.height, physicalScale: print.physicalScale,
+60:       });
+61:       const { getByTestId } = render(<div data-testid="paper" style={{
+62:         width: print.width, transform: `scale(${reading.displayScale})`,
+63:       }}><p data-testid="body" style={typographyTextCssProperties(typographyTextMetrics({
+64:         text: 'Paper typography 标尺', width: print.contentWidth, typography: profile,
+65:       }))}>Paper typography 标尺</p></div>);
+66:       const paper = getByTestId('paper');
+67:       const body = getByTestId('body');
+68:       const font = inheritedFontPx(body);
+69:       expect(getComputedStyle(paper).width).toBe('904px');
+70:       const equivalent = font / 904 * 900;
+71:       expect(equivalent).toBeGreaterThanOrEqual(15.7);
+72:       expect(equivalent).toBeLessThanOrEqual(16.3);
+73:       const lineRatio = Number.parseFloat(getComputedStyle(body).lineHeight) / font;
+74:       expect(lineRatio).toBeGreaterThanOrEqual(1.60);
+75:       expect(lineRatio).toBeLessThanOrEqual(1.75);
+76:       // Both operands must use the display scale if normalized after scaling.
+77:       expect(font * reading.displayScale / (904 * reading.displayScale) * 900).toBeCloseTo(equivalent, 10);
+78:     });
+79: 
+80:   it.each([3, 8])('keeps a %i-column table content-sized, centered and bounded with the 0.85 cell tier', columns => {
+81:     mountProductionStyles();
+82:     const { container, getByRole } = render(<div style={{ width: print.contentWidth }}>
+83:       <TableBlockProjection block={{ block_type: 'table', content_json: {
+84:         headers: [], rows: [Array.from({ length: columns }, (_, i) => `Column ${i + 1}`)],
+85:       } }} />
+86:     </div>);
+87:     const table = getByRole('table');
+88:     const cell = container.querySelector('td')!;
+89:     const style = getComputedStyle(table);
+90:     expect(style.width).toBe('fit-content');
+91:     expect(style.maxWidth).toBe('100%');
+92:     expect(style.minWidth).not.toBe('100%');
+93:     expect(style.marginLeft).toBe('auto');
+94:     expect(style.marginRight).toBe('auto');
+95:     expect(getComputedStyle(cell).minWidth).toBe('0');
+96:     expect(getComputedStyle(cell).overflowWrap).toBe('anywhere');
+97:     const cellRatio = inheritedFontPx(cell) / profile.fontSizePx;
+98:     expect(cellRatio).toBeGreaterThanOrEqual(0.82);
+99:     expect(cellRatio).toBeLessThanOrEqual(0.88);
+100:     expect(cellRatio).toBeCloseTo(0.85, 8);
+101:   });
+102: 
+103:   it('keeps the existing binding furniture at 12px layout / 11.94690px normalized', () => {
+104:     mountProductionStyles();
+105:     const { getByText } = render(<span className="ruler-slot">1</span>);
+106:     expect(inheritedFontPx(getByText('1'))).toBe(12);
+107:     expect(inheritedFontPx(getByText('1')) / 904 * 900).toBeCloseTo(11.94690265, 7);
+108:   });
+109: });
+110: 
