@@ -1417,14 +1417,14 @@ export function useNoteCanvasDataAdapter({
       && noteRef.current?.id === requestedNote.id
     );
     const body = text.trimEnd();
-    const metadata = template.legacy_block_type === 'item_ref' || template.legacy_block_type === 'note_ref' ? {} : {
+    const metadata = template.legacy_block_type === 'item_ref' || template.legacy_block_type === 'note_ref' || template.legacy_block_type === 'toc' ? {} : {
       ...metadataForTemplateOption(template),
       ...(options.metadataPatch || {}),
     };
     const nextContent = options.contentJson || contentForTemplate(template, body);
     const nextKind = presentationKindForTemplate(template, true);
     const rollbackUnplacedBlock = options.requireAfterBlock || template.legacy_block_type === 'media' || template.legacy_block_type === 'table'
-      || template.legacy_block_type === 'component';
+      || template.legacy_block_type === 'component' || template.legacy_block_type === 'toc';
     let created: NoteBlock;
     const rollbackMediaCreation = async (failedOrderKey?: string) => {
       try {
@@ -1432,12 +1432,14 @@ export function useNoteCanvasDataAdapter({
         writeRegistry.confirm('placement:' + requestedNote.id + ':' + created.id);
         if (failedOrderKey) writeRegistry.confirm(failedOrderKey);
         if (requestIsCurrent()) addToast('error', options.requireAfterBlock
-          ? 'The answer could not be inserted below its anchor. Please retry.' : template.legacy_block_type === 'component'
+          ? 'The answer could not be inserted below its anchor. Please retry.' : template.legacy_block_type === 'toc'
+          ? 'The table of contents could not be placed. Please retry.' : template.legacy_block_type === 'component'
           ? 'The component could not be placed. Your edits are still open.' : template.legacy_block_type === 'table'
           ? 'The table could not be placed. Your edits are still open.' : 'The image could not be placed. Please paste it again.');
       } catch {
         if (requestIsCurrent()) addToast('error', options.requireAfterBlock
-          ? 'The answer insertion failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'component'
+          ? 'The answer insertion failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'toc'
+          ? 'The table of contents placement failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'component'
           ? 'The component placement failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'table'
           ? 'The table placement failed and cleanup could not finish. Reopen the note before retrying.'
           : 'The image placement failed and cleanup could not finish. Reopen the note before retrying.');
@@ -1900,7 +1902,7 @@ export function useNoteCanvasDataAdapter({
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
     // operations still cross this barrier and must not become failed writes.
-    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'table' || block.block_type === 'component') {
+    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'toc' || block.block_type === 'table' || block.block_type === 'component') {
       return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
     }
     if (!allowSourceContentMutation()) {
@@ -2424,7 +2426,7 @@ export function useNoteCanvasDataAdapter({
       baseRevision?: number;
     } = {},
   ) => {
-    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'table' || block.block_type === 'component' || !allowSourceContentMutation()) return null;
+    if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'toc' || block.block_type === 'table' || block.block_type === 'component' || !allowSourceContentMutation()) return null;
     const requestedNoteId = noteRef.current?.id || null;
     if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) {
       console.error('Failed to convert block: route receipt is unavailable');

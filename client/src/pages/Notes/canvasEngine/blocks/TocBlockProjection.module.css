@@ -1,0 +1,23 @@
+.toc {
+  color: var(--sk-ink);
+  font-size: var(--document-font-size);
+  line-height: var(--document-line-height);
+  padding-block: var(--document-paragraph-spacing);
+}
+.title {
+  font-family: var(--sk-title-font);
+  margin-block-end: var(--document-paragraph-spacing);
+}
+.entry {
+  all: unset;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--document-line-height);
+  padding-block: var(--document-paragraph-spacing);
+}
+button.entry { cursor: pointer; }
+button.entry:hover, button.entry:focus-visible { color: var(--sk-accent); }
+button.entry:focus-visible { outline: auto; }
+.chapter { font-family: var(--sk-title-font); overflow-wrap: anywhere; white-space: pre-wrap; }
+.page, .empty { font-family: var(--sk-label-font); color: var(--sk-ink-muted); }
+.page { white-space: nowrap; }

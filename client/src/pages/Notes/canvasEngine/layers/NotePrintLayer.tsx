@@ -7,6 +7,10 @@ import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import './NotePrintLayer.css';
 import { usePaperSkin } from '../PaperSkinContext';
 import { NotePaperHeaderProjection, NOTE_HEADER_INITIAL_HEIGHT } from './NotePaperHeader';
+import { deriveChapterProjection } from '../chapterProjectionService';
+import { TocProjectionProvider } from '../TocProjectionContext';
+import { tocPageNumbers } from '../tocProjectionService';
+import { readStoredLayout } from '../placementService';
 
 export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
@@ -23,11 +27,21 @@ function PrintPages({ input }: { input: NotePrintInput }) {
   const flowPlan = input.noteCanvasRuntime.pageFlowPlan;
   const extensions = new Map(input.noteCanvasRuntime.pageFrameExtensions.map((extension) => [extension.frameId, extension]));
   const hasCover = input.noteCanvasRuntime.pageFrameExtensions.some((extension) => extension.isCover);
+  const coverIds = new Set(input.noteCanvasRuntime.pageFrameExtensions.filter((extension) => extension.isCover).map((extension) => extension.frameId));
+  const layouts = Object.fromEntries(input.visibleBlocks.flatMap((block) => {
+    const layout = readStoredLayout(block);
+    return layout ? [[block.id, layout]] : [];
+  }));
+  const excluded = new Set(input.visibleBlocks.filter((block) => layouts[block.id]?.surface === 'tray'
+    || coverIds.has(layouts[block.id]?.frame_id || '')).map((block) => block.id));
+  const { agenda } = deriveChapterProjection(input.visibleBlocks, input.blockTextFlowDrafts, excluded);
+  const pageNumbers = tocPageNumbers(agenda, flowPlan, input.noteCanvasRuntime.pageFrames, coverIds, layouts,
+    input.continuousWeb, input.noteCanvasRuntime.blockFragmentProjections);
   const frames = input.noteCanvasRuntime.pageFrames.filter((frame) => {
     const extension = extensions.get(frame.id);
     return !extension?.isCover || extension.coverExportIncluded !== false;
   });
-  return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
+  return <TocProjectionProvider value={{ agenda, pageNumbers }}><div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
     {flowPlan && <style>{frames.map((frame, index) => {
       const size = getPagePrintGeometry(frame, true);
       return `@page coincides-flow-${index} { size: ${size.width}px ${size.height}px; margin: 0; }`;
@@ -98,7 +112,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
       </section>;
       });
     })}
-  </div>;
+  </div></TocProjectionProvider>;
 }
 
 export function NotePrintLayer(input: NotePrintInput) {

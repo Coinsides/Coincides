@@ -1,0 +1,245 @@
+{
+    "status":  "stopped-validation-blocked",
+    "client":  {
+                   "tests":  2339,
+                   "log":  ".codex-tmp/t1-toc/gate-05-test-unit.log",
+                   "files":  229,
+                   "failed":  0,
+                   "passed":  2339
+               },
+    "server":  {
+                   "inventory":  {
+                                     "testRoots":  [
+                                                       "server/src",
+                                                       "server/scripts"
+                                                   ],
+                                     "expectedFiles":  110,
+                                     "observedFiles":  110,
+                                     "missingFiles":  [
+
+                                                      ],
+                                     "zeroExclusions":  true,
+                                     "fileTimeoutMs":  600000
+                                 },
+                   "log":  ".codex-tmp/t1-toc/server-all.log",
+                   "durationMs":  107603,
+                   "counters":  {
+                                    "tests":  1109,
+                                    "suites":  0,
+                                    "pass":  1107,
+                                    "fail":  2,
+                                    "cancelled":  0,
+                                    "skipped":  0,
+                                    "todo":  0,
+                                    "duration_ms":  107205.1595,
+                                    "flaky-retries":  0
+                                }
+               },
+    "agentFamily":  {
+                        "counts":  {
+                                       "tests":  383,
+                                       "suites":  0,
+                                       "passed":  383,
+                                       "failed":  0,
+                                       "skipped":  0,
+                                       "todo":  0
+                                   },
+                        "files":  25,
+                        "includedInServerFull":  true
+                    },
+    "wilderness":  {
+                       "file":  "scripts/v13WildernessExecute.test.ts",
+                       "tests":  27,
+                       "suites":  0,
+                       "passed":  27,
+                       "failed":  0,
+                       "skipped":  0,
+                       "todo":  0
+                   },
+    "gate":  {
+                 "scope":  "non git/secrets 25 components",
+                 "results":  [
+                                 {
+                                     "component":  1,
+                                     "name":  "check:test-wiring",
+                                     "exitCode":  0,
+                                     "durationMs":  187,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-01-check-test-wiring.log"
+                                 },
+                                 {
+                                     "component":  2,
+                                     "name":  "test:agent-knowledge",
+                                     "exitCode":  0,
+                                     "durationMs":  3102,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-02-test-agent-knowledge.log"
+                                 },
+                                 {
+                                     "component":  3,
+                                     "name":  "check:agent-knowledge",
+                                     "exitCode":  0,
+                                     "durationMs":  354,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-03-check-agent-knowledge.log"
+                                 },
+                                 {
+                                     "component":  4,
+                                     "name":  "check:tech-debt-table",
+                                     "exitCode":  0,
+                                     "durationMs":  176,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-04-check-tech-debt-table.log"
+                                 },
+                                 {
+                                     "component":  5,
+                                     "name":  "test:unit",
+                                     "exitCode":  0,
+                                     "durationMs":  35308,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-05-test-unit.log"
+                                 },
+                                 {
+                                     "component":  6,
+                                     "name":  "test:tool-face-registry",
+                                     "exitCode":  0,
+                                     "durationMs":  630,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-06-test-tool-face-registry.log"
+                                 },
+                                 {
+                                     "component":  7,
+                                     "name":  "test:tool-face-manifest",
+                                     "exitCode":  0,
+                                     "durationMs":  3568,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-07-test-tool-face-manifest.log"
+                                 },
+                                 {
+                                     "component":  8,
+                                     "name":  "check:tool-face-manifest",
+                                     "exitCode":  0,
+                                     "durationMs":  592,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-08-check-tool-face-manifest.log"
+                                 },
+                                 {
+                                     "component":  9,
+                                     "name":  "test:tool-face-parity",
+                                     "exitCode":  0,
+                                     "durationMs":  5112,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-09-test-tool-face-parity.log"
+                                 },
+                                 {
+                                     "component":  10,
+                                     "name":  "check:tool-face-parity",
+                                     "exitCode":  0,
+                                     "durationMs":  529,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-10-check-tool-face-parity.log"
+                                 },
+                                 {
+                                     "component":  11,
+                                     "name":  "check:server-shared-runtime-import",
+                                     "exitCode":  0,
+                                     "durationMs":  550,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-11-check-server-shared-runtime-import.log"
+                                 },
+                                 {
+                                     "component":  12,
+                                     "name":  "check:owned-helper-contract",
+                                     "exitCode":  0,
+                                     "durationMs":  426,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-12-check-owned-helper-contract.log"
+                                 },
+                                 {
+                                     "component":  13,
+                                     "name":  "test:owned-helper-contract",
+                                     "exitCode":  0,
+                                     "durationMs":  1153,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-13-test-owned-helper-contract.log"
+                                 },
+                                 {
+                                     "component":  14,
+                                     "name":  "check:canvas-runtime-boundary",
+                                     "exitCode":  0,
+                                     "durationMs":  428,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-14-check-canvas-runtime-boundary.log"
+                                 },
+                                 {
+                                     "component":  15,
+                                     "name":  "check:group-gallery-shell",
+                                     "exitCode":  0,
+                                     "durationMs":  403,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-15-check-group-gallery-shell.log"
+                                 },
+                                 {
+                                     "component":  16,
+                                     "name":  "check:groups-rail-shell",
+                                     "exitCode":  0,
+                                     "durationMs":  425,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-16-check-groups-rail-shell.log"
+                                 },
+                                 {
+                                     "component":  17,
+                                     "name":  "check:single-editor-shell",
+                                     "exitCode":  0,
+                                     "durationMs":  400,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-17-check-single-editor-shell.log"
+                                 },
+                                 {
+                                     "component":  18,
+                                     "name":  "check:source-experience",
+                                     "exitCode":  0,
+                                     "durationMs":  904,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-18-check-source-experience.log"
+                                 },
+                                 {
+                                     "component":  19,
+                                     "name":  "check:v2-bn11-legacy-shutdown",
+                                     "exitCode":  0,
+                                     "durationMs":  414,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-19-check-v2-bn11-legacy-shutdown.log"
+                                 },
+                                 {
+                                     "component":  20,
+                                     "name":  "check:v2-bn11-relation-freshness",
+                                     "exitCode":  0,
+                                     "durationMs":  448,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-20-check-v2-bn11-relation-freshness.log"
+                                 },
+                                 {
+                                     "component":  21,
+                                     "name":  "smoke:canvas-engine-model-contract",
+                                     "exitCode":  0,
+                                     "durationMs":  1988,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-21-smoke-canvas-engine-model-contract.log"
+                                 },
+                                 {
+                                     "component":  22,
+                                     "name":  "build:client",
+                                     "exitCode":  0,
+                                     "durationMs":  14516,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-22-build-client.log"
+                                 },
+                                 {
+                                     "component":  23,
+                                     "name":  "build",
+                                     "exitCode":  0,
+                                     "durationMs":  1193,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-23-build.log"
+                                 },
+                                 {
+                                     "component":  24,
+                                     "name":  "smoke:canvas-engine-performance",
+                                     "exitCode":  0,
+                                     "durationMs":  1325,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-24-smoke-canvas-engine-performance.log"
+                                 },
+                                 {
+                                     "component":  25,
+                                     "name":  "docs:check",
+                                     "exitCode":  1,
+                                     "durationMs":  276,
+                                     "log":  "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\t1-toc\\gate-25-docs-check.log"
+                                 }
+                             ],
+                 "failed":  1,
+                 "passed":  24
+             },
+    "excludedGateComponents":  [
+                                   "git diff --check",
+                                   "check:changed-file-secrets"
+                               ]
+}

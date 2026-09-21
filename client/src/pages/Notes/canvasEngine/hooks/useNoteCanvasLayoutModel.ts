@@ -356,6 +356,7 @@ export function useNoteCanvasFrameModel({
         pageOffsetX, pageFrame: primaryPageFrame, pageFrames: fullFrames, contract: coordinateContract, zIndex: index })] : [];
     });
     return { blocks: exportContent.blocks, runtime: {
+      pageFlowPlan: fullPlan,
       pageFrames: fullFrames, coordinateContract, blockPlacements: placements,
       pageFrameExtensions: noteCanvasRuntime.pageFrameExtensions,
       blockFragmentProjections: fullPlan ? pageFlowFragmentProjections(fullPlan) : noteCanvasRuntime.blockFragmentProjections,

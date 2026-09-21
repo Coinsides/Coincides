@@ -22,6 +22,7 @@ import { chapterNavigationAnchors, chapterProjectionForNavigation } from './Note
 import { buildNoteNavigationResults, type NoteNavigationResult } from '../noteNavigationSearch';
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import { NoteTruthBindingProvider } from '../NoteTruthBindingContext';
+import { TocProjectionProvider } from '../TocProjectionContext';
 import styles from '../../NoteDetail.module.css';
 
 export interface NoteRuntimeDocumentLayerProps {
@@ -101,6 +102,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     headingAnchors,
   });
   const presentation = writingSurfaceProps.chapterPresentation;
+  const printSource = presentation?.searchSource;
   const chapterNeedsReveal = (id: string) => {
     let chapter = chapterProjection.chapters.find((candidate) => candidate.id === id);
     while (chapter) {
@@ -205,10 +207,16 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
         pageGapsFolded={pageGapsFolded}
         onPageGapsFoldedChange={(folded) => setGapPreference({ noteId: writingSurfaceProps.noteId, folded })}
         navigationOpen={navigation.open} onToggleNavigation={navigation.toggle} />
-      <NotePrintLayer {...writingSurfaceProps} />
+      <NotePrintLayer {...writingSurfaceProps}
+        visibleBlocks={printSource ? [...printSource.blocks] : writingSurfaceProps.visibleBlocks}
+        noteCanvasRuntime={printSource ? { ...writingSurfaceProps.noteCanvasRuntime, ...printSource.runtime,
+          pageFrameExtensions: printSource.runtime.pageFrameExtensions ?? writingSurfaceProps.noteCanvasRuntime.pageFrameExtensions,
+          blockPlacements: printSource.runtime.blockPlacements ?? writingSurfaceProps.noteCanvasRuntime.blockPlacements,
+        } : writingSurfaceProps.noteCanvasRuntime} />
     </div>
   );
-  const navigableDocument = surfaceMode === 'page' ? <div className="noteNavigationDocumentRow" data-note-navigation-row="true"
+  const navigableDocument = <TocProjectionProvider value={{ agenda: chapterProjection.agenda, onSelectChapter: selectChapter }}>
+    {surfaceMode === 'page' ? <div className="noteNavigationDocumentRow" data-note-navigation-row="true"
     data-note-navigation-with-tray={tray ? 'true' : undefined}>
     {navigation.open && <NoteNavigationPane writingSurfaceProps={writingSurfaceProps}
       tab={navigation.tab} onTabChange={navigation.setTab} currentPageFrameId={navigation.currentFrameId}
@@ -217,7 +225,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       onSelectResult={selectSearchResult}
       onClose={() => navigation.setOpen(false)} />}
     {document}
-  </div> : document;
+  </div> : document}</TocProjectionProvider>;
   if (surfaceMode !== 'page' || !tray) return <NoteTruthBindingProvider value={truth}>{navigableDocument}</NoteTruthBindingProvider>;
   return <NoteTruthBindingProvider value={truth}><div className={styles.trayViewport}>
     <button type="button" className={`${styles.contentGroupLauncher} ${styles.trayToggle}`} aria-expanded={tray.open}

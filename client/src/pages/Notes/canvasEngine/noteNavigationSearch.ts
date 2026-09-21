@@ -19,7 +19,7 @@ export interface NoteNavigationSearchInput {
   paperHeader?: { titleDraft: string; descriptionDraft: string };
   noteCanvasRuntime: Pick<NoteCanvasRuntimeModel,
     'pageFrames' | 'blockFragmentProjections' | 'coordinateContract'>
-    & Partial<Pick<NoteCanvasRuntimeModel, 'blockPlacements' | 'pageFrameExtensions'>>;
+    & Partial<Pick<NoteCanvasRuntimeModel, 'blockPlacements' | 'pageFrameExtensions' | 'pageFlowPlan'>>;
   pageOffsetX?: number;
 }
 

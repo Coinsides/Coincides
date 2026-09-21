@@ -30,9 +30,9 @@ export interface NoteSlashCommand {
   tooltip?: string;
 }
 
-export type NoteInsertAction = 'table' | 'timeline' | 'chart_bar' | 'chart_line' | 'media' | 'quote_frame' | 'callout_frame';
+export type NoteInsertAction = 'table' | 'timeline' | 'chart_bar' | 'chart_line' | 'media' | 'quote_frame' | 'callout_frame' | 'toc';
 
-/** One vocabulary for the toolbar menu and its seven additive slash entries. */
+/** One vocabulary for the toolbar menu and its additive slash entries. */
 export const NOTE_INSERT_COMMANDS: NoteSlashCommand[] = [
   { id: 'insert-table', label: '表格', insertAction: 'table', keywords: ['table'], tooltip: 'Insert table' },
   { id: 'insert-timeline', label: '时间线', insertAction: 'timeline', keywords: ['timeline'], tooltip: 'Insert timeline' },
@@ -41,6 +41,7 @@ export const NOTE_INSERT_COMMANDS: NoteSlashCommand[] = [
   { id: 'insert-media', label: '媒体图', insertAction: 'media', keywords: ['image', 'media'] },
   { id: 'quote-frame', label: '引文框', insertAction: 'quote_frame', keywords: ['quoteframe'] },
   { id: 'callout-frame', label: '提示框', insertAction: 'callout_frame', keywords: ['callout'] },
+  { id: 'insert-toc', label: '目录', insertAction: 'toc', keywords: ['toc', 'contents', 'agenda'] },
 ].map((command) => ({ ...command, group: 'default', commandKind: 'insert_structure',
   objectKind: 'structured_block', description: `${command.label} · 与插入菜单相同的入口。` } as NoteSlashCommand));
 

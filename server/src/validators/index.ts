@@ -7,6 +7,7 @@ import { noteRefBlockDataSchema } from './noteRef.js';
 import { agentContextHintSchema } from './agentContextHint.js';
 import { tableBlockContentSchema } from './tableBlock.js';
 import { componentBlockContentSchema } from './componentBlock.js';
+import { tocBlockContentSchema } from './tocBlock.js';
 
 // --- Auth ---
 
@@ -63,6 +64,7 @@ export const noteBlockTypeSchema = z.enum([
   'sidenote',
   'item_ref',
   'note_ref',
+  'toc',
   'media',
   'table',
   'component',
@@ -770,6 +772,12 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 }).superRefine((data, ctx) => {
+  if (data.block_type === 'toc') {
+    const result = tocBlockContentSchema.safeParse(data.content_json);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });
+    if (data.plain_text || data.title) ctx.addIssue({ code: z.ZodIssueCode.custom,
+      message: 'TOC blocks store only their placement', path: ['plain_text'] });
+  }
   if (data.block_type === 'component') {
     const result = componentBlockContentSchema.safeParse(data.content_json);
     if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });

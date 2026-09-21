@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 418 份文档。
+共 420 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -152,7 +152,7 @@
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
 | [design/item-genealogy-draft.md](design/item-genealogy-draft.md) | item 家谱学 + 睡眠学(实验草案 v0) | `draft` | 2026-09-14 | — |
 | [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
-| [design/visual-design-charter.md](design/visual-design-charter.md) | 视觉设计宪章(草案) | `draft` | 2026-09-21 | — |
+| [design/visual-design-charter.md](design/visual-design-charter.md) | 视觉设计宪章(草案) | `active` | 2026-09-21 | — |
 | [field-notes/2026-09-16-specimen-001-empty-note-nodes.md](field-notes/2026-09-16-specimen-001-empty-note-nodes.md) | 标本 #001 · 空白笔记当图节点 | `active` | — | — |
 | [field-notes/README.md](field-notes/README.md) | 实操标本册(field-notes) | `active` | — | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
@@ -406,6 +406,8 @@
 | [handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md](handoffs/2026-09-20-v14-c4a-shell-mechanical-order.md) | C4a · 壳批机械半 | `done(二轮施工;一轮停线=斜杠条款互咬(第四型合同缺陷),补遗一裁「补齐七项斜杠+15 项零变」后续派;HQ 收口:client 227 文件 2319/2319 亲跑定案;builder 侧 shared/dist EPERM 环境红由 HQ 亲跑 tsc -b shared 转绿(server build exit 0,v2McpArtifact 2/2);双门绿;余 2=Python 基线;2026-09-20)` | — | — |
 | [handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md](handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md) | D3a · ownership 机械收敛 | `done(二轮施工;一轮停线=裁定稿 404 条款×行为零变互咬,补遗一裁 get/find 分家后续派;HQ 收口:client 227 文件 2319/2319+server test:v2 真全绿(IPC 双恢复,Python 系在 HQ 机全过)亲跑定案;双门绿;2026-09-20)` | — | — |
 | [handoffs/2026-09-20-v14-d4-three-smalls-order.md](handoffs/2026-09-20-v14-d4-three-smalls-order.md) | D4 · 小单三件 | `done(2026-09-20 HQ 收官:一轮冲突停线→补遗一裁定→二轮交齐;HQ 机 server 主集真全绿含 Python 系;双门绿)` | — | — |
+| [handoffs/2026-09-21-v14-t1-toc-block-order.md](handoffs/2026-09-21-v14-t1-toc-block-order.md) | T1 · 目录块(agenda 投影的块化消费者) | `ready(HQ 按代理权翻牌;收尾批首单)` | — | — |
+| [handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md](handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md) | T2 · 富块提案管线(Agent 产出样张级笔记的正门) | `ready(HQ 按代理权翻牌;**派发排 T1 收口之后**——姑息模式单 builder 串行,且五族含 `toc` 依赖 T1 落地)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

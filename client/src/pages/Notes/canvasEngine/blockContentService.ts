@@ -178,7 +178,7 @@ export function textFromContent(block: BlockContentInput): string {
     const table = readTableBlockPayload(block);
     return table ? tableBlockPlainText(table) : '';
   }
-  if (block.block_type === 'item_ref' || block.block_type === 'note_ref') return '';
+  if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'toc') return '';
   const kind = presentationKindForBlock(block);
   if (kind === 'formula') {
     return formulaFieldsFromBlock(block).latex_input;
@@ -194,7 +194,7 @@ export function textFromContent(block: BlockContentInput): string {
 
 export function hasMeaningfulRenderableBlockContent(block: NoteBlock): boolean {
   if (block.block_type === 'table' || block.block_type === 'component') return true;
-  if (block.block_type === 'item_ref' || block.block_type === 'note_ref') return true;
+  if (block.block_type === 'item_ref' || block.block_type === 'note_ref' || block.block_type === 'toc') return true;
   if (block.title?.trim()) return true;
   if (textFromContent(block).trim() || block.plain_text?.trim()) return true;
   if (block.source_references.length > 0) return true;
@@ -207,6 +207,7 @@ export function hasMeaningfulRenderableBlockContent(block: NoteBlock): boolean {
 }
 
 export function contentForTemplate(template: TemplateOption, body: string): Record<string, unknown> {
+  if (template.legacy_block_type === 'toc') return {};
   if (template.legacy_block_type === 'table' || template.legacy_block_type === 'component') return structuredClone(template.default_content);
   if (template.template_key === 'formula.math' || template.learning_role === 'formula') {
     return contentForFormula(body, template.default_content || {});
@@ -223,6 +224,7 @@ export function contentForEditedBlock(
   body: string,
   fieldValuesOverride?: FieldValueRecord,
 ): Record<string, unknown> {
+  if (block.block_type === 'toc') return {};
   if (block.block_type === 'table' || block.block_type === 'component') return structuredClone(block.content_json);
   if (block.block_type === 'item_ref') return { item_id: block.content_json.item_id };
   if (block.block_type === 'note_ref') return { field: block.content_json.field };
@@ -235,6 +237,7 @@ export function contentForEditedTextFlowBlock(
   block: BlockContentInput,
   textFlow: TextBlockContentV1,
 ): Record<string, unknown> {
+  if (block.block_type === 'toc') return {};
   if (block.block_type === 'table' || block.block_type === 'component') return structuredClone(block.content_json);
   if (block.block_type === 'item_ref') return { item_id: block.content_json.item_id };
   if (block.block_type === 'note_ref') return { field: block.content_json.field };

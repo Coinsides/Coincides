@@ -230,6 +230,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     visibleBlocks: input.visibleBlocks,
     onCreateBlock: input.onCreateBlock,
     onCreateTable: input.onCreateTable,
+    onCreateToc: input.onCreateToc,
     onSaveTable: input.onSaveTable,
     onCreateComponent: input.onCreateComponent,
     onSaveComponent: input.onSaveComponent,

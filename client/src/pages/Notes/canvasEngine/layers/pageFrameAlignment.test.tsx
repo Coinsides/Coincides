@@ -374,10 +374,10 @@ describe('C4a four toolbar groups and shared insert doors', () => {
     act(() => useAgentUiStore.getState().reset());
     view.unmount(); main.remove();
   });
-  it('groups controls in the contracted order and exposes all seven menu labels with keyboard navigation', () => {
+  it('groups controls in the contracted order and exposes all eight menu labels with keyboard navigation', () => {
     const props = propsFor(frame(0), 'page');
     const view = render(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false}
-      onCreateTable={vi.fn(async () => true)} onCreateComponent={vi.fn(async () => true)} />);
+      onCreateTable={vi.fn(async () => true)} onCreateComponent={vi.fn(async () => true)} onCreateToc={vi.fn(async () => true)} />);
     const toolbar = view.getByRole('group', { name: 'Page reading controls' });
     expect([...toolbar.querySelectorAll('[data-note-toolbar-group]')].map((group) => group.getAttribute('aria-label')))
       .toEqual(['纸的状态', '手上的笔', '插入内容', '看的方式']);
@@ -387,11 +387,12 @@ describe('C4a four toolbar groups and shared insert doors', () => {
     fireEvent.keyDown(trigger, { key: 'ArrowDown' });
     const menu = view.getByRole('menu', { name: '插入' });
     const items = within(menu).getAllByRole('menuitem') as HTMLButtonElement[];
-    expect(items.map((item) => item.textContent)).toEqual(['表格', '时间线', '柱图', '折线图', '媒体图', '引文框', '提示框']);
+    expect(items.map((item) => item.textContent)).toEqual(['表格', '时间线', '柱图', '折线图', '媒体图', '引文框', '提示框', '目录']);
     expect(document.activeElement).toBe(items[0]);
     expect(items[0].title).toBe('Insert table');
-    expect(items.slice(4).every((item) => item.disabled)).toBe(true);
-    fireEvent.keyDown(menu, { key: 'End' }); expect(document.activeElement).toBe(items[3]);
+    expect(items.slice(4, 7).every((item) => item.disabled)).toBe(true);
+    expect(items[7].disabled).toBe(false);
+    fireEvent.keyDown(menu, { key: 'End' }); expect(document.activeElement).toBe(items[7]);
     fireEvent.keyDown(menu, { key: 'ArrowDown' }); expect(document.activeElement).toBe(items[0]);
     fireEvent.keyDown(menu, { key: 'Escape' });
     expect(view.queryByRole('menu', { name: '插入' })).toBeNull();
@@ -399,17 +400,18 @@ describe('C4a four toolbar groups and shared insert doors', () => {
     expect(props.onCreateBlock).not.toHaveBeenCalled();
   });
 
-  it.each(NOTE_INSERT_COMMANDS)('$label opens the same existing editor from menu and slash host', async (command) => {
+  it.each(NOTE_INSERT_COMMANDS)('$label invokes the same insertion action from menu and slash host', async (command) => {
     const props = propsFor(frame(0), 'page');
     const source = props.allBlocks[0];
     const onCreateTable = vi.fn(async () => true);
+    const onCreateToc = vi.fn(async () => true);
     const onCreateComponent = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onCreateComponent']>>(async () => true);
     const onSaveParagraphFurniture = vi.fn(async () => true);
     const paste = vi.spyOn(mediaPaste, 'pasteMediaBlock').mockResolvedValue(null);
     const host: { current: NoteInsertCommandHost | null } = { current: null };
     const view = render(<NoteInsertCommandsContext.Provider value={host}>
       <NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false} selectedBlockId={source.id}
-        onCreateTable={onCreateTable} onCreateComponent={onCreateComponent} onSaveParagraphFurniture={onSaveParagraphFurniture} />
+        onCreateTable={onCreateTable} onCreateToc={onCreateToc} onCreateComponent={onCreateComponent} onSaveParagraphFurniture={onSaveParagraphFurniture} />
     </NoteInsertCommandsContext.Provider>);
     const before = structuredClone(source);
     const imageInput = view.getByLabelText('选择媒体图') as HTMLInputElement;
@@ -419,7 +421,11 @@ describe('C4a four toolbar groups and shared insert doors', () => {
         fireEvent.click(view.getByRole('button', { name: '插入' }));
         fireEvent.click(view.getByRole('menuitem', { name: command.label }));
       } else act(() => host.current!.run(command.insertAction!, source.id));
-      if (command.insertAction === 'media') {
+      if (command.insertAction === 'toc') {
+        await waitFor(() => expect(onCreateToc).toHaveBeenCalledTimes(entry === 'menu' ? 1 : 2));
+        expect(onCreateToc.mock.lastCall).toEqual([]);
+        expect(view.queryByRole('dialog')).toBeNull();
+      } else if (command.insertAction === 'media') {
         expect(imageClick).toHaveBeenCalledTimes(entry === 'menu' ? 1 : 2);
         const file = new File(['png'], 'tiny.png', { type: 'image/png' });
         fireEvent.change(imageInput, { target: { files: [file] } });

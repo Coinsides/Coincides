@@ -69,6 +69,7 @@ import { headingLevelForRole } from '../headingRoleService';
 import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { NoteRefBlockProjection } from '../blocks/NoteRefBlockProjection';
+import { TocBlockProjection } from '../blocks/TocBlockProjection';
 import { MediaBlockProjection, MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
 import { MediaImageEditor } from '../blocks/MediaImageEditor';
 import type { MediaImageEditV1 } from '@shared/types';
@@ -106,6 +107,7 @@ interface BlockEditorLayerProps {
   tablePrint?: boolean;
   onSaveTable?: (payload: TableBlockPayload) => Promise<boolean>;
   componentPrint?: boolean;
+  tocPrint?: boolean;
   onSaveComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
   onSaveParagraphFurniture?: (value: ParagraphFurniture | null) => Promise<boolean>;
   allowSaveRecovery?: boolean;
@@ -190,6 +192,7 @@ export function BlockEditorLayer({
   tablePrint = false,
   onSaveTable,
   componentPrint = false,
+  tocPrint = false,
   onSaveComponent,
   onSaveParagraphFurniture,
   allowSaveRecovery = false,
@@ -279,6 +282,7 @@ export function BlockEditorLayer({
   const presentationKind = presentationKindForBlock(block);
   const itemReference = block.block_type === 'item_ref';
   const noteReference = block.block_type === 'note_ref';
+  const tocReference = block.block_type === 'toc';
   const mediaBlock = block.block_type === 'media';
   const [editingImage, setEditingImage] = useState(false);
   const tableBlock = block.block_type === 'table';
@@ -319,7 +323,7 @@ export function BlockEditorLayer({
   const formulaFields = presentationKind === 'formula'
     ? formulaFieldsFromBlock(block, fieldDraft ? text : undefined, fieldDraft)
     : null;
-  const blockTypeLabel = noteReference ? (block.content_json.field === 'description' ? '述名件' : '题名件') : itemReference ? 'REFERENCED ITEM' : presentationKind === 'code'
+  const blockTypeLabel = tocReference ? '目录' : noteReference ? (block.content_json.field === 'description' ? '述名件' : '题名件') : itemReference ? 'REFERENCED ITEM' : presentationKind === 'code'
     ? 'CODE'
     : getNoteBlockTemplateLabel(block.metadata, block.block_type);
   const showContextualTypeBadge = active || showBlockTypeBadge;
@@ -533,13 +537,13 @@ export function BlockEditorLayer({
         saving={saving}
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
-        bodyReadOnly={itemReference || noteReference || mediaBlock || tableBlock || componentBlock}
+        bodyReadOnly={itemReference || noteReference || tocReference || mediaBlock || tableBlock || componentBlock}
         onEditImage={mediaBlock && !contentReadOnly && !mediaPlaceholder && onSaveMediaImage
           ? () => setEditingImage(true) : undefined}
         paragraphStyleControl={!contentReadOnly && canStyleParagraph(block) && onSaveParagraphFurniture
           ? <ParagraphFurnitureControl value={paragraphFurniture} onSave={onSaveParagraphFurniture} /> : undefined}
         onBeginMove={onBeginMove}
-        onInsertTextUnitBelow={!itemReference && !noteReference && !mediaBlock && !tableBlock && !componentBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
+        onInsertTextUnitBelow={!itemReference && !noteReference && !tocReference && !mediaBlock && !tableBlock && !componentBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}
@@ -592,7 +596,9 @@ export function BlockEditorLayer({
           onFocusReleased(receipt);
         }}
       >
-          {componentBlock ? (
+          {block.block_type === 'toc' ? (
+            <TocBlockProjection print={tocPrint} interactive={!layoutMode} />
+          ) : componentBlock ? (
             <ComponentBlockProjection block={block} print={componentPrint} />
           ) : tableBlock ? (
             <TableBlockProjection block={block} print={tablePrint} />

@@ -291,6 +291,33 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     expect(rootBridgeContract.pushHistoryEntry).toHaveBeenCalledWith({ type: 'createdBlock', block: component }, { skipBoundary: true });
   });
 
+  it('T1 creates an empty toc block at the existing insertion layout and records its creation for undo', async () => {
+    const toc = { ...formalPageSpecimen, id: 'new-toc', block_type: 'toc', content_json: {}, plain_text: '' };
+    rootBridgeContract.createBlock.mockResolvedValue(toc);
+    render(<RootBridgeHarness />);
+    const create = rootBridgeContract.presentationOptions?.onCreateToc;
+    expect(create).toBeTypeOf('function');
+    await act(async () => { expect(await create!()).toBe(true); });
+    expect(rootBridgeContract.createBlock).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ legacy_block_type: 'toc' }), '',
+      { contentJson: {}, layout: rootBridgeContract.presentationOptions!.defaultDraftLayout },
+    );
+    expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith(toc.id);
+    expect(rootBridgeContract.enqueueRuntimeHistoryOperation).toHaveBeenCalledOnce();
+    expect(rootBridgeContract.pushHistoryEntry).toHaveBeenCalledExactlyOnceWith(
+      { type: 'createdBlock', block: toc }, { skipBoundary: true },
+    );
+  });
+
+  it('T1 leaves selection and history unchanged when toc creation does not finish', async () => {
+    rootBridgeContract.createBlock.mockResolvedValue(null);
+    render(<RootBridgeHarness />);
+    await act(async () => { expect(await rootBridgeContract.presentationOptions!.onCreateToc!()).toBe(false); });
+    expect(rootBridgeContract.createBlock).toHaveBeenCalledOnce();
+    expect(rootBridgeContract.markBlockSelected).not.toHaveBeenCalled();
+    expect(rootBridgeContract.pushHistoryEntry).not.toHaveBeenCalled();
+  });
+
   function coverBindingCase(field: 'title' | 'description') {
     const content = createPageFrameCollectionSeed();
     rootBridgeContract.pageFrameCollection = addNoteCoverPage(content, 'rebuilt-cover');

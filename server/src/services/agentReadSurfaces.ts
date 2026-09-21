@@ -7,6 +7,8 @@ import { getNote, listNoteBlocks } from './notes.js';
 import { validTextFlowUnits } from './textFlowUnits.js';
 import { tableBlockPlainText } from './tableBlocks.js';
 import { componentBlockPlainText } from './componentBlocks.js';
+import { tocBlockPlainText } from './tocBlocks.js';
+import { storedCoverFrameId } from './noteCoverRules.js';
 
 export const AGENT_NOTE_BLOCK_LIMIT = 200;
 export const AGENT_BOARD_ENTRY_LIMIT = 200;
@@ -77,7 +79,7 @@ function frameForLayout(layout: RecordValue, frames: ReadPageFrame[], fallback: 
       && y < box.bottom && y + height > box.top))?.frame;
 }
 
-function projectNoteBlock(userId: string, block: RecordValue) {
+function projectNoteBlock(userId: string, block: RecordValue, tocText: string) {
   const content = record(block.content_json);
   const metadata = record(block.metadata);
   const units = validTextFlowUnits(content);
@@ -89,7 +91,7 @@ function projectNoteBlock(userId: string, block: RecordValue) {
     placement_id: text(block.placement_id),
     kind,
     role,
-    text: kind === 'table' ? tableBlockPlainText(content)
+    text: kind === 'toc' ? tocText : kind === 'table' ? tableBlockPlainText(content)
       : kind === 'component' ? componentBlockPlainText(content) : text(block.plain_text),
     ...(units ? { text_units: units.map((unit) => ({
       id: text(unit.id) || null,
@@ -139,7 +141,7 @@ export function readNoteForAgent({ userId, noteId, pageIndex = 0 }: {
   const layoutsByBlock = new Map(canvas.blockLayouts.map((entry) => [entry.block_id, entry.layout]));
   const frameId = frames[pageIndex]?.id ?? null;
   let outsidePage = 0;
-  const pageBlocks = blocks.map((block, index) => {
+  const locatedBlocks = blocks.map((block, index) => {
     const persisted = block.placement_id
       ? layoutsByPlacement.get(placementKey(block.placement_id))
       : layoutsByBlock.get(text(block.id));
@@ -155,7 +157,12 @@ export function readNoteForAgent({ userId, noteId, pageIndex = 0 }: {
     return { block, index, layout, outside, frameId: frame?.id ?? null,
       x: number(layout.x) - (world ? world.x + world.contentInset.left : 0),
       y: number(layout.y) - (world ? world.y + world.contentInset.top : 0) };
-  }).filter((entry) => !entry.outside && entry.frameId === frameId)
+  });
+  const hasToc = blocks.some((block) => block.block_type === 'toc');
+  const coverFrameId = hasToc ? storedCoverFrameId(getDb(), userId, noteId) : null;
+  const tocText = hasToc ? tocBlockPlainText(locatedBlocks.filter((entry) => !entry.outside
+    && (!coverFrameId || entry.frameId !== coverFrameId)).map((entry) => entry.block)) : '';
+  const pageBlocks = locatedBlocks.filter((entry) => !entry.outside && entry.frameId === frameId)
     .sort((left, right) => {
       const positioned = typeof left.layout.y === 'number' && typeof right.layout.y === 'number';
       return (positioned ? left.y - right.y || left.x - right.x : 0)
@@ -170,7 +177,7 @@ export function readNoteForAgent({ userId, noteId, pageIndex = 0 }: {
     },
     page_index: pageIndex,
     frame_id: frameId,
-    blocks: pageBlocks.slice(0, AGENT_NOTE_BLOCK_LIMIT).map(({ block }) => projectNoteBlock(userId, block)),
+    blocks: pageBlocks.slice(0, AGENT_NOTE_BLOCK_LIMIT).map(({ block }) => projectNoteBlock(userId, block, tocText)),
     has_more: nextPageIndex !== null || truncated,
     next_page_index: nextPageIndex,
     truncated,

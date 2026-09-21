@@ -10,6 +10,7 @@ import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAsset
 import type { ManagedFileTask } from './managedFileCleanup.js';
 import { assertTableBlockContent } from './tableBlocks.js';
 import { assertComponentBlockContent } from './componentBlocks.js';
+import { assertTocBlockContent } from './tocBlocks.js';
 
 const CLIENT_CREATE_SOURCE_TYPE = 'client_note_block_create';
 const CLIENT_CREATE_CLEANUP_CONFLICT_SOURCE_TYPE = 'client_note_block_cleanup_conflict';
@@ -439,6 +440,7 @@ export function createClientNoteBlock(
     assertMediaBlockAsset(db, userId, data);
     assertTableBlockContent(data);
     assertComponentBlockContent(data);
+    assertTocBlockContent(data);
     const blockId = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();
@@ -446,7 +448,7 @@ export function createClientNoteBlock(
     const title = data.title || null;
     const plainText = data.plain_text || null;
     const metadata = stringifyJson(
-      ['item_ref', 'note_ref'].includes(data.block_type) ? (data.metadata || {}) : mergeRuntimeNoteBlockTemplateMetadata(
+      ['item_ref', 'note_ref', 'toc'].includes(data.block_type) ? (data.metadata || {}) : mergeRuntimeNoteBlockTemplateMetadata(
         db,
         userId,
         data.metadata,

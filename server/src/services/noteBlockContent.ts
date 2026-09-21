@@ -11,6 +11,7 @@ import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAsset
 import { enqueueManagedFileTask, type ManagedFileTask } from './managedFileCleanup.js';
 import { assertTableBlockContent } from './tableBlocks.js';
 import { assertComponentBlockContent } from './componentBlocks.js';
+import { assertTocBlockContent } from './tocBlocks.js';
 
 function parseJson<T>(value: string | null | undefined, fallback: T): T {
   if (!value) return fallback;
@@ -36,6 +37,10 @@ function updateNoteBlockContentInTransaction(
     content_json: data.content_json ?? parseJson(currentBlock.content_json, {}) });
   assertComponentBlockContent({ block_type: nextBlockType,
     content_json: data.content_json ?? parseJson(currentBlock.content_json, {}) });
+  assertTocBlockContent({ block_type: nextBlockType,
+    content_json: data.content_json ?? parseJson(currentBlock.content_json, {}),
+    plain_text: data.plain_text === undefined ? currentBlock.plain_text : data.plain_text,
+    title: data.title === undefined ? currentBlock.title : data.title });
   const nextMetadata = { ...parseJson<Record<string, unknown>>(currentBlock.metadata, {}), ...(data.metadata || {}) };
   assertNoteRefContent({ block_type: nextBlockType,
     content_json: data.content_json ?? parseJson(currentBlock.content_json, {}),
@@ -86,7 +91,7 @@ function updateNoteBlockContentInTransaction(
     const hasTemplateReference = data.metadata && (typeof data.metadata.template_definition_id === 'string'
       || typeof data.metadata.template_key === 'string' || typeof data.metadata.template_id === 'string');
     fields.push('metadata = ?');
-    values.push(JSON.stringify(['item_ref', 'note_ref'].includes(data.block_type ?? currentBlock.block_type) ? mergedMetadata
+    values.push(JSON.stringify(['item_ref', 'note_ref', 'toc'].includes(data.block_type ?? currentBlock.block_type) ? mergedMetadata
       : mergeRuntimeNoteBlockTemplateMetadata(db, userId, mergedMetadata, data.block_type || currentBlock.block_type,
         { allowUnknownTemplateFallback: !hasTemplateReference }).metadata));
   }

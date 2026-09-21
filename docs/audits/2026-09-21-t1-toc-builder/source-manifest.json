@@ -1,0 +1,126 @@
+[
+    {
+        "sha256":  "C439907389A62C5995F67BBA8CA55D6B65E57EE7931948D06802EE135C29BE60",
+        "path":  "client/src/pages/Notes/canvasEngine/blockContentService.ts"
+    },
+    {
+        "sha256":  "0791FD2CAC6D1CA4E73734B48F185572AA7EF9D71A229F20A6CC316A87702FB0",
+        "path":  "client/src/pages/Notes/canvasEngine/blocks/TocBlockProjection.module.css"
+    },
+    {
+        "sha256":  "023480B24A51ECBC36FFBCEBFF0495BC8CDA9A566E596A869D4A5679577D27E8",
+        "path":  "client/src/pages/Notes/canvasEngine/blocks/TocBlockProjection.test.tsx"
+    },
+    {
+        "sha256":  "E7C92F9BE7149070AAC0B3373003F1107BFF44F9D2713A13BFD06B7AC0563EAC",
+        "path":  "client/src/pages/Notes/canvasEngine/blocks/TocBlockProjection.tsx"
+    },
+    {
+        "sha256":  "989657D21752B21A6E913B2A39562FB170CA567C3996698714F96E38798A6EB6",
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+    },
+    {
+        "sha256":  "E3EDD26854852EF5DDCDB9DDD86A5F0455009A855BF38E9BEB86127D87624D03",
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts"
+    },
+    {
+        "sha256":  "CC90D419C877048E458004A87F7CB8F99B4CB3C76D4E64B78701958F3AACD110",
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts"
+    },
+    {
+        "sha256":  "62F449CBFA89B6976009C0AF073F6431C5FCA9344700B142C5422EBBA3D62313",
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx"
+    },
+    {
+        "sha256":  "03C9882B914F5D95FE59F6ACDDCD26F0898C48742019BE8E2E57E576185C5DC0",
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts"
+    },
+    {
+        "sha256":  "48C9CAADB3CE2F684E2C40884130EEBCA8620E4E327739476F0BB7440717C672",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx"
+    },
+    {
+        "sha256":  "3ADE23FEF3EF257259E2305469D1DD7C617F8D9032849F7CB80E74CD091C766D",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx"
+    },
+    {
+        "sha256":  "0AA0033DB30FBC582D80155FC20774A40245EA371D6DC4FE411927118700395B",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx"
+    },
+    {
+        "sha256":  "4D5595460B9F81E8973A4E67036FF5815F9F3D139A9928CF0009A167F855D37E",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx"
+    },
+    {
+        "sha256":  "46F052EB88A7B09A8803B9FD6991AFED82A831F58177B1F07ECE0E61BEF2C8C3",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx"
+    },
+    {
+        "sha256":  "C9D9D5AF0A2CED2A466F3534BE173FE61AC4D42C443288E922AEF0EA28088243",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx"
+    },
+    {
+        "sha256":  "29A9B72AB961659B30C941B8757244BC26389C2B3DD1B0F225FE45E7E16F272E",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx"
+    },
+    {
+        "sha256":  "466DBC561DD8CA5D09071552EF7CDA4142F57A65A6EEAFA0E7F0158A1BAA9E99",
+        "path":  "client/src/pages/Notes/canvasEngine/layers/TocPrint.test.tsx"
+    },
+    {
+        "sha256":  "2E798956E33D65CE21F0089711B06F1F056C66F70D952D0D295639CD0EB385D3",
+        "path":  "client/src/pages/Notes/canvasEngine/noteNavigationSearch.ts"
+    },
+    {
+        "sha256":  "77AC09C246F392C1438322D644874A732D40C43B974F3A77B476BEF69C8E3A06",
+        "path":  "client/src/pages/Notes/canvasEngine/notePageFlowService.ts"
+    },
+    {
+        "sha256":  "30299121FED1DCA77003FF72962203FAD12DEB6D3FD95F447278893EC343761A",
+        "path":  "client/src/pages/Notes/canvasEngine/TocProjectionContext.tsx"
+    },
+    {
+        "sha256":  "4166C412A46CA0CADF8D6E0A7C7FEF66ECFB9BCD4B281E06B88C54287B3C5218",
+        "path":  "client/src/pages/Notes/canvasEngine/tocProjectionService.ts"
+    },
+    {
+        "sha256":  "23433EE7ACC56A6196FBFB10AD51F5CE0FCD8CC62F32DF01A3CE4056407ECFB2",
+        "path":  "client/src/pages/Notes/noteSlashCommands.ts"
+    },
+    {
+        "sha256":  "F0D2B022F743726357DB5899F22525D1207DD0C4F450598482DE8C1BC6807765",
+        "path":  "server/package.json"
+    },
+    {
+        "sha256":  "F03B7A29C6C96476281D754596CF695DA186C8F981C654B3AA872F14BB862324",
+        "path":  "server/src/__tests__/v14TocBlocks.test.ts"
+    },
+    {
+        "sha256":  "F3A72A2E92A25F6EDCA64FE8C2DBB5153B6DDD72706F37B1A9496685AA91A62F",
+        "path":  "server/src/routes/notes.ts"
+    },
+    {
+        "sha256":  "71A51B251725970BFEF65365E9CD6D701A41966EEBD1D89D114A874892C88161",
+        "path":  "server/src/services/agentReadSurfaces.ts"
+    },
+    {
+        "sha256":  "966427273EAC8C7021150115D8BD577695E9DFCD1430E81B5E50B84F26BED73B",
+        "path":  "server/src/services/noteBlockContent.ts"
+    },
+    {
+        "sha256":  "F2CA59E0BE023B75D8A7E197244C3881F9125B217F8BD8D1B975D55F7976BFEB",
+        "path":  "server/src/services/noteBlockLifecycle.ts"
+    },
+    {
+        "sha256":  "BF077A6C95ADC0057D223F0AAFAF100E751920AAEFC7149024277621A8E41151",
+        "path":  "server/src/services/tocBlocks.ts"
+    },
+    {
+        "sha256":  "51527B75130A5928E5F535A6952FF58D3B969D388FEDF1D8C21CD6F3F6D617D0",
+        "path":  "server/src/validators/index.ts"
+    },
+    {
+        "sha256":  "00534A9A03A0A9C4C4328DC317C6B1CF4C35C60B223BA39B69C7211AB0367D51",
+        "path":  "server/src/validators/tocBlock.ts"
+    }
+]

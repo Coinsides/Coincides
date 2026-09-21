@@ -287,7 +287,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
         data.title || null,
         stringifyJson(data.content_json, {}),
         data.plain_text || null,
-        stringifyJson(['item_ref', 'note_ref'].includes(data.block_type) ? data.metadata : mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
+        stringifyJson(['item_ref', 'note_ref', 'toc'].includes(data.block_type) ? data.metadata : mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
         operationBatchId,
         now,
         now

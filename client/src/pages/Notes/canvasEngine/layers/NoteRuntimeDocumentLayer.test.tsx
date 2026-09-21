@@ -460,6 +460,58 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     return props;
   }
 
+  function tocProps() {
+    const props = headingProps();
+    const toc: NoteBlock = { ...codeBlock, id: 'toc', placement_id: 'toc-place', block_type: 'toc',
+      content_json: {}, plain_text: '', metadata: {}, order_index: -1 };
+    props.visibleBlocks = [toc, ...props.visibleBlocks];
+    props.allBlocks = props.visibleBlocks;
+    props.blockLayouts = { ...props.blockLayouts, toc: { ...props.blockLayouts[codeBlock.id], y: 400, height: 100 } };
+    props.noteCanvasRuntime = { ...props.noteCanvasRuntime, blockFragmentProjections: [
+      ...props.noteCanvasRuntime.blockFragmentProjections,
+      { ...props.noteCanvasRuntime.blockFragmentProjections[0], blockId: toc.id,
+        visibleRect: { x: 172, y: 400, width: 540, height: 100 } },
+    ] };
+    return props;
+  }
+
+  it('T1 reading TOC uses the existing heading jump with the navigation pane closed and live drafts', () => {
+    const props = { ...tocProps(), contentReadOnly: true };
+    const before = structuredClone(props.allBlocks);
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container, rerender } = render(documentFor(props));
+    expect(screen.queryByRole('tree')).toBeNull();
+    const toc = within(container.querySelector('[data-toc-projection="reading"]') as HTMLElement);
+    fireEvent.click(toc.getByRole('button', { name: 'Nested chapter' }));
+    expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current, { x: 0, y: 222, width: 540, height: 44 });
+    const draft = createTextBlockContentV1('Updated chapter');
+    draft.units[0].writing_role = 'heading_2';
+    rerender(documentFor({ ...props, blockTextFlowDrafts: { 'nested-heading': draft } }));
+    expect(toc.getByRole('button', { name: 'Updated chapter' })).toBeTruthy();
+    expect(toc.queryByText('Nested chapter')).toBeNull();
+    expect(props.allBlocks).toEqual(before);
+  });
+
+  it('T1 TOC reveals folded ancestors before the existing navigation resolves the new fragment', async () => {
+    const props = tocProps();
+    const projection = deriveChapterProjection(props.allBlocks);
+    const reveal = vi.fn();
+    const presentation = { projection, numbered: false, collapsedChapterIds: new Set([projection.roots[0].id]),
+      onToggleChapter: vi.fn(), onRevealChapter: reveal, onToggleNumbering: vi.fn() };
+    const folded = { ...props, visibleBlocks: props.visibleBlocks.filter((block) => block.id !== 'nested-heading'),
+      chapterPresentation: presentation, noteCanvasRuntime: { ...props.noteCanvasRuntime,
+        blockFragmentProjections: props.noteCanvasRuntime.blockFragmentProjections.filter((fragment) => fragment.blockId !== 'nested-heading') } };
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container, rerender } = render(documentFor(folded));
+    scroll.mockClear();
+    fireEvent.click(within(container.querySelector('[data-toc-projection="reading"]') as HTMLElement)
+      .getByRole('button', { name: 'Nested chapter' }));
+    expect(reveal).toHaveBeenCalledExactlyOnceWith(projection.chapters[1].id);
+    expect(scroll).not.toHaveBeenCalled();
+    rerender(documentFor({ ...props, chapterPresentation: { ...presentation, collapsedChapterIds: new Set<string>() } }));
+    await waitFor(() => expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current, { x: 0, y: 222, width: 540, height: 44 }));
+  });
+
   it('A4 heading navigation follows two chapters on one page and jumps to the chapter anchor', async () => {
     const props = headingProps();
     const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);

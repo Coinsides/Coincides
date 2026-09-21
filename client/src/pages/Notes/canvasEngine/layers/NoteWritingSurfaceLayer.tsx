@@ -253,6 +253,7 @@ export interface NoteWritingSurfaceLayerProps {
   onToggleNavigation?: () => void;
   visibleBlocks: NoteBlock[];
   onCreateTable?: (payload: TableBlockPayload) => Promise<boolean>;
+  onCreateToc?: () => Promise<boolean>;
   onSaveTable?: (block: NoteBlock, payload: TableBlockPayload) => Promise<boolean>;
   onCreateComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
   onSaveComponent?: (block: NoteBlock, payload: ComponentBlockPayload) => Promise<boolean>;
@@ -422,6 +423,7 @@ export function NoteWritingSurfaceLayer({
   visibleBlocks,
   onCreateBlock,
   onCreateTable,
+  onCreateToc,
   onSaveTable,
   onCreateComponent,
   onSaveComponent,
@@ -1570,6 +1572,7 @@ export function NoteWritingSurfaceLayer({
       if (overviewOpen || layoutMode) return '请先返回书写模式。';
       if (document.querySelector('[data-runtime-textflow-composing="true"]')) return '请先完成当前输入。';
       if (action === 'table') return onCreateTable ? undefined : '表格尚未就绪。';
+      if (action === 'toc') return onCreateToc ? undefined : '目录尚未就绪。';
       if (action === 'timeline' || action === 'chart_bar' || action === 'chart_line') return onCreateComponent ? undefined : '组件尚未就绪。';
       const block = allBlocks.find((candidate) => candidate.id === blockId);
       if (!block) return '请先选择一个已保存的段落。';
@@ -1584,6 +1587,7 @@ export function NoteWritingSurfaceLayer({
       const reason = insertCommandHost.disabledReason(action, blockId);
       if (reason) { addToast('info', reason); return; }
       if (action === 'table') { setCreatingTable(true); return; }
+      if (action === 'toc') { void onCreateToc?.(); return; }
       if (action === 'timeline' || action === 'chart_bar' || action === 'chart_line') { setCreatingComponent(action); return; }
       const block = allBlocks.find((candidate) => candidate.id === blockId);
       if (!block) return;

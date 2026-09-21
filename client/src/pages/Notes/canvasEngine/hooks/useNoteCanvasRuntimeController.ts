@@ -659,6 +659,17 @@ export function useNoteCanvasRuntimeController() {
     onSaveTable: tableHistory.save,
     onSaveComponent: componentHistory.save,
     onSaveMediaImage: mediaImageHistory.save,
+    onCreateToc: () => {
+      if (sourceProjectionPolicy.contentReadOnly || !textHistory.boundary()) return Promise.resolve(false);
+      return enqueueRuntimeHistoryOperation(async () => {
+        const created = await createBlock({ ...defaultTextTemplate, legacy_block_type: 'toc' }, '', {
+          contentJson: {}, layout: defaultDraftLayout,
+        });
+        if (!created) return false;
+        markBlockSelected(created.id);
+        return pushHistoryEntry({ type: 'createdBlock', block: created }, { skipBoundary: true });
+      });
+    },
     onCreateComponent: (payload) => {
       if (sourceProjectionPolicy.contentReadOnly || !textHistory.boundary()) return Promise.resolve(false);
       return enqueueRuntimeHistoryOperation(async () => {
