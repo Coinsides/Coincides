@@ -1,0 +1,39 @@
+{
+  "status": "NOT RUN: stopped at diagnostic conflicts",
+  "nonGitSecretsComponentCount": 25,
+  "nonGitSecretsCommands": [
+    "npm run check:test-wiring",
+    "npm run test:agent-knowledge",
+    "npm run check:agent-knowledge",
+    "npm run check:tech-debt-table",
+    "npm run test:unit",
+    "npm run test:tool-face-registry",
+    "npm run test:tool-face-manifest",
+    "npm run check:tool-face-manifest",
+    "npm run test:tool-face-parity",
+    "npm run check:tool-face-parity",
+    "npm run check:server-shared-runtime-import",
+    "npm run check:owned-helper-contract",
+    "npm run test:owned-helper-contract",
+    "npm run check:canvas-runtime-boundary",
+    "npm run check:group-gallery-shell",
+    "npm run check:groups-rail-shell",
+    "npm run check:single-editor-shell",
+    "npm run check:source-experience",
+    "npm run check:v2-bn11-legacy-shutdown",
+    "npm run check:v2-bn11-relation-freshness",
+    "npm run smoke:canvas-engine-model-contract",
+    "npm run build:client",
+    "npm run build",
+    "npm run smoke:canvas-engine-performance",
+    "npm run docs:check"
+  ],
+  "reservedForHQ": [
+    "git diff --check",
+    "npm run check:changed-file-secrets"
+  ],
+  "serverExpectedFiles": 111,
+  "serverMainFiles": 84,
+  "serverComplementFiles": 27,
+  "serverRequiredFileTimeoutMs": 600000
+}

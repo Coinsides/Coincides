@@ -1,0 +1,38 @@
+[
+  {
+    "path": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+    "sha256": "86d5fcaced74eca410ff0c97979ddbf1b2a6201dcfa6ea64fdfef3c1ceb6a3a7"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts",
+    "sha256": "b77f5f3391a2c0e76cd0c56b259135ba2662b21189b25e71cb061b0b4b98e8fa"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+    "sha256": "a84519443a5b4c70800c50404294a663d666a586154b4290040e5d5438a927e1"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/pageReadingViewportService.ts",
+    "sha256": "8f5cfd3e6ba0e713f47e271dde96828bc38762029c89edbda47c4246d6cf6ea5"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+    "sha256": "c9d9d5af0a2ced2a466f3534be173fe61ac4d42c443288e922aef0ea28088243"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css",
+    "sha256": "8a82a6fde9054715976fc437352bd8a0dfd12df117a98b0266b1cff12e6c3e1f"
+  },
+  {
+    "path": "client/src/pages/Notes/NoteDetail.module.css",
+    "sha256": "f535e5e39cf7ae625ee53d9b5b0eade8942a213b94f29e828ed30c04b6542312"
+  },
+  {
+    "path": "server/src/__tests__/v2SourceRegionCells.test.ts",
+    "sha256": "05d9f9d497d791cd91fb8b3e8dd480d41e955633ad4b2a6a343f39307c8d6369"
+  },
+  {
+    "path": "server/src/services/sourceMineruParser.ts",
+    "sha256": "4d14eaae2836cc2e08f9a04f2f53e0cdca4b779a45510f8f1a7338d1e6659f0b"
+  }
+]

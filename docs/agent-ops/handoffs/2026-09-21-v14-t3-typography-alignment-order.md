@@ -31,3 +31,23 @@
 2. 定向+回归:client 全库+server 全量(**全量补集含 v13WildernessExecute,文件预算 ≥600s,⛔按 120s 超时判红**);
 3. 证据落 `docs/audits/2026-09-21-t3-typography-builder/`,原始日志 `.codex-tmp/t3-typo/`;
 4. **禁区(带射程)**:⛔一切 git 写操作(add/commit/push/reset/改 .git);只读 git 明文允许(含验证门内部);git 检查+secrets 两组件留 HQ,其余按「非 git/secrets N 组件」申报;⛔新表新列⛔新工具⛔prompt⛔Relation/判定域⛔新依赖⛔用户库(冒烟笔记的 heading 补种归 HQ 收口,⛔builder 碰)⛔真实模型调用;⛔新设计安全对抗类用例(既有功能回归全库整跑明文允许零排除);合成凭据形值 ≤20 字符;新 `--sk-` token 后段 ≤18 字符。Result:构成分解+逐件行号+新旧断言申报表+标尺复测数字+未做项;冲突停线举证。
+
+## 补遗一(HQ 双裁:标尺口径更正 + 真实模型禁令射程)
+
+> 2026-09-21 · HQ 按代理权裁定,回应下方 Result 双停线。两处缺陷都在 HQ:走查测量混尺度、禁令无射程(第①型)。builder 双双拦对。
+
+1. **标尺口径更正(采 builder 同尺度公式)**:常驻断言与验收一律用同尺度归一(computed 字号 ÷904×900,或分子分母同取已缩放值);走查报告的 22.6/19.9/16.2 三数作废,以 builder 复测 16.6261/14.63496/11.94690 为准(HQ 已在走查报告追加更正节);
+2. **修正后的目标表**:①正文同尺度 ∈ **[15.7, 16.3]**(现 16.63,微调一档——修在纸张默认覆盖层或其换算处,申报落点);②**行高比 1.60~1.75**(现 1.467,**本单第一知觉修**);③表格:**撤 `min-width:100%`**(fit-content+居中,上限 100%——G9 真病灶),cell 档位 0.85±0.03(现 0.88,微收),padding 现值可留;④装订件 11.95 **不动**(样张带宽内);
+3. **「⛔真实模型调用」射程裁定**:该禁令射程=**远程 LLM/API 与凭据消耗**;本地 MinerU OCR 子进程(v2SourceRegionCells 真解析路)=构建内确定性工具,**全库整跑明文含它**(HQ 机例行真跑绿);此射程注入本单并自此进工单模板;
+4. 其余照原单:断言更新逐处申报、出生公约、全量预算、禁区照旧。
+
+## Result
+
+**2026-09-21 · Codex builder：BLOCKED / 诊断停线，needs: HQ。未完成施工，header不翻done。** 依本轮用户「冲突停线举证」，零产品代码及既有断言修改。完整证据见 [T3 builder诊断](../../audits/2026-09-21-t3-typography-builder/README.md)，原始记录 `.codex-tmp/t3-typo/`。
+
+1. **构成分解与第一处冲突**：通用profile=15/22（`typographyProfileService.ts:19`）；纸张默认覆盖=11pt÷物理映射（`pageFrameTypographyService.ts:38`），A4物理映射 `(210/25.4×96)/904=0.8779875967`，得到16.7048677→16.7px、行高24.5px。阅读缩放仅为 `baseScale×stepFactor`（`pageReadingViewportService.ts:76`），纸和正文共享 `NoteWritingSurfaceLayer.tsx:1706` 的transform，正文CSS variables在`:1744`。665px框对应S=665/904；**22.6015=未缩放computed字号16.7÷已缩放框宽665×900**。同尺度应为 `16.7×S/665×900=16.6261`。Chrome合成DOM在0.5/1/1.5/2步进下同尺度归一均为16.6261，真实字形宽/纸宽也恒定；未复现“阅读步进单独抬字号”的路径。不能把混尺度公式写成常驻断言或据其硬缩字。需HQ修订标尺口径。此结论不代表目标已经达标：16.6261略高于16.5，行高比1.4671仍低于目标。
+2. **表格与装订件诊断**：`TableBlockProjection.module.css:10` 当前14.7px=正文减2px，档位0.88024，同尺度900等效14.63496；`:16-17` 的max-content配min-width:100%确实撑满内容区；`:37-39` 为8em最小列宽与8×10px padding。`NoteDetail.module.css:3594` 装订件12px对应同尺度11.94690、正文比0.71856。合成测量不是原用户笔记重走；用户库未碰。按停线要求，表格三修及装订调整均未施工。
+3. **第二处冲突**：全量现役 `server/src/__tests__/v2SourceRegionCells.test.ts:183-209` 会清除command mock、指定真实MinerU Python并调用parser；`sourceMineruParser.ts:147-155` 明确运行pipeline/ocr并开启公式与表格识别，`:774-790` 启动子进程。“全库零排除”与“禁真实模型调用”在该本地OCR路径上需HQ明确边界；没有执行、跳过或伪造此测试。
+4. **新旧断言申报**：现有排印/分页/对齐断言全部“旧值→原值”，零处更新；T3常驻标尺“无→未新增”，因公式冲突停线。临时DOM诊断不冒充常驻验收。没有弱化断言。
+5. **验证申报与未做项**：验证门盘点为“**非git/secrets 25组件，执行0/25（诊断停线）**”；git diff检查及secrets两组件留HQ。server全量盘点111文件=84主集+27补集，含v13WildernessExecute，恢复时预算须≥600000ms/文件。本轮未跑client全库、server全量或验证门；未申报绿。未完成默认参数修正、表格三修、常驻标尺与回归。
+6. **禁区射程**：本轮及只读辅助agent没有git写操作/改.git、用户库操作、heading补种、真实模型调用、新依赖/工具面/prompt/Relation判定改动、schema或content/metadata/display_overrides新键、分页/坐标机制修改、字族/颜色/新token、合成凭据或新设计安全对抗用例；904/1278/760不动。辅助agent零写零测试，单builder串行。仅新增诊断证据与本Result，原走查/工单正文未改。

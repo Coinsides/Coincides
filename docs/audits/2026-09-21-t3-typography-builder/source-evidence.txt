@@ -1,0 +1,364 @@
+
+FILE client/src/pages/Notes/canvasEngine/typographyProfileService.ts
+SHA256 86d5fcaced74eca410ff0c97979ddbf1b2a6201dcfa6ea64fdfef3c1ceb6a3a7
+19: export const DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE: DocumentTypographyProfile = {
+20:   profileId: 'default-document',
+21:   fontFamily: 'Aptos, Calibri, "Segoe UI", Arial, sans-serif',
+22:   fontSizePx: 15,
+23:   lineHeightPx: 22,
+24:   paragraphSpacingPx: 0,
+25:   averageCharWidthPx: 7.2,
+26: };
+27: 
+107:   return Number.isFinite(value)
+108:     && value >= DOCUMENT_TYPOGRAPHY_LIMITS.minAverageCharWidthPx
+109:     && value <= DOCUMENT_TYPOGRAPHY_LIMITS.maxAverageCharWidthPx;
+110: }
+111: 
+112: export function estimateAverageCharWidthForTypography(
+113:   profile: Pick<DocumentTypographyProfile, 'fontSizePx'>,
+114: ): number {
+115:   return roundOne(clamp(
+116:     profile.fontSizePx * 0.48,
+117:     DOCUMENT_TYPOGRAPHY_LIMITS.minAverageCharWidthPx,
+118:     DOCUMENT_TYPOGRAPHY_LIMITS.maxAverageCharWidthPx,
+119:   ));
+120: }
+121: 
+122: export function normalizeDocumentTypographyProfile(input: unknown): DocumentTypographyProfile {
+123:   const rawProfile = isRecord(input) ? input : {};
+124:   const fontSizePx = roundOne(clamp(
+125:     finiteNumber(rawProfile.fontSizePx, DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.fontSizePx),
+126:     DOCUMENT_TYPOGRAPHY_LIMITS.minFontSizePx,
+127:     DOCUMENT_TYPOGRAPHY_LIMITS.maxFontSizePx,
+128:   ));
+129:   const minLineHeight = Math.max(fontSizePx + 2, DOCUMENT_TYPOGRAPHY_LIMITS.minLineHeightPx);
+130:   const lineHeightPx = roundOne(clamp(
+131:     finiteNumber(rawProfile.lineHeightPx, DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE.lineHeightPx),
+132:     minLineHeight,
+133:     DOCUMENT_TYPOGRAPHY_LIMITS.maxLineHeightPx,
+134:   ));
+135:   const paragraphSpacingPx = roundOne(clamp(
+216: export function documentTypographyToCssVars(
+217:   typography: DocumentTypographyProfile = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+218: ): Record<string, string> {
+219:   const normalized = normalizeDocumentTypographyProfile(typography);
+220:   return {
+221:     '--document-font-family': normalized.fontFamily,
+222:     '--document-font-size': `${normalized.fontSizePx}px`,
+223:     '--document-line-height': `${normalized.lineHeightPx}px`,
+224:     '--document-paragraph-spacing': `${normalized.paragraphSpacingPx}px`,
+225:   };
+226: }
+
+FILE client/src/pages/Notes/canvasEngine/pageFrameTypographyService.ts
+SHA256 b77f5f3391a2c0e76cd0c56b259135ba2662b21189b25e71cb061b0b4b98e8fa
+22: }
+23: 
+24: export function createPageFrameDefaultTypographyProfile(
+25:   frame?: Partial<PageFrameModel>,
+26: ): DocumentTypographyProfile {
+27:   const family = getPageFrameTypographyFamily(frame);
+28:   const baseline = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE;
+29:   const pageSize = frame?.pageSize
+30:     ?? (frame?.templateId === 'letter_portrait' ? 'Letter' : 'A4');
+31:   const printProfile = createPageFramePrintProfile(pageSize);
+32:   const { physicalScale } = getPageFramePhysicalMapping(
+33:     pageSize,
+34:     frame?.width ?? printProfile.width,
+35:     frame?.templateId,
+36:     frame?.paperSizeReferenceWidth,
+37:   );
+38:   const fontSizePx = family === 'paper' ? (11 * 96 / 72) / physicalScale : 16;
+39:   // Keep the existing family's line/paragraph/character proportions. For paper,
+40:   // each measure is converted from the 11pt family before one normalization pass.
+41:   const ratio = fontSizePx / baseline.fontSizePx;
+42:   return normalizeDocumentTypographyProfile({
+43:     ...baseline,
+44:     profileId: family === 'paper' ? 'paper-document' : 'web-document',
+45:     fontSizePx,
+46:     lineHeightPx: baseline.lineHeightPx * ratio,
+47:     paragraphSpacingPx: baseline.paragraphSpacingPx * ratio,
+48:     averageCharWidthPx: baseline.averageCharWidthPx * ratio,
+49:   });
+50: }
+60:   hydratedProfile: DocumentTypographyProfile;
+61: }): DocumentTypographyProfile {
+62:   if (hasDocumentTypographyProfileOverride(metadata)) {
+63:     return hydratedProfile;
+64:   }
+65:   // A note has one effective profile: selection changes never change the family.
+66:   return createPageFrameDefaultTypographyProfile(pageFrames?.[0]);
+67: }
+68: 
+
+FILE client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts
+SHA256 a84519443a5b4c70800c50404294a663d666a586154b4290040e5d5438a927e1
+74:   templateId?: PageFrameTemplateId,
+75:   referenceWidth?: number,
+76: ): Pick<PageFramePrintProfile, 'physicalWidthMm' | 'physicalScale'> {
+77:   const physical = pageSize === 'Custom' ? null : PAPER_PHYSICAL_SIZES_MM[pageSize];
+78:   const nominalWidthMm = pageSize === 'Custom'
+79:     ? null
+80:     : templateId?.endsWith('_landscape') ? physical!.height : physical!.width;
+81:   const anchoredWidth = referenceWidth && Number.isFinite(referenceWidth) && referenceWidth > 0
+82:     ? referenceWidth : internalWidth;
+83:   const physicalWidthMm = nominalWidthMm === null ? null : anchoredWidth === internalWidth
+84:     ? nominalWidthMm : nominalWidthMm * internalWidth / anchoredWidth;
+85:   return {
+86:     physicalWidthMm,
+87:     // Continuous presentation scale: only derived typography is quantized.
+88:     physicalScale: physicalWidthMm === null || templateId === 'screen_note'
+89:       ? 1
+90:       : (nominalWidthMm! / 25.4 * 96) / anchoredWidth,
+91:   };
+92: }
+93: 
+94: export function createPageFramePrintProfile(
+95:   pageSize: PageFramePageSize = DEFAULT_PAGE_FRAME_PAGE_SIZE,
+96:   typography: DocumentTypographyProfile = createDefaultDocumentTypographyProfile(),
+97: ): PageFramePrintProfile {
+98:   const preset = pageSize === 'Custom'
+99:     ? PAGE_FRAME_PRINT_PRESETS[DEFAULT_PAGE_FRAME_PAGE_SIZE]
+100:     : PAGE_FRAME_PRINT_PRESETS[pageSize] || PAGE_FRAME_PRINT_PRESETS[DEFAULT_PAGE_FRAME_PAGE_SIZE];
+
+FILE client/src/pages/Notes/canvasEngine/pageReadingViewportService.ts
+SHA256 8f5cfd3e6ba0e713f47e271dde96828bc38762029c89edbda47c4246d6cf6ea5
+57: }: DerivePageReadingViewportOptions): PageReadingViewport {
+58:   const width = positiveFiniteOr(paperWidth, 1);
+59:   const height = positiveFiniteOr(paperHeight, 1);
+60:   const fitWidthScale = positiveFiniteOr(availableWidth, width) / width;
+61:   const fitHeightScale = positiveFiniteOr(availableHeight, height) / height;
+62:   const isLongPage = height / width > 3;
+63:   const effectiveGear = viewState.gear === 'fit_page' && isLongPage ? 'fit_width' : viewState.gear;
+64:   const baseScale = effectiveGear === 'physical'
+65:     ? positiveFiniteOr(physicalScale, 1)
+66:     : effectiveGear === 'fit_page'
+67:       ? Math.min(fitWidthScale, fitHeightScale)
+68:       : fitWidthScale;
+69:   const stepFactor = normalizePageReadingStepFactor(viewState.stepFactor);
+70: 
+71:   return {
+72:     gear: viewState.gear,
+73:     effectiveGear,
+74:     stepFactor,
+75:     baseScale,
+76:     displayScale: baseScale * stepFactor,
+77:     isLongPage,
+78:   };
+79: }
+
+FILE client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+SHA256 c9d9d5af0a2ced2a466f3534be173fe61ac4d42c443288e922aef0ea28088243
+1690:       <div
+1691:         className={surfaceMode === 'page' ? styles.pageReadingPaper : undefined}
+1692:         data-page-display-scale={surfaceMode === 'page' ? pageReading.displayScale : undefined}
+1693:         data-page-reading-gear={surfaceMode === 'page' ? readingViewState.gear : undefined}
+1694:         data-page-reading-effective-gear={surfaceMode === 'page' ? pageReading.effectiveGear : undefined}
+1695:         data-page-reading-step={surfaceMode === 'page' ? readingViewState.stepFactor : undefined}
+1696:         style={surfaceMode === 'page' ? {
+1697:           ...primaryPageFrameTemplateStyle,
+1698:           width: pageReading.paperWidth,
+1699:           height: pageReading.paperHeight,
+1700:           ...(paperHeader || noteCanvasRuntime.pageFlowPlan ? { background: 'transparent', outline: 'none' } : {}),
+1701:           ...(noteCanvasRuntime.pageFlowPlan ? { boxShadow: 'none' } : {}),
+1702:           left: -pageDisplayBounds.left * pageReading.displayScale,
+1703:           top: (displayHeaderHeight - pageDisplayBounds.top) * pageReading.displayScale,
+1704:           paddingTop: pageReading.inset.top,
+1705:           paddingLeft: pageReading.inset.left,
+1706:           transform: `scale(${pageReading.displayScale})`,
+1707:           transformOrigin: '0 0',
+1708:         } : { display: 'contents' }}
+1738:         data-document-typography-profile={documentTypography.profileId}
+1739:         data-document-font-size={documentTypography.fontSizePx}
+1740:         data-document-line-height={documentTypography.lineHeightPx}
+1741:         style={{
+1742:           minHeight: pageReading.paperHeight - pageReading.inset.top - pageReading.inset.bottom,
+1743:           ...(surfaceMode === 'page' ? { width: pageReading.layoutWidth } : {}),
+1744:           ...documentTypographyStyle,
+1745:           ...primaryPageFrameTemplateStyle,
+1746:           '--formal-page-offset-x': `${primaryPageFrameX}px`,
+1747:           '--formal-page-width': `${primaryPageFrameWidth}px`,
+1748:         } as CSSProperties & Record<string, string | number>}
+
+FILE client/src/pages/Notes/canvasEngine/blocks/TableBlockProjection.module.css
+SHA256 8a82a6fde9054715976fc437352bd8a0dfd12df117a98b0266b1cff12e6c3e1f
+1: .viewport {
+2:   box-sizing: border-box;
+3:   width: 100%;
+4:   max-width: 100%;
+5:   min-width: 0;
+6:   overflow-x: auto;
+7:   overscroll-behavior-x: contain;
+8:   color: var(--sk-ink, var(--text-primary));
+9:   font-family: var(--document-font-family, inherit);
+10:   font-size: calc(var(--document-font-size, 15px) - 2px);
+11:   line-height: calc(var(--document-line-height, 22px) - 2px);
+12: }
+13: 
+14: .table {
+15:   width: max-content;
+16:   min-width: 100%;
+17:   table-layout: auto;
+18:   border-collapse: collapse;
+19:   font: inherit;
+20:   text-align: left;
+21: }
+22: 
+23: .table caption {
+24:   padding: 0 0 10px;
+25:   color: var(--sk-ink-muted, var(--text-secondary));
+26:   font: inherit;
+27:   font-weight: 600;
+28:   text-align: left;
+29:   white-space: pre-wrap;
+30:   overflow-wrap: anywhere;
+31: }
+32: 
+33: .table th,
+34: .table td {
+35:   box-sizing: border-box;
+36:   min-width: 8em;
+37:   max-width: 24em;
+38:   padding: 8px 10px;
+39:   border-bottom: 1px solid var(--sk-hairline, var(--border-default));
+40:   vertical-align: top;
+41:   white-space: pre-wrap;
+42:   overflow-wrap: anywhere;
+43: }
+44: 
+45: .table th {
+46:   font-weight: 600;
+47:   background: color-mix(in srgb, var(--sk-ink, var(--text-primary)) 9%, var(--sk-paper, var(--bg-primary)));
+
+FILE client/src/pages/Notes/NoteDetail.module.css
+SHA256 f535e5e39cf7ae625ee53d9b5b0eade8942a213b94f29e828ed30c04b6542312
+3582: }
+3583: 
+3584: .pageFrameSlot {
+3585:   position: absolute;
+3586:   z-index: 1;
+3587:   pointer-events: none;
+3588:   display: flex;
+3589:   align-items: center;
+3590:   justify-content: center;
+3591:   overflow: hidden;
+3592:   color: var(--sk-ink-muted, var(--text-muted));
+3593:   font-family: var(--sk-label-font, var(--document-font-family, sans-serif));
+3594:   font-size: 12px;
+3595:   line-height: 1;
+3596: }
+3597: 
+3598: .pageFrameHeaderSlot {
+3599:   border-bottom: 1px solid color-mix(in srgb, var(--border-default) 42%, transparent);
+3600: }
+3601: 
+3602: .pageFrameFooterSlot {
+3603:   border-top: 1px solid color-mix(in srgb, var(--border-default) 34%, transparent);
+3604: }
+3605: 
+3606: .pageFramePageNumberSlot {
+3607:   letter-spacing: 0;
+3608:   opacity: 0.78;
+3609: }
+
+FILE server/src/__tests__/v2SourceRegionCells.test.ts
+SHA256 05d9f9d497d791cd91fb8b3e8dd480d41e955633ad4b2a6a343f39307c8d6369
+183: test('V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable', async (t) => {
+184:   assert.equal(existsSync(SAMPLE_PDF), true, `missing read-only evidence sample: ${SAMPLE_PDF}`);
+185:   assert.equal(existsSync(MINERU_PYTHON), true, `missing pinned MinerU runtime: ${MINERU_PYTHON}`);
+186: 
+187:   const directory = mkdtempSync(join(tmpdir(), 'coincides-source-region-cells-'));
+188:   const sourceRootDir = join(directory, 'source-blobs');
+189:   const canvasAssetRootDir = join(directory, 'canvas-assets');
+190:   const environment = new Map(ENV_KEYS.map((key) => [key, process.env[key]]));
+191:   try {
+192:     delete process.env.COINCIDES_MINERU_COMMAND_JSON;
+193:     delete process.env.COINCIDES_MINERU_COMMAND_TIMEOUT_MS;
+194:     process.env.COINCIDES_PDF_PARSER = 'mineru';
+195:     process.env.COINCIDES_MINERU_LANGUAGE = 'en';
+196:     process.env.COINCIDES_MINERU_PYTHON = MINERU_PYTHON;
+197:     process.env.SOURCE_BLOB_DIR = sourceRootDir;
+198:     process.env.CANVAS_ASSET_DIR = canvasAssetRootDir;
+199: 
+200:     const pdfBytes = await onePagePdf();
+201:     const parserInputPath = join(directory, 'listening-page-30.pdf');
+202:     writeFileSync(parserInputPath, pdfBytes);
+203:     const artifact = await parseSourceArtifact({
+204:       parser_key: 'mineru',
+205:       parser_version: mineruParserVersion(),
+206:       file_path: parserInputPath,
+207:       original_filename: 'ielts-listening-page-30.pdf',
+208:       mime_type: 'application/pdf',
+209:     });
+210:     const table = tableBlock(artifact);
+211: 
+212:     const db = await initDb(join(directory, 'test.db'));
+213:     const { userId, courseId } = seedUserCourse(db);
+214:     const intake = await intakePdf(
+215:       db,
+
+FILE server/src/services/sourceMineruParser.ts
+SHA256 4d14eaae2836cc2e08f9a04f2f53e0cdca4b779a45510f8f1a7338d1e6659f0b
+147:     do_parse(
+148:         output_dir=str(output),
+149:         pdf_file_names=[source.stem],
+150:         pdf_bytes_list=[read_fn(source)],
+151:         p_lang_list=[args.lang],
+152:         backend="pipeline",
+153:         parse_method="ocr",
+154:         formula_enable=True,
+155:         table_enable=True,
+156:         f_draw_layout_bbox=False,
+157:         f_draw_span_bbox=False,
+158:         f_dump_md=True,
+159:         f_dump_middle_json=True,
+160:         f_dump_content_list=True,
+161:         f_dump_model_output=False,
+162:         f_dump_orig_pdf=False,
+163:     )
+164:     candidates = list(output.rglob("*_content_list.json"))
+165:     if len(candidates) != 1:
+266:   const configuredPython = process.env.COINCIDES_MINERU_PYTHON?.trim();
+267:   const executable = configuredPython || (process.platform === 'win32'
+268:     ? fileURLToPath(new URL('.venv/Scripts/python.exe', MINERU_PROJECT_URL))
+269:     : fileURLToPath(new URL('.venv/bin/python', MINERU_PROJECT_URL)));
+270:   if (!existsSync(executable)) {
+271:     throw new SourceMineruParserError(
+272:       'internal_interrupted',
+273:       `MinerU runtime is not provisioned at ${executable}`,
+274:     );
+275:   }
+276:   return { executable, args: ['-B', runnerPath] };
+277: }
+765:     mkdtemp(join(tmpdir(), 'coincides-mineru-')),
+766:     deadlineMs,
+767:     'runtime setup',
+768:   );
+769:   const runnerPath = join(runtimeDir, 'runner.py');
+770:   const outputDir = join(runtimeDir, 'output');
+771:   const resultPath = join(runtimeDir, 'result.json');
+772:   try {
+773:     await withinMineruDeadline(
+774:       writeFile(runnerPath, PYTHON_RUNNER, 'utf8'),
+775:       deadlineMs,
+776:       'runner setup',
+777:     );
+778:     const command = commandFromEnvironment(runnerPath);
+779:     const args = [
+780:       ...command.args,
+781:       '--input', input.file_path,
+782:       '--output', outputDir,
+783:       '--result', resultPath,
+784:       '--lang', process.env.COINCIDES_MINERU_LANGUAGE?.trim() || 'en',
+785:     ];
+786:     await runMineruChild(
+787:       command.executable,
+788:       args,
+789:       childTimeoutMs(remainingMineruTime(deadlineMs, 'subprocess execution')),
+790:     );
+791:     let envelope: MineruRunnerEnvelope;
+792:     try {
+793:       envelope = runnerEnvelope(JSON.parse(await withinMineruDeadline(
+794:         readFile(resultPath, 'utf8'),
+795:         deadlineMs,
