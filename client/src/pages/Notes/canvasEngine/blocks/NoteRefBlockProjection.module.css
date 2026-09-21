@@ -16,6 +16,6 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.title { font-size: 36px; font-weight: 700; line-height: 1.5; }
-.description { font-size: 18px; line-height: 1.55; }
+.title { font-family: var(--sk-title-font, inherit); font-size: var(--sk-paper-title-size); font-weight: var(--sk-paper-title-weight); line-height: 1.5; }
+.description { font-family: var(--sk-label-font, inherit); font-size: var(--document-font-size); line-height: 1.55; }
 .projection:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }

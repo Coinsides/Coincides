@@ -32,6 +32,19 @@ function props(withCover = true): NoteCoverPageControlsProps {
 }
 
 describe('NoteCoverPageControls', () => {
+  it.each(['手册式', '简明式'])('T7 applies %s only in cover context and keeps all existing controls available', async (name) => {
+    const input = props();
+    input.onApplyPreset = vi.fn().mockResolvedValue(undefined);
+    const view = render(<NoteCoverPageControls {...input} />);
+    fireEvent.click(screen.getByRole('button', { name: `套用${name}封面` }));
+    await screen.findByText(`已套用${name}，可继续编辑或撤销。`);
+    expect(input.onApplyPreset).toHaveBeenCalledExactlyOnceWith(name === '手册式' ? 'manual' : 'concise');
+    expect(screen.getByRole('button', { name: '添加题名件' }).matches(':disabled')).toBe(false);
+    expect(input.onSave).not.toHaveBeenCalled();
+    view.rerender(<NoteCoverPageControls {...props(false)} onApplyPreset={input.onApplyPreset} />);
+    expect(screen.queryByRole('group', { name: '封面版式预设' })).toBeNull();
+  });
+
   beforeEach(() => {
     capture.editor = null;
     vi.mocked(loadCanvasImageAssetBlobUrl).mockReset();

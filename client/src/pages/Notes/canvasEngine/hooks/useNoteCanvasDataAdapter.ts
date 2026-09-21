@@ -1424,7 +1424,7 @@ export function useNoteCanvasDataAdapter({
     const nextContent = options.contentJson || contentForTemplate(template, body);
     const nextKind = presentationKindForTemplate(template, true);
     const rollbackUnplacedBlock = options.requireAfterBlock || template.legacy_block_type === 'media' || template.legacy_block_type === 'table'
-      || template.legacy_block_type === 'component' || template.legacy_block_type === 'toc';
+      || template.legacy_block_type === 'component' || template.legacy_block_type === 'toc' || template.legacy_block_type === 'note_ref';
     let created: NoteBlock;
     const rollbackMediaCreation = async (failedOrderKey?: string) => {
       try {
@@ -1432,13 +1432,15 @@ export function useNoteCanvasDataAdapter({
         writeRegistry.confirm('placement:' + requestedNote.id + ':' + created.id);
         if (failedOrderKey) writeRegistry.confirm(failedOrderKey);
         if (requestIsCurrent()) addToast('error', options.requireAfterBlock
-          ? 'The answer could not be inserted below its anchor. Please retry.' : template.legacy_block_type === 'toc'
+          ? 'The answer could not be inserted below its anchor. Please retry.' : template.legacy_block_type === 'note_ref'
+          ? '封面绑定件未能落位，请重试。' : template.legacy_block_type === 'toc'
           ? 'The table of contents could not be placed. Please retry.' : template.legacy_block_type === 'component'
           ? 'The component could not be placed. Your edits are still open.' : template.legacy_block_type === 'table'
           ? 'The table could not be placed. Your edits are still open.' : 'The image could not be placed. Please paste it again.');
       } catch {
         if (requestIsCurrent()) addToast('error', options.requireAfterBlock
-          ? 'The answer insertion failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'toc'
+          ? 'The answer insertion failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'note_ref'
+          ? '封面绑定件未能落位，清理未完成。请重新打开笔记检查。' : template.legacy_block_type === 'toc'
           ? 'The table of contents placement failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'component'
           ? 'The component placement failed and cleanup could not finish. Reopen the note before retrying.' : template.legacy_block_type === 'table'
           ? 'The table placement failed and cleanup could not finish. Reopen the note before retrying.'
@@ -2698,8 +2700,14 @@ export function useNoteCanvasDataAdapter({
     options: { silent?: boolean } = {},
   ): Promise<NoteBlock | null> => {
     if (!allowSourceContentMutation()) return null;
+    const requestedNoteId = routeNoteIdRef.current;
+    const generation = routeRequestGenerationRef.current;
+    const epoch = successfulHydrationEpochRef.current;
+    const current = () => adapterMountActiveRef.current && routeNoteIdRef.current === requestedNoteId
+      && routeRequestGenerationRef.current === generation && successfulHydrationEpochRef.current === epoch;
     try {
       const res = await writeRegistry.track('block-status:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, { status: 'active' }));
+      if (!current()) return null;
       const restored = hydrateClientBlock({
         ...block,
         ...res.data,
@@ -2726,6 +2734,7 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('success', 'Block restored');
       return restored;
     } catch (err) {
+      if (!current()) return null;
       console.error('Failed to restore block:', err);
       if (!options.silent) addToast('error', 'Failed to restore block');
       return null;

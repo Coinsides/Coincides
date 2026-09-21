@@ -11,6 +11,7 @@ import {
   createDefaultNoteBindingSettings,
   NOTE_BINDING_SLOT_NAMES,
 } from '../../../shared/types/noteBinding.js';
+import { createManualBindingPreset } from '../../../shared/types/notePresets.js';
 import { closeDb, initDb } from '../db/init.js';
 import migration079 from '../db/migrations/079_v14_note_binding.js';
 import type { AuthRequest } from '../middleware/auth.js';
@@ -161,6 +162,45 @@ test('ordinary note edits retain binding settings and explicit null restores the
   assert.equal(reset.metadata.kept, 'metadata');
   assert.equal((f.db.prepare('SELECT binding_settings_json FROM notes WHERE id = ?').get(noteId) as any)
     .binding_settings_json, null);
+});
+
+test('manual binding preset persists through the ordinary PUT door, reopens, and remains editable', async (t) => {
+  const f = await fixture(); t.after(() => f.close());
+  const previous = createDefaultNoteBindingSettings();
+  previous.coverPage.exportIncluded = false;
+  previous.sections.push(createDefaultNoteBindingSection('old-section', 3));
+  const previousSnapshot = structuredClone(previous);
+  const note = await f.request('GET');
+  const preset = createManualBindingPreset(previous, note.title, 'Field notes');
+  assert.deepEqual(previous, previousSnapshot);
+  assert.deepEqual(preset.coverPage, previous.coverPage);
+  assert.deepEqual(preset.cover, previous.cover);
+  assert.equal(preset.sections.length, 1);
+  assert.equal(preset.sections[0].slots['header-center'].text, note.title);
+  assert.equal(preset.sections[0].slots['footer-right'].text, 'Field notes');
+  assert.deepEqual(preset.sections[0].pageNumber, {
+    enabled: true, startAt: 1, format: 'arabic', prefix: '第 ', suffix: ' 纸', slot: 'footer-center',
+  });
+  assert.equal(createManualBindingPreset(previous, note.title).sections[0].slots['footer-right'].text, '');
+
+  const applied = await f.request('PUT', `/${noteId}/binding-settings`, { binding_settings: preset });
+  assert.deepEqual(applied.binding_settings, preset);
+  await f.reopen();
+  assert.deepEqual((await f.request('GET', `/${noteId}/binding-settings`)).binding_settings, preset);
+  assert.deepEqual(JSON.parse((f.db.prepare('SELECT binding_settings_json FROM notes WHERE id = ?').get(noteId) as any)
+    .binding_settings_json), preset);
+
+  const edited = structuredClone(preset);
+  edited.sections[0].slots['header-center'].text = 'Edited running title';
+  edited.sections[0].slots['footer-right'].text = 'Revised footer';
+  edited.sections[0].pageNumber.prefix = 'Page ';
+  edited.sections[0].pageNumber.suffix = '';
+  assert.deepEqual((await f.request('PUT', `/${noteId}/binding-settings`, { binding_settings: edited })).binding_settings,
+    edited);
+  await f.reopen();
+  assert.deepEqual((await f.request('GET', `/${noteId}/binding-settings`)).binding_settings, edited);
+  assert.deepEqual(JSON.parse((f.db.prepare('SELECT binding_settings_json FROM notes WHERE id = ?').get(noteId) as any)
+    .binding_settings_json), edited);
 });
 
 test('section editing validates first page, increasing boundaries, unique ids, and normal numeric limits', () => {

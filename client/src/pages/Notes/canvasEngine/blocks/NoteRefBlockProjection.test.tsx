@@ -5,6 +5,20 @@ import { NoteTruthBindingProvider, type NoteTruthBindingValue } from '../NoteTru
 import { NoteRefBlockProjection } from './NoteRefBlockProjection';
 
 describe('NoteRefBlockProjection note truth binding', () => {
+  it.each([
+    [{ width: 760 }, { width: 72 }],
+    [{ fontSize: 34, fontFamily: 'sans-serif' }, { fontSize: 36, fontFamily: 'serif' }],
+  ])('T7 remeasures unchanged truth when placement or inherited typography changes (%j)', (before, after) => {
+    const value = { title: '原题名不变', description: '', onChange: vi.fn() };
+    const editor = (style: React.CSSProperties) => <div style={style}><NoteTruthBindingProvider value={value}><NoteRefBlockProjection field="title" /></NoteTruthBindingProvider></div>;
+    const view = render(editor(before));
+    const input = screen.getByRole('textbox') as HTMLTextAreaElement;
+    Object.defineProperty(input, 'scrollHeight', { configurable: true, value: 270 });
+    view.rerender(editor(after));
+    expect(input.style.height).toBe('270px');
+    expect(input.value).toBe(value.title); expect(value.onChange).not.toHaveBeenCalled();
+  });
+
   it('projects title and description directly from note truth and follows external updates', () => {
     const value = { title: '原题名', description: '原述名' };
     const view = render(<NoteTruthBindingProvider value={value}>

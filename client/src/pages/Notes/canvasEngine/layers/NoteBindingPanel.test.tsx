@@ -6,6 +6,43 @@ import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
 
 afterEach(cleanup);
 describe('A2 binding controls', () => {
+  it('T7 applies handbook binding immediately, retains cover settings, then accepts ordinary edits', async () => {
+    const value = createDefaultNoteBindingSettings();
+    value.coverPage = { frameId: 'cover', exportIncluded: false };
+    value.cover = { assetId: 'cover-art' };
+    const save = vi.fn(async (_value: NoteBindingSettings) => {}), close = vi.fn();
+    render(<NoteBindingPanel value={value} pageCount={3} noteTitle="现役题名" onSave={save} onClose={close} />);
+    fireEvent.change(screen.getByLabelText('手册脚右文案'), { target: { value: '自选脚注' } });
+    fireEvent.click(screen.getByRole('button', { name: '套用手册式装订' }));
+    await screen.findByText('已套用手册式装订，可继续编辑。');
+    expect(save).toHaveBeenCalledTimes(1); expect(close).not.toHaveBeenCalled();
+    const preset = save.mock.calls[0][0];
+    expect(preset).toMatchObject({ coverPage: value.coverPage, cover: value.cover, sections: [{
+      startPage: 1, pageNumber: { slot: 'footer-center', prefix: '第 ', suffix: ' 纸' },
+      slots: { 'header-center': { text: '现役题名', style: {} }, 'footer-right': { text: '自选脚注', style: {} } },
+    }] });
+    fireEvent.change(screen.getByLabelText('眉中文案'), { target: { value: '套用后手改' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存装订' }));
+    await waitFor(() => expect(close).toHaveBeenCalledOnce());
+    expect(save.mock.calls[1][0].sections[0].slots['header-center'].text).toBe('套用后手改');
+    expect(value.sections[0].slots['header-center'].text).toBe('');
+  });
+
+  it('T7 leaves the draft intact after a failed preset save and prevents double application', async () => {
+    let fail!: (error: Error) => void;
+    const pending = new Promise<void>((_resolve, reject) => { fail = reject; });
+    const save = vi.fn(() => pending);
+    render(<NoteBindingPanel pageCount={1} noteTitle="题名" onSave={save} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText('眉中文案'), { target: { value: '原草稿' } });
+    const button = screen.getByRole('button', { name: '套用手册式装订' });
+    fireEvent.click(button); fireEvent.click(button);
+    expect(save).toHaveBeenCalledOnce();
+    await act(async () => { fail(new Error('offline')); });
+    await screen.findByRole('alert');
+    expect((screen.getByLabelText('眉中文案') as HTMLInputElement).value).toBe('原草稿');
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('edits independent sections, template affixes, six slots and overrides, then saves a note setting', async () => {
     const save = vi.fn(async (_value: NoteBindingSettings) => {}), close = vi.fn();
     render(<NoteBindingPanel pageCount={4} onSave={save} onClose={close} />);

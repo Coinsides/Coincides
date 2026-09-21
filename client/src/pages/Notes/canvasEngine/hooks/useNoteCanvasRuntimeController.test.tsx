@@ -334,6 +334,24 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
       current: projection('current-binding', 'rebuilt-cover') };
   }
 
+  it.each(['manual', 'concise'] as const)('T7 wires %s through the real runtime history lane and ordinary note_ref creation', async (id) => {
+    coverBindingCase('title');
+    rootBridgeContract.createBlock.mockImplementation(async (_template, _text, options) => {
+      const { contentJson, layout } = options as { contentJson: { field: string }; layout: BlockBoxLayout };
+      return { ...formalPageSpecimen, id: contentJson.field, block_type: 'note_ref', content_json: contentJson, canvas_layout: { ...layout } };
+    });
+    render(<RootBridgeHarness />);
+    await act(async () => { await rootBridgeContract.presentationOptions!.onApplyCoverPreset!(id); });
+    expect(rootBridgeContract.createBlock).toHaveBeenCalledTimes(2);
+    for (const [template, text, options] of rootBridgeContract.createBlock.mock.calls) {
+      expect(template).toMatchObject({ legacy_block_type: 'note_ref' }); expect(text).toBe('');
+      expect(options).toMatchObject({ layout: { frame_id: 'rebuilt-cover', width_mode: 'manual', coordinate_space: 'page_frame_local' } });
+    }
+    expect(rootBridgeContract.enqueueRuntimeHistoryOperation).toHaveBeenCalledOnce();
+    expect(rootBridgeContract.pushHistoryEntry).toHaveBeenCalledWith(expect.objectContaining({ type: 'reversibleEdit' }), { skipBoundary: true });
+    expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledWith('title');
+  });
+
   it.each(['title', 'description'] as const)('focuses the current cover %s projection even when the content page retains an earlier one', async (field) => {
     const specimens = coverBindingCase(field);
     rootBridgeContract.blocks = [specimens.old, specimens.current];

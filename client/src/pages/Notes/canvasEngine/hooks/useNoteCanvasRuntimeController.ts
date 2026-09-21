@@ -27,6 +27,7 @@ import { useNoteSkin } from './useNoteSkin';
 import { useNoteBinding } from './useNoteBinding';
 import { useNoteAgentHumanEditor } from './useNoteAgentHumanEditor';
 import { getNoteBindingCoverPage } from '../../../../../../shared/types/noteBinding';
+import { applyCoverPreset } from '../applyCoverPreset';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
@@ -43,6 +44,9 @@ export function useNoteCanvasRuntimeController() {
   const paperBoundaryRef = useRef<() => boolean>(() => false);
   const paperBusyRef = useRef(false);
   const paperLayoutsRef = useRef<Record<string, BlockBoxLayout>>({});
+  const presetScope = useRef({ noteId, generation: 0 });
+  const presetMounted = useRef(true);
+  useLayoutEffect(() => { presetMounted.current = true; return () => { presetMounted.current = false; }; }, []);
   const addToast = useUIStore((state) => state.addToast);
   const {
     activeBlockId,
@@ -208,6 +212,7 @@ export function useNoteCanvasRuntimeController() {
     noteId,
     hostMode,
   });
+  presetScope.current = { noteId, generation: textHistoryGeneration };
 
   const walls = usePageFrameWalls({
     noteId, generation: textHistoryGeneration, enabled: layoutMode && surfaceMode === 'page' && !loading && !sourceProjectionPolicy.contentReadOnly,
@@ -748,6 +753,31 @@ export function useNoteCanvasRuntimeController() {
     onDeleteCanvasObject: inkCommands.deleteCanvasObject,
     onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
     onSaveBindingSettings: binding.loading || binding.error ? undefined : binding.save,
+    onApplyCoverPreset: binding.loading || binding.error || sourceProjectionPolicy.contentReadOnly ? undefined : async (id) => {
+      if (paperBusyRef.current || chapters.isMoving || headingStructure.isBusy() || !textHistory.boundary()) {
+        throw new Error('请先完成当前编辑。');
+      }
+      const scope = presetScope.current;
+      const current = () => presetMounted.current && presetScope.current.noteId === scope.noteId && presetScope.current.generation === scope.generation;
+      const frame = flowPageFrameCollection?.pageFrames.find((entry) => entry.id === coverFrameId);
+      if (!frame) throw new Error('请先添加封面页。');
+      let failure: unknown;
+      const saved = await enqueueRuntimeHistoryOperation(async () => {
+        try {
+          const selected = await applyCoverPreset(id, { frame, blocks, layouts: unpaginatedBlockLayouts, current,
+            create: (field, layout) => createBlock({ ...defaultTextTemplate, legacy_block_type: 'note_ref' }, '', {
+              contentJson: { field }, layout,
+            }),
+            place: persistBlockLayout, trash: (blockId) => trashBlock(blockId, { silent: true }),
+            restore: (block) => restoreBlock(block, { silent: true }),
+            remember: (entry) => pushHistoryEntry(entry, { skipBoundary: true }),
+          });
+          if (current()) { markBlockSelected(selected); setFocusBlockId(selected); }
+          return true;
+        } catch (error) { failure = error; return false; }
+      });
+      if (!saved) throw failure ?? new Error('封面版式未保存，请重试。');
+    },
     onAddNoteBinding: binding.loading || binding.error || sourceProjectionPolicy.contentReadOnly ? undefined : async (field) => {
       if (!textHistory.boundary()) throw new Error('请先完成当前编辑。');
       const frame = flowPageFrameCollection?.pageFrames.find((frame) => frame.id === coverFrameId);

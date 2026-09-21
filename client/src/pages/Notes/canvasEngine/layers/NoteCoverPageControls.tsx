@@ -5,6 +5,7 @@ import { NoteCoverEditor } from '../../../Courses/noteCover/NoteCoverEditor';
 import { loadCanvasImageAssetBlobUrl, uploadCanvasImageAsset } from '../canvasAssetRepository';
 import { addNoteCoverPage, removeNoteCoverPage } from '../noteCoverPageCollection';
 import type { PageFrameCollectionModel } from '../types';
+import { COVER_PRESETS, type CoverPresetId } from '../../../../../../shared/types/notePresets';
 
 export interface NoteCoverPageControlsProps {
   noteId: string;
@@ -14,15 +15,17 @@ export interface NoteCoverPageControlsProps {
   onChange: (value: NoteBindingSettings) => void;
   onSave: (value: NoteBindingSettings, collection?: PageFrameCollectionModel) => Promise<void>;
   onAddBinding: (field: 'title' | 'description') => Promise<void>;
+  onApplyPreset?: (id: CoverPresetId) => Promise<void>;
   onBusyChange?: (busy: boolean) => void;
 }
 
-export function NoteCoverPageControls({ noteId, collection, value, onChange, onSave, onAddBinding, onBusyChange }: NoteCoverPageControlsProps) {
+export function NoteCoverPageControls({ noteId, collection, value, onChange, onSave, onAddBinding, onApplyPreset, onBusyChange }: NoteCoverPageControlsProps) {
   const settings = upgradeNoteBindingSettings(value);
   const coverId = settings.coverPage.frameId;
   const frame = collection.pageFrames.find((frame) => frame.id === coverId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [editing, setEditing] = useState<{ assetId: string; url: string; frame?: NoteCoverFrame } | null>(null);
   const alive = useRef(true);
   const inFlight = useRef(false);
@@ -39,7 +42,7 @@ export function NoteCoverPageControls({ noteId, collection, value, onChange, onS
   useEffect(() => () => { if (editing) URL.revokeObjectURL(editing.url); }, [editing]);
   const act = async (operation: () => Promise<void>) => {
     if (inFlight.current) return;
-    inFlight.current = true; setBusy(true); setError(''); busyCallback.current?.(true);
+    inFlight.current = true; setBusy(true); setError(''); setNotice(''); busyCallback.current?.(true);
     try { await operation(); } catch (error) { if (alive.current) setError(error instanceof Error ? error.message : '封面未保存，请重试。'); }
     finally {
       inFlight.current = false;
@@ -61,6 +64,14 @@ export function NoteCoverPageControls({ noteId, collection, value, onChange, onS
       if (alive.current) onChange(next);
     })}>添加封面页</button> : <>
       <p>第 0 页可自由摆放文字与媒体，页眉、页脚和页码静默。</p>
+      {onApplyPreset && <div role="group" aria-label="封面版式预设">
+        {COVER_PRESETS.map((preset) => <button key={preset.id} type="button" disabled={busy}
+          onClick={() => void act(async () => {
+            await onApplyPreset(preset.id);
+            if (alive.current) setNotice(`已套用${preset.name}，可继续编辑或撤销。`);
+          })}>套用{preset.name}封面</button>)}
+        <p>重排封面题名与述名，保留其他内容和封面图。</p>
+      </div>}
       <button type="button" disabled={busy} onClick={() => void act(() => onAddBinding('title'))}>添加题名件</button>
       <button type="button" disabled={busy} onClick={() => void act(() => onAddBinding('description'))}>添加述名件</button>
       <label><input type="checkbox" checked={settings.coverPage.exportIncluded} disabled={busy}
@@ -86,6 +97,7 @@ export function NoteCoverPageControls({ noteId, collection, value, onChange, onS
       })}>移除封面页</button>
     </>}
     {busy && <p role="status">正在保存封面…</p>}
+    {notice && <p role="status">{notice}</p>}
     {error && <p role="alert">{error}</p>}
     {editing && frame && <NoteCoverEditor imageUrl={editing.url} initialFrame={editing.frame}
       aspectRatio={frame.width / frame.height} frameKind="page" error={error || undefined}

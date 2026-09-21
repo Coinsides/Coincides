@@ -48,6 +48,7 @@ export interface NoteChromeLayerProps {
   onRetryBinding?: () => void;
   onSaveBindingSettings?: (value: import('@shared/types/noteBinding').NoteBindingSettings, collection?: PageFrameCollectionModel) => Promise<void>;
   onAddNoteBinding?: (field: 'title' | 'description') => Promise<void>;
+  onApplyCoverPreset?: (id: import('@shared/types/notePresets').CoverPresetId) => Promise<void>;
   appearanceAnchorRef?: RefObject<HTMLButtonElement>;
   mountAppearanceCard?: boolean;
   hostMode?: 'page' | 'modal';
@@ -110,6 +111,7 @@ export function NoteChromeLayer({
   onRetryBinding,
   onSaveBindingSettings,
   onAddNoteBinding,
+  onApplyCoverPreset,
   appearanceAnchorRef,
   mountAppearanceCard = true,
   hostMode = 'page',
@@ -758,9 +760,10 @@ export function NoteChromeLayer({
             </div>
           </FloatingOverlayLayer>
       <FloatingOverlayLayer open={bindingOpen}>
-        {onSaveBindingSettings && <NoteBindingPanel key={note.id} value={note.binding_settings}
+        {onSaveBindingSettings && <NoteBindingPanel key={note.id} value={note.binding_settings} noteTitle={note.title}
           coverControls={onAddNoteBinding && !contentReadOnly ? {
             noteId: note.id, metadata: note.metadata, collection: pageFrameCollection, onAddBinding: onAddNoteBinding,
+            onApplyPreset: onApplyCoverPreset,
           } : undefined}
           pageCount={pageFrames.length} onSave={onSaveBindingSettings} onClose={() => setBindingOpen(false)} />}
       </FloatingOverlayLayer>

@@ -1,0 +1,90 @@
+[
+  {
+    "path": "shared/types/notePresets.ts",
+    "sha256": "83a77aeff76286522e60b0e1640513997bf4db76c00a3fd12d0b45a716706312"
+  },
+  {
+    "path": "client/src/pages/DesignStudio/TemplateDrawer.tsx",
+    "sha256": "ae4843bd80f1c9944a6482a16f3944ec72f16eaf35e3f8d7a9a8b70cd56ed53d"
+  },
+  {
+    "path": "client/src/pages/DesignStudio/TemplateDrawer.test.tsx",
+    "sha256": "4d2d6dcecbb1a9b06ad17f17b363cf01b7247922bc4fa20e3bffac6ad273a6b6"
+  },
+  {
+    "path": "client/src/pages/DesignStudio/DesignStudio.tsx",
+    "sha256": "d63b1b9e99126fe6d093a47cbbacc42135e4be58656c4bb8b7904107ef581fe0"
+  },
+  {
+    "path": "client/src/pages/DesignStudio/DesignStudio.test.tsx",
+    "sha256": "a70beee5db07831f81a0fb0dd8259d0f15694205f52a69380591a505d7223188"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/noteCoverPresets.ts",
+    "sha256": "af18d47bfc32c13fe91545dac40a753946546832c54a267bd951fce15a030056"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/applyCoverPreset.ts",
+    "sha256": "d0bb23dfbf7e382aa6c6100fa538bae05127aade7f6f78754a8674f00deaf66f"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/applyCoverPreset.test.tsx",
+    "sha256": "3a1cadf92b2fd552064e820aa164076802da8b4d97368c0109539d005646c963"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/blocks/NoteRefBlockProjection.tsx",
+    "sha256": "3f99f72ae26cd60438e9820f7417d82f6771703e004a6487d1b418f5ee64c43c"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/blocks/NoteRefBlockProjection.module.css",
+    "sha256": "ed8fe208e23c5d24a6747a3668a12ecae0656da6c8f02686ec933bc2130b21d3"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/blocks/NoteRefBlockProjection.test.tsx",
+    "sha256": "73fa82174a3615f21e72256caa1a00e5015bf6f335754c731c2a13636ef0084e"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+    "sha256": "dc66a062de481439a8a097028c18f724e495305327a6cf47fbd3297b1f24a4dd"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+    "sha256": "6b581a617c2379f1d1754eba64cb8615d2bae60b83b9885217d5d56e1d19836d"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+    "sha256": "ff77a679382f3f2e47bd6a0ca7c200fec402fc687d71f95d98ebd8c8cdcc92f7"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+    "sha256": "c87e401b67bd9f6f8aa857b483edfbf061d32f6ea09d2ffd5a80baca365d8913"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+    "sha256": "e3d643ffb019b6edaefafad616d7f6376ead5a98e86c70e48567a11051b6afe9"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/layers/NoteBindingPanel.tsx",
+    "sha256": "7e727cb7ac8dfa2776eb1086a532713cce62c1037f5941ee20d11b40b62c884a"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/layers/NoteBindingPanel.test.tsx",
+    "sha256": "ee4bb1ab912d7b7c84612675ef3fb7e209de6378795e2e0cea87488b820ec5c7"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+    "sha256": "68de940f8de6bb4e857b6fc0de87c785dcb11137c3ebed9888e2ae247ee3bcb4"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverPageControls.tsx",
+    "sha256": "145a2147fc81c3941e7544b8990f0da33c5889e958939abe9462657325e6617f"
+  },
+  {
+    "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverPageControls.test.tsx",
+    "sha256": "2bb624595cc5d9d8fe91de9a70a13d58d296cc6853b9ee3fdc62913e9f840e4e"
+  },
+  {
+    "path": "server/src/__tests__/v14NoteBinding.test.ts",
+    "sha256": "fa8add3a24244b66b4621f845678409d67e8e8816cfffe2dc7d165b5f5c4a43e"
+  }
+]

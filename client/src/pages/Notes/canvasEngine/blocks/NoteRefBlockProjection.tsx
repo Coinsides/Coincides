@@ -8,12 +8,14 @@ export function NoteRefBlockProjection({ field, readOnly = false }: {
   const binding = useNoteTruthBinding();
   const textarea = useRef<HTMLTextAreaElement>(null);
   const text = binding?.[field] ?? '';
+  // Placement and inherited typography can change without changing note truth.
+  // Measure after each render so switching presets or font roles keeps all lines visible.
   useLayoutEffect(() => {
     const element = textarea.current;
     if (!element) return;
     element.style.height = '0px';
     element.style.height = `${Math.max(element.scrollHeight, field === 'title' ? 54 : 28)}px`;
-  }, [text, field]);
+  });
   const editable = Boolean(binding?.onChange) && !binding?.readOnly && !readOnly;
   const className = `${styles.projection} ${field === 'title' ? styles.title : styles.description}`;
   if (!editable) return <div className={className} data-note-truth-field={field}>{text}</div>;

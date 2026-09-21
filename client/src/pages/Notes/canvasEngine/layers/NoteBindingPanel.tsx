@@ -4,22 +4,26 @@ import { createDefaultNoteBindingSettings, NOTE_BINDING_SLOT_NAMES,
 import styles from './NoteBindingPanel.module.css';
 import { NoteCoverPageControls, type NoteCoverPageControlsProps } from './NoteCoverPageControls';
 import type { PageFrameCollectionModel } from '../types';
+import { createManualBindingPreset } from '../../../../../../shared/types/notePresets';
 
 export const bindingSlotLabels: Record<NoteBindingSlotName, string> = {
   'header-left': '眉左', 'header-center': '眉中', 'header-right': '眉右',
   'footer-left': '脚左', 'footer-center': '脚中', 'footer-right': '脚右',
 };
 
-export function NoteBindingPanel({ value, pageCount, onSave, onClose, coverControls }: {
+export function NoteBindingPanel({ value, pageCount, onSave, onClose, coverControls, noteTitle }: {
   value?: NoteBindingSettings | null; pageCount: number;
   onSave: (value: NoteBindingSettings, collection?: PageFrameCollectionModel) => Promise<void>; onClose: () => void;
   coverControls?: Omit<NoteCoverPageControlsProps, 'value' | 'onChange' | 'onSave'>;
+  noteTitle?: string;
 }) {
   const [draft, setDraft] = useState(() => structuredClone(value ?? createDefaultNoteBindingSettings()));
   const [selected, setSelected] = useState(0);
   const [busy, setBusy] = useState(false);
   const [coverBusy, setCoverBusy] = useState(false);
   const [error, setError] = useState('');
+  const [presetFooter, setPresetFooter] = useState('');
+  const [notice, setNotice] = useState('');
   const mounted = useRef(true);
   const saving = useRef(false);
   const coverSaving = useRef(false);
@@ -53,6 +57,22 @@ export function NoteBindingPanel({ value, pageCount, onSave, onClose, coverContr
           if (mounted.current) setCoverBusy(next);
           coverControls.onBusyChange?.(next);
         }} />}
+      {noteTitle !== undefined && <section aria-label="装订预设">
+        <label>手册脚右文案（可选）<input aria-label="手册脚右文案" value={presetFooter} maxLength={2000}
+          onChange={(event) => setPresetFooter(event.target.value)} /></label>
+        <button type="button" onClick={async () => {
+          if (saving.current || coverSaving.current) return;
+          saving.current = true; setBusy(true); setError(''); setNotice('');
+          const next = createManualBindingPreset(draft, noteTitle, presetFooter);
+          try {
+            await onSave(next);
+            if (mounted.current) { setDraft(next); setSelected(0); setNotice('已套用手册式装订，可继续编辑。'); }
+          } catch { if (mounted.current) setError('手册式装订未保存，请重试。'); }
+          finally { saving.current = false; if (mounted.current) setBusy(false); }
+        }}>套用手册式装订</button>
+        <p>整本使用一段装订；眉中取当前笔记题名，脚中为第 N 纸。</p>
+        {notice && <p role="status">{notice}</p>}
+      </section>}
       <label><input type="checkbox" checked={draft.enabled} onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} />显示装订</label>
       <p>设置应用到整段页面；机械页序保持不变。当前共 {pageCount} 页。</p>
       <label>装订段<select value={selected} onChange={(event) => setSelected(Number(event.target.value))}>

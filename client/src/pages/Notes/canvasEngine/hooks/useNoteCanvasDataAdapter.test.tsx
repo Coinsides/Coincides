@@ -546,6 +546,52 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(subject.result.current.blocks.find((block) => block.id === 'media')?.canvas_layout).toEqual(expect.objectContaining(layout));
   });
 
+  it('T7 note_ref placement failure rolls back the new block instead of reporting a local-only placement', async () => {
+    mocks.coordinateContract = 'v2';
+    const collection = f11RuntimeCollection();
+    canvasPersistenceResponse = { pageFrameCollection: collection };
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => url.endsWith('/page-frame-collection') ? { data: collection } : originalGet(url));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    mocks.post.mockImplementation(async (_url, body) => ({ data: { ...serverBlock('', false), ...body, id: 'cover-ref', placement_id: 'cover-place' } }));
+    mocks.put.mockRejectedValue(new Error('Placement offline'));
+    mocks.delete.mockResolvedValue({ data: { success: true } });
+    await act(async () => {
+      const result = await subject.result.current.createBlock({ ...recoveryTemplate, legacy_block_type: 'note_ref' }, '', {
+        contentJson: { field: 'title' }, layout: { x: 0, y: 100, width: 72, height: 400, width_mode: 'manual',
+          frame_id: collection.primaryFrameId!, coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
+      });
+      expect(result).toBeNull();
+    });
+    expect(mocks.delete).toHaveBeenCalledWith('/note-blocks/cover-ref');
+    expect(mocks.addToast).toHaveBeenCalledWith('error', '封面绑定件未能落位，请重试。');
+    expect(subject.result.current.blocks).toHaveLength(0);
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it('T7 ignores a delayed history restore response after switching notes', async () => {
+    const oldBlock = { ...serverBlock('', false), id: 'old-cover-ref', block_type: 'note_ref', content_json: { field: 'title' } };
+    const pending = deferred<{ data: NoteBlock }>();
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => url === '/notes/next-note' ? { data: { ...note, id: 'next-note' } }
+      : url === '/notes/next-note/blocks' ? { data: [] }
+      : url === '/canvas-objects/by-note/next-note' ? { data: {} }
+      : url === '/annotation-truths/by-note/next-note' ? { data: [] } : originalGet(url));
+    const subject = renderHook(({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { wrapper, initialProps: { noteId: note.id } });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    mocks.put.mockReturnValueOnce(pending.promise);
+    let restoring!: Promise<NoteBlock | null>;
+    act(() => { restoring = subject.result.current.restoreBlock(oldBlock, { silent: true }); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledWith('/note-blocks/old-cover-ref', { status: 'active' }));
+    subject.rerender({ noteId: 'next-note' });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe('next-note'));
+    await act(async () => { pending.resolve({ data: oldBlock }); expect(await restoring).toBeNull(); });
+    expect(subject.result.current.blocks).toHaveLength(0);
+    expect(subject.result.current.blockTextDrafts).not.toHaveProperty('old-cover-ref');
+  });
+
   function c3TransferFixture(options: {
     lostResponse?: boolean;
     staleAddress?: 'text unit' | 'inline' | 'board unit';

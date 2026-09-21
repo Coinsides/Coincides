@@ -3,12 +3,13 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { BookCopy, Boxes, Palette, Search, Sticker, SwatchBook } from 'lucide-react';
 import PaletteDrawer from './PaletteDrawer';
 import SuiteDrawer from './SuiteDrawer';
+import TemplateDrawer from './TemplateDrawer';
 import styles from './DesignStudio.module.css';
 
 const drawers = [
   { id: 'suites', label: '外观套装', icon: SwatchBook },
   { id: 'palette', label: '调色板', icon: Palette },
-  { id: 'templates', label: '模板库', icon: BookCopy, description: '收纳不同用途的纸张与版式模板。' },
+  { id: 'templates', label: '模板库', icon: BookCopy },
   { id: 'components', label: '部件', icon: Boxes, description: '收纳可组合的页面部件与样式。' },
   { id: 'stickers', label: '贴纸', icon: Sticker, description: '收纳可重复使用的装饰件与贴纸集合。' },
 ] as const;
@@ -41,7 +42,7 @@ function Gallery({ drawer, label, description }: { drawer: string; label: string
         <input type="search" aria-label="搜索资产" placeholder="按名称搜索" value={search} onChange={(event) => setSearch(event.target.value)} />
       </label>}
     </div>
-    {drawer === 'suites' ? <SuiteDrawer search={search} /> : drawer === 'palette' ? <PaletteDrawer search={search} /> :
+    {drawer === 'suites' ? <SuiteDrawer search={search} /> : drawer === 'palette' ? <PaletteDrawer search={search} /> : drawer === 'templates' ? <TemplateDrawer search={search} /> :
       <div className={styles.placeholder}><p>{description}</p><span>V14 随批实装</span></div>}
   </section>;
 }

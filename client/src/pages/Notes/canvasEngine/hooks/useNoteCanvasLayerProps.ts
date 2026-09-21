@@ -101,6 +101,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onSaveDocumentTypographyProfile: input.onSaveDocumentTypographyProfile,
     onSaveBindingSettings: input.onSaveBindingSettings,
     onAddNoteBinding: input.onAddNoteBinding,
+    onApplyCoverPreset: input.onApplyCoverPreset,
     bindingError: input.bindingError,
     onRetryBinding: input.onRetryBinding,
     onToggleExportPreview: input.onToggleExportPreview,

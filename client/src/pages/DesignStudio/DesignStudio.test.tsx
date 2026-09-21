@@ -6,7 +6,7 @@ import DesignStudio from './DesignStudio';
 vi.mock('./SuiteDrawer', () => ({ default: ({ search }: { search: string }) => <div data-testid="suite-drawer">{search}</div> }));
 vi.mock('./PaletteDrawer', () => ({ default: ({ search }: { search: string }) => <div data-testid="palette-drawer">{search}</div> }));
 vi.mock('@/stores/authStore', () => ({ useAuthStore: (selector: (state: unknown) => unknown) => selector({
-  token: 'ds3', user: { id: 'ds3', onboarding_completed: true }, loadUser: vi.fn(),
+  token: 'ds3', user: { id: 'ds3', onboarding_completed: true, settings: { theme: 'dark' } }, loadUser: vi.fn(),
 }) }));
 vi.mock('@/stores/courseStore', () => ({ useCourseStore: (selector: (state: unknown) => unknown) => selector({ courses: [], fetchCourses: vi.fn() }) }));
 vi.mock('@/stores/tagStore', () => ({ useTagStore: (selector: (state: unknown) => unknown) => selector({ fetchTags: vi.fn() }) }));
@@ -80,7 +80,6 @@ describe('Design studio shell', () => {
   });
 
   it.each([
-    ['templates', '收纳不同用途的纸张与版式模板。'],
     ['components', '收纳可组合的页面部件与样式。'],
     ['stickers', '收纳可重复使用的装饰件与贴纸集合。'],
   ])('keeps %s as an explanatory placeholder without an inventory implementation', (drawer, description) => {
