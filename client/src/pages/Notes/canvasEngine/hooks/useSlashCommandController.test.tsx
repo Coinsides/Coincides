@@ -196,10 +196,11 @@ afterEach(() => {
 });
 
 describe('slash command async current behavior', () => {
-  it.each(NOTE_INSERT_COMMANDS)('C4a /$label accepts the same Chinese word printed in the insert menu', (command) => {
-    const text = `正文 /${command.label}`;
+  it.each(NOTE_INSERT_COMMANDS)('C4a /$label accepts its Chinese menu word without action ellipsis', (command) => {
+    const word = command.label.replace(/…$/, '');
+    const text = `正文 /${word}`;
     const trigger = detectSlashTrigger(text);
-    expect(trigger?.query).toBe(command.label);
+    expect(trigger?.query).toBe(word);
     expect(filterSlashCommands(trigger!.query)).toEqual([command]);
   });
   it.each(NOTE_INSERT_COMMANDS)('C4a keyboard $label removes only the trigger and invokes the shared insert host', async (command) => {

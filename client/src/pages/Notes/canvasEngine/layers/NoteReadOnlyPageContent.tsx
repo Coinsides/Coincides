@@ -70,6 +70,7 @@ export function NoteReadOnlyPageContent({
             tablePrint={print}
             componentPrint={print}
             tocPrint={print}
+            inlineLinkPrint={print}
             layoutMode={false}
             pageOffsetX={0}
             blockControlAnchor={null}

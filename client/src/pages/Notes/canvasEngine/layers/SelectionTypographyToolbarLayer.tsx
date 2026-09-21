@@ -20,6 +20,7 @@ import {
   patchDocumentTypographyProfile,
 } from '../typographyProfileService';
 import styles from '../../NoteDetail.module.css';
+import { NOTE_INSERT_COMMANDS } from '../../noteSlashCommands';
 
 interface SelectionTypographyToolbarLayerProps {
   selection: {
@@ -32,6 +33,8 @@ interface SelectionTypographyToolbarLayerProps {
   onCopyBoardReference?: () => void | Promise<void>;
   onSendToStaging?: () => Promise<boolean>;
   onAskAgent?: () => void;
+  onLink?: () => void;
+  linkDisabledReason?: string;
 }
 
 export function SelectionTypographyToolbarLayer({
@@ -42,6 +45,8 @@ export function SelectionTypographyToolbarLayer({
   onCopyBoardReference,
   onSendToStaging,
   onAskAgent,
+  onLink,
+  linkDisabledReason,
 }: SelectionTypographyToolbarLayerProps) {
   const sending = useRef(false);
   const [sendingToStaging, setSendingToStaging] = useState(false);
@@ -106,7 +111,7 @@ export function SelectionTypographyToolbarLayer({
 
   const placement = placeSelectionToolbar({
     anchorRect: selection.anchorRect,
-    toolbarWidth: (onCopyBoardReference ? 710 : 520) + (onSendToStaging ? 140 : 0),
+    toolbarWidth: (onCopyBoardReference ? 710 : 520) + (onSendToStaging ? 140 : 0) + (onLink ? 90 : 0),
     toolbarHeight: 44,
   });
   const minimumLineHeightPx = Math.max(
@@ -125,6 +130,9 @@ export function SelectionTypographyToolbarLayer({
       onMouseDown={handleToolbarMouseDown}
     >
       {onAskAgent && <button type="button" className={styles.selectionTypographyButton} onClick={onAskAgent}>问 Agent</button>}
+      {onLink && <button type="button" className={styles.selectionTypographyButton} onClick={onLink}
+        disabled={Boolean(linkDisabledReason)} title={linkDisabledReason} data-note-insert-command="inline-link">
+        {NOTE_INSERT_COMMANDS.find((command) => command.insertAction === 'link')!.label}</button>}
       {onCopyBoardReference && (
         <button
           type="button"

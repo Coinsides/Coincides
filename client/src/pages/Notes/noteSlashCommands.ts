@@ -30,7 +30,7 @@ export interface NoteSlashCommand {
   tooltip?: string;
 }
 
-export type NoteInsertAction = 'table' | 'timeline' | 'chart_bar' | 'chart_line' | 'media' | 'quote_frame' | 'callout_frame' | 'toc';
+export type NoteInsertAction = 'table' | 'timeline' | 'chart_bar' | 'chart_line' | 'media' | 'quote_frame' | 'callout_frame' | 'toc' | 'link';
 
 /** One vocabulary for the toolbar menu and its additive slash entries. */
 export const NOTE_INSERT_COMMANDS: NoteSlashCommand[] = [
@@ -42,6 +42,7 @@ export const NOTE_INSERT_COMMANDS: NoteSlashCommand[] = [
   { id: 'quote-frame', label: '引文框', insertAction: 'quote_frame', keywords: ['quoteframe'] },
   { id: 'callout-frame', label: '提示框', insertAction: 'callout_frame', keywords: ['callout'] },
   { id: 'insert-toc', label: '目录', insertAction: 'toc', keywords: ['toc', 'contents', 'agenda'] },
+  { id: 'inline-link', label: '链接到…', insertAction: 'link', keywords: ['link', '链接'], requiresSelection: true },
 ].map((command) => ({ ...command, group: 'default', commandKind: 'insert_structure',
   objectKind: 'structured_block', description: `${command.label} · 与插入菜单相同的入口。` } as NoteSlashCommand));
 

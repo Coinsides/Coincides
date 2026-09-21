@@ -1,0 +1,10 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=2",
+  "cwd": "client",
+  "isolation": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-t6-client-QOtEpe",
+  "startedAt": "2026-09-21T22:18:14.609Z",
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 149460,
+  "excludedFiles": []
+}

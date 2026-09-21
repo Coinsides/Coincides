@@ -1,0 +1,167 @@
+{
+  "recordedAt": "2026-09-21T22:23:02.870Z",
+  "contractAddedLines": 18,
+  "contractExistingTextUnchanged": true,
+  "contractBaselineSha256": "a5b965afd9d54bc2dbc34076085409bd8588b958fc982438942779ecbcb526d9",
+  "protectedScope": [
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inlineLifecycle.ts",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/commandSurfaceService.ts",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowService.ts",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "shared",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "server/src/toolFace",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "server/src/agent",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "server/src/db",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "package.json",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "client/package.json",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "client/package-lock.json",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "server/package.json",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "server/package-lock.json",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "AGENTS.md",
+      "trackedDiffEmpty": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "trackedDiffEmpty": true
+    }
+  ],
+  "codeFiles": [
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "sha256": "93b57b452397a33d015861777f1515ca5740c2d67038ecee359b4e495f3c38c5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/InlineLinkContext.tsx",
+      "sha256": "a3307c86cd55c735597e4915c94df80b91bafe286a701d285067924c8d7d5af8"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/InlineLinkProvider.test.tsx",
+      "sha256": "a1da5acd6a89b9554d9f715fe5c463bcea60b98b0244213a807561d91ea73ea0"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/InlineLinkProvider.tsx",
+      "sha256": "37fbabad6a242efa6d75bc302a591c7d7052460dec9337c797427151f8f03d63"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/InlineLinkTextLayer.tsx",
+      "sha256": "4d701c2b1718a903dee8eb4661245d198b656b53e22940ce542f1e81bdc7df3a"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/PaginatedTextBlockProjection.tsx",
+      "sha256": "508f551200a785854d3e4d94f222d4fc060e3c0aaa0f94b91fbb255958889639"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx",
+      "sha256": "d361a35cbf8458c9841967289547d0dbbd1981056c74e9aa46e47e4c17889ff2"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx",
+      "sha256": "e0f98fabbdbe3be3ca510b01cf385bdf84a0b4f436ae5e6266d2fa337d6a2e74"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inlineLinkService.test.ts",
+      "sha256": "ecfe5391473872b0395e65505682780d664be5b5c3175d37631b8fb87a8354f6"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inlineLinkService.ts",
+      "sha256": "c69add03ceabb5f766f6c475dea3e66704c925eaf65d7c9c0cf62e63d4f71901"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx",
+      "sha256": "bf79a5fef57fc9a507d24cdda8aa4dfeb03b21ac0872f10841241b02d4e180ad"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx",
+      "sha256": "f4d41b88763fd02d6977ebcf5c609463564c7b0c004b310d9ea98a05f7c24f2f"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/InlineLinkPicker.tsx",
+      "sha256": "b48d2ea126f2e8473d84e979522a38cd2501d7c1e006f8a562fbd2b6650bcc12"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+      "sha256": "c9d064daa8ad53ff53e5681d940eb52298db1f182354e021d19b5356814f0931"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx",
+      "sha256": "24979207757d6b33549e2ba3e91d9bacfe7ae9aa547bb81af74b25a4f8250f5c"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "sha256": "4f312dce767dde611c2b4a9a89ae725b87f8cb8146da384dc1d511b6853577f6"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx",
+      "sha256": "e3148979104e5a3e910090df697751f66286dd51df2b6569458850b6373118c1"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "sha256": "efa5febe1c372651192947b282247943b5728c1722e4763b1b1d545de12e4138"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/SelectionTypographyToolbarLayer.tsx",
+      "sha256": "0d683bdb993623a91344b98ee1d007a44724cf1b53e977cedec2487206982e5d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "sha256": "14139cbe5d5e716171c51e9464089a87b01943e0f5e54852217723016ddbf6ef"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowDocumentHistory.integration.test.tsx",
+      "sha256": "a0e4c29e15514ac540ff9fc35982e88e9f12d0434a65761bcbb70c5771b48f22"
+    },
+    {
+      "path": "client/src/pages/Notes/noteSlashCommands.ts",
+      "sha256": "2776ebb67727a18f5ed24eb9f75c25806ec6f92e8a0f347572a16ecb1bbd7a2d"
+    },
+    {
+      "path": "docs/contracts/TextFlow-Contract.md",
+      "sha256": "f8d67f67a2a820fb4d91bb18cac2e81610550d72a6d92bbc055fdacc9d505daf"
+    },
+    {
+      "path": "server/src/__tests__/v14ReadTools.test.ts",
+      "sha256": "a251ddd24ed607c8ce348a102c9d72c0201942d394ffa2c5ecd759eb278635b4"
+    }
+  ],
+  "note": "Read-only diff scope proof; neither git diff --check nor secret scan executed. HEAD/working copy comparison ignores only CRLF vs LF."
+}

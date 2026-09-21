@@ -190,6 +190,23 @@ test('read_note returns ordered structured blocks page by page, including the em
   assert.deepEqual(last.blocks, []);
 });
 
+test('T6 read_note keeps heading, block and note inline links in the unchanged flat text projection', async t => {
+  const f = await fixture(t);
+  const before = await read(t, f.db, 'read_note', { note_id: f.noteId });
+  const row = f.db.prepare('SELECT content_json FROM note_blocks WHERE id = ?').get(f.paragraphId) as Row;
+  const content = JSON.parse(row.content_json);
+  content.text_flow.inline_structures = [
+    { target_kind: 'heading', block_id: f.headingId, unit_id: `${f.headingId}:unit` },
+    { target_kind: 'block', block_id: f.headingId },
+    { target_kind: 'note', note_id: f.noteId },
+  ].map((target, index) => ({ id: `link-${index}`, semantic_kind: 'inline_link',
+    parent_text_unit_id: `${f.paragraphId}:unit`, anchor_text: 'body', anchor_range: { start: 4, end: 8 },
+    field_values: target, metadata: {}, status: 'active' }));
+  f.db.prepare('UPDATE note_blocks SET content_json = ? WHERE id = ?').run(JSON.stringify(content), f.paragraphId);
+  const after = await read(t, f.db, 'read_note', { note_id: f.noteId });
+  assert.deepEqual(after, before);
+});
+
 test('read_board returns current member summaries, positions, edges, and visual geometry', async t => {
   const f = await fixture(t);
   const result = await read(t, f.db, 'read_board', { board_id: f.board.id });

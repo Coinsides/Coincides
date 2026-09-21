@@ -1812,6 +1812,87 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   word-break: break-word;
 }
 
+.inlineLinkTextLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  color: var(--text-primary);
+}
+
+.pageTextArea.inlineLinkEditor {
+  color: transparent;
+  caret-color: var(--text-primary);
+}
+
+.inlineLink {
+  color: var(--sk-accent, var(--accent-primary));
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+a.inlineLink {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.inlineLink:focus-visible {
+  outline: 1px solid var(--sk-accent, var(--accent-primary));
+  outline-offset: 2px;
+}
+
+.inlineLinkUnavailable {
+  color: var(--sk-ink-muted, var(--text-muted));
+  text-decoration: underline dotted;
+  text-underline-offset: 0.15em;
+}
+
+.inlineLinkAnchorLost {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  color: var(--sk-ink-muted, var(--text-muted));
+}
+
+.inlineLinkPicker {
+  position: fixed;
+  pointer-events: auto;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(640px, calc(100vw - 32px));
+  max-height: 65vh;
+  overflow: auto;
+  padding: 16px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+}
+
+.inlineLinkPicker header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.inlineLinkColumns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.inlineLinkColumns button { display: block; width: 100%; text-align: start; overflow-wrap: anywhere; }
+.inlineLinkPicker button {
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.inlineLinkPicker button:disabled { color: var(--sk-ink-muted, var(--text-muted)); cursor: default; }
+.inlineLinkPicker button:focus-visible { outline: 2px solid var(--sk-accent, var(--accent-primary)); }
+
+@media print {
+  .inlineLinkTextLayer, .inlineLinkAnchorLost, .inlineLinkPicker { display: none !important; }
+  .inlineLinkEditor { color: var(--text-primary) !important; }
+}
+
 .textUnitAnnotationSpan {
   position: relative;
   border-radius: 4px;

@@ -15,6 +15,8 @@ import { replaceTextUnitText } from '../textFlowService';
 import { deriveSingleTextEditDelta } from '../rangeRebaseService';
 import { indentTextUnit, mergeTextUnitWithPrevious, outdentTextUnit, parseTextUnitsFromPlainText, pasteTextIntoTextFlow, setTextUnitWritingRole, splitTextUnitForEnter, textUnitMarkerForDisplay, updateTextUnitMetadata } from '../textUnitEditorService';
 import { TextFlowSelectionLayer } from './TextFlowSelectionLayer';
+import { InlineLinkTextLayer } from './InlineLinkTextLayer';
+import { inlineLinksForUnit } from '../inlineLinkService';
 import { TextUnitGutterLayer } from '../layers/TextUnitGutterLayer';
 import { useTextUnitHandleDrag } from '../hooks/useTextUnitHandleDrag';
 import { reorderTextUnit } from '../textUnitOrderService';
@@ -502,10 +504,13 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
               {highlights.map((segment, highlightIndex) => segment.annotationIds.length ? <mark key={highlightIndex} className={styles.textUnitAnnotationSpan}
                 data-annotation-highlight-ids={JSON.stringify(segment.annotationIds)}>{segment.text}</mark> : <span key={highlightIndex}>{segment.text}</span>)}
             </div>}
+            {!props.inlineLinkPrint && <InlineLinkTextLayer flow={flow} unit={unit} start={slice.start} end={slice.displayEnd}
+              style={textStyle} layoutMode={layoutMode} />}
             <textarea ref={(node) => {
               if (node) refs.current.set(slice.key, node); else refs.current.delete(slice.key);
               if (index === 0) { if (typeof textareaRef === 'function') textareaRef(node); else if (textareaRef) (textareaRef as { current: HTMLTextAreaElement | null }).current = node; }
-            }} value={value} readOnly={readOnly} rows={1} className={styles.pageTextArea} style={textStyle}
+            }} value={value} readOnly={readOnly} rows={1}
+              className={`${styles.pageTextArea} ${!props.inlineLinkPrint && inlineLinksForUnit(flow, unit.id).length ? styles.inlineLinkEditor : ''}`} style={textStyle}
               data-block-id={blockId} data-text-flow-id={textFlowId} data-text-unit-id={unit.id} data-text-unit-text={unit.text}
               data-text-start={slice.start} data-text-end={slice.end} data-text-display-end={slice.displayEnd} data-runtime-textflow-editor={!readOnly || props.onTextEditBoundary ? 'true' : undefined}
               onFocus={(event) => { focused.current = true; if (!traversing.current) capture(slice, event.currentTarget); if (!traversing.current && !composition.current) props.onTextEditBoundary?.('focus', readSelection(slice, event.currentTarget)); props.onFocused({ blockId, textFlowId, textUnitId: unit.id }); }}

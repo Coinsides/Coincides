@@ -1,0 +1,29 @@
+diff --git a/docs/contracts/TextFlow-Contract.md b/docs/contracts/TextFlow-Contract.md
+index 0b459329..9637f56f 100644
+--- a/docs/contracts/TextFlow-Contract.md
++++ b/docs/contracts/TextFlow-Contract.md
+@@ -74,6 +74,24 @@ These rules also apply to selected-range replacement, Enter and paste retention.
+ 
+ The `inline_formula` and `inline_code` commands remain `disabled: true` in `commandSurfaceService.ts`. B8/B9 preserve existing records and do not activate those commands or define formula/code rendering and adoption semantics.
+ 
++### Amendment — 2026-09-21 · V14 T6 inline_link activation
++
++Authority: [T6 order §一](../agent-ops/handoffs/2026-09-21-v14-t6-inline-link-order.md). This additive amendment activates only the already-present `inline_link` kind for human-created, presentation-level navigation. The existing clauses above remain unchanged. It adds no semantic kind, persisted field, table, chapter identity or Relation endpoint; `inline_formula` and `inline_code` remain disabled, with their commands and rendering semantics unchanged.
++
++An `inline_link` record uses the existing parent unit, selected-text evidence and UTF-16 `anchor_range`. Its `field_values` is one of the following target shapes:
++
++```ts
++{ target_kind: 'heading', block_id: string, unit_id: string }
++{ target_kind: 'block', block_id: string }
++{ target_kind: 'note', note_id: string }
++```
++
++Heading and block targets belong to the current Note; note targets belong to the current Project. A heading target identifies the existing heading unit within its owning block, not a stored chapter: chapters remain derived. URL and cross-project targets are outside this activation. The selected-text toolbar and slash surface share the same Link to action and target picker, consuming the existing chapter projection and project-note list.
++
++Resolved links use the existing accent-token link presentation. Activation routes through the existing heading/chapter, block or document-tab note navigation. A missing target renders inert text with a muted degradation indicator; it does not delete or rewrite the inline record. Unavailable or degraded anchor coordinates do not manufacture a new valid range. Printing and export render only the ordinary text, without link color, active navigation, degradation markers or footnote numbers. The existing flat `read_note` text projection and its schema remain unchanged.
++
++All existing B8 retention, remapping and degradation rules above govern edits without a link-specific lifecycle. In particular an edit inside an anchor leaves its range null and preserves its evidence and payload. Undo/redo use the existing full-flow snapshots and save queue. This amendment changes no coordinate, grapheme, status, identity, history, revision or atomicity clause, and adds no Agent tool, prompt or proposal payload.
++
+ ## 4. Coordinates and grapheme boundaries
+ 
+ **Stored coordinates remain UTF-16 code-unit offsets.** Unit-local `start`/`end`, selection offsets, annotation/board ranges and existing anchor records keep their coordinate system. End offsets are exclusive. Grapheme handling changes boundary resolution, not storage units, normalization of source text or persisted historical offsets.

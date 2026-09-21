@@ -21,6 +21,9 @@ import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import { ParagraphFurnitureEditor } from '../blocks/ParagraphFurnitureEditor';
 import { canStyleParagraph, readParagraphFurniture, type ParagraphFurniture } from '../paragraphFurniture';
 import { NoteInsertCommandsContext, type NoteInsertCommandHost } from '../NoteInsertCommandsContext';
+import { useInlineLinks } from '../InlineLinkContext';
+import { appendInlineLink, type InlineLinkTarget } from '../inlineLinkService';
+import { InlineLinkPicker } from './InlineLinkPicker';
 import { NotePageGapLayer } from './NotePageGapLayer';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { NoteCoverUnderlay } from './NoteCoverUnderlay';
@@ -35,7 +38,7 @@ import { useNoteDocumentShell } from '../hooks/useNoteDocumentShell';
 import { createDefaultPageReadingViewState, type PageReadingGear, type PageReadingViewState } from '../pageReadingViewportService';
 import type { TemplateOption } from '@/services/templateOptions';
 import { useEffect, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type DragEvent, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type RefObject, type SetStateAction } from 'react';
-import type { NoteSlashCommand } from '../../noteSlashCommands';
+import { NOTE_INSERT_COMMANDS, type NoteSlashCommand } from '../../noteSlashCommands';
 import {
   presentationKindForBlock,
   textFromContent,
@@ -481,6 +484,12 @@ export function NoteWritingSurfaceLayer({
   const [creatingComponent, setCreatingComponent] = useState<BuiltinComponentKind | null>(null);
   useEffect(() => { setCreatingComponent(null); }, [noteId]);
   const insertHost = useContext(NoteInsertCommandsContext);
+  const inlineLinks = useInlineLinks();
+  const [linkRequest, setLinkRequest] = useState<{ noteId: string; id: string; range: CapturedSelectionRange } | null>(null);
+  const [selectionSlash, setSelectionSlash] = useState<{ range: CapturedSelectionRange; anchor: { x: number; y: number } } | null>(null);
+  const linkSaveState = useRef({ linkRequest, visibleBlocks, blockTextFlowDrafts, contentReadOnly, layoutMode, overviewOpen });
+  linkSaveState.current = { linkRequest, visibleBlocks, blockTextFlowDrafts, contentReadOnly, layoutMode, overviewOpen };
+  useEffect(() => { setLinkRequest(null); setSelectionSlash(null); }, [noteId, contentReadOnly, layoutMode, overviewOpen]);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageAnchorRef = useRef<string | null>(null);
   const furnitureDialogRef = useRef<HTMLDivElement>(null);
@@ -1565,12 +1574,64 @@ export function NoteWritingSurfaceLayer({
   };
 
   // The toolbar and slash command controller share these existing human doors.
+  const linkSelectionReason = (range: CapturedSelectionRange | null) => {
+    if (!inlineLinks) return '链接导航尚未就绪。';
+    if (contentReadOnly || layoutMode || overviewOpen) return '请先返回正文书写模式。';
+    if (!range || range.startOffset >= range.endOffset) return '请先选中正文文字。';
+    const block = visibleBlocks.find((candidate) => candidate.id === range.blockId);
+    const unit = getCurrentTextFlowForBlock(range.blockId)?.units.find((candidate) => candidate.id === range.textUnitId);
+    if (!block || !unit || unit.status === 'deleted' || unit.text !== range.text
+      || range.startOffset < 0 || range.endOffset > unit.text.length) return '文字已改变，请重新选择。';
+    if (noteCanvasRuntime.pageFrameExtensions.some((frame) => frame.isCover && frame.frameId === blockLayouts[block.id]?.frame_id)) {
+      return '请先选中正文文字。';
+    }
+    return undefined;
+  };
+  const openLinkPicker = (range: CapturedSelectionRange | null) => {
+    const reason = linkSelectionReason(range);
+    if (reason || !range) { addToast('info', reason ?? '请先选中正文文字。'); return; }
+    onTextEditBoundary?.('selection', { unitId: range.textUnitId, start: range.startOffset, end: range.endOffset });
+    setAnnotationContextMenu(null); setSelectionSlash(null);
+    setLinkRequest({ noteId, id: `inline-link-${crypto.randomUUID()}`, range: { ...range } });
+  };
+  const saveInlineLink = async (target: InlineLinkTarget) => {
+    if (!linkRequest || linkRequest.noteId !== noteId || linkSelectionReason(linkRequest.range) || !inlineLinks?.resolve(target)) return false;
+    const session = mediaPasteSession.current;
+    const isCurrent = () => session.active && mediaPasteSession.current === session
+      && linkSaveState.current.linkRequest === linkRequest && !linkSaveState.current.contentReadOnly
+      && !linkSaveState.current.layoutMode && !linkSaveState.current.overviewOpen;
+    if (target.target_kind === 'note') {
+      const notes = await inlineLinks.refreshNotes();
+      if (!notes?.some((note) => note.id === target.note_id)) return false;
+    }
+    if (!isCurrent()) return false;
+    const live = linkSaveState.current;
+    const block = live.visibleBlocks.find((entry) => entry.id === linkRequest.range.blockId);
+    const previous = block && (live.blockTextFlowDrafts[block.id] ?? getTextFlowContent(block.content_json));
+    if (!block || !previous) return false;
+    const existing = previous.inline_structures.find((record) => record.id === linkRequest.id);
+    if (existing && JSON.stringify(existing.field_values) !== JSON.stringify(target)) return false;
+    const next = existing ? previous : appendInlineLink(previous, linkRequest.range, target, linkRequest.id);
+    if (!next) return false;
+    const selection = { unitId: linkRequest.range.textUnitId, start: linkRequest.range.startOffset, end: linkRequest.range.endOffset };
+    if (!existing) {
+      const result = await onApplyBlockTextFlowEdit(block, next, { previousTextFlow: previous,
+        metadata: { kind: 'structural', inputType: 'insertInlineLink', unitId: selection.unitId, isComposing: false,
+          beforeSelection: selection, afterSelection: selection } });
+      if (result?.success === false) return false;
+    }
+    if (!isCurrent()) return false;
+    const saved = await saveBlockAndConsumeOutcome(block, plainTextFromTextFlow(next), { silent: true, textFlow: next });
+    if (saved && isCurrent()) clearDraft();
+    return Boolean(saved);
+  };
   const insertTargetBlockId = selectedBlockId ?? focusedTextOwner?.blockId ?? focusBlockId;
   const insertCommandHost: NoteInsertCommandHost = {
     disabledReason: (action, blockId = insertTargetBlockId) => {
       if (contentReadOnly) return '引用源内容已锁定。';
       if (overviewOpen || layoutMode) return '请先返回书写模式。';
       if (document.querySelector('[data-runtime-textflow-composing="true"]')) return '请先完成当前输入。';
+      if (action === 'link') return linkSelectionReason(draftRangeCount === 1 ? latestDraftRange : null);
       if (action === 'table') return onCreateTable ? undefined : '表格尚未就绪。';
       if (action === 'toc') return onCreateToc ? undefined : '目录尚未就绪。';
       if (action === 'timeline' || action === 'chart_bar' || action === 'chart_line') return onCreateComponent ? undefined : '组件尚未就绪。';
@@ -1586,6 +1647,7 @@ export function NoteWritingSurfaceLayer({
     run: (action, blockId = insertTargetBlockId) => {
       const reason = insertCommandHost.disabledReason(action, blockId);
       if (reason) { addToast('info', reason); return; }
+      if (action === 'link') { openLinkPicker(latestDraftRange); return; }
       if (action === 'table') { setCreatingTable(true); return; }
       if (action === 'toc') { void onCreateToc?.(); return; }
       if (action === 'timeline' || action === 'chart_bar' || action === 'chart_line') { setCreatingComponent(action); return; }
@@ -1652,6 +1714,44 @@ export function NoteWritingSurfaceLayer({
     <DocumentTextFlowSelectionContext.Provider value={documentTextSelection}>
     <section
       ref={surfaceRef}
+      onMouseDownCapture={(event) => {
+        if (selectionSlash && event.target instanceof Element && !event.target.closest('[data-inline-link-selection-slash]')) setSelectionSlash(null);
+      }}
+      onKeyDownCapture={(event) => {
+        if (selectionSlash) {
+          const owner = event.target;
+          const range = selectionSlash.range;
+          const offset = owner instanceof HTMLTextAreaElement ? Number(owner.dataset.textStart) || 0 : 0;
+          const matches = owner instanceof HTMLTextAreaElement && owner.dataset.blockId === range.blockId
+            && owner.dataset.textUnitId === range.textUnitId
+            && (owner.selectionStart + offset === range.startOffset || owner.selectionStart + offset === range.endOffset)
+            && owner.selectionEnd + offset === range.endOffset;
+          if (event.key === 'Enter' && matches) { event.preventDefault(); event.stopPropagation(); openLinkPicker(range); return; }
+          if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); setSelectionSlash(null); return; }
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); event.stopPropagation(); return; }
+          setSelectionSlash(null);
+        }
+        const node = event.target;
+        if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey || event.nativeEvent.isComposing
+          || !(node instanceof HTMLTextAreaElement)
+          || !node.dataset.textUnitId || !node.dataset.blockId || !node.dataset.textFlowId) return;
+        const start = Number(node.dataset.textStart) || 0;
+        const nativeRange: CapturedSelectionRange = { blockId: node.dataset.blockId, textFlowId: node.dataset.textFlowId,
+          textUnitId: node.dataset.textUnitId, text: node.dataset.textUnitText ?? node.value,
+          startOffset: start + node.selectionStart, endOffset: start + node.selectionEnd };
+        // The ordinary editor projects mouse selections as a retained draft and
+        // collapses the native caret at its end; paginated/native selections stay live.
+        const retained = draftRangeCount === 1 && latestDraftRange?.blockId === nativeRange.blockId
+          && latestDraftRange.textUnitId === nativeRange.textUnitId && latestDraftRange.endOffset === nativeRange.endOffset
+          ? latestDraftRange : null;
+        const range = nativeRange.startOffset !== nativeRange.endOffset ? nativeRange : retained;
+        if (!range) return;
+        if (linkSelectionReason(range)) return;
+        event.preventDefault(); event.stopPropagation();
+        const rect = node.getBoundingClientRect();
+        replaceDraft({ range, anchorRect: rect });
+        setSelectionSlash({ range, anchor: { x: rect.left, y: rect.bottom } });
+      }}
       data-text-unit-move-scope={noteId}
       className={`${styles.writingSurface} ${styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''}`}
       data-page-frame-template={primaryPageFrameExtension?.templateId || primaryPageFrame?.templateId || 'none'}
@@ -2024,7 +2124,10 @@ export function NoteWritingSurfaceLayer({
               left={display.x} width={display.width} onToggle={() => setPageGapsFolded(!pageGapsFolded)} />;
           })}
 
-        {slashTarget && (
+        {selectionSlash && <div data-inline-link-selection-slash="true"><SlashMenuLayer activeCommandId="inline-link"
+          commands={NOTE_INSERT_COMMANDS.filter((command) => command.insertAction === 'link')}
+          onSelect={() => openLinkPicker(selectionSlash.range)} anchor={selectionSlash.anchor} /></div>}
+        {slashTarget && !selectionSlash && (
           <SlashMenuLayer
             activeCommandId={activeSlashCommandId}
             commands={slashCommands}
@@ -2143,6 +2246,8 @@ export function NoteWritingSurfaceLayer({
         onCancelDraft={clearDraft}
       />
       <SelectionTypographyToolbarLayer
+        onLink={() => insertCommandHost.run('link')}
+        linkDisabledReason={insertCommandHost.disabledReason('link')}
         onAskAgent={isNoteAgentRoute ? () => { void askAgent(); } : undefined}
         selection={!contentReadOnly && selectionDraft && latestDraftRange && draftRangeCount === 1 && !annotationContextMenu ? {
           range: latestDraftRange,
@@ -2159,6 +2264,8 @@ export function NoteWritingSurfaceLayer({
         onClose={() => setAnnotationContextMenu(null)}
         onAction={(actionId) => handleSelectionContextAction(actionId)}
       />
+      {linkRequest?.noteId === noteId && <InlineLinkPicker key={linkRequest.id}
+        onClose={() => setLinkRequest(null)} onSelect={saveInlineLink} />}
       <ContextMenuLayer
         menu={annotationHighlightMenu}
         onClose={() => setAnnotationHighlightContextMenu(null)}

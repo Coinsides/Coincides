@@ -108,6 +108,7 @@ interface BlockEditorLayerProps {
   onSaveTable?: (payload: TableBlockPayload) => Promise<boolean>;
   componentPrint?: boolean;
   tocPrint?: boolean;
+  inlineLinkPrint?: boolean;
   onSaveComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
   onSaveParagraphFurniture?: (value: ParagraphFurniture | null) => Promise<boolean>;
   allowSaveRecovery?: boolean;
@@ -188,6 +189,7 @@ export function BlockEditorLayer({
   textUnitGutterLaneX,
   contentReadOnly,
   mediaPlaceholder = false,
+  inlineLinkPrint = false,
   onSaveMediaImage,
   tablePrint = false,
   onSaveTable,
@@ -632,6 +634,7 @@ export function BlockEditorLayer({
           />
         ) : (
           <TextProjection
+            inlineLinkPrint={inlineLinkPrint}
             fragments={decoratedFlowFragments}
             typography={documentTypography}
             onFlowSelectionStart={onFlowSelectionStart}

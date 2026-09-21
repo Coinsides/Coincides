@@ -25,6 +25,8 @@ import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
 import { measureTextareaNavigation, textareaBoundaryCaret, textareaCaretAtPoint, textareaLineCaret } from '../textareaNavigation';
 import { TextFlowSelectionLayer } from './TextFlowSelectionLayer';
+import { InlineLinkTextLayer } from './InlineLinkTextLayer';
+import { inlineLinksForUnit } from '../inlineLinkService';
 import { DocumentTextFlowSelectionContext } from '../hooks/useDocumentTextFlowSelection';
 import { flowSelectionText, orderedFlowSelection, replaceFlowSelection, type FlowPoint, type FlowSelection } from '../textFlowSelection';
 import { deriveSingleTextEditDelta } from '../rangeRebaseService';
@@ -96,6 +98,7 @@ import type {
 } from '../textFlowEditSession';
 
 export interface TextBlockProjectionProps {
+  inlineLinkPrint?: boolean;
   blockId: string;
   readOnly: boolean;
   text: string;
@@ -498,6 +501,7 @@ function badgeAnchorStateEqual(
 }
 
 export function TextBlockProjection({
+  inlineLinkPrint = false,
   blockId,
   readOnly,
   text,
@@ -1786,6 +1790,8 @@ export function TextBlockProjection({
                     ))}
                   </div>
                 )}
+                {!inlineLinkPrint && <InlineLinkTextLayer flow={editableFlow} unit={unit} layoutMode={layoutMode}
+                  className={roleTextClassNames.join(' ')} style={headingTextCssProperties(unit.writing_role)} />}
                 <textarea
                   ref={(node) => {
                     unitRefs.current[unit.id] = node;
@@ -1794,6 +1800,7 @@ export function TextBlockProjection({
                   className={[
                     styles.pageTextArea,
                     styles.textUnitTextArea,
+                    !inlineLinkPrint && inlineLinksForUnit(editableFlow, unit.id).length ? styles.inlineLinkEditor : '',
                     ...roleTextClassNames,
                   ].filter(Boolean).join(' ')}
                   value={unit.text}

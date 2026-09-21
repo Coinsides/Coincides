@@ -23,6 +23,10 @@ import { buildNoteNavigationResults, type NoteNavigationResult } from '../noteNa
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import { NoteTruthBindingProvider } from '../NoteTruthBindingContext';
 import { TocProjectionProvider } from '../TocProjectionContext';
+import { InlineLinkProvider } from '../InlineLinkProvider';
+import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
+import { readStoredLayout } from '../placementService';
+import { resolveScreenRect, selectPlacementFrame } from '../placementContractService';
 import styles from '../../NoteDetail.module.css';
 
 export interface NoteRuntimeDocumentLayerProps {
@@ -88,6 +92,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     writingSurfaceProps.pageOffsetX, pageGapPresentation]);
   const [pendingChapter, setPendingChapter] = useState<{ noteId: string; id: string } | null>(null);
   const [pendingSearchResult, setPendingSearchResult] = useState<NoteNavigationResult | null>(null);
+  const [pendingLinkBlock, setPendingLinkBlock] = useState<{ noteId: string; blockId: string } | null>(null);
   const overview = useNoteOverviewController({
     noteId: writingSurfaceProps.noteId,
     surfaceMode,
@@ -186,6 +191,46 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     overviewOpen: overview.open,
     overviewFrameId: overview.currentFrameId,
   });
+  const linkBlocks = (presentation?.searchSource?.blocks ?? writingSurfaceProps.allBlocks ?? writingSurfaceProps.visibleBlocks)
+    .filter((block) => {
+      const layout = readStoredLayout(block);
+      return layout?.surface !== 'tray' && layout?.surface !== 'canvas_workspace';
+    });
+  const selectLinkBlock = (blockId: string) => {
+    const chapter = [...chapterProjection.chapters].reverse().find((entry) => entry.blockIds.includes(blockId));
+    if (chapter) presentation?.onRevealChapter(chapter.id);
+    setPendingLinkBlock({ noteId: writingSurfaceProps.noteId, blockId });
+  };
+  useEffect(() => {
+    if (!pendingLinkBlock) return;
+    if (pendingLinkBlock.noteId !== writingSurfaceProps.noteId || !linkBlocks.some((block) => block.id === pendingLinkBlock.blockId)) {
+      setPendingLinkBlock(null); return;
+    }
+    const chapter = [...chapterProjection.chapters].reverse().find((entry) => entry.blockIds.includes(pendingLinkBlock.blockId));
+    if (chapter && chapterNeedsReveal(chapter.id)) return;
+    const fragment = writingSurfaceProps.noteCanvasRuntime.blockFragmentProjections
+      .filter((entry) => entry.blockId === pendingLinkBlock.blockId).sort((a, b) => a.fragmentIndex - b.fragmentIndex)[0];
+    const frame = writingSurfaceProps.noteCanvasRuntime.pageFrames.find((entry) => entry.id === fragment?.pageFrameId);
+    if (fragment && frame) {
+      const readingFrame = projectPageFrameToReadingSurface(frame, writingSurfaceProps.noteCanvasRuntime.coordinateContract, writingSurfaceProps.pageOffsetX);
+      navigation.selectResult(pendingLinkBlock.blockId, frame.id, { ...fragment.visibleRect,
+        x: fragment.visibleRect.x + readingFrame.x - frame.x,
+        y: fragment.visibleRect.y + (pageGapPresentation.offsetByFrameId.get(frame.id) || 0) });
+    } else {
+      const layout = writingSurfaceProps.blockLayouts[pendingLinkBlock.blockId];
+      if (layout) {
+        const owner = selectPlacementFrame(layout, writingSurfaceProps.noteCanvasRuntime.pageFrames, writingSurfaceProps.noteCanvasRuntime.coordinateContract);
+        const rect = resolveScreenRect(layout, owner, writingSurfaceProps.noteCanvasRuntime.coordinateContract, writingSurfaceProps.pageOffsetX);
+        navigation.selectResult(pendingLinkBlock.blockId, owner?.id ?? '', { ...rect,
+          y: rect.y + (pageGapPresentation.offsetByFrameId.get(owner?.id ?? '') || 0) });
+      } else {
+        writingSurfaceProps.onSelectBlock(pendingLinkBlock.blockId);
+        writingSurfaceProps.onRequestFocusBlock(pendingLinkBlock.blockId);
+      }
+    }
+    setPendingLinkBlock(null);
+  }, [pendingLinkBlock, writingSurfaceProps.noteId, linkBlocks, chapterProjection, presentation?.collapsedChapterIds,
+    writingSurfaceProps.noteCanvasRuntime, writingSurfaceProps.blockLayouts, writingSurfaceProps.pageOffsetX, pageGapPresentation, navigation.selectResult]);
   useImperativeHandle(ref, () => ({ resumeEditingForExit: overview.resumeForExit }));
   const document = (
     <div
@@ -215,7 +260,10 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
         } : writingSurfaceProps.noteCanvasRuntime} />
     </div>
   );
-  const navigableDocument = <TocProjectionProvider value={{ agenda: chapterProjection.agenda, onSelectChapter: selectChapter }}>
+  const navigableDocument = <InlineLinkProvider noteId={writingSurfaceProps.noteId} projectId={writingSurfaceProps.projectId}
+    chapters={chapterProjection} blocks={linkBlocks} drafts={writingSurfaceProps.blockTextFlowDrafts}
+    onSelectChapter={selectChapter} onSelectBlock={selectLinkBlock}>
+    <TocProjectionProvider value={{ agenda: chapterProjection.agenda, onSelectChapter: selectChapter }}>
     {surfaceMode === 'page' ? <div className="noteNavigationDocumentRow" data-note-navigation-row="true"
     data-note-navigation-with-tray={tray ? 'true' : undefined}>
     {navigation.open && <NoteNavigationPane writingSurfaceProps={writingSurfaceProps}
@@ -225,7 +273,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       onSelectResult={selectSearchResult}
       onClose={() => navigation.setOpen(false)} />}
     {document}
-  </div> : document}</TocProjectionProvider>;
+  </div> : document}</TocProjectionProvider></InlineLinkProvider>;
   if (surfaceMode !== 'page' || !tray) return <NoteTruthBindingProvider value={truth}>{navigableDocument}</NoteTruthBindingProvider>;
   return <NoteTruthBindingProvider value={truth}><div className={styles.trayViewport}>
     <button type="button" className={`${styles.contentGroupLauncher} ${styles.trayToggle}`} aria-expanded={tray.open}

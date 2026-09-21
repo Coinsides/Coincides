@@ -374,7 +374,7 @@ describe('C4a four toolbar groups and shared insert doors', () => {
     act(() => useAgentUiStore.getState().reset());
     view.unmount(); main.remove();
   });
-  it('groups controls in the contracted order and exposes all eight menu labels with keyboard navigation', () => {
+  it('preserves the eight menu labels and appends a selection-gated link door with keyboard navigation', () => {
     const props = propsFor(frame(0), 'page');
     const view = render(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false}
       onCreateTable={vi.fn(async () => true)} onCreateComponent={vi.fn(async () => true)} onCreateToc={vi.fn(async () => true)} />);
@@ -387,11 +387,12 @@ describe('C4a four toolbar groups and shared insert doors', () => {
     fireEvent.keyDown(trigger, { key: 'ArrowDown' });
     const menu = view.getByRole('menu', { name: '插入' });
     const items = within(menu).getAllByRole('menuitem') as HTMLButtonElement[];
-    expect(items.map((item) => item.textContent)).toEqual(['表格', '时间线', '柱图', '折线图', '媒体图', '引文框', '提示框', '目录']);
+    expect(items.map((item) => item.textContent)).toEqual(['表格', '时间线', '柱图', '折线图', '媒体图', '引文框', '提示框', '目录', '链接到…']);
     expect(document.activeElement).toBe(items[0]);
     expect(items[0].title).toBe('Insert table');
     expect(items.slice(4, 7).every((item) => item.disabled)).toBe(true);
     expect(items[7].disabled).toBe(false);
+    expect(items[8].disabled).toBe(true);
     fireEvent.keyDown(menu, { key: 'End' }); expect(document.activeElement).toBe(items[7]);
     fireEvent.keyDown(menu, { key: 'ArrowDown' }); expect(document.activeElement).toBe(items[0]);
     fireEvent.keyDown(menu, { key: 'Escape' });
@@ -421,7 +422,11 @@ describe('C4a four toolbar groups and shared insert doors', () => {
         fireEvent.click(view.getByRole('button', { name: '插入' }));
         fireEvent.click(view.getByRole('menuitem', { name: command.label }));
       } else act(() => host.current!.run(command.insertAction!, source.id));
-      if (command.insertAction === 'toc') {
+      if (command.insertAction === 'link') {
+        // No text selection or link host in this fixture: neither entry may save or open a picker.
+        expect(host.current!.disabledReason('link')).toBeTruthy();
+        expect(view.queryByRole('dialog')).toBeNull();
+      } else if (command.insertAction === 'toc') {
         await waitFor(() => expect(onCreateToc).toHaveBeenCalledTimes(entry === 'menu' ? 1 : 2));
         expect(onCreateToc.mock.lastCall).toEqual([]);
         expect(view.queryByRole('dialog')).toBeNull();

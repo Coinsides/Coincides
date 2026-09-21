@@ -1,0 +1,38 @@
+[
+  {
+    "name": "targeted-complete",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "src/pages/Notes/canvasEngine/inlineLinkService.test.ts",
+      "src/pages/Notes/canvasEngine/InlineLinkProvider.test.tsx",
+      "src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+      "src/pages/Notes/canvasEngine/textFlowDocumentHistory.integration.test.tsx",
+      "src/pages/Notes/canvasEngine/inlineLifecycle.test.ts",
+      "src/pages/Notes/canvasEngine/blocks/PaginatedTextBlockProjection.test.tsx",
+      "src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx",
+      "src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx",
+      "--maxWorkers=2"
+    ],
+    "cwd": "D:\\Coinsides\\v2.x\\Coincides\\client",
+    "startedAt": "2026-09-21T22:17:34.334Z",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 13749
+  },
+  {
+    "name": "build-client-final",
+    "args": [
+      "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      "run",
+      "build:client"
+    ],
+    "cwd": "D:\\Coinsides\\v2.x\\Coincides",
+    "startedAt": "2026-09-21T22:17:48.087Z",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 57568
+  }
+]

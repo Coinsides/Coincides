@@ -22,6 +22,10 @@ import { resolveSkin } from '@/styles/skinPresets';
 import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
 import { buildPaperSkinStyles } from '../paperSkinStyles';
 import { NOTE_HEADER_INITIAL_HEIGHT } from './NotePaperHeader';
+import { appendInlineLink, type InlineLinkTarget } from '../inlineLinkService';
+import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { InlineLinkContext } from '../InlineLinkContext';
+import { deriveChapterProjection } from '../chapterProjectionService';
 
 vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));
 
@@ -142,6 +146,29 @@ afterEach(() => {
 });
 
 describe('NotePrintLayer lifecycle and frozen print snapshot', () => {
+  it('T6 real beforeprint portal suppresses all three links and degraded marks even with a live navigation context', () => {
+    const targets: InlineLinkTarget[] = [{ target_kind: 'heading', block_id: 'h', unit_id: 'u' },
+      { target_kind: 'block', block_id: 'b' }, { target_kind: 'note', note_id: 'n' }];
+    const blocks = targets.map((target, index) => {
+      const text = `Print link ${index}`;
+      const base = createTextBlockContentV1(text);
+      const flow = appendInlineLink(base, { blockId: `b${index}`, textFlowId: `textflow-b${index}`, textUnitId: 'tu-1',
+        startOffset: 0, endOffset: text.length, text }, target)!;
+      if (index === 2) flow.inline_structures[0].anchor_range = null;
+      return { ...block(`b${index}`, text), content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+    });
+    const navigate = vi.fn();
+    const input = inputFor({ blocks, frames: [frame('first'), frame('second', { y: 1800 })],
+      placements: blocks.map((entry, index) => placement(entry.id, { y: index === 2 ? 1900 : 230 + index * 100 })) });
+    render(<InlineLinkContext.Provider value={{ chapters: deriveChapterProjection([]), blocks, notes: [], notesState: 'ready',
+      refreshNotes: vi.fn(), resolve: () => true, navigate }}><NotePrintLayer {...input} /></InlineLinkContext.Provider>);
+    printEvent('beforeprint');
+    const root = document.querySelector<HTMLElement>(ROOT)!;
+    expect(root.querySelector('[data-inline-link-layer], [data-inline-link-id], [data-inline-link-degraded], [role="link"]')).toBeNull();
+    expect([...root.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['Print link 0', 'Print link 1', 'Print link 2']);
+    expect(navigate).not.toHaveBeenCalled();
+    expect(blocks[2].content_json[TEXT_FLOW_CONTENT_KEY].inline_structures[0].anchor_range).toBeNull();
+  });
   it('fits a frozen lower-edge header and unchanged body into only the first page using the current separator tokens', () => {
     const input = inputFor({ frames: [frame('first'), frame('second', { y: 1800 })] });
     const before = JSON.stringify(input.noteCanvasRuntime);

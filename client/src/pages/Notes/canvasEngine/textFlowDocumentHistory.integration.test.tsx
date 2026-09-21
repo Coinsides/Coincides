@@ -11,6 +11,7 @@ import { useTextFlowHistory, type TextFlowHistoryHost } from './hooks/useTextFlo
 import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1 } from './runtimeDataTypes';
 import { navigateTextFlowBlockBoundary, type TextFlowNavigationTarget } from './textFlowBlockNavigation';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from './textFlowService';
+import { appendInlineLink } from './inlineLinkService';
 
 // jsdom supplies events; real-browser smoke separately checks B5 mirror geometry.
 vi.mock('./textareaNavigation', async (importOriginal) => ({
@@ -50,7 +51,7 @@ function renderDocumentHistory() {
     if (options?.textFlow) saved.push({ blockId: block.id, flow: structuredClone(options.textFlow) });
     return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
   });
-  let current!: { history: ReturnType<typeof usePlacementHistory>; flows: TextBlockContentV1[] };
+  let current!: { history: ReturnType<typeof usePlacementHistory>; flows: TextBlockContentV1[]; textHistory: ReturnType<typeof useTextFlowHistory> };
   function Fixture() {
     const drafts = useBlockDraftAuthority();
     const [annotations, setAnnotations] = useState<AnnotationTruthV1[]>([]);
@@ -80,7 +81,7 @@ function renderDocumentHistory() {
       applyDocumentEdit: textHistory.applyDocumentEdit,
     });
     const flows = blocks.map((block, index) => drafts.blockTextFlowDrafts[block.id] ?? before[index]);
-    current = { history, flows };
+    current = { history, flows, textHistory };
     return <DocumentTextFlowSelectionContext.Provider value={selection}>
       {blocks.map((block, index) => <TextBlockProjection key={block.id} blockId={block.id}
         text={plainText(flows[index])} textFlow={flows[index]} presentationKind="paragraph" readOnly={disabled}
@@ -127,6 +128,36 @@ function renderDocumentHistory() {
 }
 
 describe('B6b real document selection → B4 runtime history integration', () => {
+  it('T6 creation, B8 in-anchor edit and undo/redo preserve complete inline link snapshots', async () => {
+    const editor = renderDocumentHistory();
+    const previous = editor.current().flows[0];
+    const linked = appendInlineLink(previous, { blockId: 'block-0', textFlowId: 'textflow-block-0',
+      textUnitId: 'unit-0', startOffset: 1, endOffset: 4, text: 'alpha' },
+    { target_kind: 'note', note_id: 'other-note' }, 'created-link')!;
+    const selection = { unitId: 'unit-0', start: 1, end: 4 };
+    await act(async () => {
+      const history = editor.current().textHistory;
+      await history.applyEdit(editor.blocks[0], linked, { previousTextFlow: previous,
+        metadata: { kind: 'structural', inputType: 'insertInlineLink', unitId: 'unit-0', isComposing: false,
+          beforeSelection: selection, afterSelection: selection } });
+      await history.saveBlock(editor.blocks[0], 'alpha', { silent: true, textFlow: linked });
+    });
+    await editor.idle();
+    expect(editor.current().flows[0]).toEqual(linked);
+    await editor.replay('z'); expect(editor.current().flows[0]).toEqual(previous);
+    await editor.replay('y'); expect(editor.current().flows[0]).toEqual(linked);
+    act(() => { editor.unit(0).focus(); editor.unit(0).setSelectionRange(2, 3); });
+    fireEvent.select(editor.unit(0));
+    fireEvent.change(editor.unit(0), { target: { value: 'alXha', selectionStart: 3, selectionEnd: 3 } });
+    fireEvent.blur(editor.unit(0)); await editor.idle();
+    const damaged = structuredClone(editor.current().flows[0]);
+    expect(damaged.inline_structures.find((record) => record.id === 'created-link')).toMatchObject({
+      anchor_range: null, anchor_text: 'lph', field_values: { target_kind: 'note', note_id: 'other-note' },
+      metadata: { pre_edit_offsets: { text_unit_id: 'unit-0', start_offset: 1, end_offset: 4, range_text_cache: 'lph' } },
+    });
+    await editor.replay('z'); expect(editor.current().flows[0]).toEqual(linked);
+    await editor.replay('y'); expect(editor.current().flows[0]).toEqual(damaged);
+  });
   it('places the optimistic caret at the first endpoint while the first block save is pending', async () => {
     const editor = renderDocumentHistory();
     await editor.select();

@@ -27,6 +27,8 @@ import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowServ
 import { deriveChapterProjection } from '../chapterProjectionService';
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+import api from '@/services/api';
+import { appendInlineLink, type InlineLinkTarget } from '../inlineLinkService';
 
 beforeEach(() => localStorage.clear());
 afterEach(() => localStorage.clear());
@@ -474,6 +476,111 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     ] };
     return props;
   }
+
+  it.each(['toolbar', 'slash', 'slash-pointer'] as const)('T6 %s preserves the body selection and creates all three targets through the text save door', async (entry) => {
+    vi.spyOn(api, 'get').mockResolvedValue({ data: [{ id: 'next-note', title: 'Next note', course_id: 'project-a', status: 'active' }] });
+    const targets: Array<[InlineLinkTarget, string, string]> = [
+      [{ target_kind: 'heading', block_id: 'nested-heading', unit_id: 'heading-unit-1' }, '本笔记章树', 'Nested chapter'],
+      [{ target_kind: 'block', block_id: 'nested-heading' }, '本笔记章树', 'Nested chapter'],
+      [{ target_kind: 'note', note_id: 'next-note' }, '本项目笔记', 'Next note'],
+    ];
+    for (const [target, column, label] of targets) {
+      const props = headingProps();
+      const { container, unmount } = render(documentFor(props));
+      const editor = container.querySelector<HTMLTextAreaElement>('textarea[data-block-id="block-a"]')!;
+      act(() => { editor.focus(); editor.setSelectionRange(0, 5); });
+      fireEvent.mouseUp(editor);
+      if (entry === 'toolbar') fireEvent.click(screen.getByRole('button', { name: '链接到…' }));
+      else {
+        const beforeChanges = vi.mocked(props.onBlockTextChange).mock.calls.length;
+        expect(fireEvent.keyDown(editor, { key: '/' })).toBe(false);
+        expect(editor.value).toBe('First chapter');
+        expect(vi.mocked(props.onBlockTextChange).mock.calls.length).toBe(beforeChanges);
+        if (entry === 'slash-pointer') fireEvent.mouseDown(screen.getByRole('button', { name: /链接到… · 与插入菜单相同的入口/ }));
+        else fireEvent.keyDown(editor, { key: 'Enter' });
+      }
+      const dialog = await screen.findByRole('dialog', { name: '链接到…' });
+      await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Next note' })).toBeTruthy());
+      const buttons = within(within(dialog).getByRole('region', { name: column })).getAllByRole('button', { name: label });
+      fireEvent.click(target.target_kind === 'block' ? buttons[buttons.length - 1] : buttons[0]);
+      await waitFor(() => expect(props.onApplyBlockTextFlowEdit).toHaveBeenCalledOnce());
+      const [, flow, options] = vi.mocked(props.onApplyBlockTextFlowEdit).mock.calls[0];
+      expect(flow.inline_structures[0]).toMatchObject({ semantic_kind: 'inline_link', anchor_text: 'First',
+        parent_text_unit_id: 'heading-unit-0', anchor_range: { start: 0, end: 5 }, field_values: target });
+      expect(options).toMatchObject({ metadata: { kind: 'structural', inputType: 'insertInlineLink',
+        beforeSelection: { unitId: 'heading-unit-0', start: 0, end: 5 } } });
+      await waitFor(() => expect(props.onSaveBlock).toHaveBeenCalledWith(props.visibleBlocks[0], 'First chapter',
+        expect.objectContaining({ textFlow: flow, silent: true })));
+      unmount();
+    }
+  });
+
+  it.each(['heading', 'block'] as const)('T6 %s clicks reveal a folded target before using its current navigation rectangle', async (kind) => {
+    const props = headingProps();
+    const body = props.visibleBlocks[0];
+    const flow = body.content_json[TEXT_FLOW_CONTENT_KEY] as import('../runtimeDataTypes').TextBlockContentV1;
+    const target: InlineLinkTarget = kind === 'heading' ? { target_kind: 'heading', block_id: 'nested-heading', unit_id: 'heading-unit-1' }
+      : { target_kind: 'block', block_id: 'nested-heading' };
+    const linked = appendInlineLink(flow, { blockId: body.id, textFlowId: 'textflow-block-a', textUnitId: 'heading-unit-0',
+      startOffset: 0, endOffset: 5, text: flow.units[0].text }, target)!;
+    props.blockTextFlowDrafts = { [body.id]: linked };
+    const projection = deriveChapterProjection(props.allBlocks);
+    const reveal = vi.fn();
+    const presentation = { projection, numbered: false, collapsedChapterIds: new Set([projection.roots[0].id]),
+      onToggleChapter: vi.fn(), onRevealChapter: reveal, onToggleNumbering: vi.fn() };
+    const folded = { ...props, visibleBlocks: [body], chapterPresentation: presentation,
+      noteCanvasRuntime: { ...props.noteCanvasRuntime, blockFragmentProjections: props.noteCanvasRuntime.blockFragmentProjections.slice(0, 1) } };
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const view = render(documentFor(folded));
+    fireEvent.click(screen.getByRole('link', { name: 'First' }));
+    expect(reveal).toHaveBeenCalledWith(projection.chapters[1].id);
+    expect(scroll).not.toHaveBeenCalled();
+    view.rerender(documentFor({ ...props, chapterPresentation: { ...presentation, collapsedChapterIds: new Set() } }));
+    await waitFor(() => expect(scroll).toHaveBeenLastCalledWith(props.blockListRef.current, { x: 0, y: 222, width: 540, height: 44 }));
+    expect(props.onApplyBlockTextFlowEdit).not.toHaveBeenCalled();
+  });
+
+  it('T6 block navigation uses the existing placement rectangle without a page fragment', async () => {
+    const props = headingProps();
+    const body = props.visibleBlocks[0];
+    const flow = body.content_json[TEXT_FLOW_CONTENT_KEY] as import('../runtimeDataTypes').TextBlockContentV1;
+    props.blockTextFlowDrafts = { [body.id]: appendInlineLink(flow, { blockId: body.id, textFlowId: 'textflow-block-a',
+      textUnitId: 'heading-unit-0', startOffset: 0, endOffset: 5, text: flow.units[0].text },
+    { target_kind: 'block', block_id: 'nested-heading' })! };
+    props.noteCanvasRuntime = { ...props.noteCanvasRuntime, blockFragmentProjections: [] };
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    render(documentFor(props)); fireEvent.click(screen.getByRole('link', { name: 'First' }));
+    await waitFor(() => expect(scroll).toHaveBeenCalledOnce());
+    expect(scroll.mock.calls[0][1]).toMatchObject({ y: 222, width: 540, height: 44 });
+  });
+
+  it('T6 selected slash does not consume Enter after the user clicks another unit', () => {
+    const props = headingProps();
+    const { container } = render(documentFor(props));
+    const [first, second] = [...container.querySelectorAll('textarea')];
+    act(() => { first.focus(); first.setSelectionRange(0, 5); });
+    fireEvent.keyDown(first, { key: '/' });
+    fireEvent.mouseDown(second); act(() => second.focus());
+    fireEvent.keyDown(second, { key: 'Enter' });
+    expect(screen.queryByRole('dialog', { name: '链接到…' })).toBeNull();
+  });
+
+  it('T6 waits for note validation and refuses a source selection changed during that read', async () => {
+    const props = headingProps();
+    let finish!: (response: { data: unknown[] }) => void;
+    const notes = [{ id: 'next-note', title: 'Next note', course_id: 'project-a', status: 'active' }];
+    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: notes }).mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    const view = render(documentFor(props));
+    const editor = view.container.querySelector<HTMLTextAreaElement>('textarea')!;
+    act(() => { editor.focus(); editor.setSelectionRange(0, 5); }); fireEvent.mouseUp(editor);
+    fireEvent.click(screen.getByRole('button', { name: '链接到…' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Next note' }));
+    const changed = createTextBlockContentV1('New body'); changed.units[0].id = 'heading-unit-0';
+    view.rerender(documentFor({ ...props, blockTextFlowDrafts: { 'block-a': changed } }));
+    await act(async () => { finish({ data: notes }); });
+    expect(props.onApplyBlockTextFlowEdit).not.toHaveBeenCalled();
+    expect(await screen.findByRole('alert')).toBeTruthy();
+  });
 
   it('T1 reading TOC uses the existing heading jump with the navigation pane closed and live drafts', () => {
     const props = { ...tocProps(), contentReadOnly: true };
