@@ -1,0 +1,27 @@
+{
+  "mode": "docs-final",
+  "startedAt": "2026-09-21T09:23:33.585Z",
+  "fileTimeoutMs": 600000,
+  "zeroExclusions": false,
+  "isolation": {
+    "database": ":memory:",
+    "dotenv": "empty",
+    "providerCredentials": "isolated empty",
+    "userDatabase": "never"
+  },
+  "jobs": [
+    {
+      "name": "docs-final",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "exitCode": 0,
+      "durationMs": 563,
+      "log": ".codex-tmp/t2-richblock/docs-final.log"
+    }
+  ],
+  "finishedAt": "2026-09-21T09:23:34.149Z"
+}

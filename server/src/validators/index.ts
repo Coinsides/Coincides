@@ -8,6 +8,7 @@ import { agentContextHintSchema } from './agentContextHint.js';
 import { tableBlockContentSchema } from './tableBlock.js';
 import { componentBlockContentSchema } from './componentBlock.js';
 import { tocBlockContentSchema } from './tocBlock.js';
+import { PARAGRAPH_FURNITURE_KEY, paragraphFurnitureSchema } from './paragraphFurniture.js';
 
 // --- Auth ---
 
@@ -772,6 +773,14 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 }).superRefine((data, ctx) => {
+  const furniture = data.display_overrides_json?.[PARAGRAPH_FURNITURE_KEY];
+  if (furniture !== undefined) {
+    const result = paragraphFurnitureSchema.safeParse(furniture);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue,
+      path: ['display_overrides_json', PARAGRAPH_FURNITURE_KEY, ...issue.path] });
+    if (data.block_type !== 'paragraph') ctx.addIssue({ code: z.ZodIssueCode.custom,
+      path: ['display_overrides_json', PARAGRAPH_FURNITURE_KEY], message: 'Furniture requires a paragraph' });
+  }
   if (data.block_type === 'toc') {
     const result = tocBlockContentSchema.safeParse(data.content_json);
     if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });

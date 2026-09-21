@@ -1,0 +1,36 @@
+{
+  "mode": "server-recheck",
+  "startedAt": "2026-09-21T09:15:42.338Z",
+  "fileTimeoutMs": 600000,
+  "zeroExclusions": false,
+  "isolation": {
+    "database": ":memory:",
+    "dotenv": "empty",
+    "providerCredentials": "isolated empty",
+    "userDatabase": "never"
+  },
+  "jobs": [
+    {
+      "name": "server-recheck",
+      "cwd": "server",
+      "args": [
+        "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+        "--test-timeout=600000",
+        "src/__tests__/v2MaterialLibrary.test.ts",
+        "src/__tests__/v2SourceMineruWiring.test.ts",
+        "src/__tests__/v2SourceRegionCells.test.ts",
+        "src/__tests__/v14OrganizedNoteRichBlocks.test.ts"
+      ],
+      "files": [
+        "src/__tests__/v2MaterialLibrary.test.ts",
+        "src/__tests__/v2SourceMineruWiring.test.ts",
+        "src/__tests__/v2SourceRegionCells.test.ts",
+        "src/__tests__/v14OrganizedNoteRichBlocks.test.ts"
+      ],
+      "exitCode": 1,
+      "durationMs": 12011,
+      "log": ".codex-tmp/t2-richblock/server-recheck.log"
+    }
+  ],
+  "finishedAt": "2026-09-21T09:15:54.351Z"
+}

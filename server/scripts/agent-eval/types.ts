@@ -45,6 +45,8 @@ export interface EvalTurn {
 }
 export interface Scenario {
   name: string;
+  /** Explicit fixture/tool pipeline scenario: no model turns and never eligible for live mode. */
+  scriptedOnly?: true;
   dimensions: string[];
   setup(fixtures: Fixtures): void | Promise<void>;
   turns: EvalTurn[];

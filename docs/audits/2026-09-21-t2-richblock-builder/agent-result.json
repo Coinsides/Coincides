@@ -1,0 +1,72 @@
+{
+  "mode": "agent",
+  "startedAt": "2026-09-21T09:15:52.743Z",
+  "fileTimeoutMs": 600000,
+  "zeroExclusions": false,
+  "isolation": {
+    "database": ":memory:",
+    "dotenv": "empty",
+    "providerCredentials": "isolated empty",
+    "userDatabase": "never"
+  },
+  "jobs": [
+    {
+      "name": "agent",
+      "cwd": "server",
+      "args": [
+        "D:\\Coinsides\\v2.x\\Coincides\\scripts\\run-server-test-suite.mjs",
+        "--test-timeout=600000",
+        "scripts/agent-eval/harness.test.ts",
+        "src/__tests__/v13AgentMemories.test.ts",
+        "src/__tests__/v14AgentKnowledgeProjection.test.ts",
+        "src/__tests__/v14AgentRouteLifecycle.test.ts",
+        "src/__tests__/v14AgentVerbTransfer.test.ts",
+        "src/__tests__/v14AgentWriteDoor.test.ts",
+        "src/__tests__/v14AttentionContext.test.ts",
+        "src/__tests__/v14ClaimObservation.test.ts",
+        "src/__tests__/v14ClaimReceipt.test.ts",
+        "src/__tests__/v14ContextHint.test.ts",
+        "src/__tests__/v14DeleteCeremony.test.ts",
+        "src/__tests__/v14EpisodeContext.test.ts",
+        "src/__tests__/v14EpisodeStorage.test.ts",
+        "src/__tests__/v14IntentRouter.test.ts",
+        "src/__tests__/v14LoopRobustness.test.ts",
+        "src/__tests__/v14MemoryQuickwins.test.ts",
+        "src/__tests__/v14NotePatch.test.ts",
+        "src/__tests__/v14ProposalUnification.test.ts",
+        "src/__tests__/v14ReadTools.test.ts",
+        "src/__tests__/v14TurnIdentity.test.ts",
+        "src/__tests__/v14UiCommands.test.ts",
+        "src/agent/providers/index.test.ts"
+      ],
+      "files": [
+        "scripts/agent-eval/harness.test.ts",
+        "src/__tests__/v13AgentMemories.test.ts",
+        "src/__tests__/v14AgentKnowledgeProjection.test.ts",
+        "src/__tests__/v14AgentRouteLifecycle.test.ts",
+        "src/__tests__/v14AgentVerbTransfer.test.ts",
+        "src/__tests__/v14AgentWriteDoor.test.ts",
+        "src/__tests__/v14AttentionContext.test.ts",
+        "src/__tests__/v14ClaimObservation.test.ts",
+        "src/__tests__/v14ClaimReceipt.test.ts",
+        "src/__tests__/v14ContextHint.test.ts",
+        "src/__tests__/v14DeleteCeremony.test.ts",
+        "src/__tests__/v14EpisodeContext.test.ts",
+        "src/__tests__/v14EpisodeStorage.test.ts",
+        "src/__tests__/v14IntentRouter.test.ts",
+        "src/__tests__/v14LoopRobustness.test.ts",
+        "src/__tests__/v14MemoryQuickwins.test.ts",
+        "src/__tests__/v14NotePatch.test.ts",
+        "src/__tests__/v14ProposalUnification.test.ts",
+        "src/__tests__/v14ReadTools.test.ts",
+        "src/__tests__/v14TurnIdentity.test.ts",
+        "src/__tests__/v14UiCommands.test.ts",
+        "src/agent/providers/index.test.ts"
+      ],
+      "exitCode": 0,
+      "durationMs": 9574,
+      "log": ".codex-tmp/t2-richblock/agent.log"
+    }
+  ],
+  "finishedAt": "2026-09-21T09:16:02.320Z"
+}

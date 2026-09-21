@@ -143,7 +143,7 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-20 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-21 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
@@ -408,7 +408,7 @@
 | [handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md](handoffs/2026-09-20-v14-d3a-ownership-convergence-order.md) | D3a · ownership 机械收敛 | `done(二轮施工;一轮停线=裁定稿 404 条款×行为零变互咬,补遗一裁 get/find 分家后续派;HQ 收口:client 227 文件 2319/2319+server test:v2 真全绿(IPC 双恢复,Python 系在 HQ 机全过)亲跑定案;双门绿;2026-09-20)` | — | — |
 | [handoffs/2026-09-20-v14-d4-three-smalls-order.md](handoffs/2026-09-20-v14-d4-three-smalls-order.md) | D4 · 小单三件 | `done(2026-09-20 HQ 收官:一轮冲突停线→补遗一裁定→二轮交齐;HQ 机 server 主集真全绿含 Python 系;双门绿)` | — | — |
 | [handoffs/2026-09-21-v14-t1-toc-block-order.md](handoffs/2026-09-21-v14-t1-toc-block-order.md) | T1 · 目录块(agenda 投影的块化消费者) | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿含该两文件;client 2339/2339 逐字对上;docs 索引收口后 25 组件门全绿;双门绿)` | — | — |
-| [handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md](handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md) | T2 · 富块提案管线(Agent 产出样张级笔记的正门) | `ready(HQ 按代理权翻牌;**派发排 T1 收口之后**——姑息模式单 builder 串行,且五族含 `toc` 依赖 T1 落地)` | — | — |
+| [handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md](handoffs/2026-09-21-v14-t2-rich-block-pipeline-order.md) | T2 · 富块提案管线(Agent 产出样张级笔记的正门) | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿含该两文件;client 2341/2341 逐字对上;双门绿。Agent 产样张级笔记的正门自此开通)` | — | — |
 | [handoffs/2026-09-21-v14-t3-typography-alignment-order.md](handoffs/2026-09-21-v14-t3-typography-alignment-order.md) | T3 · 排印对齐批 | `ready(HQ 按代理权翻牌;**派发排 T2 之后**,单 builder 串行)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |

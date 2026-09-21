@@ -1,0 +1,456 @@
+[
+  {
+    "file": "server/src/services/organizedNoteBlocks.ts",
+    "sha256": "a18a71504a7839db3454287b1c94a0c59ae53b54cb4b0428c730189dbe1d48e2",
+    "bytes": 8638,
+    "anchors": [
+      {
+        "line": 7,
+        "text": "const textTypes = new Set(['heading', 'paragraph', 'definition', 'theorem', 'proof', 'formula',"
+      },
+      {
+        "line": 16,
+        "text": "function textContent(text: string, role: string, id: string) {"
+      },
+      {
+        "line": 25,
+        "text": "export function normalizeOrganizedNoteBlock(db: Database.Database, userId: string, value: unknown, index: number) {"
+      },
+      {
+        "line": 31,
+        "text": "const heading = Array.isArray(units) ? units.map(record).filter(unit => unit.status !== 'deleted')"
+      },
+      {
+        "line": 43,
+        "text": "const downgrade = (reason: string) => {"
+      },
+      {
+        "line": 62,
+        "text": "const checked = createNoteBlockSchema.safeParse({ block_type: type, content_json: content,"
+      },
+      {
+        "line": 67,
+        "text": "if (type === 'toc') {"
+      },
+      {
+        "line": 100,
+        "text": "export function deterministicRichContent(text: string): Record<string, unknown>[] {"
+      }
+    ]
+  },
+  {
+    "file": "server/src/services/organizedNoteProposals.ts",
+    "sha256": "2ffb24a472f21b19b20294067b7ea78afb1a713c53b221fddd5fe1d33a9b8856",
+    "bytes": 16612,
+    "anchors": [
+      {
+        "line": 8,
+        "text": "import { deterministicRichContent, normalizeOrganizedNoteBlock } from './organizedNoteBlocks.js';"
+      },
+      {
+        "line": 9,
+        "text": "import { ORGANIZED_NOTE_GENERATION_PROMPT } from './organizedNotePrompt.js';"
+      },
+      {
+        "line": 182,
+        "text": "function deterministicBlocks(db: Database.Database, userId: string, segments: any[]): OrganizedNoteBlock[] {"
+      },
+      {
+        "line": 185,
+        "text": "blocks.push({ ...normalizeOrganizedNoteBlock(db, userId, value, blocks.length),"
+      },
+      {
+        "line": 188,
+        "text": "const chapterTitles = new Set(segments.filter(segment => segment.segment_type === 'heading').map(segment => segment.title));"
+      },
+      {
+        "line": 189,
+        "text": "if (chapterTitles.size >= 3) add({ block_type: 'toc', content_json: {} }, []);"
+      },
+      {
+        "line": 227,
+        "text": "ORGANIZED_NOTE_GENERATION_PROMPT"
+      },
+      {
+        "line": 237,
+        "text": "...normalizeOrganizedNoteBlock(db, userId, block, index),"
+      },
+      {
+        "line": 299,
+        "text": "warnings: [...new Set([...allWarnings, ...blocks.flatMap(block => block.warnings)])],"
+      },
+      {
+        "line": 313,
+        "text": "export function applyOrganizedNoteProposal(db: Database.Database, userId: string, proposal: ProposalRow) {"
+      },
+      {
+        "line": 356,
+        "text": "INSERT INTO note_block_placements (id, note_id, block_id, order_index, display_overrides_json, created_at, updated_at)"
+      },
+      {
+        "line": 366,
+        "text": "data.blocks = [...data.blocks].sort((a, b) => a.order_index - b.order_index).map((block, index) => ({"
+      },
+      {
+        "line": 367,
+        "text": "...normalizeOrganizedNoteBlock(db, userId, block, index),"
+      },
+      {
+        "line": 409,
+        "text": "db.prepare('UPDATE proposals SET data = ? WHERE id = ? AND user_id = ?')"
+      },
+      {
+        "line": 427,
+        "text": "warnings: data.warnings,"
+      }
+    ]
+  },
+  {
+    "file": "server/src/validators/paragraphFurniture.ts",
+    "sha256": "55cb7faf73a0552b749384922b138d44f6ee27b08b0c39a21e76e67894edbd32",
+    "bytes": 422,
+    "anchors": [
+      {
+        "line": 4,
+        "text": "export const PARAGRAPH_FURNITURE_KEY = 'paragraph_furniture_v1';"
+      },
+      {
+        "line": 5,
+        "text": "export const paragraphFurnitureSchema = z.discriminatedUnion('variant', ["
+      }
+    ]
+  },
+  {
+    "file": "server/src/validators/index.ts",
+    "sha256": "befb5d3e43470f62fbc8866c9d84247c0f2256fe3cbacfdabf3a4e925e146865",
+    "bytes": 49404,
+    "anchors": [
+      {
+        "line": 776,
+        "text": "const furniture = data.display_overrides_json?.[PARAGRAPH_FURNITURE_KEY];"
+      }
+    ]
+  },
+  {
+    "file": "server/src/services/organizedNotePrompt.ts",
+    "sha256": "f8303d25c4273b7ca21f07afc1bbf8fc81138eac496b385842bac489c6a08169",
+    "bytes": 2786,
+    "anchors": [
+      {
+        "line": 2,
+        "text": "export const ORGANIZED_NOTE_BASE_PROMPT = ["
+      },
+      {
+        "line": 10,
+        "text": "export const ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT = `"
+      },
+      {
+        "line": 25,
+        "text": "export const ORGANIZED_NOTE_GENERATION_PROMPT = ORGANIZED_NOTE_BASE_PROMPT + ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT;"
+      }
+    ]
+  },
+  {
+    "file": "client/src/components/AgentPanel/proposalInboxModel.ts",
+    "sha256": "059f4dd1b99366dd5d242573a760a15fe369553741cdd6ab29cdbf0132fb01da",
+    "bytes": 6281,
+    "anchors": [
+      {
+        "line": 26,
+        "text": "export function describeOrganizedNoteBlock(value: unknown) {"
+      },
+      {
+        "line": 84,
+        "text": "blocks: proposal.type === 'organized_note' ? entries.map(describeOrganizedNoteBlock) : [],"
+      },
+      {
+        "line": 85,
+        "text": "warnings: proposal.type === 'organized_note' && Array.isArray(data.warnings)"
+      }
+    ]
+  },
+  {
+    "file": "client/src/components/AgentPanel/ProposalInbox.tsx",
+    "sha256": "a1af73e3e42941823113868a05fdc1a9eabda4512bb92aa393994a205a847b61",
+    "bytes": 3733,
+    "anchors": [
+      {
+        "line": 37,
+        "text": "{view.blocks.length > 0 && <details>"
+      },
+      {
+        "line": 38,
+        "text": "<summary>查看内容块摘要（{view.blocks.length}）</summary>"
+      },
+      {
+        "line": 44,
+        "text": "{view.warnings.map((warning, index) => <p className={styles.notice} key={index}>{warning}</p>)}"
+      }
+    ]
+  },
+  {
+    "file": "client/src/pages/Courses/CourseDetail.tsx",
+    "sha256": "36420a86282338c1274de8ca39c2a68dd1834df6475ffa5c3a0950a29defbcea",
+    "bytes": 67419,
+    "anchors": [
+      {
+        "line": 1448,
+        "text": "{(activeProposal.data.blocks || []).map((block) => {"
+      },
+      {
+        "line": 1449,
+        "text": "const summary = describeOrganizedNoteBlock(block);"
+      },
+      {
+        "line": 1457,
+        "text": "{summary.warnings.map((warning, index) => <div key={index} className={styles.groupWarning}>"
+      }
+    ]
+  },
+  {
+    "file": "server/scripts/agent-eval/types.ts",
+    "sha256": "6663932d1147356aa2d2ad49756a042dd5e40afc4a694b6c84c5ea6a1ad4bd7e",
+    "bytes": 2200,
+    "anchors": [
+      {
+        "line": 49,
+        "text": "scriptedOnly?: true;"
+      }
+    ]
+  },
+  {
+    "file": "server/scripts/agent-eval/discovery.ts",
+    "sha256": "b18e2848aa088cffad99008694accb2fd906b1d3369573dcd8599bcf16f40c36",
+    "bytes": 1446,
+    "anchors": [
+      {
+        "line": 19,
+        "text": "|| !Array.isArray(scenario.turns) || (!scenario.turns.length && scenario.scriptedOnly !== true)"
+      }
+    ]
+  },
+  {
+    "file": "server/scripts/agent-eval/harness.ts",
+    "sha256": "74c46b414ce454fbd697a19d0250cf15fb2abf23e7fdcbcc8048d488c2728ce1",
+    "bytes": 8499,
+    "anchors": [
+      {
+        "line": 28,
+        "text": "if (scenario.scriptedOnly && mode !== 'scripted') throw new Error('This scenario is scripted-only');"
+      }
+    ]
+  },
+  {
+    "file": "server/scripts/agent-eval/scenarios/14-rich-block-pipeline.ts",
+    "sha256": "e2e9c05c58914ae251cdd73b6464a1b8cf229010aede7ac7bb31c4400cccf51a",
+    "bytes": 7186,
+    "anchors": [
+      {
+        "line": 14,
+        "text": "name: '14-rich-block-pipeline', scriptedOnly: true,"
+      },
+      {
+        "line": 16,
+        "text": "async setup(ctx) {"
+      },
+      {
+        "line": 40,
+        "text": "turns: [],"
+      },
+      {
+        "line": 44,
+        "text": "await ctx.check('zero provider turns; deterministic pending proposal spans all five families without note writes', () => {"
+      },
+      {
+        "line": 62,
+        "text": "await ctx.check('only human apply writes the note with native table/component/furniture and truth-free TOC rows', () => {"
+      },
+      {
+        "line": 86,
+        "text": "await ctx.check('discard remains the existing whole-proposal human action', async () => {"
+      }
+    ]
+  },
+  {
+    "file": "server/scripts/agent-eval/harness.test.ts",
+    "sha256": "2a5dd743decf5b770d933356c94c416d16bd8d9f402fe3070a51a248384ebdec",
+    "bytes": 20590,
+    "anchors": [
+      {
+        "line": 80,
+        "text": "test('explicit scripted-only fixture scenarios permit zero provider turns', async t => {"
+      }
+    ]
+  },
+  {
+    "file": "server/src/__tests__/v14OrganizedNoteRichBlocks.test.ts",
+    "sha256": "4850bfb38766c3da6757bf28df2730e0d57e13647d4bf6327e1f389909675d8d",
+    "bytes": 12390,
+    "anchors": [
+      {
+        "line": 25,
+        "text": "test('all five families normalize with the exact human creation payload semantics', async t => {"
+      },
+      {
+        "line": 48,
+        "text": "test('table and component limits match human validators at their exact accepted boundaries', async t => {"
+      },
+      {
+        "line": 65,
+        "text": "test('invalid rich payloads downgrade without losing text and account for each failed block', async t => {"
+      },
+      {
+        "line": 90,
+        "text": "test('excluded families and unknown component envelopes cannot enter through type or template aliases', async t => {"
+      },
+      {
+        "line": 105,
+        "text": "test('proposal appearance contains only furniture semantics and text headings survive apply normalization', async t => {"
+      },
+      {
+        "line": 122,
+        "text": "test('apply revalidates persisted payloads, writes placement furniture, persists warnings and supports existing trash/restore', async t => {"
+      },
+      {
+        "line": 154,
+        "text": "test('deterministic source grammar preserves tabular, chronological, quote and caution content without a model', () => {"
+      },
+      {
+        "line": 161,
+        "text": "test('T2 generator amendment removal recovers the original 569-byte SHA-256 without changing C2 prompt', () => {"
+      }
+    ]
+  },
+  {
+    "file": "client/src/components/AgentPanel/proposalInboxModel.richBlocks.test.tsx",
+    "sha256": "abf068235067b267d9b85bd3063c13b9aad1910a6fcc67b11d3f3cc1a1f1154b",
+    "bytes": 3688,
+    "anchors": [
+      {
+        "line": 18,
+        "text": "it('derives counts from live payloads, including headerless and header-only tables', () => {"
+      },
+      {
+        "line": 26,
+        "text": "it('shows every block summary and warning, and keeps apply/discard as explicit human actions', () => {"
+      }
+    ]
+  },
+  {
+    "file": "server/package.json",
+    "sha256": "2741e83bcc654dbd4eaec3392fb63b8a711b93f4a8ff0956c123019abcbbce11",
+    "bytes": 8508,
+    "anchors": [
+      {
+        "line": 40,
+        "text": "\"test:v2\": \"node ../scripts/run-server-test-suite.mjs src/__tests__/v2NoteFoundation.test.ts src/__tests__/v2NoteBlockLifecycle.test.ts src/__tests__/v2MaterialLibrary.test.ts src/__tests__/v2ContentGroups.test.ts src/__tests__/v2GroupFolders.test.ts src/__tests__/v2CanvasPersistenceCutover.test.ts src/__tests__/v2Purposes.test.ts src/__tests__/v2SourceIdentityFloor.test.ts src/__tests__/v2SourceFileIntake.test.ts src/__tests__/v2SourceMaterialization.test.ts src/__tests__/v2SourceLifecycleClosure.test.ts src/__tests__/v2ItemRelationFloor.test.ts src/__tests__/v2Items.test.ts src/__tests__/v2Relations.test.ts src/__tests__/v2RelationLifecycleClosure.test.ts scripts/v2OperationBatchTimestampMigration.test.ts src/__tests__/textFlowIdentityContract.test.ts src/__tests__/v2DevQuickLogin.test.ts src/__tests__/v2TestV2ManifestHook.test.ts src/__tests__/v2DocumentParserPdf.test.ts src/__tests__/v2BlockRestoreDoor.test.ts src/__tests__/v2SourceImprints.test.ts src/__tests__/v2SourceNeverReject.test.ts src/__tests__/v2SourceContainerIntake.test.ts src/__tests__/v2SourceT0Alignment.test.ts src/__tests__/v2SourceTranscriberFingerprint.test.ts src/__tests__/v2SourceMineruWiring.test.ts src/__tests__/v2SourceRegionCells.test.ts src/__tests__/v2ImprintEmbedding.test.ts src/__tests__/v2ImprintRetrieval.test.ts src/__tests__/v2ImprintCitations.test.ts src/__tests__/v2TemplateStudioDecommission.test.ts src/__tests__/providerCredentials.test.ts src/__tests__/v13AgentMemories.test.ts src/__tests__/v13AtomicTextSave.test.ts src/__tests__/v13AtomicTextSaveMigration.test.ts src/__tests__/v13BoardChalk.test.ts src/__tests__/v13BoardStaging.test.ts src/__tests__/v13BoardTextRanges.test.ts src/__tests__/v13BoardTrayRelocation.test.ts src/__tests__/v13BoardViewportBookmarks.test.ts src/__tests__/v13CanvasRetirement.test.ts src/__tests__/v13EventsLedger.test.ts src/__tests__/v13GraphemeTextRanges.test.ts src/__tests__/v13ItemRefBlocks.test.ts src/__tests__/v13MediaBlocks.test.ts src/__tests__/v14OrganizedNoteRichBlocks.test.ts src/__tests__/v14TableBlocks.test.ts src/__tests__/v14TocBlocks.test.ts src/__tests__/v14ComponentBlocks.test.ts src/__tests__/v14ParagraphFurniture.test.ts src/__tests__/v13NoteMetadata.test.ts src/__tests__/v13PagePresets.test.ts src/__tests__/v13PaperInk.test.ts src/__tests__/v13PaperSkin.test.ts src/__tests__/v14PaletteColors.test.ts src/__tests__/v14AgentWriteDoor.test.ts src/__tests__/v14AgentVerbTransfer.test.ts src/__tests__/v14DeleteCeremony.test.ts src/__tests__/v14ProposalUnification.test.ts src/__tests__/v14ReadTools.test.ts src/__tests__/v14ContextHint.test.ts src/__tests__/v14SkinSuites.test.ts src/__tests__/v14CardCover.test.ts src/__tests__/v14NoteBinding.test.ts src/__tests__/v14CoverPage.test.ts src/__tests__/v13ProjectDeletionReferences.test.ts src/__tests__/v13SourceProjectionRepair.test.ts src/__tests__/v13SourceReprojection.test.ts src/__tests__/v13Tray.test.ts src/__tests__/v13TrayOrder.test.ts src/__tests__/v13WallCollectionBatch.test.ts src/__tests__/v14PaperFreedom.test.ts src/agent/providers/index.test.ts src/__tests__/v14LoopRobustness.test.ts src/__tests__/v14AgentRouteLifecycle.test.ts src/__tests__/v14MemoryQuickwins.test.ts src/__tests__/v14ClaimReceipt.test.ts src/__tests__/v14ClaimObservation.test.ts src/__tests__/v14TurnIdentity.test.ts src/__tests__/v14AgentKnowledgeProjection.test.ts src/__tests__/v14BoardVisual.test.ts src/__tests__/v14BoardVisualGeometry.test.ts src/__tests__/v14BoardLayoutInspector.test.ts\","
+      }
+    ]
+  },
+  {
+    "file": "docs/contracts/Organized-Note-Rich-Block-Prompt-Amendment.md",
+    "sha256": "05c7593a0d50384985cbf784aff73342c0de95d90e9272cc168684a7f551d70c",
+    "bytes": 2337,
+    "anchors": [
+      {
+        "line": 7,
+        "text": "# Amendment — 2026-09-21 · organized_note rich blocks"
+      },
+      {
+        "line": 17,
+        "text": "| 原生成器 prompt | 569 | `2a330527f4d46fff0f1e6bcde4fe308c10b667480a575026c7e6789042cc9274` |"
+      },
+      {
+        "line": 19,
+        "text": "| 追加后 prompt | 2460 | `0159d0c94773cc51599ab235dcdb00960521a9eaae96f30903f3d88470cd46cf` |"
+      },
+      {
+        "line": 20,
+        "text": "| 精确移除追加节后的还原件 | 569 | `2a330527f4d46fff0f1e6bcde4fe308c10b667480a575026c7e6789042cc9274` |"
+      }
+    ]
+  },
+  {
+    "file": "docs/agent-ops/current-state/app-operating-manual.md",
+    "sha256": "d0eae6aba7fe6f6b2ad9f77d90f8cbabade004aadce060ee6abb93b9dbe09245",
+    "bytes": 39633,
+    "anchors": [
+      {
+        "line": 83,
+        "text": "- **富块提案(T2)**:organized_note 支持文字、表格、内建组件(timeline/chart_bar/chart_line)、目录，以及 paragraph 的引文/提示框样式。材料页领域预览和 Agent 收件箱均提供逐块类型摘要与 warning；表格数字为数据行×列，组件数量从实际载荷计算。目录只存放置，章标题读时派生；至少三个不同章节标题的确定性材料提案带目录。越界类型或无效载荷保留原文降成 paragraph 并记账，单块无效不废整案。采纳后沿用块删除/恢复及笔记编辑器撤销。生成器只传数据/语义，样式由现役 token 决定；无自动 apply、无 media/item_ref/note_ref 代造代绑。测试走显式表格/日期/引文/提示语法的确定性回退；未调用真实模型。提示词可逆证明见 `docs/contracts/Organized-Note-Rich-Block-Prompt-Amendment.md`。"
+      }
+    ]
+  },
+  {
+    "file": "docs/agent-ops/current-state/agent-knowledge-fingerprint.json",
+    "sha256": "56716505dd2b8d399425350293bd0b975c4d26bd07d208bb18abf80c5a021d61",
+    "bytes": 3700,
+    "anchors": [
+      {
+        "line": 4,
+        "text": "\"hash\": \"85acce270a2224893e4c011ce4e46e1625f01d5ceba81f7f393cca7aa2a78b15\","
+      },
+      {
+        "line": 145,
+        "text": "\"updated\": \"2026-09-21\""
+      }
+    ]
+  },
+  {
+    "file": "docs/agent-ops/INDEX.md",
+    "sha256": "2f6ca4443bf5b7f771a34ccd2fcab8c537fa00e7686d81ea2b9706db72180ba1",
+    "bytes": 90849,
+    "anchors": [
+      {
+        "line": 144,
+        "text": "| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |"
+      },
+      {
+        "line": 145,
+        "text": "| [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |"
+      },
+      {
+        "line": 146,
+        "text": "| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-21 | — |"
+      },
+      {
+        "line": 147,
+        "text": "| [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |"
+      },
+      {
+        "line": 148,
+        "text": "| [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |"
+      },
+      {
+        "line": 149,
+        "text": "| [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |"
+      },
+      {
+        "line": 150,
+        "text": "| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-09-20(D3a 二轮 TD-15/16 施工实况更新；清债判定留 HQ) | — |"
+      }
+    ]
+  },
+  {
+    "file": "docs/agent-ops/current-state/INDEX.md",
+    "sha256": "d55ca939ddb41c6834ed08b4783874f24f8e6c8823871994e13ac98193f01b06",
+    "bytes": 1345,
+    "anchors": [
+      {
+        "line": 17,
+        "text": "| [app-operating-manual.md](app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-21 | — |"
+      }
+    ]
+  },
+  {
+    "file": "docs/contracts/INDEX.md",
+    "sha256": "24deedfc85d52bf99e68f713ae27087cc581c9a83ad79d0ca037f1c26f111d93",
+    "bytes": 3033,
+    "anchors": [
+      {
+        "line": 25,
+        "text": "| [Organized-Note-Rich-Block-Prompt-Amendment.md](Organized-Note-Rich-Block-Prompt-Amendment.md) | Amendment — 2026-09-21 · organized_note rich blocks | `active` | 2026-09-21 | — |"
+      }
+    ]
+  }
+]

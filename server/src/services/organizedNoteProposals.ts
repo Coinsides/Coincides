@@ -5,10 +5,8 @@ import { AppError } from '../middleware/errorHandler.js';
 import { getProviderFromSettings } from '../agent/providers/index.js';
 import { resolveProviderCredential } from './providerCredentials.js';
 import { ensureSegmentsForMaterial, listCourseMaterials } from './courseMaterials.js';
-import {
-  legacyBlockTypeForRuntimeTemplate,
-  mergeRuntimeNoteBlockTemplateMetadata,
-} from './templateDefinitions.js';
+import { deterministicRichContent, normalizeOrganizedNoteBlock } from './organizedNoteBlocks.js';
+import { ORGANIZED_NOTE_GENERATION_PROMPT } from './organizedNotePrompt.js';
 import { resolveSourceBoardForProposal } from './sourceBoards.js';
 import { resolveSourceScopesForProposal } from './sourceScopes.js';
 import { createProposal, HUMAN_PROPOSAL_CONTEXT, type ProposalCreationContext } from './proposals.js';
@@ -47,6 +45,7 @@ interface OrganizedNoteBlock {
   block_type: string;
   title: string | null;
   content_json: Record<string, unknown>;
+  display_overrides_json: Record<string, unknown>;
   plain_text: string;
   metadata: Record<string, unknown>;
   order_index: number;
@@ -182,109 +181,27 @@ function sourceReferencesForSegment(db: Database.Database, segment: any): Source
 
 function deterministicBlocks(db: Database.Database, userId: string, segments: any[]): OrganizedNoteBlock[] {
   const blocks: OrganizedNoteBlock[] = [];
+  const add = (value: unknown, refs: SourceReference[], confidence = 0.7) => {
+    blocks.push({ ...normalizeOrganizedNoteBlock(db, userId, value, blocks.length),
+      source_references: refs, confidence });
+  };
+  const chapterTitles = new Set(segments.filter(segment => segment.segment_type === 'heading').map(segment => segment.title));
+  if (chapterTitles.size >= 3) add({ block_type: 'toc', content_json: {} }, []);
   for (const segment of segments) {
     const refs = sourceReferencesForSegment(db, segment);
-    const excerpt = refs[0]?.source_excerpt || segment.summary || segment.title;
+    // Generate from full fixture/source fragments, not the 500-character citation excerpt.
+    const fragments = db.prepare(`
+      SELECT sf.content FROM material_segment_fragments msf
+      JOIN source_fragments sf ON sf.id = msf.fragment_id
+      WHERE msf.segment_id = ? ORDER BY msf.order_index ASC, sf.order_index ASC
+    `).all(segment.id) as { content: string }[];
+    const excerpt = fragments.map(fragment => fragment.content).join('\n')
+      || segment.summary || segment.title || '';
     const headingText = segment.title || 'Source segment';
-    const headingMetadata = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {}, 'heading');
-    const paragraphMetadata = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {}, 'paragraph');
-    blocks.push({
-      temp_id: `block-${blocks.length + 1}`,
-      block_type: legacyBlockTypeForRuntimeTemplate(headingMetadata.template),
-      title: headingText,
-      content_json: { body: headingText },
-      plain_text: headingText,
-      metadata: headingMetadata.metadata,
-      order_index: blocks.length,
-      source_references: refs,
-      confidence: segment.confidence ?? 0.7,
-      warnings: [],
-    });
-    blocks.push({
-      temp_id: `block-${blocks.length + 1}`,
-      block_type: legacyBlockTypeForRuntimeTemplate(paragraphMetadata.template),
-      title: null,
-      content_json: { body: excerpt },
-      plain_text: excerpt,
-      metadata: paragraphMetadata.metadata,
-      order_index: blocks.length,
-      source_references: refs,
-      confidence: segment.confidence ?? 0.7,
-      warnings: [],
-    });
+    add({ block_type: 'heading', title: headingText, plain_text: headingText }, refs, segment.confidence ?? 0.7);
+    for (const block of deterministicRichContent(excerpt)) add(block, refs, segment.confidence ?? 0.7);
   }
   return blocks;
-}
-
-function sanitizeAiBlock(
-  db: Database.Database,
-  userId: string,
-  block: any,
-  fallbackRefs: SourceReference[],
-  orderIndex: number,
-): OrganizedNoteBlock | null {
-  const allowedTypes = new Set([
-    'heading',
-    'paragraph',
-    'definition',
-    'theorem',
-    'proof',
-    'formula',
-    'example',
-    'exercise',
-    'answer',
-    'sidenote',
-  ]);
-  const blockType = typeof block?.block_type === 'string' && allowedTypes.has(block.block_type)
-    ? block.block_type
-    : 'paragraph';
-  const inputMetadata = typeof block?.metadata === 'object' && block.metadata !== null
-    ? block.metadata as Record<string, unknown>
-    : {};
-  const requestedTemplateId = typeof block?.template_id === 'string'
-    ? block.template_id
-    : typeof inputMetadata.template_id === 'string'
-      ? inputMetadata.template_id
-      : undefined;
-  const requestedRole = typeof block?.learning_role === 'string'
-    ? block.learning_role
-    : typeof inputMetadata.learning_role === 'string'
-      ? inputMetadata.learning_role
-      : undefined;
-  const resolved = mergeRuntimeNoteBlockTemplateMetadata(
-    db,
-    userId,
-    requestedTemplateId ? { ...inputMetadata, template_id: requestedTemplateId } : inputMetadata,
-    blockType,
-    { allowUnknownTemplateFallback: true },
-  );
-  const metadata = resolved.metadata;
-  const normalizedBlockType = legacyBlockTypeForRuntimeTemplate(resolved.template);
-  const plainText = String(block?.plain_text || block?.content_json?.body || block?.title || '').trim();
-  if (!plainText) return null;
-  const warnings = [
-    ...(Array.isArray(block?.warnings) ? block.warnings.map(String) : []),
-    ...resolved.warnings,
-  ];
-  if (requestedTemplateId && resolved.resolution_status === 'template_missing') {
-    warnings.push(`Unknown template_id "${requestedTemplateId}" was mapped to ${metadata.template_id}.`);
-  } else if (requestedRole && requestedRole !== metadata.learning_role) {
-    warnings.push(`Unsupported learning_role "${requestedRole}" was mapped to ${metadata.learning_role}.`);
-  }
-  return {
-    temp_id: String(block?.temp_id || `ai-block-${orderIndex + 1}`),
-    block_type: normalizedBlockType,
-    title: typeof block?.title === 'string' ? block.title : null,
-    content_json: typeof block?.content_json === 'object' && block.content_json !== null
-      ? block.content_json
-      : { body: plainText },
-    plain_text: plainText,
-    metadata,
-    order_index: orderIndex,
-    source_references: fallbackRefs,
-    confidence: typeof block?.confidence === 'number' ? block.confidence : 0.7,
-    warnings,
-  };
 }
 
 async function tryGenerateAiBlocks(
@@ -303,18 +220,11 @@ async function tryGenerateAiBlocks(
       const excerpt = refs.map((ref) => ref.source_excerpt).join('\n');
       return `Segment: ${segment.title}\nPages: ${segment.page_start || '?'}-${segment.page_end || '?'}\nExcerpt:\n${excerpt}`;
     }).join('\n\n---\n\n').slice(0, 12000);
-    const systemPrompt = [
-      'You create factual, source-aware study note proposals.',
-      'Return only JSON. Do not diagnose the learner. Do not claim complete course understanding.',
-      'Prefer these template_id values: text.paragraph, formula.math, code.snippet.',
-      'Use legacy block_type values only for compatibility: heading, paragraph, definition, theorem, proof, formula, example, exercise, answer, sidenote.',
-      'JSON shape: {"blocks":[{"block_type":"paragraph","template_id":"text.paragraph","learning_role":"note","title":"...","content_json":{"body":"..."},"plain_text":"...","confidence":0.7,"warnings":[]}]}',
-    ].join('\n');
     let text = '';
     for await (const chunk of provider.chat(
       [{ role: 'user', content: `Draft organized note proposal blocks for "${title}" from these source ranges:\n\n${sourceBrief}` }],
       [],
-      systemPrompt
+      ORGANIZED_NOTE_GENERATION_PROMPT
     )) {
       if (chunk.type === 'text') text += chunk.text;
       if (chunk.type === 'error') return null;
@@ -323,9 +233,11 @@ async function tryGenerateAiBlocks(
     if (!Array.isArray(parsed.blocks)) return null;
 
     const fallbackRefs = segments.flatMap((segment) => sourceReferencesForSegment(db, segment)).slice(0, 3);
-    const blocks = parsed.blocks
-      .map((block, index) => sanitizeAiBlock(db, userId, block, fallbackRefs, index))
-      .filter((block): block is OrganizedNoteBlock => Boolean(block));
+    const blocks = parsed.blocks.map((block, index) => ({
+      ...normalizeOrganizedNoteBlock(db, userId, block, index),
+      source_references: block?.block_type === 'toc' ? [] : fallbackRefs,
+      confidence: typeof block?.confidence === 'number' ? block.confidence : 0.7,
+    }));
     return blocks.length > 0 ? blocks : null;
   } catch {
     return null;
@@ -384,7 +296,7 @@ export async function createOrganizedNoteProposal(
     scope_summary: resolvedScopes.scope_summary,
     segment_ids: segmentIds,
     blocks,
-    warnings: allWarnings,
+    warnings: [...new Set([...allWarnings, ...blocks.flatMap(block => block.warnings)])],
   };
 
   return db.transaction(() => {
@@ -441,8 +353,8 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'proposal', ?, ?, ?, ?)
   `);
   const insertPlacement = db.prepare(`
-    INSERT INTO note_block_placements (id, note_id, block_id, order_index, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO note_block_placements (id, note_id, block_id, order_index, display_overrides_json, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
   const insertSource = db.prepare(`
     INSERT INTO note_block_sources (
@@ -451,7 +363,13 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  for (const block of data.blocks.sort((a, b) => a.order_index - b.order_index)) {
+  data.blocks = [...data.blocks].sort((a, b) => a.order_index - b.order_index).map((block, index) => ({
+    ...normalizeOrganizedNoteBlock(db, userId, block, index),
+    source_references: block?.block_type === 'toc' ? [] : block?.source_references || [],
+    confidence: block?.confidence ?? null,
+  }));
+  data.warnings = [...new Set([...(data.warnings || []), ...data.blocks.flatMap(block => block.warnings)])];
+  for (const block of data.blocks) {
     const blockId = uuidv4();
     insertBlock.run(
       blockId,
@@ -462,13 +380,7 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
       JSON.stringify(block.content_json || {}),
       block.plain_text || null,
       JSON.stringify({
-        ...mergeRuntimeNoteBlockTemplateMetadata(
-          db,
-          userId,
-          block.metadata || {},
-          block.block_type,
-          { allowUnknownTemplateFallback: true },
-        ).metadata,
+        ...block.metadata,
         proposal_id: proposal.id,
         temp_id: block.temp_id,
       }),
@@ -476,7 +388,7 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
       now,
       now
     );
-    insertPlacement.run(uuidv4(), noteId, blockId, block.order_index, now, now);
+    insertPlacement.run(uuidv4(), noteId, blockId, block.order_index, JSON.stringify(block.display_overrides_json), now, now);
 
     for (const ref of block.source_references || []) {
       insertSource.run(
@@ -494,6 +406,9 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
     }
   }
 
+  db.prepare('UPDATE proposals SET data = ? WHERE id = ? AND user_id = ?')
+    .run(JSON.stringify(data), proposal.id, userId);
+
   if (data.source_material_ids.length > 0) {
     db.prepare(`
       UPDATE source_materials
@@ -509,5 +424,6 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
     note_id: noteId,
     operation_batch_id: batchId,
     blocks_count: data.blocks.length,
+    warnings: data.warnings,
   };
 }

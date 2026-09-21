@@ -23,6 +23,9 @@ export async function runScenario(input: Scenario | string, mode: Mode = 'script
   let fixture: Fixtures | undefined;
   let snapshot: (() => Record<string, Row[]>) | undefined;
   try {
+    // Load only after isolation, but before live credential resolution.
+    const scenario = typeof input === 'string' ? await loadScenario(input) : input;
+    if (scenario.scriptedOnly && mode !== 'scripted') throw new Error('This scenario is scripted-only');
     if (mode === 'live') {
       // Future live runs read only dashscope via the existing machine resolver,
       // then keep it in process memory. Other machine providers (e.g. Voyage)
@@ -34,7 +37,6 @@ export async function runScenario(input: Scenario | string, mode: Mode = 'script
       process.env.DASHSCOPE_API_KEY = key;
     }
     // Scenario imports also happen after the environment has been isolated.
-    const scenario = typeof input === 'string' ? await loadScenario(input) : input;
     result.name = scenario.name;
     result.dimensions = scenario.dimensions;
     const dbModule = await import('../../src/db/init.js');

@@ -1,0 +1,81 @@
+{
+  "state": "STOP: Python/MinerU environment",
+  "files": 111,
+  "fileTimeoutMs": 600000,
+  "tests": 1118,
+  "pass": 1116,
+  "fail": 2,
+  "skipped": 0,
+  "cancelled": 0,
+  "failures": [
+    {
+      "line": 61806,
+      "excerpt": [
+        "not ok 102 - src\\\\__tests__\\\\v2SourceMineruWiring.test.ts",
+        "  ---",
+        "  duration_ms: 1690.6977",
+        "  type: 'test'",
+        "  location: 'D:\\\\Coinsides\\\\v2.x\\\\Coincides\\\\server\\\\src\\\\__tests__\\\\v2SourceMineruWiring.test.ts:1:1'",
+        "  failureType: 'testCodeFailure'",
+        "  exitCode: 1",
+        "  signal: ~",
+        "  error: 'test failed'",
+        "  code: 'ERR_TEST_FAILURE'",
+        "  ...",
+        "# sqlite-vec loaded: vv0.1.7",
+        "# 📦 Running 83 pending migration(s)...",
+        "#   ✅ 001_baseline: Establish migration baseline for v1.0 schema",
+        "#   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks",
+        "#   ✅ 003_goal_nesting: Add parent_id to goals for nesting support",
+        "#   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking",
+        "#   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder",
+        "#   ✅ 006_onboarding: Add onboarding_completed flag to users",
+        "#   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system",
+        "#   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)",
+        "#   ✅ 009_task_time_block: Add time_block_id foreign key to tasks for explicit block association",
+        "#   ✅ 010_enforce_card_sections: Ensure all cards have a section_id: create \"Unsorted\" section per deck for orphaned cards",
+        "#   ✅ 011_task_cards: Create task_cards M:N association table for Task-Card linkage"
+      ]
+    },
+    {
+      "line": 62646,
+      "excerpt": [
+        "not ok 1009 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable",
+        "  ---",
+        "  duration_ms: 3277.8607",
+        "  type: 'test'",
+        "  location: 'D:\\\\Coinsides\\\\v2.x\\\\Coincides\\\\server\\\\src\\\\__tests__\\\\v2SourceRegionCells.test.ts:28:2231'",
+        "  failureType: 'testCodeFailure'",
+        "  error: `MinerU exited abnormally (code 101): Unable to create process using '\"C:\\\\Users\\\\70208\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.12.11-windows-x86_64-none\\\\python.exe\" -B C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\runner.py --input C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-source-region-cells-aBHYFf\\\\listening-page-30.pdf --output C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\output --result C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\result.json --lang en'`",
+        "  code: 'parser_failure'",
+        "  name: 'SourceArtifactError'",
+        "  stack: |-",
+        "    parseSourceArtifact (D:\\Coinsides\\v2.x\\Coincides\\server\\src\\services\\sourceArtifact.ts:452:13)",
+        "    async TestContext.<anonymous> (D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceRegionCells.test.ts:203:22)",
+        "    async Test.run (node:internal/test_runner/test:1054:7)",
+        "    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)",
+        "  ...",
+        "# sqlite-vec loaded: vv0.1.7",
+        "# 📦 Running 83 pending migration(s)...",
+        "#   ✅ 001_baseline: Establish migration baseline for v1.0 schema",
+        "#   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks",
+        "#   ✅ 003_goal_nesting: Add parent_id to goals for nesting support",
+        "#   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking",
+        "#   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder",
+        "#   ✅ 006_onboarding: Add onboarding_completed flag to users",
+        "#   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system"
+      ]
+    }
+  ],
+  "wildernessIncluded": true,
+  "environmentErrors": [
+    {
+      "line": 61783,
+      "text": "# <ref *1> Error: spawnSync python.exe ENOENT"
+    },
+    {
+      "line": 62652,
+      "text": "  error: `MinerU exited abnormally (code 101): Unable to create process using '\"C:\\\\Users\\\\70208\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.12.11-windows-x86_64-none\\\\python.exe\" -B C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\runner.py --input C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-source-region-cells-aBHYFf\\\\listening-page-30.pdf --output C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\output --result C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\result.json --lang en'`"
+    }
+  ]
+}

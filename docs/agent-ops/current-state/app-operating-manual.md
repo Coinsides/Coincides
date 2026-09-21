@@ -1,6 +1,6 @@
-> **状态 (Status)**: active(v2,2026-09-20 C4a 补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
+> **状态 (Status)**: active(v2,2026-09-21 T2 富块提案补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
 > **层 (Layer)**: 现状 / 应用操作说明书
-> **日期 (Updated)**: 2026-09-20
+> **日期 (Updated)**: 2026-09-21
 > **防腐条款**: 交付新面的工单,申报义务含"说明书条目已更新/无涉";每版段收口过一遍 diff。发现缺条错条=当场补(steward: Fable)。
 
 # Coincides 应用操作说明书 v2
@@ -80,6 +80,7 @@
 - **收件箱 UI**:打开 Agent 面板→头部「提案」计数→展开待处理列表。可用型逐条「采纳」或「丢弃」,操作后刷新列表并提示结果;不可用型显示「此类提案暂不支持一键采纳」,仍可丢弃。material_reconciliation 的空 body apply 仅标记已复核,按钮为「标记已复核」,不执行调和动作。零 pending 时入口收敛;对话流结束刷新待处理计数;
 - 人门生成整理笔记:`POST /api/proposals/organized-note {course_id, document_ids:[...], note_title?}`(=CourseDetail「Note Proposal」按钮);**已知限制**:生成输入被截(每段 3 片段×500 字,总 12k)——长材料只会整理出开头,候源管线批修;
 - chat 路:让 Agent 发 organized_note 提案(A3a 已开);**apply 仍须人门**。
+- **富块提案(T2)**:organized_note 支持文字、表格、内建组件(timeline/chart_bar/chart_line)、目录，以及 paragraph 的引文/提示框样式。材料页领域预览和 Agent 收件箱均提供逐块类型摘要与 warning；表格数字为数据行×列，组件数量从实际载荷计算。目录只存放置，章标题读时派生；至少三个不同章节标题的确定性材料提案带目录。越界类型或无效载荷保留原文降成 paragraph 并记账，单块无效不废整案。采纳后沿用块删除/恢复及笔记编辑器撤销。生成器只传数据/语义，样式由现役 token 决定；无自动 apply、无 media/item_ref/note_ref 代造代绑。测试走显式表格/日期/引文/提示语法的确定性回退；未调用真实模型。提示词可逆证明见 `docs/contracts/Organized-Note-Rich-Block-Prompt-Amendment.md`。
 - **修改已有文字(C2)**:Agent 经 `create_proposal {type:'note_patch',data:{note_id,patches:[{block_id,unit_id?,new_text}]}}` 发整 unit 替换提案;多 unit 块须指定 unit_id。创建时冻结旧文与块版本,不会改正文。收件箱逐 patch 显示旧文/新文,可逐项采纳或弃,允许部分采纳。先打开对应笔记,采纳沿该页编辑 runtime 的 text-save 保存队列与 Undo/Redo;保存请求附 `proposal_patch:{proposal_id,patch_index}`,正文与提案状态同事务。全案 `/apply` 不执行 note_patch。
 - **失效与撤销**:靶块在发案后被编辑则显示失效,不可盲采纳;同提案同块多个 unit 依次采纳时,只跟进该提案已知的前次采纳版本。逐弃=`POST /api/proposals/:id/patches/:patchIndex/discard`;全弃保留已采纳事实。撤销走当前笔记原有栈,只恢复文字与范围,不把已处理提案重新变成 pending。
 

@@ -1,0 +1,39 @@
+{
+  "mode": "client-final",
+  "startedAt": "2026-09-21T09:16:02.695Z",
+  "fileTimeoutMs": 600000,
+  "zeroExclusions": false,
+  "isolation": {
+    "database": ":memory:",
+    "dotenv": "empty",
+    "providerCredentials": "isolated empty",
+    "userDatabase": "never"
+  },
+  "jobs": [
+    {
+      "name": "client-final",
+      "cwd": "client",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test:unit"
+      ],
+      "exitCode": 0,
+      "durationMs": 35222,
+      "log": ".codex-tmp/t2-richblock/client-final.log"
+    },
+    {
+      "name": "client-build-final",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build:client"
+      ],
+      "exitCode": 0,
+      "durationMs": 14927,
+      "log": ".codex-tmp/t2-richblock/client-build-final.log"
+    }
+  ],
+  "finishedAt": "2026-09-21T09:16:52.845Z"
+}

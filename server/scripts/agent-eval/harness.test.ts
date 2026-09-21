@@ -77,6 +77,16 @@ test('malformed scenario modules are rejected before execution', async t => {
   }
 });
 
+test('explicit scripted-only fixture scenarios permit zero provider turns', async t => {
+  const directory = temporaryDirectory(t);
+  writeFileSync(join(directory, 'package.json'), '{"type":"module"}');
+  const file = join(directory, 'zero-turns.ts');
+  writeFileSync(file, validModule.replace("turns: [{ user: 'synthetic', script() { return []; } }]", 'scriptedOnly: true, turns: []'));
+  const scenario = await loadScenario(file);
+  assert.deepEqual(scenario.turns, []);
+  assert.equal(scenario.scriptedOnly, true);
+});
+
 test('CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios', () => {
   assert.deepEqual(parseOptions([]), { mode: 'scripted', dryRun: false, list: false, selected: [] });
   assert.deepEqual(parseOptions(['--dry-run', '--scenario', '02-empty-claim']),

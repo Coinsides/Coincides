@@ -1,0 +1,574 @@
+{
+  "schemaVersion": 1,
+  "runId": "2026-09-21T09-11-24-407Z-7574a6b8",
+  "scenarios": [
+    {
+      "name": "01-goal-task-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 12,
+        "total": 12,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 3,
+        "toolRounds": 3,
+        "durationMs": 1535.5837,
+        "turns": [
+          {
+            "durationMs": 19.48400000000015,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 6.761199999999917,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 5.538199999999961,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "02-empty-claim",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 4,
+        "total": 4,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 1,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 1,
+        "toolRounds": 0,
+        "durationMs": 1923.3031,
+        "turns": [
+          {
+            "durationMs": 14.759499999999662,
+            "toolRounds": 0
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "03-proposal-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 6,
+        "total": 6,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 1,
+        "toolRounds": 1,
+        "durationMs": 1707.0893999999998,
+        "turns": [
+          {
+            "durationMs": 32.77080000000001,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "delete-ceremony",
+      "dimensions": [
+        "task_completion",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 8,
+        "total": 8,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 2,
+        "toolRounds": 2,
+        "durationMs": 1644.449,
+        "turns": [
+          {
+            "durationMs": 29.19309999999996,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 8.157700000000204,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "memory-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 11,
+        "total": 11,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 3,
+        "toolRounds": 3,
+        "durationMs": 1535.1542000000002,
+        "turns": [
+          {
+            "durationMs": 18.673700000000053,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 15.935300000000097,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 21.624699999999848,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "06-loop-resilience",
+      "dimensions": [
+        "task_completion",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 11,
+        "total": 11,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 1,
+        "byTool": {
+          "create_proposal": 1
+        }
+      },
+      "timing": {
+        "userTurns": 2,
+        "toolRounds": 10,
+        "durationMs": 2658.315,
+        "turns": [
+          {
+            "durationMs": 34.97410000000036,
+            "toolRounds": 2
+          },
+          {
+            "durationMs": 11.812600000000202,
+            "toolRounds": 8
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "07-board-concept-map",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 9,
+        "total": 9,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 2,
+        "toolRounds": 2,
+        "durationMs": 5085.0682,
+        "turns": [
+          {
+            "durationMs": 41.9983000000002,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 578.6913999999997,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "08-board-batch-revert",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 12,
+        "total": 12,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 2,
+        "toolRounds": 2,
+        "durationMs": 5526.2026,
+        "turns": [
+          {
+            "durationMs": 34.76559999999972,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 1101.0064000000002,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "09-memory-directive",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 5,
+        "total": 5,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 1,
+        "toolRounds": 1,
+        "durationMs": 11304.9392,
+        "turns": [
+          {
+            "durationMs": 33.242599999999584,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "10-note-patch-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 10,
+        "total": 10,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 3,
+        "toolRounds": 2,
+        "durationMs": 5162.0405,
+        "turns": [
+          {
+            "durationMs": 26.94470000000001,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 5.310299999999188,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 5.103099999999358,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "11-episode-compression-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 20,
+        "total": 20,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 14,
+        "toolRounds": 1,
+        "durationMs": 3116.1351,
+        "turns": [
+          {
+            "durationMs": 17.253699999999753,
+            "toolRounds": 1
+          },
+          {
+            "durationMs": 6.975099999999657,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 7.145899999999983,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 11.676699999999983,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 7.465400000000045,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 5.816199999999753,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 6.74389999999994,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 18.196400000000267,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 5.558599999999842,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 5.3244000000004235,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 9.114900000000034,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 5.113799999999628,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 5.734400000000278,
+            "toolRounds": 0
+          },
+          {
+            "durationMs": 9.397699999999986,
+            "toolRounds": 0
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "12-episode-recall-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 6,
+        "total": 6,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 1,
+        "toolRounds": 1,
+        "durationMs": 2284.3596000000002,
+        "turns": [
+          {
+            "durationMs": 18.67340000000013,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "13-ui-shell-journey",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 8,
+        "total": 8,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 1,
+        "byTool": {
+          "ui_focus_object": 1
+        }
+      },
+      "timing": {
+        "userTurns": 1,
+        "toolRounds": 1,
+        "durationMs": 2366.1513,
+        "turns": [
+          {
+            "durationMs": 44.67399999999998,
+            "toolRounds": 1
+          }
+        ]
+      },
+      "failures": []
+    },
+    {
+      "name": "14-rich-block-pipeline",
+      "dimensions": [
+        "task_completion",
+        "claim_without_receipt",
+        "tool_misuse",
+        "turns_and_duration"
+      ],
+      "mode": "scripted",
+      "scenarioAssertionsEvaluated": true,
+      "taskCompletion": {
+        "passed": 3,
+        "total": 3,
+        "rate": 1
+      },
+      "claimWithoutReceiptCount": 0,
+      "toolMisuse": {
+        "count": 0,
+        "byTool": {}
+      },
+      "timing": {
+        "userTurns": 0,
+        "toolRounds": 0,
+        "durationMs": 2294.6321,
+        "turns": []
+      },
+      "failures": []
+    }
+  ],
+  "taskCompletion": {
+    "passed": 125,
+    "total": 125,
+    "rate": 1
+  },
+  "claimWithoutReceiptCount": 1,
+  "toolMisuse": {
+    "count": 2,
+    "byTool": {
+      "create_proposal": 1,
+      "ui_focus_object": 1
+    }
+  },
+  "timing": {
+    "userTurns": 36,
+    "toolRounds": 29,
+    "durationMs": 48143.423
+  }
+}

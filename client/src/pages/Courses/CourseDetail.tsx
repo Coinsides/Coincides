@@ -16,6 +16,7 @@ import {
 } from '../Notes/canvasEngine/canvasObjectRepository';
 import { ProjectSourcesPanel } from '../Sources/ProjectSourcesPanel';
 import { ProjectDeleteDialog } from './ProjectDeleteDialog';
+import { describeOrganizedNoteBlock } from '@/components/AgentPanel/proposalInboxModel';
 import styles from './CourseDetail.module.css';
 import { ProjectNoteCard } from './noteCover/ProjectNoteCard';
 
@@ -290,6 +291,8 @@ interface ProposalResponse {
       order_index: number;
       confidence: number | null;
       metadata?: Record<string, unknown>;
+      content_json?: Record<string, unknown>;
+      display_overrides_json?: Record<string, unknown>;
       source_references: Array<{
         source_excerpt?: string;
         source_page_start?: number | null;
@@ -1442,15 +1445,21 @@ export default function CourseDetailPage() {
 
                 {activeProposal.type === 'organized_note' && (
                   <div className={styles.proposalItems}>
-                    {(activeProposal.data.blocks || []).slice(0, 8).map((block) => (
+                    {(activeProposal.data.blocks || []).map((block) => {
+                      const summary = describeOrganizedNoteBlock(block);
+                      return (
                       <div key={block.temp_id} className={styles.proposalItem}>
-                        <span className={styles.itemKind}>{getNoteBlockTemplateLabel(block.metadata, block.block_type)}</span>
-                        <span className={styles.itemText}>{block.title || block.plain_text}</span>
+                        <span className={styles.itemKind}>{summary.label}</span>
+                        <span className={styles.itemText}>{summary.text}</span>
                         <span className={styles.itemMetaSmall}>
                           {block.source_references?.length || 0} refs
                         </span>
+                        {summary.warnings.map((warning, index) => <div key={index} className={styles.groupWarning}>
+                          <AlertTriangle size={12} /><span>{warning}</span>
+                        </div>)}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 

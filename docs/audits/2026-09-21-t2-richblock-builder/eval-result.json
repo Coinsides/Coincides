@@ -1,0 +1,27 @@
+{
+  "mode": "eval",
+  "startedAt": "2026-09-21T09:11:23.922Z",
+  "fileTimeoutMs": 600000,
+  "zeroExclusions": false,
+  "isolation": {
+    "database": ":memory:",
+    "dotenv": "empty",
+    "providerCredentials": "isolated empty",
+    "userDatabase": "never"
+  },
+  "jobs": [
+    {
+      "name": "eval",
+      "cwd": "server",
+      "args": [
+        "--import",
+        "tsx",
+        "scripts/agent-eval/runner.ts"
+      ],
+      "exitCode": 0,
+      "durationMs": 58971,
+      "log": ".codex-tmp/t2-richblock/eval.log"
+    }
+  ],
+  "finishedAt": "2026-09-21T09:12:22.894Z"
+}

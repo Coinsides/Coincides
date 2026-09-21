@@ -23,6 +23,29 @@ function text(value: unknown): string {
   return normalized.length > 160 ? `${normalized.slice(0, 160)}…` : normalized;
 }
 
+export function describeOrganizedNoteBlock(value: unknown) {
+  const block = record(value);
+  const content = record(block.content_json);
+  const params = record(content.params);
+  const furniture = record(record(block.display_overrides_json).paragraph_furniture_v1);
+  let label = '文字';
+  if (block.block_type === 'table') {
+    const rows = Array.isArray(content.rows) ? content.rows : [];
+    const headers = Array.isArray(content.headers) ? content.headers : [];
+    const width = headers.length || (Array.isArray(rows[0]) ? rows[0].length : 0);
+    label = `表格 ${rows.length}×${width}（数据行×列）`;
+  } else if (block.block_type === 'component') {
+    if (content.component_kind === 'timeline') label = `时间线 ${Array.isArray(params.entries) ? params.entries.length : 0} 条目`;
+    else if (content.component_kind === 'chart_bar' || content.component_kind === 'chart_line') {
+      label = `${content.component_kind === 'chart_bar' ? '柱状图' : '折线图'} ${Array.isArray(params.series) ? params.series.length : 0} 组 · ${Array.isArray(params.x_labels) ? params.x_labels.length : 0} 点`;
+    } else label = '未知组件（采纳时降级为文字）';
+  } else if (block.block_type === 'toc') label = '目录';
+  else if (furniture.variant === 'quote') label = ['引文', text(furniture.source)].filter(Boolean).join(' · ');
+  else if (furniture.variant === 'callout') label = ['提示框', text(furniture.label)].filter(Boolean).join(' · ');
+  return { label, text: block.block_type === 'toc' ? '' : text(block.title) || text(block.plain_text),
+    warnings: Array.isArray(block.warnings) ? block.warnings.filter((warning): warning is string => typeof warning === 'string') : [] };
+}
+
 export function describeProposal(proposal: Proposal) {
   // The persisted queue can also contain retired types. Only the eight current
   // handlers in server/src/routes/proposals.ts are offered an apply action.
@@ -58,6 +81,9 @@ export function describeProposal(proposal: Proposal) {
     applyMessage: reviewOnly ? '提案已标记复核，未采纳候选证据' : '提案已采纳',
     notice: proposal.type === 'note_patch' ? '逐块查看旧文与新文。采纳由笔记编辑器执行，可在笔记中撤销。' : !definition ? '此类提案暂不支持一键采纳'
       : reviewOnly ? '这里只标记已复核，不采纳候选证据。逐组决策请在项目材料页处理。' : '',
+    blocks: proposal.type === 'organized_note' ? entries.map(describeOrganizedNoteBlock) : [],
+    warnings: proposal.type === 'organized_note' && Array.isArray(data.warnings)
+      ? data.warnings.filter((warning): warning is string => typeof warning === 'string') : [],
   };
 }
 

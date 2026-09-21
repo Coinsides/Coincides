@@ -1,0 +1,372 @@
+{
+  "name": "14-rich-block-pipeline",
+  "dimensions": [
+    "task_completion",
+    "claim_without_receipt",
+    "tool_misuse",
+    "turns_and_duration"
+  ],
+  "mode": "scripted",
+  "assertions": [
+    {
+      "name": "zero provider turns; deterministic pending proposal spans all five families without note writes",
+      "passed": true
+    },
+    {
+      "name": "only human apply writes the note with native table/component/furniture and truth-free TOC rows",
+      "passed": true
+    },
+    {
+      "name": "discard remains the existing whole-proposal human action",
+      "passed": true
+    }
+  ],
+  "turns": [],
+  "durationMs": 2294.6321,
+  "finalTables": {
+    "goals": [],
+    "tasks": [],
+    "time_blocks": [],
+    "agent_authorizations": [],
+    "agent_memories": [],
+    "operation_batches": [
+      {
+        "id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "source_type": "proposal",
+        "source_id": "39860766-4319-4658-8ab1-d8e2e990cc93",
+        "label": "Apply organized note proposal",
+        "status": "applied",
+        "metadata": "{\"proposal_type\":\"organized_note\"}",
+        "created_at": "2026-09-21 09:12:22",
+        "applied_at": "2026-09-21T09:12:22.824Z",
+        "reverted_at": null
+      }
+    ],
+    "events": [
+      {
+        "seq": 1,
+        "ts": "2026-09-21T09:12:22.818Z",
+        "user_id": "eval-user",
+        "actor_kind": "agent",
+        "channel": "chat",
+        "verb": "proposal_issued",
+        "objects": "[{\"kind\":\"proposal\",\"id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\"}]",
+        "summary": "Issued a proposal",
+        "meta": "{\"proposal_type\":\"organized_note\",\"conversation_id\":\"eval-conversation\"}"
+      },
+      {
+        "seq": 2,
+        "ts": "2026-09-21T09:12:22.842Z",
+        "user_id": "eval-user",
+        "actor_kind": "agent",
+        "channel": "chat",
+        "verb": "proposal_issued",
+        "objects": "[{\"kind\":\"proposal\",\"id\":\"c618718a-006b-400f-8b31-3f395819f7ee\"}]",
+        "summary": "Issued a proposal",
+        "meta": "{\"proposal_type\":\"organized_note\",\"conversation_id\":\"eval-conversation\"}"
+      }
+    ],
+    "proposals": [
+      {
+        "id": "39860766-4319-4658-8ab1-d8e2e990cc93",
+        "user_id": "eval-user",
+        "conversation_id": "eval-conversation",
+        "type": "organized_note",
+        "status": "applied",
+        "data": "{\"version\":\"v2.1\",\"proposal_kind\":\"organized_note\",\"course_id\":\"11111111-1111-4111-8111-111111111111\",\"title\":\"宋代财用\",\"description\":\"Candidate note generated from selected source material.\",\"generation_mode\":\"deterministic_fallback\",\"source_material_ids\":[\"55c65f98-5286-40db-b550-063de805c86a\"],\"source_scope_ids\":[],\"scope_summary\":[],\"segment_ids\":[\"51ef59bf-a12a-47db-bc99-dcc508590c7c\",\"c616331b-6084-46b9-b480-6f64af571a14\",\"ce34231f-a1a7-42cc-9381-6faf28acd64e\"],\"blocks\":[{\"temp_id\":\"block-1\",\"block_type\":\"toc\",\"title\":null,\"content_json\":{},\"plain_text\":\"\",\"metadata\":{},\"display_overrides_json\":{},\"order_index\":0,\"warnings\":[],\"source_references\":[],\"confidence\":0.7},{\"temp_id\":\"block-2\",\"block_type\":\"paragraph\",\"title\":\"新法对照\",\"content_json\":{\"body\":\"新法对照\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-2-text\",\"text\":\"新法对照\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"新法对照\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":1,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-0\",\"source_page_start\":1,\"source_page_end\":1,\"source_excerpt\":\"| 新法 | 作用 |\\n| --- | --- |\\n| 青苗法 | 调节借贷 |\\n| 募役法 | 调节差役 |\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"4c54a22c-1e5c-4150-8f48-e56fe330cf95\",\"material_segment_id\":\"51ef59bf-a12a-47db-bc99-dcc508590c7c\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-3\",\"block_type\":\"table\",\"title\":null,\"content_json\":{\"headers\":[\"新法\",\"作用\"],\"rows\":[[\"青苗法\",\"调节借贷\"],[\"募役法\",\"调节差役\"]]},\"plain_text\":\"| 新法 | 作用 |\\n| --- | --- |\\n| 青苗法 | 调节借贷 |\\n| 募役法 | 调节差役 |\",\"metadata\":{\"template_id\":\"media.table\",\"system_type\":\"media\",\"learning_role\":\"note\",\"template_key\":\"media.table\",\"template_definition_id\":\"59c7e46a-08c5-4863-85ce-a8a2f83effe7\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":2,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-0\",\"source_page_start\":1,\"source_page_end\":1,\"source_excerpt\":\"| 新法 | 作用 |\\n| --- | --- |\\n| 青苗法 | 调节借贷 |\\n| 募役法 | 调节差役 |\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"4c54a22c-1e5c-4150-8f48-e56fe330cf95\",\"material_segment_id\":\"51ef59bf-a12a-47db-bc99-dcc508590c7c\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-4\",\"block_type\":\"paragraph\",\"title\":\"施行时间\",\"content_json\":{\"body\":\"施行时间\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-4-text\",\"text\":\"施行时间\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"施行时间\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":3,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-1\",\"source_page_start\":2,\"source_page_end\":2,\"source_excerpt\":\"1069年：新法开始\\n1072年：方田均税法\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"0e5c6d92-fbe0-4c87-a8be-145eb91bc0c6\",\"material_segment_id\":\"c616331b-6084-46b9-b480-6f64af571a14\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-5\",\"block_type\":\"component\",\"title\":null,\"content_json\":{\"component_kind\":\"timeline\",\"params\":{\"entries\":[{\"year\":\"1069\",\"label\":\"新法开始\"},{\"year\":\"1072\",\"label\":\"方田均税法\"}]}},\"plain_text\":\"1069年：新法开始\\n1072年：方田均税法\",\"metadata\":{\"template_id\":\"component.timeline\",\"system_type\":\"component\",\"learning_role\":\"note\",\"template_key\":\"component.timeline\",\"template_definition_id\":\"c622ffea-a976-4c47-975a-247b31d6e619\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":4,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-1\",\"source_page_start\":2,\"source_page_end\":2,\"source_excerpt\":\"1069年：新法开始\\n1072年：方田均税法\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"0e5c6d92-fbe0-4c87-a8be-145eb91bc0c6\",\"material_segment_id\":\"c616331b-6084-46b9-b480-6f64af571a14\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-6\",\"block_type\":\"paragraph\",\"title\":\"财用摘录\",\"content_json\":{\"body\":\"财用摘录\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-6-text\",\"text\":\"财用摘录\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"财用摘录\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":5,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-2\",\"source_page_start\":3,\"source_page_end\":3,\"source_excerpt\":\"> 以天下之财，供天下之费。\\n\\n> [!NOTE]\\n> 比较施行背景。\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"ffd97a29-507f-4f78-91f1-7f42899f82d3\",\"material_segment_id\":\"ce34231f-a1a7-42cc-9381-6faf28acd64e\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-7\",\"block_type\":\"paragraph\",\"title\":null,\"content_json\":{\"body\":\"以天下之财，供天下之费。\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-7-text\",\"text\":\"以天下之财，供天下之费。\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"以天下之财，供天下之费。\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{\"paragraph_furniture_v1\":{\"variant\":\"quote\",\"source\":\"\"}},\"order_index\":6,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-2\",\"source_page_start\":3,\"source_page_end\":3,\"source_excerpt\":\"> 以天下之财，供天下之费。\\n\\n> [!NOTE]\\n> 比较施行背景。\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"ffd97a29-507f-4f78-91f1-7f42899f82d3\",\"material_segment_id\":\"ce34231f-a1a7-42cc-9381-6faf28acd64e\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-8\",\"block_type\":\"paragraph\",\"title\":null,\"content_json\":{\"body\":\"\\n比较施行背景。\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-8-text\",\"text\":\"\\n比较施行背景。\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"\\n比较施行背景。\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{\"paragraph_furniture_v1\":{\"variant\":\"callout\",\"label\":\"注意\"}},\"order_index\":7,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-2\",\"source_page_start\":3,\"source_page_end\":3,\"source_excerpt\":\"> 以天下之财，供天下之费。\\n\\n> [!NOTE]\\n> 比较施行背景。\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"ffd97a29-507f-4f78-91f1-7f42899f82d3\",\"material_segment_id\":\"ce34231f-a1a7-42cc-9381-6faf28acd64e\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"unsupported\",\"block_type\":\"paragraph\",\"title\":null,\"content_json\":{\"body\":\"保留这段材料\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"unsupported-text\",\"text\":\"保留这段材料\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"保留这段材料\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":8,\"warnings\":[\"Block 9: unsupported block_type \\\"unsupported\\\"; downgraded to paragraph.\"],\"source_references\":[],\"confidence\":null}],\"warnings\":[\"AI generation was not used because no AI key is configured; deterministic fallback created the proposal.\",\"Block 9: unsupported block_type \\\"unsupported\\\"; downgraded to paragraph.\"]}",
+        "created_at": "2026-09-21T09:12:22.817Z",
+        "resolved_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "c618718a-006b-400f-8b31-3f395819f7ee",
+        "user_id": "eval-user",
+        "conversation_id": "eval-conversation",
+        "type": "organized_note",
+        "status": "discarded",
+        "data": "{\"version\":\"v2.1\",\"proposal_kind\":\"organized_note\",\"course_id\":\"11111111-1111-4111-8111-111111111111\",\"title\":\"合成评测课程 Organized Notes\",\"description\":\"Candidate note generated from selected source material.\",\"generation_mode\":\"deterministic_fallback\",\"source_material_ids\":[\"55c65f98-5286-40db-b550-063de805c86a\"],\"source_scope_ids\":[],\"scope_summary\":[],\"segment_ids\":[\"51ef59bf-a12a-47db-bc99-dcc508590c7c\",\"c616331b-6084-46b9-b480-6f64af571a14\",\"ce34231f-a1a7-42cc-9381-6faf28acd64e\"],\"blocks\":[{\"temp_id\":\"block-1\",\"block_type\":\"toc\",\"title\":null,\"content_json\":{},\"plain_text\":\"\",\"metadata\":{},\"display_overrides_json\":{},\"order_index\":0,\"warnings\":[],\"source_references\":[],\"confidence\":0.7},{\"temp_id\":\"block-2\",\"block_type\":\"paragraph\",\"title\":\"新法对照\",\"content_json\":{\"body\":\"新法对照\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-2-text\",\"text\":\"新法对照\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"新法对照\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":1,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-0\",\"source_page_start\":1,\"source_page_end\":1,\"source_excerpt\":\"| 新法 | 作用 |\\n| --- | --- |\\n| 青苗法 | 调节借贷 |\\n| 募役法 | 调节差役 |\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"4c54a22c-1e5c-4150-8f48-e56fe330cf95\",\"material_segment_id\":\"51ef59bf-a12a-47db-bc99-dcc508590c7c\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-3\",\"block_type\":\"table\",\"title\":null,\"content_json\":{\"headers\":[\"新法\",\"作用\"],\"rows\":[[\"青苗法\",\"调节借贷\"],[\"募役法\",\"调节差役\"]]},\"plain_text\":\"| 新法 | 作用 |\\n| --- | --- |\\n| 青苗法 | 调节借贷 |\\n| 募役法 | 调节差役 |\",\"metadata\":{\"template_id\":\"media.table\",\"system_type\":\"media\",\"learning_role\":\"note\",\"template_key\":\"media.table\",\"template_definition_id\":\"59c7e46a-08c5-4863-85ce-a8a2f83effe7\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":2,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-0\",\"source_page_start\":1,\"source_page_end\":1,\"source_excerpt\":\"| 新法 | 作用 |\\n| --- | --- |\\n| 青苗法 | 调节借贷 |\\n| 募役法 | 调节差役 |\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"4c54a22c-1e5c-4150-8f48-e56fe330cf95\",\"material_segment_id\":\"51ef59bf-a12a-47db-bc99-dcc508590c7c\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-4\",\"block_type\":\"paragraph\",\"title\":\"施行时间\",\"content_json\":{\"body\":\"施行时间\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-4-text\",\"text\":\"施行时间\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"施行时间\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":3,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-1\",\"source_page_start\":2,\"source_page_end\":2,\"source_excerpt\":\"1069年：新法开始\\n1072年：方田均税法\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"0e5c6d92-fbe0-4c87-a8be-145eb91bc0c6\",\"material_segment_id\":\"c616331b-6084-46b9-b480-6f64af571a14\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-5\",\"block_type\":\"component\",\"title\":null,\"content_json\":{\"component_kind\":\"timeline\",\"params\":{\"entries\":[{\"year\":\"1069\",\"label\":\"新法开始\"},{\"year\":\"1072\",\"label\":\"方田均税法\"}]}},\"plain_text\":\"1069年：新法开始\\n1072年：方田均税法\",\"metadata\":{\"template_id\":\"component.timeline\",\"system_type\":\"component\",\"learning_role\":\"note\",\"template_key\":\"component.timeline\",\"template_definition_id\":\"c622ffea-a976-4c47-975a-247b31d6e619\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":4,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-1\",\"source_page_start\":2,\"source_page_end\":2,\"source_excerpt\":\"1069年：新法开始\\n1072年：方田均税法\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"0e5c6d92-fbe0-4c87-a8be-145eb91bc0c6\",\"material_segment_id\":\"c616331b-6084-46b9-b480-6f64af571a14\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-6\",\"block_type\":\"paragraph\",\"title\":\"财用摘录\",\"content_json\":{\"body\":\"财用摘录\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-6-text\",\"text\":\"财用摘录\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"财用摘录\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{},\"order_index\":5,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-2\",\"source_page_start\":3,\"source_page_end\":3,\"source_excerpt\":\"> 以天下之财，供天下之费。\\n\\n> [!NOTE]\\n> 比较施行背景。\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"ffd97a29-507f-4f78-91f1-7f42899f82d3\",\"material_segment_id\":\"ce34231f-a1a7-42cc-9381-6faf28acd64e\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-7\",\"block_type\":\"paragraph\",\"title\":null,\"content_json\":{\"body\":\"以天下之财，供天下之费。\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-7-text\",\"text\":\"以天下之财，供天下之费。\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"以天下之财，供天下之费。\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{\"paragraph_furniture_v1\":{\"variant\":\"quote\",\"source\":\"\"}},\"order_index\":6,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-2\",\"source_page_start\":3,\"source_page_end\":3,\"source_excerpt\":\"> 以天下之财，供天下之费。\\n\\n> [!NOTE]\\n> 比较施行背景。\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"ffd97a29-507f-4f78-91f1-7f42899f82d3\",\"material_segment_id\":\"ce34231f-a1a7-42cc-9381-6faf28acd64e\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8},{\"temp_id\":\"block-8\",\"block_type\":\"paragraph\",\"title\":null,\"content_json\":{\"body\":\"\\n比较施行背景。\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-8-text\",\"text\":\"\\n比较施行背景。\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}},\"plain_text\":\"\\n比较施行背景。\",\"metadata\":{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\"},\"display_overrides_json\":{\"paragraph_furniture_v1\":{\"variant\":\"callout\",\"label\":\"注意\"}},\"order_index\":7,\"warnings\":[],\"source_references\":[{\"document_id\":\"44444444-4444-4444-8444-444444444444\",\"document_chunk_id\":\"rich-chunk-2\",\"source_page_start\":3,\"source_page_end\":3,\"source_excerpt\":\"> 以天下之财，供天下之费。\\n\\n> [!NOTE]\\n> 比较施行背景。\",\"reference_type\":\"chunk\",\"confidence\":0.8,\"metadata\":{\"source_fragment_id\":\"ffd97a29-507f-4f78-91f1-7f42899f82d3\",\"material_segment_id\":\"ce34231f-a1a7-42cc-9381-6faf28acd64e\",\"source_material_id\":\"55c65f98-5286-40db-b550-063de805c86a\"}}],\"confidence\":0.8}],\"warnings\":[\"AI generation was not used because no AI key is configured; deterministic fallback created the proposal.\"]}",
+        "created_at": "2026-09-21T09:12:22.842Z",
+        "resolved_at": "2026-09-21T09:12:22.843Z"
+      }
+    ],
+    "notes": [
+      {
+        "id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "title": "宋代财用",
+        "description": "Candidate note generated from selected source material.",
+        "status": "active",
+        "source_kind": "proposal",
+        "page_format": "flow",
+        "binding_settings_json": null,
+        "metadata": "{\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"generation_mode\":\"deterministic_fallback\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "note_class": "user"
+      }
+    ],
+    "note_blocks": [
+      {
+        "id": "f058a69a-f38a-418e-8ffd-05f9d4690552",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "toc",
+        "title": null,
+        "content_json": "{}",
+        "plain_text": null,
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-1\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "d10c54d5-0bde-42ac-870f-dbae5baa2f19",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "paragraph",
+        "title": "新法对照",
+        "content_json": "{\"body\":\"新法对照\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-2-text\",\"text\":\"新法对照\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}}",
+        "plain_text": "新法对照",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-2\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "a2989058-bd4f-4a65-a0d5-73e2b02bc976",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "table",
+        "title": null,
+        "content_json": "{\"headers\":[\"新法\",\"作用\"],\"rows\":[[\"青苗法\",\"调节借贷\"],[\"募役法\",\"调节差役\"]]}",
+        "plain_text": "| 新法 | 作用 |\n| --- | --- |\n| 青苗法 | 调节借贷 |\n| 募役法 | 调节差役 |",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"media.table\",\"system_type\":\"media\",\"learning_role\":\"note\",\"template_key\":\"media.table\",\"template_definition_id\":\"59c7e46a-08c5-4863-85ce-a8a2f83effe7\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-3\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "e7d10a5d-6044-4f4b-861b-35d5d16d41f5",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "paragraph",
+        "title": "施行时间",
+        "content_json": "{\"body\":\"施行时间\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-4-text\",\"text\":\"施行时间\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}}",
+        "plain_text": "施行时间",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-4\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "ad43638d-ef56-43ff-a068-035f9b9fb00a",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "component",
+        "title": null,
+        "content_json": "{\"component_kind\":\"timeline\",\"params\":{\"entries\":[{\"year\":\"1069\",\"label\":\"新法开始\"},{\"year\":\"1072\",\"label\":\"方田均税法\"}]}}",
+        "plain_text": "1069年：新法开始\n1072年：方田均税法",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"component.timeline\",\"system_type\":\"component\",\"learning_role\":\"note\",\"template_key\":\"component.timeline\",\"template_definition_id\":\"c622ffea-a976-4c47-975a-247b31d6e619\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-5\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "04c7e3d0-538c-406a-8d7d-bda586121e8d",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "paragraph",
+        "title": "财用摘录",
+        "content_json": "{\"body\":\"财用摘录\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-6-text\",\"text\":\"财用摘录\",\"writing_role\":\"heading\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}}",
+        "plain_text": "财用摘录",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-6\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "f5170a21-4873-47b5-bf87-f147de0501e3",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "paragraph",
+        "title": null,
+        "content_json": "{\"body\":\"以天下之财，供天下之费。\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-7-text\",\"text\":\"以天下之财，供天下之费。\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}}",
+        "plain_text": "以天下之财，供天下之费。",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-7\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "6ca07b2e-c248-48bb-bb30-8d4ee73b3839",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "paragraph",
+        "title": null,
+        "content_json": "{\"body\":\"\\n比较施行背景。\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"block-8-text\",\"text\":\"\\n比较施行背景。\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}}",
+        "plain_text": "\n比较施行背景。",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"block-8\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      },
+      {
+        "id": "3e218995-cf8b-439f-a684-1aea6ff0474d",
+        "user_id": "eval-user",
+        "course_id": "11111111-1111-4111-8111-111111111111",
+        "block_type": "paragraph",
+        "title": null,
+        "content_json": "{\"body\":\"保留这段材料\",\"text_flow\":{\"textflow_version\":\"TextBlockContentV1\",\"units\":[{\"id\":\"unsupported-text\",\"text\":\"保留这段材料\",\"writing_role\":\"paragraph\",\"indent_level\":0,\"order_index\":0,\"metadata\":{},\"status\":\"active\"}],\"inline_structures\":[],\"metadata\":{}}}",
+        "plain_text": "保留这段材料",
+        "status": "active",
+        "source_kind": "proposal",
+        "metadata": "{\"template_id\":\"text.paragraph\",\"system_type\":\"text\",\"learning_role\":\"note\",\"template_key\":\"text.paragraph\",\"template_definition_id\":\"5a3b78d0-1f9c-4675-ad14-aa416953201b\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\",\"taxonomy_version\":\"v2.5.0\",\"proposal_id\":\"39860766-4319-4658-8ab1-d8e2e990cc93\",\"temp_id\":\"unsupported\"}",
+        "operation_batch_id": "b47c6c65-5114-458f-be5c-f9751489dede",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z",
+        "trashed_at": null,
+        "text_save_revision": 0
+      }
+    ],
+    "note_block_placements": [
+      {
+        "id": "16c00eaa-cda3-4b35-9293-31f05002efea",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "f058a69a-f38a-418e-8ffd-05f9d4690552",
+        "parent_placement_id": null,
+        "order_index": 0,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "63a49fbb-c3f5-49cb-aae0-f67a39b55609",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "d10c54d5-0bde-42ac-870f-dbae5baa2f19",
+        "parent_placement_id": null,
+        "order_index": 1,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "7f754d21-3d4b-454d-95fa-913ebfa13d18",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "a2989058-bd4f-4a65-a0d5-73e2b02bc976",
+        "parent_placement_id": null,
+        "order_index": 2,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "6692d5bf-606e-48af-8c67-575f569c5ca2",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "e7d10a5d-6044-4f4b-861b-35d5d16d41f5",
+        "parent_placement_id": null,
+        "order_index": 3,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "c18495f0-472a-4f16-9b33-89efe1c4cb37",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "ad43638d-ef56-43ff-a068-035f9b9fb00a",
+        "parent_placement_id": null,
+        "order_index": 4,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "47ad63a8-b413-4abc-b457-040a70d465f5",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "04c7e3d0-538c-406a-8d7d-bda586121e8d",
+        "parent_placement_id": null,
+        "order_index": 5,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "2d209dda-e15b-43c9-8039-2bfb4c1839a6",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "f5170a21-4873-47b5-bf87-f147de0501e3",
+        "parent_placement_id": null,
+        "order_index": 6,
+        "display_mode": "default",
+        "display_overrides_json": "{\"paragraph_furniture_v1\":{\"variant\":\"quote\",\"source\":\"\"}}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "a2d38bc5-b226-4710-b062-bb6cc20c1955",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "6ca07b2e-c248-48bb-bb30-8d4ee73b3839",
+        "parent_placement_id": null,
+        "order_index": 7,
+        "display_mode": "default",
+        "display_overrides_json": "{\"paragraph_furniture_v1\":{\"variant\":\"callout\",\"label\":\"注意\"}}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      },
+      {
+        "id": "73b5b7e9-3189-4ce7-9e90-234962e1f9b5",
+        "note_id": "b8232ac5-1259-4355-b326-4409a9eb911c",
+        "block_id": "3e218995-cf8b-439f-a684-1aea6ff0474d",
+        "parent_placement_id": null,
+        "order_index": 8,
+        "display_mode": "default",
+        "display_overrides_json": "{}",
+        "created_at": "2026-09-21T09:12:22.824Z",
+        "updated_at": "2026-09-21T09:12:22.824Z"
+      }
+    ],
+    "agent_messages": [],
+    "agent_episodes": []
+  },
+  "scenarioAssertionsEvaluated": true
+}

@@ -16,7 +16,7 @@ export async function loadScenario(path: string): Promise<Scenario> {
   if (!scenario || typeof scenario.name !== 'string' || !scenario.name.trim()
     || !Array.isArray(scenario.dimensions) || !scenario.dimensions.length
     || typeof scenario.setup !== 'function' || typeof scenario.assertions !== 'function'
-    || !Array.isArray(scenario.turns) || !scenario.turns.length
+    || !Array.isArray(scenario.turns) || (!scenario.turns.length && scenario.scriptedOnly !== true)
     || scenario.turns.some(turn => !turn || !['string', 'function'].includes(typeof turn.user) || typeof turn.script !== 'function')) {
     throw new Error(`Invalid scenario module: ${path}`);
   }

@@ -34,6 +34,14 @@ export default function ProposalInbox({ proposals, loading, error, busy, refresh
                 <h3>{view.summary}</h3>
                 {view.description && <p>{view.description}</p>}
                 {view.detail && <p>{view.detail}</p>}
+                {view.blocks.length > 0 && <details>
+                  <summary>查看内容块摘要（{view.blocks.length}）</summary>
+                  {view.blocks.map((block, index) => <div key={index}>
+                    <p>{index + 1}. {block.label}{block.text ? ` · ${block.text}` : ''}</p>
+                    {block.warnings.map((warning, warningIndex) => <p className={styles.notice} key={warningIndex}>{warning}</p>)}
+                  </div>)}
+                </details>}
+                {view.warnings.map((warning, index) => <p className={styles.notice} key={index}>{warning}</p>)}
                 {view.notice && <p className={styles.notice}>{view.notice}</p>}
                 {proposal.type === 'note_patch' && <NotePatchReview proposal={proposal} onRefresh={refresh} />}
                 <div className={styles.actions}>

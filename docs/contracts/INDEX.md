@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-20
+> **日期 (Updated)**: 2026-09-21
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/contracts`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 16 份文档。
+共 17 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -22,6 +22,7 @@
 | [Link-Source-Relation-Boundary-Contract.md](Link-Source-Relation-Boundary-Contract.md) | Link / SourceReference / ObjectRelation Boundary Contract | `deferred` | 2026-06-23 | — |
 | [Notebook-Object-Boundary-Contract.md](Notebook-Object-Boundary-Contract.md) | Notebook 对象边界契约 | `active` | 2026-08-20 | — |
 | [Notebook-Object-Inventory-Contract.md](Notebook-Object-Inventory-Contract.md) | Notebook Object Inventory Contract（已冻结） | `(缺状态头)` | — | — |
+| [Organized-Note-Rich-Block-Prompt-Amendment.md](Organized-Note-Rich-Block-Prompt-Amendment.md) | Amendment — 2026-09-21 · organized_note rich blocks | `active` | 2026-09-21 | — |
 | [Petal-Contract.md](Petal-Contract.md) | Petal Contract | `superseded` | 2026-07-14 | ⚠️ `docs/agent-ops/analysis/relation-item-graph-concept-design… |
 | [Source-Ladder-Contract.md](Source-Ladder-Contract.md) | Source 三层梯子与锚契约 | `active` | 2026-08-20 | — |
 | [Source-Provenance-Contract.md](Source-Provenance-Contract.md) | Source / Provenance Contract | `deferred` | 2026-06-23 | — |

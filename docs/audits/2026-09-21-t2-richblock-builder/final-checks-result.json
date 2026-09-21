@@ -1,0 +1,75 @@
+{
+  "mode": "final-checks",
+  "startedAt": "2026-09-21T09:18:31.059Z",
+  "fileTimeoutMs": 600000,
+  "zeroExclusions": false,
+  "isolation": {
+    "database": ":memory:",
+    "dotenv": "empty",
+    "providerCredentials": "isolated empty",
+    "userDatabase": "never"
+  },
+  "jobs": [
+    {
+      "name": "final-test-agent-knowledge",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "test:agent-knowledge"
+      ],
+      "exitCode": 0,
+      "durationMs": 3120,
+      "log": ".codex-tmp/t2-richblock/final-test-agent-knowledge.log"
+    },
+    {
+      "name": "final-check-agent-knowledge",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "check:agent-knowledge"
+      ],
+      "exitCode": 0,
+      "durationMs": 353,
+      "log": ".codex-tmp/t2-richblock/final-check-agent-knowledge.log"
+    },
+    {
+      "name": "final-typecheck-agent-eval",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "typecheck:agent-eval"
+      ],
+      "exitCode": 0,
+      "durationMs": 2733,
+      "log": ".codex-tmp/t2-richblock/final-typecheck-agent-eval.log"
+    },
+    {
+      "name": "final-build",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "durationMs": 1190,
+      "log": ".codex-tmp/t2-richblock/final-build.log"
+    },
+    {
+      "name": "final-docs-check",
+      "cwd": ".",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "docs:check"
+      ],
+      "exitCode": 0,
+      "durationMs": 570,
+      "log": ".codex-tmp/t2-richblock/final-docs-check.log"
+    }
+  ],
+  "finishedAt": "2026-09-21T09:18:39.025Z"
+}
