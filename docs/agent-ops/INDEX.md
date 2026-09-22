@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 427 份文档。
+共 428 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -415,6 +415,7 @@
 | [handoffs/2026-09-21-v14-t6-inline-link-order.md](handoffs/2026-09-21-v14-t6-inline-link-order.md) | T6 · 行内链接(inline_link 激活,三靶) | `done(2026-09-21 HQ 收官:一轮交齐;builder 环境两红=Python 系,HQ 机 server 主集真全绿——首跑遇 exit-134 原生崩溃+IPC 毛刺双瞬态,隔离双绿+全量复跑绿,判机器受压非代码;client 2412/2412 逐字对上;双门绿)` | — | — |
 | [handoffs/2026-09-21-v14-t7-cover-binding-presets-order.md](handoffs/2026-09-21-v14-t7-cover-binding-presets-order.md) | T7 · 封面版式预设 + 装订预设(设计室模板抽屉开张) | `done(2026-09-21 HQ 收官:一轮零停线;builder 环境两红=Python 系,HQ 机 server 主集真全绿;client 2431/2431 逐字对上;双门绿;说明书已由 HQ 守门同步。收尾批可派线至此全部落账)` | — | — |
 | [handoffs/2026-09-21-v14-t8-visual-relations-order.md](handoffs/2026-09-21-v14-t8-visual-relations-order.md) | T8 · 封面墨色修 + 视觉关系断言首批 | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿;client 2463/2463 逐字对上;双门绿。压页眉真路径=新纸默认 top 0,Henry 目击两连胜)` | — | — |
+| [handoffs/2026-09-22-v14-t9-spec-extractor-order.md](handoffs/2026-09-22-v14-t9-spec-extractor-order.md) | T9 · 规格提取器 + 首航 | `done(Henry 2026-09-21 拍「提取器确实可以立项」;render-then-distill 管线首件；builder 2026-09-22 完工，验证红项见 Result，待 HQ 复核)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

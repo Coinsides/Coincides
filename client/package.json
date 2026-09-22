@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test:unit": "vitest run",
+    "spec:extract": "node scripts/specExtractor/index.mjs",
     "check:canvas-runtime-boundary": "node scripts/canvasRuntimeBoundaryCheck.mjs",
     "check:group-gallery-shell": "node scripts/groupGalleryShellContractCheck.mjs",
     "check:single-editor-shell": "node scripts/singleEditorShellContractCheck.mjs",
