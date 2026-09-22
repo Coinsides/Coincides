@@ -1,0 +1,940 @@
+<title>宋史手册</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --desk:#e7dfcf; --desk-deep:#ddd2bb;
+  --paper:#faf5e9; --paper-2:#f3ecda;
+  --ink:#2d2418; --ink-2:#6a5c46; --ink-3:#9a896c;
+  --hair:#d8cbae; --hair-2:#e6dcc4;
+  --gold:#9a7016; --gold-deep:#7c5a10; --gold-wash:#f1e2b3;
+  --indigo:#3b5d8f; --indigo-deep:#2e4a75; --indigo-wash:#e6edf7;
+  --celadon:#5f8f81; --celadon-deep:#44715f; --celadon-wash:#e2efe8;
+  --seal:#a63b2a; --seal-wash:#f6e2db;
+  --chrome-bg:#f4eee0; --chrome-ink:#4a3e2b;
+  --pg-shadow:0 16px 38px rgba(84,62,20,.16), 0 2px 8px rgba(84,62,20,.10);
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#17130e; --desk-deep:#0f0c08;
+    --paper:#f2ead7; --paper-2:#eae1cb;
+    --hair:#d2c4a2; --hair-2:#ddd2b6;
+    --chrome-bg:#262019; --chrome-ink:#d8ccb4;
+    --pg-shadow:0 18px 44px rgba(0,0,0,.55), 0 2px 10px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#17130e; --desk-deep:#0f0c08;
+  --paper:#f2ead7; --paper-2:#eae1cb;
+  --hair:#d2c4a2; --hair-2:#ddd2b6;
+  --chrome-bg:#262019; --chrome-ink:#d8ccb4;
+  --pg-shadow:0 18px 44px rgba(0,0,0,.55), 0 2px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--desk);margin:0;padding-inline:16px;padding-block:34px 80px;
+  font-family:"Noto Serif SC",Georgia,serif;color:var(--ink);}
+.book{max-width:920px;margin:0 auto;display:grid;gap:46px;}
+.page{background:var(--paper);color:var(--ink);border-radius:3px;box-shadow:var(--pg-shadow);
+  padding:52px 62px 46px;min-height:1150px;position:relative;display:flex;flex-direction:column;}
+@media (max-width:720px){ .page{padding:26px 20px 30px;min-height:0;} }
+.page-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  border-bottom:1px solid var(--hair);padding-bottom:8px;margin-bottom:30px;
+  font-family:"Noto Sans SC",sans-serif;font-size:11.5px;letter-spacing:.14em;color:var(--ink-3);}
+.page-head .seg{letter-spacing:.06em}
+.page-foot{margin-top:auto;padding-top:26px;text-align:center;
+  font-family:"Noto Sans SC",sans-serif;font-size:11.5px;letter-spacing:.2em;color:var(--ink-3);}
+h1,h2,h3{line-height:1.35;text-wrap:balance;margin:0;}
+.ch-no{font-family:"Noto Sans SC",sans-serif;font-size:12px;letter-spacing:.4em;color:var(--seal);
+  font-weight:700;margin-bottom:10px;}
+h1.ch-title{font-size:33px;font-weight:900;letter-spacing:.04em;margin-bottom:6px;}
+.epigraph{margin:22px 0 8px;padding:14px 20px;background:var(--paper-2);border-left:3px solid var(--hair);
+  color:var(--ink-2);font-size:14.5px;line-height:1.9;}
+.epigraph .who{display:block;margin-top:6px;font-family:"Noto Sans SC",sans-serif;font-size:11.5px;
+  letter-spacing:.15em;color:var(--ink-3);text-align:right;}
+h2.sec{font-size:20px;font-weight:700;margin:34px 0 4px;padding-left:12px;border-left:4px solid var(--seal);}
+.page p{font-size:16px;line-height:2.06;margin:14px 0;max-width:100%;}
+.purpose-chip{display:inline-flex;align-items:center;gap:6px;font-family:"Noto Sans SC",sans-serif;
+  font-size:11px;letter-spacing:.08em;color:var(--celadon-deep);background:var(--celadon-wash);
+  border:1px solid var(--celadon);border-radius:999px;padding:2px 12px;font-weight:700;}
+
+/* ---- 三色判定层 ---- */
+.u-gold{background:linear-gradient(transparent 62%, var(--gold-wash) 62%);
+  border-bottom:2px solid var(--gold);padding-bottom:1px;}
+.gseal{display:inline-grid;place-items:center;width:17px;height:17px;margin-left:5px;vertical-align:2px;
+  border:1.5px solid var(--gold);color:var(--gold-deep);border-radius:3px;
+  font-family:"Noto Sans SC",sans-serif;font-size:10.5px;font-weight:700;cursor:default;position:relative;}
+.u-blue{margin:14px 0 14px 26px;padding:10px 16px;border-left:3px solid var(--indigo);
+  background:var(--indigo-wash);border-radius:0 8px 8px 0;}
+.u-blue p{margin:4px 0;font-size:14.8px;line-height:1.95;color:var(--indigo-deep);}
+.u-blue .tag{font-family:"Noto Sans SC",sans-serif;font-size:10.5px;letter-spacing:.1em;
+  color:var(--indigo);font-weight:700;}
+[data-tip]{position:relative;}
+[data-tip]:hover::after,[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;left:50%;bottom:130%;
+  transform:translateX(-50%);white-space:nowrap;background:var(--ink);color:var(--paper);
+  font-family:"Noto Sans SC",sans-serif;font-size:11px;letter-spacing:.05em;font-weight:500;
+  padding:5px 10px;border-radius:6px;z-index:30;pointer-events:none;}
+body.no-judge .u-gold{background:none;border-bottom:none;padding-bottom:0;}
+body.no-judge .gseal{display:none;}
+body.no-judge .u-blue{display:none;}
+
+/* ---- 回程锚 ---- */
+.anch{display:inline-block;margin-left:6px;vertical-align:1px;font-family:"Noto Sans SC",sans-serif;
+  font-size:10px;letter-spacing:.04em;color:var(--gold-deep);background:var(--paper-2);
+  border:1px solid var(--hair);border-radius:999px;padding:1px 8px;cursor:default;white-space:nowrap;}
+.anch::before{content:"◈ ";color:var(--gold);}
+body.no-judge .anch{display:none;}
+.quoteblock{margin:20px 0;padding:16px 22px;background:var(--paper-2);border:1px solid var(--hair);
+  border-radius:10px;font-size:15.5px;line-height:2.05;position:relative;}
+.quoteblock::before{content:"引";position:absolute;top:-11px;left:14px;background:var(--seal);color:var(--paper);
+  font-family:"Noto Sans SC",sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;
+  padding:2px 10px;border-radius:4px;}
+.quoteblock .qsrc{display:block;margin-top:8px;text-align:right;font-family:"Noto Sans SC",sans-serif;
+  font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;}
+
+/* ---- 源库 ---- */
+.src-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:20px;font-family:"Noto Sans SC",sans-serif;}
+@media (max-width:720px){ .src-grid{grid-template-columns:1fr;} }
+.src-card{border:1px solid var(--hair);border-radius:10px;padding:12px 15px;background:var(--paper-2);
+  display:grid;gap:6px;align-content:start;}
+.src-card .ti{font-family:"Noto Serif SC",serif;font-size:15.5px;font-weight:700;color:var(--ink);}
+.src-card .au{font-size:11.5px;color:var(--ink-2);}
+.src-card .fmt{display:flex;gap:6px;flex-wrap:wrap;}
+.fchip{font-size:10.5px;color:var(--ink-3);border:1px solid var(--hair);border-radius:4px;padding:0 7px;background:var(--paper);}
+.src-card .rc{font-size:11px;color:var(--celadon-deep);border-top:1px dashed var(--hair);padding-top:6px;letter-spacing:.03em;}
+.src-card .rc b{font-weight:700;}
+
+/* ---- 页边答卡 ---- */
+.anscard{float:right;clear:right;width:250px;margin:6px 0 14px 22px;background:var(--paper);
+  border:1px solid var(--celadon);border-left:4px solid var(--celadon);border-radius:10px;
+  padding:12px 14px;font-family:"Noto Sans SC",sans-serif;box-shadow:0 6px 16px rgba(60,80,60,.12);}
+.anscard .sel{font-size:11px;color:var(--ink-3);letter-spacing:.05em;}
+.anscard .q{font-size:13px;font-weight:700;color:var(--ink);margin:6px 0 4px;}
+.anscard .a{font-size:12.5px;line-height:1.8;color:var(--ink-2);}
+.anscard .who{margin-top:8px;font-size:10.5px;letter-spacing:.12em;color:var(--celadon-deep);font-weight:700;}
+@media (max-width:720px){ .anscard{float:none;width:100%;margin:14px 0;} }
+
+/* ---- item 卡 ---- */
+.items-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+@media (max-width:720px){ .items-grid{grid-template-columns:1fr;} }
+.item-card{border:1px solid var(--hair);border-radius:10px;padding:13px 15px;background:var(--paper-2);
+  font-family:"Noto Sans SC",sans-serif;display:grid;gap:7px;align-content:start;}
+.item-card .st{font-family:"Noto Serif SC",serif;font-size:14px;line-height:1.85;color:var(--ink);}
+.tbadge{display:inline-block;justify-self:start;padding:1px 10px;border-radius:4px;font-size:11px;
+  font-weight:700;letter-spacing:.15em;}
+.tbadge.t概念{background:var(--celadon-wash);color:var(--celadon-deep);border:1px solid var(--celadon);}
+.tbadge.t断言{background:var(--gold-wash);color:var(--gold-deep);border:1px solid var(--gold);}
+.tbadge.t实例{background:var(--indigo-wash);color:var(--indigo-deep);border:1px solid var(--indigo);}
+.tbadge.t方法{background:var(--seal-wash);color:var(--seal);border:1px solid var(--seal);}
+.tbadge.t数据{background:var(--paper);color:var(--ink-2);border:1px solid var(--ink-3);}
+.tbadge.t问题{background:var(--paper);color:var(--seal);border:1px dashed var(--seal);}
+.petals{display:flex;flex-wrap:wrap;gap:5px;}
+.petal{font-size:11px;color:var(--ink-2);background:var(--paper);border:1px solid var(--hair);
+  border-radius:999px;padding:1px 9px;}
+.item-card .src{font-size:11px;color:var(--ink-3);letter-spacing:.04em;}
+
+/* ---- 时间线 ---- */
+.tl{list-style:none;margin:20px 0;padding:0 0 0 26px;border-left:2px solid var(--hair);
+  display:grid;gap:14px;font-family:"Noto Sans SC",sans-serif;}
+.tl li{position:relative;}
+.tl li::before{content:"";position:absolute;left:-32.5px;top:7px;width:11px;height:11px;border-radius:50%;
+  background:var(--paper);border:3px solid var(--seal);}
+.tl .yr{font-weight:700;color:var(--seal);font-size:14px;letter-spacing:.06em;margin-right:10px;}
+.tl .ev{font-family:"Noto Serif SC",serif;font-size:15px;color:var(--ink);}
+.tl details{margin-top:2px;}
+.tl summary{cursor:pointer;font-size:12px;color:var(--ink-3);letter-spacing:.08em;list-style:none;}
+.tl summary::before{content:"▸ ";}
+.tl details[open] summary::before{content:"▾ ";}
+.tl .dt{font-size:13px;line-height:1.85;color:var(--ink-2);margin-top:4px;}
+
+/* ---- 表格 ---- */
+.tbl-wrap{overflow-x:auto;margin:18px 0;}
+table.tbl{border-collapse:collapse;width:100%;font-family:"Noto Sans SC",sans-serif;font-size:13px;min-width:560px;}
+.tbl caption{caption-side:top;text-align:left;font-weight:700;font-size:13px;letter-spacing:.1em;
+  color:var(--ink-2);padding-bottom:8px;}
+.tbl th{background:var(--paper-2);border-bottom:2px solid var(--hair);padding:8px 10px;text-align:left;
+  font-size:12px;letter-spacing:.1em;color:var(--ink-2);}
+.tbl td{border-bottom:1px solid var(--hair-2);padding:9px 10px;line-height:1.7;color:var(--ink);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+
+/* ---- 复习件 ---- */
+.cloze{font-size:16px;line-height:2.1;}
+.blank{display:inline-block;min-width:64px;border:none;border-bottom:2px solid var(--gold);
+  background:var(--gold-wash);color:transparent;border-radius:3px 3px 0 0;cursor:pointer;
+  font:inherit;padding:0 8px;text-align:center;}
+.blank.shown{color:var(--gold-deep);background:transparent;font-weight:700;}
+.flip{border:1px solid var(--hair);border-radius:10px;background:var(--paper-2);padding:16px 18px;
+  cursor:pointer;font:inherit;text-align:left;width:100%;display:grid;gap:6px;transition:transform .18s;}
+.flip:active{transform:scale(.985);}
+.flip .side{font-family:"Noto Sans SC",sans-serif;font-size:10.5px;letter-spacing:.2em;color:var(--celadon-deep);font-weight:700;}
+.flip .face{font-size:15px;line-height:1.9;}
+.flip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+@media (max-width:720px){ .flip-grid{grid-template-columns:1fr;} }
+.qa{margin:10px 0;border:1px solid var(--hair);border-radius:8px;padding:10px 16px;background:var(--paper);}
+.qa summary{cursor:pointer;font-size:15px;font-weight:600;}
+.qa .ans{margin-top:8px;color:var(--ink-2);font-size:14px;line-height:1.9;}
+
+/* ---- 目的树 ---- */
+.ptree{font-family:"Noto Sans SC",sans-serif;margin:18px 0;}
+.ptree ul{list-style:none;margin:0;padding-left:26px;border-left:2px solid var(--hair);display:grid;gap:10px;}
+.ptree>ul{border-left:none;padding-left:0;}
+.pnode{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--hair);
+  border-radius:9px;padding:7px 14px;font-size:13.5px;font-weight:500;}
+.pnode.root{border-color:var(--celadon);border-width:2px;font-weight:700;font-size:14.5px;}
+.pnode.retired{opacity:.62;text-decoration:none;}
+.pnode .cnt{font-size:11px;color:var(--ink-3);}
+.pnode .rtag{font-size:10.5px;color:var(--ink-3);border:1px dashed var(--ink-3);border-radius:4px;padding:0 6px;}
+.lockbtn{font-family:inherit;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer;
+  border:1.5px solid var(--celadon);color:var(--celadon-deep);background:var(--celadon-wash);
+  border-radius:999px;padding:3px 14px;}
+.lockbtn[aria-pressed="true"]{background:var(--celadon);color:var(--paper);}
+.portrait{display:grid;gap:8px;margin:16px 0;font-family:"Noto Sans SC",sans-serif;font-size:12px;}
+.pbar{display:grid;grid-template-columns:88px 1fr 52px;gap:10px;align-items:center;color:var(--ink-2);}
+.pbar .rail{height:10px;border-radius:999px;background:var(--paper-2);border:1px solid var(--hair);overflow:hidden;}
+.pbar .fill{height:100%;border-radius:999px;}
+.envelope{border:1.5px solid var(--celadon);border-radius:12px;padding:16px 18px;margin:16px 0;
+  background:var(--paper);font-family:"Noto Sans SC",sans-serif;box-shadow:0 8px 20px rgba(60,90,70,.10);}
+.envelope .eh{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;}
+.envelope .kind{font-size:11px;font-weight:700;letter-spacing:.15em;color:var(--celadon-deep);
+  background:var(--celadon-wash);border-radius:4px;padding:2px 9px;}
+.envelope .body{font-family:"Noto Serif SC",serif;font-size:14.5px;line-height:1.95;margin:10px 0;}
+.envelope .btns{display:flex;gap:8px;flex-wrap:wrap;}
+.ebtn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:5px 16px;cursor:pointer;
+  border:1.5px solid var(--celadon);background:var(--celadon);color:var(--paper);}
+.ebtn.ghost{background:transparent;color:var(--celadon-deep);}
+.envelope.done{opacity:.65;}
+.envelope.done .btns{display:none;}
+.envelope .result{display:none;font-size:12.5px;color:var(--celadon-deep);font-weight:700;}
+.envelope.done .result{display:block;}
+.envelope.muted{opacity:.45;filter:grayscale(.4);}
+.receipt{margin-top:10px;border-top:1px dashed var(--hair);padding-top:8px;font-size:11.5px;
+  letter-spacing:.06em;color:var(--ink-3);}
+.receipt b{color:var(--celadon-deep);}
+
+/* ---- 判断履历 ---- */
+.verlog{display:grid;gap:0;margin:18px 0;font-family:"Noto Sans SC",sans-serif;}
+.ver{border-left:3px solid var(--hair);padding:12px 18px 16px;position:relative;}
+.ver.now{border-left-color:var(--gold);}
+.ver .meta{font-size:11px;letter-spacing:.1em;color:var(--ink-3);margin-bottom:6px;}
+.ver .meta b{color:var(--ink-2);}
+.ver .txt{font-family:"Noto Serif SC",serif;font-size:15px;line-height:1.95;}
+.ver.old .txt{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--seal);
+  text-decoration-thickness:1.5px;}
+.ver .stamp{position:absolute;right:10px;top:10px;font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  border-radius:4px;padding:1px 8px;}
+.ver.old .stamp{color:var(--ink-3);border:1px dashed var(--ink-3);}
+.ver.now .stamp{color:var(--gold-deep);border:1px solid var(--gold);background:var(--gold-wash);}
+
+/* ---- 编年史 ---- */
+.chron{list-style:none;margin:20px 0;padding:0;display:grid;gap:0;font-family:"Noto Sans SC",sans-serif;}
+.chron li{display:grid;grid-template-columns:96px 14px 1fr;gap:12px;align-items:start;}
+.chron .d{font-size:11.5px;letter-spacing:.08em;color:var(--ink-3);text-align:right;padding-top:3px;
+  font-variant-numeric:tabular-nums;}
+.chron .dot{width:9px;height:9px;border-radius:50%;background:var(--celadon);margin:6px auto 0;position:relative;}
+.chron li:not(:last-child) .dot::after{content:"";position:absolute;left:4px;top:11px;width:1.5px;height:52px;
+  background:var(--hair);}
+.chron .t{font-size:13.5px;line-height:1.75;color:var(--ink);padding-bottom:22px;}
+.chron .t small{display:block;color:var(--ink-3);font-size:11.5px;}
+.chron li.flip-ev .dot{background:var(--seal);}
+
+/* ---- 图形页 ---- */
+.figbox{margin:18px 0;border:1px solid var(--hair);border-radius:10px;background:var(--paper-2);
+  padding:16px;overflow-x:auto;}
+.figbox svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.figcap{font-family:"Noto Sans SC",sans-serif;font-size:11.5px;letter-spacing:.1em;color:var(--ink-3);
+  text-align:center;margin-top:10px;}
+
+/* ---- 封面 ---- */
+.page.cover{align-items:center;justify-content:center;background:
+  radial-gradient(ellipse at 30% 20%, var(--paper) 0%, var(--paper-2) 100%);}
+.cover-inner{display:flex;gap:46px;align-items:center;justify-content:center;padding:40px 0;}
+.vtitle{writing-mode:vertical-rl;font-size:88px;font-weight:900;letter-spacing:.28em;line-height:1.1;}
+.cover-side{display:grid;gap:18px;max-width:300px;font-family:"Noto Sans SC",sans-serif;}
+.cover-side .sub{font-family:"Noto Serif SC",serif;font-size:17px;line-height:2;color:var(--ink-2);}
+.sealbox{width:76px;height:76px;border:4px solid var(--seal);color:var(--seal);border-radius:8px;
+  display:grid;place-items:center;font-size:26px;font-weight:900;letter-spacing:.1em;
+  font-family:"Noto Serif SC",serif;transform:rotate(-3deg);line-height:1.2;text-align:center;}
+.meta-rows{display:grid;gap:7px;font-size:12px;color:var(--ink-2);}
+.meta-rows b{color:var(--ink);}
+@media (max-width:720px){ .cover-inner{flex-direction:column;gap:26px;} .vtitle{writing-mode:horizontal-tb;font-size:52px;letter-spacing:.2em;} }
+
+/* ---- 目录 ---- */
+.toc{list-style:none;margin:26px 0;padding:0;display:grid;gap:2px;font-size:15.5px;}
+.toc li{display:flex;align-items:baseline;gap:10px;padding:7px 2px;}
+.toc a{color:var(--ink);text-decoration:none;}
+.toc a:hover{color:var(--seal);}
+.toc .dots{flex:1;border-bottom:2px dotted var(--hair);transform:translateY(-4px);}
+.toc .pn{font-family:"Noto Sans SC",sans-serif;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+.toc .lv2{padding-left:26px;font-size:14px;color:var(--ink-2);}
+
+/* ---- 杂件 ---- */
+.funbox{margin:20px 0;border:1.5px dashed var(--seal);border-radius:10px;padding:12px 18px;
+  background:var(--seal-wash);font-family:"Noto Sans SC",sans-serif;font-size:13px;line-height:1.9;color:var(--ink);}
+.funbox b{color:var(--seal);letter-spacing:.15em;}
+.srcline{margin-top:22px;padding-top:10px;border-top:1px dashed var(--hair);
+  font-family:"Noto Sans SC",sans-serif;font-size:11.5px;color:var(--ink-3);letter-spacing:.05em;line-height:1.9;}
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;font-family:"Noto Sans SC",sans-serif;}
+@media (max-width:720px){ .legend-grid{grid-template-columns:1fr;} }
+.lg-card{border:1px solid var(--hair);border-radius:10px;padding:13px 16px;background:var(--paper-2);
+  font-size:13px;line-height:1.85;color:var(--ink-2);}
+.lg-card b{display:block;color:var(--ink);margin-bottom:4px;font-size:13.5px;}
+.toolbar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:50;
+  display:flex;gap:8px;font-family:"Noto Sans SC",sans-serif;}
+.tbtn{border:1px solid var(--hair);background:var(--chrome-bg);color:var(--chrome-ink);
+  border-radius:999px;padding:7px 16px;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+  cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.14);font-family:inherit;}
+.tbtn[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#fff;}
+a.backtop{color:inherit;text-decoration:none;}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important;} }
+:focus-visible{outline:2px solid var(--celadon);outline-offset:2px;}
+</style>
+
+<div class="toolbar">
+  <button class="tbtn" id="judgeToggle" aria-pressed="true">判定层 · 开</button>
+  <button class="tbtn" id="tocBtn">目录</button>
+</div>
+
+<main class="book" id="book">
+
+<!-- ═══ 封面 ═══ -->
+<section class="page cover" data-toc="封面" id="pg-cover">
+  <div class="cover-inner">
+    <div class="vtitle">宋史手册</div>
+    <div class="cover-side">
+      <div class="sealbox">汴京<br>书案</div>
+      <p class="sub">从陈桥的黄袍到崖山的风涛——一个学习者与他的 Agent 在三百年宋史里合写的一册工作样张。</p>
+      <div class="meta-rows">
+        <div>项目:<b>宋代</b> · 皮肤:<b>绢本 · 汝青</b></div>
+        <div>源库:<b>十件原始文档 · 22,195 碎片</b>(第 3 纸)</div>
+        <div>根目的:<b>宋史专题研究</b> <span style="color:var(--celadon-deep);font-weight:700">🔒 已锁</span></div>
+        <div>前任根目的:历史兴趣调研(2026-08-02 立 · 09-12 换届)</div>
+        <div>判定库:金 182 · 蓝 67 · 认亲合并 12 对</div>
+      </div>
+      <span class="purpose-chip">⌖ 本册为 Coincides 成品打样 · 全部机关皆可动</span>
+    </div>
+  </div>
+  <div class="page-foot">Coincides · 打样件 · 2026-09-19</div>
+</section>
+
+<!-- ═══ 目录 ═══ -->
+<section class="page" data-toc="目录" id="pg-toc">
+  <div class="page-head"><span>宋史手册</span><span class="seg">卷首</span></div>
+  <div class="ch-no">目 录</div>
+  <h1 class="ch-title">二十四纸总目</h1>
+  <ul class="toc" id="tocList"></ul>
+  <div class="page-foot"></div>
+</section>
+
+<!-- ═══ 源库页 ═══ -->
+<section class="page" data-toc="源库 · 十件原始文档" id="pg-sources">
+  <div class="page-head"><span>引用源库</span><span class="seg">录入 → 统一格式 → 打散保序</span></div>
+  <div class="ch-no">源 库</div>
+  <h1 class="ch-title">一切从十件原始文档开始</h1>
+  <p style="font-size:14.5px;color:var(--ink-2)">本册不是凭空写的。十件原始文档先入引用源库:格式各异的原件被统一为内部格式、按原序打散为可引用的碎片——原件恒在,碎片保序可拼回。此后书里的每一条金笔,都带着回程锚指回这里(悬停 ◈ 可见;判定层关闭时锚随判定一同隐去)。</p>
+  <div class="src-grid">
+    <div class="src-card"><div class="ti">宋史</div><div class="au">元 · 脱脱等 · 纪传体正史(取食货志/职官志/列传)</div>
+      <div class="fmt"><span class="fchip">影印 PDF</span><span class="fchip">496 卷</span><span class="fchip">project_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>4,812</b> · 保序拼回校验通过 · 08-03 入库</div></div>
+    <div class="src-card"><div class="ti">续资治通鉴长编</div><div class="au">南宋 · 李焘 · 编年(取太祖—哲宗诸卷)</div>
+      <div class="fmt"><span class="fchip">点校本 EPUB</span><span class="fchip">520 卷</span><span class="fchip">project_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>6,240</b> · 保序拼回校验通过 · 08-03 入库</div></div>
+    <div class="src-card"><div class="ti">梦溪笔谈</div><div class="au">北宋 · 沈括 · 笔记(技艺/器用诸门)</div>
+      <div class="fmt"><span class="fchip">扫描件</span><span class="fchip">26 卷</span><span class="fchip">library_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>587</b> · 困难区 3 处截图切片 · 08-10 入库</div></div>
+    <div class="src-card"><div class="ti">东京梦华录</div><div class="au">南宋 · 孟元老 · 汴京城市回忆录</div>
+      <div class="fmt"><span class="fchip">点校本 EPUB</span><span class="fchip">10 卷</span><span class="fchip">library_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>312</b> · 保序拼回校验通过 · 08-10 入库</div></div>
+    <div class="src-card"><div class="ti">宋会要辑稿</div><div class="au">清 · 徐松辑 · 政书(食货/职官门)</div>
+      <div class="fmt"><span class="fchip">影印 PDF</span><span class="fchip">表格族</span><span class="fchip">project_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>2,905</b> · 表格区 sheet 锚候补 · 08-12 入库</div></div>
+    <div class="src-card"><div class="ti">涑水记闻</div><div class="au">北宋 · 司马光 · 朝野轶闻笔记</div>
+      <div class="fmt"><span class="fchip">点校本 EPUB</span><span class="fchip">16 卷</span><span class="fchip">library_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>428</b> · 保序拼回校验通过 · 08-15 入库</div></div>
+    <div class="src-card"><div class="ti">临川先生文集</div><div class="au">北宋 · 王安石 · 文集(取奏议/书信)</div>
+      <div class="fmt"><span class="fchip">影印 PDF</span><span class="fchip">100 卷</span><span class="fchip">project_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>1,634</b> · 保序拼回校验通过 · 09-02 入库</div></div>
+    <div class="src-card"><div class="ti">三朝北盟会编</div><div class="au">南宋 · 徐梦莘 · 靖康史料汇编</div>
+      <div class="fmt"><span class="fchip">影印 PDF</span><span class="fchip">250 卷</span><span class="fchip">project_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>3,178</b> · 保序拼回校验通过 · 09-05 入库</div></div>
+    <div class="src-card"><div class="ti">北宋政治改革家王安石</div><div class="au">邓广铭 · 现代研究(1997)</div>
+      <div class="fmt"><span class="fchip">EPUB</span><span class="fchip">现代研究</span><span class="fchip">library_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>892</b> · 保序拼回校验通过 · 09-06 入库</div></div>
+    <div class="src-card"><div class="ti">宋代经济史</div><div class="au">漆侠 · 现代研究(1987 · 财政数据主源)</div>
+      <div class="fmt"><span class="fchip">扫描件</span><span class="fchip">数据表多</span><span class="fchip">library_upload</span></div>
+      <div class="rc">✓ 转写统一 · 碎片 <b>1,207</b> · 表格区 sheet 锚候补 · 09-06 入库</div></div>
+  </div>
+  <p style="font-family:'Noto Sans SC',sans-serif;font-size:12px;color:var(--ink-3);margin-top:16px">▲ 碎片数与入库日为打样模拟值;书目与卷次皆真。录入只做格式统一与保序打散——<strong style="color:var(--ink-2)">源层零判定</strong>,三色要等带着目的的阅读才动笔。</p>
+  <div class="page-foot"></div>
+</section>
+
+<section class="page" data-toc="立国:陈桥兵变与祖宗之法"><div class="page-head"><span>第一章 · 立国:陈桥兵变与祖宗之法</span><span class="seg">历史兴趣调研(前任根)</span></div><div class="ch-no">第 一 章</div><h1 class="ch-title">立国:陈桥兵变与祖宗之法</h1><span class="purpose-chip">⌖ 挂靠:历史兴趣调研(前任根)</span><div class="epigraph">卧榻之侧,岂容他人鼾睡乎!<span class="who">宋太祖赵匡胤(《续资治通鉴长编》卷十六,开宝八年)</span></div><h2 class="sec">一夜之间:黄袍加身的剧本</h2><p>显德七年(960)正月初一,开封城里年味未散,镇州、定州的紧急军报便到了:契丹与北汉联兵南下。宰相范质仓促点将,派殿前都点检赵匡胤率禁军北上御敌。他后来才捶胸顿足地明白过来:这一纸调令,等于把后周的江山亲手递了出去。</p>
+<p><span class="u-gold">陈桥兵变的过程可以一句话说完:建隆元年(960)正月,赵匡胤率军至陈桥驿,当夜军中鼓噪,黎明时分被部下以黄袍加身,随即回师开封,受后周恭帝禅让建宋。全程几乎兵不血刃,开封市肆不惊——这是五代数十年兵变史上剧本最完整、代价最小的一次。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷一 · 建隆元年正月 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「陈桥兵变的过程可以一句话…」</span><p>说它有「剧本感」不是苛责,至少三处针脚露了出来:南下的军情此后再无下文,真假存疑;禅位诏书竟是现成的,翰林学士陶谷从袖中取出;而黄袍——那可不是军营里的常备物资。史书写「仓促」,处处都是从容。</p></div>
+<p>入城之前,赵匡胤与将士约法:不得惊犯周室太后幼主,不得凌辱公卿,不得剽掠府库市肆,违者族诛。这份克制在五代乱军中近乎奇迹,也为新王朝挣来了第一笔政治信用。</p>
+<p><span class="u-gold">陈桥兵变的历史意义不在改朝换代本身——五代五十三年间,中原前后五朝十四帝,大半靠兵变或篡弑上位——而在于赵匡胤此后用一整套制度,终结了「天子,兵强马壮者当为之」的循环。宋朝由此成为最后一个靠兵变建立的中原王朝。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:邓广铭《北宋政治改革家王安石》 · 第一章(北宋建国与中央集权背景) · 碎片可拼回原文">邓广铭《北宋政治改革家王安石》</span></p>
+<p>所以真正值得追问的不是「赵匡胤如何当上皇帝」,而是「为什么此后再没人能用同样的办法当皇帝」。答案藏在后来被宋人尊为「祖宗之法」的一系列安排里——本章余下的篇幅,讲的就是这套安排如何一步步落子。</p>
+<h2 class="sec">一杯酒,三步棋:兵权的和平回收</h2><aside class="anscard"><div class="sel">⌖ 圈选:「更戍法让禁军大抵三年一轮…」</div><div class="q">轮换驻地明明会拖垮战斗力,宋朝人自己看不出来吗?</div><div class="a">看得出。范仲淹等屡有批评,神宗朝行将兵法才部分废止。设计者是两害相权:宁可对外战力打折,也要锁死对内兵变的可能——这是被五代吓出来的优先级。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>建隆二年(961)七月的一个晚上,太祖设宴款待石守信、高怀德、王审琦等禁军宿将。酒酣耳热之际,他屏退左右,叹了口气:人生如白驹过隙,你们何不释去兵权,出守大藩,多置良田美宅,歌儿舞女以终天年,君臣之间两无猜疑?第二天,宿将们纷纷称病请辞。</p>
+<p><span class="u-gold">杯酒释兵权的实质是一场赎买:以节度使的高位厚禄加上皇室联姻,和平解除禁军高级将领的兵权。它用制度化的交易取代了历代开国惯用的诛戮功臣——成本是钱和官爵,收益是禁军指挥权彻底回到皇帝手中。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《涑水记闻》 · 卷一(太祖与石守信等宴饮事) · 碎片可拼回原文">《涑水记闻》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「杯酒释兵权的实质是一场赎…」</span><p>那杯酒的戏剧性细节出自司马光《涑水记闻》等笔记,现代史家对宴席场面多有考辨;但建隆二年七月罢宿将典禁军,于《长编》有明文。区分「事件的内核」与「事件的讲法」,是读宋史要上的第一课——这样的故事,后面还会遇到很多。</p></div>
+<p><span class="u-gold">赵普为太祖定下削藩三纲领:「稍夺其权,制其钱谷,收其精兵」。落成制度就是三件事:派文臣知州、设通判连署,夺其治权;设诸路转运使,把地方财赋直输中央;拣选州郡精壮编入禁军,地方只剩老弱。节度使从此渐成荣誉头衔。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷二 · 建隆二年七月 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<p>收上来的兵怎么安置?宋朝把军队切成两层:禁军为天子卫兵,屯驻京师与要冲,是真正的野战力量;厢军留在州郡,名为常备军,实际多充劳役杂差。一支军队从制度上被分成了「能打的」与「不能打的」。</p>
+<p><span class="u-gold">强干弱枝、守内虚外,是宋初军事布局的总原则:精锐禁军约半数屯驻京畿,余者更番戍守四方,地方州郡只握厢军弱旅。其结果是,帝国境内任何一个节点都再也凑不出一支足以造反的军队。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 兵志一(禁军) · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">更戍法让禁军大抵三年一轮换驻地,而将领不随军队移动,造成「兵不识将,将不识兵」。这不是管理疏漏,而是精确的设计:士兵与将帅无法结成私人依附,兵变最需要的组织纽带被预先剪断。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 兵志(更戍之制) · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「强干弱枝、守内虚外,是宋…」</span><p>这笔账要两面算。收益页写着:此后百余年,内地再无成建制的军阀叛乱,这是唐中叶以来两百年未有之局。成本页写着:边防兵力单薄、将从中御,面对辽与西夏先天吃亏。宋人自己也算得清楚——「积弱」的抱怨,几乎与王朝同龄。</p></div><blockquote class="quoteblock">稍夺其权,制其钱谷,收其精兵,则天下自安矣。<span class="qsrc">—— 《续资治通鉴长编》 · 卷二 · 建隆二年七月 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第一章 · 立国:陈桥兵变与祖宗之法</span><span class="seg">历史兴趣调研(前任根)</span></div><h2 class="sec">先南后北:统一的次序与止步之处</h2><aside class="anscard"><div class="sel">⌖ 圈选:「太祖夜召晋王赵光义入宫对…」</div><div class="q">烛影斧声到底是不是太宗杀了哥哥?</div><div class="a">无实证。此说出自僧文莹《续湘山野录》,正史不载;「斧」也是玉柱斧文具而非兵器。可确认的只有:死得突然、传弟不传子、太宗急改年号。存疑即可,不必断案。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>解决了「谁掌兵」,下一个问题是「先打谁」。周世宗时王朴献《平边策》,主张先取江南、后图幽燕,已画出草图;乾德年间一个雪夜,太祖踏雪造访赵普家,火炉边定下的仍是这个方向——先南后北,先易后难。</p>
+<p><span class="u-gold">先南后北的统一方略,核心是一笔经济账:南方诸国富庶而兵弱,先取之可尽收其财赋以养兵;北汉贫瘠却有契丹为后盾,先攻则损耗巨大且惊动强邻。以南方之财,养征北之兵——次序本身就是战略。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《涑水记闻》 · 卷一(太祖雪夜访赵普定策) · 碎片可拼回原文">《涑水记闻》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「先南后北的统一方略,核心…」</span><p>先易后难的另一面,是把最硬的骨头留到了最后,而最后未必还有当初的牙口。等宋朝腾出手来面对幽云十六州时,辽已坐大,窗口期稍纵即逝。后人复盘至此,总忍不住替太祖惋惜那场没来得及打的北伐。</p></div>
+<p>棋按谱走:乾德元年(963)假道灭荆南、继取湖南;965年伐后蜀,自出兵至孟昶出降仅六十六日;971年下南汉;975年金陵城破,李煜奉表出降。978年吴越钱俶纳土、陈洪进献漳泉二州,南方不战而毕。</p>
+<p>976年十月,太祖夜召晋王赵光义入宫对饮,当夜暴崩。烛影斧声,千古之谜。太宗即位,接过的是一个只剩北汉未平的棋盘。</p>
+<p>太平兴国四年(979),太宗亲征灭北汉,五代十国至此终结。但他携灭国之威、不及休整便直趋幽州,在高梁河被辽军击溃,身中流矢——据宋人笔记,是乘着驴车逃回来的。宋朝的统一从此止步于幽云十六州以南,这条止步线,几乎规定了此后一百多年的国防态势与财政负担。</p>
+<h2 class="sec">文治的骨架:分权、科举与冗官的种子</h2><aside class="anscard"><div class="sel">⌖ 圈选:「殿试始用糊名弥封,考官不…」</div><div class="q">糊了名,考官认笔迹怎么办?</div><div class="a">所以真宗朝又设誊录院:专人朱笔抄录试卷,考官只看誊本,笔迹也被隔断。糊名管姓名,誊录管笔迹——制度漏洞是一层层打补丁补上的。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>武的一半安顿好了,再看文的一半。太祖有句名言:「宰相须用读书人。」但重用读书人,不等于信任任何一个具体的读书人——对文官,他同样准备了一套精细的分权手术。</p>
+<p><span class="u-gold">宋初中枢实行二府三司制:中书门下(政事堂)掌行政,枢密院掌军政,并称「二府」;盐铁、度支、户部合为三司,总揽财政,长官三司使号称「计相」。唐代宰相总领的事权,被一分为三,皇帝居中总其成。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 职官志(中书门下 · 枢密院 · 三司) · 碎片可拼回原文">《宋史》</span></p>
+<p>地方上同样文进武退:原节度使辖区改由文臣知州,任满即换,又设通判与之连署文书、互相牵制。与此配套,官、职、差遣三者分离——「官」只定俸禄品级,实际做什么事,全看朝廷临时授予的「差遣」。名实分离,人人可换,谁也坐不大。</p>
+<p><span class="u-gold">科举在宋初完成三级跳:开宝六年(973)太祖因知贡举李昉被讼徇私,亲试举人于讲武殿,殿试自此成为定制,进士皆为「天子门生」;淳化三年(992)殿试始用糊名弥封,考官不见姓名;真宗朝再添誊录,连笔迹也认不得。取士之公,前所未有。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 选举志一(科目上) · 碎片可拼回原文">《宋史》</span></p>
+<p>规模同样惊人。唐代每榜进士常不过二三十人,太宗太平兴国二年(977)一榜取士竟达五百人,授官之优亦远迈前代。读书应举成为整个社会的上升正道,「重文轻武」由此从帝王心术变成了社会风气。</p>
+<p><span class="u-gold">但冗官的种子也在此时埋下:科举扩容、恩荫补官、官职差遣分离造成的名实两套编制,三股水源汇成一条河。真宗、仁宗以后,「冗官、冗兵、冗费」成为国是难题,而三冗的每一条都能溯源到太祖太宗立下的祖宗之法——这是本书后面几章要反复回来的原点。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 宋代财政(冗官冗兵冗费) · 碎片可拼回原文">漆侠《宋代经济史》</span></p><blockquote class="quoteblock">艺祖革命,首用文吏而夺武臣之权,宋之尚文,端本乎此。<span class="qsrc">—— 《宋史》 · 文苑传 · 序 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第一章 · 立国:陈桥兵变与祖宗之法 · 铸卡</span><span class="seg">宋史 · 通用层(晋升自兴趣期)</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>宋初兵权三分——谁也凑不齐「再来一次陈桥兵变」所需的全套钥匙</caption><thead><tr><th>权</th><th>归谁</th><th>含义与牵制</th></tr></thead><tbody><tr><td>握兵(统训)</td><td>三衙(殿前司、侍卫马军司、侍卫步军司)</td><td>日常统领训练禁军,但无权调动一兵一卒</td></tr><tr><td>发兵(调度)</td><td>枢密院(多以文臣主之)</td><td>掌调兵之符,却不直接统领军队</td></tr><tr><td>用兵(出征)</td><td>临时委任的率臣</td><td>战时受命领兵,兵散即交权还朝</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">960</span><span class="ev">陈桥兵变,宋朝建立</span><details><summary>细看</summary><div class="dt">赵匡胤黄袍加身,受周禅,改元建隆</div></details></li><li><span class="yr">961</span><span class="ev">杯酒释兵权</span><details><summary>细看</summary><div class="dt">石守信等禁军宿将罢军职,出为节度使</div></details></li><li><span class="yr">963</span><span class="ev">平荆湖</span><details><summary>细看</summary><div class="dt">假道灭荆南,继取湖南,统一战争开局</div></details></li><li><span class="yr">965</span><span class="ev">灭后蜀</span><details><summary>细看</summary><div class="dt">自出兵至孟昶出降仅六十六日</div></details></li><li><span class="yr">971</span><span class="ev">灭南汉</span><details><summary>细看</summary><div class="dt">刘鋹降,岭南平</div></details></li><li><span class="yr">973</span><span class="ev">殿试成为定制</span><details><summary>细看</summary><div class="dt">太祖亲试举人于讲武殿,进士皆为天子门生</div></details></li><li><span class="yr">975</span><span class="ev">灭南唐</span><details><summary>细看</summary><div class="dt">金陵城破,李煜奉表出降</div></details></li><li><span class="yr">976</span><span class="ev">太祖崩,太宗即位</span><details><summary>细看</summary><div class="dt">烛影斧声,千古之谜</div></details></li><li><span class="yr">978</span><span class="ev">吴越纳土</span><details><summary>细看</summary><div class="dt">钱俶献两浙,陈洪进献漳泉,南方尽入版图</div></details></li><li><span class="yr">979</span><span class="ev">灭北汉;高梁河之败</span><details><summary>细看</summary><div class="dt">五代十国终结;北伐幽州溃败,统一止步幽云</div></details></li><li><span class="yr">986</span><span class="ev">雍熙北伐失败</span><details><summary>细看</summary><div class="dt">三路攻辽皆败,名将杨业被俘,绝食而死</div></details></li><li><span class="yr">992</span><span class="ev">殿试始行糊名</span><details><summary>细看</summary><div class="dt">淳化三年,考官不复见举人姓名</div></details></li><li><span class="yr">997</span><span class="ev">太宗崩,真宗即位</span><details><summary>细看</summary><div class="dt">至道三年分天下为十五路,祖宗之法框架成形</div></details></li></ul><h2 class="sec">铸卡(6 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">强干弱枝:宋初军制总原则——精锐禁军约半数屯驻京畿,地方州郡仅留充杂役的厢军,使帝国任何一个地方节点都不再具备发动叛乱的军事资源。</div><div class="petals"><span class="petal">干=禁军:天子卫兵,集中京师与要冲</span><span class="petal">枝=厢军:名为常备军,实为州郡劳役</span><span class="petal">隐含代价:守内虚外,边防先天单薄</span></div><div class="src">◈ 《宋史·兵志》</div></div><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">陈桥兵变的历史意义不在改朝换代,而在于宋朝以制度手段终结了「兵强马壮者为天子」的五代循环——宋是最后一个靠兵变建立的中原王朝。</div><div class="petals"><span class="petal">五代五十三年、十四帝,多以兵变篡弑上位</span><span class="petal">终结靠的是制度(收兵权、更戍、分权)而非杀戮</span><span class="petal">检验标准:此后北宋内地再无成建制军阀叛乱</span></div><div class="src">◈ 《宋史·太祖本纪》</div></div><div class="item-card"><span class="tbadge t方法">方法</span><div class="st">赵普削藩三纲领:「稍夺其权,制其钱谷,收其精兵」——治权、财权、兵权三线并进,把藩镇拆成空壳。</div><div class="petals"><span class="petal">夺其权:文臣知州+通判连署</span><span class="petal">制钱谷:诸路转运使直输中央</span><span class="petal">收精兵:拣壮勇入禁军,地方留老弱</span></div><div class="src">◈ 《续资治通鉴长编》卷二</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">太平兴国二年(977)太宗一榜取士约五百人(进士百余,诸科及特奏名合计),而唐代每榜进士常仅二三十人——科举规模一举放大一个数量级。</div><div class="petals"><span class="petal">扩容是收士心的政治动作:天子门生遍布朝野</span><span class="petal">与恩荫、官职差遣分离并列为冗官三源之一</span></div><div class="src">◈ 《续资治通鉴长编》卷一八</div></div><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">二府三司:中书门下掌行政、枢密院掌军政(并称二府),三司(盐铁、度支、户部)总揽财政、长官号「计相」——唐代宰相的事权被一分为三,皇帝居中总揽。</div><div class="petals"><span class="petal">分权的对象是宰相,不是皇帝</span><span class="petal">枢密院有发兵之权而不统兵;三衙统兵而无发兵之权</span><span class="petal">财权独立成司,宰相不预钱谷</span></div><div class="src">◈ 《宋史·职官志》</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">「杯酒释兵权」的经典酒宴场面是否实有其事?——罢宿将典禁军确凿,戏剧化细节则出自后人笔记,层累增饰。</div><div class="petals"><span class="petal">事件内核:建隆二年七月石守信等罢军职,《长编》有明文</span><span class="petal">叙事外壳:对话与酒宴细节见于笔记,版本互异</span><span class="petal">方法论:区分「事」与「事的讲法」</span></div><div class="src">◈ 《涑水记闻》卷一</div></div></div><div class="funbox"><b>冷知识</b> 「黄袍加身」此后成了宋朝皇帝的专属心病——本章讲的正是一个靠兵变上台的人,如何把「防止下一次兵变」做成一整套国家制度,而且做得太成功:三百年后人们抱怨的不再是武人跋扈,而是武人太弱。制度的每一味药,都对着五代的病;药的副作用,则留给了后面的章节。</div><div class="srcline">本章源:《宋史》(元·脱脱等修)(太祖本纪、太宗本纪、职官志、兵志) · 《续资治通鉴长编》(宋·李焘)(卷一至卷四二(建隆至至道)) · 《涑水记闻》(宋·司马光)(卷一) · 邓小南《祖宗之法:北宋前期政治述略》(生活·读书·新知三联书店,2006年)</div><div class="page-foot"></div></section>
+<section class="page" data-toc="澶渊之盟与三国体系"><div class="page-head"><span>第二章 · 澶渊之盟与三国体系</span><span class="seg">历史兴趣调研(前任根)</span></div><div class="ch-no">第 二 章</div><h1 class="ch-title">澶渊之盟与三国体系</h1><span class="purpose-chip">⌖ 挂靠:历史兴趣调研(前任根)</span><div class="epigraph">城下之盟，《春秋》耻之。澶渊之举，是城下之盟也。<span class="who">王钦若对宋真宗语，《宋史·寇准传》</span></div><h2 class="sec">从驴车到守势——太宗两次北伐</h2><p>故事要从一场大胜之后的冒进讲起。979年，宋太宗赵光义亲征太原，灭北汉，五代十国的最后一块割据拼图归位。此时距宋建国不足二十年，太宗决定挟灭国之威顺势北上，夺回后晋石敬瑭割让给契丹的幽云十六州。</p>
+<p>疲惫的宋军围攻幽州城（今北京）不下，辽将耶律休哥率援军驰至，双方决战于城西高梁河。宋军腹背受敌，全线崩溃。</p>
+<p><span class="u-gold">979年高梁河之战，宋太宗亲征幽州惨败，中箭负伤、乘驴车南逃。宋朝第一次武力收复幽云十六州的尝试就此终结，此战也确立了此后数十年辽军对宋军的野战心理优势。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷二〇 · 太平兴国四年七月 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「979年高梁河之战，宋太…」</span><p>「高梁河车神」在今天是网络段子，对当时的宋人却是实打实的创伤——太宗的箭伤据宋人记载屡屡复发，最终与他的死也脱不了干系。皇帝的身体，成了这场败仗最长的注脚。</p></div>
+<p>七年后，太宗卷土重来。986年雍熙北伐兵分三路：东路曹彬出雄州吸引辽军主力，中路田重进出飞狐，西路潘美、杨业攻山后诸州。开局一度顺利，西路连下寰、朔、云、应四州。</p>
+<p><span class="u-gold">986年雍熙北伐三路皆败：东路主力溃于岐沟关，西路名将杨业在陈家谷孤军被俘、绝食三日而死。此后宋对辽转入全面战略防御，「收复幽云」从国策降格为口号。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷二七二 · 杨业传 · 碎片可拼回原文">《宋史》</span></p>
+<p>杨业之死后来被民间演绎成「杨家将」的忠烈传奇。但对照史料会发现，真实的败因更多是监军王侁的掣肘与友军失约，而非评书里潘仁美式的奸臣构陷——传奇需要反派，历史往往只有制度。</p>
+<h2 class="sec">澶州城下——一支床子弩改写的谈判</h2><aside class="anscard"><div class="sel">⌖ 圈选:「宋每年向辽提供银十万两、…」</div><div class="q">这笔岁币对辽国意味着什么？占辽国财政的比重大吗？</div><div class="a">很重要。辽的农耕与货币经济薄弱，岁币白银加榷场收入是其硬通货主要来源，且不动刀兵年年进账。但辽代财政史料残缺，具体占比给不出精确数字，只能说「可观」。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>1004年秋，辽承天太后萧绰与辽圣宗耶律隆绪亲率大军南下，绕开沿途坚城，直插黄河北岸的澶州（今河南濮阳），距开封仅一河之隔。朝中顿时人心浮动：王钦若主张迁都金陵，陈尧叟主张避入蜀地。</p>
+<p><span class="u-gold">宰相寇准力排迁都之议，促成宋真宗亲征渡河。御驾登上澶州北城门楼，宋军望见黄伞盖，「踊跃欢呼，声闻数十里」。亲征稳住了战线，也给了宋朝坐上谈判桌的底气。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷二八一 · 寇准传 · 碎片可拼回原文">《宋史》</span></p>
+<p>战场上的一个偶然，加重了辽方的和谈意愿：辽军先锋统帅萧挞凛到阵前视察地形，被宋军城头的床子弩一箭射杀。主帅暴毙，孤军深入、后路漫长，萧太后决定见好就收。</p>
+<p><span class="u-gold">1005年1月（景德元年十二月），宋辽订立澶渊之盟：宋每年向辽提供银十万两、绢二十万匹，名义是「助军旅之费」；两国约为兄弟之国，真宗年长为兄；各守疆界、互不收纳叛亡，沿边开设榷场。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷五八 · 景德元年十二月 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「1005年1月（景德元年…」</span><p>注意条款的措辞艺术：钱叫「助军旅之费」而不叫贡纳，关系是「兄弟」而非君臣。宋朝在名分上寸步不让，在实利上花钱买安全——这套外交修辞本身，就值得单独铸一张卡。</p></div>
+<p>盟约以誓书形式互换，双方皇帝对天盟誓、告于宗庙。此后宋辽岁岁互派使节贺正旦、贺生辰，一套稳定的外交礼仪运转了上百年——包拯、沈括、苏辙都当过使辽的「外交官」。</p><blockquote class="quoteblock">虽有敕，汝往所许不得过三十万，过三十万勿来见准，准将斩汝。<span class="qsrc">—— 《宋史》 · 卷二八一 · 寇准传 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第二章 · 澶渊之盟与三国体系</span><span class="seg">历史兴趣调研(前任根)</span></div><h2 class="sec">百年和平，还是百年屈辱？</h2><aside class="anscard"><div class="sel">⌖ 圈选:「「城下之盟，《春秋》耻之…」</div><div class="q">王钦若为什么拆真宗的台？当初主张逃跑的不正是他自己吗？</div><div class="a">正因如此。亲征之功归寇准，主逃的王钦若被边缘化。把澶渊定性为耻是一石二鸟：既贬寇准功业，又为自己翻身——不久寇准罢相。评价之争的背后，常常是权力之争。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><p>对澶渊之盟的评价，从墨迹未干的那天起就在打架。这正是它作为学习素材的价值：同一组史实，视角一换，结论整个翻面——而且双方手里都有硬证据。</p>
+<p><span class="u-gold">主和的账本：澶渊之盟为宋辽换来约一百二十年无大战，是农耕与游牧政权之间罕见的长期和平；三十万岁币在宋朝年度财政收入中占比很小（通常估计不足百分之一二），远低于一年战事的军费。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 下册 · 岁币与宋代财政 · 碎片可拼回原文">漆侠《宋代经济史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「主和的账本：澶渊之盟为宋…」</span><p>富弼算过这笔账：岁币开支不及用兵之费的百分之一二。而苏洵写《六国论》痛骂六国「赂秦」，明眼人都读得出是在敲打本朝。同一笔钱，一个读出精明，一个读出苟且——你先认同谁，往往取决于你先读到谁。</p></div>
+<p><span class="u-gold">主辱的账本：澶渊之盟开了中原王朝以岁币买和平的先例，西夏随即效仿，庆历增币接踵而至；长期和平又让朝野「忘战去兵」，河北边防日渐废弛，为后来徽宗朝的崩盘埋下伏笔。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《三朝北盟会编》 · 政宣上帙 · 碎片可拼回原文">《三朝北盟会编》</span></p>
+<p>真宗本人就经历了一场耐人寻味的认识演化：签约之初他颇为自得，直到王钦若进言「城下之盟，《春秋》耻之」，一句话把功业说成了耻辱。皇帝从此郁郁，转而策划「天书降神」、东封泰山，用一场盛大的造神运动找补面子——对盟约的评价一变，连国家大政都跟着转向。</p>
+<p><span class="u-gold">榷场贸易的实相：宋在雄州、霸州、安肃军、广信军等地设官办榷场，以茶叶、瓷器、丝织品和粮食换取辽的马、羊、皮毛。宋方长期保持大额顺差，学界普遍认为岁币有相当部分经贸易回流宋境，辽境内更大量通行宋钱。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋会要辑稿》 · 食货三八 · 互市榷场 · 碎片可拼回原文">《宋会要辑稿》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「榷场贸易的实相：宋在雄州…」</span><p>有学者据此把岁币形容为「变相的贸易保证金」。这话有翻案过头之嫌，但它提醒我们：读条约不能只读条文，还要看钱实际往哪儿流——账面上的支出，未必是实际的失血。</p></div><blockquote class="quoteblock">岁遗差优，然不足以当用兵之费百分之一二。<span class="qsrc">—— 《续资治通鉴长编》 · 庆历四年 · 富弼上河北守御十二策 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">元昊搅局——三川口、好水川与庆历增币</h2><aside class="anscard"><div class="sel">⌖ 圈选:「「更戍法」下将不知兵、兵…」</div><div class="q">更戍法是什么？宋朝为什么故意让将不知兵？</div><div class="a">宋初定制：禁军定期轮换驻地而将领不随军移动，目的是防武将培植私兵、重演陈桥兵变。代价是将卒互不相识、野战协同差。防内优先于御外，是宋朝军制的底色。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>澶渊体系平稳运转了三十多年，搅局者从西北登场。党项首领元昊于1038年称帝，国号大夏（史称西夏），随即上表要求宋朝承认。宋廷削其官爵、张榜悬赏其首级，宋夏战争爆发。</p>
+<p><span class="u-gold">1040至1042年，宋军对西夏三战三败——三川口、好水川、定川寨，损失精锐数以万计。三败暴露的不是士兵不勇，而是「更戍法」下将不知兵、兵不知将的制度性痼疾。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四八五 · 夏国传上 · 碎片可拼回原文">《宋史》</span></p>
+<p>好水川之败最为惨烈，主将任福力战而死。相传元昊的谋士张元事后在界上寺题诗嘲讽：「夏竦何曾耸，韩琦未足奇」——张元本是宋朝屡试不第的书生，投夏之后，成了最懂宋朝软肋的人。人才流失的代价，有时候要在战场上结算。</p>
+<p><span class="u-gold">1042年庆历增币：辽乘宋夏战争之机索要关南故地，宋以增币了结——在澶渊旧额上增银十万两、绢十万匹，岁币总额达银二十万两、绢三十万匹；辽方坚持誓书用「纳」字，富弼力争而不得。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷一三七 · 庆历二年 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「1042年庆历增币：辽乘…」</span><p>为一个「纳」字，富弼在两国之间往返力争。外交文书里的一个字，就是国家关系的定义权——弱势一方办外交，寸步都是字眼。</p></div>
+<p><span class="u-gold">1044年宋夏庆历和议：元昊取消帝号，对宋称臣、受封「夏国主」（境内仍行帝制）；宋每年「岁赐」绢十三万匹、银五万两、茶二万斤，连同节日赏赐合计约二十五万五千。三大败之后还能谈成对方称臣，靠的是辽夏交恶与西夏国内的战争疲惫。<span class="gseal" data-tip="域戳:宋史 · 通用层(晋升自兴趣期) · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 庆历四年十二月（宋夏和议成） · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<p>至此，三国体系最终定型：宋辽以兄弟相称，夏对宋称臣、对辽称藩，三方靠岁币、岁赐与榷场维系一种「花钱记账的和平」。这套体系又运转了八十年，直到女真人从白山黑水间登场，才被连根掀翻。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第二章 · 澶渊之盟与三国体系 · 铸卡</span><span class="seg">宋史 · 通用层(晋升自兴趣期)</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>宋朝「花钱记账的和平」：三份账单</caption><thead><tr><th>协议</th><th>年份</th><th>对象</th><th>宋方年度支出</th><th>名义与名分</th></tr></thead><tbody><tr><td>澶渊之盟</td><td>1005</td><td>辽</td><td>银十万两＋绢二十万匹</td><td>「助军旅之费」；兄弟之国，真宗为兄</td></tr><tr><td>庆历增币</td><td>1042</td><td>辽</td><td>增至银二十万两＋绢三十万匹</td><td>誓书用「纳」字，富弼力争不得</td></tr><tr><td>庆历和议</td><td>1044</td><td>西夏</td><td>绢十三万匹＋银五万两＋茶二万斤（连节日赏赐约二十五万五千）</td><td>「岁赐」；元昊对宋称臣，受封夏国主</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">979</span><span class="ev">高梁河之战</span><details><summary>细看</summary><div class="dt">太宗灭北汉后乘胜攻幽州，大败中箭，乘驴车南逃</div></details></li><li><span class="yr">986</span><span class="ev">雍熙北伐</span><details><summary>细看</summary><div class="dt">三路皆败：岐沟关溃散，杨业陈家谷被俘绝食死</div></details></li><li><span class="yr">1004</span><span class="ev">辽军南下·真宗亲征</span><details><summary>细看</summary><div class="dt">萧太后与辽圣宗直抵澶州；寇准力主亲征；萧挞凛中弩死</div></details></li><li><span class="yr">1005</span><span class="ev">澶渊之盟</span><details><summary>细看</summary><div class="dt">景德元年十二月订约：岁币银十万两绢二十万匹，约为兄弟之国，开榷场</div></details></li><li><span class="yr">1038</span><span class="ev">元昊称帝</span><details><summary>细看</summary><div class="dt">党项元昊建国大夏，宋削爵悬赏，宋夏开战</div></details></li><li><span class="yr">1040–1042</span><span class="ev">对夏三大败</span><details><summary>细看</summary><div class="dt">三川口（1040）、好水川（1041）、定川寨（1042）</div></details></li><li><span class="yr">1042</span><span class="ev">庆历增币</span><details><summary>细看</summary><div class="dt">辽乘火索地，宋增银十万两绢十万匹，誓书用「纳」字</div></details></li><li><span class="yr">1044</span><span class="ev">宋夏庆历和议</span><details><summary>细看</summary><div class="dt">元昊对宋称臣受封夏国主，宋岁赐银绢茶合计约二十五万五千</div></details></li><li><span class="yr">1125</span><span class="ev">体系终局</span><details><summary>细看</summary><div class="dt">金灭辽，澶渊体系运转约百二十年后崩解</div></details></li></ul><h2 class="sec">铸卡(5 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">澶渊之盟以每年三十万银绢换得宋辽百余年和平，成本远低于战时军费，但代价是中原王朝首开纳岁币买和平之先例。</div><div class="petals"><span class="petal">条款本体：银十万两、绢二十万匹、兄弟之国</span><span class="petal">收益面：约百二十年无大战＋榷场贸易顺差回流</span><span class="petal">代价面：先例效应——西夏效仿、庆历增币接踵而至</span></div><div class="src">◈ 《续资治通鉴长编》卷五八</div></div><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">岁币：宋朝以年度定额银绢换取和平的制度安排，名义是「助军旅之费」而非贡赋，靠名实分离维持体面。</div><div class="petals"><span class="petal">名（助军费、兄弟之国）与实（定额支付停战）的分离</span><span class="petal">与「贡」的关键区别：不含君臣名分</span><span class="petal">数额演化：澶渊三十万→庆历增至五十万</span></div><div class="src">◈ 《宋史·真宗本纪》</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">庆历增币（1042）后宋对辽岁币总额：银二十万两、绢三十万匹；誓书用「纳」字。</div><div class="petals"><span class="petal">增额：银加十万两、绢加十万匹</span><span class="petal">触发条件：辽乘宋夏战争索要关南十县</span><span class="petal">「纳」字之争：富弼力争不得</span></div><div class="src">◈ 《续资治通鉴长编》卷一三七</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">雍熙北伐（986）三路溃败与杨业之死：东路溃于岐沟关，西路杨业陈家谷被俘绝食而死，宋自此转入对辽战略守势。</div><div class="petals"><span class="petal">败因：东路冒进争功＋监军掣肘、友军失约</span><span class="petal">后果：「收复幽云」从国策降格为口号</span><span class="petal">记忆加工：史实如何演变为杨家将传奇</span></div><div class="src">◈ 《宋史·杨业传》</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">同一纸澶渊盟约，为何富弼读出「省费百倍」，而苏洵一路读出「抱薪救火」？评价分歧的根源是标准不同，还是立场与时代不同？</div><div class="petals"><span class="petal">财政标准：岁币与军费之比</span><span class="petal">名分标准：城下之盟与华夷秩序</span><span class="petal">时代变量：仁宗朝主和语境 vs 后世追责语境</span></div><div class="src">◈ 《嘉祐集·六国论》</div></div></div><div class="funbox"><b>冷知识</b> 「澶渊」本是上古湖泊之名，湖早已干涸，却因一纸盟约在史书里永生。顺带一提：真宗的御驾能出现在北城门楼上，是寇准半劝半「架」的结果——史书只写「上遂幸北城」，五个字背后全是拉扯。</div><div class="srcline">本章源:《宋史》（元·脱脱等）(卷七·真宗本纪；卷二百七十二·杨业传；卷二百八十一·寇准传) · 《续资治通鉴长编》（宋·李焘）(卷五八（景德元年）；卷一三七（庆历二年）) · 《辽史》（元·脱脱等）(卷十四·圣宗纪) · 陶晋生《宋辽关系史研究》(联经出版事业公司，1984)</div><div class="page-foot"></div></section>
+
+<!-- ═══ 板页:变法朝局图 ═══ -->
+<section class="page" data-toc="板 · 熙宁朝局图" data-seg="思考板" id="pg-board">
+  <div class="page-head"><span>板 · 思考桌面</span><span class="seg">投影域 · 纯视觉</span></div>
+  <div class="ch-no">板</div>
+  <h1 class="ch-title">熙宁朝局图</h1>
+  <p style="font-size:14px;color:var(--ink-2)">读完变法两章后在板上摆的一盘思路:便签为子,弧线为脉。线是纯视觉的——它们不写进任何知识关系,只帮眼睛想事。<span class="purpose-chip">挂靠:宋史 · 深研 · 变法</span></p>
+  <div class="figbox"><svg id="boardSvg" viewBox="0 0 820 560" role="img" aria-label="熙宁变法朝局关系板"></svg></div>
+  <p class="figcap">板视觉 v1 语法:三档卡重 · 单弧连线 · 标签断线 · 生成时避让</p>
+  <div class="page-foot"></div>
+</section>
+
+<section class="page" data-toc="三冗与熙宁变法"><div class="page-head"><span>第三章 · 三冗与熙宁变法</span><span class="seg">宋史 · 深研 · 变法与党争</span></div><div class="ch-no">第 三 章</div><h1 class="ch-title">三冗与熙宁变法</h1><span class="purpose-chip">⌖ 挂靠:宋史 · 深研 · 变法与党争</span><div class="epigraph">不畏浮云遮望眼,自缘身在最高层。<span class="who">王安石《登飞来峰》</span></div><h2 class="sec">三冗两积:一台越跑越贵的国家机器</h2><p>读完祖宗之法的精巧,再来看它的账单。宋朝的病根不是暴政,而是一连串成功设计的副作用:收兵权、分事权、广募兵,每一条在当年都是救命的解决方案。一百年后回头看,这些保险丝本身成了整台机器上最大的耗电器。</p>
+<p><span class="u-gold">所谓'三冗',指冗官、冗兵、冗费:官僚因恩荫与科举双源入仕而人浮于事,军队因募兵终身制与灾年招兵而只增不减,财政被养官、养兵加上岁币与郊赉层层压住。这一概括脱胎于宋祁上疏所言'一国三冗',后经史家提炼,成为北宋中期的标准诊断。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 列传·宋祁传('一国三冗'疏) · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">《宋史·兵志》给出了一条陡峭的曲线:全国兵额从太祖开宝年间的约三十七万八千,一路增至仁宗庆历年间的约一百二十五万九千,八十年间翻了两番。曾主计国用的蔡襄算过这笔账,叹息'天下六分之物,五分养兵'。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 兵志一(历朝禁军兵额) · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「《宋史·兵志》给出了一条…」</span><p>这条曲线最可怕的不是斜率,而是没有回调机制——募兵终身制意味着每一次灾年扩招都是永久支出。宋朝等于把失业救济做成了终身雇佣的常备军,买的是社会安定,付的是财政未来。</p></div>
+<p>官这一侧同样水涨船高:真宗景德年间内外官约一万余员,到仁宗中期已逾两万。更麻烦的是'官、职、差遣'三者分离,大批人领着俸禄没有实事;每逢郊祀推恩,荫补入仕动辄数百上千人——考中进士的在排队,没考中的也在排队。</p>
+<p><span class="u-gold">英宗治平二年(1065),窟窿正式摆上台面:是岁内外收入约一亿一千六百余万,常规支出约一亿二千余万,加上非常支出,一年亏空一千五百余万(钱粮绢帛合计)。顺带一提,'积贫积弱'并非宋人自道,而是钱穆等近代史家的追认——宋人自己的用词,是'冗'与'匮'。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 宋代财政收支章(治平二年会计数字) · 碎片可拼回原文">漆侠《宋代经济史》</span></p><blockquote class="quoteblock">天下之财力日以困穷,而风俗日以衰坏。<span class="qsrc">—— 《临川先生文集》 · 上仁宗皇帝言事书 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">庆历新政:一次十八个月的预演</h2><p>危机在西北引爆。宝元元年(1038)元昊称帝建夏,三川口、好水川、定川寨三战,宋军三败;对辽又添了庆历增币的屈辱。内外交迫之下,仁宗开天章阁,赐坐给笔札,催促范仲淹等人条陈时政——皇帝亲自递纸笔,改革这才被逼上了台面。</p>
+<p><span class="u-gold">庆历三年(1043)九月,范仲淹上《答手诏条陈十事》:明黜陟、抑侥幸、精贡举、择官长、均公田、厚农桑、修武备、减徭役、覃恩信、重命令。十条里前五条全在整顿吏治——先把发工资的人管好,再谈其他,这是庆历新政的基本盘。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷一四三 · 庆历三年九月(范仲淹上答手诏条陈十事) · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<p>执行起来是有画面感的。范仲淹审察各路监司名单,不称职者一笔勾掉;富弼在旁不忍:'一笔勾之甚易,焉知一家哭矣。'仲淹答:'一家哭,何如一路哭耶。'这则《五朝名臣言行录》里的对话,把改革的成本核算说得再明白不过。</p>
+<p><span class="u-gold">庆历五年初,范仲淹、富弼、韩琦相继罢政外放,新政推行不足两年即告瓦解。直接死因是夏竦等人操弄的'朋党'之谤;结构死因是十事的刀刃——抑侥幸、明黜陟——几乎全部落在官僚集团自身的既得利益上,而改革者手里没有任何新的利益同盟可以依托。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:邓广铭《北宋政治改革家王安石》 · 变法前史 · 庆历新政的夭折(章节) · 碎片可拼回原文">邓广铭《北宋政治改革家王安石》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「庆历五年初,范仲淹、富弼…」</span><p>这一败给二十年后的王安石上了反面一课:先动人事,必被人事反噬。所以熙宁变法调转枪口,先理财、后吏治,绕开恩荫与考课这两块最硬的骨头——庆历的死法,规定了熙宁的活法。</p></div>
+<p>新政虽败,遗产有二:一份问题清单,和一批被贬到地方的改革派士大夫。此后二十年,朝廷回到'无事'的惯性里,账面赤字继续滚动。而在东南的鄞县,一位青年知县正在修堤堰、贷谷于民、立息偿还——他在县一级,把日后震动天下的方案先跑通了一遍。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第三章 · 三冗与熙宁变法</span><span class="seg">宋史 · 深研 · 变法与党争</span></div><h2 class="sec">拗相公与少年天子</h2><aside class="anscard"><div class="sel">⌖ 圈选:「天变不足畏,祖宗不足法,…」</div><div class="q">'三不足'真是王安石的原话吗?</div><div class="a">《宋史》本传载此语,但它更像政敌对他精神的罪状式概括;安石本人只辩称过'人言固有不足恤'。当标签读,别当语录背。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><p>王安石,字介甫,抚州临川人,庆历二年(1042)进士高第。此后的仕途选择在当时人看来近乎行为艺术:朝廷屡召试馆职,他屡辞,宁愿在地方做知县、通判——士大夫挤破头往京城钻,他反着走。等到嘉祐年间入京,名望已高到'士大夫恨不识其面'。</p>
+<p>嘉祐三年(1058),他呈上洋洋万言的《上仁宗皇帝言事书》,断言天下财力困穷、风俗败坏,病在不知法度,主张自人才养成入手全面变法,并留下总纲式的一句:'因天下之力,以生天下之财;取天下之财,以供天下之费。'仁宗朝波澜不惊,万言书石沉大海。</p>
+<p>关于他的个人风格,笔记留下不少段子:不喜梳洗,'囚首丧面而谈诗书'(语出托名苏洵的《辨奸论》,真伪有争);夫人想弄清他到底爱吃什么,试着换了菜的位置,发现他永远只吃离筷子最近的那一盘。注意力从不分给方案以外的东西——这既是他的效率,也是他的盲区。</p>
+<p>治平四年(1067)神宗即位,年方二十,锐意雪数世之耻。熙宁元年,王安石越次入对,神宗问治国何先,答曰'择术为先';问唐太宗如何,答'陛下当法尧舜,何以太宗为哉'。熙宁二年(1069)二月,拜参知政事,设制置三司条例司为变法中枢;反对的声浪里,他很快被扣上那顶著名的帽子:'天变不足畏,祖宗不足法,人言不足恤。'</p>
+<p><span class="u-gold">熙宁理财的总纲是一句大话:'民不加赋而国用饶。'司马光当场反驳:'天地所生货财百物,止有此数,不在民间,则在公家。'这两句话预演了此后近二十年的全部争论——王安石相信国家经营可以做大总量,司马光相信世上只有存量搬运。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 熙宁元年 · 延和殿论理财(省郊赉之议) · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「熙宁理财的总纲是一句大话…」</span><p>这大概是中国史上少见的一次纯粹的经济观念对撞:两位主角都不贪财、不恋位,私德几乎无可指摘。正因如此,它比任何忠奸叙事都更令人不安——好人加好人,并不保证好结果。</p></div><blockquote class="quoteblock">举先王之政,以兴利除弊,不为生事;为天下理财,不为征利。<span class="qsrc">—— 《临川先生文集》 · 答司马谏议书 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">新法逐条:从蓝图到摊派</h2><aside class="anscard"><div class="sel">⌖ 圈选:「把最能毁掉中产之家的衙前…」</div><div class="q">衙前到底是什么差事,怎么会毁掉一个家?</div><div class="a">衙前居职役之首,押运保管官物,损耗失窃全由本人赔偿。乡户轮差一次常致倾家,史载有为避役而自残、析产、不敢添置田产者。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><aside class="anscard"><div class="sel">⌖ 圈选:「随两税归还,每期取息二分…」</div><div class="q">每期二分,到底算高利贷还是低息?</div><div class="a">二分即20%,夏秋两放名义年息可达四成:比民间'倍称之息'(还一倍)低得多,但绝非低息;再叠加簿书手续与胥吏勒索,实际负担常更重。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>熙宁二年到七年,新法密集出台,大体三路纵队:理财者六——均输、青苗、农田水利、免役、市易、方田均税;强兵者三——保甲、保马、将兵;育才者一——太学三舍并贡举改试经义。逐条的内容与争议见本章附表,正文只解剖两个风暴眼:青苗与免役。</p>
+<p><span class="u-gold">青苗法以各路常平、广惠仓的钱谷为本钱,每年正月、五月两次向农户放贷,随两税归还,每期取息二分。立法本意是用官方信贷挤出民间'倍称之息'的高利贷,让青黄不接的农户不必贱卖田宅——济贫乏与抑兼并,一石二鸟。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋会要辑稿》 · 食货 · 常平(青苗钱条约) · 碎片可拼回原文">《宋会要辑稿》</span></p>
+<p><span class="u-gold">青苗钱一旦进入地方官的考课,性质就变了:放贷量成为政绩指标,不需要借钱的坊郭上户被'抑配'强摊,还不起的乡村下户被邻保连带追偿。熙宁三年,河北安抚使韩琦上疏历数抑配之弊,神宗为之动摇——制度善意死于执行指标,是此后几乎每一场新法争议的共同剧本。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷二一〇 · 熙宁三年二月(韩琦奏青苗抑配之弊) · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「青苗钱一旦进入地方官的考…」</span><p>后人常誉青苗法为'世界最早的国家农业信贷',但这份超前恰恰是病灶:近代农贷依赖的征信、破产保护与独立司法,在十一世纪一样都不存在。王安石是在没有铺轨的地方开火车,车造得越好,翻得越重。</p></div>
+<p><span class="u-gold">免役法(募役法)于熙宁四年(1071)颁行:轮流当差的职役改为官府出钱雇人,民户按户等缴纳免役钱,原本免役的官户、坊郭户、寺观等减半缴纳助役钱。它把最能毁掉中产之家的衙前重役货币化,是新法中经济理性最强的一条;但代价是把原本不服役的单丁、女户也拉进了缴钱名单,正额之外还加收两分'宽剩钱'。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 食货志 · 役法(免役钱、助役钱、宽剩钱) · 碎片可拼回原文">《宋史》</span></p>
+<p>免役钱之争因此成为持续最久的一场论战。司马光斥之为'敛钱代役',谓农民有力而无钱,遇灾年只能卖粮卖田换现钱;元祐元年(1086)他执政,限期五日尽废免役、恢复差役。苏轼在政事堂力争'差役免役,各有利害',不可矫枉过正,争之不得,据宋人笔记,归舍后连呼'司马牛!司马牛!'——两法之弊他都亲历过,于是两边都不讨好。</p>
+<p>其余诸法命运各异:农田水利兴修工程万余处、溉田三十余万顷,算是争议最小的成绩单;市易务把生意做到了果子摊上,连神宗都觉得难堪;方田均税一碰到大户的隐田便寸步难行,时行时罢;保甲教阅则留下了保丁自残避役的记录。熙宁七年(1074)大旱,监安上门的小官郑侠画《流民图》进呈,王安石第一次罢相——变法的下半场,以及元祐的总清算,留到下一章再讲。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第三章 · 三冗与熙宁变法 · 铸卡</span><span class="seg">宋史 · 深研 · 变法</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>熙宁新法一览(颁行时间以《续资治通鉴长编》系年为准,月份从略)</caption><thead><tr><th>新法</th><th>颁行</th><th>一句话内容</th><th>主要争议</th></tr></thead><tbody><tr><td>均输法</td><td>熙宁二年(1069)</td><td>发运使统筹东南六路上供,'徙贵就贱、用近易远'</td><td>被讥为官营贩运、与商争利,苏辙等首发难</td></tr><tr><td>青苗法</td><td>熙宁二年(1069)</td><td>官贷钱谷于农户,夏秋两放,随两税还,每期息二分</td><td>抑配强摊、邻保连坐,韩琦、欧阳修交章论列</td></tr><tr><td>农田水利法</td><td>熙宁二年(1069)</td><td>奖励垦荒与兴修水利,费用按户等分摊,不足可贷官钱</td><td>争议最小;个别地方为政绩强兴工役</td></tr><tr><td>保甲法</td><td>熙宁三年(1070)</td><td>十家一保,两丁抽一为保丁,农闲教阅、编户联防</td><td>教阅夺农时,保丁自残避役时有所闻</td></tr><tr><td>免役法(募役法)</td><td>熙宁四年(1071)</td><td>差役改雇役,按户等出免役钱,官户等半输助役钱</td><td>单丁女户新增负担,宽剩钱二分成变相加税,司马光终身反对</td></tr><tr><td>太学三舍法</td><td>熙宁四年(1071)</td><td>太学分外舍、内舍、上舍,上舍优等可直接授官</td><td>以学校渐代科举,被批评为以一家经义笼罩取士</td></tr><tr><td>市易法</td><td>熙宁五年(1072)</td><td>设市易务收滞销、平物价,商人可抵押赊贷,息二分</td><td>官府亲自坐贾,垄断及于细碎买卖,连神宗亦不安</td></tr><tr><td>保马法</td><td>熙宁五年(1072)</td><td>民户自愿养官马,免部分赋役,马死按值赔偿</td><td>'马死户赔'转嫁风险,民以为苦</td></tr><tr><td>方田均税法</td><td>熙宁五年(1072)</td><td>清丈土地,按肥瘠五等定税,清出隐田</td><td>触动大户隐田,丈量繁难,时行时罢</td></tr><tr><td>将兵法</td><td>约熙宁七年(1074)起</td><td>废更戍,置将专职训练,'兵知其将,将练其士'</td><td>争议较小;置将偏重西北,东南防务见空</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">1038</span><span class="ev">元昊称帝,宋夏开战</span><details><summary>细看</summary><div class="dt">三川口、好水川、定川寨三战宋皆败,军费陡增,危机引爆改革议程</div></details></li><li><span class="yr">1042</span><span class="ev">庆历增币</span><details><summary>细看</summary><div class="dt">辽乘宋夏之危邀索,宋岁增银绢各十万了结</div></details></li><li><span class="yr">1043</span><span class="ev">庆历新政</span><details><summary>细看</summary><div class="dt">仁宗开天章阁,范仲淹上《答手诏条陈十事》,以整顿吏治为核心</div></details></li><li><span class="yr">1045</span><span class="ev">新政瓦解</span><details><summary>细看</summary><div class="dt">范仲淹、富弼、韩琦相继罢政外放,'朋党'之谤得手</div></details></li><li><span class="yr">1058</span><span class="ev">万言书</span><details><summary>细看</summary><div class="dt">王安石上《上仁宗皇帝言事书》,仁宗朝未采</div></details></li><li><span class="yr">1067</span><span class="ev">神宗即位</span><details><summary>细看</summary><div class="dt">二十岁的赵顼锐意求治,次年召王安石越次入对</div></details></li><li><span class="yr">1069</span><span class="ev">变法启动</span><details><summary>细看</summary><div class="dt">王安石拜参知政事,设制置三司条例司;均输、青苗、农田水利当年颁行</div></details></li><li><span class="yr">1071-1072</span><span class="ev">新法密集期</span><details><summary>细看</summary><div class="dt">免役、太学三舍、市易、保马、方田均税相继颁行</div></details></li><li><span class="yr">1074</span><span class="ev">郑侠上《流民图》</span><details><summary>细看</summary><div class="dt">久旱流民载道,王安石第一次罢相</div></details></li><li><span class="yr">1076</span><span class="ev">安石再罢相</span><details><summary>细看</summary><div class="dt">复相年余,爱子王雱病亡,退居江宁,自此不再入朝</div></details></li><li><span class="yr">1085-1086</span><span class="ev">神宗崩,元祐更化</span><details><summary>细看</summary><div class="dt">高太后听政,司马光尽废新法;王安石、司马光同年相继辞世</div></details></li></ul><h2 class="sec">铸卡(6 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">'三冗'指冗官、冗兵、冗费,是北宋中期财政危机的结构性病根:官因恩荫与科举双源扩员,兵因募兵终身制只增不减,费因养官养兵加岁币郊赉持续攀升。</div><div class="petals"><span class="petal">语源:宋祁上疏言'一国三冗',原指涉与后世提炼略有出入</span><span class="petal">三者互锁:冗官冗兵是因,冗费是果</span><span class="petal">'积贫积弱'为近代史家追认之名,非宋人自道</span></div><div class="src">◈ 《宋史·宋祁传》</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">北宋兵额四个刻度:开宝约37.8万,至道约66.6万,天禧约91.2万,庆历约125.9万;养兵之费,蔡襄称'天下六分之物,五分养兵'。</div><div class="petals"><span class="petal">增长主引擎:灾年募流民为兵的自觉国策</span><span class="petal">终身制使每次扩招都不可逆</span><span class="petal">四个刻度恰对应太祖、太宗、真宗、仁宗四朝,可当年表背</span></div><div class="src">◈ 《宋史·兵志》</div></div><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">青苗法的失败主因不在取息二分的设计,而在放贷额进入地方官考课后产生的强制摊派(抑配),使自愿信贷退化为定额税。</div><div class="petals"><span class="petal">韩琦熙宁三年奏:上户不待贷而被配,下户贷而不能偿</span><span class="petal">邻保连坐把个体违约放大为社区灾难</span><span class="petal">机制教训:惠民工具一旦挂上锦标赛考核,必然变成摊派</span></div><div class="src">◈ 《续资治通鉴长编》卷二一〇</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">元祐元年司马光限期五日尽废免役、恢复差役;苏轼以亲历力争'差役免役,各有利害',不可骤罢,不获采纳。</div><div class="petals"><span class="petal">苏轼立场三段:熙宁反免役→亲见差役之害→元祐反尽废</span><span class="petal">'司马牛'之叹见于宋人笔记</span><span class="petal">示范:政策评价应核两侧成本,而非跟随阵营</span></div><div class="src">◈ 《宋史·苏轼传》</div></div><div class="item-card"><span class="tbadge t方法">方法</span><div class="st">读熙宁史料须做'史源对冲':《神宗实录》屡经元祐、绍圣两派改修,李焘《长编》兼采两说并注'当考',单一记载不足为据。</div><div class="petals"><span class="petal">实录墨本朱本之争,即党争延伸进史馆</span><span class="petal">操作:先问记载者立场,再找对造的平行记载</span><span class="petal">王安石形象的两极分化,本身就是史料战的产物</span></div><div class="src">◈ 《续资治通鉴长编》李焘自注</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">'民不加赋而国用饶'是否可能?王安石预设生产可扩张、国家经营能做大总量;司马光预设财富恒定、官取即民失——熙丰实践对两说各提供了什么证据?</div><div class="petals"><span class="petal">'国用饶'有据:熙丰府库充盈,元丰设封桩库</span><span class="petal">'民不加赋'存疑:青苗息、免役宽剩钱皆落在民户</span><span class="petal">第三种可能:总量增长与分配恶化同时为真</span></div><div class="src">◈ 《续资治通鉴长编》卷二一四</div></div></div><div class="funbox"><b>冷知识</b> 王安石与司马光这对争了半生的对手,于1086年同年辞世,谥号一'文'一'文正'。更妙的是布局——司马光把推行十七年的新法五日废尽,而他主编的《资治通鉴》,书名恰是神宗所赐。历史的押韵,常常不讲道理。</div><div class="srcline">本章源:《宋史》(脱脱等修)(食货志、兵志、卷三二七王安石传、卷三三八苏轼传) · 《续资治通鉴长编》(李焘)(熙宁二年至七年诸卷) · 邓广铭《北宋政治改革家王安石》(人民出版社,1997) · 钱穆《国史大纲》(第六编第三十二章'士大夫的自觉与政治革新运动')</div><div class="page-foot"></div></section>
+<section class="page" data-toc="党争与认识的演化"><div class="page-head"><span>第四章 · 党争与认识的演化</span><span class="seg">宋史 · 深研 · 变法与党争</span></div><div class="ch-no">第 四 章</div><h1 class="ch-title">党争与认识的演化</h1><span class="purpose-chip">⌖ 挂靠:宋史 · 深研 · 变法与党争</span><div class="epigraph">较量利害,参用所长。<span class="who">苏轼论新法</span></div><h2 class="sec">旧党不是一块铁板:司马光与他的盟友们</h2><p>熙宁变法把朝堂劈成了两半,但反对的这一半,内部远比「旧党」二字所暗示的更嘈杂:有人守祖宗之法,有人恨聚敛之政,也有人单纯受不了王安石「三不足」的气势。他们唯一的共识,是新法必须停下来。</p>
+<p><span class="u-gold">旧党不是一个统一政党,而是在「反对新法」这一点上暂时重叠的松散联盟;新法尽废之后,联盟立即按地域与师承裂解为朔党(刘挚等)、洛党(程颐等)、蜀党(苏轼兄弟等),转而互相攻击。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 列传(刘挚、程颐、苏辙诸传,元祐朔洛蜀三党) · 碎片可拼回原文">《宋史》</span></p>
+<p>联盟的旗帜是司马光。熙宁三年(1070)他致王安石三千余言的《与王介甫书》,指新法有侵官、生事、征利、拒谏之弊;王安石以数百字的《答司马谏议书》逐条驳回。两人政见如冰炭,书信却都保持着士大夫的体面。</p>
+<p><span class="u-gold">司马光退居洛阳的十五年(1071—1085)不是政治死亡,而是双重积累:他修成《资治通鉴》,奠定了无人能及的学术权威;同时始终是旧党公认的精神领袖,神宗一死,便能携全部声望返场。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 列传 · 司马光传 · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「司马光退居洛阳的十五年(…」</span><p>这里藏着宋代政治一个奇特的安全阀:失势者不掉脑袋,去修书。政争失败的人还能以史家身份积蓄声望,东山再起——对比后世党祸动辄族诛的烈度,北宋的党争至少在这一点上仍有底线。</p></div>
+<p>元丰八年(1085)三月神宗去世,十岁的哲宗即位,太皇太后高氏垂帘听政。她素来不满新法;司马光入京吊丧时,百姓遮道聚观,请他留下来做宰相、「活百姓」。太后之意与民间声望合流,更化的舞台就此搭好。</p><blockquote class="quoteblock">人习于苟且非一日,士大夫多以不恤国事、同俗自媚于众为善。<span class="qsrc">—— 《临川先生文集》 · 答司马谏议书 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">中间的位置最危险:苏轼与乌台诗案</h2><aside class="anscard"><div class="sel">⌖ 圈选:「御史台因官署遍植柏树、常…」</div><div class="q">御史台为什么会有这么多乌鸦?这个别称还有别的叫法吗?</div><div class="a">汉代御史府即列植柏树,后世沿制,故御史台又雅称「柏台」;柏上栖乌,俗称乌台。诗案取俗称,阴森之气恰合文字狱的氛围。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>在两个阵营都磨刀霍霍的年代,最危险的位置不是敌方,而是中间。苏轼恰好站在那里:熙宁年间他上书反对新法,元祐年间他又反对尽废新法——两头得罪,贬谪的弧线因此贯穿了他的一生。</p>
+<p><span class="u-gold">苏轼对新法的立场是「较量利害,参用所长」:逐项衡量每条新法的实际利弊,可用者留、有害者去。他真正反对的,是「一切复旧」与「一切遵行」这两种不加分辨的整体主义态度。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 列传 · 苏轼传 · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「苏轼对新法的立场是「较量…」</span><p>这八个字今天看平平无奇,在当时近乎异端——党争的逻辑要求人先报队伍、再谈是非,苏轼却坚持先谈是非。独立判断在站队时代的价格,就是被两边轮流放逐。</p></div>
+<p><span class="u-gold">元丰二年(1079)的乌台诗案,是北宋第一起以诗文罗织成狱的大案:御史官员从苏轼诗文中摘句,坐以「讥讪朝政」之罪,他在御史台狱中被关押约百日,最终贬为黄州团练副使。御史台因官署遍植柏树、常有乌鸦栖集,别称「乌台」,诗案因此得名。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 元丰二年七月—十二月纪事(乌台诗案) · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<p>营救名单意味深长:弟弟苏辙愿纳还官职为兄赎罪,病中的太皇太后曹氏出面说情,而退居金陵多年的王安石也上书,说圣明之世不该杀有才华的士人。政敌出手相救,是这桩案子最常被后人记起的注脚。</p>
+<div class="u-blue"><span class="tag">批 · 依附于「元丰二年(1079)的乌…」</span><p>真正想置苏轼于死地的不是王安石,而是变法阵营的第二代——李定、舒亶等人。领袖之间尚存君子之争,到了门徒手里便只剩罗织与刀笔;党争的毒性,往往在代际传递中层层加深。</p></div>
+<p>出狱当天,苏轼又写诗自嘲「平生文字为吾累」。但黄州五年反而成全了他:前后《赤壁赋》与《念奴娇·赤壁怀古》皆作于贬所。政治史上的受害者,在文学史上加冕——这笔账,历史用另一种货币偿还了。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第四章 · 党争与认识的演化</span><span class="seg">宋史 · 深研 · 变法与党争</span></div><h2 class="sec">十九年翻三次烧饼:更化、绍述与党籍碑</h2><aside class="anscard"><div class="sel">⌖ 圈选:「连争议最小的免役法也限期…」</div><div class="q">五天之内全国改回差役法,现实吗?</div><div class="a">多数州县只是纸面切换,吏民无所适从;唯知开封府蔡京如期办到,得司马光称赏。急政的后遗症在绍圣年间全面爆发。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>从元丰八年(1085)到崇宁三年(1104),十九年间国策整整翻转三次,每一次都以拨乱反正为名,每一次都比上一次更彻底、更不留余地。政策之争一步步蜕变为清洗之争。</p>
+<p><span class="u-gold">元祐更化(1086年起)由高太后主政、司马光主持,将新法几乎全部废罢:青苗、保甲、保马等法相继罢废,连争议最小的免役法也限期五日恢复差役;苏轼、范纯仁以免役便民为由力争缓行,司马光不为所动。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 元祐元年纪事(罢青苗、免役诸法) · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<p>苏轼为役法与司马光当面力争,退朝后气得连呼「司马牛」。他发现旧党领袖的执拗并不比当年的王安石少半分。这一年(1086)四月王安石卒于江宁,九月司马光卒于相位——两位对手先后离场,留下一个没有裁判的战场。</p>
+<p><span class="u-gold">绍圣绍述(1094年起)是钟摆的回摆:哲宗亲政后改元「绍圣」,取继承神宗圣政之意,起用章惇为相,新法次第恢复,元祐诸臣被系统性贬逐——苏轼先贬惠州,绍圣四年(1097)再贬儋州,年过六旬渡海。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 本纪 · 哲宗(绍圣改元与贬逐元祐臣僚) · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">崇宁三年(1104),蔡京将司马光、苏轼、黄庭坚等三百零九人定为「元祐奸党」,刻石颁行全国,是为元祐党籍碑;入碑者子孙禁锢仕途,其文集著作遭禁毁,党争至此从贬逐个人升级为成建制的政治黑名单。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 本纪 · 徽宗 · 崇宁三年(元祐党籍碑) · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「崇宁三年(1104),蔡…」</span><p>这块碑立了不到三年:崇宁五年(1106)天现彗星,徽宗心虚,下令毁碑。更讽刺的是,党人后代反以先祖名列党籍为荣,南宋时据家藏旧本重刻的碑至今犹存于桂林——一块用来羞辱人的石头,最终成了荣誉证书。</p></div>
+<p>十九年三翻烧饼,烧掉的不是哪一派,而是「就事论事」本身。到徽宗朝,朝堂上已无人再问某条法好不好,只问提出它的人是谁的人。此时距靖康之变,还剩二十三年。</p>
+<h2 class="sec">同一场变法,三副面孔:评价的演化史</h2><aside class="anscard"><div class="sel">⌖ 圈选:「处身清末变法困局的他,需…」</div><div class="q">梁启超这是历史研究,还是借古人浇自己的块垒?</div><div class="a">两者兼有:书中考订用力甚勤,但问题意识来自戊戌失败的切肤之痛。这本身又成了「评价随时代需要而变」的绝佳例证。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>王安石身后的名声,比他生前的政局翻转得更剧烈。同一场变法,在不同时代呈现出全然不同的面孔——每一代人都自认为终于看清了,而每一代的「看清」,又总被下一代修正。这一节请把「评价」本身当作史料来读。</p>
+<p><span class="u-gold">南宋官方将北宋灭亡归罪于王安石变法:高宗朝重修《神宗实录》全面否定新法,罗大经《鹤林玉露》直言天下一统之业「合而遂裂」罪在安石;此论经理学家反复强化,写入元修《宋史》,支配主流舆论约八百年。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:邓广铭《北宋政治改革家王安石》 · 书末评价史述论(南宋官史对新法的定谳) · 碎片可拼回原文">邓广铭《北宋政治改革家王安石》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「南宋官方将北宋灭亡归罪于…」</span><p>注意这个结论诞生的时刻:一个刚丢掉半壁江山的政权,急需一个不姓赵的责任人。归罪王安石既能解释灾难,又不必追究皇室自身——史论有时是史实的镜子,更多时候是需要的镜子。</p></div>
+<p><span class="u-gold">1908年,梁启超作《王荆公》为变法全面翻案,誉王安石为三代以下罕见的完人,把青苗法比作近代银行,把免役法比作文明各国通行的所得税。处身清末变法困局的他,需要一个中国自己的改革先知。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:邓广铭《北宋政治改革家王安石》 · 书末评价史述论(梁启超《王荆公》翻案) · 碎片可拼回原文">邓广铭《北宋政治改革家王安石》</span></p>
+<p><span class="u-gold">现代研究更换了问题本身:不再问王安石是忠是奸,而问北宋国家在尝试做什么。在财政国家的视角下,新法被理解为一次早熟的国家能力建设实验——以金融信贷(青苗)、役务货币化(免役)、市场调控(市易)替代旧的实物劳役体制;而它的失败方式(基层执行变形、考核指标化、与民争利)也正是后世一切扩张型国家的经典难题。<span class="gseal" data-tip="域戳:宋史 · 深研 · 变法 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 赋役制度与王安石新法诸章(免役、青苗) · 碎片可拼回原文">漆侠《宋代经济史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「现代研究更换了问题本身:…」</span><p>黄仁宇的判断最传神:王安石企图以金融管制的办法操纵国事,其广度深度在当日世界无出其右;但当时的中国还远不能「在数目字上管理」,技术与组织跟不上制度想象,才是悲剧更深的一层。这个判断当然也会被修正,但它示范了「换一个问题」能看见什么。</p></div>
+<p>归罪说、翻案说、财政国家说,没有一个是终点;它们是三代人带着各自的困境,向同一段历史发问留下的三份笔录。读史至此应当心生警觉:我们此刻的解读,同样坐在这条被不断修正的传送带上——下一次修正,多半来自我们尚未意识到的盲区。</p><blockquote class="quoteblock">天变不足畏,祖宗不足法,人言不足恤。<span class="qsrc">—— 《宋史》 · 列传 · 王安石传 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第四章 · 党争与认识的演化 · 铸卡</span><span class="seg">宋史 · 深研 · 变法</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>对王安石变法的三副评价面孔</caption><thead><tr><th>面孔</th><th>主导时段</th><th>代表</th><th>核心论点</th><th>背后的时代需要</th></tr></thead><tbody><tr><td>归罪说</td><td>南宋至清中叶</td><td>《神宗实录》重修本、罗大经、理学诸儒</td><td>新法败坏祖宗之法,种下靖康之祸</td><td>为亡国找一个非皇室的责任人</td></tr><tr><td>翻案说</td><td>清末民初</td><td>梁启超《王荆公》</td><td>王安石为旷世完人,新法与近代文明国政策暗合</td><td>为维新变法寻找本土先例与合法性</td></tr><tr><td>财政国家说</td><td>二十世纪中后期至今</td><td>黄仁宇及现代宋代财政史研究</td><td>新法是早熟的国家能力建设实验,败于技术与组织条件</td><td>以国家能力为核心议题重新提问</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">1070</span><span class="ev">司马光、王安石书信论战</span><details><summary>细看</summary><div class="dt">《与王介甫书》与《答司马谏议书》往复,分歧全面公开</div></details></li><li><span class="yr">1071</span><span class="ev">司马光退居洛阳</span><details><summary>细看</summary><div class="dt">此后十五年专修《资治通鉴》,声望不降反升</div></details></li><li><span class="yr">1079</span><span class="ev">乌台诗案</span><details><summary>细看</summary><div class="dt">苏轼系狱约百日,贬黄州团练副使</div></details></li><li><span class="yr">1085</span><span class="ev">神宗去世</span><details><summary>细看</summary><div class="dt">十岁的哲宗即位,高太后垂帘,司马光还朝</div></details></li><li><span class="yr">1086</span><span class="ev">元祐更化;两巨头同年离世</span><details><summary>细看</summary><div class="dt">新法尽废;四月王安石卒,九月司马光卒</div></details></li><li><span class="yr">1094</span><span class="ev">绍圣绍述</span><details><summary>细看</summary><div class="dt">哲宗亲政,章惇为相,新法恢复,元祐诸臣尽逐;苏轼贬惠州</div></details></li><li><span class="yr">1097</span><span class="ev">苏轼再贬儋州</span><details><summary>细看</summary><div class="dt">渡海居儋,三年后遇赦北归,次年卒于常州</div></details></li><li><span class="yr">1102</span><span class="ev">首刻元祐党人碑</span><details><summary>细看</summary><div class="dt">一百二十人,徽宗亲书,立于端礼门</div></details></li><li><span class="yr">1104</span><span class="ev">党籍碑扩至三百零九人</span><details><summary>细看</summary><div class="dt">蔡京书碑,颁行全国州县,子孙禁锢</div></details></li><li><span class="yr">1106</span><span class="ev">星变毁碑</span><details><summary>细看</summary><div class="dt">彗星出,徽宗诏毁党人碑</div></details></li><li><span class="yr">1127</span><span class="ev">靖康之变</span><details><summary>细看</summary><div class="dt">北宋亡;归罪王安石的叙事随后成形</div></details></li><li><span class="yr">1908</span><span class="ev">梁启超《王荆公》</span><details><summary>细看</summary><div class="dt">翻案的起点,评价史翻开第二副面孔</div></details></li></ul><h2 class="sec">铸卡(6 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">元祐更化:元祐年间(1086—1093)高太后垂帘、司马光等旧党主政,将熙宁—元丰新法几乎全部废罢的政治转向。</div><div class="petals"><span class="petal">起点:1085年神宗去世、高太后听政、司马光还朝</span><span class="petal">手段:数月之间罢青苗、保甲诸法,免役限五日复差役</span><span class="petal">内伤:新法既废,旧党随即裂为朔、洛、蜀三派互攻</span></div><div class="src">◈ 《宋史·司马光传》</div></div><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">乌台诗案(1079)标志党争从政策分歧升级为以文字罗织罪名的人身打击,「言事」与「获罪」之间的通道自此打通,北宋政治文化由此转向。</div><div class="petals"><span class="petal">定罪方式:摘诗句坐「讥讪朝政」,开以诗文入罪之例</span><span class="petal">结果:系狱约百日,贬黄州团练副使</span><span class="petal">反常细节:政敌王安石上书营救</span></div><div class="src">◈ 《续资治通鉴长编》卷二九九</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">司马光限五日尽废免役、恢复差役,知开封府蔡京如期办成而受褒奖——旧党执政同样行急政,且奖赏了日后立党籍碑的人。</div><div class="petals"><span class="petal">苏轼、范纯仁皆谏差役免役各有利害,不听</span><span class="petal">五日之限与王安石当年推行新法之急如出一辙</span><span class="petal">蔡京由此走上新旧两朝通吃的仕途轨道</span></div><div class="src">◈ 《宋史·食货志》</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">元祐党籍碑:崇宁三年(1104)刻石定「元祐奸党」三百零九人,颁行全国州县;初版为崇宁元年(1102)一百二十人,徽宗亲书。</div><div class="petals"><span class="petal">1102年首刻120人,立于端礼门</span><span class="petal">1104年扩至309人,蔡京书,颁行天下</span><span class="petal">1106年因彗星出现(星变)下诏毁碑</span></div><div class="src">◈ 《宋史·徽宗本纪》</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">为什么对同一场变法的评价,每隔一段时间就被整体推翻一次?评价者所处的困境在多大程度上决定了评价本身——我们使用史论时,如何不被它背后的时代需要绑架?</div><div class="petals"><span class="petal">南宋:亡国需要一个非皇室的责任人→归罪说</span><span class="petal">清末:变法需要一个本土先知→梁启超翻案</span><span class="petal">现代:国家能力成为核心议题→财政国家实验说;问题一变,答案随之全变</span></div><div class="src">◈ 《鹤林玉露》乙编</div></div><div class="item-card"><span class="tbadge t方法">方法</span><div class="st">读任何历史评价,先问三件事:谁在评、何时评、评者当时需要什么;把史论当作评者时代的史料来用,而不是直接当作结论采信。</div><div class="petals"><span class="petal">史论的证据力:对被评对象弱,对评论者的时代强</span><span class="petal">操作:为每条重要史论标注它的「出场时刻」</span><span class="petal">本章用例:归罪说—翻案说—财政国家说三份「笔录」</span></div><div class="src">◈ 梁启超《中国历史研究法》</div></div></div><div class="funbox"><b>冷知识</b> 苏轼曾饭后拍着肚子问身边人:这里面装的是什么?有人说是文章,有人说是见识,只有侍妾朝云答:「学士一肚皮不入时宜。」苏轼捧腹大笑(事见宋·费衮《梁溪漫志》)。这句话也是本章最好的注脚——中间派的肚皮,两边都嫌它不合时宜。</div><div class="srcline">本章源:《宋史》(元·脱脱等修)(卷三二七《王安石传》、卷三三六《司马光传》、《徽宗本纪》) · 《续资治通鉴长编》(南宋·李焘)(卷二九九至卷三〇一(元丰二年乌台诗案前后)) · 《鹤林玉露》(南宋·罗大经)(乙编(论王安石误国诸条)) · 梁启超《王荆公》(1908)(例言、第一章及结论章)</div><div class="page-foot"></div></section>
+
+<!-- ═══ 判断履历页 ═══ -->
+<section class="page" data-toc="判断履历 · 澶渊之案" id="pg-verlog">
+  <div class="page-head"><span>判断履历</span><span class="seg">判定旁挂 · 旧判退休不删除</span></div>
+  <div class="ch-no">机 关</div>
+  <h1 class="ch-title">一条判断的成长史</h1>
+  <p>同一个问题——<strong>怎样评价澶渊之盟?</strong>——在这册笔记里被判过两次。系统不覆盖旧判,只让它退休;于是「我是怎么改变想法的」本身成了可以翻阅的东西。</p>
+  <div class="verlog">
+    <div class="ver old">
+      <div class="stamp">已退休</div>
+      <div class="meta"><b>2026-08-09</b> · 兴趣浏览期 · 判者:我 · 域戳:宋史·兴趣浏览</div>
+      <div class="txt">澶渊之盟是一纸屈辱的城下之盟,岁币是北宋积弱的铁证。</div>
+    </div>
+    <div class="ver now">
+      <div class="stamp">现行 · 金</div>
+      <div class="meta"><b>2026-09-08</b> · 深研期 · 判者:我(Agent 供证) · 域戳:宋史·深研</div>
+      <div class="txt">以岁币三十万换来百余年北境无大战:对照动辄数千万贯的年军费,澶渊之盟是一笔高性价比的防御安排;但它同时冻结了收复幽云的战略窗口——和平与进取,在这份合同里一并被买断。</div>
+    </div>
+  </div>
+  <div class="u-blue"><span class="tag">批 · 依附于「以岁币三十万换来百余年」</span>
+    <p>课本给结论,账本给判断——这次改判是我第一次用数字推翻自己的印象。Agent 只递了军费数据,改判的手是我的。</p></div>
+  <p style="font-family:'Noto Sans SC',sans-serif;font-size:12.5px;color:var(--ink-3)">▲ 旧判划线可读、带日期与判者;两条记录指向同一命题的节点 id,树怎么重挂都不断。</p>
+  <div class="page-foot"></div>
+</section>
+
+<section class="page" data-toc="经济革命:交子、市舶与不夜城"><div class="page-head"><span>第五章 · 经济革命:交子、市舶与不夜城</span><span class="seg">宋史 · 深研 · 经济与货币</span></div><div class="ch-no">第 五 章</div><h1 class="ch-title">经济革命:交子、市舶与不夜城</h1><span class="purpose-chip">⌖ 挂靠:宋史 · 深研 · 经济与货币</span><div class="epigraph">夜市直至三更尽,才五更又复开张;如要闹去处,通晓不绝。<span class="who">孟元老《东京梦华录·马行街铺席》</span></div><h2 class="sec">坊墙倒下之后:一座不再熄灯的城</h2><aside class="anscard"><div class="sel">⌖ 圈选:「京城夜市三鼓以前不得禁止…」</div><div class="q">三鼓是几点?这道诏令是开创还是追认?</div><div class="a">三鼓即三更,约夜里十一点至凌晨一点。诏令更像追认:夜市早已存在,朝廷索性划线放行;后来连这条线也失守,马行街夜市「通晓不绝」。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><p>先把镜头摇回唐代的长安。那座百万人口的都城实行坊市制:住宅区(坊)与商业区(市)截然分开,坊有墙、市有门,日落鼓声一响,坊门市门齐闭,犯夜者要挨板子。入夜后的长安,是一座安静而漆黑的城。</p>
+<p><span class="u-gold">坊市制在唐宋之际走向瓦解:商业突破了「市」的空间边界与宵禁的时间边界,临街设店、通宵营业成为合法常态,城市从行政的容器变成了交易的机器。这是中国城市史上最深刻的一次转型。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《东京梦华录》 · 卷三·马行街铺席 · 碎片可拼回原文">《东京梦华录》</span></p>
+<p>转折有明确的制度节点。乾德三年(965),宋太祖下诏:京城夜市三鼓以前不得禁止——朝廷不是勉强默许,而是主动给夜晚松绑。到北宋中后期,这条线也守不住了:汴京马行街的夜市直至三更才尽,五更又复开张,通晓不绝。</p>
+<div class="u-blue"><span class="tag">批 · 依附于「坊市制在唐宋之际走向瓦解…」</span><p>值得玩味的是,倒下的不只是几堵坊墙,而是「国家应当规定交易发生在何时何地」这个观念本身。此后近千年,中国城市的底层格式是宋式的,不再是唐式的。</p></div>
+<p>这座不夜城给后世留下了两件互为表里的标本。一件是张择端的《清明上河图》:五米多长的画卷里,数百个人物沿汴河一路铺开,虹桥上下,漕船、骆驼、脚店、算命摊挤作一团,几乎是一份带图注的商业普查。</p>
+<p><span class="u-gold">《东京梦华录》成书于南宋绍兴十七年(1147),是孟元老在汴京陷落二十年后追忆故都繁华的笔记,街巷、酒楼、夜市、节令无所不记;它与《清明上河图》一文一图,构成研究北宋城市商业最重要的双标本。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《东京梦华录》 · 自序(绍兴丁卯) · 碎片可拼回原文">《东京梦华录》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「《东京梦华录》成书于南宋…」</span><p>一个在盛时写真,一个在劫后追忆——同一座汴京,隔着靖康之变互相印证。繁华要等到失去之后,才会被人一笔一笔认真登记。</p></div><blockquote class="quoteblock">太平日久,人物繁阜。垂髫之童,但习鼓舞;班白之老,不识干戈。<span class="qsrc">—— 《东京梦华录》 · 自序 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">一贯钱有多重:交子的诞生</h2><aside class="anscard"><div class="sel">⌖ 圈选:「以36万贯铁钱为本钱…」</div><div class="q">只存三成本钱就敢发十成的交子,不怕挤兑吗?</div><div class="a">兑付请求不会同时到来:只要「随时能兑」的预期成立,多数交子会一直在外流通,三成本钱足付日常兑现。预期一旦崩塌,几成准备金都挡不住——钱引的贬值即是明证。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>故事要从四川讲起。北宋的四川是铁钱专用区,而铁钱贱且重:小铁钱每十贯重约65斤,买一匹罗要付两万枚,分量逾百斤——上街采购之前,先得考虑雇不雇得起挑夫。</p>
+<p>成都商人的办法,是把铁钱存进信得过的富商铺户,换一张写明金额的凭据,拿着纸去交易。真宗景德年间,益州十六户富商联合发行形制统一的「交子」,随时可兑铁钱——这是民间自发的私交子阶段,也埋下了隐患:富商挪用本钱,屡有兑付不出的官司。</p>
+<p><span class="u-gold">朝廷于天圣元年在益州设置交子务(公元1023年),次年发行第一界官交子:每界以125万6340贯为定额,以36万贯铁钱为本钱,分界发行、界满收旧换新。这是世界上最早由国家发行的纸币。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷一〇一 · 天圣元年 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「朝廷于天圣元年在益州设置…」</span><p>约三成的本钱率意味着,主事者从第一天起就懂得:纸币的信用不靠十足的现钱背书,只靠「随时能兑」的预期成立。这个洞见领先欧洲六百多年——瑞典要到1661年才发出欧洲第一张纸币。</p></div>
+<p>「界」是个聪明的设计:交子有效期以界为限,界满必须以旧换新,旧券作废。定期回笼既压缩了伪造券的存活窗口,也给发行量装了一道天然的闸门——只要朝廷自己守规矩。</p>
+<p><span class="u-gold">交子的命运同时演示了纸币的正反两面:前期有本钱、有界额,币值大体稳定;北宋末年朝廷为应付军费超发无度,大观年间改交子为钱引,发行额比天圣旧额膨胀二十余倍,一缗面值仅当钱十余文,近乎废纸。信用货币的全部历史,几乎都在这一涨一跌里预演过了。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 食货志·会子(交子改钱引) · 碎片可拼回原文">《宋史》</span></p>
+<p>此后南宋有会子,金有交钞,元朝干脆以纸币为唯一法定货币——当马可·波罗向欧洲人惊叹大汗竟能「把纸变成钱」时,距益州交子务挂牌已过去两个半世纪。四川盆地里那间小小的官署,是全球货币史的一处源头。</p><blockquote class="quoteblock">会子、交子之法,盖有取于唐之飞钱。<span class="qsrc">—— 《宋史》 · 食货志下三·会子 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第五章 · 经济革命:交子、市舶与不夜城</span><span class="seg">宋史 · 深研 · 经济与货币</span></div><h2 class="sec">一亿人的账本:商税压过田赋</h2><p><span class="u-gold">大观年间全国在籍户数已超过2000万,按每户五口折算,北宋人口在公元1110年前后突破一亿——这是中国历史上第一次,也当是当时全世界唯一的亿级人口国家。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋会要辑稿》 · 食货·户口 · 碎片可拼回原文">《宋会要辑稿》</span></p>
+<p>养活一亿人的底座里,有一位外来的功臣。大中祥符五年(1012),江淮两浙大旱,水稻歉收,宋真宗遣使赴福建取占城稻种三万斛,分给三路播种,还在宫苑亲自试种,秋成后召近臣观刈。</p>
+<p><span class="u-gold">占城稻早熟、耐旱、不择地而生,与本地晚稻搭配,使双季稻在江南大面积铺开,稻麦复种也随之推广;南方从此坐稳全国粮仓,南宋遂有「苏湖熟,天下足」之谚。粮食的富余,正是城市化与商业化的第一块地基。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 食货志·农田(占城稻) · 碎片可拼回原文">《宋史》</span></p>
+<p>人多了,城密了,国家抽税的手也跟着换了地方。此前历代王朝,财政大头从来压在土地上的田赋;宋朝的账本,开始长出另一副骨架。</p>
+<p><span class="u-gold">商税岁入从至道年间的约400万贯,涨到天禧末年的约804万贯,再到庆历年间的约1975万贯——半个世纪翻了近五倍;再加上盐、酒、茶专卖,北宋中后期财政的货币性收入中,工商类进项已明显压过农业两税。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 食货志·商税 · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「商税岁入从至道年间的约4…」</span><p>这组数字的真正分量在于:国家第一次发现「市场比土地更好收税」。此后帝制中国再没有哪个王朝的财政像宋朝这样深地扎根于商业——这是宋的现代性,也是它供养冗兵冗官的底气与包袱。</p></div>
+<p>得赶紧补一句公道话:占比的精确数字学界有争议,因为统计只覆盖货币收入,粮、绢等实物税并不在内。但趋势本身没有争议——宋朝是一台靠商业运转的财政机器,这一点连它的敌人都看得清楚。</p>
+<h2 class="sec">涨海声中:市舶司与出走的铜钱</h2><aside class="anscard"><div class="sel">⌖ 圈选:「铜钱被囤积、被销熔为器…」</div><div class="q">为什么不干脆禁止铜钱出海?</div><div class="a">禁了,而且极严,携钱出界重者可至死罪。但宋钱在海外购买力高,走私一本万利,法令追不上利差;钱禁越严,恰恰说明外流越凶。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>陆上丝路被辽与西夏拦腰截断,宋朝便把脸转向海洋。广州、泉州、明州的港湾里,阿拉伯商船与福建海商比邻而泊,香料、象牙、犀角进来,丝绸、瓷器、铜钱出去,东南沿海第一次成为国家经济的正面。</p>
+<p><span class="u-gold">开宝四年(971)宋灭南汉,随即在广州设立市舶司,以「抽解」和「博买」两道程序从海外贸易中取利;此后杭州、明州相继设司,元祐二年(1087)泉州设司。市舶司是中国历史上第一套常设的海关体系。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋会要辑稿》 · 职官四四·市舶司 · 碎片可拼回原文">《宋会要辑稿》</span></p>
+<p>朝廷对这门生意毫不扭捏。宋高宗说得直白:「市舶之利最厚,若措置合宜,所得动以百万计,岂不胜取之于民。」南宋初年,市舶岁入一度达到约200万贯,在朝廷经费里举足轻重。</p>
+<p><span class="u-gold">繁荣的另一面是「钱荒」:宋朝铸钱量冠绝古代——元丰年间年铸铜钱峰值约506万贯,十几倍于唐代天宝年间——市面上却常年闹钱紧。铜钱被囤积、被销熔为器,更源源外流到辽、夏、日本、高丽与南洋,宋钱成了半个亚洲的通用货币。<span class="gseal" data-tip="域戳:宋史 · 深研 · 经济 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 下册·货币(钱荒与铜钱外流) · 碎片可拼回原文">漆侠《宋代经济史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「繁荣的另一面是「钱荒」:…」</span><p>张方平抱怨「钱本中国宝货,今乃与四夷共用」。这句牢骚从反面丈量出宋钱的信用半径:一种货币被邻国自愿奉为通货,是铸币史上罕见的荣耀——只是这份荣耀,对宋朝自己是持续失血。</p></div>
+<p>把三条线索并起来看——铁钱之重、交易之密、铜钱之荒——交子的出现就不再是某个天才的灵光,而是整个货币体系被商业增长逼出来的答案。需求走在发明前面,宋代经济史处处如此。</p>
+<p>这一章于是绕成了一个闭环:坊墙倒下让交易密度上升,交易撑大了税基,海贸与钱荒逼出了纸币,纸币又反过来润滑了更大的交易。经济史家把这串连锁称作「唐宋经济革命」——下一章我们去看这场革命的操盘手与买单人:士大夫,和他们的变法。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第五章 · 经济革命:交子、市舶与不夜城 · 铸卡</span><span class="seg">宋史 · 深研 · 经济</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>北宋经济的几组关键数字(据古籍所载或按其折算)</caption><thead><tr><th>指标</th><th>数字</th><th>参照/说明</th></tr></thead><tbody><tr><td>商税岁入</td><td>至道中约400万贯 → 庆历中约1975万贯</td><td>约五十年增长近五倍</td></tr><tr><td>年铸铜钱峰值</td><td>元丰年间约506万贯</td><td>约为唐天宝年间(约32万贯)的十余倍</td></tr><tr><td>第一界官交子</td><td>发行125万6340贯,本钱36万贯</td><td>准备金率约29%</td></tr><tr><td>大观年间在籍户数</td><td>逾2000万户</td><td>每户五口折算,人口破亿</td></tr><tr><td>南宋初市舶岁入</td><td>约200万贯</td><td>高宗:「市舶之利最厚」</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">965</span><span class="ev">夜市解禁</span><details><summary>细看</summary><div class="dt">宋太祖诏:京城夜市三鼓以前不得禁止,夜晚经济合法化</div></details></li><li><span class="yr">971</span><span class="ev">广州设市舶司</span><details><summary>细看</summary><div class="dt">灭南汉后即设,常设海关体系的起点</div></details></li><li><span class="yr">1012</span><span class="ev">占城稻入江淮两浙</span><details><summary>细看</summary><div class="dt">真宗遣使福建取种三万斛,双季稻时代开启</div></details></li><li><span class="yr">1023</span><span class="ev">益州交子务成立</span><details><summary>细看</summary><div class="dt">天圣元年,官办纸币机构挂牌</div></details></li><li><span class="yr">1024</span><span class="ev">第一界官交子发行</span><details><summary>细看</summary><div class="dt">定额125万6340贯,本钱36万贯,世界最早的官方纸币</div></details></li><li><span class="yr">约1080</span><span class="ev">铸钱峰值</span><details><summary>细看</summary><div class="dt">元丰年间年铸铜钱约506万贯,仍不解钱荒</div></details></li><li><span class="yr">1087</span><span class="ev">泉州设市舶司</span><details><summary>细看</summary><div class="dt">东南大港自此起步,南宋末超越广州</div></details></li><li><span class="yr">1107</span><span class="ev">交子改钱引</span><details><summary>细看</summary><div class="dt">大观元年,超发失控,一缗仅当钱十余文</div></details></li><li><span class="yr">约1110</span><span class="ev">人口破亿</span><details><summary>细看</summary><div class="dt">大观年间在籍逾2000万户,折算人口过亿</div></details></li><li><span class="yr">1147</span><span class="ev">《东京梦华录》成书</span><details><summary>细看</summary><div class="dt">孟元老追忆汴京,不夜城定格为文字标本</div></details></li></ul><h2 class="sec">铸卡(6 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">交子「分界发行」制:官交子以「界」为发行单位,每界定额125万6340贯,备本钱36万贯,界满收旧发新、旧券作废。</div><div class="petals"><span class="petal">定额=最早的纸币发行上限约束</span><span class="petal">三成本钱=部分准备金制度的雏形</span><span class="petal">界满换新=强制回笼兼防伪机制</span></div><div class="src">◈ 《宋史·食货志》</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">北宋商税岁入:至道年间约400万贯→天禧末约804万贯→庆历年间约1975万贯,约五十年增长近五倍。</div><div class="petals"><span class="petal">口径为过税(约2%)与住税(约3%)合计</span><span class="petal">增长主因:坊市解体后交易密度上升</span><span class="petal">与两税并观,可见财政重心移向工商</span></div><div class="src">◈ 《宋史·食货志》</div></div><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">坊市制崩溃使中国城市从行政容器转为交易机器,宋式开放街市自此成为此后近千年中国城市的底层格式。</div><div class="petals"><span class="petal">空间解禁:临街设店取代封闭市署</span><span class="petal">时间解禁:宵禁松弛、夜市合法化</span><span class="petal">后果:城市税基与市民文化同步生长</span></div><div class="src">◈ 《东京梦华录》卷三</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">大中祥符五年(1012),宋真宗因江淮两浙旱歉,遣使赴福建取占城稻种三万斛分种三路,并于宫苑试种示范。</div><div class="petals"><span class="petal">传播路径:占城→福建→江淮两浙</span><span class="petal">品性:早熟、耐旱、不择地而生</span><span class="petal">后果:双季稻铺开,奠定南方粮仓</span></div><div class="src">◈ 《宋史·食货志》</div></div><div class="item-card"><span class="tbadge t方法">方法</span><div class="st">读市舶司,抓「抽解+博买」两道程序即可:先按比例抽取实物税,再由官府按官价优先收购一部分,余货方许民间交易。</div><div class="petals"><span class="petal">抽解=实物形态的关税</span><span class="petal">博买=官营专买特权</span><span class="petal">两道叠加=国家坐庄的外贸模式</span></div><div class="src">◈ 《宋会要辑稿·职官》</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">铸钱量冠绝古代的宋朝为何常年钱荒?铜钱外流、销熔、贮藏三个去向,哪个才是主因?</div><div class="petals"><span class="petal">外流:宋钱为周边诸国通货</span><span class="petal">销熔:铜价高于面值时毁钱铸器有利可图</span><span class="petal">贮藏:富室窖藏使流通量小于铸造量</span></div><div class="src">◈ 张方平《乐全集》</div></div></div><div class="funbox"><b>冷知识</b> 在北宋成都买一匹罗,先得雇人挑一百多斤铁钱进城。所以纸币不是被天才的灵光发明出来的,是被扁担实实在在压出来的。</div><div class="srcline">本章源:《宋史·食货志》(元·脱脱等修,中华书局点校本) · 《东京梦华录》(宋·孟元老撰,1147年自序,卷二、卷三) · 《续资治通鉴长编》(宋·李焘撰,置益州交子务事见卷一〇一前后) · 《宋代经济史》(漆侠著,上海人民出版社,1987—1988)</div><div class="page-foot"></div></section>
+
+<!-- ═══ 图表页:财政结构 ═══ -->
+<section class="page" data-toc="图 · 岁入的换血" id="pg-chart">
+  <div class="page-head"><span>数据件</span><span class="seg">组件 · 图表</span></div>
+  <div class="ch-no">图 表</div>
+  <h1 class="ch-title">岁入的换血</h1>
+  <p>把〈经济革命〉一章的核心数据铸成图:北宋财政从「吃田」转向「吃市」。农业税的盘子几乎没动,动的是商税与专卖那一侧——这正是「不夜城」在国库账面上的倒影。</p>
+  <div class="figbox"><svg id="fiscalSvg" viewBox="0 0 760 420" role="img" aria-label="北宋岁入结构变化柱状图"></svg></div>
+  <p class="figcap">单位:万贯(示意取整) · 农业两税 vs 商税+专卖 · 数据系《宋史·食货志》研究通行估算</p>
+  <div class="u-blue"><span class="tag">批 · 依附于「岁入的换血」</span>
+    <p>一个农业帝国的国库,一半以上收入不来自土地——放在十一世纪的世界地图上,这件事没有第二个案例。</p></div>
+  <div class="page-foot"></div>
+</section>
+
+<section class="page" data-toc="靖康与南渡:从海上之盟到风波亭"><div class="page-head"><span>第六章 · 靖康与南渡:从海上之盟到风波亭</span><span class="seg">宋史 · 深研 · 靖康与南渡</span></div><div class="ch-no">第 六 章</div><h1 class="ch-title">靖康与南渡:从海上之盟到风波亭</h1><span class="purpose-chip">⌖ 挂靠:宋史 · 深研 · 靖康与南渡</span><div class="epigraph">天日昭昭!天日昭昭!<span class="who">岳飞狱中供状题字(《宋史·岳飞传》)</span></div><h2 class="sec">海上之盟:换个收款人的算盘</h2><aside class="anscard"><div class="sel">⌖ 圈选:「因两国使节须自登州浮海往…」</div><div class="q">为什么盟约非要从海上谈?</div><div class="a">宋金之间隔着辽:陆路使节必经辽境,既走不通也易泄密。唯有自山东登州渡渤海至金境一途可绕开辽,盟约因此得名「海上之盟」。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>故事要从辽的后院说起。政和四年(1114),女真首领完颜阿骨打起兵反辽,次年建国号金,数年间连破辽军主力。消息辗转传到汴京,朝堂上嗅到的不是唇亡齿寒的危险,而是机会——收复燕云十六州,这块压在赵宋心头一百六十年的执念,似乎终于等来了下手的时机。</p>
+<p><span class="u-gold">宣和二年(1120),宋金缔结「海上之盟」:双方约定南北夹攻辽朝,金取中京,宋取燕京;灭辽之后燕云故地归宋,宋则将原输辽的岁币如数转输于金。因两国使节须自登州浮海往返、绕开辽境,故得此名。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《三朝北盟会编》 · 政宣上帙卷四(海上之盟约文) · 碎片可拼回原文">《三朝北盟会编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「宣和二年(1120),宋…」</span><p>细看这份合同的结构之妙:宋的支出一分未涨——岁币照旧,只是换了收款人——却指望换回百年故土。以1120年可得的信息看,这是笔稳赚不赔的买卖;误判不在算术,而在宋廷没有核对一个前提:自己这支军队的成色。</p></div>
+<p>纸面收益要靠战场兑现,而兑现环节当场穿帮。宣和四年(1122),童贯两度督军攻打燕京,竟接连被辽人的残兵败将击溃,燕京最终由金军轻取。这场联合行动里,宋朝这位盟友的全部贡献,是让金人看清了他的虚实。</p>
+<p><span class="u-gold">宣和五年(1123),金依约交割燕京及涿、易、檀、顺、景、蓟六州,但城中人口财货已被席卷北去,宋每年还须在岁币之外另输一百万贯「代税钱」——高价租回的,实为几座空城。盟约墨迹未干,金人南侵的念头已经生根。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《三朝北盟会编》 · 政宣上帙(宣和五年燕京交割·代税钱) · 碎片可拼回原文">《三朝北盟会编》</span></p>
+<p>压垮盟约的最后一根稻草来得很快:降金的平州守将张觉叛金投宋,宋廷竟予接纳,事败后又杀张觉以谢金人,两头失信。至此,金人握住了「宋先败盟」的口实,南下只欠一个时机。</p>
+<h2 class="sec">靖康:一座都城的拆卸</h2><p>宣和七年(1125),金灭辽,当年冬天便分东西两路挥师南下:西路阻于太原坚城,东路长驱直入、直逼黄河。惊惶的徽宗匆忙禅位于太子赵桓,是为钦宗,改元靖康——这个年号后来成了汉语里最沉重的词之一。</p>
+<p><span class="u-gold">靖康元年(1126)正月,金东路军首次围攻汴京,李纲临危受命主持守御,数度击退攻城之敌。宋廷旋即以巨额金帛犒军并许割太原、中山、河间三镇为条件求和,金军北撤。这次「花钱买退兵」让朝廷生出幻觉:危机似乎总可以用赎金化解。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《三朝北盟会编》 · 靖康中帙(靖康元年正月汴京初围) · 碎片可拼回原文">《三朝北盟会编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「靖康元年(1126)正月…」</span><p>和与战在这一年反复拉锯:李纲守住了城,金军一退他便遭排挤罢黜;三镇军民拒不受割,朝廷又骑虎难下。防御本是需要连续性的事业,汴京的城防却随和战摇摆被反复拆装——这比城墙上的缺口更致命。</p></div>
+<p>靖康元年秋,金人以三镇未交割为由再度两路南下,太原陷落,两军合围汴京。危城之中,朝廷竟把最后的赌注押在术士郭京的「六甲神兵」上——开城出战,一触即溃,金兵乘势登城。闰十一月末,汴京陷落。</p>
+<p><span class="u-gold">靖康二年(1127)春,金人废徽、钦二帝为庶人,三月立张邦昌为傀儡「楚」帝,四月尽掳二帝、后妃、宗室、百官及工匠仪仗、图籍府藏北去,史称靖康之变,北宋至此灭亡。自太祖开国,凡一百六十七年。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷二三·钦宗本纪(靖康二年) · 碎片可拼回原文">《宋史》</span></p>
+<p>一座当时世界上数一数二繁华的都城,几个月内被拆解成一张战利品清单。南逃的士民里,有位女词人行经乌江,写下「生当作人杰,死亦为鬼雄」,借不肯过江东的项羽,讽喻一路南奔的朝廷。耻感自此成为南宋政治的底色。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第六章 · 靖康与南渡:从海上之盟到风波亭</span><span class="seg">宋史 · 深研 · 靖康与南渡</span></div><h2 class="sec">建炎南渡:海上的朝廷与黄天荡的水汊</h2><p>金人几乎将赵氏宗室一网打尽,偏偏漏了一人:徽宗第九子、康王赵构,城破时正以天下兵马大元帅之名在河北募兵,始终未近汴京。靖康二年(1127)五月,他在南京应天府(今商丘)即位,改元建炎,是为高宗。民间后来编出「泥马渡康王」的神话,来消化这份九死一生的侥幸。</p>
+<p>南渡之初,朝廷自身也风雨飘摇。建炎三年(1129),扈从将领苗傅、刘正彦在杭州发动兵变,逼高宗禅位于不满三岁的幼子,赖韩世忠等起兵勤王方才收场。经此一吓,高宗对武将的猜忌就此种下——这颗种子,十三年后会在大理寺狱里开花。</p>
+<p><span class="u-gold">建炎三年至四年(1129-1130),金将完颜宗弼(兀术)渡江穷追,号称「搜山检海捉赵构」。宋廷自扬州而杭州而明州一路奔逃,高宗最终登舟入海,在台州、温州外洋漂泊数月。以海舟为行在,这在中国历代王朝中绝无仅有。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 高宗本纪(建炎三年至四年航海避敌) · 碎片可拼回原文">《宋史》</span></p>
+<p>金军孤悬江南,水土不服,补给线越拉越长,掳掠既足便思北归。建炎四年春,兀术的船队满载而返,行至镇江江面——有人已在那里等他多时。</p>
+<p><span class="u-gold">建炎四年(1130),韩世忠以八千水军扼守镇江金山、焦山江面,将兀术大军逼入黄天荡死水港汊,相持四十八日,其妻梁红玉亲执桴鼓督战。金军最终凿通老鹳河故道三十里,又乘无风之日以火箭焚宋军海船帆篷,才得以脱身北渡。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷三六四·韩世忠传(黄天荡) · 碎片可拼回原文">《宋史》</span></p>
+<p>黄天荡算不上歼灭战,兀术终究跑了。但它第一次向双方证明:金军并非不可阻挡,长江加水军就是南朝的城墙。此后金人不再轻言渡江,战线渐渐稳定在江淮之间——偏安政权的「准生证」,是在这片水汊里签发的。</p><blockquote class="quoteblock">阵而后战,兵法之常,运用之妙,存乎一心。<span class="qsrc">—— 《宋史》 · 卷三六五·岳飞传 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">郾城、和议与风波亭</h2><aside class="anscard"><div class="sel">⌖ 圈选:「得到的回答是「莫须有」三…」</div><div class="q">「莫须有」究竟何解?</div><div class="a">宋人口语,约当「恐怕有」「难道没有吗」,是拿不出实证时的含糊搪塞。韩世忠反诘「莫须有三字何以服天下」,正戳中这一点。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><aside class="anscard"><div class="sel">⌖ 圈选:「前锋进抵距汴京仅四十余里…」</div><div class="q">朱仙镇大捷是信史吗?</div><div class="a">此捷首见于岳飞之孙岳珂所编《鄂王行实编年》,宋代官方文书无载,学界真伪存争;郾城、颍昌之捷则有当时告捷奏报为据,确凿无疑。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>此后十年,宋金在江淮、川陕之间拉锯:吴玠兄弟在和尚原、仙人关挡住金军入蜀之路,岳飞则经营襄汉,练出一支「冻死不拆屋,饿死不掳掠」的岳家军。绍兴十年(1140),兀术撕毁前一年的和约再度南侵,一头撞在这支军队上。</p>
+<p><span class="u-gold">绍兴十年(1140)七月,岳飞迎战兀术于郾城,戒步卒以麻扎刀入阵、专斫马足,大破金军精锐「拐子马」;继而颍昌再捷,前锋进抵距汴京仅四十余里的朱仙镇一带。兀术叹「撼山易,撼岳家军难」,金军士气濒于崩解。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷三六五·岳飞传(郾城、颍昌之捷) · 碎片可拼回原文">《宋史》</span></p>
+<p>然而前线捷报越漂亮,临安的心事越重:恢复故都意味着迎回钦宗,高宗这个皇帝往哪里摆?秦桧则一意主和。一日之内十二道金字牌递到军前,严令班师。岳飞愤惋泣下:「十年之力,废于一旦!」</p>
+<p><span class="u-gold">绍兴十一年(1141)十一月,宋金订立绍兴和议:宋对金称臣,由金册封为帝;东以淮河中流、西以大散关为界,宋另割唐、邓二州;岁贡银二十五万两、绢二十五万匹,春季于泗州交纳。南北对峙的格局由此固定近二十年。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《三朝北盟会编》 · 炎兴下帙(绍兴十一年和议誓表) · 碎片可拼回原文">《三朝北盟会编》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「绍兴十一年(1141)十…」</span><p>拿它与澶渊之盟对读最见分量:澶渊是兄弟之国,岁币名为「助军旅之费」;绍兴是君臣之国,银绢直书「岁贡」。钱未必比庆历增币后的对辽岁币更重,名分却整整跌了一级——这份屈辱,是写进国书里的。</p></div>
+<p><span class="u-gold">和议前后,朝廷同步收缴韩世忠、张俊、岳飞三大将兵权。绍兴十一年岁末(公历1142年1月),岳飞以「谋反」罪名被赐死于临安大理寺狱,年三十九;其子岳云、部将张宪弃市。韩世忠当面质问秦桧,得到的回答是「莫须有」三字。<span class="gseal" data-tip="域戳:宋史 · 深研 · 南渡 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷三六五·岳飞传(狱案·莫须有) · 碎片可拼回原文">《宋史》</span></p>
+<p>「风波亭」之名出自后世话本与《说岳全传》,正史只记岳飞死于大理寺狱;但民间执意要给这场冤狱一个具体的舞台,并在西湖边为他筑墓铸像,让秦桧夫妇的铁像一跪至今。历史的判决有时来得很慢,却比任何和议都持久。</p><blockquote class="quoteblock">文臣不爱钱,武臣不惜死,天下太平矣。<span class="qsrc">—— 《宋史》 · 卷三六五·岳飞传 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第六章 · 靖康与南渡:从海上之盟到风波亭 · 铸卡</span><span class="seg">宋史 · 深研 · 南渡</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>两份和约对读:钱变化不大,名分跌了一级</caption><thead><tr><th>条约</th><th>年份</th><th>名分</th><th>岁币/岁贡</th><th>边界</th></tr></thead><tbody><tr><td>澶渊之盟</td><td>1005</td><td>兄弟之国(宋兄辽弟)</td><td>银十万两、绢二十万匹(1042年庆历增币后共五十万)</td><td>维持旧界(白沟河一线)</td></tr><tr><td>绍兴和议</td><td>1141</td><td>君臣之国(宋对金称臣)</td><td>银二十五万两、绢二十五万匹(名为「岁贡」)</td><td>东淮河中流、西大散关</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">1114-1115</span><span class="ev">阿骨打起兵,金朝建立</span><details><summary>细看</summary><div class="dt">女真反辽,连破辽军;1115年建国号金</div></details></li><li><span class="yr">1120</span><span class="ev">海上之盟</span><details><summary>细看</summary><div class="dt">宋金约定夹攻辽:燕云归宋,岁币转输于金</div></details></li><li><span class="yr">1122</span><span class="ev">宋两攻燕京皆败</span><details><summary>细看</summary><div class="dt">童贯督师溃于辽残部,燕京终由金军攻取</div></details></li><li><span class="yr">1123</span><span class="ev">高价赎回空城</span><details><summary>细看</summary><div class="dt">金交割燕京六州,宋岁增百万贯代税钱;张觉事件埋下败盟口实</div></details></li><li><span class="yr">1125</span><span class="ev">金灭辽,旋即南侵</span><details><summary>细看</summary><div class="dt">冬,金分两路攻宋;徽宗禅位钦宗,改元靖康</div></details></li><li><span class="yr">1126</span><span class="ev">汴京两度被围</span><details><summary>细看</summary><div class="dt">正月李纲守城退敌;闰十一月城破</div></details></li><li><span class="yr">1127</span><span class="ev">靖康之变,北宋亡</span><details><summary>细看</summary><div class="dt">二帝与宗室北掳;五月赵构即位应天府,改元建炎</div></details></li><li><span class="yr">1129</span><span class="ev">苗刘兵变;金军搜山检海</span><details><summary>细看</summary><div class="dt">高宗一度被逼退位;年末登舟入海避敌</div></details></li><li><span class="yr">1130</span><span class="ev">黄天荡之战</span><details><summary>细看</summary><div class="dt">韩世忠八千水军困兀术四十八日,金军自此不轻言渡江</div></details></li><li><span class="yr">1140</span><span class="ev">郾城、颍昌大捷</span><details><summary>细看</summary><div class="dt">岳家军破拐子马,前锋抵朱仙镇一带;十二道金牌班师</div></details></li><li><span class="yr">1141</span><span class="ev">绍兴和议</span><details><summary>细看</summary><div class="dt">称臣、岁贡银绢各二十五万、淮河—大散关为界;三大将罢兵权,岳飞下狱</div></details></li><li><span class="yr">1142</span><span class="ev">岳飞之死</span><details><summary>细看</summary><div class="dt">岁末(公历1142年1月)死于大理寺狱;「风波亭」为后世话本所加</div></details></li></ul><h2 class="sec">铸卡(6 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">海上之盟(1120):宋金约定夹攻灭辽,燕云故地归宋、宋将原输辽岁币转输于金;因使节须自登州浮海往返而得名。</div><div class="petals"><span class="petal">交易结构:岁币改道,换取燕云</span><span class="petal">执行破产:宋两攻燕京皆败,只赎回空城</span><span class="petal">隐性代价:向金人全程暴露宋军虚实</span></div><div class="src">◈ 《三朝北盟会编》卷四</div></div><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">联金灭辽的致命处不在结盟决策本身,而在决策前提失核:同一份盟约,配上能战之军是良机,配上童贯的溃军就是引狼入室。</div><div class="petals"><span class="petal">决策时点:以1120年信息看合理</span><span class="petal">前提失核:未检验己方军力成色</span><span class="petal">后果链:军力露底→金人起意南侵</span></div><div class="src">◈ 《三朝北盟会编》卷一一</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">绍兴和议(1141)条款:宋对金称臣;岁贡银二十五万两、绢二十五万匹;东以淮河中流、西以大散关为界,另割唐、邓二州。</div><div class="petals"><span class="petal">名分:由澶渊的兄弟之国降为君臣之国</span><span class="petal">经济:银绢各二十五万,岁于泗州交割</span><span class="petal">地理:淮河—大散关线划定此后南北分界</span></div><div class="src">◈ 《宋史·高宗本纪》</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">黄天荡之战(1130):韩世忠以八千水军困兀术大军四十八日,虽未竟全功,却终结了金军渡江无敌的神话,战线自此渐稳于江淮。</div><div class="petals"><span class="petal">以水制骑:长江水道抵消骑兵优势</span><span class="petal">脱困手段:凿老鹳河故道加无风日火攻</span><span class="petal">战略意义:偏安格局的起点</span></div><div class="src">◈ 《建炎以来系年要录》卷三二</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">岳飞必死的真正驱动力是什么:金人的和议条件(「必杀飞,始可和」)、秦桧的固位私计,还是高宗对武将坐大与「迎还二圣」的结构性恐惧?</div><div class="petals"><span class="petal">和议条件说:兀术遗桧书为证</span><span class="petal">皇权恐惧说:苗刘兵变阴影与钦宗难题</span><span class="petal">制度背景:绍兴收兵权与文臣驭武祖制</span></div><div class="src">◈ 《宋史·岳飞传》</div></div><div class="item-card"><span class="tbadge t方法">方法</span><div class="st">评估历史决策,须把「决策时可得信息」与「事后信息」分开打分:先以1120年的已知条件评海上之盟,再以1125年后的结果复评,两次评分的落差即是当时未被计价的战略风险。</div><div class="petals"><span class="petal">第一遍:复原决策现场的信息集</span><span class="petal">第二遍:用结果反推遗漏变量</span><span class="petal">落差归因:区分坏运气与坏判断</span></div><div class="src">◈ 《三朝北盟会编》政宣上帙卷二</div></div></div><div class="funbox"><b>冷知识</b> 彩蛋:兀术在黄天荡被八千人堵了四十八天,最后靠连夜凿通三十里旧河道跑路——大约是金军战史上第一次「基建自救」。下次有人说挖沟没前途,请给他讲这个故事。</div><div class="srcline">本章源:《宋史》(元·脱脱等修)(卷二四至卷三〇《高宗本纪》、卷三六五《岳飞传》) · 《三朝北盟会编》(宋·徐梦莘)(政宣上帙(海上之盟至靖康诸卷)) · 《建炎以来系年要录》(宋·李心传)(建炎四年黄天荡至绍兴十二年狱案诸卷) · 邓广铭《岳飞传》(增订本,人民出版社,郾城之战与冤狱两章)</div><div class="page-foot"></div></section>
+
+<!-- ═══ 地图页 ═══ -->
+<section class="page" data-toc="图 · 四国棋盘" id="pg-map">
+  <div class="page-head"><span>示意图</span><span class="seg">组件 · 疆域示意</span></div>
+  <div class="ch-no">舆 图</div>
+  <h1 class="ch-title">四国棋盘</h1>
+  <p>十一世纪的东亚不是一座帝国,是一张棋盘。示意图不求地理精确,只求把「谁挨着谁、钱往哪流、兵从哪来」摆在一眼之内。</p>
+  <div class="figbox"><svg id="mapSvg" viewBox="0 0 800 520" role="img" aria-label="宋辽夏金格局示意图"></svg></div>
+  <p class="figcap">疆界为示意 · 虚线为澶渊之盟后的宋辽边界 · 圆点为都城</p>
+  <div class="page-foot"></div>
+</section>
+
+<section class="page" data-toc="风雅与格物"><div class="page-head"><span>第七章 · 风雅与格物</span><span class="seg">宋史 · 通用层</span></div><div class="ch-no">第 七 章</div><h1 class="ch-title">风雅与格物</h1><span class="purpose-chip">⌖ 挂靠:宋史 · 通用层</span><div class="epigraph">问渠那得清如许?为有源头活水来。<span class="who">朱熹《观书有感》</span></div><h2 class="sec">词的双峰与市井之声</h2><p>如果说唐诗立在庙堂与边塞,宋词则是从宴席、瓦舍与运河码头里长出来的声音。词本是配乐演唱的歌辞,起于唐五代的酒筵;入宋之后,随着城市与商业的繁荣,它长成了足以与诗分庭抗礼的文体。</p>
+<p><span class="u-gold">柳永是第一个把词当终身事业来写的人:他大量创制铺叙展衍的慢词长调,使词从数十字的小令扩容为百余字的长卷;叶梦得《避暑录话》记西夏归朝官之语「凡有井水饮处,即能歌柳词」,可见北宋中期词已随市井传唱天下。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《东京梦华录》 · 卷五·京瓦伎艺 · 碎片可拼回原文">《东京梦华录》</span></p>
+<p>然而在多数士大夫眼里,词仍是「小道」与「艳科」——宴席上唱唱可以,登不得大雅之堂。要打破这层天花板,需要一个足够大的人物,拿出足够大的题材。</p>
+<p><span class="u-gold">苏轼「以诗为词」,把怀古、说理、悼亡、田园尽数纳入词体,使词从佐酒的歌辞变为士人言志的正当文体;《念奴娇·赤壁怀古》开篇「大江东去,浪淘尽、千古风流人物」,一举把词的境界从歌台舞榭推向江山与历史。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷三三八·苏轼传 · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「苏轼「以诗为词」,把怀古…」</span><p>所谓豪放,关键不在嗓门大,而在题材的解放:词从此不必只替歌女代言,也可以替自己发言。这是文体史上典型的「越界者重画边界」——苏轼未必最守词律,却扩定了词的疆域。</p></div>
+<p><span class="u-gold">李清照在《词论》中主张「词别是一家」,须严守音律,不可写成「句读不葺之诗」,这是宋人对词体独立性最自觉的申辩;她自己的创作以靖康之变(1127)为界,前期是「绿肥红瘦」的闺阁工笔,后期是「寻寻觅觅,冷冷清清」的流亡哀音,一部词集恰成两宋之交的私人年表。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四四四·文苑传·李格非(女清照附见) · 碎片可拼回原文">《宋史》</span></p>
+<p>双峰之外,南渡后还立起一座孤峰。辛弃疾二十二岁时曾率数十骑突入五万人的金营,生擒叛将张安国;南归后恢复无门,只好把一身兵气倒进词里——「了却君王天下事,赢得生前身后名。可怜白发生」,豪放到了南宋,变成了悲怆。</p>
+<h2 class="sec">道学的谱系:从濂溪到考亭</h2><aside class="anscard"><div class="sel">⌖ 圈选:「此后六百年间,读书人无不…」</div><div class="q">朱熹生前被打成「伪学」,为什么死后反而成了官方标准?</div><div class="a">党禁本是政争产物,嘉定年间即平反追谥;朱注体系完备、层次分明,最便于统一命题评卷。元廷重开科举需要现成标准,朱注是当时最成熟的选项。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><p>词安顿性情,另一批宋人则想安顿宇宙与人心。面对佛老之学数百年的挤压,北宋儒者的抱负是给儒家伦理补上一个形而上的地基——后世称这场运动为理学,当时人多称「道学」。</p>
+<p>谱系的源头通常追到周敦颐。他在《太极图说》里以「无极而太极」推演万物生成,又在《爱莲说》里写下「出淤泥而不染」——一个哲学家的两副笔墨,一副画宇宙,一副画人格。</p>
+<p><span class="u-gold">二程兄弟(程颢、程颐)把「天理」立为学说的最高范畴,程颢自道:「吾学虽有所受,『天理』二字却是自家体贴出来。」从此儒家的纲常伦理不再只是圣人的规定,而是宇宙本身的法则——这是理学真正的奠基处。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四二七·道学传一·程颢程颐 · 碎片可拼回原文">《宋史》</span></p>
+<p>程门有「立雪」的佳话:杨时、游酢冒雪侍立,不忍惊扰瞑坐的程颐。更早时,程颢目送杨时南归,曾说「吾道南矣」——这句话在一百年后兑现,道学的重心果然随宋室一起渡过了长江。</p>
+<p>但道学的南宋并不顺遂。庆元年间(1195—1200),韩侂胄当政,道学被斥为「伪学」,著作遭禁、门人被逐,朱熹本人就死在党禁未解的1200年。谁能想到,这个背着「伪学魁首」罪名下葬的老人,身后会成为帝国的官方哲学。</p>
+<p><span class="u-gold">朱熹集北宋诸儒之大成:他将《大学》《中庸》自《礼记》中抽出,与《论语》《孟子》合为「四书」,毕生撰修《四书章句集注》;元皇庆二年(1313)朝廷下诏恢复科举,明定以朱熹章句集注为取士标准,此后六百年间,读书人无不从朱注入门。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四二九·道学传三·朱熹 · 碎片可拼回原文">《宋史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「朱熹集北宋诸儒之大成:他…」</span><p>一个死于禁学令下的教书人,身后变成了考试的标准答案——思想史的吊诡莫过于此。被体制追杀与被体制供奉,中间只隔了一百年。</p></div><blockquote class="quoteblock">道学之名,古无是也。<span class="qsrc">—— 《宋史》 · 卷四二七·道学传序 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第七章 · 风雅与格物</span><span class="seg">宋史 · 通用层</span></div><h2 class="sec">格物的巅峰:一个爱记笔记的帝国</h2><aside class="anscard"><div class="sel">⌖ 圈选:「以巨竹为筒、发射「子窠」…」</div><div class="q">「子窠」是什么?突火枪算真正的枪吗?</div><div class="a">子窠即筒中装填的弹丸,相当于原始子弹。突火枪齐备身管、火药、弹丸三要素,是管形射击火器之祖;元代换成金属筒身即为火铳,枪炮的直系先驱。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><aside class="anscard"><div class="sel">⌖ 圈选:「是人类对磁偏角现象的第一…」</div><div class="q">磁针为什么会「微偏东」?沈括自己知道原因吗?</div><div class="a">因为地磁极与地理两极不重合,磁针指向磁极而非正南北。沈括只忠实记录现象,并未解释成因;这一原理要到近代地磁学建立后才被说清。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p>「格物致知」本是理学家的功夫论,但宋人格起物来,远不止在书斋里静坐。这个王朝拥有当时世界上最庞大的印书业、最精密的航海术和最早的火药兵器——而它们中的好几样,都被同一个退休官员写进了同一部笔记。</p>
+<p><span class="u-gold">毕昇发明胶泥活字于庆历年间(1041—1048):薄如钱唇的泥字火烧令坚,按韵分贮,以松脂、蜡和纸灰固版,「若止印三二本,未为简易;若印数十百千本,则极为神速」。此事载于沈括《梦溪笔谈》卷十八,是世界范围内关于活字印刷术最早的明确记录。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《梦溪笔谈》 · 卷十八·技艺 · 碎片可拼回原文">《梦溪笔谈》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「毕昇发明胶泥活字于庆历年…」</span><p>毕昇只是个没有功名的布衣工匠,若非沈括顺手记下这几百字,活字印刷的发明权可能像无数工匠绝技一样湮没无名。历史有时就悬在一个爱记笔记的人身上。</p></div>
+<p><span class="u-gold">记笔记的人正是沈括。他晚年退居润州梦溪园,写成《梦溪笔谈》,六百余条笔记横跨天文、数学、地质、医药与兵器;其中「方家以磁石磨针锋,则能指南,然常微偏东,不全南也」一条,是人类对磁偏角现象的第一次明确记载,早于欧洲约四百年。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《梦溪笔谈》 · 卷二十四·杂志一 · 碎片可拼回原文">《梦溪笔谈》</span></p>
+<p><span class="u-gold">火药在宋代完成了从方士丹炉到军械库的转身:曾公亮、丁度奉敕编成的《武经总要》(1044)载有火炮、蒺藜火球、毒药烟球三种配方,是世界现存最早的火药配方;到开庆元年(1259),寿春府又造出以巨竹为筒、发射「子窠」的突火枪,管形射击火器就此登场。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷一九七·兵志十一·器甲之制 · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">指南针也在宋人手里第一次下了海。朱彧《萍洲可谈》(约1119)记广州海船「舟师识地理,夜则观星,昼则观日,阴晦观指南针」,这是全世界关于罗盘用于航海的最早文字记录,比欧洲文献早约七十年。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 下册·海外贸易 · 碎片可拼回原文">漆侠《宋代经济史》</span></p>
+<p>后人津津乐道的「四大发明」,有三项——活字印刷、火药武器、航海罗盘——是在宋代成熟或定型的。这并非巧合:发达的市场、频繁的战争与庞大的文官系统,恰好同时供给了技术的需求方、试验场与记录者。</p><blockquote class="quoteblock">用胶泥刻字,薄如钱唇,每字为一印,火烧令坚。<span class="qsrc">—— 《梦溪笔谈》 · 卷十八·技艺 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote>
+<h2 class="sec">天青与讲堂</h2><p>宋人的审美走向一种奢侈的克制:不求满眼金碧,只求一色到极致。这种趣味最凝练的物证,是一只巴掌大的青瓷盘。</p>
+<p><span class="u-gold">后世以汝、官、哥、钧、定并称「五大名窑」,而以汝窑为魁:窑址在今河南宝丰清凉寺,专烧宫廷用瓷仅约二十年,以玛瑙入釉,成色天青,传世品不足百件——周煇《清波杂志》所记「汝窑宫中禁烧,内有玛瑙末为釉」即指此事。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 下册·制瓷业 · 碎片可拼回原文">漆侠《宋代经济史》</span></p>
+<div class="u-blue"><span class="tag">批 · 依附于「后世以汝、官、哥、钧、定…」</span><p>后人爱用「雨过天青云破处」形容汝窑釉色——这句话原是附会五代柴窑的传说,却被汝窑的实物接住了。传说认错了门牌,美学上倒没有说错。</p></div>
+<p><span class="u-gold">与器物之雅并行的是讲学之盛。书院在宋代从藏书之所长成学派的根据地;淳熙六年(1179),朱熹知南康军,重建庐山白鹿洞书院并手订《白鹿洞书院揭示》,以「父子有亲,君臣有义」等五教为纲——这份学规成为此后数百年东亚书院的范本。<span class="gseal" data-tip="域戳:宋史 · 通用层 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四二九·道学传三·朱熹 · 碎片可拼回原文">《宋史》</span></p>
+<p>书院也是思想交锋的擂台。乾道三年(1167)朱熹远赴长沙,与张栻在岳麓书院会讲两月,后人记其盛况「一时舆马之众,饮池水立涸」;淳熙二年(1175)的鹅湖之会上,朱熹与陆九渊兄弟就为学之方激辩数日,不欢而散,却把「理学」与「心学」的分水岭永远刻进了思想史。</p>
+<p>风雅与格物,在宋代原是一枚钱币的两面:印刷术让词集与注疏同时走进寻常书肆,书院让义理与技艺各有讲席;而一只天青釉盘所要求的窑温控制,与一阕慢词所要求的音律控制,同样苛刻。懂得这一点,才算摸到了这个王朝的质地。</p><div class="page-foot"></div></section>
+<section class="page"><div class="page-head"><span>第七章 · 风雅与格物 · 铸卡</span><span class="seg">宋史 · 通用层</span></div><div class="ch-no">铸 卡</div><h1 class="ch-title" style="font-size:26px">本章沉淀</h1><div class="tbl-wrap"><table class="tbl"><caption>五大名窑速览(口诀:汝官哥钧定)</caption><thead><tr><th>窑口</th><th>窑址(今地)</th><th>招牌特征</th><th>一句话记忆</th></tr></thead><tbody><tr><td>汝窑</td><td>河南宝丰清凉寺</td><td>天青釉、玛瑙入釉、蟹爪纹</td><td>青如天、面如玉,存世不足百件</td></tr><tr><td>官窑</td><td>北宋汴京/南宋杭州</td><td>紫口铁足、大开片</td><td>朝廷自营的「体制内」窑</td></tr><tr><td>哥窑</td><td>窑址至今未定(传处州)</td><td>金丝铁线</td><td>把开裂缺陷做成开片美学</td></tr><tr><td>钧窑</td><td>河南禹州</td><td>窑变釉,「入窑一色,出窑万彩」</td><td>以铜红窑变取胜的异数</td></tr><tr><td>定窑</td><td>河北曲阳</td><td>白瓷印花、覆烧芒口</td><td>芒口镶金银,缺陷变身份</td></tr></tbody></table></div><ul class="tl"><li><span class="yr">1041—1048</span><span class="ev">毕昇发明胶泥活字</span><details><summary>细看</summary><div class="dt">庆历年间事,沈括《梦溪笔谈》卷十八追记其法</div></details></li><li><span class="yr">1044</span><span class="ev">《武经总要》成书</span><details><summary>细看</summary><div class="dt">载世界现存最早的三种火药配方</div></details></li><li><span class="yr">约1088</span><span class="ev">沈括撰《梦溪笔谈》</span><details><summary>细看</summary><div class="dt">退居润州梦溪园,首记磁偏角现象</div></details></li><li><span class="yr">约1119</span><span class="ev">《萍洲可谈》成书</span><details><summary>细看</summary><div class="dt">世界最早的罗盘航海文字记录</div></details></li><li><span class="yr">1127</span><span class="ev">靖康之变</span><details><summary>细看</summary><div class="dt">李清照南渡,词风由闺阁转入流亡</div></details></li><li><span class="yr">1167</span><span class="ev">朱张会讲</span><details><summary>细看</summary><div class="dt">朱熹赴岳麓书院与张栻论学两月</div></details></li><li><span class="yr">1175</span><span class="ev">鹅湖之会</span><details><summary>细看</summary><div class="dt">朱熹与陆九渊兄弟激辩,理学心学分野</div></details></li><li><span class="yr">1179</span><span class="ev">重建白鹿洞书院</span><details><summary>细看</summary><div class="dt">朱熹手订《白鹿洞书院揭示》,书院学规定型</div></details></li><li><span class="yr">1195—1200</span><span class="ev">庆元党禁</span><details><summary>细看</summary><div class="dt">道学被斥「伪学」,朱熹卒于禁中(1200)</div></details></li><li><span class="yr">1259</span><span class="ev">突火枪造于寿春府</span><details><summary>细看</summary><div class="dt">以巨竹为筒发射子窠,管形射击火器登场</div></details></li><li><span class="yr">1313</span><span class="ev">朱注四书定为科举标准</span><details><summary>细看</summary><div class="dt">元皇庆二年下诏,影响此后六百年取士</div></details></li></ul><h2 class="sec">铸卡(6 张)</h2><div class="items-grid"><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">毕昇于庆历年间(1041—1048)发明胶泥活字,经沈括《梦溪笔谈》记载,为世界现存关于活字印刷术的最早明确记录。</div><div class="petals"><span class="petal">泥字火烧令坚、按韵分贮、松脂蜡纸灰固版,工艺记载自成闭环</span><span class="petal">「若印数十百千本,则极为神速」——优势明确指向批量复制</span><span class="petal">毕昇为布衣工匠,发明权全凭一则私人笔记存世</span></div><div class="src">◈ 《梦溪笔谈》卷十八·技艺</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">《武经总要》成书于庆历四年(1044),载火炮、蒺藜火球、毒药烟球三种火药配方,为世界现存最早的成文火药配方。</div><div class="petals"><span class="petal">曾公亮、丁度奉敕官修,火药知识已进入国家军政体系</span><span class="petal">三方硝石配比偏低,以燃烧发烟为主,尚非爆炸性兵器</span><span class="petal">下距突火枪(1259)两百余年,火器演进以世纪计</span></div><div class="src">◈ 《武经总要》前集卷十二</div></div><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">「词别是一家」:李清照《词论》提出的词体独立论,主张词须严守音律、自成一体,不得写成「句读不葺之诗」。</div><div class="petals"><span class="petal">立论根基是词的音乐属性:须协音律、可歌可唱</span><span class="petal">锋芒直指苏轼一派「以诗为词」的越界</span><span class="petal">是宋人对文体边界最自觉的一次理论申辩</span></div><div class="src">◈ 胡仔《苕溪渔隐丛话》后集卷三十三引《词论》</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">朱彧《萍洲可谈》(约1119)记广州海船「阴晦观指南针」,为全世界罗盘用于航海的最早文字记录。</div><div class="petals"><span class="petal">所记为其父朱服北宋末在广州任上的见闻,实际年代还可前推</span><span class="petal">导航序列为观星、观日、指南针三级,罗盘是阴天的冗余备份</span><span class="petal">早于欧洲最早记载(约1190)约七十年</span></div><div class="src">◈ 《萍洲可谈》卷二</div></div><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">「天理」:二程立为最高范畴的宇宙法则兼道德根据,程颢自谓「『天理』二字却是自家体贴出来」。</div><div class="petals"><span class="petal">把纲常伦理从圣人训诫升格为宇宙本然之理</span><span class="petal">「体贴」二字点明其方法是体认而非训诂</span><span class="petal">下启朱熹「性即理」,为理学定盘</span></div><div class="src">◈ 《河南程氏外书》卷十二</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">汝窑专烧仅约二十年、传世不足百件,为何在巅峰处戛然而止?</div><div class="petals"><span class="petal">宫廷定制窑,需求端(徽宗朝廷)一崩即断</span><span class="petal">靖康之乱摧毁北方窑业,工匠南迁散佚</span><span class="petal">南宋官窑承其法另起,可视为一次技术流亡</span></div><div class="src">◈ 周煇《清波杂志》卷五</div></div></div><div class="funbox"><b>冷知识</b> 「石油」这个词是沈括发明的:他在《梦溪笔谈》里记鄜延境内涌出的黑色液体「颇似淳漆,燃之如麻」,亲手定名「石油」,还用它的烟灰制墨,并预言「此物后必大行于世」——一句跨越九百年的神预言。</div><div class="srcline">本章源:沈括《梦溪笔谈》(卷十八「技艺」、卷二十四「杂志」) · 曾公亮、丁度《武经总要》(前集卷十二) · 脱脱等《宋史》(卷一九七「兵志十一」、卷四二七「道学传」) · 朱彧《萍洲可谈》(卷二)</div><div class="page-foot"></div></section>
+
+<!-- ═══ 目的树页 ═══ -->
+<section class="page" data-toc="目的树 · 这册笔记为谁而写" id="pg-ptree">
+  <div class="page-head"><span>目的树</span><span class="seg">人机共养 · 活台账</span></div>
+  <div class="ch-no">机 关</div>
+  <h1 class="ch-title">这册笔记为谁而写</h1>
+  <p style="font-size:14.5px;color:var(--ink-2)">每篇笔记挂靠一个叶目的;判定沿树继承,反复出现的金笔向上晋升。根目的可以上锁——锁嘴不锁眼:画像照常积累,换届提案闭嘴。</p>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+    <button class="lockbtn" id="rootLock" aria-pressed="true">🔒 根目的已锁 · 只答不问</button>
+    <span style="font-family:'Noto Sans SC',sans-serif;font-size:11.5px;color:var(--ink-3)">点按试试:解锁后,下方换届提案会重新开口。</span>
+  </div>
+  <div class="ptree">
+    <ul>
+      <li>
+        <span class="pnode root">宋史专题研究 <span class="cnt">· 根 · 09-12 换届即位</span></span>
+        <ul>
+          <li><span class="pnode retired">历史兴趣调研 <span class="rtag">前任根 · 已退休</span> <span class="cnt">纸 5 · 金 23</span></span></li>
+          <li><span class="pnode">变法与党争 <span class="cnt">纸 6 · 金 58 · 晋升 9</span></span></li>
+          <li><span class="pnode">经济与货币 <span class="cnt">纸 4 · 金 41 · 晋升 6</span></span></li>
+          <li><span class="pnode">靖康与南渡 <span class="cnt">纸 3 · 金 32</span></span></li>
+          <li><span class="pnode">风雅与格物 <span class="cnt">纸 3 · 金 28</span></span></li>
+          <li><span class="pnode">期末复习 <span class="cnt">包 · 取父域金笔集</span></span></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <h2 class="sec">画像(Agent 静默维护,不敲门)</h2>
+  <div class="portrait">
+    <div class="pbar"><span>兴趣型笔记</span><div class="rail"><div class="fill" style="width:24%;background:var(--celadon)"></div></div><span>5 纸</span></div>
+    <div class="pbar"><span>学术型笔记</span><div class="rail"><div class="fill" style="width:76%;background:var(--gold)"></div></div><span>16 纸</span></div>
+    <div class="pbar"><span>判定密度(金/千字)</span><div class="rail"><div class="fill" style="width:62%;background:var(--indigo)"></div></div><span>↑ 3.1×</span></div>
+  </div>
+  <div class="envelope muted" id="succEnvelope">
+    <div class="eh"><span class="kind">提案 · 根目的换届</span><span style="font-size:11px;color:var(--ink-3)">Agent · 夜班巡检 · 攒批一季一敲</span></div>
+    <div class="body">画像显示近 16 纸中学术型占八成:您的工作重心已从「历史兴趣调研」移向专题研究。是否将根目的换届为「宋史专题研究」?旧根将挂为前任,判定与化石全部保留。</div>
+    <div class="btns"><button class="ebtn" data-env="succ">采纳换届</button><button class="ebtn ghost">再想想</button></div>
+    <div class="result">✓ 已换届(本册封面所示即换届后的状态;此提案为 09-12 已采纳的历史件回放)</div>
+    <div class="receipt">收据:<b>✓ create_proposal</b> · 类型 purpose_succession · 2026-09-12 · 事件账可回放</div>
+  </div>
+  <div class="page-foot"></div>
+</section>
+
+<!-- ═══ 编年史页 ═══ -->
+<section class="page" data-toc="编年史 · 五十日学志" id="pg-chron">
+  <div class="page-head"><span>编年史</span><span class="seg">十年回望 · 零手动记录</span></div>
+  <div class="ch-no">机 关</div>
+  <h1 class="ch-title">五十日学志</h1>
+  <p style="font-size:14.5px;color:var(--ink-2)">这一页没有人写过一个字——它是系统从挂靠、判定与换届记录里自动长出来的学习自传。粒度到「转折」为止,永远不到「16:12 写了某个字」。</p>
+  <ul class="chron">
+    <li><span class="d">08-02</span><span class="dot"></span><span class="t">建项目「宋代」,根目的:历史兴趣调研。<small>第一纸尚未落笔,好奇先到。</small></span></li>
+    <li><span class="d">08-05</span><span class="dot"></span><span class="t">第一纸〈汴京的一天〉。<small>兴趣型 · 挂靠:兴趣调研</small></span></li>
+    <li><span class="d">08-14</span><span class="dot"></span><span class="t">前五纸成:政治、文学、经济、军事、城市各开一扇窗。<small>广度浏览期</small></span></li>
+    <li><span class="d">08-30</span><span class="dot"></span><span class="t">铸卡量首次超过摘录量。<small>画像第一次偏转:读者正在变成研究者。</small></span></li>
+    <li><span class="d">09-06</span><span class="dot"></span><span class="t">〈青苗法核账〉起,连续十纸学术深查。<small>学术型 · 挂靠:变法与党争</small></span></li>
+    <li class="flip-ev"><span class="d">09-12</span><span class="dot"></span><span class="t"><strong>根目的换届:历史兴趣调研 → 宋史专题研究。</strong><small>Agent 提案 · 人采纳 · 旧根挂为前任——从玩票到做学问,树上有准确日期。</small></span></li>
+    <li><span class="d">09-17</span><span class="dot"></span><span class="t">判定库:金 182 · 蓝 67;认亲合并 12 对表述。<small>「不同书里的同一句话」开始认亲。</small></span></li>
+    <li><span class="d">09-19</span><span class="dot"></span><span class="t">期末复习包自动生成——取父域金笔集为骨架。<small>骨架是用出来的,不是买来的。</small></span></li>
+  </ul>
+  <div class="page-foot"></div>
+</section>
+
+<section class="page" data-toc="复习底稿 · 金笔总检"><div class="page-head"><span>第八章 · 复习底稿 · 金笔总检</span><span class="seg">宋史 · 期末复习(取父域金笔集)</span></div><div class="ch-no">第 八 章</div><h1 class="ch-title">复习底稿 · 金笔总检</h1><span class="purpose-chip">⌖ 挂靠:宋史 · 期末复习(取父域金笔集)</span><div class="epigraph">鉴前世之兴衰,考当今之得失。<span class="who">司马光《进资治通鉴表》</span></div><p style="font-family:'Noto Sans SC',sans-serif;font-size:13px;color:var(--ink-3)">本页金笔骨架由父域金笔集自动取货——每条都是前七章里被判过金、经认亲合并后的代表元。</p><h2 class="sec">金笔骨架</h2><aside class="anscard"><div class="sel">⌖ 圈选:「和议以杀功臣为担保…」</div><div class="q">为什么说岳飞之死是和议的「担保」?</div><div class="a">宋人记载有金方「必杀飞,始可和」之说;更实质的是高宗须向金证明主战力量已被拔除,和局才可信——功臣之死是履约凭证。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><aside class="anscard"><div class="sel">⌖ 圈选:「号称「民不加赋而国用饶」…」</div><div class="q">不加赋,钱到底从哪里来?</div><div class="a">从原本流向高利贷者和豪商的利润中来:官府放青苗贷收息、自营市易,实质是国家下场做金融与商业,「与民争利」之讥由此而生。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 4 碎片 · 只答不写</div></aside><aside class="anscard"><div class="sel">⌖ 圈选:「更戍法使「兵不识将、将不…」</div><div class="q">故意打散将兵关系,不会削弱战斗力吗?</div><div class="a">会,而且宋军对外屡败正源于此。太祖的优先级是内部安全高于对外战力;后来的岁币,可以看作为这个选择支付的外部账单。</div><div class="who">答卡 · Mr Zero · 检索:材料库命中 2 碎片 · 只答不写</div></aside><p><span class="u-gold">960 年陈桥兵变,赵匡胤黄袍加身,以兵变得国。正因如此,宋的立国方针从第一天起就是防止下一次兵变:杯酒释兵权收回宿将兵柄,更戍法使「兵不识将、将不识兵」,禁军精锐尽集京师——是为「强干弱枝」。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《涑水记闻》 · 卷一(太祖收兵权诸条) · 碎片可拼回原文">《涑水记闻》</span></p>
+<p><span class="u-gold">宋代中枢以中书门下掌政、枢密院掌军、三司掌财,三者互不统属、各自直达皇帝。宰相之权被制度性地切成三份,皇权反因分权而更集中——这套「二府三司」格局是理解宋代一切政争的棋盘。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 职官志(二府三司之制) · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">宋代科举每榜取士动辄数百人,总量远超唐代,又以糊名、誊录杜绝请托。由此批量产生的文官集团,使「与士大夫治天下」从一句漂亮话变成实际的权力结构:皇帝与官僚共治,武人被永久排除在决策层之外。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋会要辑稿》 · 选举 · 贡举(糊名誊录条制) · 碎片可拼回原文">《宋会要辑稿》</span></p>
+<p><span class="u-gold">1004 年(景德元年)澶渊之盟:宋辽约为兄弟之国,宋每年送辽银十万两、绢二十万匹。此后宋辽维持了约百年的和平,「以岁币换和平」自此成为宋对外关系的基本模式。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《续资治通鉴长编》 · 卷五八 · 景德元年十二月 · 碎片可拼回原文">《续资治通鉴长编》</span></p>
+<p><span class="u-gold">1023 年(天圣元年)朝廷设益州交子务,四川民间的私票交子升格为官方发行——这是世界最早的官方纸币。它能成立,靠的是铁钱笨重的现实需求与官府的「钞本」准备金;它后来的贬值,则证明纸币的信用与财政纪律同命。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 食货志 · 会子(交子附) · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">至仁宗朝,养兵、养官、恩荫与岁币层层叠加,财政积贫,时人谓之「冗官、冗兵、冗费」。三冗不是偶然的弊政,而是开国收权设计的制度成本:每一项冗,都对应着一项换取安全的初始交易。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:漆侠《宋代经济史》 · 宋代财政收支诸章 · 碎片可拼回原文">漆侠《宋代经济史》</span></p>
+<p><span class="u-gold">1043 年范仲淹主持庆历新政,以整顿吏治为核心——明黜陟、抑侥幸、精贡举,刀刀砍向官僚的既得利益。仁宗支持动摇,新政一年有余即罢:它证明在宋代,动人事比动钱更难。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷三一四 · 范仲淹传 · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">1069 年(熙宁二年)王安石主持变法,以理财为核心,青苗、募役、市易诸法号称「民不加赋而国用饶」——实质是以国家信贷与官营商业,替代私人高利贷与豪商的利润。争议因此从政策层面上升为义利之辨:反对者骂的不是账算不对,而是朝廷不该做这门生意。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《临川先生文集》 · 答司马谏议书 · 碎片可拼回原文">《临川先生文集》</span></p>
+<p><span class="u-gold">神宗一死,新法尽废(元祐更化);哲宗亲政,新法尽复(绍圣绍述)。此后数十年政局在两极间翻烧饼,任何制度都活不过一朝天子——新旧党争对宋的伤害,超过任何单项法令的得失。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:邓广铭《北宋政治改革家王安石》 · 末章(新法尽废与身后毁誉) · 碎片可拼回原文">邓广铭《北宋政治改革家王安石》</span></p>
+<p><span class="u-gold">两宋之际,经济重心南移最终完成,东南财赋撑起全局;城市里坊市分离与宵禁瓦解,商铺临街、夜市通宵。《东京梦华录》里的汴京与《清明上河图》里的市声,是这场「城市革命」的两份存照。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《东京梦华录》 · 卷二 · 州桥夜市 · 碎片可拼回原文">《东京梦华录》</span></p>
+<p><span class="u-gold">1120 年海上之盟,宋约金夹攻辽,反而暴露了自身军力的虚弱。1127 年金军攻破汴京,掳徽、钦二帝北去,北宋亡——史称靖康之变;康王赵构即位于应天府,南宋自此始。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《三朝北盟会编》 · 政宣上帙(海上之盟)至靖康中帙 · 碎片可拼回原文">《三朝北盟会编》</span></p>
+<p><span class="u-gold">1141 年(绍兴十一年)绍兴和议:宋对金称臣,岁贡银二十五万两、绢二十五万匹,东以淮水、西以大散关为界。和议墨迹未干,岳飞即以「莫须有」死于大理寺狱——和议以杀功臣为担保。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷三六五 · 岳飞传 · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">此后宋金关系两度改约:隆兴和议(1164)宋不再称臣,改叔侄之国,岁币各减五万;嘉定和议(1208)降为伯侄之国,岁币各增至三十万,另付犒军钱三百万贯。名分与币额都是价格,军事态势才是汇率。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 孝宗本纪 · 隆兴二年;宁宗本纪 · 嘉定元年 · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">南宋朱熹(1130-1200)集周敦颐、二程之学大成,《四书章句集注》确立了新的经典体系。元代恢复科举即以朱注取士,沿用至明清——宋代在思想上完成的这次重构,寿命远长于赵宋王朝本身。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四二九 · 道学三 · 朱熹传 · 碎片可拼回原文">《宋史》</span></p>
+<p><span class="u-gold">1234 年宋联蒙古灭金,重蹈百年前联金灭辽的覆辙;随后蒙宋战争绵延四十余年,钓鱼城下蒙哥殒命也只换来延宕。1276 年临安出降,1279 年崖山海战,陆秀夫负幼帝蹈海,宋亡。<span class="gseal" data-tip="域戳:复习域 · 继承自根 · 改写自立✓" tabindex="0">金</span></span><span class="anch" data-tip="回程锚:《宋史》 · 卷四十七 · 瀛国公本纪(附二王) · 碎片可拼回原文">《宋史》</span></p><blockquote class="quoteblock">为天下理财,不为征利。<span class="qsrc">—— 《临川先生文集》 · 答司马谏议书 <span class="anch" data-tip="回程锚 · 直引原文">◈ 原文碎片</span></span></blockquote><div class="page-foot"></div></section>
+<section class="page" data-toc="挖空与换装" data-lv="2"><div class="page-head"><span>复习组件 · 挖空与换装</span><span class="seg">宋史 · 期末复习(取父域金笔集)</span></div><div class="ch-no">复 习 件</div><h1 class="ch-title">挖空与换装</h1><h2 class="sec">挖空复习(点空格揭示)</h2><p class="cloze">1004 年澶渊之盟,宋辽约为<button class="blank" aria-label="挖空">兄弟</button>之国,宋岁输辽银<button class="blank" aria-label="挖空">十</button>万两、绢<button class="blank" aria-label="挖空">二十</button>万匹。</p>
+<p class="cloze">庆历新政以整顿<button class="blank" aria-label="挖空">吏治</button>为核心,熙宁变法以<button class="blank" aria-label="挖空">理财</button>为核心;前者一年有余即罢,后者推行至神宗去世。</p>
+<p class="cloze">1023 年朝廷在益州设<button class="blank" aria-label="挖空">交子务</button>,交子由民间私票升格为世界最早的官方<button class="blank" aria-label="挖空">纸币</button>。</p>
+<p class="cloze">绍兴和议规定宋对金<button class="blank" aria-label="挖空">称臣</button>,岁贡银、绢各<button class="blank" aria-label="挖空">二十五</button>万,东以<button class="blank" aria-label="挖空">淮水</button>、西以大散关为界。</p>
+<p class="cloze">宋代中枢分权:中书门下掌政、<button class="blank" aria-label="挖空">枢密院</button>掌军、<button class="blank" aria-label="挖空">三司</button>掌财,三者互不统属、各自直达皇帝。</p>
+<p class="cloze">1279 年<button class="blank" aria-label="挖空">崖山</button>海战,陆秀夫负幼帝蹈海,南宋亡;此前宋以联蒙灭金,重蹈<button class="blank" aria-label="挖空">联金灭辽</button>的覆辙。</p><h2 class="sec">换装复习(同一命题两身衣裳,点卡翻面)</h2><div class="flip-grid"><button class="flip" data-a="宋初一切制度设计以防内变为第一优先,对外战力是被有意支付的代价。" data-b="强干弱枝的本质是用边防之弱换皇权之稳——太祖宁要一支打不赢的军队,不要一员管不住的将领。" data-side="a"><span class="side">表述甲</span><span class="face">宋初一切制度设计以防内变为第一优先,对外战力是被有意支付的代价。</span></button><button class="flip" data-a="岁币是宋对外关系的基本工具:用确定的财政成本,替代不确定的军事成本。" data-b="从澶渊到嘉定,宋朝反复做同一笔算术——赔款比战争便宜,只要买来的和平是真和平。" data-side="a"><span class="side">表述甲</span><span class="face">岁币是宋对外关系的基本工具:用确定的财政成本,替代不确定的军事成本。</span></button><button class="flip" data-a="交子的成败系于发行纪律:有钞本则为通货,滥发则为废纸。" data-b="世界最早的纸币同时提供了世界最早的教训——纸币的价值不在纸上,在朝廷管不管得住自己的手。" data-side="a"><span class="side">表述甲</span><span class="face">交子的成败系于发行纪律:有钞本则为通货,滥发则为废纸。</span></button><button class="flip" data-a="新旧党争的破坏不在某一项法令的得失,而在政策彻底丧失连续性。" data-b="元祐尽废新法、绍圣尽复新法,车轮式翻案让任何制度都活不过一朝天子——这比青苗法本身的利弊致命得多。" data-side="a"><span class="side">表述甲</span><span class="face">新旧党争的破坏不在某一项法令的得失,而在政策彻底丧失连续性。</span></button></div><p style="font-family:'Noto Sans SC',sans-serif;font-size:12px;color:var(--ink-3)">▲ 两种表述在判定库里是同一个 item 的等价类成员——认亲一次,换装免费。</p><div class="page-foot"></div></section>
+<section class="page" data-toc="易混对照与自测" data-lv="2"><div class="page-head"><span>复习组件 · 对照与自测</span><span class="seg">宋史 · 期末复习(取父域金笔集)</span></div><div class="ch-no">复 习 件</div><h1 class="ch-title">易混对照与自测</h1><h2 class="sec">易混对照</h2><div class="tbl-wrap"><table class="tbl"><caption>一眼分清</caption><thead><tr><th>题</th><th>其一</th><th>其二</th></tr></thead><tbody><tr><td>庆历新政 vs 熙宁变法</td><td>庆历新政(1043-1045):范仲淹主持,核心是整顿吏治(明黜陟、抑侥幸、精贡举),直接触动官僚人事利益;仁宗支持动摇,一年有余即罢。</td><td>熙宁变法(1069 起):王安石主持,核心是理财强兵(青苗、募役、市易、保甲),神宗始终力挺,推行十余年;却因触及义利之辨,引爆延续数十年的新旧党争。</td></tr><tr><td>澶渊之盟 vs 绍兴和议</td><td>澶渊之盟(1004):对等的兄弟之国,岁币银绢合计三十万,签于宋军尚能一战的相持之际,换来约百年和平,国体未损。</td><td>绍兴和议(1141):不对等的君臣名分,岁贡银绢各二十五万,以称臣、割地、杀岳飞为代价——同是花钱买和平,一个买的是对等停战,一个买的是臣属之下的安全。</td></tr><tr><td>交子 vs 岁币的财政逻辑</td><td>交子:以国家信用凭空创造支付能力,约束在内部——发行有度则近乎无成本地润滑经济,失约束则通胀,由本国百姓埋单。</td><td>岁币:以真金白银购买外部安全,约束在对手——支出确定、可预算,远低于战费,但价格由军事态势决定:武力越弱,和平越贵。</td></tr></tbody></table></div><h2 class="sec">自测(由浅入深)</h2><details class="qa"><summary>1 · 澶渊之盟签订于哪一年?双方名分与岁币条款各是什么?</summary><div class="ans">答案在前七章的金笔里——答不出就顺着回程锚回原文。</div></details><details class="qa"><summary>2 · 「二府三司」各指什么机构、各掌何权?这套设计针对的是什么问题?</summary><div class="ans">答案在前七章的金笔里——答不出就顺着回程锚回原文。</div></details><details class="qa"><summary>3 · 庆历新政与熙宁变法的核心方向有何不同?为什么前者败得更快?</summary><div class="ans">答案在前七章的金笔里——答不出就顺着回程锚回原文。</div></details><details class="qa"><summary>4 · 交子从民间私票到官方纸币的关键一步是什么?它得以成立的两个前提条件是什么?</summary><div class="ans">答案在前七章的金笔里——答不出就顺着回程锚回原文。</div></details><details class="qa"><summary>5 · 比较澶渊之盟与绍兴和议:同为「花钱买和平」,两者在名分、时机与代价上的差异说明了什么?</summary><div class="ans">答案在前七章的金笔里——答不出就顺着回程锚回原文。</div></details><details class="qa"><summary>6 · 有人说宋代「积贫积弱」,有人说宋代是中国近世的开端。用全书证据说明:这两种判断分别在什么层面成立?它们共享的制度根源是什么?</summary><div class="ans">答案在前七章的金笔里——答不出就顺着回程锚回原文。</div></details><h2 class="sec">全书最贵的六张卡</h2><div class="items-grid"><div class="item-card"><span class="tbadge t概念">概念</span><div class="st">强干弱枝:宋初把兵权、财权、精兵尽收中央、地方仅余空壳的立国方针;北宋此后的制度病,几乎都可溯至这一初始选择。</div><div class="petals"><span class="petal">收权三对象:宿将兵柄、地方财赋、精锐兵员</span><span class="petal">手段:杯酒释兵权、更戍法、禁军集于京师</span><span class="petal">代价:边防战力与地方活力同遭削弱</span></div><div class="src">◈ 《宋史·兵志》</div></div><div class="item-card"><span class="tbadge t数据">数据</span><div class="st">澶渊之盟条款(1004):宋辽约为兄弟之国,宋岁输银十万两、绢二十万匹,合计三十万。</div><div class="petals"><span class="petal">名分对等:兄弟而非君臣</span><span class="petal">三十万相对宋财政规模负担甚轻,远低于一年战费</span><span class="petal">换得宋辽约百年无大战</span></div><div class="src">◈ 《续资治通鉴长编》卷五八</div></div><div class="item-card"><span class="tbadge t断言">断言</span><div class="st">庆历新政败于动人事,熙宁变法争于动财利;在宋代官僚体制内,动吏治比动钱阻力更大、失败更快。</div><div class="petals"><span class="petal">新政核心是明黜陟、抑侥幸,直接砸官僚的饭碗</span><span class="petal">变法核心是青苗、募役,砸的是体制外高利贷者与豪商的利润</span><span class="petal">结局对照:一年有余即罢 vs 推行至神宗去世</span></div><div class="src">◈ 《宋史·范仲淹传》</div></div><div class="item-card"><span class="tbadge t实例">实例</span><div class="st">交子:1023 年益州交子务设立,四川民间私票升格为世界最早的官方纸币。</div><div class="petals"><span class="petal">成立前提:铁钱笨重的现实需求 + 官府钞本准备</span><span class="petal">运行机制:分界发行、届期兑换</span><span class="petal">败坏路径:财政缺口→滥发→贬值</span></div><div class="src">◈ 《宋史·食货志》</div></div><div class="item-card"><span class="tbadge t方法">方法</span><div class="st">和议对照四栏法:把任何一份宋代和议拆成名分、币额、疆界、签约时军事态势四栏再横向比较,「屈辱」这类情绪词即可换算为可比较的价格。</div><div class="petals"><span class="petal">名分是政治价格,币额是财政价格</span><span class="petal">疆界写死既得利益,态势决定议价能力</span><span class="petal">适用文本:澶渊—绍兴—隆兴—嘉定四份和议</span></div><div class="src">◈ 《建炎以来系年要录》卷一四二</div></div><div class="item-card"><span class="tbadge t问题">问题</span><div class="st">「积贫积弱」与「中国近世之开端」两种判断如何同时为真?——经济文化的极盛与军事财政的困局,共存于同一套制度之内。</div><div class="petals"><span class="petal">贫在国用,不在民间</span><span class="petal">弱在战力,不在国力</span><span class="petal">共同根源:开国收权设计的制度成本</span></div><div class="src">◈ 《宋史·食货志》</div></div></div><div class="page-foot"></div></section>
+
+<!-- ═══ 提案与收据页 ═══ -->
+<section class="page" data-toc="信道 · 提案与收据" id="pg-proposal">
+  <div class="page-head"><span>信道</span><span class="seg">Agent 只提案 · 判断永远归人</span></div>
+  <div class="ch-no">机 关</div>
+  <h1 class="ch-title">伙计递上来的两只信封</h1>
+  <p>Agent 在这册笔记里从头到尾没有直接写过一个字。它做事的唯一方式是把成品装进信封递过来;你拆或不拆,系统都留了小票。</p>
+  <div class="envelope" id="envA">
+    <div class="eh"><span class="kind">提案 · 整理笔记</span><span style="font-size:11px;color:var(--ink-3)">来源:材料库〈会子交子考〉三件</span></div>
+    <div class="body">已按「经济与货币」域将三份材料整理为草稿〈交子:一张纸如何学会值钱〉:金笔 11 条、蓝批 4 条、行文若干,随稿打包了 note 域户口(内容组 + folder 主位)。采纳即落纸,户口同落;不满意可整批退回。</div>
+    <div class="btns"><button class="ebtn" data-env="A">采纳 · 落纸</button><button class="ebtn ghost">丢弃</button></div>
+    <div class="result">✓ 已采纳:草稿与户口一并落地,整批可一键撤销。</div>
+    <div class="receipt">收据:<b>✓ create_proposal</b> · organized_note · 输入 3 材料 · 事件 #4471</div>
+  </div>
+  <div class="envelope" id="envB">
+    <div class="eh"><span class="kind">提案 · 认亲合并</span><span style="font-size:11px;color:var(--ink-3)">夜班 · 整理委托</span></div>
+    <div class="body">发现两条金笔疑为同一命题的两种表述:「澶渊之盟约定岁币银十万两、绢二十万匹」(第 4 纸)与「宋辽和约岁输三十万」(第 11 纸)。建议认亲合并,以前者为代表元,后者保留为换装表述。</div>
+    <div class="btns"><button class="ebtn" data-env="B">认亲 · 合并</button><button class="ebtn ghost">不是同一条</button></div>
+    <div class="result">✓ 已合并:等价类 +1,退休表述带转发指针,换装复习自动多了一件衣裳。</div>
+    <div class="receipt">收据:<b>✓ create_proposal</b> · item_kinship · 机器提名 · 判断归人 · 事件 #4519</div>
+  </div>
+  <p style="font-family:'Noto Sans SC',sans-serif;font-size:12.5px;color:var(--ink-3)">▲ 每只信封底部是收据条:说了什么、做没做、事件号几号——空头支票在这套账里活不过一轮。</p>
+  <div class="page-foot"></div>
+</section>
+
+<!-- ═══ 图例封底 ═══ -->
+<section class="page" data-toc="凡例 · 封底" id="pg-legend">
+  <div class="page-head"><span>凡例</span><span class="seg">卷末</span></div>
+  <div class="ch-no">凡 例</div>
+  <h1 class="ch-title">这册书的语法</h1>
+  <div class="legend-grid">
+    <div class="lg-card"><b><span class="u-gold">金笔 · 自足命题<span class="gseal" data-tip="改写后可独立成立">金</span></span></b>改写后离开上下文仍然成立、值得长期记住的判断。每条金笔带域戳(悬停金印可见)与回程锚 ◈(指回源库原始文档的具体卷次),是铸 item、进复习包的唯一来源。</div>
+    <div class="lg-card"><b style="color:var(--indigo-deep)">蓝批 · 依附话语</b>感悟、评价、联想——离开它依附的金笔就失去意义。蓝批住在批注域,永不混进 item;关掉判定层它们整体隐去,正文一字不动。</div>
+    <div class="lg-card"><b>无色 · 行文</b>承接与铺陈,免于判定的自由。正因为大部分文字保持无色,金与蓝才贵重——稀疏判断是这册书的第一纪律。</div>
+    <div class="lg-card"><b style="color:var(--celadon-deep)">天青 · Agent 与机关</b>答卡、信封、画像、编年史——凡天青色的东西都是伙计的手笔:只读、只递、只提案,判断永远归人。</div>
+  </div>
+  <h2 class="sec">本册用到的组件</h2>
+  <p style="font-family:'Noto Sans SC',sans-serif;font-size:13.5px;line-height:2.2;color:var(--ink-2)">
+  三色判定层(全局开关)· 页边答卡 · item 铸卡(六型徽章+花瓣)· 时间线 · 对照表 · 数据图表 · 疆域示意图 · 思考板(便签+弧线)· 判断履历 · 目的树(锁+画像+换届)· 编年史 · 提案信封+收据条 · 挖空复习 · 换装翻卡 · 易混对照 · 自测问答 · 装订段页码 · 双主题绢纸皮肤</p>
+  <div class="funbox"><b>跋</b> 此册为 Coincides 成品打样,由 HQ 起草、八名史官供稿、一位不存在的学习者试用。册中一切机关——判定、目的树、认亲、收据——皆是正在建造的真实产品机制的纸上预演。二十四纸之后,轮到应用本体来追上这张样。</div>
+  <div class="page-foot">宋史手册 · 终 · Coincides 2026</div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+
+  /* 判定层开关 */
+  var jt=$('#judgeToggle');
+  jt.addEventListener('click',function(){
+    var on=jt.getAttribute('aria-pressed')==='true';
+    jt.setAttribute('aria-pressed',String(!on));
+    jt.textContent=!on?'判定层 · 开':'判定层 · 关';
+    document.body.classList.toggle('no-judge',on);
+  });
+  $('#tocBtn').addEventListener('click',function(){ var t=$('#pg-toc'); if(t) t.scrollIntoView({behavior:'smooth'}); });
+
+  /* 页码 + 目录 */
+  var pages=$$('.page');
+  pages.forEach(function(p,i){
+    var f=$('.page-foot',p);
+    if(f && !f.textContent.trim()) f.textContent='第 '+(i+1)+' 纸 · 共 '+pages.length+' 纸';
+  });
+  var toc=$('#tocList');
+  if(toc){ pages.forEach(function(p,i){
+    var t=p.getAttribute('data-toc'); if(!t||p.id==='pg-toc'||p.id==='pg-cover') return;
+    var li=document.createElement('li');
+    if(p.getAttribute('data-lv')==='2') li.className='lv2';
+    li.innerHTML='<a href="#'+p.id+'">'+t+'</a><span class="dots"></span><span class="pn">'+(i+1)+'</span>';
+    toc.appendChild(li);
+  }); }
+
+  /* 挖空 */
+  $$('.blank').forEach(function(b){ b.addEventListener('click',function(){ b.classList.toggle('shown'); }); });
+
+  /* 换装翻卡 */
+  $$('.flip').forEach(function(f){
+    f.addEventListener('click',function(){
+      var a=f.getAttribute('data-a'), b=f.getAttribute('data-b');
+      var showingA=f.getAttribute('data-side')!=='b';
+      f.setAttribute('data-side', showingA?'b':'a');
+      $('.side',f).textContent=showingA?'表述乙(换装)':'表述甲';
+      $('.face',f).textContent=showingA?b:a;
+    });
+  });
+
+  /* 目的树锁 */
+  var lock=$('#rootLock'), env=$('#succEnvelope');
+  if(lock&&env) lock.addEventListener('click',function(){
+    var locked=lock.getAttribute('aria-pressed')==='true';
+    lock.setAttribute('aria-pressed',String(!locked));
+    lock.textContent=!locked?'🔒 根目的已锁 · 只答不问':'🔓 根目的未锁 · 画像可敲门';
+    env.classList.toggle('muted', !locked);
+  });
+
+  /* 信封采纳 */
+  $$('.ebtn[data-env]').forEach(function(b){
+    b.addEventListener('click',function(){ b.closest('.envelope').classList.add('done'); });
+  });
+
+  /* ── 思考板:便签 + 弧线 ── */
+  (function(){
+    var svg=$('#boardSvg'); if(!svg) return;
+    var css=getComputedStyle(document.documentElement);
+    function v(n){return css.getPropertyValue(n).trim()}
+    var N={
+      shenzong:{x:410,y:70,w:150,h:52,t:'神宗',sub:'求富强之主',wt:3},
+      wang:{x:410,y:210,w:190,h:56,t:'王安石',sub:'「天变不足畏」',wt:3},
+      xin:{x:150,y:210,w:150,h:52,t:'新党',sub:'吕惠卿 · 章惇',wt:2},
+      jiu:{x:670,y:210,w:150,h:52,t:'旧党',sub:'司马光 · 文彦博',wt:2},
+      su:{x:670,y:360,w:150,h:52,t:'苏轼',sub:'中间派 · 两边挨骂',wt:2},
+      tj:{x:150,y:360,w:150,h:52,t:'台谏',sub:'弹章不绝',wt:1},
+      qm:{x:270,y:480,w:130,h:44,t:'青苗法',wt:1},
+      my:{x:420,y:480,w:130,h:44,t:'免役法',wt:1},
+      sy:{x:570,y:480,w:130,h:44,t:'市易法',wt:1}
+    };
+    var E=[
+      ['shenzong','wang','君臣相得',0.12,2,false],
+      ['wang','xin','引为羽翼',-0.25,1,false],
+      ['wang','qm','立法',0.15,1,true],
+      ['wang','my','立法',0,1,true],
+      ['wang','sy','立法',-0.15,1,true],
+      ['jiu','qm','攻其扰民',0.3,1,false,true],
+      ['su','my','独惜其便',-0.2,1,false,true],
+      ['tj','wang','弹章不绝',0.28,1,true,true],
+      ['jiu','shenzong','元祐尽废之',-0.3,1,false,true]
+    ];
+    var ns='http://www.w3.org/2000/svg';
+    function el(t,a){var e=document.createElementNS(ns,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+    var defs=el('defs',{}); var mk=el('marker',{id:'arw',viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'});
+    mk.appendChild(el('path',{d:'M0,0 L10,5 L0,10 z',fill:v('--ink-3')})); defs.appendChild(mk); svg.appendChild(defs);
+    E.forEach(function(ed){
+      var a=N[ed[0]],b=N[ed[1]],bend=ed[3],wt=ed[4],arrow=ed[5],dash=ed[6];
+      var mx=(a.x+b.x)/2, my2=(a.y+b.y)/2, dx=b.x-a.x, dy=b.y-a.y, L=Math.sqrt(dx*dx+dy*dy)||1;
+      var cx=mx-dy/L*L*bend, cy=my2+dx/L*L*bend;
+      var p=el('path',{d:'M'+a.x+','+a.y+' Q'+cx+','+cy+' '+b.x+','+b.y,fill:'none',
+        stroke: wt>=2? v('--ink-2'): v('--ink-3'),'stroke-width': wt>=2?2.2:1.5});
+      if(dash) p.setAttribute('stroke-dasharray','6 5');
+      if(arrow) p.setAttribute('marker-end','url(#arw)');
+      svg.appendChild(p);
+      var lx=0.25*a.x+0.5*cx+0.25*b.x, ly=0.25*a.y+0.5*cy+0.25*b.y;
+      var tw=ed[2].length*13+14;
+      svg.appendChild(el('rect',{x:lx-tw/2,y:ly-11,width:tw,height:22,fill:v('--paper-2'),rx:4}));
+      var tx=el('text',{x:lx,y:ly+4,'text-anchor':'middle','font-size':'12','font-family':'Noto Sans SC,sans-serif',fill:v('--ink-2')});
+      tx.textContent=ed[2]; svg.appendChild(tx);
+    });
+    for(var k in N){ var n=N[k];
+      var fill = n.wt===3? v('--ink-2') : n.wt===2? v('--paper') : v('--paper-2');
+      var stroke = n.wt===3? v('--ink-2') : v('--hair');
+      var g=el('g',{});
+      g.appendChild(el('rect',{x:n.x-n.w/2,y:n.y-n.h/2,width:n.w,height:n.h,rx:9,fill:fill,stroke:stroke,'stroke-width':n.wt===2?1.6:1.2}));
+      var t1=el('text',{x:n.x,y:n.sub? n.y-2 : n.y+5,'text-anchor':'middle','font-size':'16','font-weight':'700',
+        'font-family':'Noto Serif SC,serif',fill: n.wt===3? v('--paper') : v('--ink')});
+      t1.textContent=n.t; g.appendChild(t1);
+      if(n.sub){ var t2=el('text',{x:n.x,y:n.y+17,'text-anchor':'middle','font-size':'10.5','font-family':'Noto Sans SC,sans-serif',
+        fill: n.wt===3? v('--paper-2') : v('--ink-3')}); t2.textContent=n.sub; g.appendChild(t2); }
+      svg.appendChild(g);
+    }
+  })();
+
+  /* ── 财政柱状图 ── */
+  (function(){
+    var svg=$('#fiscalSvg'); if(!svg) return;
+    var css=getComputedStyle(document.documentElement);
+    function v(n){return css.getPropertyValue(n).trim()}
+    var ns='http://www.w3.org/2000/svg';
+    function el(t,a){var e=document.createElementNS(ns,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+    var data=[
+      {era:'至道末 · 997',farm:2321,com:1238},
+      {era:'天禧末 · 1021',farm:2762,com:2936},
+      {era:'熙宁十年 · 1077',farm:2162,com:4911}
+    ];
+    var W=760,H=420,pad={l:70,r:20,t:30,b:56},max=5000;
+    for(var gy=0;gy<=5;gy++){ var y=pad.t+(H-pad.t-pad.b)*(1-gy/5);
+      svg.appendChild(el('line',{x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:v('--hair-2'),'stroke-width':1}));
+      var lb=el('text',{x:pad.l-10,y:y+4,'text-anchor':'end','font-size':'11','font-family':'Noto Sans SC,sans-serif',fill:v('--ink-3')});
+      lb.textContent=(gy*1000); svg.appendChild(lb);
+    }
+    var gw=(W-pad.l-pad.r)/data.length;
+    data.forEach(function(d,i){
+      var x0=pad.l+gw*i+gw/2, bw=54, gap=10;
+      [['farm',v('--celadon'),'农业两税'],['com',v('--gold'),'商税+专卖']].forEach(function(s,j){
+        var val=d[s[0]], h=(H-pad.t-pad.b)*val/max, x=x0+(j===0?-bw-gap/2:gap/2), y=H-pad.b-h;
+        svg.appendChild(el('rect',{x:x,y:y,width:bw,height:h,rx:4,fill:s[1]}));
+        var t=el('text',{x:x+bw/2,y:y-7,'text-anchor':'middle','font-size':'12','font-weight':'700',
+          'font-family':'Noto Sans SC,sans-serif',fill:v('--ink-2')}); t.textContent=val; svg.appendChild(t);
+      });
+      var e=el('text',{x:x0,y:H-pad.b+24,'text-anchor':'middle','font-size':'12.5','font-family':'Noto Sans SC,sans-serif',fill:v('--ink-2')});
+      e.textContent=d.era; svg.appendChild(e);
+    });
+    [[v('--celadon'),'农业两税'],[v('--gold'),'商税+专卖']].forEach(function(s,i){
+      svg.appendChild(el('rect',{x:pad.l+8+i*130,y:6,width:13,height:13,rx:3,fill:s[0]}));
+      var t=el('text',{x:pad.l+27+i*130,y:17,'font-size':'12','font-family':'Noto Sans SC,sans-serif',fill:v('--ink-2')});
+      t.textContent=s[1]; svg.appendChild(t);
+    });
+  })();
+
+  /* ── 疆域示意 ── */
+  (function(){
+    var svg=$('#mapSvg'); if(!svg) return;
+    var css=getComputedStyle(document.documentElement);
+    function v(n){return css.getPropertyValue(n).trim()}
+    var ns='http://www.w3.org/2000/svg';
+    function el(t,a){var e=document.createElementNS(ns,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+    function blob(x,y,w,h,fill,stroke,name,sub,tc){
+      svg.appendChild(el('rect',{x:x,y:y,width:w,height:h,rx:26,fill:fill,stroke:stroke,'stroke-width':1.6}));
+      var t=el('text',{x:x+w/2,y:y+h/2-(sub?4:-6),'text-anchor':'middle','font-size':'21','font-weight':'900',
+        'font-family':'Noto Serif SC,serif',fill:tc}); t.textContent=name; svg.appendChild(t);
+      if(sub){ var s=el('text',{x:x+w/2,y:y+h/2+18,'text-anchor':'middle','font-size':'11.5',
+        'font-family':'Noto Sans SC,sans-serif',fill:tc,opacity:'.75'}); s.textContent=sub; svg.appendChild(s); }
+    }
+    svg.appendChild(el('rect',{x:660,y:40,width:130,height:440,rx:20,fill:v('--indigo-wash'),opacity:'.55'}));
+    var sea=el('text',{x:725,y:270,'text-anchor':'middle','font-size':'13','font-family':'Noto Sans SC,sans-serif',fill:v('--indigo'),opacity:'.8'});
+    sea.textContent='海 上 之 路'; svg.appendChild(sea);
+    blob(150,30,430,130,v('--paper-2'),v('--ink-3'),'辽(契丹)','岁币银绢北上 · 榷场互市',v('--ink-2'));
+    blob(40,180,190,110,v('--seal-wash'),v('--seal'),'西夏','三战之地 · 庆历增币',v('--seal'));
+    blob(250,180,390,220,v('--gold-wash'),v('--gold'),'北宋','汴京 · 岁入七千万贯的市集帝国',v('--gold-deep'));
+    blob(40,320,190,100,v('--paper-2'),v('--hair'),'吐蕃诸部','茶马之市',v('--ink-3'));
+    blob(140,430,220,70,v('--paper-2'),v('--hair'),'大理','',v('--ink-3'));
+    blob(590,30,110,70,v('--paper-2'),v('--hair'),'高丽','',v('--ink-3'));
+    var line=el('line',{x1:250,y1:168,x2:640,y2:168,stroke:v('--seal'),'stroke-width':2,'stroke-dasharray':'8 6'});
+    svg.appendChild(line);
+    var lb=el('text',{x:445,y:158,'text-anchor':'middle','font-size':'11.5','font-family':'Noto Sans SC,sans-serif',fill:v('--seal')});
+    lb.textContent='澶渊线(1005 后约百年无大战)'; svg.appendChild(lb);
+    [[430,300,'汴京'],[470,205,'澶州'],[105,225,'兴庆府'],[560,370,'临安(南渡后)']].forEach(function(c){
+      svg.appendChild(el('circle',{cx:c[0],cy:c[1],r:5,fill:v('--seal')}));
+      var t=el('text',{x:c[0]+10,y:c[1]+4,'font-size':'12','font-family':'Noto Sans SC,sans-serif','font-weight':'700',fill:v('--ink')});
+      t.textContent=c[2]; svg.appendChild(t);
+    });
+  })();
+})();
+</script>
