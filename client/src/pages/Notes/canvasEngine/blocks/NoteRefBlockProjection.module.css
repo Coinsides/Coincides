@@ -9,7 +9,7 @@
   border-radius: 0;
   outline: none;
   background: transparent;
-  color: inherit;
+  color: var(--sk-ink);
   font-family: inherit;
   resize: none;
   overflow: hidden;
@@ -18,4 +18,5 @@
 }
 .title { font-family: var(--sk-title-font, inherit); font-size: var(--sk-paper-title-size); font-weight: var(--sk-paper-title-weight); line-height: 1.5; }
 .description { font-family: var(--sk-label-font, inherit); font-size: var(--document-font-size); line-height: 1.55; }
+.projection::placeholder { color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); opacity: 1; }
 .projection:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }

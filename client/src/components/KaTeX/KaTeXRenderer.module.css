@@ -4,7 +4,7 @@
 
 .katex :global(.katex) {
   font-size: 1em;
-  color: var(--text-primary);
+  color: var(--sk-ink, var(--text-primary));
 }
 
 .katex :global(.katex-display) {

@@ -1,0 +1,2885 @@
+{
+  "measurement": "production projected CSS pixel rectangles, not browser layout",
+  "scenarios": [
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 12
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 24
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 36
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 48
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3129890453834116,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 7.51173708920188
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6259780907668232,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 15.02347417840376
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 0.9389671361502347,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 22.53521126760563
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.2519561815336464,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 30.04694835680752
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.43899379834157903,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 10.535851160197897
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.8779875966831581,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 21.071702320395794
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.316981395024737,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 31.607553480593687
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.7559751933663161,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 42.14340464079159
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 12
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 24
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 36
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 48
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3129890453834116,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 7.51173708920188
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 7.51173708920188
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6259780907668232,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 15.02347417840376
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 15.02347417840376
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 0.9389671361502347,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 22.53521126760563
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 22.53521126760563
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.2519561815336464,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 30.04694835680752
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 30.04694835680752
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.43899379834157903,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 10.535851160197897
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 10.535851160197897
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.8779875966831581,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 21.071702320395794
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 21.071702320395794
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.316981395024737,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 31.607553480593687
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 31.607553480593687
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.7559751933663161,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 42.14340464079159
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 42.14340464079159
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 12
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 24
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 36
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 48
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3418803418803419,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 8.205128205128206
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6837606837606838,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 16.410256410256412
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 1.0256410256410255,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 24.615384615384613
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.3675213675213675,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 32.820512820512825
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.45132743362831856,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 10.831858407079645
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.9026548672566371,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 21.66371681415929
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.3539823008849556,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 32.49557522123894
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.8053097345132743,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 43.32743362831858
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 12
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 12
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 24
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 36
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 36
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 48
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3418803418803419,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 8.205128205128206
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 8.205128205128206
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6837606837606838,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 16.410256410256412
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 16.410256410256412
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 1.0256410256410255,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 24.615384615384613
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 24.615384615384613
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.3675213675213675,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 32.820512820512825
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 32.820512820512825
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.45132743362831856,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 10.831858407079645
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 10.831858407079645
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.9026548672566371,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 21.66371681415929
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 21.66371681415929
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.3539823008849556,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 32.49557522123894
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 32.49557522123894
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.8053097345132743,
+      "topInset": 72,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": 43.32743362831858
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": 43.32743362831858
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 12,
+      "slotCount": 12
+    }
+  ]
+}

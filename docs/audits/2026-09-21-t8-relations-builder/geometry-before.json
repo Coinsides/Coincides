@@ -1,0 +1,6389 @@
+{
+  "measurement": "production projected CSS pixel rectangles, not browser layout",
+  "scenarios": [
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 15
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -24
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 30
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -48
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 45
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -72
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 60
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -96
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3129890453834116,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 79.29055816379761,
+          "overlapY": 8.137715179968701
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 79.2905581637976,
+          "overlapY": 8.137715179968701
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 79.29055816379758,
+          "overlapY": 8.137715179968701
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 79.29055816379761,
+          "overlapY": 1.2519561815336449
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 79.2905581637976,
+          "overlapY": 1.2519561815336449
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 79.29055816379758,
+          "overlapY": 1.2519561815336449
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 79.29055816379761,
+          "overlapY": 9.389671361502348
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 79.2905581637976,
+          "overlapY": 9.389671361502348
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 79.29055816379758,
+          "overlapY": 9.389671361502348
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -15.023474178403756
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6259780907668232,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 158.58111632759523,
+          "overlapY": 16.275430359937403
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 158.5811163275952,
+          "overlapY": 16.275430359937403
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 158.58111632759517,
+          "overlapY": 16.275430359937403
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 158.58111632759523,
+          "overlapY": 2.5039123630672897
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 158.5811163275952,
+          "overlapY": 2.5039123630672897
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 158.58111632759517,
+          "overlapY": 2.5039123630672897
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 158.58111632759523,
+          "overlapY": 18.779342723004696
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 158.5811163275952,
+          "overlapY": 18.779342723004696
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 158.58111632759517,
+          "overlapY": 18.779342723004696
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -30.046948356807512
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 0.9389671361502347,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 237.8716744913928,
+          "overlapY": 24.413145539906104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 237.87167449139287,
+          "overlapY": 24.413145539906104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 237.8716744913927,
+          "overlapY": 24.413145539906104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 237.8716744913928,
+          "overlapY": 3.7558685446009363
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 237.87167449139287,
+          "overlapY": 3.7558685446009363
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 237.8716744913927,
+          "overlapY": 3.7558685446009363
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 237.8716744913928,
+          "overlapY": 28.16901408450704
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 237.87167449139287,
+          "overlapY": 28.16901408450704
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 237.8716744913927,
+          "overlapY": 28.16901408450704
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -45.070422535211264
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.2519561815336464,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 317.16223265519045,
+          "overlapY": 32.550860719874805
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 317.1622326551904,
+          "overlapY": 32.550860719874805
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 317.16223265519034,
+          "overlapY": 32.550860719874805
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 317.16223265519045,
+          "overlapY": 5.007824726134579
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 317.1622326551904,
+          "overlapY": 5.007824726134579
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 317.16223265519034,
+          "overlapY": 5.007824726134579
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 317.16223265519045,
+          "overlapY": 37.55868544600939
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 317.1622326551904,
+          "overlapY": 37.55868544600939
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 317.16223265519034,
+          "overlapY": 37.55868544600939
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -60.093896713615024
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.43899379834157903,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 111.21176224653335,
+          "overlapY": 11.413838756881052
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 111.21176224653337,
+          "overlapY": 11.413838756881052
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 111.21176224653334,
+          "overlapY": 11.413838756881052
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 111.21176224653335,
+          "overlapY": 1.755975193366318
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 111.21176224653337,
+          "overlapY": 1.755975193366318
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 111.21176224653334,
+          "overlapY": 1.755975193366318
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 111.21176224653335,
+          "overlapY": 13.16981395024737
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 111.21176224653337,
+          "overlapY": 13.16981395024737
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 111.21176224653334,
+          "overlapY": 13.16981395024737
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -21.071702320395794
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.8779875966831581,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 222.4235244930667,
+          "overlapY": 22.827677513762104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 222.42352449306674,
+          "overlapY": 22.827677513762104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 222.42352449306668,
+          "overlapY": 22.827677513762104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 222.4235244930667,
+          "overlapY": 3.511950386732636
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 222.42352449306674,
+          "overlapY": 3.511950386732636
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 222.42352449306668,
+          "overlapY": 3.511950386732636
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 222.4235244930667,
+          "overlapY": 26.33962790049474
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 222.42352449306674,
+          "overlapY": 26.33962790049474
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 222.42352449306668,
+          "overlapY": 26.33962790049474
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -42.14340464079159
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.316981395024737,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 333.6352867396001,
+          "overlapY": 34.24151627064317
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 333.6352867396,
+          "overlapY": 34.24151627064317
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 333.6352867395998,
+          "overlapY": 34.24151627064317
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 333.6352867396001,
+          "overlapY": 5.267925580098947
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 333.6352867396,
+          "overlapY": 5.267925580098947
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 333.6352867395998,
+          "overlapY": 5.267925580098947
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 333.6352867396001,
+          "overlapY": 39.509441850742114
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 333.6352867396,
+          "overlapY": 39.509441850742114
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 333.6352867395998,
+          "overlapY": 39.509441850742114
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -63.21510696118738
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.7559751933663161,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 444.8470489861334,
+          "overlapY": 45.65535502752421
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 444.8470489861335,
+          "overlapY": 45.65535502752421
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 444.84704898613336,
+          "overlapY": 45.65535502752421
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 444.8470489861334,
+          "overlapY": 7.023900773465272
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 444.8470489861335,
+          "overlapY": 7.023900773465272
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 444.84704898613336,
+          "overlapY": 7.023900773465272
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 444.8470489861334,
+          "overlapY": 52.67925580098948
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 444.8470489861335,
+          "overlapY": 52.67925580098948
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 444.84704898613336,
+          "overlapY": 52.67925580098948
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -84.28680928158317
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 15
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -24
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 30
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -48
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 45
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -72
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 60
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -96
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3129890453834116,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 79.29055816379761,
+          "overlapY": 8.137715179968701
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 79.2905581637976,
+          "overlapY": 8.137715179968701
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 79.29055816379758,
+          "overlapY": 8.137715179968701
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 79.29055816379761,
+          "overlapY": 1.2519561815336449
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 79.2905581637976,
+          "overlapY": 1.2519561815336449
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 79.29055816379758,
+          "overlapY": 1.2519561815336449
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 79.29055816379761,
+          "overlapY": 9.389671361502348
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 79.2905581637976,
+          "overlapY": 9.389671361502348
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 79.29055816379758,
+          "overlapY": 9.389671361502348
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -15.023474178403756
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -15.023474178403756
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6259780907668232,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 158.58111632759523,
+          "overlapY": 16.275430359937403
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 158.5811163275952,
+          "overlapY": 16.275430359937403
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 158.58111632759517,
+          "overlapY": 16.275430359937403
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 158.58111632759523,
+          "overlapY": 2.5039123630672897
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 158.5811163275952,
+          "overlapY": 2.5039123630672897
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 158.58111632759517,
+          "overlapY": 2.5039123630672897
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 158.58111632759523,
+          "overlapY": 18.779342723004696
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 158.5811163275952,
+          "overlapY": 18.779342723004696
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 158.58111632759517,
+          "overlapY": 18.779342723004696
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -30.046948356807512
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -30.046948356807512
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 0.9389671361502347,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 237.8716744913928,
+          "overlapY": 24.413145539906104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 237.87167449139287,
+          "overlapY": 24.413145539906104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 237.8716744913927,
+          "overlapY": 24.413145539906104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 237.8716744913928,
+          "overlapY": 3.7558685446009363
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 237.87167449139287,
+          "overlapY": 3.7558685446009363
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 237.8716744913927,
+          "overlapY": 3.7558685446009363
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 237.8716744913928,
+          "overlapY": 28.16901408450704
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 237.87167449139287,
+          "overlapY": 28.16901408450704
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 237.8716744913927,
+          "overlapY": 28.16901408450704
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -45.070422535211264
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -45.070422535211264
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.2519561815336464,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 317.16223265519045,
+          "overlapY": 32.550860719874805
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 317.1622326551904,
+          "overlapY": 32.550860719874805
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 317.16223265519034,
+          "overlapY": 32.550860719874805
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 317.16223265519045,
+          "overlapY": 5.007824726134579
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 317.1622326551904,
+          "overlapY": 5.007824726134579
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 317.16223265519034,
+          "overlapY": 5.007824726134579
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 317.16223265519045,
+          "overlapY": 37.55868544600939
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 317.1622326551904,
+          "overlapY": 37.55868544600939
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 317.16223265519034,
+          "overlapY": 37.55868544600939
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -60.093896713615024
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -60.093896713615024
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.43899379834157903,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 111.21176224653335,
+          "overlapY": 11.413838756881052
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 111.21176224653337,
+          "overlapY": 11.413838756881052
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 111.21176224653334,
+          "overlapY": 11.413838756881052
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 111.21176224653335,
+          "overlapY": 1.755975193366318
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 111.21176224653337,
+          "overlapY": 1.755975193366318
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 111.21176224653334,
+          "overlapY": 1.755975193366318
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 111.21176224653335,
+          "overlapY": 13.16981395024737
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 111.21176224653337,
+          "overlapY": 13.16981395024737
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 111.21176224653334,
+          "overlapY": 13.16981395024737
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -21.071702320395794
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -21.071702320395794
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.8779875966831581,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 222.4235244930667,
+          "overlapY": 22.827677513762104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 222.42352449306674,
+          "overlapY": 22.827677513762104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 222.42352449306668,
+          "overlapY": 22.827677513762104
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 222.4235244930667,
+          "overlapY": 3.511950386732636
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 222.42352449306674,
+          "overlapY": 3.511950386732636
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 222.42352449306668,
+          "overlapY": 3.511950386732636
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 222.4235244930667,
+          "overlapY": 26.33962790049474
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 222.42352449306674,
+          "overlapY": 26.33962790049474
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 222.42352449306668,
+          "overlapY": 26.33962790049474
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -42.14340464079159
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -42.14340464079159
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.316981395024737,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 333.6352867396001,
+          "overlapY": 34.24151627064317
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 333.6352867396,
+          "overlapY": 34.24151627064317
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 333.6352867395998,
+          "overlapY": 34.24151627064317
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 333.6352867396001,
+          "overlapY": 5.267925580098947
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 333.6352867396,
+          "overlapY": 5.267925580098947
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 333.6352867395998,
+          "overlapY": 5.267925580098947
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 333.6352867396001,
+          "overlapY": 39.509441850742114
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 333.6352867396,
+          "overlapY": 39.509441850742114
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 333.6352867395998,
+          "overlapY": 39.509441850742114
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -63.21510696118738
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -63.21510696118738
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.7559751933663161,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 444.8470489861334,
+          "overlapY": 45.65535502752421
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 444.8470489861335,
+          "overlapY": 45.65535502752421
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 444.84704898613336,
+          "overlapY": 45.65535502752421
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 444.8470489861334,
+          "overlapY": 7.023900773465272
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 444.8470489861335,
+          "overlapY": 7.023900773465272
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 444.84704898613336,
+          "overlapY": 7.023900773465272
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 444.8470489861334,
+          "overlapY": 52.67925580098948
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 444.8470489861335,
+          "overlapY": 52.67925580098948
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 444.84704898613336,
+          "overlapY": 52.67925580098948
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -84.28680928158317
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -84.28680928158317
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 15
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -24
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 30
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -48
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 45
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -72
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 60
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -96
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3418803418803419,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 86.60968660968662,
+          "overlapY": 8.88888888888889
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 86.6096866096866,
+          "overlapY": 8.88888888888889
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 86.6096866096866,
+          "overlapY": 8.88888888888889
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 86.60968660968662,
+          "overlapY": 1.3675213675213698
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 86.6096866096866,
+          "overlapY": 1.3675213675213698
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 86.6096866096866,
+          "overlapY": 1.3675213675213698
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 86.60968660968662,
+          "overlapY": 10.256410256410259
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 86.6096866096866,
+          "overlapY": 10.256410256410259
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 86.6096866096866,
+          "overlapY": 10.256410256410259
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -16.410256410256412
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6837606837606838,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 173.21937321937324,
+          "overlapY": 17.77777777777778
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 173.2193732193732,
+          "overlapY": 17.77777777777778
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 173.2193732193732,
+          "overlapY": 17.77777777777778
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 173.21937321937324,
+          "overlapY": 2.7350427350427395
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 173.2193732193732,
+          "overlapY": 2.7350427350427395
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 173.2193732193732,
+          "overlapY": 2.7350427350427395
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 173.21937321937324,
+          "overlapY": 20.512820512820518
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 173.2193732193732,
+          "overlapY": 20.512820512820518
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 173.2193732193732,
+          "overlapY": 20.512820512820518
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -32.820512820512825
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 1.0256410256410255,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 259.8290598290598,
+          "overlapY": 26.666666666666664
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 259.82905982905976,
+          "overlapY": 26.666666666666664
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 259.8290598290597,
+          "overlapY": 26.666666666666664
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 259.8290598290598,
+          "overlapY": 4.102564102564102
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 259.82905982905976,
+          "overlapY": 4.102564102564102
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 259.8290598290597,
+          "overlapY": 4.102564102564102
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 259.8290598290598,
+          "overlapY": 30.769230769230766
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 259.82905982905976,
+          "overlapY": 30.769230769230766
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 259.8290598290597,
+          "overlapY": 30.769230769230766
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -49.230769230769226
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.3675213675213675,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 346.4387464387465,
+          "overlapY": 35.55555555555556
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 346.4387464387464,
+          "overlapY": 35.55555555555556
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 346.4387464387464,
+          "overlapY": 35.55555555555556
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 346.4387464387465,
+          "overlapY": 5.470085470085479
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 346.4387464387464,
+          "overlapY": 5.470085470085479
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 346.4387464387464,
+          "overlapY": 5.470085470085479
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 346.4387464387465,
+          "overlapY": 41.025641025641036
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 346.4387464387464,
+          "overlapY": 41.025641025641036
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 346.4387464387464,
+          "overlapY": 41.025641025641036
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -65.64102564102565
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.45132743362831856,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 114.33628318584073,
+          "overlapY": 11.734513274336283
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 114.33628318584073,
+          "overlapY": 11.734513274336283
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 114.33628318584067,
+          "overlapY": 11.734513274336283
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 114.33628318584073,
+          "overlapY": 1.8053097345132763
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 114.33628318584073,
+          "overlapY": 1.8053097345132763
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 114.33628318584067,
+          "overlapY": 1.8053097345132763
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 114.33628318584073,
+          "overlapY": 13.53982300884956
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 114.33628318584073,
+          "overlapY": 13.53982300884956
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 114.33628318584067,
+          "overlapY": 13.53982300884956
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -21.663716814159294
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.9026548672566371,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 228.67256637168146,
+          "overlapY": 23.469026548672566
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 228.67256637168146,
+          "overlapY": 23.469026548672566
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 228.67256637168134,
+          "overlapY": 23.469026548672566
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 228.67256637168146,
+          "overlapY": 3.6106194690265525
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 228.67256637168146,
+          "overlapY": 3.6106194690265525
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 228.67256637168134,
+          "overlapY": 3.6106194690265525
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 228.67256637168146,
+          "overlapY": 27.07964601769912
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 228.67256637168146,
+          "overlapY": 27.07964601769912
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 228.67256637168134,
+          "overlapY": 27.07964601769912
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -43.32743362831859
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.3539823008849556,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 343.0088495575221,
+          "overlapY": 35.203539823008846
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 343.0088495575221,
+          "overlapY": 35.203539823008846
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 343.00884955752224,
+          "overlapY": 35.203539823008846
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 343.0088495575221,
+          "overlapY": 5.415929203539825
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 343.0088495575221,
+          "overlapY": 5.415929203539825
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 343.00884955752224,
+          "overlapY": 5.415929203539825
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 343.0088495575221,
+          "overlapY": 40.61946902654867
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 343.0088495575221,
+          "overlapY": 40.61946902654867
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 343.00884955752224,
+          "overlapY": 40.61946902654867
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -64.99115044247787
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.8053097345132743,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 457.3451327433629,
+          "overlapY": 46.93805309734513
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 457.3451327433629,
+          "overlapY": 46.93805309734513
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 457.3451327433627,
+          "overlapY": 46.93805309734513
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 457.3451327433629,
+          "overlapY": 7.221238938053105
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 457.3451327433629,
+          "overlapY": 7.221238938053105
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 457.3451327433627,
+          "overlapY": 7.221238938053105
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 457.3451327433629,
+          "overlapY": 54.15929203539824
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 457.3451327433629,
+          "overlapY": 54.15929203539824
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-2",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 457.3451327433627,
+          "overlapY": 54.15929203539824
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "page-frame-2",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -86.65486725663717
+        }
+      ],
+      "pageCount": 2,
+      "blockCount": 8,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 0.5,
+      "displayScale": 0.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 13
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 2
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 126.66666666666669,
+          "overlapY": 15
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 126.66666666666663,
+          "overlapY": 15
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -24
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -24
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1,
+      "displayScale": 1,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 26
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 4
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 253.33333333333337,
+          "overlapY": 30
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 253.33333333333326,
+          "overlapY": 30
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -48
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -48
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 1.5,
+      "displayScale": 1.5,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 39
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 6
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 380,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 379.99999999999994,
+          "overlapY": 45
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 379.9999999999999,
+          "overlapY": 45
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -72
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -72
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_width",
+      "stepFactor": 2,
+      "displayScale": 2,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 52
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 8
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 506.66666666666674,
+          "overlapY": 60
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 506.6666666666665,
+          "overlapY": 60
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -96
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -96
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 0.5,
+      "displayScale": 0.3418803418803419,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 86.60968660968662,
+          "overlapY": 8.88888888888889
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 86.6096866096866,
+          "overlapY": 8.88888888888889
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 86.6096866096866,
+          "overlapY": 8.88888888888889
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 86.60968660968662,
+          "overlapY": 1.3675213675213698
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 86.6096866096866,
+          "overlapY": 1.3675213675213698
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 86.6096866096866,
+          "overlapY": 1.3675213675213698
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 86.60968660968662,
+          "overlapY": 10.256410256410259
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 86.6096866096866,
+          "overlapY": 10.256410256410259
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 86.6096866096866,
+          "overlapY": 10.256410256410259
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -16.410256410256412
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -16.410256410256412
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1,
+      "displayScale": 0.6837606837606838,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 173.21937321937324,
+          "overlapY": 17.77777777777778
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 173.2193732193732,
+          "overlapY": 17.77777777777778
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 173.2193732193732,
+          "overlapY": 17.77777777777778
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 173.21937321937324,
+          "overlapY": 2.7350427350427395
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 173.2193732193732,
+          "overlapY": 2.7350427350427395
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 173.2193732193732,
+          "overlapY": 2.7350427350427395
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 173.21937321937324,
+          "overlapY": 20.512820512820518
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 173.2193732193732,
+          "overlapY": 20.512820512820518
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 173.2193732193732,
+          "overlapY": 20.512820512820518
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -32.820512820512825
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -32.820512820512825
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 1.5,
+      "displayScale": 1.0256410256410255,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 259.8290598290598,
+          "overlapY": 26.666666666666664
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 259.82905982905976,
+          "overlapY": 26.666666666666664
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 259.8290598290597,
+          "overlapY": 26.666666666666664
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 259.8290598290598,
+          "overlapY": 4.102564102564102
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 259.82905982905976,
+          "overlapY": 4.102564102564102
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 259.8290598290597,
+          "overlapY": 4.102564102564102
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 259.8290598290598,
+          "overlapY": 30.769230769230766
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 259.82905982905976,
+          "overlapY": 30.769230769230766
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 259.8290598290597,
+          "overlapY": 30.769230769230766
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -49.230769230769226
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -49.230769230769226
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "fit_page",
+      "stepFactor": 2,
+      "displayScale": 1.3675213675213675,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 346.4387464387465,
+          "overlapY": 35.55555555555556
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 346.4387464387464,
+          "overlapY": 35.55555555555556
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 346.4387464387464,
+          "overlapY": 35.55555555555556
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 346.4387464387465,
+          "overlapY": 5.470085470085479
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 346.4387464387464,
+          "overlapY": 5.470085470085479
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 346.4387464387464,
+          "overlapY": 5.470085470085479
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 346.4387464387465,
+          "overlapY": 41.025641025641036
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 346.4387464387464,
+          "overlapY": 41.025641025641036
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 346.4387464387464,
+          "overlapY": 41.025641025641036
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -65.64102564102565
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -65.64102564102565
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 0.5,
+      "displayScale": 0.45132743362831856,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 114.33628318584073,
+          "overlapY": 11.734513274336283
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 114.33628318584073,
+          "overlapY": 11.734513274336283
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 114.33628318584067,
+          "overlapY": 11.734513274336283
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 114.33628318584073,
+          "overlapY": 1.8053097345132763
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 114.33628318584073,
+          "overlapY": 1.8053097345132763
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 114.33628318584067,
+          "overlapY": 1.8053097345132763
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 114.33628318584073,
+          "overlapY": 13.53982300884956
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 114.33628318584073,
+          "overlapY": 13.53982300884956
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 114.33628318584067,
+          "overlapY": 13.53982300884956
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -21.663716814159294
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -21.663716814159294
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1,
+      "displayScale": 0.9026548672566371,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 228.67256637168146,
+          "overlapY": 23.469026548672566
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 228.67256637168146,
+          "overlapY": 23.469026548672566
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 228.67256637168134,
+          "overlapY": 23.469026548672566
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 228.67256637168146,
+          "overlapY": 3.6106194690265525
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 228.67256637168146,
+          "overlapY": 3.6106194690265525
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 228.67256637168134,
+          "overlapY": 3.6106194690265525
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 228.67256637168146,
+          "overlapY": 27.07964601769912
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 228.67256637168146,
+          "overlapY": 27.07964601769912
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 228.67256637168134,
+          "overlapY": 27.07964601769912
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -43.32743362831859
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -43.32743362831859
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 1.5,
+      "displayScale": 1.3539823008849556,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 343.0088495575221,
+          "overlapY": 35.203539823008846
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 343.0088495575221,
+          "overlapY": 35.203539823008846
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 343.00884955752224,
+          "overlapY": 35.203539823008846
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 343.0088495575221,
+          "overlapY": 5.415929203539825
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 343.0088495575221,
+          "overlapY": 5.415929203539825
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 343.00884955752224,
+          "overlapY": 5.415929203539825
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 343.0088495575221,
+          "overlapY": 40.61946902654867
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 343.0088495575221,
+          "overlapY": 40.61946902654867
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 343.00884955752224,
+          "overlapY": 40.61946902654867
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -64.99115044247787
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -64.99115044247787
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "gear": "physical",
+      "stepFactor": 2,
+      "displayScale": 1.8053097345132743,
+      "topInset": 0,
+      "registeredTemplates": [
+        "text.paragraph",
+        "formula.math",
+        "code.snippet",
+        "media.image",
+        "media.table",
+        "component.timeline",
+        "component.chart_bar",
+        "component.chart_line"
+      ],
+      "violations": [
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "overlapX": 457.3451327433629,
+          "overlapY": 46.93805309734513
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "overlapX": 457.3451327433629,
+          "overlapY": 46.93805309734513
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "overlapX": 457.3451327433627,
+          "overlapY": 46.93805309734513
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-left",
+          "overlapX": 457.3451327433629,
+          "overlapY": 7.221238938053105
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-center",
+          "overlapX": 457.3451327433629,
+          "overlapY": 7.221238938053105
+        },
+        {
+          "relation": "intersection",
+          "pageId": "relation-body",
+          "blockId": "relation-formula.math",
+          "slotId": "header-right",
+          "overlapX": 457.3451327433627,
+          "overlapY": 7.221238938053105
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "overlapX": 457.3451327433629,
+          "overlapY": 54.15929203539824
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "overlapX": 457.3451327433629,
+          "overlapY": 54.15929203539824
+        },
+        {
+          "relation": "intersection",
+          "pageId": "page-frame-3",
+          "blockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "overlapX": 457.3451327433627,
+          "overlapY": 54.15929203539824
+        }
+      ],
+      "headerClearances": [
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-left",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-center",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "relation-body",
+          "firstBlockId": "relation-text.paragraph",
+          "slotId": "header-right",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-left",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-center",
+          "gap": -86.65486725663717
+        },
+        {
+          "pageId": "page-frame-3",
+          "firstBlockId": "relation-component.chart_line",
+          "slotId": "header-right",
+          "gap": -86.65486725663717
+        }
+      ],
+      "pageCount": 3,
+      "blockCount": 10,
+      "slotCount": 12
+    }
+  ]
+}

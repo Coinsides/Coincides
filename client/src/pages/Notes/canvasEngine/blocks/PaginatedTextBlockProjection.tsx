@@ -493,7 +493,7 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
             onOpenMenu={layoutMode ? undefined : (point) => setMenu({ unitId: unit.id, point })} />}
           {slice.first && handleDropTarget?.unitId === unit.id && <div className={styles.textUnitDropIndicator}
             data-text-unit-drop-indicator={unit.id} data-drop-edge={handleDropTarget.edge} aria-hidden="true" />}
-          {slice.first && marker && <span style={{ position: 'absolute', left: metrics.indentLevel * 24, top: 0, lineHeight: `${metrics.lineHeightPx}px` }}>
+          {slice.first && marker && <span className={styles.paginatedTextMarker} style={{ position: 'absolute', left: metrics.indentLevel * 24, top: 0, lineHeight: `${metrics.lineHeightPx}px` }}>
             {unit.writing_role === 'todo_item' ? <input type="checkbox" aria-label="Toggle todo item" checked={unit.metadata.checked === true} disabled={readOnly}
               onChange={() => emit(updateTextUnitMetadata(latestFlow.current, unit.id, { checked: unit.metadata.checked !== true }), { unitId: unit.id, offset: 0 }, undefined)} />
               : unit.writing_role === 'toggle_item' ? <button type="button" aria-label={unit.metadata.collapsed ? 'Expand toggle item' : 'Collapse toggle item'} disabled={readOnly}

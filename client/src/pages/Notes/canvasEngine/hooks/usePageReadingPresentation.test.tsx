@@ -77,6 +77,9 @@ function ReadingHarness({
   });
   const frame = useNoteCanvasFrameModel({
     ...resolved, documentTypographyProfile: typography, draftActive: false, draftLayout: null,
+    // These are current A4 preset notes, as production forwards note.page_format.
+    // Its frame model returns content height excluding the separate top inset.
+    notePagePreset: 'a4_portrait',
     pageFrameCollection: data.collection, persistedCanvasObjects: [], persistedCanvasPlacements: [],
     persistedContentMounts: [], persistedVisualConnectors: [], persistedImageObjects: [], persistedStructuredObjects: [],
     pageOffsetX: policy.pageOffsetX, surfaceMode: mode, viewportTransform: canvasViewport, pageReadingViewport: pageViewport,

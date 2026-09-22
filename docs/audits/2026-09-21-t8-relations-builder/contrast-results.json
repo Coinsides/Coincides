@@ -1,0 +1,417 @@
+{
+  "measurement": "mounted production CSS in jsdom; supported CSS paint resolved without screenshot diff",
+  "records": [
+    {
+      "type": "cover",
+      "preset": "default",
+      "ratios": [
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 17.317048507866375,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 17.317048507866375,
+            "threshold": 4.5
+          }
+        ],
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 17.317048507866375,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 17.317048507866375,
+            "threshold": 4.5
+          }
+        ]
+      ]
+    },
+    {
+      "type": "cover",
+      "preset": "quiet-ink",
+      "ratios": [
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 14.478196947770302,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 14.478196947770302,
+            "threshold": 4.5
+          }
+        ],
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 14.478196947770302,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 14.478196947770302,
+            "threshold": 4.5
+          }
+        ]
+      ]
+    },
+    {
+      "type": "cover",
+      "preset": "warm-paper",
+      "ratios": [
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 13.190812036393435,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 13.190812036393435,
+            "threshold": 4.5
+          }
+        ],
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 13.190812036393435,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 13.190812036393435,
+            "threshold": 4.5
+          }
+        ]
+      ]
+    },
+    {
+      "type": "cover",
+      "preset": "workbench",
+      "ratios": [
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 12.959531408643135,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 12.959531408643135,
+            "threshold": 4.5
+          }
+        ],
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 12.959531408643135,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 12.959531408643135,
+            "threshold": 4.5
+          }
+        ]
+      ]
+    },
+    {
+      "type": "cover",
+      "preset": "silk",
+      "ratios": [
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 12.726461160050224,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 12.726461160050224,
+            "threshold": 4.5
+          }
+        ],
+        [
+          {
+            "text": "封面题名回归夹具",
+            "ratio": 12.726461160050224,
+            "threshold": 3
+          },
+          {
+            "text": "可读述名",
+            "ratio": 12.726461160050224,
+            "threshold": 4.5
+          }
+        ]
+      ]
+    },
+    {
+      "type": "contrast",
+      "preset": "default",
+      "samples": 50,
+      "failures": [],
+      "minimum": {
+        "element": "relation-component.timeline:span._year_230b8d",
+        "text": "Relation sample",
+        "foreground": {
+          "r": 109.8,
+          "g": 150.10000000000002,
+          "b": 238.5,
+          "a": 1
+        },
+        "backgrounds": [
+          {
+            "r": 16,
+            "g": 17,
+            "b": 20,
+            "a": 1
+          }
+        ],
+        "fontSize": 15,
+        "fontWeight": 600,
+        "threshold": 4.5,
+        "ratio": 6.5358030730455585
+      },
+      "exemptions": []
+    },
+    {
+      "type": "contrast",
+      "preset": "quiet-ink",
+      "samples": 50,
+      "failures": [],
+      "minimum": {
+        "element": "paper:span.",
+        "text": "header-left",
+        "foreground": {
+          "r": 171.2,
+          "g": 174.8,
+          "b": 182.35000000000002,
+          "a": 1
+        },
+        "backgrounds": [
+          {
+            "r": 23,
+            "g": 24,
+            "b": 28,
+            "a": 1
+          }
+        ],
+        "fontSize": 12,
+        "fontWeight": 400,
+        "threshold": 4.5,
+        "ratio": 8.05073384098091
+      },
+      "exemptions": []
+    },
+    {
+      "type": "contrast",
+      "preset": "warm-paper",
+      "samples": 50,
+      "failures": [],
+      "minimum": {
+        "element": "paper:span.",
+        "text": "header-left",
+        "foreground": {
+          "r": 100.2,
+          "g": 92.6,
+          "b": 81.4,
+          "a": 1
+        },
+        "backgrounds": [
+          {
+            "r": 249,
+            "g": 245,
+            "b": 237,
+            "a": 1
+          },
+          {
+            "r": 247,
+            "g": 243,
+            "b": 234,
+            "a": 1
+          },
+          {
+            "r": 245,
+            "g": 240,
+            "b": 229,
+            "a": 1
+          }
+        ],
+        "fontSize": 12,
+        "fontWeight": 400,
+        "threshold": 4.5,
+        "ratio": 5.745810043064673
+      },
+      "exemptions": []
+    },
+    {
+      "type": "contrast",
+      "preset": "workbench",
+      "samples": 50,
+      "failures": [],
+      "minimum": {
+        "element": "paper:span.",
+        "text": "header-left",
+        "foreground": {
+          "r": 159.6,
+          "g": 167.2,
+          "b": 178.1,
+          "a": 1
+        },
+        "backgrounds": [
+          {
+            "r": 26,
+            "g": 30,
+            "b": 37,
+            "a": 1
+          }
+        ],
+        "fontSize": 12,
+        "fontWeight": 400,
+        "threshold": 4.5,
+        "ratio": 6.902806211447132
+      },
+      "exemptions": []
+    },
+    {
+      "type": "contrast",
+      "preset": "silk",
+      "samples": 50,
+      "failures": [],
+      "minimum": {
+        "element": "relation-component.timeline:span._year_230b8d",
+        "text": "Relation sample",
+        "foreground": {
+          "r": 77.5,
+          "g": 105.55,
+          "b": 92.25,
+          "a": 1
+        },
+        "backgrounds": [
+          {
+            "r": 242,
+            "g": 234,
+            "b": 215,
+            "a": 1
+          }
+        ],
+        "fontSize": 15,
+        "fontWeight": 600,
+        "threshold": 4.5,
+        "ratio": 4.981391408959494
+      },
+      "exemptions": []
+    },
+    {
+      "type": "editable",
+      "preset": "default",
+      "samples": 55,
+      "failures": []
+    },
+    {
+      "type": "editable",
+      "preset": "quiet-ink",
+      "samples": 55,
+      "failures": []
+    },
+    {
+      "type": "editable",
+      "preset": "warm-paper",
+      "samples": 55,
+      "failures": []
+    },
+    {
+      "type": "editable",
+      "preset": "workbench",
+      "samples": 55,
+      "failures": []
+    },
+    {
+      "type": "editable",
+      "preset": "silk",
+      "samples": 55,
+      "failures": []
+    },
+    {
+      "type": "roles",
+      "preset": "default",
+      "roles": [
+        "paragraph",
+        "heading",
+        "quote",
+        "bullet_item",
+        "numbered_item",
+        "todo_item",
+        "toggle_item"
+      ],
+      "samples": 10,
+      "failures": []
+    },
+    {
+      "type": "roles",
+      "preset": "quiet-ink",
+      "roles": [
+        "paragraph",
+        "heading",
+        "quote",
+        "bullet_item",
+        "numbered_item",
+        "todo_item",
+        "toggle_item"
+      ],
+      "samples": 10,
+      "failures": []
+    },
+    {
+      "type": "roles",
+      "preset": "warm-paper",
+      "roles": [
+        "paragraph",
+        "heading",
+        "quote",
+        "bullet_item",
+        "numbered_item",
+        "todo_item",
+        "toggle_item"
+      ],
+      "samples": 10,
+      "failures": []
+    },
+    {
+      "type": "roles",
+      "preset": "workbench",
+      "roles": [
+        "paragraph",
+        "heading",
+        "quote",
+        "bullet_item",
+        "numbered_item",
+        "todo_item",
+        "toggle_item"
+      ],
+      "samples": 10,
+      "failures": []
+    },
+    {
+      "type": "roles",
+      "preset": "silk",
+      "roles": [
+        "paragraph",
+        "heading",
+        "quote",
+        "bullet_item",
+        "numbered_item",
+        "todo_item",
+        "toggle_item"
+      ],
+      "samples": 10,
+      "failures": []
+    }
+  ]
+}

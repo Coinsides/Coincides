@@ -1,12 +1,12 @@
-.row { display: flex; align-items: center; gap: 8px; height: 28px; margin-top: 12px; min-width: 0; font-size: 12px; color: var(--text-secondary); }
+.row { display: flex; align-items: center; gap: 8px; height: 28px; margin-top: 12px; min-width: 0; font-size: 12px; color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); }
 .tags { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
-.chip { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; max-width: 180px; height: 24px; padding: 2px 7px; border-radius: 4px; background: var(--bg-hover); color: var(--text-primary); }
-.chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; max-width: 180px; height: 24px; padding: 2px 7px; border-radius: 4px; background: var(--bg-hover); color: var(--sk-ink); }
+.chip span { color: var(--sk-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip svg { flex-shrink: 0; }
-.add, .disclosure { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; flex: 0 0 auto; white-space: nowrap; }
+.add, .disclosure { color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; flex: 0 0 auto; white-space: nowrap; }
 .add { padding: 0 4px; }
 .disclosure { margin-left: auto; flex-shrink: 1; min-width: 0; }
-.disclosure span { overflow: hidden; text-overflow: ellipsis; }
+.disclosure span { color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); overflow: hidden; text-overflow: ellipsis; }
 .disclosure svg { flex-shrink: 0; }
 .row[data-empty='true'] .add { opacity: 0; }
 :global([data-note-paper-header]:hover) .add, :global([data-note-paper-header]:focus-within) .add { opacity: 1; }
@@ -14,7 +14,7 @@
 .row button:hover, .popup a:hover, .popup button:hover { background: var(--bg-hover); }
 .row button:focus-visible, .popup a:focus-visible, .popup input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .row button:disabled { opacity: 0.5; cursor: default; }
-.rowError { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowError { color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .popup { position: fixed; inset: auto; box-sizing: border-box; margin: 0; width: min(368px, calc(100vw - 16px)); padding: 16px; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); font-size: 13px; line-height: 1.5; text-align: left; user-select: text; }
 .popup:popover-open { display: block; }
 .popup header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

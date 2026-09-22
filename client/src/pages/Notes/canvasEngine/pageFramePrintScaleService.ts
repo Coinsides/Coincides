@@ -22,6 +22,9 @@ export const DEFAULT_PAGE_FRAME_PAGE_SIZE: Exclude<PageFramePageSize, 'Custom'> 
 const DEFAULT_CONTENT_WIDTH = 760;
 const DEFAULT_HORIZONTAL_MARGIN = 72;
 const DEFAULT_BOTTOM_MARGIN = 96;
+// New A4/Letter pages reserve the existing 18..48 px binding header lane.
+// Explicit persisted insets, including top: 0, remain unchanged by normalization.
+const DEFAULT_BINDING_TOP_MARGIN = 72;
 
 export const PAPER_PHYSICAL_SIZES_MM = {
   A5: { width: 148, height: 210 },
@@ -46,23 +49,23 @@ export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom
     pageSize: 'A4',
     width: A4_PAGE_GEOMETRY.width,
     height: A4_PAGE_GEOMETRY.height,
-    contentInset: { ...A4_PAGE_GEOMETRY.contentInset },
+    contentInset: { ...A4_PAGE_GEOMETRY.contentInset, top: DEFAULT_BINDING_TOP_MARGIN },
     contentWidth: A4_PAGE_GEOMETRY.contentWidth,
-    contentHeight: A4_PAGE_GEOMETRY.height - A4_PAGE_GEOMETRY.contentInset.bottom,
+    contentHeight: A4_PAGE_GEOMETRY.height - DEFAULT_BINDING_TOP_MARGIN - A4_PAGE_GEOMETRY.contentInset.bottom,
   },
   Letter: {
     pageSize: 'Letter',
     width: DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2,
     height: Math.round((DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2) * (11 / 8.5)),
     contentInset: {
-      top: 0,
+      top: DEFAULT_BINDING_TOP_MARGIN,
       right: DEFAULT_HORIZONTAL_MARGIN,
       bottom: DEFAULT_BOTTOM_MARGIN,
       left: DEFAULT_HORIZONTAL_MARGIN,
     },
     contentWidth: DEFAULT_CONTENT_WIDTH,
     contentHeight: Math.round((DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2) * (11 / 8.5))
-      - DEFAULT_BOTTOM_MARGIN,
+      - DEFAULT_BINDING_TOP_MARGIN - DEFAULT_BOTTOM_MARGIN,
   },
   A3: additionalPrintPreset('A3'),
   Legal: additionalPrintPreset('Legal'),

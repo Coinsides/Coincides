@@ -23,7 +23,7 @@
 
 .table caption {
   padding: 0 0 10px;
-  color: var(--sk-ink-muted, var(--text-secondary));
+  color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink));
   font: inherit;
   font-weight: 600;
   text-align: left;
@@ -33,6 +33,7 @@
 
 .table th,
 .table td {
+  color: var(--sk-ink);
   box-sizing: border-box;
   min-width: 0;
   max-width: 24em;
@@ -53,7 +54,7 @@
 }
 
 .viewport:focus-visible { outline: 2px solid var(--sk-accent, var(--accent-primary)); outline-offset: 2px; }
-.invalid { color: var(--text-secondary); font-size: 13px; }
+.invalid { color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); font-size: 13px; }
 .print { overflow: hidden; }
 
 @media print {

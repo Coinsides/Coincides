@@ -17,7 +17,8 @@ export function PageFrameSlotsLayer({ slots, offsetX = 0, offsetY = 0 }: {
       fontFamily: families[override?.fontFamily ?? 'skin'],
       fontSize: override?.fontSize, fontWeight: override?.fontWeight,
       fontStyle: override?.italic ? 'italic' : undefined,
-      color: override?.colorToken ? `var(--sk-${override.colorToken})` : undefined };
+      color: override?.colorToken ? (override.colorToken === 'ink' ? 'var(--sk-ink)'
+        : `color-mix(in srgb, var(--sk-${override.colorToken}) 65%, var(--sk-ink))`) : undefined };
     const kindClass = slot.kind === 'header' ? styles.pageFrameHeaderSlot
       : slot.kind === 'footer' ? styles.pageFrameFooterSlot : styles.pageFramePageNumberSlot;
     return <div key={slot.slotId} className={`${styles.pageFrameSlot} ${kindClass}`}

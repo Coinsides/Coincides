@@ -2,7 +2,9 @@ import { createRef, useState } from 'react';
 import { createPaperFreehand } from '../freehandService';
 import { MemoryRouter } from 'react-router-dom';
 import { act, cleanup, fireEvent, render, renderHook, waitFor, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+// @ts-expect-error -- Optional audit output runs in Vitest's Node host.
+import { writeFileSync } from 'node:fs';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
 import { resolveDocumentPageFlowPlan } from '../documentPageFlowService';
 import { noteBlocksToPageFlow, pageFlowFirstLayouts, pageFlowFragmentProjections } from '../notePageFlowService';
@@ -29,6 +31,15 @@ import * as mediaPaste from '../mediaBlockPasteService';
 import { deriveChapterProjection } from '../chapterProjectionService';
 import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
 import { useAgentUiStore } from '@/stores/agentUiStore';
+import { createVisualRelationFixture } from '../../../../test/visualRelationsFixture';
+import { NOTE_HEADER_INITIAL_HEIGHT } from './NotePaperHeader';
+
+declare const process: { env: Record<string, string | undefined> };
+const externalHeaderAudit: unknown[] = [];
+afterAll(() => {
+  if (process.env.T8_EXTERNAL_HEADER_REPORT) writeFileSync(process.env.T8_EXTERNAL_HEADER_REPORT,
+    `${JSON.stringify({ measurement: 'production allocated header band and inline positioning inputs; no intrinsic layout', scenarios: externalHeaderAudit }, null, 2)}\n`);
+});
 
 vi.mock('../canvasAssetRepository', async (importOriginal) => ({
   ...await importOriginal<typeof import('../canvasAssetRepository')>(),
@@ -330,6 +341,46 @@ function alignment(frameX: number, mode: SurfaceMode, options: {
   view.unmount();
   return result;
 }
+
+describe('T8 external paper-title band stays before body geometry', () => {
+  it.each(['A4', 'Letter'] as const)('%s keeps its allocated header band clear at multiple scales and suppresses it with a cover', (pageSize) => {
+    for (const withCover of [false, true]) for (const stepFactor of [0.5, 1, 2]) {
+      const data = createVisualRelationFixture(pageSize, withCover);
+      const first = data.frames.find((page) => page.id === 'relation-body')!;
+      const initial = propsFor(first, 'page');
+      const view = render(<NoteWritingSurfaceLayer {...initial}
+        allBlocks={data.blocks} visibleBlocks={data.blocks} blockLayouts={data.layouts}
+        documentTypographyProfile={data.typography}
+        pageReadingViewState={{ gear: 'fit_width', stepFactor }}
+        noteCanvasRuntime={{ ...data.runtime, coordinateContract: 'v2', pageFlowPlan: data.plan,
+          blockFragmentProjections: data.fragments }}
+        paperHeader={{ titleDraft: 'External paper title', descriptionDraft: 'External description', contentReadOnly: true,
+          onTitleDraftChange: vi.fn(), onDescriptionDraftChange: vi.fn(), onSaveTitle: vi.fn(), onSaveDescription: vi.fn() }} />);
+      const header = view.container.querySelector('[data-note-paper-header]');
+      if (withCover) {
+        expect(header).toBeNull();
+        externalHeaderAudit.push({ pageSize, withCover, stepFactor, externalBand: 'suppressed' });
+      }
+      else {
+        expect(header).not.toBeNull();
+        const body = view.container.querySelector<HTMLElement>('[data-page-display-scale]')!;
+        const firstBlock = view.container.querySelector<HTMLElement>('[data-note-block-shell][data-block-id="relation-text.paragraph"]')!;
+        const scale = Number(body.dataset.pageDisplayScale);
+        const bodyTop = Number.parseFloat(body.style.top);
+        const firstTop = bodyTop + (Number.parseFloat(body.style.paddingTop) + Number.parseFloat(firstBlock.style.top)) * scale;
+        // jsdom uses the production header's documented fallback because it
+        // cannot measure intrinsic height. This checks the allocated band and
+        // committed positioning inputs, not a claimed glyph/client-rect gap.
+        expect(bodyTop).toBeCloseTo(NOTE_HEADER_INITIAL_HEIGHT * scale);
+        expect(firstTop - NOTE_HEADER_INITIAL_HEIGHT * scale).toBeGreaterThanOrEqual(0);
+        externalHeaderAudit.push({ pageSize, withCover, stepFactor, scale,
+          allocatedHeaderHeight: NOTE_HEADER_INITIAL_HEIGHT, bodyTop, firstTop,
+          gapAfterAllocatedBand: firstTop - NOTE_HEADER_INITIAL_HEIGHT * scale });
+      }
+      view.unmount();
+    }
+  });
+});
 
 it('C4 paper tools are available in writing and disabled in layout and read-only modes', () => {
   const props = propsFor(frame(0), 'page');

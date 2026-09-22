@@ -17,13 +17,14 @@
   height: 100%;
   overflow: hidden;
   border: 1px solid var(--border-default);
-  color: var(--text-primary);
+  color: var(--sk-ink);
   background: var(--sk-paper, var(--bg-primary));
   font: inherit;
 }
 
 .status span,
 .placeholder span {
+  color: var(--sk-ink);
   padding: 0 8px;
   overflow: hidden;
   text-overflow: ellipsis;

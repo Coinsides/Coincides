@@ -1378,8 +1378,8 @@ function testPageFrameLayoutAffiliationAndMoveCohort(): void {
   );
   assertEqual(
     projectedLayout.y,
-    pageFrame.y + pageLocalLayout.y,
-    'Page Mode-created block layout stores the PageFrame canvas y offset',
+    pageFrame.y + pageFrame.contentInset.top + pageLocalLayout.y,
+    'Page Mode-created block layout stores the PageFrame content-origin canvas y offset',
   );
   assertEqual(
     projectedPlacement.x,
@@ -1388,8 +1388,8 @@ function testPageFrameLayoutAffiliationAndMoveCohort(): void {
   );
   assertEqual(
     projectedPlacement.y,
-    pageFrame.y + pageLocalLayout.y,
-    'Page Mode-created block renders inside the moved PageFrame y',
+    pageFrame.y + pageFrame.contentInset.top + pageLocalLayout.y,
+    'Page Mode-created block renders inside the moved PageFrame content y',
   );
   const blockLayouts: Record<string, BlockBoxLayout> = {
     inside: { x: 160, y: 140, width: 240, height: 120 },
@@ -2013,13 +2013,13 @@ function testPageFrameAwareExportPreview(): void {
   const layouts: Record<string, BlockBoxLayout> = {
     [blocks[0].id]: {
       x: primaryPageFrame.contentInset.left + 16,
-      y: 24,
+      y: primaryPageFrame.y + primaryPageFrame.contentInset.top + 24,
       width: 220,
       height: 72,
     },
     [blocks[1].id]: {
       x: secondaryPageFrame.x + secondaryPageFrame.contentInset.left,
-      y: 40,
+      y: secondaryPageFrame.y + secondaryPageFrame.contentInset.top + 40,
       width: 220,
       height: 72,
     },

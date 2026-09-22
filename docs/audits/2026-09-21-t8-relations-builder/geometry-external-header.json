@@ -1,0 +1,101 @@
+{
+  "measurement": "production allocated header band and inline positioning inputs; no intrinsic layout",
+  "scenarios": [
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "stepFactor": 0.5,
+      "scale": 0.37610619469026546,
+      "allocatedHeaderHeight": 197,
+      "bodyTop": 74.0929203539823,
+      "firstTop": 128.25221238938053,
+      "gapAfterAllocatedBand": 54.15929203539824
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "stepFactor": 1,
+      "scale": 0.7522123893805309,
+      "allocatedHeaderHeight": 197,
+      "bodyTop": 148.1858407079646,
+      "firstTop": 256.50442477876106,
+      "gapAfterAllocatedBand": 108.31858407079648
+    },
+    {
+      "pageSize": "A4",
+      "withCover": false,
+      "stepFactor": 2,
+      "scale": 1.5044247787610618,
+      "allocatedHeaderHeight": 197,
+      "bodyTop": 296.3716814159292,
+      "firstTop": 513.0088495575221,
+      "gapAfterAllocatedBand": 216.63716814159295
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "stepFactor": 0.5,
+      "externalBand": "suppressed"
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "stepFactor": 1,
+      "externalBand": "suppressed"
+    },
+    {
+      "pageSize": "A4",
+      "withCover": true,
+      "stepFactor": 2,
+      "externalBand": "suppressed"
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "stepFactor": 0.5,
+      "scale": 0.37610619469026546,
+      "allocatedHeaderHeight": 197,
+      "bodyTop": 74.0929203539823,
+      "firstTop": 128.25221238938053,
+      "gapAfterAllocatedBand": 54.15929203539824
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "stepFactor": 1,
+      "scale": 0.7522123893805309,
+      "allocatedHeaderHeight": 197,
+      "bodyTop": 148.1858407079646,
+      "firstTop": 256.50442477876106,
+      "gapAfterAllocatedBand": 108.31858407079648
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": false,
+      "stepFactor": 2,
+      "scale": 1.5044247787610618,
+      "allocatedHeaderHeight": 197,
+      "bodyTop": 296.3716814159292,
+      "firstTop": 513.0088495575221,
+      "gapAfterAllocatedBand": 216.63716814159295
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "stepFactor": 0.5,
+      "externalBand": "suppressed"
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "stepFactor": 1,
+      "externalBand": "suppressed"
+    },
+    {
+      "pageSize": "Letter",
+      "withCover": true,
+      "stepFactor": 2,
+      "externalBand": "suppressed"
+    }
+  ]
+}

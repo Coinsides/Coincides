@@ -12,6 +12,8 @@ import type { NoteBlock } from '../runtimeDataTypes';
 import type { DocumentTypographyProfile, PageFrameCollectionModel } from '../types';
 import { usePaperSize } from './usePaperSize';
 import { usePlacementHistory } from './usePlacementHistory';
+import { estimateTypographyTextBlockHeight } from '../typographyMeasurementService';
+import { getPageFrameContentRect } from '../pageFrameService';
 import type { TextFlowHistoryHost } from './useTextFlowHistory';
 
 class PaperPointerEvent extends MouseEvent {
@@ -93,11 +95,19 @@ describe('A5 paper size shared history and Layout gestures', () => {
       surfaceMode: 'page', metadata, pageFrames: target.pageFrames, hydratedProfile: typography,
     }));
     const block: NoteBlock = { id: 'text', placement_id: 'placement:text', block_type: 'paragraph', title: null,
-      plain_text: 'a'.repeat(3800), content_json: {}, metadata: {}, order_index: 0,
+      plain_text: 'a'.repeat(3500), content_json: {}, metadata: {}, order_index: 0,
       source_references: [], display_overrides_json: {}, canvas_layout: {
         x: 0, y: 0, width: 760, height: 100, width_mode: 'auto', frame_id: 'paper-first',
         coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside',
       } };
+    const targetFrame = createPrimaryPageFrame({ templateId: 'letter_portrait' });
+    const targetContent = getPageFrameContentRect(targetFrame);
+    // Guard the specimen's intended boundary independently of the pagination
+    // operation: Letter fits one page while the retained A4 type metrics do not.
+    const heightFor = (profile: DocumentTypographyProfile) => estimateTypographyTextBlockHeight({
+      text: block.plain_text!, width: targetContent.width, typography: profile }).heightPx;
+    expect(heightFor(createPageFrameDefaultTypographyProfile(targetFrame))).toBeLessThanOrEqual(targetContent.height);
+    expect(heightFor(typography)).toBeGreaterThan(targetContent.height);
     const subject = mountPaper({ initialState: { collection, blocks: [block] }, typography, resolveTypography });
     await act(async () => { expect(await subject.current.paper.setPreset('letter_portrait')).toBe(true); });
     expect(resolveTypography).toHaveBeenCalledTimes(1);

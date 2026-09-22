@@ -4,8 +4,8 @@
 .stamp { position: absolute; left: 4px; top: 7px; width: 22px; height: 26px; display: grid; place-items: center;
   color: var(--sk-danger); border: 1px solid currentColor; font-family: var(--sk-title-font, serif); font-size: 14px; }
 .label { position: absolute; left: 34px; right: 10px; top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--sk-annotation); font-size: 12px; font-weight: 600; line-height: 20px; }
-.source { position: absolute; left: 34px; right: 10px; margin: 0; color: var(--sk-ink-muted); text-align: right;
+  color: color-mix(in srgb, var(--sk-annotation) 50%, var(--sk-ink)); font-size: 12px; font-weight: 600; line-height: 20px; }
+.source { position: absolute; left: 34px; right: 10px; margin: 0; color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); text-align: right;
   font: 13px/20px Aptos, Calibri, "Segoe UI", Arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
 .editor { width: 280px; max-width: calc(100vw - 32px); padding: 14px; display: grid; gap: 12px;
   background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }

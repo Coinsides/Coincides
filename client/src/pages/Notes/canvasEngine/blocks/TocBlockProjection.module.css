@@ -5,19 +5,21 @@
   padding-block: var(--document-paragraph-spacing);
 }
 .title {
+  color: var(--sk-ink);
   font-family: var(--sk-title-font);
   margin-block-end: var(--document-paragraph-spacing);
 }
 .entry {
   all: unset;
+  color: var(--sk-ink);
   display: flex;
   justify-content: space-between;
   gap: var(--document-line-height);
   padding-block: var(--document-paragraph-spacing);
 }
 button.entry { cursor: pointer; }
-button.entry:hover, button.entry:focus-visible { color: var(--sk-accent); }
+button.entry:hover, button.entry:focus-visible { color: color-mix(in srgb, var(--sk-accent) 65%, var(--sk-ink)); }
 button.entry:focus-visible { outline: auto; }
-.chapter { font-family: var(--sk-title-font); overflow-wrap: anywhere; white-space: pre-wrap; }
-.page, .empty { font-family: var(--sk-label-font); color: var(--sk-ink-muted); }
+.chapter { color: var(--sk-ink); font-family: var(--sk-title-font); overflow-wrap: anywhere; white-space: pre-wrap; }
+.page, .empty { font-family: var(--sk-label-font); color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); }
 .page { white-space: nowrap; }

@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BoardNewNoteDialog } from './BoardNewNoteDialog';
+import { createPageFramePrintProfile } from '../Notes/canvasEngine/pageFramePrintScaleService';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn() }));
 vi.mock('@/services/api', () => ({ default: http }));
@@ -62,7 +63,7 @@ describe('Board New note ceremony', () => {
       project: { name: 'Chinese history' }, title: 'Trade routes', page_format: 'a4_portrait',
       collection: expect.objectContaining({ pageFrames: [expect.objectContaining({
         templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
-        contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
+        contentInset: createPageFramePrintProfile('A4').contentInset,
       })] }),
     });
     expect(http.put).not.toHaveBeenCalled();
@@ -95,7 +96,7 @@ describe('Board New note ceremony', () => {
       project_id: 'project-first', title: 'Trade routes', page_format: 'a4_portrait',
       collection: expect.objectContaining({ pageFrames: [expect.objectContaining({
         templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
-        contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
+        contentInset: createPageFramePrintProfile('A4').contentInset,
       })], pageStacks: [expect.objectContaining({ frameIds: [expect.any(String)] })] }),
     });
     expect(http.put).not.toHaveBeenCalled();

@@ -1,0 +1,816 @@
+{
+  "status": "completed_with_server_environment_blocks",
+  "generatedAt": "2026-09-22T03:47:22.196Z",
+  "node": "v22.22.1",
+  "runtimeGate": {
+    "source": "package.json#verify:v2-bn8-runtime",
+    "scopedComponentCount": 25,
+    "omittedForHQ": [
+      "git diff --check",
+      "npm run check:changed-file-secrets"
+    ],
+    "finalPassedComponents": 25,
+    "finalExitCode": 0,
+    "components": [
+      {
+        "component": 1,
+        "command": "npm run check:test-wiring",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 1,
+            "command": "npm run check:test-wiring",
+            "log": ".codex-tmp/t8-relations/01-check-test-wiring.log",
+            "started": "2026-09-22T03:24:19.284Z",
+            "finished": "2026-09-22T03:24:19.488Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 2,
+        "command": "npm run test:agent-knowledge",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 2,
+            "command": "npm run test:agent-knowledge",
+            "log": ".codex-tmp/t8-relations/02-test-agent-knowledge.log",
+            "started": "2026-09-22T03:24:19.488Z",
+            "finished": "2026-09-22T03:24:22.684Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 3,
+        "command": "npm run check:agent-knowledge",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 3,
+            "command": "npm run check:agent-knowledge",
+            "log": ".codex-tmp/t8-relations/03-check-agent-knowledge.log",
+            "started": "2026-09-22T03:24:22.684Z",
+            "finished": "2026-09-22T03:24:23.046Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 4,
+        "command": "npm run check:tech-debt-table",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 4,
+            "command": "npm run check:tech-debt-table",
+            "log": ".codex-tmp/t8-relations/04-check-tech-debt-table.log",
+            "started": "2026-09-22T03:24:23.047Z",
+            "finished": "2026-09-22T03:24:23.230Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 5,
+        "command": "npm run test:unit",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 5,
+            "command": "npm run test:unit",
+            "log": ".codex-tmp/t8-relations/05-test-unit.log",
+            "started": "2026-09-22T03:33:06.486Z",
+            "finished": "2026-09-22T03:33:43.459Z",
+            "code": 1,
+            "signal": null
+          },
+          {
+            "component": 5,
+            "command": "npm run test:unit",
+            "log": ".codex-tmp/t8-relations/05-test-unit-client.log",
+            "started": "2026-09-22T03:39:01.079Z",
+            "finished": "2026-09-22T03:40:00.309Z",
+            "code": 1,
+            "signal": null
+          },
+          {
+            "component": 5,
+            "command": "npm run test:unit",
+            "invocation": "node C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js --prefix client run test:unit -- --maxWorkers=2",
+            "log": ".codex-tmp/t8-relations/05-test-unit-unit.log",
+            "started": "2026-09-22T03:41:52.520Z",
+            "finished": "2026-09-22T03:44:09.104Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 6,
+        "command": "npm run test:tool-face-registry",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 6,
+            "command": "npm run test:tool-face-registry",
+            "log": ".codex-tmp/t8-relations/06-test-tool-face-registry.log",
+            "started": "2026-09-22T03:24:23.230Z",
+            "finished": "2026-09-22T03:24:23.849Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 7,
+        "command": "npm run test:tool-face-manifest",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 7,
+            "command": "npm run test:tool-face-manifest",
+            "log": ".codex-tmp/t8-relations/07-test-tool-face-manifest.log",
+            "started": "2026-09-22T03:24:23.850Z",
+            "finished": "2026-09-22T03:24:27.484Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 8,
+        "command": "npm run check:tool-face-manifest",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 8,
+            "command": "npm run check:tool-face-manifest",
+            "log": ".codex-tmp/t8-relations/08-check-tool-face-manifest.log",
+            "started": "2026-09-22T03:24:27.484Z",
+            "finished": "2026-09-22T03:24:28.251Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 9,
+        "command": "npm run test:tool-face-parity",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 9,
+            "command": "npm run test:tool-face-parity",
+            "log": ".codex-tmp/t8-relations/09-test-tool-face-parity.log",
+            "started": "2026-09-22T03:24:28.252Z",
+            "finished": "2026-09-22T03:24:33.935Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 10,
+        "command": "npm run check:tool-face-parity",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 10,
+            "command": "npm run check:tool-face-parity",
+            "log": ".codex-tmp/t8-relations/10-check-tool-face-parity.log",
+            "started": "2026-09-22T03:24:33.935Z",
+            "finished": "2026-09-22T03:24:34.455Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 11,
+        "command": "npm run check:server-shared-runtime-import",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 11,
+            "command": "npm run check:server-shared-runtime-import",
+            "log": ".codex-tmp/t8-relations/11-check-server-shared-runtime-import.log",
+            "started": "2026-09-22T03:24:34.455Z",
+            "finished": "2026-09-22T03:24:35.014Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 12,
+        "command": "npm run check:owned-helper-contract",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 12,
+            "command": "npm run check:owned-helper-contract",
+            "log": ".codex-tmp/t8-relations/12-check-owned-helper-contract.log",
+            "started": "2026-09-22T03:24:35.015Z",
+            "finished": "2026-09-22T03:24:35.454Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 13,
+        "command": "npm run test:owned-helper-contract",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 13,
+            "command": "npm run test:owned-helper-contract",
+            "log": ".codex-tmp/t8-relations/13-test-owned-helper-contract.log",
+            "started": "2026-09-22T03:24:35.454Z",
+            "finished": "2026-09-22T03:24:36.661Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 14,
+        "command": "npm run check:canvas-runtime-boundary",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 14,
+            "command": "npm run check:canvas-runtime-boundary",
+            "log": ".codex-tmp/t8-relations/14-check-canvas-runtime-boundary.log",
+            "started": "2026-09-22T03:24:36.661Z",
+            "finished": "2026-09-22T03:24:37.089Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 15,
+        "command": "npm run check:group-gallery-shell",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 15,
+            "command": "npm run check:group-gallery-shell",
+            "log": ".codex-tmp/t8-relations/15-check-group-gallery-shell.log",
+            "started": "2026-09-22T03:24:37.089Z",
+            "finished": "2026-09-22T03:24:37.520Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 16,
+        "command": "npm run check:groups-rail-shell",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 16,
+            "command": "npm run check:groups-rail-shell",
+            "log": ".codex-tmp/t8-relations/16-check-groups-rail-shell.log",
+            "started": "2026-09-22T03:24:37.520Z",
+            "finished": "2026-09-22T03:24:37.934Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 17,
+        "command": "npm run check:single-editor-shell",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 17,
+            "command": "npm run check:single-editor-shell",
+            "log": ".codex-tmp/t8-relations/17-check-single-editor-shell.log",
+            "started": "2026-09-22T03:24:37.934Z",
+            "finished": "2026-09-22T03:24:38.378Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 18,
+        "command": "npm run check:source-experience",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 18,
+            "command": "npm run check:source-experience",
+            "log": ".codex-tmp/t8-relations/18-check-source-experience.log",
+            "started": "2026-09-22T03:24:38.378Z",
+            "finished": "2026-09-22T03:24:39.368Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 19,
+        "command": "npm run check:v2-bn11-legacy-shutdown",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 19,
+            "command": "npm run check:v2-bn11-legacy-shutdown",
+            "log": ".codex-tmp/t8-relations/19-check-v2-bn11-legacy-shutdown.log",
+            "started": "2026-09-22T03:24:39.369Z",
+            "finished": "2026-09-22T03:24:39.821Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 20,
+        "command": "npm run check:v2-bn11-relation-freshness",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 20,
+            "command": "npm run check:v2-bn11-relation-freshness",
+            "log": ".codex-tmp/t8-relations/20-check-v2-bn11-relation-freshness.log",
+            "started": "2026-09-22T03:24:39.821Z",
+            "finished": "2026-09-22T03:24:40.271Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 21,
+        "command": "npm run smoke:canvas-engine-model-contract",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 21,
+            "command": "npm run smoke:canvas-engine-model-contract",
+            "log": ".codex-tmp/t8-relations/21-smoke-canvas-engine-model-contract.log",
+            "started": "2026-09-22T03:24:40.271Z",
+            "finished": "2026-09-22T03:24:42.352Z",
+            "code": 1,
+            "signal": null
+          },
+          {
+            "component": 21,
+            "command": "npm run smoke:canvas-engine-model-contract",
+            "code": 0,
+            "log": ".codex-tmp/t8-relations/21-model-contract-final.log",
+            "finished": "2026-09-22T03:26:59.369Z",
+            "validation": "Canvas engine model contract check passed (60 groups)."
+          }
+        ]
+      },
+      {
+        "component": 22,
+        "command": "npm run build:client",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 22,
+            "command": "npm run build:client",
+            "log": ".codex-tmp/t8-relations/22-build-client.log",
+            "started": "2026-09-22T03:33:43.459Z",
+            "finished": "2026-09-22T03:33:58.401Z",
+            "code": 0,
+            "signal": null
+          },
+          {
+            "component": 22,
+            "command": "npm run build:client",
+            "log": ".codex-tmp/t8-relations/22-build-client-client.log",
+            "started": "2026-09-22T03:40:00.311Z",
+            "finished": "2026-09-22T03:40:57.811Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 23,
+        "command": "npm run build",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 23,
+            "command": "npm run build",
+            "log": ".codex-tmp/t8-relations/23-build.log",
+            "started": "2026-09-22T03:24:42.353Z",
+            "finished": "2026-09-22T03:24:43.602Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 24,
+        "command": "npm run smoke:canvas-engine-performance",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 24,
+            "command": "npm run smoke:canvas-engine-performance",
+            "log": ".codex-tmp/t8-relations/24-smoke-canvas-engine-performance.log",
+            "started": "2026-09-22T03:24:43.603Z",
+            "finished": "2026-09-22T03:24:45.026Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      },
+      {
+        "component": 25,
+        "command": "npm run docs:check",
+        "finalExitCode": 0,
+        "attempts": [
+          {
+            "component": 25,
+            "command": "npm run docs:check",
+            "log": ".codex-tmp/t8-relations/25-docs-check.log",
+            "started": "2026-09-22T03:24:45.026Z",
+            "finished": "2026-09-22T03:24:45.332Z",
+            "code": 1,
+            "signal": null
+          },
+          {
+            "component": 25,
+            "command": "npm run docs:check",
+            "invocation": "node C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js run docs:check",
+            "log": ".codex-tmp/t8-relations/25-docs-check-docs.log",
+            "started": "2026-09-22T03:46:59.342Z",
+            "finished": "2026-09-22T03:46:59.927Z",
+            "code": 0,
+            "signal": null
+          }
+        ]
+      }
+    ],
+    "docsSubchecksAfterInitialShortCircuit": [
+      {
+        "command": "node scripts/docs-inventory.mjs --check",
+        "code": 0,
+        "log": ".codex-tmp/t8-relations/docs-inventory-direct.log"
+      },
+      {
+        "command": "node docs/agent-ops/current-state/glossary-shape-vs-capability.test.mjs",
+        "code": 0,
+        "log": ".codex-tmp/t8-relations/glossary-direct.log"
+      }
+    ]
+  },
+  "client": {
+    "firstFullLibrary": {
+      "files": {
+        "failed": 5,
+        "passed": 233,
+        "skipped": 0,
+        "total": 238
+      },
+      "tests": {
+        "failed": 12,
+        "passed": 2451,
+        "skipped": 0,
+        "total": 2463
+      },
+      "durationSeconds": 36.14,
+      "code": 1,
+      "log": ".codex-tmp/t8-relations/05-test-unit-round1.log"
+    },
+    "secondFullLibrary": {
+      "files": {
+        "failed": 10,
+        "passed": 228,
+        "skipped": 0,
+        "total": 238
+      },
+      "tests": {
+        "failed": 14,
+        "passed": 2449,
+        "skipped": 0,
+        "total": 2463
+      },
+      "durationSeconds": 58.02,
+      "code": 1,
+      "log": ".codex-tmp/t8-relations/05-test-unit-round2.log",
+      "classification": "13 tests hit the existing 5000 ms deadline and one asynchronous bookmark wait failed during concurrent suite saturation; full-library bounded-worker rerun follows without exclusion or timeout extension."
+    },
+    "finalFullLibrary": {
+      "files": {
+        "failed": 0,
+        "passed": 238,
+        "skipped": 0,
+        "total": 238
+      },
+      "tests": {
+        "failed": 0,
+        "passed": 2463,
+        "skipped": 0,
+        "total": 2463
+      },
+      "durationSeconds": 136.04,
+      "code": 0,
+      "runnerOptions": {
+        "maxWorkers": 2,
+        "testTimeoutMs": 5000,
+        "excludes": []
+      },
+      "log": ".codex-tmp/t8-relations/05-test-unit-unit.log"
+    },
+    "finalBuild": {
+      "code": 0,
+      "nodeEnv": "production",
+      "log": ".codex-tmp/t8-relations/22-build-client-client.log"
+    },
+    "postFullLibraryScannerRecheck": {
+      "files": {
+        "failed": 0,
+        "passed": 1,
+        "skipped": 0,
+        "total": 1
+      },
+      "tests": {
+        "failed": 0,
+        "passed": 23,
+        "skipped": 0,
+        "total": 23
+      },
+      "durationSeconds": 6.55,
+      "code": 0,
+      "checkedBy": "root",
+      "log": ".codex-tmp/t8-relations/contrast-final-review.log",
+      "reason": "Last test-helper-only gradient parsing correction after full-library start; no production change."
+    },
+    "postFullLibraryTypecheck": {
+      "command": "tsc -b",
+      "code": 0,
+      "checkedBy": "root",
+      "log": ".codex-tmp/t8-relations/contrast-final-tsc-build.log"
+    },
+    "incidentalCommandError": {
+      "result": "TS5058: attempted tsconfig.app.json does not exist; corrected to successful tsc -b.",
+      "log": ".codex-tmp/t8-relations/contrast-final-tsc.log",
+      "classification": "command/path error, not source failure or an additional gate component"
+    },
+    "firstBuildCaveat": "First build passed under runner NODE_ENV=test; retained as an attempt, superseded by explicit production build."
+  },
+  "server": {
+    "fileInventory": [
+      "scripts/agent-eval/harness.test.ts",
+      "scripts/v13WildernessExecute.test.ts",
+      "scripts/v13WildernessShadowRun.test.ts",
+      "scripts/v14OwnershipContract.test.ts",
+      "scripts/v2Bn12LifecycleMigration.test.ts",
+      "scripts/v2OperationBatchTimestampMigration.test.ts",
+      "src/__tests__/providerCredentials.test.ts",
+      "src/__tests__/textFlowIdentityContract.test.ts",
+      "src/__tests__/v13AgentMemories.test.ts",
+      "src/__tests__/v13AtomicTextSave.test.ts",
+      "src/__tests__/v13AtomicTextSaveMigration.test.ts",
+      "src/__tests__/v13BoardCeremonyNote.test.ts",
+      "src/__tests__/v13BoardChalk.test.ts",
+      "src/__tests__/v13BoardIdentity.test.ts",
+      "src/__tests__/v13BoardRoutes.test.ts",
+      "src/__tests__/v13BoardSchema.test.ts",
+      "src/__tests__/v13BoardServices.test.ts",
+      "src/__tests__/v13BoardStaging.test.ts",
+      "src/__tests__/v13BoardTextRanges.test.ts",
+      "src/__tests__/v13BoardTrayRelocation.test.ts",
+      "src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "src/__tests__/v13BoardWave1.test.ts",
+      "src/__tests__/v13CanvasRetirement.test.ts",
+      "src/__tests__/v13CoordinateContract.test.ts",
+      "src/__tests__/v13EventsLedger.test.ts",
+      "src/__tests__/v13GraphemeTextRanges.test.ts",
+      "src/__tests__/v13ItemFloor.test.ts",
+      "src/__tests__/v13ItemRefBlocks.test.ts",
+      "src/__tests__/v13MediaBlocks.test.ts",
+      "src/__tests__/v13NoteMetadata.test.ts",
+      "src/__tests__/v13PagePresets.test.ts",
+      "src/__tests__/v13PaperInk.test.ts",
+      "src/__tests__/v13PaperSkin.test.ts",
+      "src/__tests__/v13ProjectDeletionReferences.test.ts",
+      "src/__tests__/v13RecordedAction.test.ts",
+      "src/__tests__/v13SourceProjectionRepair.test.ts",
+      "src/__tests__/v13SourceReprojection.test.ts",
+      "src/__tests__/v13Tray.test.ts",
+      "src/__tests__/v13TrayOrder.test.ts",
+      "src/__tests__/v13WallCollectionBatch.test.ts",
+      "src/__tests__/v14AgentKnowledgeProjection.test.ts",
+      "src/__tests__/v14AgentRouteLifecycle.test.ts",
+      "src/__tests__/v14AgentVerbTransfer.test.ts",
+      "src/__tests__/v14AgentWriteDoor.test.ts",
+      "src/__tests__/v14AttentionContext.test.ts",
+      "src/__tests__/v14BoardLayoutInspector.test.ts",
+      "src/__tests__/v14BoardSandbox.test.ts",
+      "src/__tests__/v14BoardVisual.test.ts",
+      "src/__tests__/v14BoardVisualGeometry.test.ts",
+      "src/__tests__/v14CardCover.test.ts",
+      "src/__tests__/v14ClaimObservation.test.ts",
+      "src/__tests__/v14ClaimReceipt.test.ts",
+      "src/__tests__/v14ComponentBlocks.test.ts",
+      "src/__tests__/v14ContextHint.test.ts",
+      "src/__tests__/v14CoverPage.test.ts",
+      "src/__tests__/v14DeleteCeremony.test.ts",
+      "src/__tests__/v14EpisodeContext.test.ts",
+      "src/__tests__/v14EpisodeStorage.test.ts",
+      "src/__tests__/v14IntentRouter.test.ts",
+      "src/__tests__/v14LoopRobustness.test.ts",
+      "src/__tests__/v14MemoryQuickwins.test.ts",
+      "src/__tests__/v14NoteBinding.test.ts",
+      "src/__tests__/v14NotePatch.test.ts",
+      "src/__tests__/v14OrganizedNoteRichBlocks.test.ts",
+      "src/__tests__/v14PaletteColors.test.ts",
+      "src/__tests__/v14PaperFreedom.test.ts",
+      "src/__tests__/v14ParagraphFurniture.test.ts",
+      "src/__tests__/v14ProposalUnification.test.ts",
+      "src/__tests__/v14ReadTools.test.ts",
+      "src/__tests__/v14SkinSuites.test.ts",
+      "src/__tests__/v14TableBlocks.test.ts",
+      "src/__tests__/v14TocBlocks.test.ts",
+      "src/__tests__/v14TurnIdentity.test.ts",
+      "src/__tests__/v14UiCommands.test.ts",
+      "src/__tests__/v2BlockRestoreDoor.test.ts",
+      "src/__tests__/v2CanvasPersistenceCutover.test.ts",
+      "src/__tests__/v2ContentGroups.test.ts",
+      "src/__tests__/v2DevQuickLogin.test.ts",
+      "src/__tests__/v2DocumentParserPdf.test.ts",
+      "src/__tests__/v2GroupFolders.test.ts",
+      "src/__tests__/v2ImprintCitations.test.ts",
+      "src/__tests__/v2ImprintEmbedding.test.ts",
+      "src/__tests__/v2ImprintRetrieval.test.ts",
+      "src/__tests__/v2ItemRelationFloor.test.ts",
+      "src/__tests__/v2Items.test.ts",
+      "src/__tests__/v2MaterialLibrary.test.ts",
+      "src/__tests__/v2McpArtifact.test.ts",
+      "src/__tests__/v2McpTransport.test.ts",
+      "src/__tests__/v2NoteBlockLifecycle.test.ts",
+      "src/__tests__/v2NoteFoundation.test.ts",
+      "src/__tests__/v2NotesLifecycle.test.ts",
+      "src/__tests__/v2NotesListService.test.ts",
+      "src/__tests__/v2Purposes.test.ts",
+      "src/__tests__/v2RelationLifecycleClosure.test.ts",
+      "src/__tests__/v2Relations.test.ts",
+      "src/__tests__/v2SourceContainerIntake.test.ts",
+      "src/__tests__/v2SourceFileIntake.test.ts",
+      "src/__tests__/v2SourceIdentityFloor.test.ts",
+      "src/__tests__/v2SourceImprints.test.ts",
+      "src/__tests__/v2SourceLifecycleClosure.test.ts",
+      "src/__tests__/v2SourceMaterialization.test.ts",
+      "src/__tests__/v2SourceMineruWiring.test.ts",
+      "src/__tests__/v2SourceNeverReject.test.ts",
+      "src/__tests__/v2SourceRegionCells.test.ts",
+      "src/__tests__/v2SourceT0Alignment.test.ts",
+      "src/__tests__/v2SourceTranscriberFingerprint.test.ts",
+      "src/__tests__/v2TemplateStudioDecommission.test.ts",
+      "src/__tests__/v2TestV2ManifestHook.test.ts",
+      "src/__tests__/v2TrashNotesTool.test.ts",
+      "src/agent/providers/index.test.ts",
+      "src/toolFace/registry.test.ts"
+    ],
+    "fileCount": 111,
+    "excludedFiles": [],
+    "fileTimeoutMs": 600000,
+    "concurrency": 2,
+    "finalPassedFiles": 109,
+    "environmentBlockedFiles": 2,
+    "finalExitCode": 1,
+    "firstFullRun": {
+      "started": "2026-09-22T03:18:00.535Z",
+      "finished": "2026-09-22T03:20:38.343Z",
+      "files": 111,
+      "fileTimeoutMs": 600000,
+      "concurrency": 2,
+      "code": 1,
+      "signal": null,
+      "summariesInOrder": [
+        {
+          "tests": 1114,
+          "suites": 0,
+          "pass": 1100,
+          "fail": 14,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "durationMs": 155434.5817
+        },
+        {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "durationMs": 1204.8627
+        },
+        {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "durationMs": 992.1171
+        }
+      ],
+      "log": ".codex-tmp/t8-relations/server-full.log",
+      "classification": "10 runner credential-directory errors, 2 Node IPC placeholders recovered by 6/6 and 4/4 isolated retries, 2 Python/MinerU environment errors. Complete 111-file rerun followed."
+    },
+    "finalFullRun": {
+      "started": "2026-09-22T03:20:58.345Z",
+      "finished": "2026-09-22T03:24:11.014Z",
+      "files": 111,
+      "fileTimeoutMs": 600000,
+      "concurrency": 2,
+      "code": 1,
+      "signal": null,
+      "summariesInOrder": [
+        {
+          "tests": 1077,
+          "suites": 0,
+          "pass": 1074,
+          "fail": 3,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "durationMs": 181178.2764
+        },
+        {
+          "tests": 59,
+          "suites": 0,
+          "pass": 59,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "durationMs": 11354.8937
+        }
+      ],
+      "log": ".codex-tmp/t8-relations/server-full-corrected.log",
+      "retry": {
+        "file": "src/__tests__/v2MaterialLibrary.test.ts",
+        "reason": "Node IPC deserialization error",
+        "result": "PASS",
+        "tests": 59,
+        "pass": 59,
+        "fail": 0,
+        "retries": 1
+      },
+      "countingNote": "Main summary includes an IPC file placeholder; report main and isolated retry separately rather than summing the placeholder with its 59 recovered tests."
+    },
+    "environmentFailures": [
+      {
+        "file": "src/__tests__/v2SourceMineruWiring.test.ts",
+        "stage": "module import",
+        "code": "ENOENT",
+        "detail": "spawnSync python.exe"
+      },
+      {
+        "file": "src/__tests__/v2SourceRegionCells.test.ts",
+        "stage": "real local MinerU OCR",
+        "code": 101,
+        "detail": "Pinned venv cannot launch its UV Python; independent direct spawn confirms EPERM."
+      }
+    ],
+    "pythonProbe": {
+      "status": null,
+      "error": "EPERM",
+      "message": "spawnSync C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe EPERM",
+      "log": ".codex-tmp/t8-relations/python-probe.json"
+    },
+    "finalPresetDependencyRecheck": {
+      "file": "scripts/v13WildernessExecute.test.ts",
+      "command": "node ../scripts/run-server-test-suite.mjs --test-timeout=600000 scripts/v13WildernessExecute.test.ts",
+      "code": 0,
+      "summaries": [
+        {
+          "tests": 27,
+          "suites": 0,
+          "pass": 27,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "durationMs": 96601.5202
+        }
+      ],
+      "log": ".codex-tmp/t8-relations/server-wilderness-final.log",
+      "scope": "After final default preset changes; normalizePageFramePrintBaseline and coordinate contract unchanged."
+    }
+  }
+}

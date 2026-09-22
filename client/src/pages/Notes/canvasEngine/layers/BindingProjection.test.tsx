@@ -35,7 +35,7 @@ describe('A2 one binding projection in reading, overview and print', () => {
     expect(reading.container.querySelectorAll('[data-page-frame-slot]')).toHaveLength(6);
     const title = reading.container.querySelector<HTMLElement>('[data-page-frame-slot-position="header-left"]')!;
     expect(title.textContent).toBe('手填书名'); expect(title.style.fontSize).toBe('18px');
-    expect(title.style.fontFamily).toBe('Georgia, serif'); expect(title.style.color).toBe('var(--sk-accent)');
+    expect(title.style.fontFamily).toBe('Georgia, serif'); expect(title.style.color).toBe('color-mix(in srgb, var(--sk-accent) 65%, var(--sk-ink))');
     expect(reading.container.querySelector('[data-page-frame-slot="page-number"]')?.textContent).toBe('[IV]');
     reading.unmount();
     const thumbnail = render(<NotePageThumbnail input={input} frame={second} pageNumber={2} width={200}

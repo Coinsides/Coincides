@@ -1,7 +1,7 @@
-.chapterHeadingFurniture { position: absolute; right: calc(100% + 28px); top: 4px; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; width: 34px; color: var(--text-muted); font-size: 11px; line-height: 1.3; }
-.chapterHeadingFurniture button { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 22px; border: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; }
+.chapterHeadingFurniture { position: absolute; right: calc(100% + 28px); top: 4px; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; width: 34px; color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); font-size: 11px; line-height: 1.3; }
+.chapterHeadingFurniture button { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 22px; border: 0; padding: 0; background: transparent; color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); cursor: pointer; }
 .chapterHeadingFurniture button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 1px; }
-.chapterHeadingNumber { width: 100%; padding-right: 2px; text-align: right; font-variant-numeric: tabular-nums; }
+.chapterHeadingNumber { color: color-mix(in srgb, var(--sk-ink-muted) 65%, var(--sk-ink)); width: 100%; padding-right: 2px; text-align: right; font-variant-numeric: tabular-nums; }
 [data-chapter-drop="before"] { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 [data-chapter-drop="after"] { outline: 2px dashed var(--border-focus); outline-offset: 2px; }
 @media print { .chapterHeadingFurniture button { display: none; } }

@@ -5,6 +5,7 @@ import { createDefaultDocumentTypographyProfile } from '../typographyProfileServ
 import { createViewport } from '../engineModel';
 import { useNoteCanvasFrameModel, type UseNoteCanvasFrameModelOptions } from './useNoteCanvasLayoutModel';
 import type { BlockBoxLayout } from '../runtimeLayout';
+import { createPageFramePrintProfile } from '../pageFramePrintScaleService';
 
 function input(preset: 'a4_portrait' | 'letter_portrait' | 'screen_note'): UseNoteCanvasFrameModelOptions {
   const collection = createNotePagePresetSeed(preset);
@@ -21,8 +22,8 @@ function input(preset: 'a4_portrait' | 'letter_portrait' | 'screen_note'): UseNo
 
 describe('new note page presets in the mounted frame model', () => {
   it.each([
-    ['a4_portrait', 904, 1278, { top: 0, right: 72, bottom: 96, left: 72 }],
-    ['letter_portrait', 904, 1170, { top: 0, right: 72, bottom: 96, left: 72 }],
+    ['a4_portrait', 904, 1278, createPageFramePrintProfile('A4').contentInset],
+    ['letter_portrait', 904, 1170, createPageFramePrintProfile('Letter').contentInset],
     ['screen_note', 1120, 720, { top: 48, right: 64, bottom: 64, left: 64 }],
   ] as const)('keeps %s geometry after mounting and remounting', (preset, width, height, contentInset) => {
     const options = input(preset);

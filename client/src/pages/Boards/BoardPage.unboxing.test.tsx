@@ -7,6 +7,7 @@ import { BOARD_STAGING_MIME } from './BoardStaging';
 import type { BoardDetail, BoardMember } from './boardTypes';
 import type { Note, NoteBlock } from '../Notes/canvasEngine/runtimeDataTypes';
 import type { PageFrameCollectionModel } from '../Notes/canvasEngine/types';
+import { createPageFramePrintProfile } from '../Notes/canvasEngine/pageFramePrintScaleService';
 import { MEDIA_FIXTURE_ASSET_ID, MEDIA_FIXTURE_BLOB_PATH, readCanvasAssetFixture } from '../../../test/fixtures/canvasAssetFixture';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
@@ -61,7 +62,7 @@ async function createNote() {
   expect(notes[0]).toMatchObject({ course_id: 'new-project', title: 'Unboxed thought', page_format: 'a4_portrait' });
   expect(collection?.pageFrames).toEqual([expect.objectContaining({
     templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
-    contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
+    contentInset: createPageFramePrintProfile('A4').contentInset,
   })]);
 }
 function stagingTransfer() {
