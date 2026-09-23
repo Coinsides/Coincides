@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { NoteBindingSettings } from '../../../../../../shared/types/noteBinding';
 import { createTypographyDomLineMeasurer } from '../typographyDomMeasurementService';
 import { resolveDocumentPageFlowPlan } from '../documentPageFlowService';
 import { noteBlocksToPageFlow, pageFlowFirstLayouts } from '../notePageFlowService';
@@ -11,6 +12,7 @@ import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameMode
 export function useNotePageFlow(input: {
   noteId?: string; enabled: boolean; coordinateContract?: CoordinateContract;
   coverFrameId?: string | null;
+  bindingSettings?: NoteBindingSettings | null;
   hiddenBlockIds?: ReadonlySet<string>;
   blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>; pageFrames: PageFrameModel[];
   collection: PageFrameCollectionModel | null; typography: DocumentTypographyProfile;
@@ -34,9 +36,10 @@ export function useNotePageFlow(input: {
     && input.pageFrames.some((frame) => frame.id !== input.coverFrameId && frame.templateId !== 'screen_note') ? resolveDocumentPageFlowPlan({
     collection: normalizePageFrameCollection(input.collection || {
       pageFrames: input.pageFrames, primaryFrameId: input.pageFrames[0]?.id || null,
-    }), blocks, coverFrameId: input.coverFrameId, documentTypography: input.typography, coordinateContract: input.coordinateContract,
+    }), blocks, coverFrameId: input.coverFrameId, bindingSettings: input.bindingSettings,
+    documentTypography: input.typography, coordinateContract: input.coordinateContract,
     measureTextLines: measurer,
-  }) : undefined, [blocks, input.collection, input.pageFrames, input.coverFrameId, input.typography, input.coordinateContract, measurer, measurementRevision]);
+  }) : undefined, [blocks, input.collection, input.pageFrames, input.coverFrameId, input.bindingSettings, input.typography, input.coordinateContract, measurer, measurementRevision]);
   const layouts = useMemo(() => plan ? pageFlowFirstLayouts(plan, input.layouts) : input.layouts, [plan, input.layouts]);
   const latest = useRef(input);
   latest.current = input;
@@ -75,9 +78,9 @@ export function useNotePageFlow(input: {
   const presentationPlan = useMemo(() => plan && input.hiddenBlockIds?.size
     ? resolveDocumentPageFlowPlan({ collection: plan.collection,
       blocks: blocks.filter((block) => !input.hiddenBlockIds!.has(block.blockId)),
-      coverFrameId: input.coverFrameId, documentTypography: input.typography,
+      coverFrameId: input.coverFrameId, bindingSettings: input.bindingSettings, documentTypography: input.typography,
       coordinateContract: input.coordinateContract, measureTextLines: measurer,
-    }) : plan, [plan, blocks, input.hiddenBlockIds, input.coverFrameId, input.typography, input.coordinateContract, measurer]);
+    }) : plan, [plan, blocks, input.hiddenBlockIds, input.coverFrameId, input.bindingSettings, input.typography, input.coordinateContract, measurer]);
   const presentationLayouts = useMemo(() => presentationPlan === plan ? layouts
     : pageFlowFirstLayouts(presentationPlan!, input.layouts), [presentationPlan, plan, layouts, input.layouts]);
   return { plan: presentationPlan, layouts: presentationLayouts, fullPlan: plan, fullLayouts: layouts };

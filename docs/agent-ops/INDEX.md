@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-22
+> **日期 (Updated)**: 2026-09-23
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 429 份文档。
+共 431 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -144,7 +144,7 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-21 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-23 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
@@ -417,6 +417,8 @@
 | [handoffs/2026-09-21-v14-t7-cover-binding-presets-order.md](handoffs/2026-09-21-v14-t7-cover-binding-presets-order.md) | T7 · 封面版式预设 + 装订预设(设计室模板抽屉开张) | `done(2026-09-21 HQ 收官:一轮零停线;builder 环境两红=Python 系,HQ 机 server 主集真全绿;client 2431/2431 逐字对上;双门绿;说明书已由 HQ 守门同步。收尾批可派线至此全部落账)` | — | — |
 | [handoffs/2026-09-21-v14-t8-visual-relations-order.md](handoffs/2026-09-21-v14-t8-visual-relations-order.md) | T8 · 封面墨色修 + 视觉关系断言首批 | `done(2026-09-21 HQ 收官:builder 环境两红=Python 系,HQ 机 server 主集真全绿;client 2463/2463 逐字对上;双门绿。压页眉真路径=新纸默认 top 0,Henry 目击两连胜)` | — | — |
 | [handoffs/2026-09-22-v14-t9-spec-extractor-order.md](handoffs/2026-09-22-v14-t9-spec-extractor-order.md) | T9 · 规格提取器 + 首航 | `done(2026-09-22 HQ 收官:唯一红项=文档索引,HQ 重生成后 docs:check 绿;client 2464/2464 逐字对上;双门绿。76 项 delta 对照表=采值候拍材料,并入翻牌日呈批案)` | — | — |
+| [handoffs/2026-09-23-v14-answer-card-demolition-order.md](handoffs/2026-09-23-v14-answer-card-demolition-order.md) | 答卡 v1 拆除单 | `(缺状态头)` | — | — |
+| [handoffs/2026-09-23-v14-page-repairs-order.md](handoffs/2026-09-23-v14-page-repairs-order.md) | 纸页两修单 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

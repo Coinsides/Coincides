@@ -1,4 +1,6 @@
 import { getPageFrameContentRect } from './pageFrameService';
+import { resolvePageFrameHeaderReservation } from './pageFrameSlotService';
+import type { NoteBindingSettings } from '../../../../../shared/types/noteBinding';
 import { appendPageFrameToStack, normalizePageStacksWithFrameCoverage } from './pageStackCollectionService';
 import { deriveFrameLocalAutoWidth, type CoordinateContract } from './placementContractService';
 import { DEFAULT_BLOCK_GAP, type BlockBoxLayout } from './runtimeLayout';
@@ -92,6 +94,7 @@ export interface ResolveDocumentPageFlowPlanInput {
   collection: PageFrameCollectionModel;
   /** Binding-owned cover identity. Its page and residents never enter content flow. */
   coverFrameId?: string | null;
+  bindingSettings?: NoteBindingSettings | null;
   blocks: PageFlowBlock[];
   documentTypography?: DocumentTypographyProfile;
   coordinateContract?: CoordinateContract;
@@ -115,15 +118,31 @@ function isFlowBlock(block: PageFlowBlock, contract: CoordinateContract): boolea
 
 /** Deterministic pagination of logical blocks. Trees, text, ink and manual boxes
  * are never mutated. Existing per-frame geometry is used on every continuation. */
-export function resolveDocumentPageFlowPlan({
+export function resolveDocumentPageFlowPlan(input: ResolveDocumentPageFlowPlanInput): DocumentPageFlowPlan {
+  let collection = input.collection;
+  const appendedFrameIds: string[] = [];
+  for (;;) {
+    const { plan, headersStable } = resolveDocumentPageFlowPass({ ...input, collection });
+    appendedFrameIds.push(...plan.appendedFrameIds);
+    if (headersStable) return { ...plan, appendedFrameIds };
+    // Inserting pages can move an already laid-out frame into another binding
+    // section, including within merged stacks whose frame order is reversed.
+    // Retain all new pages and remeasure against the final mechanical ordinals.
+    // Each retry requires new pages; once capacity exists, no ordinal can move.
+    collection = plan.collection;
+  }
+}
+
+function resolveDocumentPageFlowPass({
   collection: originalCollection,
   coverFrameId,
+  bindingSettings,
   blocks,
   documentTypography = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
   coordinateContract = 'v2',
   blockGap = DEFAULT_BLOCK_GAP,
   measureTextLines = measureTypographyTextLines,
-}: ResolveDocumentPageFlowPlanInput): DocumentPageFlowPlan {
+}: ResolveDocumentPageFlowPlanInput): { plan: DocumentPageFlowPlan; headersStable: boolean } {
   let collection: PageFrameCollectionModel = {
     ...originalCollection,
     pageFrames: originalCollection.pageFrames.map((frame) => ({ ...frame, contentInset: { ...frame.contentInset } })),
@@ -134,6 +153,12 @@ export function resolveDocumentPageFlowPlan({
   const appendedFrameIds: string[] = [];
   const excludedBlockIds: string[] = [];
   const overflows: PageFlowOverflow[] = [];
+  const reservedByFrame = new Map<string, number>();
+  const headerReservation = (frame: PageFrameModel): number => resolvePageFrameHeaderReservation({
+    pageFrame: frame, bindingSettings,
+    mechanicalPageNumber: collection.pageFrames.filter((candidate) => candidate.id !== coverFrameId)
+      .findIndex((candidate) => candidate.id === frame.id) + 1,
+  });
   const primaryFrameId = collection.primaryFrameId !== coverFrameId && collection.primaryFrameId
     || collection.pageFrames.find((frame) => frame.id !== coverFrameId)?.id;
   const blocksByStack = new Map<string, PageFlowBlock[]>();
@@ -157,6 +182,7 @@ export function resolveDocumentPageFlowPlan({
     const currentFrame = (): PageFrameModel => {
       return collection.pageFrames.find((frame) => frame.id === contentFrameIds()[frameIndex])!;
     };
+    cursorY = headerReservation(currentFrame());
     const advanceFrame = (): void => {
       const stack = collection.pageStacks!.find((candidate) => candidate.id === stackId)!;
       if (frameIndex + 1 >= contentFrameIds().length) {
@@ -170,7 +196,7 @@ export function resolveDocumentPageFlowPlan({
         collection = { ...next, selectedFrameId: originalCollection.selectedFrameId, selectedStackId: originalCollection.selectedStackId };
       }
       frameIndex += 1;
-      cursorY = 0;
+      cursorY = headerReservation(currentFrame());
     };
 
     for (const block of stackBlocks) {
@@ -181,6 +207,8 @@ export function resolveDocumentPageFlowPlan({
       while (!complete) {
         const frame = currentFrame();
         const content = getPageFrameContentRect(frame);
+        const startY = headerReservation(frame);
+        const usableHeight = Math.max(0, content.height - startY);
         const web = isWebFrame(frame);
         const width = deriveFrameLocalAutoWidth(block.layout, frame, 'v2')!;
         const text = block.text || '';
@@ -204,7 +232,7 @@ export function resolveDocumentPageFlowPlan({
             takenLines.push(line);
             rowHeight += line.heightPx;
           }
-          if (takenLines.length === 0 && cursorY > 0) {
+          if (takenLines.length === 0 && cursorY > startY) {
             advanceFrame();
             continue;
           }
@@ -214,7 +242,7 @@ export function resolveDocumentPageFlowPlan({
             + takenLines.reduce((sum, line) => sum + line.heightPx, 0) + firstFragmentExtraHeight);
           complete = takenLines.length === lines.length;
         } else {
-          if (height > available && cursorY > 0) {
+          if (height > available && cursorY > startY) {
             advanceFrame();
             continue;
           }
@@ -237,10 +265,11 @@ export function resolveDocumentPageFlowPlan({
         };
         blockFragments.push(fragment);
         fragments.push(fragment);
-        if (!web && height > content.height) {
+        reservedByFrame.set(frame.id, startY);
+        if (!web && height > usableHeight) {
           overflows.push({ kind: block.kind === 'text' ? 'text_line_exceeds_page' : 'indivisible_block_exceeds_page',
             blockId: block.blockId, frameId: frame.id, fragmentId: fragment.id,
-            requiredHeight: height, availableHeight: content.height, overflowPx: height - content.height });
+            requiredHeight: height, availableHeight: usableHeight, overflowPx: height - usableHeight });
         }
         cursorY += height + Math.max(0, blockGap);
         if (web && cursorY > content.height) {
@@ -259,8 +288,9 @@ export function resolveDocumentPageFlowPlan({
       }
     }
   }
-  return {
+  return { headersStable: collection.pageFrames.every((frame) => !reservedByFrame.has(frame.id)
+    || reservedByFrame.get(frame.id) === headerReservation(frame)), plan: {
     collection, fragments, placementUpdates, appendedFrameIds, excludedBlockIds, overflows,
     frames: collection.pageFrames.map((frame) => ({ frame, fragments: fragments.filter((fragment) => fragment.frameId === frame.id) })),
-  };
+  } };
 }

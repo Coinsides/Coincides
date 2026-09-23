@@ -163,8 +163,9 @@ describe('A2 note-owned binding projection into page-frame slots', () => {
   });
 
   it('reprojects counters over A1 generated pages after text and target-paper geometry change', () => {
-    const first = { ...frame('p1', 120, 100, 0), x: 0,
-      contentInset: { top: 10, right: 10, bottom: 10, left: 10 } };
+    // Retain 80px of body capacity after the existing 48px header lane.
+    const first = { ...frame('p1', 120, 138, 0), x: 0,
+      contentInset: { top: 48, right: 10, bottom: 10, left: 10 } };
     const settings = createDefaultNoteBindingSettings();
     const body = createDefaultNoteBindingSection('body', 2);
     body.pageNumber.format = 'roman-upper';

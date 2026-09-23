@@ -68,8 +68,14 @@ describe('T3 paper typography ruler (same layout scale, computed / 904 * 900)', 
       const font = inheritedFontPx(body);
       expect(getComputedStyle(paper).width).toBe('904px');
       const equivalent = font / 904 * 900;
-      expect(equivalent).toBeGreaterThanOrEqual(15.7);
-      expect(equivalent).toBeLessThanOrEqual(16.3);
+      // Independent physical ruler: 10pt at this paper width, with the existing
+      // single 0.1px quantization (never a wider shared A4/Letter tolerance band).
+      const physicalWidthMm = pageSize === 'A4' ? 210 : 215.9;
+      const exactFont = (10 * 96 / 72) / ((physicalWidthMm / 25.4 * 96) / 904);
+      const roundedFont = Math.round(exactFont * 10) / 10;
+      expect(font).toBe(roundedFont);
+      expect(Math.abs(equivalent - exactFont / 904 * 900)).toBeLessThanOrEqual(0.05 / 904 * 900);
+      expect(equivalent).toBeCloseTo(pageSize === 'A4' ? 15.13274336 : 14.73451327, 7);
       const lineRatio = Number.parseFloat(getComputedStyle(body).lineHeight) / font;
       expect(lineRatio).toBeGreaterThanOrEqual(1.60);
       expect(lineRatio).toBeLessThanOrEqual(1.75);

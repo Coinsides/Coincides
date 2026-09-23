@@ -33,6 +33,8 @@ import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
 import { useAgentUiStore } from '@/stores/agentUiStore';
 import { createVisualRelationFixture } from '../../../../test/visualRelationsFixture';
 import { NOTE_HEADER_INITIAL_HEIGHT } from './NotePaperHeader';
+import { createDefaultNoteBindingSettings } from '../../../../../../shared/types/noteBinding';
+import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
 
 declare const process: { env: Record<string, string | undefined> };
 const externalHeaderAudit: unknown[] = [];
@@ -380,6 +382,62 @@ describe('T8 external paper-title band stays before body geometry', () => {
       view.unmount();
     }
   });
+});
+
+describe('page repairs: shared header reservation in writing and print', () => {
+  it.each([false, true].flatMap((withCover) => [false, true].map((enabled) => ({ withCover, enabled }))))(
+    'keeps first and continuation body outside the header (cover=$withCover, header=$enabled)', ({ withCover, enabled }) => {
+      const first = { ...frame(0), height: 320 };
+      const cover = { ...first, id: 'repair-cover', y: -400 };
+      const frames = withCover ? [cover, first] : [first];
+      const initial = propsFor(first, 'page');
+      const typography = createPageFrameDefaultTypographyProfile(first);
+      const bindingSettings = createDefaultNoteBindingSettings();
+      bindingSettings.coverPage.frameId = withCover ? cover.id : null;
+      bindingSettings.sections[0].headerFooterEnabled = enabled;
+      bindingSettings.sections[0].slots['header-center'].text = 'Synthetic header';
+      const flow = createTextBlockContentV1('Synthetic body text. '.repeat(100));
+      const block = { ...initial.visibleBlocks[0], plain_text: flow.units[0].text, content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+      const layout: BlockBoxLayout = { ...initial.blockLayouts[block.id], width_mode: 'auto' };
+      const collection = { pageFrames: frames, primaryFrameId: first.id,
+        pageStacks: [{ ...createPageStackFromFrame(first), frameIds: frames.map((entry) => entry.id) }] };
+      const plan = resolveDocumentPageFlowPlan({ collection, bindingSettings, coverFrameId: bindingSettings.coverPage.frameId,
+        blocks: noteBlocksToPageFlow([block], { [block.id]: layout }, {}, {}), documentTypography: typography });
+      const layouts = pageFlowFirstLayouts(plan, { [block.id]: layout });
+      const runtime = buildNoteCanvasRuntimeModel({ mode: 'page', primaryPageFrame: first, bindingSettings,
+        pageFrames: plan.collection.pageFrames, pageStacks: plan.collection.pageStacks,
+        viewport: initial.viewportTransform, documentTypography: typography,
+        blockPlacements: [buildRuntimeBlockPlacement({ block, canvasId: 'repair-canvas', layout: layouts[block.id],
+          pageOffsetX: 0, pageFrame: first, pageFrames: plan.collection.pageFrames, contract: 'v2', zIndex: 0 })] });
+      const props = { ...initial, allBlocks: [block], visibleBlocks: [block], blockLayouts: layouts,
+        documentTypographyProfile: typography, contentReadOnly: true, layoutMode: false,
+        noteCanvasRuntime: { ...runtime, coordinateContract: 'v2' as const, pageFlowPlan: plan,
+          blockFragmentProjections: pageFlowFragmentProjections(plan) } };
+      const view = render(<><NoteWritingSurfaceLayer {...props} /><NotePrintLayer {...props} /></>);
+      const writing = view.container.querySelector('[data-text-unit-move-scope]')!;
+      const shell = writing.querySelector<HTMLElement>('[data-note-block-shell]')!;
+      const rows = Array.from(writing.querySelectorAll<HTMLElement>('[data-page-flow-fragment-id]'));
+      expect(rows.length).toBeGreaterThan(2);
+      act(() => window.dispatchEvent(new Event('beforeprint')));
+      const printed = document.querySelector('[data-note-print-root]')!;
+      for (const row of rows) {
+        const id = row.dataset.pageFlowFrameId!;
+        const page = plan.collection.pageFrames.find((entry) => entry.id === id)!;
+        const bodyTop = Number.parseFloat(shell.style.top) + Number.parseFloat(row.style.top);
+        const headers = Array.from(writing.querySelectorAll<HTMLElement>(`[data-page-frame-slot="header"][data-page-frame-slot-frame="${id}"]`));
+        expect(headers).toHaveLength(enabled ? 3 : 0);
+        for (const header of headers) expect(bodyTop).toBeGreaterThanOrEqual(Number.parseFloat(header.style.top) + Number.parseFloat(header.style.height));
+        const printPage = printed.querySelector(`[data-page-frame-id="${id}"]`)!;
+        const clip = printPage.querySelector<HTMLElement>('[data-note-print-fragment]')!;
+        expect(Number.parseFloat(clip.style.top)).toBeCloseTo(bodyTop - page.y);
+        for (const header of printPage.querySelectorAll<HTMLElement>('[data-page-frame-slot="header"]')) {
+          expect(Number.parseFloat(clip.style.top)).toBeGreaterThanOrEqual(Number.parseFloat(header.style.top) + Number.parseFloat(header.style.height));
+        }
+      }
+      if (withCover) expect(printed.querySelector(`[data-page-frame-id="${cover.id}"]`)!.querySelector('[data-page-frame-slot]')).toBeNull();
+      expect(Array.from(printed.querySelectorAll<HTMLTextAreaElement>('textarea')).map((node) => node.value).join('')).toBe(block.plain_text);
+      act(() => window.dispatchEvent(new Event('afterprint')));
+    });
 });
 
 it('C4 paper tools are available in writing and disabled in layout and read-only modes', () => {

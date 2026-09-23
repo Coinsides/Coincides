@@ -80,7 +80,7 @@ describe('T8 permanent paper geometry relations', () => {
     expect(scanGeometryRelations([page]).violations).toEqual([]);
   });
 
-  it.each([0, 24])('still reports existing/user-authored top inset %s; defaults do not rewrite stored walls', (top) => {
+  it.each([0, 24])('reserves headers at existing/user-authored top inset %s without rewriting stored walls', (top) => {
     const data = createVisualRelationFixture('A4', false, { persistedTopInset: top });
     const first = data.frames[0];
     expect(first.contentInset.top).toBe(top);
@@ -89,7 +89,8 @@ describe('T8 permanent paper geometry relations', () => {
       blocks: projected.map((fragment) => ({ id: fragment.blockId, rect: fragment.blockRect })),
       slots: listPageFrameSlots(createBindingPageFrameSlots({ pageFrame: first, mechanicalPageNumber: 1, bindingSettings: data.binding }))
         .map((slot) => ({ id: slot.position!, rect: slot.rect })) }]);
-    expect(result.violations.some((entry) => entry.relation === 'intersection' && entry.slotId === 'header-center')).toBe(true);
+    expect(result.violations).toEqual([]);
+    expect(projected[0].blockRect.y).toBe(first.y + 48);
   });
 
   it('reports an authored binding offset that pushes a header into otherwise valid body space', () => {

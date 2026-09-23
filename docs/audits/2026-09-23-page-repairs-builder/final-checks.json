@@ -1,0 +1,29 @@
+{
+  "scope": "Tail checks run separately after pre-existing docs index failure; full runtime gate remains exit 1",
+  "checks": [
+    {
+      "name": "diff-whitespace",
+      "command": "git --no-optional-locks diff --check",
+      "exitCode": 0,
+      "log": "diff-whitespace.log"
+    },
+    {
+      "name": "changed-file-secrets",
+      "command": "node scripts/changedFileSecretScan.mjs",
+      "exitCode": 0,
+      "log": "changed-file-secrets.log"
+    },
+    {
+      "name": "docs-inventory",
+      "command": "node scripts/docs-inventory.mjs --check",
+      "exitCode": 0,
+      "log": "docs-inventory.log"
+    },
+    {
+      "name": "glossary",
+      "command": "npm run check:glossary-shape-vs-capability",
+      "exitCode": 0,
+      "log": "glossary-check.log"
+    }
+  ]
+}

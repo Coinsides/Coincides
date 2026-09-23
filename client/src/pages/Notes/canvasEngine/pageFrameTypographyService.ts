@@ -35,9 +35,9 @@ export function createPageFrameDefaultTypographyProfile(
     frame?.templateId,
     frame?.paperSizeReferenceWidth,
   );
-  // Paper defaults use a quarter-point type scale and a more open reading rhythm.
+  // Paper defaults use 10pt; reading gears affect presentation scale only.
   // Physical mapping and the single normalization pass stay shared with print.
-  const fontSizePx = family === 'paper' ? (10.75 * 96 / 72) / physicalScale : 16;
+  const fontSizePx = family === 'paper' ? (10 * 96 / 72) / physicalScale : 16;
   const ratio = fontSizePx / baseline.fontSizePx;
   return normalizeDocumentTypographyProfile({
     ...baseline,

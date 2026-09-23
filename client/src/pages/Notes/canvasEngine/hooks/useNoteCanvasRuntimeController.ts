@@ -257,7 +257,8 @@ export function useNoteCanvasRuntimeController() {
       return rendered && rendered.noteId === noteId ? rendered.collection : storedPageFrameCollection;
     },
     getLayouts: () => paperLayoutsRef.current, objects: persistedCanvasObjects, placements: walls.placements,
-    typography: documentTypographyProfile, coverFrameId, textDrafts: blockTextDrafts, flowDrafts: blockTextFlowDrafts,
+    typography: documentTypographyProfile, coverFrameId, bindingSettings: binding.value,
+    textDrafts: blockTextDrafts, flowDrafts: blockTextFlowDrafts,
     resolveTypography: (collection) => resolveEffectiveDocumentTypographyProfile({
       surfaceMode, metadata: note?.metadata, pageFrames: collection.pageFrames,
       hydratedProfile: hydratedDocumentTypographyProfile,
@@ -346,7 +347,7 @@ export function useNoteCanvasRuntimeController() {
     coordinateContract, getMoveContext: () => chapterMoveContext.current, persistLayoutSnapshot, whenWritesIdle: whenIdle,
   });
   const { plan: pageFlowPlan, layouts: blockLayouts, fullPlan: fullPageFlowPlan, fullLayouts: fullBlockLayouts } = useNotePageFlow({
-    coverFrameId,
+    coverFrameId, bindingSettings: binding.value,
     noteId, enabled: !loading && !sourceProjectionPolicy.contentReadOnly && !walls.activeWall && !walls.saving && !paper.busy
       && !chapters.isMoving && !headingBusyRef.current(),
     coordinateContract, blocks: visibleBlocks, layouts: unpaginatedBlockLayouts,

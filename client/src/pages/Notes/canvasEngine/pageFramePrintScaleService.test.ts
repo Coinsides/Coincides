@@ -58,7 +58,11 @@ describe('historical page frame print baseline', () => {
     measureTextLines: ({ text, startOffset = 0 }) => ({ lines: Array.from(text.slice(startOffset), (_, index) => ({
       startOffset: startOffset + index, endOffset: startOffset + index + 1, widthPx: 20, heightPx: 100,
     })) }) });
-    expect(plan.fragments.map((fragment) => fragment.textRange)).toEqual([{ start: 0, end: 3 }, { start: 3, end: 6 }]);
-    expect(plan.frames.map((page) => page.frame.height)).toEqual([400, 400]);
+    // 400 - 40 bottom - 48 header = 312px; 16 chrome + 3*100 no longer fits.
+    expect(plan.fragments.map((fragment) => fragment.textRange)).toEqual([
+      { start: 0, end: 2 }, { start: 2, end: 4 }, { start: 4, end: 6 },
+    ]);
+    expect(plan.fragments.every((fragment) => fragment.layout.y === 18)).toBe(true);
+    expect(plan.frames.map((page) => page.frame.height)).toEqual([400, 400, 400]);
   });
 });

@@ -1,0 +1,7 @@
+{
+  "mutation": "Return zero from the production header-reservation function",
+  "redExitCode": 1,
+  "restoredExitCode": 0,
+  "sha256Before": "430c66ce1e1fc11b17885e03050623d8719092992c5b4bc139e2d1b3610fc46d",
+  "sha256Restored": "430c66ce1e1fc11b17885e03050623d8719092992c5b4bc139e2d1b3610fc46d"
+}

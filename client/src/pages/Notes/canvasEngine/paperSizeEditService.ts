@@ -72,6 +72,7 @@ export function buildPaperSizeEdit(input: Parameters<typeof buildPageFrameWallEd
   typography: DocumentTypographyProfile;
   coverFrameId?: string | null;
   textDrafts?: Record<string, string>;
+  bindingSettings?: ResolveDocumentPageFlowPlanInput['bindingSettings'];
   flowDrafts?: Record<string, TextBlockContentV1>;
   measureTextLines?: ResolveDocumentPageFlowPlanInput['measureTextLines'];
 }): { before: PaperSizeSnapshot; after: PaperSizeSnapshot } {
@@ -86,7 +87,7 @@ export function buildPaperSizeEdit(input: Parameters<typeof buildPageFrameWallEd
   const plan = resolveDocumentPageFlowPlan({
     collection: edit.after.collection, coordinateContract: input.coordinateContract,
     blocks: noteBlocksToPageFlow(input.blocks, layouts, input.textDrafts || {}, input.flowDrafts || {}),
-    documentTypography: input.typography, coverFrameId: input.coverFrameId,
+    documentTypography: input.typography, coverFrameId: input.coverFrameId, bindingSettings: input.bindingSettings,
     measureTextLines: input.measureTextLines,
   });
   edit.after.collection = plan.collection;

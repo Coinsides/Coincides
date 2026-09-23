@@ -95,7 +95,7 @@ describe('A5 paper size shared history and Layout gestures', () => {
       surfaceMode: 'page', metadata, pageFrames: target.pageFrames, hydratedProfile: typography,
     }));
     const block: NoteBlock = { id: 'text', placement_id: 'placement:text', block_type: 'paragraph', title: null,
-      plain_text: 'a'.repeat(3500), content_json: {}, metadata: {}, order_index: 0,
+      plain_text: 'a'.repeat(4000), content_json: {}, metadata: {}, order_index: 0,
       source_references: [], display_overrides_json: {}, canvas_layout: {
         x: 0, y: 0, width: 760, height: 100, width_mode: 'auto', frame_id: 'paper-first',
         coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside',

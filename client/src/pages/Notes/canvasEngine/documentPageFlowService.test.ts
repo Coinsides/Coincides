@@ -9,8 +9,10 @@ import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from './typographyProfileService'
 import type { PageFrameCollectionModel, PageFrameModel } from './types';
 
 function frame(id: string, width = 100, height = 80, y = 0): PageFrameModel {
-  return { ...createPrimaryPageFrame({ id, y }), width: width + 20, height: height + 20,
-    contentInset: { top: 10, right: 10, bottom: 10, left: 10 } };
+  // Preserve these tests' exact content capacity with the header lane outside
+  // it. Legacy zero-inset reservation is covered by pageHeaderReservation.
+  return { ...createPrimaryPageFrame({ id, y }), width: width + 20, height: height + 58,
+    contentInset: { top: 48, right: 10, bottom: 10, left: 10 } };
 }
 
 function collection(frames = [frame('p1')]): PageFrameCollectionModel {

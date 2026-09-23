@@ -7,14 +7,17 @@ import { createDefaultDocumentTypographyProfile } from '../typographyProfileServ
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { PageFrameCollectionModel, PageFrameModel } from '../types';
 import { useNotePageFlow } from './useNotePageFlow';
+import { createDefaultNoteBindingSettings } from '../../../../../../shared/types/noteBinding';
 
 type Input = Parameters<typeof useNotePageFlow>[0];
 const collectionFor = (frame: PageFrameModel): PageFrameCollectionModel => ({
   pageFrames: [frame], primaryFrameId: frame.id, pageStacks: [createPageStackFromFrame(frame)],
 });
 function fixture(): Input {
-  const frame = { ...createPrimaryPageFrame({ id: 'page' }), width: 320, height: 220,
-    contentInset: { left: 10, right: 10, top: 10, bottom: 10 } };
+  // Keep 200px of body capacity so the pending-save test still changes wall
+  // geometry while retaining the same generated frame IDs.
+  const frame = { ...createPrimaryPageFrame({ id: 'page' }), width: 320, height: 258,
+    contentInset: { left: 10, right: 10, top: 48, bottom: 10 } };
   const blocks: NoteBlock[] = ['甲'.repeat(180), '后续块'].map((text, index) => ({
     id: `block-${index}`, placement_id: `placement-${index}`, block_type: 'paragraph', title: null,
     content_json: { [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1(text) }, plain_text: text,
@@ -32,6 +35,30 @@ function fixture(): Input {
 }
 
  describe('A1 useNotePageFlow persistence convergence', () => {
+  it('recomputes full and folded header reservation when binding settings change without writing body coordinates', () => {
+    const input = fixture();
+    input.enabled = false;
+    input.pageFrames = input.pageFrames.map((frame) => ({ ...frame, contentInset: { ...frame.contentInset, top: 0 } }));
+    input.collection = collectionFor(input.pageFrames[0]);
+    input.bindingSettings = createDefaultNoteBindingSettings();
+    input.hiddenBlockIds = new Set(['block-0']);
+    const before = structuredClone(input.layouts);
+    const { result, rerender } = renderHook((props: Input) => useNotePageFlow(props), { initialProps: input });
+    expect(result.current.fullPlan!.fragments[0].layout.y).toBe(48);
+    expect(result.current.plan!.fragments[0].layout.y).toBe(48);
+    const shifted = structuredClone(input.bindingSettings);
+    shifted.sections[0].slots['header-center'].offsetY = 24;
+    rerender({ ...input, bindingSettings: shifted });
+    expect(result.current.fullPlan!.fragments[0].layout.y).toBe(72);
+    expect(result.current.plan!.fragments[0].layout.y).toBe(72);
+    rerender({ ...input, bindingSettings: { ...shifted, enabled: false } });
+    expect(result.current.fullPlan!.fragments[0].layout.y).toBe(0);
+    expect(result.current.plan!.fragments[0].layout.y).toBe(0);
+    expect(input.layouts).toEqual(before);
+    expect(input.saveCollection).not.toHaveBeenCalled();
+    expect(input.persistLayout).not.toHaveBeenCalled();
+  });
+
   it('does not repeat writes when equivalent parent arrays and profiles are recreated', async () => {
     const input = fixture();
     const { result, rerender } = renderHook((props: Input) => useNotePageFlow(props), { initialProps: input });

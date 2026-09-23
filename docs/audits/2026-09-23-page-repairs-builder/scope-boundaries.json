@@ -1,0 +1,71 @@
+{
+  "comparison": "Read-only HEAD comparison, CRLF normalized to LF; only listed scope",
+  "rows": [
+    {
+      "path": "docs/agent-ops/INDEX.md",
+      "unchangedFromHead": true,
+      "headSha256": "b6149fe6e0c73dd2c88faf625d47e7b9033656f984e154fa4b48ccf95bc51cdd",
+      "currentSha256": "b6149fe6e0c73dd2c88faf625d47e7b9033656f984e154fa4b48ccf95bc51cdd"
+    },
+    {
+      "path": "docs/agent-ops/current-state/INDEX.md",
+      "unchangedFromHead": true,
+      "headSha256": "d55ca939ddb41c6834ed08b4783874f24f8e6c8823871994e13ac98193f01b06",
+      "currentSha256": "d55ca939ddb41c6834ed08b4783874f24f8e6c8823871994e13ac98193f01b06"
+    },
+    {
+      "path": "docs/agent-ops/current-state/app-operating-manual.md",
+      "unchangedFromHead": true,
+      "headSha256": "30e3dad4e427398c98ee0785a0d36f755ebf73f4dded97a7fe61cb81ac27b487",
+      "currentSha256": "30e3dad4e427398c98ee0785a0d36f755ebf73f4dded97a7fe61cb81ac27b487"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/typographyProfileService.ts",
+      "unchangedFromHead": true,
+      "headSha256": "86d5fcaced74eca410ff0c97979ddbf1b2a6201dcfa6ea64fdfef3c1ceb6a3a7",
+      "currentSha256": "86d5fcaced74eca410ff0c97979ddbf1b2a6201dcfa6ea64fdfef3c1ceb6a3a7"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/typographyMeasurementService.ts",
+      "unchangedFromHead": true,
+      "headSha256": "f58c6db1b9f592cc01839c4447738f9b89e5c459ba110aeefc800bcd5811d38b",
+      "currentSha256": "f58c6db1b9f592cc01839c4447738f9b89e5c459ba110aeefc800bcd5811d38b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/noteCoverPresets.ts",
+      "unchangedFromHead": true,
+      "headSha256": "af18d47bfc32c13fe91545dac40a753946546832c54a267bd951fce15a030056",
+      "currentSha256": "af18d47bfc32c13fe91545dac40a753946546832c54a267bd951fce15a030056"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+      "unchangedFromHead": true,
+      "headSha256": "0dfd696b932fe4e3e28e238bfc756532dfab519934a66201a11396d681ddf74d",
+      "currentSha256": "0dfd696b932fe4e3e28e238bfc756532dfab519934a66201a11396d681ddf74d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx",
+      "unchangedFromHead": true,
+      "headSha256": "457558e19224854e0e8f6823934f94e30a6332c7776a9d88100d598ab8c9c077",
+      "currentSha256": "457558e19224854e0e8f6823934f94e30a6332c7776a9d88100d598ab8c9c077"
+    },
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "unchangedFromHead": true,
+      "headSha256": "863b9eb869fedaee543f3769184f4e8d7d634157f59b5731ac28499688f3faee",
+      "currentSha256": "863b9eb869fedaee543f3769184f4e8d7d634157f59b5731ac28499688f3faee"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageReadingViewportService.ts",
+      "unchangedFromHead": true,
+      "headSha256": "8f5cfd3e6ba0e713f47e271dde96828bc38762029c89edbda47c4246d6cf6ea5",
+      "currentSha256": "8f5cfd3e6ba0e713f47e271dde96828bc38762029c89edbda47c4246d6cf6ea5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/headingRoleService.ts",
+      "unchangedFromHead": true,
+      "headSha256": "0d327b3f286f041edadec559792470157638e89c2eb9c438fca19c8146944551",
+      "currentSha256": "0d327b3f286f041edadec559792470157638e89c2eb9c438fca19c8146944551"
+    }
+  ]
+}

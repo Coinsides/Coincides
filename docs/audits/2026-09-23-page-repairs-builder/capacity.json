@@ -1,0 +1,76 @@
+{
+  "measurement": "Independent formula; new capacity also verified at capacity+1 in permanent pagination tests",
+  "formula": "scale=(mm/25.4*96)/904; exactFont=(pt*96/72)/scale; metrics rounded once to 0.1px; capacity=floor(740/averageCharWidth)*floor((height-72-96-16)/lineHeight)",
+  "table": [
+    {
+      "pageSize": "A4",
+      "width": 904,
+      "height": 1278,
+      "physicalScale": 0.8779875966831581,
+      "top": 72,
+      "bottom": 96,
+      "textWidth": 740,
+      "old": {
+        "pt": 10.75,
+        "exactFont": 16.325211640211638,
+        "fontPx": 16.3,
+        "linePx": 26.9,
+        "averageCharWidthPx": 7.8,
+        "sameScaleFont": 16.227876106194692,
+        "lineRatio": 1.6503067484662575,
+        "columns": 94,
+        "rows": 40,
+        "capacity": 3760,
+        "tableCellPx": 13.855
+      },
+      "current": {
+        "pt": 10,
+        "exactFont": 15.186243386243385,
+        "fontPx": 15.2,
+        "linePx": 25.1,
+        "averageCharWidthPx": 7.3,
+        "sameScaleFont": 15.132743362831858,
+        "lineRatio": 1.6513157894736843,
+        "columns": 101,
+        "rows": 43,
+        "capacity": 4343,
+        "tableCellPx": 12.92
+      }
+    },
+    {
+      "pageSize": "Letter",
+      "width": 904,
+      "height": 1170,
+      "physicalScale": 0.9026548672566371,
+      "top": 72,
+      "bottom": 96,
+      "textWidth": 740,
+      "old": {
+        "pt": 10.75,
+        "exactFont": 15.879084967320264,
+        "fontPx": 15.9,
+        "linePx": 26.2,
+        "averageCharWidthPx": 7.6,
+        "sameScaleFont": 15.829646017699114,
+        "lineRatio": 1.6477987421383646,
+        "columns": 97,
+        "rows": 37,
+        "capacity": 3589,
+        "tableCellPx": 13.515
+      },
+      "current": {
+        "pt": 10,
+        "exactFont": 14.77124183006536,
+        "fontPx": 14.8,
+        "linePx": 24.4,
+        "averageCharWidthPx": 7.1,
+        "sameScaleFont": 14.734513274336283,
+        "lineRatio": 1.6486486486486485,
+        "columns": 104,
+        "rows": 40,
+        "capacity": 4160,
+        "tableCellPx": 12.58
+      }
+    }
+  ]
+}

@@ -258,6 +258,17 @@ export function listPageFrameSlots(slots: PageFrameSlots = {}): PageFrameSlot[] 
   });
 }
 
+/** Flow starts below enabled header furniture, relative to the stored content
+ * origin. Keep authored walls and slot geometry intact, including legacy top: 0. */
+export function resolvePageFrameHeaderReservation(input: CreateBindingPageFrameSlotsInput): number {
+  if (input.isCover || input.pageFrame.templateId === 'screen_note'
+    || input.pageFrame.background?.kind === 'screen') return 0;
+  const contentTop = input.pageFrame.y + input.pageFrame.contentInset.top;
+  return Math.max(0, ...listPageFrameSlots(createBindingPageFrameSlots(input))
+    .filter((slot) => slot.enabled && slot.position?.startsWith('header-'))
+    .map((slot) => slot.rect.y + slot.rect.height - contentTop));
+}
+
 /** Apply presentation geometry once, preserving aliases to the projected slots. */
 export function mapPageFrameSlots(slots: PageFrameSlots, project: (slot: PageFrameSlot) => PageFrameSlot): PageFrameSlots {
   const mapped = new Map<string, PageFrameSlot>();

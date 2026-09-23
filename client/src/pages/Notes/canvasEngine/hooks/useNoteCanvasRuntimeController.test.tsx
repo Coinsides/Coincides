@@ -427,7 +427,7 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     expect(previousBoundary()).toBe(false);
   });
 
-  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 10.75pt across repeated Page rerenders', () => {
+  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 10pt across repeated Page rerenders', () => {
     const frameFor = (pageSize: 'A4' | 'Letter'): PageFrameModel => {
       const print = createPageFramePrintProfile(pageSize);
       return {
@@ -449,9 +449,9 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     const specimen = {
       ...formalPageSpecimen,
       canvas_layout: undefined,
-      // Straddle A4/Letter wrapping after the quarter-point paper default change.
-      plain_text: 'x'.repeat(96),
-      content_json: { body: 'x'.repeat(96) },
+      // Straddle A4/Letter wrapping at 10pt: A4 fits 101 ASCII characters per line; Letter fits 104.
+      plain_text: 'x'.repeat(103),
+      content_json: { body: 'x'.repeat(103) },
     };
     rootBridgeContract.blocks = [specimen];
     const setFrame = (frame: PageFrameModel) => {
@@ -487,15 +487,15 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     const letterPage = snapshot(letter);
     expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
     expect(rootBridgeContract.noteId).toBe(NOTE_ID);
-    expect(a4Page.profile.fontSizePx).toBe(16.3);
-    expect(letterPage.profile.fontSizePx).toBe(15.9);
+    expect(a4Page.profile.fontSizePx).toBe(15.2);
+    expect(letterPage.profile.fontSizePx).toBe(14.8);
     expect(a4Page.measurement.lineCount).toBeGreaterThan(letterPage.measurement.lineCount);
     expect(a4Page.layout.height).toBeGreaterThan(letterPage.layout.height);
     expect(a4Page.layout.width).toBe(letterPage.layout.width);
     for (const [pageSize, sample] of [['A4', a4Page], ['Letter', letterPage]] as const) {
       const { physicalScale } = createPageFramePrintProfile(pageSize);
       const physicalPt = sample.profile.fontSizePx * physicalScale * 72 / 96;
-      expect(Math.abs(physicalPt - 10.75) / 10.75).toBeLessThanOrEqual(0.005);
+      expect(Math.abs(physicalPt - 10) / 10).toBeLessThanOrEqual(0.005);
     }
 
     rerender(<RootBridgeHarness />);

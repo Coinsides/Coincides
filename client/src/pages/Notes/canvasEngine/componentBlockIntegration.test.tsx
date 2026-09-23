@@ -55,7 +55,7 @@ describe('B2 component integration on the B1 route', () => {
   it.each([
     ['normal', 300, 0, 0, 1, 0],
     ['whole block moves to the next page', 300, 400, 0, 2, 0],
-    ['oversized block owns a page and reports its overflow', 700, 80, 40, 3, 160],
+    ['oversized block owns a page and reports its overflow', 700, 80, 40, 3, 168],
   ] as const)('%s follows A1 media pagination without splitting', (_name, height, leading, trailing, pageCount, overflow) => {
     for (const payload of [timeline, chart, { ...chart, component_kind: 'chart_line' }]) {
       const data = seed(height, leading, trailing, payload);
@@ -66,12 +66,12 @@ describe('B2 component integration on the B1 route', () => {
       const fragments = data.plan.fragments.filter((entry) => entry.blockId === 'reforms');
       expect(fragments).toHaveLength(1);
       expect(fragments[0]).toMatchObject({ isFirst: true, isLast: true, textRange: null, lineRange: null, lines: [],
-        layout: { height, y: 0, width: 420 } });
+        layout: { height, y: 8, width: 420 } });
       expect(data.plan.frames).toHaveLength(pageCount);
       expect(fragments[0].frameId).toBe(data.plan.frames[leading ? 1 : 0].frame.id);
       if (overflow) {
         expect(data.plan.overflows).toEqual([expect.objectContaining({ blockId: 'reforms',
-          kind: 'indivisible_block_exceeds_page', requiredHeight: height, availableHeight: 540, overflowPx: overflow })]);
+          kind: 'indivisible_block_exceeds_page', requiredHeight: height, availableHeight: 532, overflowPx: overflow })]);
         expect(data.plan.frames[1].fragments.map((entry) => entry.blockId)).toEqual(['reforms']);
         expect(data.plan.frames[2].fragments.map((entry) => entry.blockId)).toEqual(['trailing']);
       } else expect(data.plan.overflows).toEqual([]);
