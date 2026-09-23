@@ -1,0 +1,33 @@
+{
+  "scope": "functional / regression; directed client files only",
+  "isolatedEnvironment": ".codex-tmp/answer-card-demolition-empty-env via COINCIDES_VALIDATION_ENV_DIR",
+  "provider": "mocked fetch; no real model",
+  "primary": {
+    "files": 11,
+    "tests": 87,
+    "pass": 87,
+    "fail": 0,
+    "exitCode": 0,
+    "log": "client-regression-tests.log"
+  },
+  "sharedEditor": {
+    "files": 4,
+    "tests": 35,
+    "pass": 35,
+    "fail": 0,
+    "exitCode": 0,
+    "log": "client-editor-tests.log"
+  },
+  "clientTypecheck": {
+    "exitCode": 0,
+    "log": "client-typecheck.log"
+  },
+  "serverTypecheck": {
+    "exitCode": 0,
+    "log": "server-typecheck.log"
+  },
+  "agentKnowledge": {
+    "exitCode": 0,
+    "log": "agent-knowledge-check.log"
+  }
+}

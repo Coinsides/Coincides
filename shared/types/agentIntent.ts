@@ -17,6 +17,5 @@ export interface AgentIntentPlan {
   proposal_id?: string;
 }
 export interface AgentMessageMeta {
-  answer_card?: { selection: NoteSelection; question: string };
   intent_plan?: AgentIntentPlan;
 }

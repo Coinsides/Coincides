@@ -16,7 +16,6 @@ import {
   createStreamBudget, runToolWithinBudget, type AgentRunOptions,
 } from './runtime-budget.js';
 import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
-import type { AgentMessageMeta } from '../../../shared/types/agentIntent.js';
 import { readAttentionContext, ATTENTION_CONTEXT_LIMITS } from './attentionContext.js';
 import { createAgentUiRunState } from './tools/uiCommands.js';
 import { AGENT_UI_TOOLS, agentUiCommandSchema } from '../toolFace/uiActions.js';
@@ -161,8 +160,6 @@ export async function* runAgent(
   }
   let lastAssistantMessageId: string | undefined;
   let lastAssistantContent = '';
-  const answerMeta: AgentMessageMeta | undefined = contextHint?.type === 'note_view' && contextHint.data.selection
-    ? { answer_card: { selection: contextHint.data.selection, question: userMessage } } : undefined;
   const saveTurnMessage = (role: string, content: string, toolCalls?: string | null, toolResults?: string | null) => {
     const id = memory.saveMessage(conversationId, role, content, toolCalls, toolResults, turnId);
     if (role === 'assistant') {
@@ -412,9 +409,9 @@ export async function* runAgent(
     yield { type: 'error', error: turnError };
     return;
   }
-  if (answerMeta && lastAssistantMessageId) {
-    db.prepare('UPDATE agent_messages SET meta=? WHERE id=?').run(JSON.stringify(answerMeta), lastAssistantMessageId);
-    yield { type: 'message_meta', data: { message_id: lastAssistantMessageId, meta: answerMeta, content: lastAssistantContent } };
+  if (lastAssistantMessageId) {
+    // The conversation adopts the final persisted body after tool rounds.
+    yield { type: 'message_meta', data: { message_id: lastAssistantMessageId, meta: {}, content: lastAssistantContent } };
   }
   yield { type: 'done' };
 }

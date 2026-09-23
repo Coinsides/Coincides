@@ -204,10 +204,10 @@ for (const scenario of [
       yield { type: 'done' };
     });
     const events = await post();
-    assert.deepEqual(events.slice(-2).map(event => event.type), ['turn_receipt', 'done']);
+    assert.deepEqual(events.slice(-3).map(event => event.type), ['turn_receipt', 'message_meta', 'done']);
     assert.equal(events.filter(event => event.type === 'turn_receipt').length, 1);
     assert.equal(events.filter(event => event.type === 'error').length, 0);
-    const receipt = events.at(-2)!.data as AgentTurnReceipt;
+    const receipt = events.find(event => event.type === 'turn_receipt')!.data as AgentTurnReceipt;
     assert.equal(receipt.write_ok_count, scenario.write);
     assert.equal(receipt.write_fail_count, scenario.fail);
     assert.equal(receipt.read_calls.length, scenario.read);
@@ -220,6 +220,8 @@ for (const scenario of [
     const changes = db.prepare('SELECT total_changes() AS n').get();
     const history = get();
     const assistants = history.filter(row => row.role === 'assistant');
+    assert.deepEqual(events.find(event => event.type === 'message_meta')!.data,
+      { message_id: assistants.at(-1)!.id, meta: {}, content: assistants.at(-1)!.content });
     assert.deepEqual(assistants.at(-1)?.turn_receipt, receipt);
     for (const row of assistants.slice(0, -1)) assert.equal(row.turn_receipt, undefined);
     assert.equal(new Set(history.map(row => row.turn_id)).size, 1);
@@ -263,9 +265,9 @@ for (const matches of [true, false]) {
       yield { type: 'done' };
     });
     const first = await post();
-    assert.equal((first.at(-2)!.data as AgentTurnReceipt).write_ok_count, 1);
+    assert.equal((first.find(event => event.type === 'turn_receipt')!.data as AgentTurnReceipt).write_ok_count, 1);
     const second = await post();
-    assert.deepEqual(second.at(-2)!.data, empty);
+    assert.deepEqual(second.find(event => event.type === 'turn_receipt')!.data, empty);
     assert.equal(second.filter(event => event.type === 'text').map(event => (event.data as { content: string }).content).join(''), reference);
     assert.equal(get().at(-1)?.content, reference);
     assert.equal(db.prepare("SELECT * FROM events WHERE verb = 'claim_without_receipt'").all().length, matches ? 0 : 1);
@@ -321,15 +323,19 @@ for (const bFinishesFirst of [false, true]) {
     if (bFinishesFirst) { allowB.resolve(); await bRunning; allowA.resolve(); }
     else { allowA.resolve(); await aRunning; allowB.resolve(); }
     const [aEvents, bEvents] = await Promise.all([aRunning, bRunning]);
-    for (const events of [aEvents, bEvents]) assert.deepEqual(events.slice(-2).map(event => event.type), ['turn_receipt', 'done']);
-    const aLive = aEvents.at(-2)!.data as AgentTurnReceipt;
-    const bLive = bEvents.at(-2)!.data as AgentTurnReceipt;
+    for (const events of [aEvents, bEvents]) assert.deepEqual(events.slice(-3).map(event => event.type), ['turn_receipt', 'message_meta', 'done']);
+    const aLive = aEvents.find(event => event.type === 'turn_receipt')!.data as AgentTurnReceipt;
+    const bLive = bEvents.find(event => event.type === 'turn_receipt')!.data as AgentTurnReceipt;
     assert.equal(aLive.write_ok_count, 1);
     assert.deepEqual(bLive, empty);
     assert.equal((db.prepare('SELECT COUNT(*) AS n FROM agent_memories').get() as { n: number }).n, 1);
     const history = get();
     const aFinal = history.find(row => row.content === 'A 已保存。')!;
     const bFinal = history.find(row => row.role === 'assistant' && row.content.startsWith('B '))!;
+    assert.deepEqual(aEvents.find(event => event.type === 'message_meta')!.data,
+      { message_id: aFinal.id, meta: {}, content: aFinal.content });
+    assert.deepEqual(bEvents.find(event => event.type === 'message_meta')!.data,
+      { message_id: bFinal.id, meta: {}, content: bFinal.content });
     assert.deepEqual(aFinal.turn_receipt, aLive);
     assert.deepEqual(bFinal.turn_receipt, bLive);
     assert.equal(aFinal.turn_id, beforeRelease[0].turn_id);

@@ -1,0 +1,16 @@
+{
+  "node": "v22.22.1",
+  "testFiles": [
+    "src/__tests__/v14NotePatch.test.ts",
+    "src/__tests__/v14IntentRouter.test.ts",
+    "src/__tests__/v14AttentionContext.test.ts",
+    "src/__tests__/v14ContextHint.test.ts",
+    "src/__tests__/v14LoopRobustness.test.ts",
+    "src/__tests__/v14AgentRouteLifecycle.test.ts",
+    "src/__tests__/v14ClaimReceipt.test.ts",
+    "src/__tests__/v14TurnIdentity.test.ts",
+    "src/__tests__/v14EpisodeStorage.test.ts"
+  ],
+  "exitCode": 0,
+  "isolation": "in-memory SQLite; temporary credential/upload/asset directories; scripted providers; no dotenv or application bootstrap"
+}

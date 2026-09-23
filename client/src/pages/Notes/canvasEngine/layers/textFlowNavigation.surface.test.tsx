@@ -15,6 +15,8 @@ import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowServ
 import { useBlockSelectionController } from '../hooks/useBlockSelectionController';
 import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
 import { useUIStore } from '@/stores/uiStore';
+import { useAgentStore } from '@/stores/agentStore';
+import { AgentMessageRole, type AgentMessage } from '@shared/types';
 
 vi.mock('@/services/api', () => ({ default: { get: vi.fn(), put: vi.fn(), post: vi.fn() } }));
 vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn(async () => 'data:image/png;base64,') }));
@@ -175,6 +177,38 @@ describe('fix1 real writing surface navigation (synthetic memory)', () => {
 
 
 describe('C2 attention uses the current block selection', () => {
+  it('does not project legacy answer cards or their exits on the real note surface', async () => {
+    const props = propsFor(frame(0), 'page');
+    const block = props.visibleBlocks[0];
+    const historical = { id: 'old-answer', conversation_id: 'old-chat', role: AgentMessageRole.Assistant,
+      content: 'Complete answer retained in conversation.', tool_calls: null, tool_results: null, token_count: null,
+      created_at: '2026-09-20T00:00:00Z', meta: { answer_card: { question: 'Why this paragraph?',
+        selection: { note_id: props.noteId, block_ids: [block.id] } } } };
+    const previousMessages = useAgentStore.getState().messages;
+    const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      left: 100, top: 80, right: 500, bottom: 180, width: 400, height: 100, x: 100, y: 80, toJSON: () => ({}),
+    });
+    // Legacy JSON is intentionally not part of the active metadata type.
+    useAgentStore.setState({ messages: [historical as unknown as AgentMessage] });
+    try {
+      const view = render(<NoteAgentContextRoute.Provider value={true}>
+        <NoteWritingSurfaceLayer {...props} selectedBlockId={block.id} contentReadOnly={false} layoutMode={false} />
+      </NoteAgentContextRoute.Provider>);
+      expect(view.container.querySelector('[data-note-block-shell="true"]')).toBeTruthy();
+      expect(view.getByRole('button', { name: '问 Agent' })).toBeTruthy();
+      expect(view.queryByRole('complementary', { name: '页边答卡' })).toBeNull();
+      expect(view.queryByRole('button', { name: '插入为块' })).toBeNull();
+      expect(view.queryByRole('button', { name: '散去' })).toBeNull();
+      expect(view.queryByText(historical.content)).toBeNull();
+      expect(props.onCreateBlock).not.toHaveBeenCalled();
+      expect(useAgentStore.getState().messages).toEqual([historical]);
+      view.unmount();
+    } finally {
+      measure.mockRestore();
+      useAgentStore.setState({ messages: previousMessages });
+    }
+  });
+
   it('opens the existing contextHint channel after saving selected text, without a model call', async () => {
     const props = propsFor(frame(0), 'page');
     const block = props.visibleBlocks[0];

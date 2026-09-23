@@ -5,7 +5,6 @@ import { getNoteAgentHumanEditor } from '@/lib/noteAgentHumanBridge';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { createBoardTextRangeEditSession } from '../boardTextRangeEditSession';
 import type { NoteBlock } from '../runtimeDataTypes';
-import { STATIC_TEMPLATE_OPTIONS } from '@/services/templateOptions';
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
 import { usePlacementHistory } from './usePlacementHistory';
 import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
@@ -18,10 +17,8 @@ function setup(options: { failSave?: boolean } = {}) {
     block_type: 'paragraph', title: null, plain_text: 'Before', content_json: { body: 'Before', [TEXT_FLOW_CONTENT_KEY]: flow },
     metadata: {}, order_index: 0, source_references: [], text_save_revision: 2 };
   const save = vi.fn<ReturnType<typeof useNoteCanvasDataAdapter>['saveBlock']>();
-  const created = { ...block, id: 'c2-answer', placement_id: 'c2-answer-placement', plain_text: 'Answer' };
-  const create = vi.fn(async () => created);
   const trash = vi.fn(async () => true);
-  const restore = vi.fn(async () => created);
+  const restore = vi.fn(async () => block);
   const boardRanges = createBoardTextRangeEditSession('c2-note', async (_note, ranges) => ranges);
   boardRanges.hydrate([{ id: 'c2-range', note_id: 'c2-note', board_id: 'c2-board', block_id: block.id,
     text_flow_id: `textflow-${block.id}`, text_unit_id: flow.units[0].id, start_offset: 0, end_offset: 6,
@@ -46,13 +43,12 @@ function setup(options: { failSave?: boolean } = {}) {
     const history = usePlacementHistory({ noteId: 'c2-note', generation: 1, beforeHistoryBoundary: textHistory.boundary,
       applyLayoutDrafts: () => {}, persistLayoutSnapshot: async () => true, trashBlockForHistory: trash, restoreBlockForHistory: restore });
     host.current = history;
-    useNoteAgentHumanEditor({ noteId: 'c2-note', enabled: true, readOnly: false, textHistory, history,
-      whenIdle: async () => {}, createBlock: create, template: STATIC_TEMPLATE_OPTIONS.find((item) => item.legacy_block_type === 'paragraph')!,
-      layouts: { 'c2-block': { x: 12, y: 24, width: 200, height: 50 } }, beforeAction: textHistory.boundary, selectBlock: () => {} });
+    useNoteAgentHumanEditor({ noteId: 'c2-note', enabled: true, readOnly: false, textHistory,
+      whenIdle: async () => {}, beforeAction: textHistory.boundary });
     return { history, textHistory };
   });
   const patch = { block_id: block.id, unit_id: flow.units[0].id, old_text: 'Before', new_text: 'After', base_revision: 2, status: 'pending' as const };
-  return { ...result, save, create, trash, restore, patch, boardRanges };
+  return { ...result, save, trash, restore, patch, boardRanges };
 }
 
 describe('C2 mounted human editor and incumbent undo history', () => {
@@ -104,15 +100,14 @@ describe('C2 mounted human editor and incumbent undo history', () => {
     expect(subject.save).toHaveBeenCalledTimes(1);
   });
 
-  it('inserts a human-kept answer immediately after its anchor and uses the existing createdBlock undo entry', async () => {
+  it('does not expose an answer insertion exit or create writes or history when mounted', async () => {
     const subject = setup();
-    expect(subject.create).not.toHaveBeenCalled();
-    await act(async () => expect(await getNoteAgentHumanEditor('c2-note')!.insertAnswer('c2-block', 'Answer')).toBe(true));
-    expect(subject.create).toHaveBeenCalledWith(expect.anything(), 'Answer', expect.objectContaining({ afterBlockId: 'c2-block', layout: expect.objectContaining({ y: 90 }) }));
-    await act(async () => expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true));
-    expect(subject.trash).toHaveBeenCalledWith('c2-answer', { silent: true });
-    await act(async () => expect(await subject.result.current.history.redoRuntimeHistory()).toBe(true));
-    expect(subject.restore).toHaveBeenCalledTimes(1);
+    expect(getNoteAgentHumanEditor('c2-note')?.applyPatch).toBeTypeOf('function');
+    expect(getNoteAgentHumanEditor('c2-note')).not.toHaveProperty('insertAnswer');
+    await act(async () => expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false));
+    expect(subject.save).not.toHaveBeenCalled();
+    expect(subject.trash).not.toHaveBeenCalled();
+    expect(subject.restore).not.toHaveBeenCalled();
     subject.unmount();
     expect(getNoteAgentHumanEditor('c2-note')).toBeUndefined();
   });

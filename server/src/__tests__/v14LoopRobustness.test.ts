@@ -198,9 +198,9 @@ test('eight completed tool rounds emit one round_limit before done and retain ei
   });
   const events = await collect(runAgent(USER, CONVERSATION, 'Continue.'));
   assert.equal(rounds, 8);
-  assert.deepEqual(events.slice(-3).map(event => event.type), ['round_limit', 'turn_receipt', 'done']);
+  assert.deepEqual(events.slice(-4).map(event => event.type), ['round_limit', 'turn_receipt', 'message_meta', 'done']);
   assert.equal(events.filter(event => event.type === 'turn_receipt').length, 1);
-  assert.deepEqual(events.at(-2)?.data, {
+  assert.deepEqual(events.find(event => event.type === 'turn_receipt')!.data, {
     write_calls: [], read_calls: Array.from({ length: 8 }, () => ({ name: 'list_courses', ok: true })),
     write_ok_count: 0, write_fail_count: 0,
   });
@@ -209,6 +209,11 @@ test('eight completed tool rounds emit one round_limit before done and retain ei
   assert.equal(events.filter(event => event.type === 'tool_call_end' && !event.error).length, 8);
   const assistant = saved(db).filter(row => row.role === 'assistant');
   assert.equal(assistant.length, 8, 'the final tool-round text is not saved again at exhaustion');
+  const finalMessage = db.prepare("SELECT id,content FROM agent_messages WHERE conversation_id=? AND role='assistant' ORDER BY rowid DESC LIMIT 1")
+    .get(CONVERSATION) as { id: string; content: string };
+  assert.deepEqual(events.find(event => event.type === 'message_meta')!.data,
+    { message_id: finalMessage.id, meta: {}, content: finalMessage.content });
+  assert.equal(finalMessage.content, 'Round 8.');
   assert.ok(assistant.every(row => row.tool_calls !== null));
   assertReplayPairs(new MemoryManager(USER).getConversationHistory(CONVERSATION), 8);
 });

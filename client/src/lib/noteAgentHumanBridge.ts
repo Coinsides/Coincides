@@ -19,7 +19,6 @@ export interface NotePatchReviewData {
 export interface NoteAgentHumanEditor {
   noteId: string;
   applyPatch: (proposalId: string, index: number, patch: NotePatchReview) => Promise<boolean>;
-  insertAnswer: (anchorBlockId: string, answer: string) => Promise<boolean>;
 }
 
 const editors = new Map<symbol, NoteAgentHumanEditor>();

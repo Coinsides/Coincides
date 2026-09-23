@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-23",
+  "order": "docs/agent-ops/handoffs/2026-09-23-v14-answer-card-demolition-order.md",
+  "status": "done",
+  "resultLine": 42,
+  "gitDiffCheck": "PASS",
+  "testsPassed": 243,
+  "testsFailed": 0,
+  "scope": "functional / regression directed",
+  "wholeRepositoryGateRun": false,
+  "gitWriteOperations": 0
+}

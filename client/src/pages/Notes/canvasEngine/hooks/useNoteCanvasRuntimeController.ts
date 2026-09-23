@@ -513,9 +513,7 @@ export function useNoteCanvasRuntimeController() {
   textHistoryHostRef.current = { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle, isReplaying: isRuntimeHistoryReplaying };
 
   useNoteAgentHumanEditor({ noteId, enabled: !loading && Boolean(note) && hostMode === 'page',
-    readOnly: sourceProjectionPolicy.contentReadOnly, textHistory,
-    history: { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle }, whenIdle,
-    createBlock, template: defaultTextTemplate, layouts: blockLayouts, selectBlock: markBlockSelected,
+    readOnly: sourceProjectionPolicy.contentReadOnly, textHistory, whenIdle,
     beforeAction: () => !paperBusyRef.current && !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary(),
   });
 

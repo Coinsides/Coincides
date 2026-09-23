@@ -1,26 +1,18 @@
 import { useLayoutEffect, useRef } from 'react';
 import { registerNoteAgentHumanEditor } from '@/lib/noteAgentHumanBridge';
 import { replaceTextUnitText } from '../textFlowService';
-import type { useTextFlowHistory, TextFlowHistoryHost } from './useTextFlowHistory';
-import type { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
-import type { TemplateOption } from '@/services/templateOptions';
-import type { BlockBoxLayout } from '../runtimeLayout';
+import type { useTextFlowHistory } from './useTextFlowHistory';
 
 interface Options {
   noteId: string | undefined;
   enabled: boolean;
   readOnly: boolean;
   textHistory: ReturnType<typeof useTextFlowHistory>;
-  history: TextFlowHistoryHost;
   whenIdle: () => Promise<void>;
-  createBlock: ReturnType<typeof useNoteCanvasDataAdapter>['createBlock'];
-  template: TemplateOption;
-  layouts: Record<string, BlockBoxLayout>;
   beforeAction: () => boolean;
-  selectBlock: (id: string) => void;
 }
 
-/** Proposal acceptance and answer insertion are explicit human UI actions. */
+/** Proposal acceptance is an explicit human UI action. */
 export function useNoteAgentHumanEditor(options: Options): void {
   const latest = useRef(options);
   latest.current = options;
@@ -68,23 +60,6 @@ export function useNoteAgentHumanEditor(options: Options): void {
           return active;
         } catch { return false; }
         finally { busy = false; }
-      },
-      async insertAnswer(anchorBlockId, answer) {
-        if (!answer.trim() || !await ready()) return false;
-        try {
-          const api = latest.current;
-          const anchor = api.textHistory.readLiveBlock(anchorBlockId);
-          const layout = api.layouts[anchorBlockId];
-          if (!anchor || !layout) return false;
-          return await api.history.enqueueRuntimeHistoryOperation(async () => {
-            if (!active) return false;
-            const created = await api.createBlock(api.template, answer, { afterBlockId: anchorBlockId, requireAfterBlock: true,
-              layout: { ...layout, y: layout.y + layout.height + 16, height: 96 }, silent: true });
-            if (!created || !active) return false;
-            api.selectBlock(created.id);
-            return api.history.pushHistoryEntry({ type: 'createdBlock', block: created }, { skipBoundary: true });
-          });
-        } finally { busy = false; }
       },
     });
     return () => { active = false; unregister(); };

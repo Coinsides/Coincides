@@ -17,7 +17,7 @@ const proposal: Proposal = { id: 'c2-proposal', user_id: 'c2-user', conversation
 describe('C2 patch-by-patch human review', () => {
   it('renders old/new text, sends only the clicked patch to the mounted editor, and never offers a stale apply', async () => {
     const applyPatch = vi.fn(async () => true);
-    const unregister = registerNoteAgentHumanEditor({ noteId: 'c2-note', applyPatch, insertAnswer: async () => false });
+    const unregister = registerNoteAgentHumanEditor({ noteId: 'c2-note', applyPatch });
     const refresh = vi.fn(async () => {});
     try {
       render(<NotePatchReview proposal={proposal} onRefresh={refresh} />);

@@ -98,7 +98,7 @@ function hangProvider(t: TestContext) {
 }
 
 test('SSE lifecycle: a completely read request body close does not cancel a healthy response', async t => {
-  const { req, res, run, assertCleaned } = await fixture(t);
+  const { db, req, res, run, assertCleaned } = await fixture(t);
   const started = deferred<AbortSignal>();
   const proceed = deferred<void>();
   t.mock.method(OpenAIProvider.prototype, 'chat', async function* (
@@ -116,10 +116,15 @@ test('SSE lifecycle: a completely read request body close does not cancel a heal
   assert.equal(signal.aborted, false);
   proceed.resolve();
   await running;
-  assert.deepEqual(res.events().map(event => event.type), ['text', 'turn_receipt', 'done']);
+  assert.deepEqual(res.events().map(event => event.type), ['text', 'turn_receipt', 'message_meta', 'done']);
   assert.deepEqual(res.events()[1].data, {
     write_calls: [], read_calls: [], write_ok_count: 0, write_fail_count: 0,
   });
+  const finalMessage = res.events()[2].data;
+  assert.deepEqual(finalMessage.meta, {});
+  assert.deepEqual(db.prepare('SELECT content FROM agent_messages WHERE id=?').get(finalMessage.message_id),
+    { content: finalMessage.content });
+  assert.equal(finalMessage.content, 'Healthy response.');
   assert.equal(res.endCount, 1);
   assertCleaned();
 });
@@ -240,7 +245,7 @@ test('SSE lifecycle: eight tool rounds emit a distinct round_limit and a visible
   assert.equal(providerCalls, 8);
   const events = res.events();
   assert.equal(events.filter(event => event.type === 'tool_end').length, 8);
-  assert.deepEqual(events.slice(-4).map(event => event.type), ['round_limit', 'error', 'turn_receipt', 'done']);
+  assert.deepEqual(events.slice(-5).map(event => event.type), ['round_limit', 'error', 'turn_receipt', 'message_meta', 'done']);
   assert.equal(events.filter(event => event.type === 'turn_receipt').length, 1);
   assert.deepEqual(events.find(event => event.type === 'turn_receipt')!.data, {
     // This existing fixture has no argument delta: its empty raw arguments are

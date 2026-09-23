@@ -8,7 +8,6 @@ import { createDefaultComponentBlockPayload, type ComponentBlockPayload, type Bu
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
 import { NoteAgentContextRoute } from '../../NoteAgentContextRoute';
-import { NoteAnswerCards } from './NoteAnswerCards';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { createPageGapPresentation, projectPageFrameToReadingSurface } from '../pageFramePresentationService';
 import { Boxes, MousePointer2, Pencil, Eraser, PanelLeft } from 'lucide-react';
@@ -2231,7 +2230,6 @@ export function NoteWritingSurfaceLayer({
           <span>Groups</span>
         </button>
       )}
-      {isNoteAgentRoute && <NoteAnswerCards noteId={noteId} surfaceRef={surfaceRef} />}
       <SelectionToolbarLayer
         onAskAgent={isNoteAgentRoute ? () => { void askAgent(); } : undefined}
         selection={selectionDraft && latestDraftRange ? {

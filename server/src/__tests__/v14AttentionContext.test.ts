@@ -76,8 +76,8 @@ async function fixture(t: TestContext, withToolRound = false) {
   return { db, calls, request, send };
 }
 
-test('C2 selected note goes through HTTP and scripted provider; live and history carry the same answer-card anchor', async t => {
-  const { calls, request, send } = await fixture(t);
+test('C2 selected note reaches the provider and conversation without live or persisted answer-card metadata', async t => {
+  const { db, calls, request, send } = await fixture(t);
   const stream = await send('Explain the selected passage.', hint);
   assert.equal(calls.length, 1);
   const userMessage = calls[0].at(-1)!.content as string;
@@ -85,7 +85,7 @@ test('C2 selected note goes through HTTP and scripted provider; live and history
   assert.match(userMessage, /Selected original/);
   assert.match(userMessage, /truncated=false; missing=\[\]/);
   const meta = stream.find(event => event.event === 'message_meta')!.data;
-  assert.deepEqual(meta.meta.answer_card, { selection, question: 'Explain the selected passage.' });
+  assert.equal(Object.prototype.hasOwnProperty.call(meta.meta, 'answer_card'), false);
   const receipt = stream.find(event => event.event === 'turn_receipt')!.data;
   assert.equal(receipt.write_ok_count, 0);
   const history = JSON.parse((await request('/messages')).text);
@@ -94,20 +94,44 @@ test('C2 selected note goes through HTTP and scripted provider; live and history
   assert.equal(assistant.content, 'Selected passage explained.');
   assert.equal(meta.content, assistant.content);
   assert.deepEqual(assistant.turn_receipt, receipt);
+  for (const message of history) assert.equal(Object.prototype.hasOwnProperty.call(message.meta, 'answer_card'), false);
+  const rows = db.prepare('SELECT meta FROM agent_messages WHERE conversation_id=?').all(CONVERSATION) as { meta: string }[];
+  for (const row of rows) assert.equal(Object.prototype.hasOwnProperty.call(JSON.parse(row.meta), 'answer_card'), false);
 });
 
-test('C2 multi-round answer-card live content matches its final persisted message after a read tool', async t => {
-  const { calls, request, send } = await fixture(t, true);
+for (const [name, contextHint] of [['with selection', hint], ['without selection', undefined]] as const) {
+  test(`C2 multi-round conversation ${name} adopts final persisted content without answer-card metadata`, async t => {
+    const { calls, request, send } = await fixture(t, true);
+    const stream = await send('Explain the selected passage.', contextHint);
+    assert.equal(calls.length, 2);
+    assert.equal(stream.filter(event => event.event === 'text').map(event => event.data.content).join(''),
+      'Let me read the selected note first. Selected passage explained.');
+    const meta = stream.find(event => event.event === 'message_meta')!.data;
+    const history = JSON.parse((await request('/messages')).text);
+    const assistant = history.find((message: any) => message.id === meta.message_id);
+    assert.equal(meta.content, 'Selected passage explained.');
+    assert.equal(meta.content, assistant.content);
+    assert.deepEqual(meta.meta, assistant.meta);
+    assert.equal(Object.prototype.hasOwnProperty.call(meta.meta, 'answer_card'), false);
+    for (const message of history) assert.equal(Object.prototype.hasOwnProperty.call(message.meta, 'answer_card'), false);
+  });
+}
+
+test('C2 new replies leave historical answer-card metadata unchanged', async t => {
+  const { db, request, send } = await fixture(t);
+  const historicalMeta = JSON.stringify({ answer_card: { selection, question: 'An old question.' } });
+  db.prepare('INSERT INTO agent_messages(id,conversation_id,role,content,meta) VALUES(?,?,?,?,?)')
+    .run('legacy-answer', CONVERSATION, 'assistant', 'An old answer.', historicalMeta);
+  const oldRow = db.prepare("SELECT * FROM agent_messages WHERE id='legacy-answer'").get();
   const stream = await send('Explain the selected passage.', hint);
-  assert.equal(calls.length, 2);
-  assert.equal(stream.filter(event => event.event === 'text').map(event => event.data.content).join(''),
-    'Let me read the selected note first. Selected passage explained.');
-  const meta = stream.find(event => event.event === 'message_meta')!.data;
+  assert.deepEqual(db.prepare("SELECT * FROM agent_messages WHERE id='legacy-answer'").get(), oldRow);
   const history = JSON.parse((await request('/messages')).text);
-  const assistant = history.find((message: any) => message.id === meta.message_id);
-  assert.equal(meta.content, 'Selected passage explained.');
-  assert.equal(meta.content, assistant.content);
-  assert.deepEqual(meta.meta, assistant.meta);
+  assert.deepEqual(history.find((message: any) => message.id === 'legacy-answer').meta, JSON.parse(historicalMeta));
+  const meta = stream.find(event => event.event === 'message_meta')!.data;
+  assert.equal(Object.prototype.hasOwnProperty.call(meta.meta, 'answer_card'), false);
+  for (const message of history.filter((message: any) => message.id !== 'legacy-answer')) {
+    assert.equal(Object.prototype.hasOwnProperty.call(message.meta, 'answer_card'), false);
+  }
 });
 
 test('C2 oversized and missing selected material reaches the provider with explicit bounded-context notices', async t => {

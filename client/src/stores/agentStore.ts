@@ -158,7 +158,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     };
     set({ messages: [...get().messages, userMsg], streaming: true, streamingText: '', streamingReceipt: null, activeToolName: null });
     let turnReceipt: AgentTurnReceipt | undefined;
-    let responseMeta: AgentMessage['meta'];
+    let responseIntentPlan: NonNullable<AgentMessage['meta']>['intent_plan'];
     let responseMessageId: string | undefined;
     let responseContent: string | undefined;
 
@@ -246,12 +246,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
               case 'message_meta': {
                 try {
                   const parsed = JSON.parse(evt.data);
-                  if (typeof parsed.message_id === 'string' && parsed.meta && typeof parsed.meta === 'object') {
+                  if (typeof parsed.message_id === 'string') {
                     responseMessageId = parsed.message_id;
-                    responseMeta = parsed.meta;
+                    responseIntentPlan = parsed.meta?.intent_plan;
                     if (typeof parsed.content === 'string') responseContent = parsed.content;
                   }
-                } catch { /* Invalid projection metadata does not discard the answer. */ }
+                } catch { /* Invalid message metadata does not discard the answer. */ }
                 break;
               }
               case 'turn_receipt': {
@@ -273,7 +273,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                   conversation_id: convId!,
                   role: 'assistant' as AgentMessage['role'],
                   content: responseContent ?? accumulated,
-                  ...(responseMeta ? { meta: responseMeta } : {}),
+                  ...(responseIntentPlan ? { meta: { intent_plan: responseIntentPlan } } : {}),
                   ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
                   tool_calls: null,
                   tool_results: null,
@@ -331,7 +331,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           conversation_id: convId!,
           role: 'assistant' as AgentMessage['role'],
           content: responseContent ?? accumulated,
-                  ...(responseMeta ? { meta: responseMeta } : {}),
+          ...(responseIntentPlan ? { meta: { intent_plan: responseIntentPlan } } : {}),
           ...(turnReceipt ? { turn_receipt: turnReceipt } : {}),
           tool_calls: null,
           tool_results: null,
