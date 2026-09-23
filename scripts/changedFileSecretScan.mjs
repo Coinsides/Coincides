@@ -33,7 +33,9 @@ function isProbablyBinary(buffer) {
 
 const patterns = [
   ['private key block', /-----BEGIN (?:RSA |DSA |EC |OPENSSH |PGP )?PRIVATE KEY-----/],
-  ['openai-style api key', /sk-[A-Za-z0-9_-]{20,}/],
+  // (?<!-) excludes CSS custom properties like `--sk-headrule-left` —
+  // second false positive of this shape (claude-log 169 判断点③ family rule).
+  ['openai-style api key', /(?<!-)sk-[A-Za-z0-9_-]{20,}/],
   ['github classic token', /ghp_[A-Za-z0-9]{20,}/],
   ['github fine-grained token', /github_pat_[A-Za-z0-9_]{20,}/],
   ['slack token', /xox[baprs]-[A-Za-z0-9-]{20,}/],
