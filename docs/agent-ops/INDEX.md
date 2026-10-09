@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-23
+> **日期 (Updated)**: 2026-10-09
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 431 份文档。
+共 432 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -98,6 +98,7 @@
 | [analysis/2026-09-21-design-charter-roadmap-impact.md](analysis/2026-09-21-design-charter-roadmap-impact.md) | 设计宪章对后续路线的影响清单 | `active` | 2026-09-21 | — |
 | [analysis/2026-09-21-paper-line-walk-report.md](analysis/2026-09-21-paper-line-walk-report.md) | 纸面线专项走查报告(Q1/Q2/Q3/G7/G9 + T1 冒烟) | `active` | — | — |
 | [analysis/2026-09-22-flip-day-briefing.md](analysis/2026-09-22-flip-day-briefing.md) | 翻牌日呈批案(九件) | `active` | — | — |
+| [analysis/2026-09-23-knowledge-architecture-target-design.md](analysis/2026-09-23-knowledge-architecture-target-design.md) | 知识架构目标态设计稿 v2(候拍) | `draft` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
