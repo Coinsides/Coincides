@@ -1,0 +1,42 @@
+[
+    {
+        "path":  "server/src/__tests__/v14CoverPage.test.ts",
+        "declaredTests":  8,
+        "executedTests":  0,
+        "CRLF":  0,
+        "bareLF":  255,
+        "containsReplacementChar":  false
+    },
+    {
+        "path":  "server/src/__tests__/v14CardCover.test.ts",
+        "declaredTests":  4,
+        "executedTests":  0,
+        "CRLF":  0,
+        "bareLF":  181,
+        "containsReplacementChar":  false
+    },
+    {
+        "path":  "server/src/__tests__/v14NoteBinding.test.ts",
+        "declaredTests":  7,
+        "executedTests":  0,
+        "CRLF":  0,
+        "bareLF":  225,
+        "containsReplacementChar":  false
+    },
+    {
+        "path":  "client/src/pages/Courses/Courses.test.tsx",
+        "declaredTests":  18,
+        "executedTests":  0,
+        "CRLF":  0,
+        "bareLF":  299,
+        "containsReplacementChar":  false
+    },
+    {
+        "path":  "client/src/pages/Courses/CourseDetail.test.tsx",
+        "declaredTests":  5,
+        "executedTests":  0,
+        "CRLF":  0,
+        "bareLF":  123,
+        "containsReplacementChar":  false
+    }
+]

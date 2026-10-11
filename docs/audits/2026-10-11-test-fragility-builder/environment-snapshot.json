@@ -1,0 +1,90 @@
+{
+    "capturedAt":  "2026-10-11T08:41:48.3135246+08:00",
+    "cwd":  "D:\\Coinsides\\v2.x\\Coincides",
+    "powerShellVersion":  "5.1.26100.9168",
+    "timeZoneId":  "China Standard Time",
+    "utcOffset":  "08:00:00",
+    "supportsDaylightSavingTime":  false,
+    "processTZ":  null,
+    "codegraphDirectoryExists":  false,
+    "rootNodeModulesExists":  false,
+    "serverNodeModulesExists":  true,
+    "clientNodeModulesExists":  true,
+    "nodeObservedVersion":  null,
+    "nodeExecutionStatus":  "blocked: Access is denied",
+    "testsExecuted":  0,
+    "existingCoverFixtureDirectories":  [
+                                            {
+                                                "name":  "fixture-12080x",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-3nJosZ",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-53NMkZ",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-8a4IsF",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-a87V5k",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-cgoJjO",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-fLGLvV",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-gOTuDh",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-I4H8PI",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-L19TZp",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-Md5g44",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-ov7dZd",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-PsgzGw",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-t3f0O4",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-VelKLf",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-xFpXKK",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-xzpwYX",
+                                                "childEntryCount":  1
+                                            },
+                                            {
+                                                "name":  "fixture-YQAHvj",
+                                                "childEntryCount":  1
+                                            }
+                                        ]
+}

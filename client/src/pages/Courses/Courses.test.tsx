@@ -39,6 +39,11 @@ vi.mock('./ProjectDeleteDialog', () => ({
   },
 }));
 
+// Keep both timestamps on the same local calendar day in every time zone.
+const now = new Date(2026, 7, 29, 16, 0, 0);
+const recentNoteUpdatedAt = new Date(now);
+recentNoteUpdatedAt.setHours(now.getHours() - 4);
+
 const recentCourse: CourseWithRecentNote = {
   id: 'course-1',
   user_id: 'user-1',
@@ -53,7 +58,7 @@ const recentCourse: CourseWithRecentNote = {
   recent_note: {
     id: 'note-recent',
     title: 'Matrix inverses',
-    updated_at: '2026-08-29T13:00:00.000Z',
+    updated_at: recentNoteUpdatedAt.toISOString(),
     excerpt: 'First line from the note\nSecond line from the note',
   },
 };
@@ -84,7 +89,7 @@ describe('Project life-trace cards', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-08-29T16:00:00.000Z'));
+    vi.setSystemTime(now);
     mocks.courseState.courses = [];
     mocks.courseState.deleteCourse = mocks.deleteCourse;
     mocks.uiState.modal = null;

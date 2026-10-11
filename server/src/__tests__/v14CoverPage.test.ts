@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtempSync } from 'node:fs';
+import { mkdirSync, mkdtempSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import express from 'express';
 import type { Server } from 'node:http';
@@ -32,7 +32,9 @@ const local = { x: 12.125, y: 20.375, width: 250.625, height: 90.875, frame_id: 
   coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside', width_mode: 'manual' };
 
 async function fixture() {
-  const directory = mkdtempSync(join(resolve('../.codex-tmp/a3-cover'), 'fixture-'));
+  const parentDirectory = resolve('../.codex-tmp/a3-cover');
+  mkdirSync(parentDirectory, { recursive: true });
+  const directory = mkdtempSync(join(parentDirectory, 'fixture-'));
   const path = join(directory, 'cover.sqlite');
   let db = await initDb(path);
   db.prepare("INSERT INTO users(id,email,password_hash,name) VALUES(?,?,'fixture','A3')").run(userId, 'a3@example.test');

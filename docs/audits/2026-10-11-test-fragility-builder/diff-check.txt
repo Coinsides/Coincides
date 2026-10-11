@@ -1,0 +1,5 @@
+Command: git --no-optional-locks diff --check
+Exit code: 0
+Output: (empty)
+Scope: final working tree, including appended Result; not runtime validation.
+Additional static checks: tracked changes limited to two tests and the handoff; original order/header preserved; UTF-8 strict decode passed.
