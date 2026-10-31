@@ -206,7 +206,7 @@ test('K-1 model change creates a new identity and same-model rerun never overwri
   });
 });
 
-test('DashScope provider uses the fixed international endpoint and validates 1024-float responses', async () => {
+test('DashScope provider uses the default Beijing endpoint and validates 1024-float responses', async () => {
   const previousKey = process.env.DASHSCOPE_API_KEY;
   process.env.DASHSCOPE_API_KEY = 'syn-fake-embedding';
   const requests: Array<{ url: string; init?: RequestInit }> = [];

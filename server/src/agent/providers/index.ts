@@ -37,7 +37,7 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
     model ||= activeProvider === 'deepseek' ? 'deepseek-flash' : 'qwen-plus';
     baseUrl ||= activeProvider === 'deepseek'
       ? 'https://api.deepseek.com'
-      : 'https://dashscope-intl.aliyuncs.com/compatible-mode';
+      : 'https://dashscope.aliyuncs.com/compatible-mode';
     // OpenAIProvider appends /v1; normalize only these new settings branches.
     baseUrl = baseUrl.replace(/\/v1\/?$/, '');
   }

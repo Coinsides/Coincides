@@ -144,7 +144,7 @@ test('test-connection uses one minimal mocked request for each existing provider
     ['openai', 'https://api.openai.com/v1/chat/completions', 'gpt-4o'],
     ['generic', 'https://api.openai.com/v1/chat/completions', 'gpt-4o'],
     ['deepseek', 'https://api.deepseek.com/v1/chat/completions', 'deepseek-flash'],
-    ['dashscope', 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions', 'qwen-plus'],
+    ['dashscope', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', 'qwen-plus'],
     ['voyage', 'https://api.voyageai.com/v1/embeddings', 'voyage-4'],
   ];
   await withApi(async (call) => {

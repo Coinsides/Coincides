@@ -198,7 +198,7 @@ export const updateSettingsSchema = z.object({
       base_url: z.string().optional(),
     })).optional(),
     active_provider: z.string().optional(),
-    embedding_provider: z.enum(['voyage', 'openai', 'cohere']).optional(),
+    embedding_provider: z.enum(['voyage', 'dashscope', 'openai', 'cohere']).optional(),
     embedding_model: z.string().optional(),
   }),
 });

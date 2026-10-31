@@ -54,7 +54,7 @@ async function captureRequest(t: TestContext, provider: AIProvider, expectedKey:
 
 const newProviders = [
   { name: 'deepseek', env: 'DEEPSEEK_API_KEY', baseUrl: 'https://api.deepseek.com', model: 'deepseek-flash' },
-  { name: 'dashscope', env: 'DASHSCOPE_API_KEY', baseUrl: 'https://dashscope-intl.aliyuncs.com/compatible-mode', model: 'qwen-plus' },
+  { name: 'dashscope', env: 'DASHSCOPE_API_KEY', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode', model: 'qwen-plus' },
 ];
 
 for (const { name, env, baseUrl, model } of newProviders) {

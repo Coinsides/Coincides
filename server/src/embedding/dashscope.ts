@@ -1,12 +1,37 @@
 import { resolveProviderCredential } from '../services/providerCredentials.js';
 
-export const DASHSCOPE_EMBEDDING_ENDPOINT =
-  'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/embeddings';
+// Beijing is the default region; intl keys are not accepted there (and vice versa).
+export const DASHSCOPE_DEFAULT_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode';
+export const DASHSCOPE_EMBEDDING_ENDPOINT = `${DASHSCOPE_DEFAULT_BASE_URL}/v1/embeddings`;
 export const DASHSCOPE_EMBEDDING_MODEL = 'text-embedding-v4';
 export const DASHSCOPE_EMBEDDING_DIMENSIONS = 1024;
 export const DASHSCOPE_EMBEDDING_ENCODING_FORMAT = 'float' as const;
-export const DASHSCOPE_EMBEDDING_MODEL_ID =
-  `dashscope:${DASHSCOPE_EMBEDDING_MODEL}:${DASHSCOPE_EMBEDDING_DIMENSIONS}`;
+export const DASHSCOPE_EMBEDDING_TIMEOUT_MS = 30_000;
+
+export type DashScopeRegion = 'cn-beijing' | 'intl';
+
+export function dashScopeEmbeddingModelId(region: DashScopeRegion): string {
+  return `dashscope:${region}:${DASHSCOPE_EMBEDDING_MODEL}:${DASHSCOPE_EMBEDDING_DIMENSIONS}`;
+}
+
+export const DASHSCOPE_EMBEDDING_MODEL_ID = dashScopeEmbeddingModelId('cn-beijing');
+
+/**
+ * Resolve the embeddings endpoint from a compatible-mode base URL. Precedence:
+ * explicit base (user settings) > DASHSCOPE_BASE_URL env > Beijing default.
+ */
+export function resolveDashScopeEmbeddingEndpoint(baseUrl?: string): string {
+  const base = (baseUrl || process.env.DASHSCOPE_BASE_URL || DASHSCOPE_DEFAULT_BASE_URL)
+    .replace(/\/+$/, '')
+    .replace(/\/v1$/, '');
+  return `${base}/v1/embeddings`;
+}
+
+export function dashScopeRegionForEndpoint(endpoint: string): DashScopeRegion {
+  let host = '';
+  try { host = new URL(endpoint).hostname; } catch { /* treated as default region */ }
+  return host.startsWith('dashscope-intl.') ? 'intl' : 'cn-beijing';
+}
 
 export type DashScopeEmbeddingErrorCode =
   | 'missing_api_key'
@@ -99,7 +124,12 @@ function parseVector(value: unknown): number[] | null {
 }
 
 function parseResponse(body: DashScopeResponseBody, expectedCount: number): DashScopeEmbeddingBatch {
-  if (body.model !== DASHSCOPE_EMBEDDING_MODEL || !Array.isArray(body.data)) {
+  // Regions may report a dated variant of the model name, so only the prefix is pinned.
+  if (
+    typeof body.model !== 'string'
+    || !body.model.startsWith(DASHSCOPE_EMBEDDING_MODEL)
+    || !Array.isArray(body.data)
+  ) {
     throw new DashScopeEmbeddingError(
       'invalid_response',
       'DashScope embedding response has an unexpected model or data shape',
@@ -140,7 +170,7 @@ function parseResponse(body: DashScopeResponseBody, expectedCount: number): Dash
 }
 
 export function createDashScopeEmbeddingProvider(
-  options: { fetchImpl?: FetchLike } = {},
+  options: { fetchImpl?: FetchLike; baseUrl?: string; timeoutMs?: number } = {},
 ): DashScopeEmbeddingProvider {
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   if (typeof fetchImpl !== 'function') {
@@ -149,9 +179,11 @@ export function createDashScopeEmbeddingProvider(
       'No fetch implementation is available for DashScope embeddings',
     );
   }
+  const endpoint = resolveDashScopeEmbeddingEndpoint(options.baseUrl);
+  const timeoutMs = options.timeoutMs ?? DASHSCOPE_EMBEDDING_TIMEOUT_MS;
 
   return {
-    modelId: DASHSCOPE_EMBEDDING_MODEL_ID,
+    modelId: dashScopeEmbeddingModelId(dashScopeRegionForEndpoint(endpoint)),
     model: DASHSCOPE_EMBEDDING_MODEL,
     dimensions: DASHSCOPE_EMBEDDING_DIMENSIONS,
     encodingFormat: DASHSCOPE_EMBEDDING_ENCODING_FORMAT,
@@ -163,7 +195,7 @@ export function createDashScopeEmbeddingProvider(
       const apiKey = readDashScopeApiKey();
       let response: Response;
       try {
-        response = await fetchImpl(DASHSCOPE_EMBEDDING_ENDPOINT, {
+        response = await fetchImpl(endpoint, {
           method: 'POST',
           headers: {
             authorization: `Bearer ${apiKey}`,
@@ -175,11 +207,15 @@ export function createDashScopeEmbeddingProvider(
             dimensions: DASHSCOPE_EMBEDDING_DIMENSIONS,
             encoding_format: DASHSCOPE_EMBEDDING_ENCODING_FORMAT,
           }),
+          signal: AbortSignal.timeout(timeoutMs),
         });
-      } catch {
+      } catch (err) {
+        const timedOut = err instanceof Error && err.name === 'TimeoutError';
         throw new DashScopeEmbeddingError(
           'network_error',
-          'DashScope embedding request failed before receiving a response',
+          timedOut
+            ? `DashScope embedding request timed out after ${timeoutMs}ms`
+            : 'DashScope embedding request failed before receiving a response',
         );
       }
 

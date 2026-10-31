@@ -2,6 +2,7 @@ import type { EmbeddingProvider } from './types.js';
 
 const VOYAGE_API_URL = 'https://api.voyageai.com/v1/embeddings';
 const MAX_BATCH_SIZE = 128;
+export const VOYAGE_TIMEOUT_MS = 30_000;
 
 export class VoyageProvider implements EmbeddingProvider {
   name = 'voyage';
@@ -10,10 +11,12 @@ export class VoyageProvider implements EmbeddingProvider {
 
   private apiKey: string;
   private model: string;
+  private timeoutMs: number;
 
-  constructor(apiKey: string, model: string = 'voyage-3') {
+  constructor(apiKey: string, model: string = 'voyage-3', timeoutMs: number = VOYAGE_TIMEOUT_MS) {
     this.apiKey = apiKey;
     this.model = model;
+    this.timeoutMs = timeoutMs;
   }
 
   async embed(texts: string[], inputType: 'document' | 'query'): Promise<number[][]> {
@@ -37,18 +40,27 @@ export class VoyageProvider implements EmbeddingProvider {
   }
 
   private async embedBatch(texts: string[], inputType: 'document' | 'query'): Promise<number[][]> {
-    const response = await fetch(VOYAGE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        input: texts,
-        model: this.model,
-        input_type: inputType,
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(VOYAGE_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          input: texts,
+          model: this.model,
+          input_type: inputType,
+        }),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err) {
+      const timedOut = err instanceof Error && err.name === 'TimeoutError';
+      throw new Error(timedOut
+        ? `Voyage AI network error: request timed out after ${this.timeoutMs}ms`
+        : 'Voyage AI network error: request failed before receiving a response');
+    }
 
     if (!response.ok) {
       const errorBody = await response.text();

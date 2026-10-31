@@ -371,7 +371,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
     }
 
     // AI summary
-    let summary = '';
+    let summary: string | null = '';
     let documentType = 'other';
     try {
       const result = await generateSummary(extractedText, userId);
@@ -379,7 +379,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
       documentType = result.documentType;
     } catch (err) {
       console.error('Summary generation failed:', err);
-      summary = 'Summary generation failed.';
+      summary = null;
     }
 
     // Update document record

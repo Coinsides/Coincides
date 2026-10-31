@@ -181,7 +181,7 @@ const CONNECTION_DEFAULTS: Record<CredentialProvider, { model: string; baseUrl: 
   openai: { model: 'gpt-4o', baseUrl: 'https://api.openai.com' },
   generic: { model: 'gpt-4o', baseUrl: 'https://api.openai.com' },
   deepseek: { model: 'deepseek-flash', baseUrl: 'https://api.deepseek.com' },
-  dashscope: { model: 'qwen-plus', baseUrl: 'https://dashscope-intl.aliyuncs.com/compatible-mode' },
+  dashscope: { model: 'qwen-plus', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode' },
   voyage: { model: 'voyage-4', baseUrl: 'https://api.voyageai.com' },
 };
 

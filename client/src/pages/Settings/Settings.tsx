@@ -27,9 +27,13 @@ const defaultModels: Record<string, string> = {
 
 const embeddingProviderOptions = [
   { value: 'voyage', label: 'Voyage AI' },
+  { value: 'dashscope', label: '阿里云百炼' },
 ];
 
 const embeddingModelOptions: Record<string, Array<{ value: string; label: string }>> = {
+  dashscope: [
+    { value: 'text-embedding-v4', label: 'text-embedding-v4' },
+  ],
   voyage: [
     { value: 'voyage-4', label: 'voyage-4' },
     { value: 'voyage-3', label: 'voyage-3' },
