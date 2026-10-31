@@ -125,6 +125,7 @@ export interface SourceArtifactLimits {
   maxPdfPages: number;
   maxBlocks: number;
   maxZipExpansionRatio: number;
+  maxZipExpandedBytes: number;
   timeoutMs: number;
 }
 
@@ -142,7 +143,10 @@ export interface ParseSourceArtifactOptions {
 const DEFAULT_LIMITS: SourceArtifactLimits = {
   maxPdfPages: 1000,
   maxBlocks: 5000,
-  maxZipExpansionRatio: 5,
+  // Text XML compresses well, so ordinary documents reach 10x+. The absolute
+  // expanded-size cap is the primary guard; the ratio only catches outliers.
+  maxZipExpansionRatio: 100,
+  maxZipExpandedBytes: 200 * 1024 * 1024,
   timeoutMs: 120_000,
 };
 
@@ -169,6 +173,7 @@ function limitsFrom(options: ParseSourceArtifactOptions, parserKey: string): Sou
     maxPdfPages: Math.max(1, Math.trunc(options.limits?.maxPdfPages ?? defaults.maxPdfPages)),
     maxBlocks: Math.max(1, Math.trunc(options.limits?.maxBlocks ?? defaults.maxBlocks)),
     maxZipExpansionRatio: Math.max(1, options.limits?.maxZipExpansionRatio ?? defaults.maxZipExpansionRatio),
+    maxZipExpandedBytes: Math.max(1, Math.trunc(options.limits?.maxZipExpandedBytes ?? defaults.maxZipExpandedBytes)),
     timeoutMs: Math.max(1, Math.trunc(options.limits?.timeoutMs ?? defaults.timeoutMs)),
   };
 }
@@ -249,6 +254,12 @@ function assertDocxExpansionSafe(buffer: Buffer, limits: SourceArtifactLimits): 
     const name = buffer.subarray(nameStart, nameEnd).toString('utf8').replace(/\\/g, '/');
     if (name === 'word/document.xml') hasWordDocument = true;
     totalUncompressed += uncompressedSize;
+    if (totalUncompressed > limits.maxZipExpandedBytes) {
+      throw new SourceArtifactError(
+        'resource_limit',
+        `DOCX expanded size exceeds the ${limits.maxZipExpandedBytes} byte total limit`,
+      );
+    }
     if (totalUncompressed > buffer.length * limits.maxZipExpansionRatio) {
       throw new SourceArtifactError(
         'resource_limit',

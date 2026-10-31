@@ -1,0 +1,54 @@
+TAP version 13
+# Subtest: a lecture-like docx at about 10x expansion parses under the default limits
+ok 1 - a lecture-like docx at about 10x expansion parses under the default limits
+  ---
+  duration_ms: 101.5197
+  type: 'test'
+  ...
+# Subtest: docx expansion gates report ratio and total-size limits separately
+ok 2 - docx expansion gates report ratio and total-size limits separately
+  ---
+  duration_ms: 28.3356
+  type: 'test'
+  ...
+# Subtest: docx declaring more than 200MB expanded is stopped by the default total-size limit
+ok 3 - docx declaring more than 200MB expanded is stopped by the default total-size limit
+  ---
+  duration_ms: 11.8405
+  type: 'test'
+  ...
+# Subtest: multipart filenames survive both upload middlewares as UTF-8
+not ok 4 - multipart filenames survive both upload middlewares as UTF-8
+  ---
+  duration_ms: 324.017
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\vpsF1SourceFirstUse.test.ts:7:943'
+  failureType: 'testCodeFailure'
+  error: |-
+    sources: 网络与服务器.pdf
+    + actual - expected
+    
+    + 'ç½\x91ç»\x9Cä¸\x8Eæ\x9C\x8Då\x8A¡å\x99¨.pdf'
+    - '网络与服务器.pdf'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '网络与服务器.pdf'
+  actual: 'ç½\x91ç»\x9Cä¸\x8Eæ\x9C\x8Då\x8A¡å\x99¨.pdf'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF1SourceFirstUse.test.ts:199:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 3
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1544.9302
+# flaky-retries 0

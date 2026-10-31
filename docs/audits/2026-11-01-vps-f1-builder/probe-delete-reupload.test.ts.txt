@@ -1,0 +1,73 @@
+// Throwaway read-only probe for HQ ruling 3 (not part of the repo).
+// Scenario: a failed resource_limit Source is deleted, then the same bytes are uploaded again.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { randomUUID as uuidv4 } from 'node:crypto';
+import { closeDb, initDb } from 'D:/Coinsides/v2.x/Coincides/server/src/db/init.ts';
+import { intakeSourceTempFile, resolveSourceStorageKey, getSourceBlobRoot } from 'D:/Coinsides/v2.x/Coincides/server/src/services/sourceFileIntake.ts';
+import { materializeSourceNow } from 'D:/Coinsides/v2.x/Coincides/server/src/services/sourceMaterialization.ts';
+import { deleteSourceWithCompensation } from 'D:/Coinsides/v2.x/Coincides/server/src/services/sourceLifecycle.ts';
+import { SourceArtifactError } from 'D:/Coinsides/v2.x/Coincides/server/src/services/sourceArtifact.ts';
+
+test('failed resource_limit Source: delete then re-upload same bytes creates a fresh record', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'coincides-f1-probe-'));
+  const sourceRootDir = join(dir, 'source-blobs');
+  const canvasAssetRootDir = join(dir, 'canvas-assets');
+  try {
+    const db = await initDb(join(dir, 'probe.db'));
+    const userId = uuidv4();
+    const courseId = uuidv4();
+    db.prepare("INSERT INTO users (id,email,password_hash,name) VALUES (?,?,'synthetic','Probe')").run(userId, `${userId}@example.invalid`);
+    db.prepare("INSERT INTO courses (id,user_id,name) VALUES (?,?,'Probe Project')").run(courseId, userId);
+    const bytes = 'Lecture handout body\n\nSecond paragraph';
+    const upload = () => {
+      const tempDir = join(sourceRootDir, '.tmp');
+      mkdirSync(tempDir, { recursive: true });
+      const path = join(tempDir, `${uuidv4()}.upload`);
+      writeFileSync(path, bytes);
+      return intakeSourceTempFile(db, userId, {
+        course_id: courseId,
+        origin_entry_kind: 'project_upload',
+        file: { path, originalname: 'handout.txt', mimetype: 'text/plain', size: Buffer.byteLength(bytes) },
+      }, { rootDir: sourceRootDir });
+    };
+
+    const first = await upload();
+    const failed = await materializeSourceNow(db, userId, first.source.id, {
+      sourceRootDir, canvasAssetRootDir,
+      parseArtifact: async () => { throw new SourceArtifactError('resource_limit', 'Injected resource limit'); },
+    });
+    assert.equal(failed.status, 'failed');
+    assert.equal(failed.error_code, 'resource_limit');
+    const storageKey = (db.prepare('SELECT storage_key FROM source_files WHERE source_record_id = ?').get(first.source.id) as any).storage_key;
+    const blobPath = resolveSourceStorageKey(storageKey, getSourceBlobRoot(sourceRootDir));
+    assert.equal(existsSync(blobPath), true);
+
+    const deleted = deleteSourceWithCompensation(db, userId, first.source.id, { sourceRootDir, canvasAssetRootDir });
+    assert.equal(deleted.deleted, true);
+    assert.equal(deleted.cleanup_jobs_created, 0);
+    const count = (sql: string, ...p: unknown[]) => (db.prepare(sql).get(...p) as { c: number }).c;
+    console.info('[probe] after delete', {
+      source_records: count('SELECT COUNT(*) c FROM source_records WHERE id = ?', first.source.id),
+      source_files: count('SELECT COUNT(*) c FROM source_files WHERE source_record_id = ?', first.source.id),
+      source_files_same_hash: count('SELECT COUNT(*) c FROM source_files WHERE user_id = ? AND content_hash = ?', userId, first.source.file.content_hash),
+      source_materializations: count('SELECT COUNT(*) c FROM source_materializations WHERE source_record_id = ?', first.source.id),
+      placements: count('SELECT COUNT(*) c FROM source_project_placements WHERE source_record_id = ?', first.source.id),
+      blob_exists: existsSync(blobPath),
+    });
+    assert.equal(count('SELECT COUNT(*) c FROM source_files WHERE user_id = ? AND content_hash = ?', userId, first.source.file.content_hash), 0);
+    assert.equal(existsSync(blobPath), false);
+
+    const second = await upload();
+    console.info('[probe] re-upload', { created: second.created, deduplicated: second.deduplicated, same_id: second.source.id === first.source.id, status: second.source.materialization.status });
+    assert.equal(second.created, true);
+    assert.equal(second.deduplicated, false);
+    assert.notEqual(second.source.id, first.source.id);
+  } finally {
+    closeDb();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

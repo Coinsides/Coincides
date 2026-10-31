@@ -1,0 +1,43 @@
+TAP version 13
+# Subtest: a lecture-like docx at about 10x expansion parses under the default limits
+not ok 1 - a lecture-like docx at about 10x expansion parses under the default limits
+  ---
+  duration_ms: 20.8759
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\vpsF1SourceFirstUse.test.ts:1:4575'
+  failureType: 'testCodeFailure'
+  error: 'DOCX expanded size exceeds the 5x archive limit'
+  code: 'resource_limit'
+  name: 'SourceArtifactError'
+  stack: |-
+    assertDocxExpansionSafe (D:\Coinsides\v2.x\Coincides\server\src\services\sourceArtifact.ts:264:13)
+    Object.parse (D:\Coinsides\v2.x\Coincides\server\src\services\sourceArtifact.ts:329:5)
+  ...
+# Subtest: docx expansion gates report ratio and total-size limits separately
+ok 2 - docx expansion gates report ratio and total-size limits separately
+  ---
+  duration_ms: 17.9044
+  type: 'test'
+  ...
+# Subtest: docx declaring more than 200MB expanded is stopped by the default total-size limit
+ok 3 - docx declaring more than 200MB expanded is stopped by the default total-size limit
+  ---
+  duration_ms: 7.3484
+  type: 'test'
+  ...
+# Subtest: multipart filenames survive both upload middlewares as UTF-8
+ok 4 - multipart filenames survive both upload middlewares as UTF-8
+  ---
+  duration_ms: 471.1417
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 3
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1592.7826
+# flaky-retries 0

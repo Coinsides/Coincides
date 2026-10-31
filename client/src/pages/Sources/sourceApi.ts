@@ -136,7 +136,8 @@ export async function openAuthenticatedSourceBlob(
 ): Promise<void> {
   const previewWindow = mode === 'preview' ? window.open('about:blank', '_blank') : null;
   try {
-    const response = await api.get<Blob>(source.file.blob_url, { responseType: 'blob' });
+    // file.blob_url already carries /api; build the path like canvas assets do.
+    const response = await api.get<Blob>(`/sources/${source.id}/blob`, { responseType: 'blob' });
     const objectUrl = URL.createObjectURL(response.data);
     if (mode === 'download') {
       const anchor = document.createElement('a');
