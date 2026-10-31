@@ -11,7 +11,7 @@ export function createProvider(providerName: string, config: ProviderConfig): AI
     case 'generic':
     case 'deepseek':
     case 'dashscope':
-      return new OpenAIProvider(config);
+      return new OpenAIProvider({ ...config, providerName });
     default:
       throw new Error(`Unknown provider: ${providerName}`);
   }
@@ -34,7 +34,7 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   }
 
   if (activeProvider === 'deepseek' || activeProvider === 'dashscope') {
-    model ||= activeProvider === 'deepseek' ? 'deepseek-chat' : 'qwen-plus';
+    model ||= activeProvider === 'deepseek' ? 'deepseek-flash' : 'qwen-plus';
     baseUrl ||= activeProvider === 'deepseek'
       ? 'https://api.deepseek.com'
       : 'https://dashscope-intl.aliyuncs.com/compatible-mode';

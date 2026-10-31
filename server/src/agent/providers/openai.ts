@@ -6,11 +6,13 @@ export class OpenAIProvider implements AIProvider {
   private apiKey: string;
   private model: string;
   private baseUrl: string;
+  private providerName?: string;
 
   constructor(config: ProviderConfig) {
     this.apiKey = config.apiKey;
     this.model = config.model;
     this.baseUrl = (config.baseUrl || 'https://api.openai.com').replace(/\/$/, '');
+    this.providerName = config.providerName;
   }
 
   async *chat(
@@ -79,6 +81,11 @@ export class OpenAIProvider implements AIProvider {
     if (openaiTools.length > 0) {
       body.tools = openaiTools;
       body.parallel_tool_calls = true;
+    }
+    // DeepSeek thinks by default and then requires reasoning_content to be
+    // replayed on tool rounds. Disable it; other compatible hosts may reject the field.
+    if (this.providerName === 'deepseek') {
+      body.thinking = { type: 'disabled' };
     }
 
     // A local controller also closes the request when the caller stops consuming.

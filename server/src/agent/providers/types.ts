@@ -50,6 +50,8 @@ export interface ProviderConfig {
   apiKey: string;
   model: string;
   baseUrl?: string;
+  /** Settings provider id; lets a shared adapter apply vendor-only request fields. */
+  providerName?: string;
 }
 
 export interface AIProvider {

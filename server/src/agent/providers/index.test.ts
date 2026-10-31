@@ -53,7 +53,7 @@ async function captureRequest(t: TestContext, provider: AIProvider, expectedKey:
 }
 
 const newProviders = [
-  { name: 'deepseek', env: 'DEEPSEEK_API_KEY', baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
+  { name: 'deepseek', env: 'DEEPSEEK_API_KEY', baseUrl: 'https://api.deepseek.com', model: 'deepseek-flash' },
   { name: 'dashscope', env: 'DASHSCOPE_API_KEY', baseUrl: 'https://dashscope-intl.aliyuncs.com/compatible-mode', model: 'qwen-plus' },
 ];
 
@@ -223,6 +223,24 @@ function assertSuccessfulCall(chunks: StreamChunk[], id: string, args: Record<st
   assert.deepEqual(JSON.parse(callChunks.filter((chunk) => chunk.type === 'tool_call_delta')
     .map((chunk) => chunk.text ?? '').join('')), args);
 }
+
+test('deepseek requests disable thinking mode through createProvider', async (t) => {
+  const requests = stubStream(t, ['data: [DONE]\n\n']);
+  await collect(createProvider('deepseek', { apiKey: 'syn-thinking', model: 'deepseek-flash' }));
+  await collect(createProvider('deepseek', { apiKey: 'syn-thinking', model: 'deepseek-flash' }), []);
+  assert.deepEqual(requests[0].thinking, { type: 'disabled' });
+  assert.deepEqual(requests[1].thinking, { type: 'disabled' });
+});
+
+test('other OpenAI-compatible providers never send the thinking field', async (t) => {
+  const requests = stubStream(t, ['data: [DONE]\n\n']);
+  for (const name of ['openai', 'generic', 'dashscope']) {
+    await collect(createProvider(name, { apiKey: 'syn-thinking', model: 'stream-fixture' }));
+  }
+  await collect();
+  assert.equal(requests.length, 4);
+  for (const request of requests) assert.equal('thinking' in request, false);
+});
 
 test('OpenAI requests explicitly set the output budget and parallel tool calls', async (t) => {
   const requests = stubStream(t, ['data: [DONE]\n\n']);

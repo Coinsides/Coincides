@@ -21,7 +21,7 @@ const defaultModels: Record<string, string> = {
   anthropic: 'claude-sonnet-4-20250514',
   openai: 'gpt-4o',
   generic: 'gpt-4o',
-  deepseek: 'deepseek-chat',
+  deepseek: 'deepseek-flash',
   dashscope: 'qwen-plus',
 };
 

@@ -1,0 +1,337 @@
+TAP version 13
+# Subtest: deepseek: createProvider uses the OpenAI-compatible adapter
+ok 1 - deepseek: createProvider uses the OpenAI-compatible adapter
+  ---
+  duration_ms: 3.9432
+  type: 'test'
+  ...
+# Subtest: deepseek: env fallback supplies defaults for absent or empty settings
+ok 2 - deepseek: env fallback supplies defaults for absent or empty settings
+  ---
+  duration_ms: 38.5615
+  type: 'test'
+  ...
+# Subtest: deepseek: local credentials win and only the terminal v1 suffix is removed
+ok 3 - deepseek: local credentials win and only the terminal v1 suffix is removed
+  ---
+  duration_ms: 7.3613
+  type: 'test'
+  ...
+# Subtest: deepseek: local credentials work without env fallback
+ok 4 - deepseek: local credentials work without env fallback
+  ---
+  duration_ms: 4.4444
+  type: 'test'
+  ...
+# Subtest: deepseek: missing credentials produce only the existing configuration error
+ok 5 - deepseek: missing credentials produce only the existing configuration error
+  ---
+  duration_ms: 2.0248
+  type: 'test'
+  ...
+# Subtest: dashscope: createProvider uses the OpenAI-compatible adapter
+ok 6 - dashscope: createProvider uses the OpenAI-compatible adapter
+  ---
+  duration_ms: 1.2716
+  type: 'test'
+  ...
+# Subtest: dashscope: env fallback supplies defaults for absent or empty settings
+ok 7 - dashscope: env fallback supplies defaults for absent or empty settings
+  ---
+  duration_ms: 3.527
+  type: 'test'
+  ...
+# Subtest: dashscope: local credentials win and only the terminal v1 suffix is removed
+ok 8 - dashscope: local credentials win and only the terminal v1 suffix is removed
+  ---
+  duration_ms: 5.3977
+  type: 'test'
+  ...
+# Subtest: dashscope: local credentials work without env fallback
+ok 9 - dashscope: local credentials work without env fallback
+  ---
+  duration_ms: 3.4713
+  type: 'test'
+  ...
+# Subtest: dashscope: missing credentials produce only the existing configuration error
+ok 10 - dashscope: missing credentials produce only the existing configuration error
+  ---
+  duration_ms: 1.5539
+  type: 'test'
+  ...
+# Subtest: openai: existing defaults and explicit URL handling work with local credentials
+ok 11 - openai: existing defaults and explicit URL handling work with local credentials
+  ---
+  duration_ms: 3.9305
+  type: 'test'
+  ...
+# Subtest: generic: existing defaults and explicit URL handling work with local credentials
+ok 12 - generic: existing defaults and explicit URL handling work with local credentials
+  ---
+  duration_ms: 3.734
+  type: 'test'
+  ...
+# Subtest: anthropic remains the default provider with env fallback
+ok 13 - anthropic remains the default provider with env fallback
+  ---
+  duration_ms: 2.039
+  type: 'test'
+  ...
+# Subtest: deepseek requests disable thinking mode through createProvider
+not ok 14 - deepseek requests disable thinking mode through createProvider
+  ---
+  duration_ms: 4.0374
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\agent\\providers\\index.test.ts:3:1588'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + undefined
+    - {
+    -   type: 'disabled'
+    - }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    type: 'disabled'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\agent\providers\index.test.ts:231:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: other OpenAI-compatible providers never send the thinking field
+ok 15 - other OpenAI-compatible providers never send the thinking field
+  ---
+  duration_ms: 3.9406
+  type: 'test'
+  ...
+# Subtest: OpenAI requests explicitly set the output budget and parallel tool calls
+ok 16 - OpenAI requests explicitly set the output budget and parallel tool calls
+  ---
+  duration_ms: 1.9259
+  type: 'test'
+  ...
+# Subtest: OpenAI empty arguments returns a readable tool error at done
+ok 17 - OpenAI empty arguments returns a readable tool error at done
+  ---
+  duration_ms: 2.4548
+  type: 'test'
+  ...
+# Subtest: OpenAI unfinished JSON returns a readable tool error at done
+ok 18 - OpenAI unfinished JSON returns a readable tool error at done
+  ---
+  duration_ms: 1.7714
+  type: 'test'
+  ...
+# Subtest: OpenAI length-truncated arguments returns a readable tool error at done
+ok 19 - OpenAI length-truncated arguments returns a readable tool error at done
+  ---
+  duration_ms: 1.9535
+  type: 'test'
+  ...
+# Subtest: OpenAI empty arguments returns a readable tool error at eof
+ok 20 - OpenAI empty arguments returns a readable tool error at eof
+  ---
+  duration_ms: 1.8329
+  type: 'test'
+  ...
+# Subtest: OpenAI unfinished JSON returns a readable tool error at eof
+ok 21 - OpenAI unfinished JSON returns a readable tool error at eof
+  ---
+  duration_ms: 1.6757
+  type: 'test'
+  ...
+# Subtest: OpenAI length-truncated arguments returns a readable tool error at eof
+ok 22 - OpenAI length-truncated arguments returns a readable tool error at eof
+  ---
+  duration_ms: 1.6026
+  type: 'test'
+  ...
+# Subtest: OpenAI keeps a deliberately empty JSON object valid
+ok 23 - OpenAI keeps a deliberately empty JSON object valid
+  ---
+  duration_ms: 1.8609
+  type: 'test'
+  ...
+# Subtest: OpenAI diagnostics report a bounded prefix for a long interrupted note
+ok 24 - OpenAI diagnostics report a bounded prefix for a long interrupted note
+  ---
+  duration_ms: 1.7407
+  type: 'test'
+  ...
+# Subtest: OpenAI interleaved calls with the same name retain separate IDs and arguments
+ok 25 - OpenAI interleaved calls with the same name retain separate IDs and arguments
+  ---
+  duration_ms: 1.7832
+  type: 'test'
+  ...
+# Subtest: OpenAI missing continuation index uses the most recently registered call
+ok 26 - OpenAI missing continuation index uses the most recently registered call
+  ---
+  duration_ms: 2.3306
+  type: 'test'
+  ...
+# Subtest: OpenAI registers late name and ID before exposing buffered arguments
+ok 27 - OpenAI registers late name and ID before exposing buffered arguments
+  ---
+  duration_ms: 2.2254
+  type: 'test'
+  ...
+# Subtest: OpenAI fallback IDs remain stable within a call and distinct across calls and turns
+ok 28 - OpenAI fallback IDs remain stable within a call and distinct across calls and turns
+  ---
+  duration_ms: 2.5229
+  type: 'test'
+  ...
+# Subtest: OpenAI handles no-space SSE fields, split UTF-8, and an unterminated final line
+ok 29 - OpenAI handles no-space SSE fields, split UTF-8, and an unterminated final line
+  ---
+  duration_ms: 1.9438
+  type: 'test'
+  ...
+# Subtest: Anthropic normal text and tool streams retain the existing protocol and token budget
+ok 30 - Anthropic normal text and tool streams retain the existing protocol and token budget
+  ---
+  duration_ms: 2.5261
+  type: 'test'
+  ...
+# Subtest: Anthropic HTTP payload caches system, the final tool, and the rolling conversation prefix
+ok 31 - Anthropic HTTP payload caches system, the final tool, and the rolling conversation prefix
+  ---
+  duration_ms: 11.9083
+  type: 'test'
+  ...
+# Subtest: Anthropic HTTP payload leaves empty system and tools valid without empty cache blocks
+ok 32 - Anthropic HTTP payload leaves empty system and tools valid without empty cache blocks
+  ---
+  duration_ms: 6.3725
+  type: 'test'
+  ...
+# Subtest: Anthropic caching preserves growing text and tool history, input objects, and safety filtering
+ok 33 - Anthropic caching preserves growing text and tool history, input objects, and safety filtering
+  ---
+  duration_ms: 21.0166
+  type: 'test'
+  ...
+# Subtest: openai: a pre-aborted chat makes no network request
+ok 34 - openai: a pre-aborted chat makes no network request
+  ---
+  duration_ms: 1.5263
+  type: 'test'
+  ...
+# Subtest: openai: abort reaches an in-flight fetch and releases the chat
+ok 35 - openai: abort reaches an in-flight fetch and releases the chat
+  ---
+  duration_ms: 1.7654
+  type: 'test'
+  ...
+# Subtest: openai: abort interrupts a response body stalled after visible text
+ok 36 - openai: abort interrupts a response body stalled after visible text
+  ---
+  duration_ms: 2.214
+  type: 'test'
+  ...
+# Subtest: generic: a pre-aborted chat makes no network request
+ok 37 - generic: a pre-aborted chat makes no network request
+  ---
+  duration_ms: 1.3299
+  type: 'test'
+  ...
+# Subtest: generic: abort reaches an in-flight fetch and releases the chat
+ok 38 - generic: abort reaches an in-flight fetch and releases the chat
+  ---
+  duration_ms: 1.4021
+  type: 'test'
+  ...
+# Subtest: generic: abort interrupts a response body stalled after visible text
+ok 39 - generic: abort interrupts a response body stalled after visible text
+  ---
+  duration_ms: 1.4358
+  type: 'test'
+  ...
+# Subtest: deepseek: a pre-aborted chat makes no network request
+ok 40 - deepseek: a pre-aborted chat makes no network request
+  ---
+  duration_ms: 1.2104
+  type: 'test'
+  ...
+# Subtest: deepseek: abort reaches an in-flight fetch and releases the chat
+ok 41 - deepseek: abort reaches an in-flight fetch and releases the chat
+  ---
+  duration_ms: 1.2449
+  type: 'test'
+  ...
+# Subtest: deepseek: abort interrupts a response body stalled after visible text
+ok 42 - deepseek: abort interrupts a response body stalled after visible text
+  ---
+  duration_ms: 1.4312
+  type: 'test'
+  ...
+# Subtest: dashscope: a pre-aborted chat makes no network request
+ok 43 - dashscope: a pre-aborted chat makes no network request
+  ---
+  duration_ms: 3.3256
+  type: 'test'
+  ...
+# Subtest: dashscope: abort reaches an in-flight fetch and releases the chat
+ok 44 - dashscope: abort reaches an in-flight fetch and releases the chat
+  ---
+  duration_ms: 1.2827
+  type: 'test'
+  ...
+# Subtest: dashscope: abort interrupts a response body stalled after visible text
+ok 45 - dashscope: abort interrupts a response body stalled after visible text
+  ---
+  duration_ms: 1.409
+  type: 'test'
+  ...
+# Subtest: anthropic: a pre-aborted chat makes no network request
+ok 46 - anthropic: a pre-aborted chat makes no network request
+  ---
+  duration_ms: 1.2415
+  type: 'test'
+  ...
+# Subtest: anthropic: abort reaches an in-flight fetch and releases the chat
+ok 47 - anthropic: abort reaches an in-flight fetch and releases the chat
+  ---
+  duration_ms: 2.072
+  type: 'test'
+  ...
+# Subtest: anthropic: abort interrupts a response body stalled after visible text
+ok 48 - anthropic: abort interrupts a response body stalled after visible text
+  ---
+  duration_ms: 2.0698
+  type: 'test'
+  ...
+# Subtest: OpenAI early return cancels the body without awaiting a stalled cancellation handshake
+ok 49 - OpenAI early return cancels the body without awaiting a stalled cancellation handshake
+  ---
+  duration_ms: 1.6606
+  type: 'test'
+  ...
+# Subtest: OpenAI protocol completion closes a peer that keeps its response body open
+ok 50 - OpenAI protocol completion closes a peer that keeps its response body open
+  ---
+  duration_ms: 1.5384
+  type: 'test'
+  ...
+# Subtest: Anthropic early return aborts the real SDK transport without waiting for more events
+ok 51 - Anthropic early return aborts the real SDK transport without waiting for more events
+  ---
+  duration_ms: 23.7549
+  type: 'test'
+  ...
+1..51
+# tests 51
+# suites 0
+# pass 50
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 648.5485
+# flaky-retries 0

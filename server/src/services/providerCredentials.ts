@@ -180,7 +180,7 @@ const CONNECTION_DEFAULTS: Record<CredentialProvider, { model: string; baseUrl: 
   anthropic: { model: 'claude-sonnet-4-20250514', baseUrl: 'https://api.anthropic.com' },
   openai: { model: 'gpt-4o', baseUrl: 'https://api.openai.com' },
   generic: { model: 'gpt-4o', baseUrl: 'https://api.openai.com' },
-  deepseek: { model: 'deepseek-chat', baseUrl: 'https://api.deepseek.com' },
+  deepseek: { model: 'deepseek-flash', baseUrl: 'https://api.deepseek.com' },
   dashscope: { model: 'qwen-plus', baseUrl: 'https://dashscope-intl.aliyuncs.com/compatible-mode' },
   voyage: { model: 'voyage-4', baseUrl: 'https://api.voyageai.com' },
 };

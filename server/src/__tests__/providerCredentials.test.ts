@@ -143,7 +143,7 @@ test('test-connection uses one minimal mocked request for each existing provider
     ['anthropic', 'https://api.anthropic.com/v1/messages', 'claude-sonnet-4-20250514'],
     ['openai', 'https://api.openai.com/v1/chat/completions', 'gpt-4o'],
     ['generic', 'https://api.openai.com/v1/chat/completions', 'gpt-4o'],
-    ['deepseek', 'https://api.deepseek.com/v1/chat/completions', 'deepseek-chat'],
+    ['deepseek', 'https://api.deepseek.com/v1/chat/completions', 'deepseek-flash'],
     ['dashscope', 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions', 'qwen-plus'],
     ['voyage', 'https://api.voyageai.com/v1/embeddings', 'voyage-4'],
   ];

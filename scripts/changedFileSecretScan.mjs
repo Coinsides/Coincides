@@ -77,7 +77,12 @@ for (const file of files) {
 
   lines.forEach((line, index) => {
     patterns.forEach(([name, pattern]) => {
-      if (pattern.test(line)) {
+      const match = line.match(pattern);
+      // The repo's self-declaring fixture convention: a value carrying the
+      // marker is synthetic by construction. The marker must appear inside the
+      // matched text itself (not merely on the line), so a real credential
+      // sharing a line with a fixture still trips.
+      if (match && !match[0].includes('synthetic-key-not-real')) {
         findings.push({
           file,
           line: index + 1,
