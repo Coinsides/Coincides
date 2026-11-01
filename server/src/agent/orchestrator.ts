@@ -16,6 +16,7 @@ import {
   createStreamBudget, runToolWithinBudget, type AgentRunOptions,
 } from './runtime-budget.js';
 import type { AgentContextHint } from '../../../shared/types/agentContextHint.js';
+import { contextCourseIdForAgent } from '../services/agentNoteList.js';
 import { readAttentionContext, ATTENTION_CONTEXT_LIMITS } from './attentionContext.js';
 import { createAgentUiRunState } from './tools/uiCommands.js';
 import { AGENT_UI_TOOLS, agentUiCommandSchema } from '../toolFace/uiActions.js';
@@ -128,6 +129,7 @@ export async function* runAgent(
 
   // 5. Add context hint if provided
   let augmentedMessage = userMessage;
+  const contextCourseId = contextCourseIdForAgent(db, userId, contextHint);
   if (contextHint) {
     let contextDescription = `user is viewing ${contextHint.type} — ${JSON.stringify(contextHint.data)}`;
     if (contextHint.type === 'note_view') {
@@ -300,7 +302,7 @@ export async function* runAgent(
         }
         try {
           const result = await runToolWithinBudget(() => executeTool(tc.name, tc.arguments, userId, {
-            actor: 'agent', channel: 'chat', conversationId, callId: tc.id,
+            actor: 'agent', channel: 'chat', conversationId, callId: tc.id, contextCourseId,
           }, uiState), deadline);
 
           // Some existing executors return an error receipt instead of throwing.

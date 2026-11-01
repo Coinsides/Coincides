@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(),
   updateSettings: vi.fn(), addToast: vi.fn(), logout: vi.fn(),
   userSettings: {} as Record<string, unknown>,
+  userLoaded: true,
   defaultChatProvider: null as string | null,
   embeddingProviderName: null as string | null,
 }));
@@ -20,10 +21,10 @@ const savedSettings = {
 vi.mock('@/services/api', () => ({ default: mocks }));
 vi.mock('@/stores/authStore', () => ({
   useAuthStore: (select = (state: unknown) => state) => select({
-    user: {
-      name: 'Synthetic user', email: 'synthetic-user@example.invalid',
+    user: mocks.userLoaded ? {
+      id: 'synthetic-user', name: 'Synthetic user', email: 'synthetic-user@example.invalid',
       settings: mocks.userSettings,
-    },
+    } : null,
     updateSettings: mocks.updateSettings, logout: mocks.logout,
   }),
 }));
@@ -35,6 +36,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.userSettings = savedSettings;
+  mocks.userLoaded = true;
   mocks.defaultChatProvider = null;
   mocks.embeddingProviderName = null;
   mocks.get.mockImplementation(async (url: string) => {
@@ -99,6 +101,40 @@ describe('Settings provider management integration', () => {
     await waitFor(() => expect(mocks.updateSettings).toHaveBeenCalledWith({
       embedding_provider: 'dashscope', embedding_model: 'text-embedding-v4',
     }));
+  });
+
+  it('waits for late-arriving user settings on a full page load before showing or saving a provider', async () => {
+    mocks.userLoaded = false;
+    mocks.userSettings = { active_provider: 'deepseek', ai_providers: { deepseek: { default_model: 'synthetic-deepseek-model' } } };
+    const view = render(<MemoryRouter><SettingsPage /></MemoryRouter>);
+    const provider = screen.getByLabelText('Provider', { selector: '#agent-provider' }) as HTMLSelectElement;
+    const save = screen.getByRole('button', { name: 'Loading...' }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    expect(provider.disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true);
+
+    mocks.userLoaded = true;
+    view.rerender(<MemoryRouter><SettingsPage /></MemoryRouter>);
+    await waitFor(() => expect(provider.value).toBe('deepseek'));
+    expect((screen.getByLabelText('Model', { selector: '#agent-model' }) as HTMLInputElement).value).toBe('synthetic-deepseek-model');
+    const ready = screen.getByRole('button', { name: 'Save Provider Settings' }) as HTMLButtonElement;
+    expect(ready.disabled).toBe(false);
+    fireEvent.click(ready);
+    await waitFor(() => expect(mocks.updateSettings).toHaveBeenCalledWith(expect.objectContaining({ active_provider: 'deepseek' })));
+    expect(mocks.updateSettings).not.toHaveBeenCalledWith(expect.objectContaining({ active_provider: 'anthropic' }));
+  });
+
+  it('waits for the keyed default before enabling save when no provider was chosen and settings arrive late', async () => {
+    mocks.userLoaded = false;
+    mocks.userSettings = {};
+    mocks.defaultChatProvider = 'deepseek';
+    const view = render(<MemoryRouter><SettingsPage /></MemoryRouter>);
+    expect((screen.getByRole('button', { name: 'Loading...' }) as HTMLButtonElement).disabled).toBe(true);
+    mocks.userLoaded = true;
+    view.rerender(<MemoryRouter><SettingsPage /></MemoryRouter>);
+    const save = await screen.findByRole('button', { name: 'Save Provider Settings' }) as HTMLButtonElement;
+    expect((screen.getByLabelText('Provider', { selector: '#agent-provider' }) as HTMLSelectElement).value).toBe('deepseek');
+    expect(save.disabled).toBe(false);
   });
 
   it('keeps an explicit provider choice even when another provider is the keyed default', async () => {

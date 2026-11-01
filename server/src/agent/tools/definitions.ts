@@ -53,6 +53,17 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
+    name: 'list_notes',
+    description: "List the user's active notes in one project: id, title, note_class and updated_at, newest first, at most 50 (total and truncated report the rest). No body text — read a note with read_note using its id. course_id defaults to the project in view; pass it when no project is in context. An empty list means only that this project has no active notes.",
+    parameters: {
+      type: 'object',
+      properties: {
+        course_id: { type: 'string', description: 'Project (course) ID; optional when the user is viewing a note, deck or board in that project' },
+      },
+      required: [],
+    },
+  },
+  {
     name: 'list_decks',
     description: "List the student's card decks, optionally filtered by course.",
     parameters: {
@@ -225,11 +236,11 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'search_documents',
-    description: 'Search uploaded documents using semantic similarity and keyword matching. Returns matching documents with relevant content snippets from the most similar passages. For simple questions, the snippets may contain enough context to answer directly without calling get_document_content. Also returns source_results: extracted Source Library files matched by name or keywords, each with snippets and a projection_note_id to read in full with read_note.',
+    description: 'Search uploaded documents (semantic similarity when an embedding provider is configured, plus full-text and filename keyword matching) and extracted Source Library files (name and keyword matching only, not semantic). results/document_total cover documents, with relevant snippets that may answer simple questions without get_document_content; source_results/source_total cover Sources, each with snippets and a projection_note_id to read in full with read_note. No match means these terms matched nothing, not that the content does not exist.',
     parameters: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: 'Natural language search query. Semantic search finds related content even without exact keyword matches.' },
+        query: { type: 'string', description: 'Search query. Documents may also match semantically; Sources match only by name or keywords, so include the key terms.' },
         course_id: { type: 'string', description: 'Optional: filter by course ID' },
         file_type: { type: 'string', enum: ['pdf', 'docx', 'xlsx', 'image', 'txt', 'md'], description: 'Optional: filter by file type' },
       },

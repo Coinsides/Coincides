@@ -1,6 +1,6 @@
-> **状态 (Status)**: active(v2,2026-09-21 T2 富块提案补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
+> **状态 (Status)**: active(v2,2026-11-01 F8 补 list_notes 读面;2026-09-21 T2 富块提案补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
 > **层 (Layer)**: 现状 / 应用操作说明书
-> **日期 (Updated)**: 2026-09-23
+> **日期 (Updated)**: 2026-11-01
 > **防腐条款**: 交付新面的工单,申报义务含"说明书条目已更新/无涉";每版段收口过一遍 diff。发现缺条错条=当场补(steward: Fable)。
 
 # Coincides 应用操作说明书 v2
@@ -113,7 +113,7 @@
 
 **摘要与唤醒**:生产摘要用本次会话经现役 resolver 得到的同一 provider/model,每段一次、无工具、最多等待15秒且服从300秒请求预算;失败或空输出回退为各轮首个有文本消息的首句按序拼接,摘要上限768估算tokens。测试环境强制回退,不调用摘要模型。现役 `search_memories` 保留 semantic→FTS→LIKE 三路语义记忆优先,随后并入 episode 摘要 FTS,总数仍受 limit;结果带 `kind: memory|episode`,episode 携会话/范围/完整锚清单。category 过滤仅选语义记忆。自动常驻记忆检索不纳入旧 episode;更老情节需显式搜索唤醒,不新增工具或写权。
 
-**能(域写过写门:同事务史记+收据+可撤;发提案/存记忆为信道写)**:建目标/子目标/任务/卡组/分区/时间块×批;改时间块;标任务完成(**必须携用户原话锚**——用户没亲口说完成就是不能标);删时间块(**两段复述确认仪式**);发提案(九型,含 organized_note 与 note_patch);存/搜自己的记忆;读:read_note/read_board/read_content_groups/read_annotations_relations+search_documents/get_document_content(⚠️只见材料库)。
+**能(域写过写门:同事务史记+收据+可撤;发提案/存记忆为信道写)**:建目标/子目标/任务/卡组/分区/时间块×批;改时间块;标任务完成(**必须携用户原话锚**——用户没亲口说完成就是不能标);删时间块(**两段复述确认仪式**);发提案(九型,含 organized_note 与 note_patch);存/搜自己的记忆;读:read_note/read_board/read_content_groups/read_annotations_relations+search_documents/get_document_content(F5 起 search_documents 的 source_results 也覆盖已抽取 Source)+**list_notes(F8)**——列一个项目的 active 笔记:只回 id/title/note_class/updated_at,按 updated_at 倒序最多50条,超限给 total/truncated;⛔正文(正文走 read_note);course_id 缺省取当前语境(note_view/deck/board_view 所在项目,项目页本身不发语境),无语境时必须传;他人项目一律 Project not found。**提示词纪律**:⛔据空结果或越界结果断言用户内容不存在,工具做不到的(如按正文搜笔记)如实说明边界。
 
 **板写七动词(C1)**:全部为 `door_write`,复用人类板服务并同事务写 `actor=agent` 史记与可撤收据。统一输入 `{board_id,input:{...}}`,更新另携对应 `member_id/sticky_id/visual_id`。
 

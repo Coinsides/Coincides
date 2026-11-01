@@ -63,6 +63,7 @@ function noteChromeProps(
   return {
     blockTrashLoadFailed: false,
     contentReadOnly: false,
+    sourceLocked: false,
     exportPreview: {} as NoteChromeLayerProps['exportPreview'],
     layoutMode: false,
     layoutModeKind: 'off',
@@ -239,6 +240,7 @@ describe('NoteChromeLayer block restore door', () => {
     const onRestoreTrashedBlock = vi.fn();
     render(<NoteChromeLayer {...noteChromeProps({
       contentReadOnly: true,
+      sourceLocked: true,
       showBlockTrash: true,
       showMoreActions: false,
       trashedBlocks: [trashedBlock],
@@ -250,6 +252,18 @@ describe('NoteChromeLayer block restore door', () => {
     expect((restoreButton as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(restoreButton);
     expect(onRestoreTrashedBlock).not.toHaveBeenCalled();
+  });
+});
+
+describe('NoteChromeLayer lock label', () => {
+  it('shows Source locked only for a Source projection, not while a heading conversion holds the note busy', () => {
+    const view = render(<NoteChromeLayer {...noteChromeProps({ contentReadOnly: true, sourceLocked: false })} />);
+    expect(screen.queryByText('Source locked')).toBeNull();
+    expect(view.container.querySelector('[data-note-toolbar-actions="true"]')?.getAttribute('aria-busy')).toBe('true');
+
+    view.rerender(<NoteChromeLayer {...noteChromeProps({ contentReadOnly: true, sourceLocked: true })} />);
+    expect(screen.getByText('Source locked')).toBeTruthy();
+    expect(view.container.querySelector('[data-note-toolbar-actions="true"]')?.getAttribute('aria-busy')).toBeNull();
   });
 });
 

@@ -642,6 +642,7 @@ export function useNoteCanvasRuntimeController() {
     groupFolders,
     purposeFrames,
     sourceReferenceCount,
+    sourceLocked: sourceProjectionPolicy.contentReadOnly,
     contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying || walls.saving || headingStructure.busy || chapters.isMoving,
     recoveryBlockIds: sourceProjectionPolicy.contentReadOnly || historyReplaying ? [] : textHistory.recoveryBlockIds,
     surfaceMode,

@@ -71,6 +71,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     blockTrashLoadFailed: input.blockTrashLoadFailed,
     blockTrashLoading: input.blockTrashLoading,
     contentReadOnly: input.contentReadOnly,
+    sourceLocked: input.sourceLocked,
     exportPreview: input.exportPreview,
     layoutMode: input.layoutMode,
     layoutModeKind: input.layoutModeKind,

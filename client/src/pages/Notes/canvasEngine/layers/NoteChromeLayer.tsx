@@ -55,6 +55,8 @@ export interface NoteChromeLayerProps {
   blockTrashLoadFailed: boolean;
   blockTrashLoading: boolean;
   contentReadOnly: boolean;
+  /** True only for a Source projection; contentReadOnly also covers brief busy states. */
+  sourceLocked: boolean;
   exportPreview: ExportPreviewModel;
   layoutMode: boolean;
   layoutModeKind: 'off' | 'persistent' | 'temporary';
@@ -118,6 +120,7 @@ export function NoteChromeLayer({
   blockTrashLoadFailed,
   blockTrashLoading,
   contentReadOnly,
+  sourceLocked,
   exportPreview,
   layoutMode,
   layoutModeKind,
@@ -407,9 +410,10 @@ export function NoteChromeLayer({
   };
 
   return (
-    <div ref={toolbarRef} className={styles.noteToolbarActions} data-note-toolbar-actions="true">
+    <div ref={toolbarRef} className={styles.noteToolbarActions} data-note-toolbar-actions="true"
+      aria-busy={contentReadOnly && !sourceLocked ? true : undefined}>
           {bindingError && <span role="alert">{bindingError}<button type="button" onClick={onRetryBinding}>重试装订</button></span>}
-          {contentReadOnly && <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
+          {sourceLocked && <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
             <LockKeyhole size={13} /> Source locked
           </span>}
             <button
@@ -737,7 +741,7 @@ export function NoteChromeLayer({
                     })
                   )}
                 </div>
-                {contentReadOnly && (
+                {sourceLocked && (
                   <p className={styles.popoverNote}>Source-projection blocks can be reviewed here but not restored.</p>
                 )}
               </div>

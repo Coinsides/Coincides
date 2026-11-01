@@ -18,12 +18,12 @@ import agentRouter from '../routes/agent.js';
 import { runAgent } from '../agent/orchestrator.js';
 import { MemoryManager } from '../agent/memory/manager.js';
 
-test('effect coverage: every exposed definition belongs to exactly one class (43/43 including C4a)', () => {
+test('effect coverage: every exposed definition belongs to exactly one class (44/44 including C4a and F8 list_notes)', () => {
   assertToolEffectCoverage(toolDefinitions);
-  assert.equal(toolDefinitions.length, 43);
+  assert.equal(toolDefinitions.length, 44);
   assert.deepEqual([...DOOR_WRITE_TOOLS], AGENT_ACTION_TOOLS.map(tool => tool.name));
   assert.equal(CHANNEL_WRITE_TOOLS.size, 4);
-  assert.equal(READ_TOOLS.size, 22);
+  assert.equal(READ_TOOLS.size, 23);
   for (const tool of AGENT_READ_TOOLS) assert.ok(READ_TOOLS.has(tool.name));
 });
 

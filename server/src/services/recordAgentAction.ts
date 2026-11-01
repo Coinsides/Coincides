@@ -13,6 +13,8 @@ export interface AgentActionContext {
   channel: 'chat';
   conversationId: string;
   callId?: string;
+  /** Project named by the turn's context hint; a read default only, never an authorization. */
+  contextCourseId?: string;
 }
 
 interface AgentAction<T> {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCardStore } from '@/stores/cardStore';
 import { useDeckStore } from '@/stores/deckStore';
@@ -86,6 +86,19 @@ export default function DeckDetailPage() {
   }, [deckId]);
 
   useEffect(() => { loadCards(); }, [templateFilter, tagFilter, importanceFilter, search]);
+
+  // Cards added elsewhere (e.g. an adopted Agent proposal) change this deck's
+  // count in the shared deck list; reload in place when it moves.
+  const storeCardCount = deck?.card_count;
+  const seenCardCount = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (storeCardCount === undefined) return;
+    const previous = seenCardCount.current;
+    seenCardCount.current = storeCardCount;
+    if (previous === undefined || previous === storeCardCount || !deckId) return;
+    fetchSections(deckId);
+    loadCards();
+  }, [storeCardCount]);
 
 
 

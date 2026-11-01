@@ -18,6 +18,8 @@ interface DeckState {
   loading: boolean;
   error: string | null;
   fetchDecks: (courseId?: string) => Promise<void>;
+  /** Re-read the decks already listed (e.g. card counts) without changing which decks or filter are shown. */
+  refreshLoadedDecks: () => Promise<void>;
   createDeck: (data: CreateDeckData) => Promise<CardDeck>;
   updateDeck: (id: string, data: UpdateDeckData) => Promise<CardDeck>;
   deleteDeck: (id: string) => Promise<void>;
@@ -38,6 +40,17 @@ export const useDeckStore = create<DeckState>((set, get) => ({
     } catch (err) {
       console.error('Failed to fetch decks:', err);
       set({ loading: false, error: 'Failed to fetch decks' });
+    }
+  },
+
+  refreshLoadedDecks: async () => {
+    if (get().decks.length === 0) return;
+    try {
+      const { data } = await api.get<CardDeck[]>('/decks');
+      const latest = new Map(data.map((deck) => [deck.id, deck]));
+      set({ decks: get().decks.map((deck) => latest.get(deck.id) ?? deck) });
+    } catch (err) {
+      console.error('Failed to refresh decks:', err);
     }
   },
 

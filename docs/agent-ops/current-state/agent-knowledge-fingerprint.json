@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "algorithm": "sha256",
-  "hash": "85acce270a2224893e4c011ce4e46e1625f01d5ceba81f7f393cca7aa2a78b15",
+  "hash": "6db84dc9324b4794ee877217de0025bb4ff4b8171848be435fe60695340572ea",
   "facts": {
     "registryNames": [
       "board_create_edge",
@@ -83,6 +83,7 @@
         "list_courses",
         "list_decks",
         "list_goals",
+        "list_notes",
         "list_sections",
         "read_annotations_relations",
         "read_board",
@@ -125,6 +126,7 @@
       "list_courses",
       "list_decks",
       "list_goals",
+      "list_notes",
       "list_sections",
       "read_annotations_relations",
       "read_board",
@@ -142,6 +144,6 @@
   "manual": {
     "path": "docs/agent-ops/current-state/app-operating-manual.md",
     "version": "v2",
-    "updated": "2026-09-21"
+    "updated": "2026-11-01"
   }
 }

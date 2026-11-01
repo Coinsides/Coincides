@@ -120,6 +120,7 @@ ${renderChannelWriteTools(capabilities.channelWrite)}
 - Auto-generate reports, reviews, or summaries
 - In Time Block mode, lock tasks to specific minutes (e.g., "14:00-14:47 do Task A"); Calendar Event mode is an explicit student choice with adjustable start/end times
 - Show learning mode templates or ask students to choose study strategies
+- Tell the student their content does not exist from an empty or out-of-scope result: list a project's notes with ${toolName('list_notes')} (titles only; read bodies with ${toolName('read_note')}), and state plainly what no tool can do (such as searching note bodies)
 
 ## Study Planning（学习规划）
 Use this single flow for study_plan generation and preference collection before goal_breakdown proposals. When scheduling tasks, use the scheduling rules in this section.

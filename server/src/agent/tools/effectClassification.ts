@@ -8,7 +8,7 @@ export const CHANNEL_WRITE_TOOLS: ReadonlySet<string> = new Set(['save_memory', 
   ...AGENT_UI_TOOLS.map(tool => tool.name)]);
 export const READ_TOOLS: ReadonlySet<string> = new Set([
   ...AGENT_READ_TOOLS.map(tool => tool.name),
-  'list_courses', 'get_tasks', 'list_goals', 'list_decks', 'list_sections', 'list_cards',
+  'list_courses', 'list_notes', 'get_tasks', 'list_goals', 'list_decks', 'list_sections', 'list_cards',
   'get_review_due', 'get_daily_brief', 'get_study_templates', 'get_statistics_overview',
   'suggest_next_topics', 'generate_weekly_review', 'search_memories', 'get_time_blocks',
   'get_goal_dependencies', 'search_documents', 'get_document_content',

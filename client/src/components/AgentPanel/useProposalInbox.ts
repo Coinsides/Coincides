@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Proposal } from '@shared/types';
 import api from '@/services/api';
 import { useUIStore } from '@/stores/uiStore';
+import { useCourseStore } from '@/stores/courseStore';
+import { useDeckStore } from '@/stores/deckStore';
 import { describeProposal } from './proposalInboxModel';
 
 export function useProposalInbox(enabled: boolean, streaming: boolean) {
@@ -61,6 +63,15 @@ export function useProposalInbox(enabled: boolean, streaming: boolean) {
       request.current += 1;
       setProposals((current) => current.filter((item) => item.id !== proposal.id));
       addToast('success', action === 'discard' ? '提案已丢弃' : describeProposal(proposal).applyMessage);
+      // Adoption writes notes or cards behind the host page's back. Refresh the
+      // shared stores those pages already watch so their lists update in place;
+      // decks keep whichever filtered list is loaded.
+      if (action === 'apply') {
+        void Promise.allSettled([
+          useCourseStore.getState().fetchCourses(),
+          useDeckStore.getState().refreshLoadedDecks(),
+        ]);
+      }
     } catch {
       addToast('error', action === 'discard' ? '丢弃失败，请重试' : '处理失败，请重试');
     } finally {

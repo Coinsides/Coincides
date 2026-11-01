@@ -444,6 +444,12 @@ export default function CourseDetailPage() {
   // whenever they change the shared stores, without the full-page loading state.
   const storeGoals = useGoalStore((state) => state.goals);
   const storeDecks = useDeckStore((state) => state.decks);
+  // A note created elsewhere (e.g. an adopted Agent proposal) becomes this
+  // Project's recent note in the shared course list.
+  const storeRecentNote = useCourseStore((state) => {
+    const recent = state.courses.find((course) => course.id === courseId)?.recent_note;
+    return recent ? `${recent.id}:${recent.updated_at}` : null;
+  });
   const storeListsSeen = useRef(false);
   useEffect(() => {
     if (!storeListsSeen.current) {
@@ -452,11 +458,18 @@ export default function CourseDetailPage() {
     }
     if (!courseId) return;
     let cancelled = false;
-    api.get(`/courses/${courseId}/summary`)
-      .then((response) => { if (!cancelled) setData(response.data); })
+    Promise.all([
+      api.get(`/courses/${courseId}/summary`),
+      api.get(`/notes?course_id=${courseId}&status=${noteStatus}`),
+    ])
+      .then(([summary, notesResponse]) => {
+        if (cancelled) return;
+        setData(summary.data);
+        setNotes(notesResponse.data);
+      })
       .catch((err) => console.error('Failed to refresh course summary:', err));
     return () => { cancelled = true; };
-  }, [courseId, storeGoals, storeDecks]);
+  }, [courseId, storeGoals, storeDecks, storeRecentNote]);
 
   const fetchMaterials = useCallback(async () => {
     if (!courseId) return;

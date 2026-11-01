@@ -72,7 +72,8 @@ test('C4a UI group has exactly two channel verbs; existing door/read memberships
   assert.equal(AGENT_UI_DEBOUNCE_MS, SHARED_UI_DEBOUNCE_MS);
   assert.deepEqual(AGENT_UI_TOOLS.map(tool => tool.name), ['ui_open_note', 'ui_focus_object']);
   assert.deepEqual([...DOOR_WRITE_TOOLS], AGENT_ACTION_TOOLS.map(tool => tool.name));
-  assert.equal(READ_TOOLS.size, 22);
+  // F8 added one read tool, list_notes.
+  assert.equal(READ_TOOLS.size, 23);
   for (const tool of AGENT_READ_TOOLS) assert.ok(READ_TOOLS.has(tool.name));
   for (const tool of AGENT_UI_TOOLS) {
     assert.equal(classifyToolEffect(tool.name), 'channel_write');

@@ -61,6 +61,10 @@ export default function SettingsPage() {
   const [model, setModel] = useState(settings.ai_providers?.[activeProvider]?.default_model || defaultModels[activeProvider] || '');
   const [baseUrl, setBaseUrl] = useState(settings.ai_providers?.[activeProvider]?.base_url || '');
   const [saving, setSaving] = useState(false);
+  // On a full page load the user (and their settings) arrive after the first
+  // render; until the provider in effect is known the form shows placeholders
+  // and cannot be saved, so a static default is never written as a choice.
+  const [providerReady, setProviderReady] = useState(false);
 
   const handleTheme = async (theme: 'dark' | 'light') => {
     try {
@@ -102,7 +106,12 @@ export default function SettingsPage() {
   // Without a saved choice, show the provider the server actually uses (the first
   // one with a key), so saving this form never pins a provider that has no key.
   useEffect(() => {
-    if (settings.active_provider) return;
+    if (!user) return;
+    if (settings.active_provider) {
+      handleProviderChange(settings.active_provider);
+      setProviderReady(true);
+      return;
+    }
     let cancelled = false;
     api.get<{ default_chat_provider?: string | null }>('/settings/providers')
       .then(({ data }) => {
@@ -111,9 +120,14 @@ export default function SettingsPage() {
           handleProviderChange(provider);
         }
       })
-      .catch(() => { /* Keep the static default when credentials cannot be listed. */ });
+      .catch(() => { /* Keep the static default when credentials cannot be listed. */ })
+      .finally(() => { if (!cancelled) setProviderReady(true); });
     return () => { cancelled = true; };
-  }, [settings.active_provider]);
+  }, [user?.id, settings.active_provider]);
+
+  useEffect(() => {
+    if (user) setAgentName(settings.agent_name || 'Mr. Zero');
+  }, [user?.id]);
 
   const handleSaveProvider = async () => {
     setSaving(true);
@@ -149,6 +163,7 @@ export default function SettingsPage() {
   const [embModel, setEmbModel] = useState(settings.embedding_model || 'voyage-4');
   const [savingEmb, setSavingEmb] = useState(false);
   const [embStatus, setEmbStatus] = useState<EmbeddingStatus | null>(null);
+  const [embStatusLoaded, setEmbStatusLoaded] = useState(false);
   const [backfilling, setBackfilling] = useState(false);
 
   useEffect(() => {
@@ -159,16 +174,26 @@ export default function SettingsPage() {
     try {
       const res = await api.get('/embedding/status');
       setEmbStatus(res.data);
-      // Same rule as chat: without a saved choice, show the provider in effect.
-      const effective = res.data?.provider_name as string | null | undefined;
-      if (!settings.embedding_provider && effective && embeddingModelOptions[effective]) {
-        setEmbProvider(effective);
-        setEmbModel(embeddingModelOptions[effective][0].value);
-      }
     } catch (err) {
       console.error('Failed to load embedding status:', err);
     }
+    setEmbStatusLoaded(true);
   };
+
+  // Same rule as chat: show the saved choice once the user has loaded, else the
+  // provider in effect; saving waits until one of them is known.
+  const effectiveEmbProvider = embStatus?.provider_name;
+  useEffect(() => {
+    if (!user) return;
+    if (settings.embedding_provider) {
+      setEmbProvider(settings.embedding_provider);
+      setEmbModel(settings.embedding_model || embeddingModelOptions[settings.embedding_provider]?.[0]?.value || '');
+    } else if (effectiveEmbProvider && embeddingModelOptions[effectiveEmbProvider]) {
+      setEmbProvider(effectiveEmbProvider);
+      setEmbModel(embeddingModelOptions[effectiveEmbProvider][0].value);
+    }
+  }, [user?.id, settings.embedding_provider, effectiveEmbProvider]);
+  const embeddingReady = Boolean(user) && (Boolean(settings.embedding_provider) || embStatusLoaded);
 
   const handleSaveEmbedding = async () => {
     setSavingEmb(true);
@@ -298,6 +323,7 @@ export default function SettingsPage() {
               className={styles.inlineInput}
               value={activeProvider}
               onChange={(event) => handleProviderChange(event.target.value)}
+              disabled={!providerReady}
             >
               {providerOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -332,9 +358,9 @@ export default function SettingsPage() {
             <button
               className={styles.saveProviderBtn}
               onClick={handleSaveProvider}
-              disabled={saving}
+              disabled={saving || !providerReady}
             >
-              {saving ? 'Saving...' : 'Save Provider Settings'}
+              {saving ? 'Saving...' : providerReady ? 'Save Provider Settings' : 'Loading...'}
             </button>
           </div>
         </div>
@@ -396,7 +422,7 @@ export default function SettingsPage() {
               <button
                 className={styles.saveProviderBtn}
                 onClick={handleSaveEmbedding}
-                disabled={savingEmb}
+                disabled={savingEmb || !embeddingReady}
               >
                 {savingEmb ? 'Saving...' : 'Save'}
               </button>

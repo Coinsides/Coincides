@@ -102,7 +102,11 @@ const f5SourceLine = '- documents 与 Source Library 是两种来源，search_do
 const preF5SourceLine = '- 材料库（documents）与 Source Library（sources）互不相通。search_documents / get_document_content 只可检索、读取材料库；你今天检索不到 Source Library 的内容。用户给了 Source 文件而你找不到时，要如实说明这个边界，并建议用户经材料库上传，供你检索和读取。';
 const f5SourceResultsSentence = ' Its source_results list extracted Sources matched by name or keywords, with snippets; read a Source in full with read_note on its projection_note_id.';
 
-test('restoring only the authorized roster, C2, C4a and F5 amendment bytes reproduces the entire pre-edit prompt', () => {
+// F8 amendment: one appended Never-Do line, chaining list_notes to read_note. It
+// sits outside 产品说明 so the manual's declared token budget is unchanged.
+const f8AbsenceLine = '\n- Tell the student their content does not exist from an empty or out-of-scope result: list a project\'s notes with list_notes (titles only; read bodies with read_note), and state plainly what no tool can do (such as searching note bodies)';
+
+test('restoring only the authorized roster, C2, C4a, F5 and F8 amendment bytes reproduces the entire pre-edit prompt', () => {
   const projection = projectAgentCapabilities();
   const restored = buildSystemPrompt('Manual Agent', context)
     .replace(renderDirectInstructionPrompt(), '')
@@ -111,7 +115,8 @@ test('restoring only the authorized roster, C2, C4a and F5 amendment bytes repro
     .replace(renderDoorWriteTools(projection.doorWrite), oldDoorSentence)
     .replace(renderChannelWriteTools(projection.channelWrite) + '\n', '')
     .replace(f5SourceLine, preF5SourceLine)
-    .replace(f5SourceResultsSentence, '');
+    .replace(f5SourceResultsSentence, '')
+    .replace(f8AbsenceLine, '');
   // Captured from the pre-edit builder baseline, not from the new implementation.
   assert.equal(createHash('sha256').update(restored).digest('hex'),
     '44affa4b6d7a9aa940e450602900856c567af3ae43fda983b18c3a08820ff2af');

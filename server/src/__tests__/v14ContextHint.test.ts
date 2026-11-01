@@ -397,6 +397,13 @@ test('identity and dynamic context bytes remain unchanged across the six existin
   }
 });
 
+test('the agent lists notes before denying they exist and declares what no tool can do', () => {
+  const never = promptSection('## Things You Must NEVER Do');
+  assert.match(never, /content does not exist from an empty or out-of-scope result: list a project's notes with list_notes \(titles only; read bodies with read_note\)/u);
+  assert.match(never, /state plainly what no tool can do \(such as searching note bodies\)/u);
+  assert.doesNotMatch(productManual(), /list_notes/u, 'the amendment stays outside the budgeted product manual');
+});
+
 test('product manual has a bounded declared token estimate', () => {
   const manual = productManual();
   // No tokenizer dependency: estimate Han characters at 1–2 tokens each and

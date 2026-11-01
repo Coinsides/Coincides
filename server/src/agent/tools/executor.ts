@@ -30,6 +30,7 @@ import { createNotePatchProposal } from '../../services/notePatchProposals.js';
 import { readNoteForAgent, readBoardForAgent } from '../../services/agentReadSurfaces.js';
 import { readContentGroupsForAgent, readAnnotationsRelationsForAgent } from '../../services/agentReadKnowledge.js';
 import { searchSourcesForAgent } from '../../services/agentSourceSearch.js';
+import { listNotesForAgent } from '../../services/agentNoteList.js';
 import { AGENT_UI_TOOLS } from '../../toolFace/uiActions.js';
 import { executeAgentUiCommand, type AgentUiRunState } from './uiCommands.js';
 
@@ -191,6 +192,11 @@ export async function executeTool(
       return JSON.stringify(CREATE_SUB_GOAL_TOOL.output_schema.parse({
         id: goal.id, title: goal.title, parent_id: goal.parent_id, message: 'Sub-goal created successfully', receipt_id: receipt.id,
       }));
+    }
+
+    case 'list_notes': {
+      const { course_id } = args as { course_id?: string };
+      return JSON.stringify(listNotesForAgent(db, userId, { courseId: course_id, contextCourseId: context?.contextCourseId }));
     }
 
     case 'list_decks': {
@@ -716,9 +722,11 @@ export async function executeTool(
       const sourceResults = searchSourcesForAgent(db, userId, { query, course_id, file_type });
 
       if (results.length === 0 && sourceResults.length === 0) {
-        return JSON.stringify({ results: [], source_results: [], message: 'No documents or Sources found matching your query.' });
+        return JSON.stringify({ results: [], document_total: 0, source_results: [], source_total: 0,
+          message: 'No documents or Sources matched these terms. This is not proof the content does not exist; Source matching is by keyword, so try shorter or exact terms.' });
       }
-      return JSON.stringify({ results, total: results.length, source_results: sourceResults });
+      // Separate counts: a single total of documents read as "nothing found" when only Sources matched.
+      return JSON.stringify({ results, document_total: results.length, source_results: sourceResults, source_total: sourceResults.length });
     }
 
     case 'get_document_content': {
