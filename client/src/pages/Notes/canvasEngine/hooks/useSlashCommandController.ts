@@ -114,7 +114,7 @@ export interface UseSlashCommandControllerOptions {
   saveBlock: (
     block: NoteBlock,
     text: string,
-    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
+    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1; preserveDrafts?: boolean },
   ) => Promise<BlockSaveOutcome>;
   setBlockTextDrafts: Dispatch<SetStateAction<Record<string, string>>>;
   setBlockTextFlowDrafts: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;

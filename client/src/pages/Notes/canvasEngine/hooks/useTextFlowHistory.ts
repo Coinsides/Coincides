@@ -922,7 +922,10 @@ export function useTextFlowHistory(options: Options) {
         && JSON.stringify(previous.transaction[previous.side].textFlow) === JSON.stringify(saveOptions?.textFlow ?? latest.current.blockTextFlowDrafts[block.id])) {
         outcome = previous.outcome;
       } else {
-        outcome = await latest.current.saveBlock(block, text, { ...saveOptions, preserveDrafts: true });
+        // Edits saved here were published to the draft authority first, so the save
+        // preserves it. A caller saving content from elsewhere (the draft handoff)
+        // passes preserveDrafts: false to make that content the authority.
+        outcome = await latest.current.saveBlock(block, text, { preserveDrafts: true, ...saveOptions });
         if (scope.current() && outcome.status === 'saved') scope.confirmBlock(outcome.block);
       }
       return outcome.status === 'saved';

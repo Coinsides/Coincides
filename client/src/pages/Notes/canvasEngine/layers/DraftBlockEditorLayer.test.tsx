@@ -93,6 +93,8 @@ function Harness({
     saveBlock: vi.fn(async (block: NoteBlock) => savedBlockOutcome(block)),
     saveDraftBlockPlacement: vi.fn(async (block) => block),
     setActiveBlockId,
+    setBlockTextDrafts: vi.fn(),
+    setBlockTextFlowDrafts: vi.fn(),
     setFocusBlockId,
     setInteractionState: onInteractionState,
     setSelectedBlockId,

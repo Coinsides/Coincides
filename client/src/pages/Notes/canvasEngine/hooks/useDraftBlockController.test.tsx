@@ -81,6 +81,8 @@ function makeOptions(): UseDraftBlockControllerOptions {
     saveBlock: vi.fn(async () => rejectedBlockOutcome()),
     saveDraftBlockPlacement: vi.fn(async (block) => block),
     setActiveBlockId: vi.fn(),
+    setBlockTextDrafts: vi.fn(),
+    setBlockTextFlowDrafts: vi.fn(),
     setFocusBlockId: vi.fn(),
     setInteractionState: vi.fn(),
     setSelectedBlockId: vi.fn(),

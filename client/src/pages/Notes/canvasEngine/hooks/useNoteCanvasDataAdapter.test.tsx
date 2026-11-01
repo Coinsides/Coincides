@@ -4325,6 +4325,8 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
         saveBlock: adapter.saveBlock,
         saveDraftBlockPlacement: adapter.saveDraftBlockPlacement,
         setActiveBlockId: stableControllerCallbacks.setActiveBlockId,
+        setBlockTextDrafts: adapter.setBlockTextDrafts,
+        setBlockTextFlowDrafts: adapter.setBlockTextFlowDrafts,
         setFocusBlockId: stableControllerCallbacks.setFocusBlockId,
         setInteractionState: stableControllerCallbacks.setInteractionState,
         setSelectedBlockId: stableControllerCallbacks.setSelectedBlockId,
@@ -4354,6 +4356,85 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(latestPuts).toHaveLength(1);
     expect(latestPuts[0]?.[1]).toEqual(expect.objectContaining({ plain_text: 'ab' }));
     expect(durableText).toBe('ab');
+  });
+
+  it('A-04: an editor resuming after a fast-Enter draft handoff never writes back the create-time body', async () => {
+    // Server truth, revision by revision, as the atomic text-save endpoint sees it.
+    let revision = 0;
+    let storedUnits: string[] = [];
+    const created = deferred<{ data: NoteBlock }>();
+    mocks.post.mockImplementation(async (url: string) => {
+      if (url !== `/notes/${note.id}/blocks`) throw new Error(`Unexpected POST ${url}`);
+      return created.promise;
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, any>) => {
+      if (url.includes('/block-placements/')) {
+        return { data: { placement_id: 'placement-1', block_id: 'block-1', layout: payload.layout } };
+      }
+      // The harness's atomic text-save shim forwards the body here and adds the revision envelope.
+      if (url === '/note-blocks/block-1') {
+        revision += 1;
+        storedUnits = (payload.content_json?.text_flow?.units ?? []).map((unit: { text: string }) => unit.text);
+        return { data: { ...serverBlock(payload.plain_text, false), content_json: payload.content_json } };
+      }
+      throw new Error(`Unexpected PUT ${url}`);
+    });
+
+    const subject = renderHook(() => {
+      const adapter = useNoteCanvasDataAdapter(stableAdapterOptions);
+      // Mirrors useTextFlowHistory.saveBlock: drafts are preserved unless the caller says otherwise.
+      const historySave: typeof adapter.saveBlock = (block, text, options) => adapter.saveBlock(block, text, { preserveDrafts: true, ...options });
+      const controller = useDraftBlockController({
+        createBlock: adapter.createDraftBlock,
+        defaultDraftLayout: { ...defaultDraftLayout, surface: 'formal_page', boundary_role: 'inside' },
+        defaultTextTemplate: adapter.defaultTextTemplate,
+        discardDraftBlock: adapter.discardDraftBlock,
+        finalizeDraftBlock: adapter.finalizeDraftBlock,
+        note: adapter.note,
+        onDraftFocusReceipt: stableControllerCallbacks.onDraftFocusReceipt,
+        saveBlock: historySave,
+        saveDraftBlockPlacement: adapter.saveDraftBlockPlacement,
+        setActiveBlockId: stableControllerCallbacks.setActiveBlockId,
+        setBlockTextDrafts: adapter.setBlockTextDrafts,
+        setBlockTextFlowDrafts: adapter.setBlockTextFlowDrafts,
+        setFocusBlockId: stableControllerCallbacks.setFocusBlockId,
+        setInteractionState: stableControllerCallbacks.setInteractionState,
+        setSelectedBlockId: stableControllerCallbacks.setSelectedBlockId,
+      });
+      return { adapter, controller, historySave };
+    }, { wrapper });
+    await waitFor(() => expect(subject.result.current.adapter.note?.id).toBe(note.id));
+
+    let persisting!: Promise<void>;
+    act(() => {
+      subject.result.current.controller.activateDraft();
+      subject.result.current.controller.setDraftText('First');
+      persisting = subject.result.current.controller.persistDraft('First');
+    });
+    // Enter and the second paragraph arrive while the first POST is still in flight.
+    act(() => subject.result.current.controller.setDraftText('First\nSecond'));
+    await act(async () => {
+      created.resolve({ data: serverBlock('First', false, String(mocks.post.mock.calls[0]?.[1]?.client_create_key)) });
+      await persisting;
+    });
+    expect(storedUnits).toEqual(['First', 'Second']);
+
+    // The durable editor renders from the draft authority; that is what it edits next.
+    const { adapter } = subject.result.current;
+    const block = adapter.blocks.find((candidate) => candidate.id === 'block-1')!;
+    const rendered = adapter.blockTextFlowDrafts['block-1'];
+    expect(rendered.units.map((unit) => unit.text)).toEqual(['First', 'Second']);
+
+    // Keep typing at the end of the last paragraph, then blur-save as history does.
+    const units = rendered.units.map((unit, index, all) => index === all.length - 1 ? { ...unit, text: `${unit.text} and more` } : unit);
+    const edited = { ...rendered, units };
+    const before = revision;
+    await act(async () => {
+      await subject.result.current.historySave(block, units.map((unit) => unit.text).join('\n'), { silent: true, textFlow: edited });
+    });
+
+    expect(revision).toBe(before + 1);
+    expect(storedUnits).toEqual(['First', 'Second and more']);
   });
 
   it('notifies once and performs no recovery write for an ownerless v1 receipt', async () => {

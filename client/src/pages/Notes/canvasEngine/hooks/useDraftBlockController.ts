@@ -108,8 +108,14 @@ export interface UseDraftBlockControllerOptions {
   saveBlock: (
     block: NoteBlock,
     text: string,
-    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
+    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1; preserveDrafts?: boolean },
   ) => Promise<BlockSaveOutcome>;
+  // The block draft authority the durable editor renders from. The draft's
+  // content reaches the durable block only through saves, so each one publishes
+  // into the authority; otherwise the editor keeps the create-time body and its
+  // next save writes that stale body back.
+  setBlockTextDrafts: Dispatch<SetStateAction<Record<string, string>>>;
+  setBlockTextFlowDrafts: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
   saveDraftBlockPlacement: (
     block: NoteBlock,
     layout: BlockBoxLayout,
@@ -136,6 +142,8 @@ export function useDraftBlockController({
   saveBlock,
   saveDraftBlockPlacement,
   setActiveBlockId,
+  setBlockTextDrafts,
+  setBlockTextFlowDrafts,
   setFocusBlockId,
   setInteractionState,
   setSelectedBlockId,
@@ -180,6 +188,9 @@ export function useDraftBlockController({
   const persistPromiseRef = useRef<Promise<void> | null>(null);
   const requestGenerationRef = useRef(0);
   const noteIdRef = useRef(note?.id || null);
+  // True while replaying keys that reached the draft during the focus handoff;
+  // their content is adopted into the authority before the save is issued.
+  const replayingHandoffRef = useRef(false);
   const persistDraftRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   const syncDraftTextFlow = useCallback((nextText: string) => {
@@ -429,8 +440,13 @@ export function useDraftBlockController({
     if (!pending || receipt.blockId !== pending.to.blockId) return;
     if (durableSavedRevisionRef.current !== draftRevisionRef.current) {
       // Keystrokes reached the draft after its last save, while focus was moving.
-      // Replay them through the durable block before the draft goes away.
-      const replay = persistDraftRef.current();
+      // Adopt them into the authority now, before the durable editor takes any
+      // input, then save them; the authority is never written by two hands.
+      const text = draftTextRef.current.trimEnd();
+      setBlockTextDrafts((current) => ({ ...current, [pending.to.blockId]: text }));
+      setBlockTextFlowDrafts((current) => ({ ...current, [pending.to.blockId]: draftTextFlowFromText(text) }));
+      replayingHandoffRef.current = true;
+      const replay = persistDraftRef.current().finally(() => { replayingHandoffRef.current = false; });
       void replay.then(() => {
         if (pendingReconciliationRef.current && durableSavedRevisionRef.current === draftRevisionRef.current) {
           clearLocalDraft('persist_succeeded', { preserveReconciliation: true });
@@ -439,7 +455,7 @@ export function useDraftBlockController({
       return;
     }
     clearLocalDraft('persist_succeeded', { preserveReconciliation: true });
-  }, [clearLocalDraft]);
+  }, [clearLocalDraft, setBlockTextDrafts, setBlockTextFlowDrafts]);
 
   const persistDraft = useCallback((
     initialText?: string,
@@ -531,10 +547,12 @@ export function useDraftBlockController({
         if (!hasMeaningfulDraftContent(latestText)) break;
         const latestTextFlow = draftTextFlowRef.current
           || (!explicitTemplate ? draftTextFlowFromText(latestText) : null);
+        // Publish into the draft authority unless the handoff already adopted it.
+        const preserveDrafts = replayingHandoffRef.current;
         const saveOutcome = await saveBlock(
           persistedBlock,
           latestText,
-          latestTextFlow ? { silent: true, textFlow: latestTextFlow } : { silent: true },
+          latestTextFlow ? { silent: true, textFlow: latestTextFlow, preserveDrafts } : { silent: true, preserveDrafts },
         );
         if (saveOutcome.status !== 'saved' || !requestIsCurrent()) return;
         persistedBlock = saveOutcome.block;

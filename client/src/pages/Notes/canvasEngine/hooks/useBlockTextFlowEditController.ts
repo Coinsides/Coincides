@@ -91,12 +91,13 @@ export function useBlockTextFlowEditController({
       ?? (block.content_json ? getTextFlowContent(block.content_json) : null);
     const beforeAnnotations = annotationTruthsRef.current;
     const beforeBoardRanges = captureBoardTextRanges?.(block.id) ?? [];
-    const nextDrafts = {
-      ...blockTextFlowDraftsRef.current,
-      [block.id]: nextTextFlow,
-    };
-    blockTextFlowDraftsRef.current = nextDrafts;
-    setBlockTextFlowDrafts(nextDrafts);
+    // Resolve against the authority's live snapshot: a whole-map write from this
+    // render's copy would roll back drafts published since (e.g. a draft handoff).
+    setBlockTextFlowDrafts((current) => {
+      const nextDrafts = { ...current, [block.id]: nextTextFlow };
+      blockTextFlowDraftsRef.current = nextDrafts;
+      return nextDrafts;
+    });
     rebaseBoardTextRanges?.(block.id, previousTextFlow, nextTextFlow);
     let nextAnnotations = annotationTruthsRef.current;
     if (options?.restoreAnnotationRanges) {

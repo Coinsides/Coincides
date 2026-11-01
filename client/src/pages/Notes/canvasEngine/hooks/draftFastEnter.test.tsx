@@ -54,7 +54,8 @@ describe('draft first-paragraph fast Enter', () => {
       createBlock, defaultDraftLayout: layout, defaultTextTemplate: template,
       discardDraftBlock: vi.fn(async () => true), finalizeDraftBlock: vi.fn(async () => true), note,
       onDraftFocusReceipt: vi.fn(), saveBlock, saveDraftBlockPlacement: vi.fn(async (value) => value),
-      setActiveBlockId: vi.fn(), setFocusBlockId: vi.fn(), setInteractionState: vi.fn(), setSelectedBlockId: vi.fn(),
+      setActiveBlockId: vi.fn(), setBlockTextDrafts: vi.fn(), setBlockTextFlowDrafts: vi.fn(),
+      setFocusBlockId: vi.fn(), setInteractionState: vi.fn(), setSelectedBlockId: vi.fn(),
     }));
 
     let persisting!: Promise<void>;
