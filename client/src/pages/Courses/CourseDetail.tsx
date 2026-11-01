@@ -1668,7 +1668,11 @@ export default function CourseDetailPage() {
         )}
       </div>
 
-      <ProjectSourcesPanel projectId={course.id} legacyDocuments={documents} />
+      <ProjectSourcesPanel
+        projectId={course.id}
+        legacyDocuments={documents}
+        onSourceDeleted={() => void refreshCovers()}
+      />
 
       {/* Delete Confirmation */}
       {deleteConfirmation}

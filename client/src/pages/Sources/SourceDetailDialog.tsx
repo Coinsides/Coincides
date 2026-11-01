@@ -16,7 +16,7 @@ interface SourceDetailDialogProps {
   onOriginal: (source: SourceRecordDetail) => void;
   onDownload: (source: SourceRecordDetail) => void;
   onRetry: (source: SourceRecordDetail) => void;
-  onDelete?: (source: SourceRecordDetail) => void;
+  onDelete: (source: SourceRecordDetail) => void;
   onReproject?: (source: SourceRecordDetail) => void;
 }
 
@@ -61,10 +61,9 @@ export function SourceDetailDialog({
           <div className={styles.detailHeaderActions}>
             <button
               type="button"
-              disabled={!onDelete}
-              onClick={() => onDelete?.(source)}
-              title={onDelete ? 'Delete Source' : 'Delete Sources from the global Source Library'}
-              aria-label={onDelete ? 'Delete Source' : 'Delete Source unavailable here'}
+              onClick={() => onDelete(source)}
+              title="Delete Source"
+              aria-label="Delete Source"
             >
               <Trash2 size={15} />
             </button>

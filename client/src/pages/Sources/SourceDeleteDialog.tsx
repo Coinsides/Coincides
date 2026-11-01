@@ -54,17 +54,17 @@ export function SourceDeleteDialog({ source, onCancel, onConfirm }: SourceDelete
         <header>
           <div className={styles.deleteWarning}><AlertTriangle size={18} /></div>
           <div>
-            <h2 id="source-delete-title">Delete {source.display_name}</h2>
-            <p>This permanently deletes the Source identity, original file, extracted projection, and its Project placements.</p>
+            <h2 id="source-delete-title">Delete {source.display_name} permanently?</h2>
+            <p>This cannot be undone. The original file and its extracted note, including that note's blocks, are deleted, and the Source is removed from every Project it is placed in, not only this one.</p>
           </div>
           <button type="button" onClick={onCancel} aria-label="Close"><X size={16} /></button>
         </header>
 
         {loading ? <div className={styles.deleteLoading}>Calculating deletion impact...</div> : impact && (
           <div className={styles.deleteImpact}>
-            <div><strong>{impact.placement_count}</strong><span>Project placements removed</span></div>
-            <div><strong>{impact.projection_note_id ? 1 : 0}</strong><span>extracted projection removed</span></div>
-            <div><strong>{impact.retained_receipt_count}</strong><span>external receipts retained as historical evidence</span></div>
+            <div><strong>{impact.placement_count}</strong><span>Projects it is removed from</span></div>
+            <div><strong>{impact.projection_note_id ? 1 : 0}</strong><span>extracted note deleted, with its blocks</span></div>
+            <div><strong>{impact.retained_receipt_count}</strong><span>citations in other notes kept as text; their links to this Source stop working</span></div>
             {impact.projection_user_work?.has_user_work && (
               <p>Annotations and presentation work attached directly to the extracted projection will be removed. ContentGroup snapshots retain their group-local content but lose their live source target.</p>
             )}

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { FileText } from 'lucide-react';
 import { SourceDetailDialog } from './SourceDetailDialog';
+import { SourceDeleteDialog } from './SourceDeleteDialog';
 import { SourceList } from './SourceList';
 import { SourceUploader } from './SourceUploader';
 import type { SourceRecordDetail } from './sourceExperienceModel';
 import { useSourceActions } from './useSourceActions';
 import { useSourceCollection } from './useSourceCollection';
+import { deleteSource } from './sourceApi';
+import { useUIStore } from '@/stores/uiStore';
 import styles from './SourceLibrary.module.css';
 
 export interface LegacyProjectDocument {
@@ -20,20 +23,34 @@ export interface LegacyProjectDocument {
 interface ProjectSourcesPanelProps {
   projectId: string;
   legacyDocuments?: LegacyProjectDocument[];
+  /** Deleting a Source also deletes its extracted note, so the host refreshes its note list. */
+  onSourceDeleted?: () => void;
 }
 
-export function ProjectSourcesPanel({ projectId, legacyDocuments = [] }: ProjectSourcesPanelProps) {
+export function ProjectSourcesPanel({ projectId, legacyDocuments = [], onSourceDeleted }: ProjectSourcesPanelProps) {
   const collection = useSourceCollection({
     courseId: projectId,
     originEntryKind: 'project_upload',
   });
+  const addToast = useUIStore((state) => state.addToast);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+  const [deleteSourceId, setDeleteSourceId] = useState<string | null>(null);
   const selectedSource = collection.sources.find((source) => source.id === selectedSourceId) || null;
+  const deleteTarget = collection.sources.find((source) => source.id === deleteSourceId) || null;
   const showDetails = (source: SourceRecordDetail) => setSelectedSourceId(source.id);
   const actions = useSourceActions(showDetails);
 
   const retry = async (source: SourceRecordDetail) => {
     await collection.retry(source.id);
+  };
+
+  const confirmDelete = async (source: SourceRecordDetail) => {
+    await deleteSource(source.id);
+    setDeleteSourceId(null);
+    setSelectedSourceId(null);
+    await collection.refresh(true);
+    onSourceDeleted?.();
+    addToast('success', 'Source permanently deleted; historical receipts were retained');
   };
 
   return (
@@ -89,7 +106,15 @@ export function ProjectSourcesPanel({ projectId, legacyDocuments = [] }: Project
         onOriginal={(source) => void actions.original(source)}
         onDownload={(source) => void actions.download(source)}
         onRetry={(source) => void retry(source)}
+        onDelete={(source) => setDeleteSourceId(source.id)}
       />
+      {deleteTarget && (
+        <SourceDeleteDialog
+          source={deleteTarget}
+          onCancel={() => setDeleteSourceId(null)}
+          onConfirm={confirmDelete}
+        />
+      )}
     </section>
   );
 }
