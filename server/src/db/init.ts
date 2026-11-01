@@ -28,6 +28,8 @@ export async function initDb(dbPath?: string): Promise<Database.Database> {
   // Enable WAL mode for better concurrent performance
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
+  // A file with no tables yet is a brand-new database; see the contract below.
+  const freshDatabase = !db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' LIMIT 1").get();
 
   // Run base schema (CREATE TABLE IF NOT EXISTS — safe to re-run)
   const schemaPath = join(__dirname, 'schema.sql');
@@ -154,6 +156,13 @@ export async function initDb(dbPath?: string): Promise<Database.Database> {
 
   // Run versioned migrations (handles all schema evolution from v1.1+)
   await runMigrations(db);
+
+  // A new database holds no v1 coordinates, so it starts on the current contract.
+  // A missing row still reads as v1 for older databases; their v1 -> v2 switch
+  // stays with the explicit wilderness executor, and existing rows are never touched.
+  if (freshDatabase) {
+    db.prepare("INSERT OR IGNORE INTO database_meta (key, value) VALUES ('coordinate_contract', 'v2')").run();
+  }
 
   // Seed system study templates
   seedStudyTemplates();

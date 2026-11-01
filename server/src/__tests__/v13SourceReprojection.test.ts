@@ -27,7 +27,7 @@ async function fixture(run: (context: {
   const courseId = uuidv4();
   try {
     const db = await initDb(':memory:');
-    db.prepare("INSERT INTO database_meta (key, value) VALUES ('coordinate_contract', 'v2')").run();
+    db.prepare("INSERT OR REPLACE INTO database_meta (key, value) VALUES ('coordinate_contract', 'v2')").run();
     db.prepare("INSERT INTO users (id,email,password_hash,name) VALUES (?,?,'synthetic','Synthetic')")
       .run(userId, `${userId}@example.test`);
     db.prepare("INSERT INTO courses (id,user_id,name) VALUES (?,?,'Synthetic project')").run(courseId, userId);

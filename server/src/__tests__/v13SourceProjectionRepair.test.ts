@@ -43,7 +43,7 @@ async function withDb(run: (db: Database.Database, storage: string) => Promise<v
       .run('projection-user', 'projection@example.test', 'synthetic', 'Synthetic projection');
     db.prepare('INSERT INTO courses (id, user_id, name) VALUES (?, ?, ?)')
       .run('projection-course', 'projection-user', 'Synthetic project');
-    db.prepare('INSERT INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v2');
+    db.prepare('INSERT OR REPLACE INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v2');
     assert.equal(readCoordinateContract(db), 'v2');
     await run(db, root);
   } finally {

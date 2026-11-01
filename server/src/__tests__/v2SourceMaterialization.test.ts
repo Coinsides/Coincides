@@ -286,6 +286,9 @@ test('parser limits and corrupt inputs produce stable non-retryable errors', asy
 
 test('text materialization atomically publishes one read-only projection and is idempotent', async () => {
   await withDbAndStorage(async ({ db, sourceRootDir, canvasAssetRootDir }) => {
+    // The placement assertions below are the v1 (canvas_world) shape; pin it, as a
+    // new database starts on v2 since F10. v2 publication is covered by v13SourceReprojection.
+    db.prepare("INSERT OR REPLACE INTO database_meta (key, value) VALUES ('coordinate_contract', 'v1')").run();
     const { userId, courseId } = seedUserCourse(db);
     const uploaded = await intake(
       db,

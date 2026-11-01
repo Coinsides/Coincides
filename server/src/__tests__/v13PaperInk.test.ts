@@ -53,7 +53,7 @@ test('C4 fixture: paper ink create/read/reopen/erase/restore persists only in ca
     db.exec(`INSERT INTO users(id,email,password_hash,name) VALUES('${userId}','c4@example.test','fixture','C4');
       INSERT INTO courses(id,user_id,name) VALUES('c4-ink-course','${userId}','C4');
       INSERT INTO notes(id,user_id,course_id,title) VALUES('${noteId}','${userId}','c4-ink-course','Synthetic paper ink');
-      INSERT INTO database_meta(key,value) VALUES('coordinate_contract','v2');`);
+      INSERT OR REPLACE INTO database_meta(key,value) VALUES('coordinate_contract','v2');`);
     const frames = [
       { id: 'c4-page-one', x: 100, y: 160, width: 794, height: 1123 },
       { id: 'c4-page-two', x: 100, y: 1319, width: 794, height: 1123 },

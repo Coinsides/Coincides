@@ -16,6 +16,29 @@ import { materializeSourceNow } from '../services/sourceMaterialization.js';
 import type { SourceArtifact } from '../services/sourceArtifact.js';
 import { A4_PAGE_GEOMETRY } from '../../../shared/types/pageGeometry.js';
 
+test('F10: a new database starts on the v2 contract; an existing database without the row is never rewritten', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'coincides-coordinate-contract-fresh-'));
+  const path = join(dir, 'contract.db');
+  try {
+    const fresh = await initDb(path);
+    assert.deepEqual(fresh.prepare('SELECT key, value FROM database_meta').all(), [{ key: 'coordinate_contract', value: 'v2' }]);
+    assert.equal(readCoordinateContract(fresh), 'v2');
+    // Simulate an older database that predates the row, then reopen it.
+    fresh.prepare('DELETE FROM database_meta WHERE key = ?').run('coordinate_contract');
+    closeDb();
+    const reopened = await initDb(path);
+    assert.deepEqual(reopened.prepare('SELECT key, value FROM database_meta').all(), []);
+    assert.equal(readCoordinateContract(reopened), 'v1');
+    // An explicit v1 is kept as written too.
+    reopened.prepare('INSERT INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v1');
+    closeDb();
+    assert.equal(readCoordinateContract(await initDb(path)), 'v1');
+  } finally {
+    closeDb();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('coordinate metadata migration only adds an empty table and preserves placements', () => {
   const db = new Database(':memory:');
   try {
@@ -90,11 +113,9 @@ test('canvas coordinate endpoint returns the database contract without mutating 
     try {
       const address = server.address() as AddressInfo;
       const url = `http://127.0.0.1:${address.port}/api/canvas-objects/coordinate-contract`;
-      for (const expected of ['v1', 'v2']) {
-        if (expected === 'v2') {
-          db.prepare('INSERT INTO database_meta (key, value) VALUES (?, ?)')
-            .run('coordinate_contract', 'v2');
-        }
+      // F10: a new database starts on v2; an older one without the row still reads v1.
+      for (const expected of ['v2', 'v1']) {
+        if (expected === 'v1') db.prepare('DELETE FROM database_meta WHERE key = ?').run('coordinate_contract');
         const before = db.prepare('SELECT total_changes() AS count').get();
         const response = await fetch(url);
         assert.equal(response.status, 200);
@@ -173,6 +194,8 @@ test('Source v2 publication writes full-axis content-local placements aligned wi
       `).all(result.projection_note_id) as PlacementRow[];
     };
 
+    // Pin v1 explicitly: a new database starts on v2 since F10.
+    db.prepare('INSERT OR REPLACE INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v1');
     const v1 = await publish('v1');
     const firstPageY = 80 + A4_PAGE_GEOMETRY.contentInset.top;
     const secondPageY = firstPageY + A4_PAGE_GEOMETRY.height + 36;
@@ -182,7 +205,7 @@ test('Source v2 publication writes full-axis content-local placements aligned wi
       [worldX, secondPageY], [worldX, secondPageY + 90],
     ]);
     assert.ok(v1.every((row) => JSON.parse(row.metadata).layout_policy.coordinate_space === 'canvas_world'));
-    db.prepare('INSERT INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v2');
+    db.prepare('INSERT OR REPLACE INTO database_meta (key, value) VALUES (?, ?)').run('coordinate_contract', 'v2');
     const v2 = await publish('v2');
     assert.deepEqual(v2.map(({ x, y }) => [x, y]), [[0, 0], [0, 90], [0, 0], [0, 90]]);
     assert.ok(v2.every((row) => JSON.parse(row.metadata).layout_policy.coordinate_space === 'page_frame_local'));
