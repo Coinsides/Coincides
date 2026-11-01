@@ -38,3 +38,111 @@
 ## 五 · 不在射程
 
 Agent 检索面改造(除非段一判「顺手」且我核准);旧 documents 管线复活;Material/Proposal 的 UI 重设计(文案批另行);岛上既存数据回填(部署后运维裁)。
+
+
+## Result（段一 · 侦察）— 2026-11-01 · 临时工程对话1
+
+**执行状态**:`段一 done`,⛔零代码改动(仓库零写入,除本回执与 audits 证据);**停线候 Main_Designer 核准方案**。
+**一句话结论**:换供应商**可行**,但 schema 代价比预想大一档——必须按 SQLite 标准「12 步重建」关外键施工,**迁移跑器要先加一个开关**;照 046 先例的写法会静默清空六张子表的关联(已实验证实)。
+
+### 1 · 拓扑图(现物)
+
+```
+【旧供应商,已停喂】documents ──→ document_chunks
+        │ syncCourseMaterials (courseMaterials.ts:116,每次 list 都跑)
+        ▼
+source_materials (1/文档, UNIQUE(user_id, document_id), document_id NOT NULL→documents CASCADE)
+        │ ensureFragmentsForMaterial (:169) —— 每个 chunk 1 条;无 chunk 时整篇 1 条
+        ▼
+source_fragments (document_id NOT NULL→documents CASCADE, document_chunk_id→chunks SET NULL)
+        │ ensureSegmentsForMaterial (:349) —— 1 条 document 段 + 每个 heading 组 + 每个页段 + 每 5 个 fragment 1 个 chunk_group
+        ▼
+material_segments ←→ material_segment_fragments
+        │
+        ├─ organizedNoteProposals.ts —— 选段(:99-156,无段即抛「No material segments found…」:152)→ 生成笔记,receipt 写 note_block_sources(document_id/chunk_id,:361-400)
+        ├─ materialMapProposals.ts —— 按 material/document 过滤(:61-66)
+        ├─ materialReconciliationProposals.ts / reconciliationSafety.ts —— 证据链
+        └─ sourceSnapshots / sourceScopes / sourceAnchors / sourceBoards / learning canvas —— 引用 material/fragment/segment id
+```
+
+**引用 source_materials / source_fragments / material_segments 的子表(FK)**:evidence_items、excluded_material_scopes(017/018,SET NULL);source_snapshots(019,**CASCADE**);source_anchors、source_scopes(020/021,SET NULL);source_board_nodes、canvas_nodes(022/023,SET NULL);外加 fragment/segment 自身级联链。
+
+**三按钮禁用条件(client `CourseDetail.tsx:912-914` + `:990/998/1006`)**——全部由材料派生,材料出现即自然解禁:
+- Material Map:`materials.some(fragment_status === 'ready')`
+- Note Proposal:`acceptedSegmentCount > 0 || totalSegmentCount > 0`(段由 `fetchMaterials` 对 ready 材料逐个拉 `/segments` 时惰性生成,`:441-466`)
+- Reconcile:同 Material Map
+- 三者另受 `proposalBusy` / `materialLoading` 约束。另:`:1074` 快照按钮以 `materials.length === 0` 禁用——**Source 材料接进来后它会解禁,但快照服务只认 documents(见 §2 附带风险)**。
+
+### 2 · 换供应商的 schema 代价与最小迁移方案
+
+**障碍不止一处**:`source_materials.document_id` 与 `source_fragments.document_id` **都是** `NOT NULL REFERENCES documents`。SQLite 无法 ALTER 掉 NOT NULL,只能重建表。
+
+**⚠️ 关键发现:不能照抄 046 的重建写法。** 迁移跑器(`db/migrate.ts:107`)把每个迁移包在事务里,事务内 `PRAGMA foreign_keys` 无法切换 → 外键始终 ON。SQLite 3.49.2 / `legacy_alter_table=0` 下,`ALTER TABLE x RENAME TO x_legacy` 会**把所有子表的 FK 改写指向 x_legacy**,随后 `DROP TABLE x_legacy` 触发隐式删除 → SET NULL 子表被置空、CASCADE 子表被删光,且子表留下指向不存在表的 FK。最小实验已证实(证据 `docs/audits/2026-11-01-vps-f3-builder/rebuild-experiment.txt`:A 式 child.pid→null、child2 清空、FK 改指 `parent_legacy`;B 式关外键 12 步,数据与 FK 完好)。对 source_materials 而言,A 式等于清空岛上全部证据/锚点/范围/快照关联。
+(旁证:新建库上全表 FK 目标核查 = 0 条悬空,046 当年因唯一子表随后也被重建而侥幸无害;本单不触碰。)
+
+**最小方案(荐)**:
+- **跑器小改**(`db/migrate.ts`):`Migration` 增可选 `foreignKeysOff?: true`;对这类迁移,在事务**外**先 `PRAGMA foreign_keys = OFF`,事务内跑 up + `PRAGMA foreign_key_check`(有行即抛、回滚),`finally` 恢复 `ON`。其余迁移行为不变。
+- **迁移 `084_v2_material_source_bridge`**(现役最大 083),标 `foreignKeysOff`,12 步重建两表:
+  - `source_materials`:`document_id` 放宽为可空;新增 `source_record_id TEXT REFERENCES source_records(id) ON DELETE CASCADE`;CHECK 约束要求 document_id 与 source_record_id 恰有一个非空;`source_type` 取 document / source;保留 `UNIQUE(user_id, document_id)`(SQLite 唯一约束中 NULL 互不相等,Source 行不冲突),新增唯一索引 `(user_id, source_record_id, course_id)`;
+  - `source_fragments`:`document_id` 放宽可空;新增 `source_record_id`(同上 CASCADE)与 `note_block_id TEXT`(**不加 FK**,见 §3 重投影);
+  - 全部旧列与 course_id CASCADE 原样(课程生命周期登记表 `courseLifecyclePolicies.ts:68/80/81` 不受影响);重建后复建全部既有索引;
+  - **幂等**:先读 `PRAGMA table_info(source_materials)`,若 `document_id.notnull = 0` 且已有 `source_record_id` 列则直接返回。
+- **`schema.sql` 同步(⚠️坑)**:`schema.sql` 在**每次启动、迁移之前**对新旧库都跑一遍。两张表的 CREATE 应改为新形状(新库直接生对);但**新列上的索引不能写进 schema.sql**——老库此时还是旧形状,索引语句会因列不存在而崩。新索引只放迁移。
+- **向后兼容**:旧 documents 行原样迁过去,`document_id` 非空、`source_record_id` 为空,`syncCourseMaterials` 的 documents 分支不改。
+- **否决的替代**:①给每个 Source 造「影子 documents 行」——会出现在项目页「Legacy documents」列表与 Agent `search_documents` 里,且要伪造 file_path;②`writable_schema` 直改建表语句——不安全。
+
+**附带风险(段二须处理)**:
+- `listCourseMaterials` 用 `JOIN documents`(`courseMaterials.ts:262`)——必须改 LEFT JOIN,否则 Source 行被静默滤掉;
+- `listSourceFragments` / `ensureFragmentsForMaterial` 按 document 拉取,需加 Source 分支;
+- 快照服务(`sourceSnapshots.ts`)只认 documents,`source_snapshots.document_id NOT NULL`:对 Source 材料应在服务端明确拒绝(或客户端按钮按 source_type 禁用),⛔让它 500;
+- 生成笔记的 receipt(`organizedNoteProposals.ts:361`)目前只写 document_id/chunk_id——Source 来源应写进 `note_block_sources.source_record_id`(列已存在,046 加的),否则新笔记无可追溯出处。
+
+### 3 · fragment 最小来源形状:投影笔记的块 → 可行,荐采纳
+
+验证依据(`sourceProjectionMaterializer.ts:497-570`):每个投影块写入 `note_blocks`,`source_kind='source_projection'`,`block_type` 为 heading/paragraph,`plain_text` 即正文,heading 块的 `title` 即标题,`metadata` 含 `source_page_index`、`source_locator`、`artifact_block_id`,并同时写一条 receipt 到 `note_block_sources`(带 `source_record_id`)。映射:
+- `content = plain_text`;`title` = 最近一个 heading 块的文本(让既有「按 heading 分组」段逻辑直接生效);`page_start/end = source_page_index`;`fragment_type` = `page_range`(有页码)/ `chunk`(docx 等无页码);`metadata` 带 locator + artifact_block_id;`note_block_id` = 块 id;
+- 投影块 id 是确定性的(`projectionIdentity(sourceFileId,'block',artifact_block_id)`),同一原件重投影 id 稳定;
+- 合家法:正文=块,fragment 指回 TextFlow 块而非另存一份原件文本。
+
+**颗粒度取舍(候裁)**:一块一 fragment 最贴锚点,但大件(上限 5000 块)会让段数 ≈ 块数/5 + 页数 + heading 数;若嫌多,备选「一页一 fragment」(docx 无页码时退回每 N 块一条)。**荐:一块一 fragment**——段生成本就是惰性、按材料触发。
+
+**不选转写层(imprint)的理由**:`imprint_fragments` 只在 VLM 转写跑过且 `accepted` 后存在,不是每个 Source 都有;投影则是每个 materialized Source 必有。imprint 可作日后增强源。
+
+**重投影(Rebuild projection)的后果(候裁)**:重投影删旧块、按确定性 id 重建。fragment 需按 materialization 的 `updated_at` / `attempt_count` 判定陈旧后重建 → 旧 fragment 被删 → `material_segment_fragments` 链接与段的 accepted 状态随之丢失,证据/锚点等子表按 SET NULL 降级。荐:**重投影即重建该材料的 fragment 与 segment**(简单且诚实);如需保留 accepted 段,属另案。
+
+**多项目放置(候裁)**:一个 Source 可放进多个项目(`source_project_placements`),投影笔记只住一个项目。荐:**每个 (Source, 项目放置) 一条 material**,fragment 都取自同一份投影;material 的 course_id = 放置项目。
+
+### 4 · A-02 边界
+
+- 首页 Agent 的材料检索只有 `search_documents` / `get_document_content`(`agent/tools/executor.ts:612-`):三路检索 = 向量 `doc_chunk_vec` + FTS `document_chunks_fts` + `documents.filename/summary` LIKE——**全在旧 documents 管线**,Source 一个也碰不到。系统提示词还写死了这条边界并让用户「经材料库上传」(`agent/system-prompt.ts:38`)——那个入口已不存在,是误导。
+- 有利现物:`read_note` 读工具(`executor.ts:56`)已经能读投影笔记;缺的只是**发现**(Agent 不知道有哪些 Source、对应哪篇投影笔记)。`note_blocks` 没有 FTS 表。
+- **判断**:
+  - **顺手可做的低配版**(段二完成后,约半天):`search_documents` 增一路「Source 材料」——对 Source 来源的 fragment 做 LIKE + 按 display_name 匹配,结果带 `projection_note_id` 让 Agent 接 `read_note`;同步改掉 system-prompt:38 的误导句。依赖段二的 fragment,所以只能排在段二之后。
+  - **完整版**(Source 进向量/FTS 检索,与 documents 同等召回)= **独立一单**:要建 note_blocks 或 fragment 的 FTS 表、嵌入回填、结果形状统一,工作量 ≥ 段二本身。
+  - 荐:本单不带 A-02;段二收口后,由 Main_Designer 裁定是否立「低配版」小单。
+
+### 5 · 删除闭环
+
+- 有了 `source_materials.source_record_id … ON DELETE CASCADE` 与 `source_fragments.source_record_id … ON DELETE CASCADE`,`deleteSourceWithCompensation`(`sourceLifecycle.ts:116`,事务内、外键 ON)里的 `DELETE FROM source_records` 会**自动**连带删除 material → fragment → segment / segment_fragments,子表按既有 SET NULL / CASCADE 降级。**服务代码无需改动**,删除腿由 schema 承担。
+- 段二须补的测试:删 Source 后其 material/fragment/segment 计数为 0,且 evidence_items 等子表的引用被置空而非悬空。
+- 项目删除:material 的 `course_id` 仍 CASCADE(登记表已覆盖);「移到 Home」分支下投影笔记留存,但该项目的 material 随项目删除——符合「材料是项目镜头」的语义。
+
+### 段二工作量预估(供核准参考)
+
+跑器开关 + 084 迁移(含幂等与 schema.sql 同步)+ syncCourseMaterials 的 Source 分支 + LEFT JOIN 修正 + fragment/segment 的 Source 取数 + receipt 写 source_record_id + 快照对 Source 的明确拒绝 + 测试(迁移幂等 / 老数据保真 / 子表关联完好的 12 步对照、上传→材料出现→create_proposal 成功的端到端 mock 链、删除闭环、重投影重建)。估 **1–1.5 个工作段**,比 F1/F2 重一档,主要成本在迁移与测试。
+
+### 候 Main_Designer 裁定的点
+
+1. 迁移跑器加 `foreignKeysOff` 开关(动共享基础设施)——准否;
+2. fragment 颗粒度:一块一条(荐)/ 一页一条;
+3. 重投影 = 重建 fragment/segment、丢 accepted 状态(荐)——准否;
+4. 多项目放置 = 每个放置一条 material(荐);
+5. A-02 低配版是否在段二后立小单;
+6. 快照按钮对 Source 材料:服务端拒绝 + 客户端禁用(荐)/ 只服务端拒绝。
+
+### 证据与环境申报
+
+- `docs/audits/2026-11-01-vps-f3-builder/rebuild-experiment.txt`:A/B 两式重建的内存库对照实验(better-sqlite3,SQLite 3.49.2)。
+- 悬空 FK 核查:仓外一次性脚本对新建内存库跑 `PRAGMA foreign_key_list` 全表 → 0 条;`sqlite_master` 中含 `_legacy` 字样的只有 `template_definitions`,经核不是 FK 目标。
+- 仓外脚本首次运行因 CJS 不支持顶层 await、Windows 盘符路径不被 ESM 加载器接受而失败,改 `.mts` + `file:///` 后正常;回执追加时 Bash heredoc 引号解析再次失败(同 P1),改为先落文件再追加。均属工具摩擦,与产品无关。
+- 未读 `.env`;无 git 写操作;无用户库接触;无真实模型调用;仓库代码零改动。

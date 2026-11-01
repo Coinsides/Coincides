@@ -1,0 +1,6 @@
+sqlite 3.49.2 legacy_alter_table 0
+A child sql: CREATE TABLE child(id TEXT PRIMARY KEY, pid TEXT REFERENCES "parent_legacy"(id) ON DELETE SET NULL)
+A child rows: [ { id: 'c1', pid: null } ] child2 rows: []
+B child sql: CREATE TABLE child(id TEXT PRIMARY KEY, pid TEXT REFERENCES parent(id) ON DELETE SET NULL)
+B child rows: [ { id: 'c1', pid: 'p1' } ] child2 rows: [ { id: 'k1', pid: 'p1' } ]
+B after parent delete child: [ { id: 'c1', pid: null } ] child2: []
