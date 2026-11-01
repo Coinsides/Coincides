@@ -1,0 +1,445 @@
+TAP version 13
+# sqlite-vec loaded: vv0.1.7
+# 📦 Running 84 pending migration(s)...
+#   ✅ 001_baseline: Establish migration baseline for v1.0 schema
+#   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks
+#   ✅ 003_goal_nesting: Add parent_id to goals for nesting support
+#   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking
+#   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder
+#   ✅ 006_onboarding: Add onboarding_completed flag to users
+#   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system
+#   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)
+#   ✅ 009_task_time_block: Add time_block_id foreign key to tasks for explicit block association
+#   ✅ 010_enforce_card_sections: Ensure all cards have a section_id: create "Unsorted" section per deck for orphaned cards
+#   ✅ 011_task_cards: Create task_cards M:N association table for Task-Card linkage
+#   ✅ 012_time_block_templates: Create time_block_template_sets and time_block_templates tables for template system
+#   ✅ 013_time_block_instances: Convert time_blocks from weekly template to date-based instances; drop time_block_overrides
+#   ✅ 014_fix_tasks_fk: Fix tasks.time_block_id FK pointing to dropped time_blocks_old table after migration 013 rename
+#   ✅ 015_v2_note_foundation: Add v2 NoteBlock foundation tables
+#   ✅ 016_v2_material_proposal: Add v2 course material proposal seed tables
+#   ✅ 017_v2_reconciliation_evidence: Add v2 material reconciliation evidence set tables
+#   ✅ 018_v2_reconciliation_safety: Add v2 material reconciliation exclusion, conflict, and recovery tables
+#   ✅ 019_v2_source_snapshots: Add v2 source snapshot viewer foundation tables
+#   ✅ 020_v2_source_anchors: Add v2 source anchor jump-back tables
+#   ✅ 021_v2_source_scopes: Add v2 source scope selection table
+#   ✅ 022_v2_source_boards: Add v2 source board seed tables
+#   ✅ 023_v2_learning_canvas: Add v2 learning canvas document tables
+#   ✅ 024_v2_canvas_relations: Add v2 canvas edge relation and relation layer seed tables
+#   ✅ 025_v2_template_definitions: Add v2 template definition runtime table
+#   ✅ 026_v2_composition_templates: Add v2 composition template runtime tables
+#   ✅ 027_v2_domain_packages: Add v2 domain block set and package manifest runtime tables
+#   ✅ 028_v2_template_migration_proposals: Add v2 template migration proposal governance tables
+#   ✅ 029_v2_package_import_export: Add v2 package export and import preview/runtime records
+#   ✅ 030_v2_domain_refinement_proposals: Add v2 domain refinement proposal governance tables
+#   ✅ 031_v2_content_groups: Add v2 ContentGroup root entity table
+#   ✅ 032_v2_group_folders: Add v2 GroupFolder entity and ContentGroup folder placement tables
+#   ✅ 033_v2_content_group_members: Add v2 ContentGroupMember entity table
+#   ✅ 034_v2_content_group_petals: Add v2 ContentGroupFragment and ContentGroupPetal entity tables
+#   ✅ 035_v2_canvas_objects: Add durable CanvasObject, CanvasPlacement, ContentMount, and PageFrame extension tables
+#   ✅ 036_v2_annotation_truths: Add durable AnnotationTruth and AnnotationRange tables
+#   ✅ 037_v2_canvas_object_block_identity_hardening: Repair block-backed CanvasObject identity to be per placement
+#   ✅ 038_v2_canvas_note_block_mount_uniqueness: Enforce one note_block content mount per CanvasObject
+#   ✅ 039_v2_page_frame_extension_note_scope: Scope PageFrame extension identity by note and frame id
+#   ✅ 040_v2_visual_connector_extensions: Add durable visual connector extension table for visual-only CanvasObject lines
+#   ✅ 041_v2_canvas_image_assets: Add canvas image assets and image CanvasObject extension table
+#   ✅ 042_v2_structured_object_extensions: Add structured CanvasObject extension table for table objects
+#   ✅ 043_v2_page_frame_extension_repair: Repair missing note-scoped PageFrame extension rows after cutover
+#   ✅ 044_v2_purposes: Add purpose frames and move ContentGroup role semantics to purpose edge
+#   ✅ 045_v2_source_identity_floor: Add global Source identity, file, materialization, and Project placement foundation
+#   ✅ 046_v2_source_lifecycle_closure: Close Source receipt, projection deletion, and managed file cleanup lifecycles
+#   ✅ 047_v2_item_relation_floor: Add Item and Relation truth floor and ContentGroup Item membership
+#   ✅ 048_v2_operation_batches_created_at_timestamp_fix: Normalize operation_batches.created_at values from ISO with Z to SQLite datetime format
+#   ✅ 049_v2_source_imprints: Add Source imprint birth certificates and anchored fragment storage
+#   ✅ 050_v2_source_intake_declarations: Store honest intake declarations on each Source file
+#   ✅ 051_v2_transcriber_lockfile_hash: Add the raw-lockfile SHA-256 identity to Source imprint birth certificates
+#   ✅ 052_v2_imprint_fragment_vectors: Add model-isolated vector identities and sqlite-vec storage for imprint fragments
+#   ✅ 053_v2_template_studio_decommission: Retire the legacy Template Studio table family
+#   ✅ 054_v13_events_ledger: Add the append-only events ledger for V13 migration receipts
+#   ✅ 055_v13_tray_order: Add placement ordering for the note tray
+#   ✅ 056_v13_coordinate_contract: Add database metadata for the explicit coordinate contract switch
+#   ✅ 057_v13_boards: Add library boards and retire note-purpose and maintained membership writers
+#   ✅ 058_v13_board_deleted_event: Allow board_deleted receipts while preserving all existing events
+#   ✅ 059_v13_board_text_ranges: Add board-owned live text ranges independent of annotation replacement
+#   ✅ 060_v13_board_chalk_items: Add board-born Item receipts and board-owned plain-text chalk visuals
+#   ✅ 061_v13_board_staging: Add explicit board member placement and human mount provenance for Staging
+#   ✅ 062_v13_board_layers: Add board layers with nullable Base membership and persistent layer order
+#   ✅ 063_v13_atomic_text_save_revision: Add an optimistic-concurrency revision for atomic note-block text saves
+#   ✅ 064_v13_note_tags: Add flat note tags with retained actor provenance
+#   ✅ 065_v13_board_item_identity: Bridge boards to unique Item identities with honest, atomic backfill receipts
+#   ✅ 066_v13_board_viewport_bookmarks: Add board-owned named viewport snapshots without changing board layout
+#   ✅ 067_v13_paper_skin: Add an inheritable project paper skin; global and note skins use existing JSON storage
+#   ✅ 068_v13_board_skin: Add an inheritable board skin using the shared skin selection shape
+#   ✅ 069_v13_source_reprojection_receipts: Retain append-only user-work and annotation receipts for Source replacement
+#   ✅ 070_v14_palette_colors: Add named palette colors and seed the 24 immutable factory colors per user
+#   ✅ 071_v14_skin_suites: Add complete user appearance suites; factory presets remain code constants
+#   ✅ 072_v14_skin_suite_material: Retain the factory material lineage of user appearance suites
+#   ✅ 073_v14_agent_goal_event: Allow goal_created events for the Agent write door while preserving event history
+#   ✅ 074_v14_agent_planning_events: Allow planning action events while preserving event history
+#   ✅ 075_v14_delete_authorizations: Add single-use time-block delete authorizations and deletion events
+#   ✅ 076_v14_claim_without_receipt_event: Allow claim_without_receipt observations while preserving event history
+#   ✅ 077_v14_agent_message_turn_id: Register agent message turn ownership without inferring historical turns
+#   ✅ 078_v14_board_visuals: Add board stickies and visual arc edges with polymorphic bindings
+#   ✅ 079_v14_note_binding: Add nullable note-owned binding settings without backfilling existing notes
+#   ✅ 080_v14_silk_skin_material: Allow the fifth factory material in existing appearance suites
+#   ✅ 081_v14_board_agent_staging: Extend board Staging to stickies and record board changes
+#   ✅ 082_v14_agent_message_meta: Keep C2 selection anchors and reviewable intent plans on conversation messages
+#   ✅ 083_v14_agent_episodes: Add conversation episode projections and their summary FTS index without changing messages
+#   ✅ 084_v2_material_source_bridge: Let Ready Sources feed source materials and fragments next to legacy documents
+# 📦 Migrations complete (84 applied).
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a natural-language question finds a Source by its extracted text and points at read_note
+not ok 1 - a natural-language question finds a Source by its extracted text and points at read_note
+  ---
+  duration_ms: 532.3614
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\vpsF5SourceDiscovery.test.ts:1:3039'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:94:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async withFixture (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:43:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:88:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# 📦 Running 84 pending migration(s)...
+#   ✅ 001_baseline: Establish migration baseline for v1.0 schema
+#   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks
+#   ✅ 003_goal_nesting: Add parent_id to goals for nesting support
+#   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking
+#   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder
+#   ✅ 006_onboarding: Add onboarding_completed flag to users
+#   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system
+#   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)
+#   ✅ 009_task_time_block: Add time_block_id foreign key to tasks for explicit block association
+#   ✅ 010_enforce_card_sections: Ensure all cards have a section_id: create "Unsorted" section per deck for orphaned cards
+#   ✅ 011_task_cards: Create task_cards M:N association table for Task-Card linkage
+#   ✅ 012_time_block_templates: Create time_block_template_sets and time_block_templates tables for template system
+#   ✅ 013_time_block_instances: Convert time_blocks from weekly template to date-based instances; drop time_block_overrides
+#   ✅ 014_fix_tasks_fk: Fix tasks.time_block_id FK pointing to dropped time_blocks_old table after migration 013 rename
+#   ✅ 015_v2_note_foundation: Add v2 NoteBlock foundation tables
+#   ✅ 016_v2_material_proposal: Add v2 course material proposal seed tables
+#   ✅ 017_v2_reconciliation_evidence: Add v2 material reconciliation evidence set tables
+#   ✅ 018_v2_reconciliation_safety: Add v2 material reconciliation exclusion, conflict, and recovery tables
+#   ✅ 019_v2_source_snapshots: Add v2 source snapshot viewer foundation tables
+#   ✅ 020_v2_source_anchors: Add v2 source anchor jump-back tables
+#   ✅ 021_v2_source_scopes: Add v2 source scope selection table
+#   ✅ 022_v2_source_boards: Add v2 source board seed tables
+#   ✅ 023_v2_learning_canvas: Add v2 learning canvas document tables
+#   ✅ 024_v2_canvas_relations: Add v2 canvas edge relation and relation layer seed tables
+#   ✅ 025_v2_template_definitions: Add v2 template definition runtime table
+#   ✅ 026_v2_composition_templates: Add v2 composition template runtime tables
+#   ✅ 027_v2_domain_packages: Add v2 domain block set and package manifest runtime tables
+#   ✅ 028_v2_template_migration_proposals: Add v2 template migration proposal governance tables
+#   ✅ 029_v2_package_import_export: Add v2 package export and import preview/runtime records
+#   ✅ 030_v2_domain_refinement_proposals: Add v2 domain refinement proposal governance tables
+#   ✅ 031_v2_content_groups: Add v2 ContentGroup root entity table
+#   ✅ 032_v2_group_folders: Add v2 GroupFolder entity and ContentGroup folder placement tables
+#   ✅ 033_v2_content_group_members: Add v2 ContentGroupMember entity table
+#   ✅ 034_v2_content_group_petals: Add v2 ContentGroupFragment and ContentGroupPetal entity tables
+#   ✅ 035_v2_canvas_objects: Add durable CanvasObject, CanvasPlacement, ContentMount, and PageFrame extension tables
+#   ✅ 036_v2_annotation_truths: Add durable AnnotationTruth and AnnotationRange tables
+#   ✅ 037_v2_canvas_object_block_identity_hardening: Repair block-backed CanvasObject identity to be per placement
+#   ✅ 038_v2_canvas_note_block_mount_uniqueness: Enforce one note_block content mount per CanvasObject
+#   ✅ 039_v2_page_frame_extension_note_scope: Scope PageFrame extension identity by note and frame id
+#   ✅ 040_v2_visual_connector_extensions: Add durable visual connector extension table for visual-only CanvasObject lines
+#   ✅ 041_v2_canvas_image_assets: Add canvas image assets and image CanvasObject extension table
+#   ✅ 042_v2_structured_object_extensions: Add structured CanvasObject extension table for table objects
+#   ✅ 043_v2_page_frame_extension_repair: Repair missing note-scoped PageFrame extension rows after cutover
+#   ✅ 044_v2_purposes: Add purpose frames and move ContentGroup role semantics to purpose edge
+#   ✅ 045_v2_source_identity_floor: Add global Source identity, file, materialization, and Project placement foundation
+#   ✅ 046_v2_source_lifecycle_closure: Close Source receipt, projection deletion, and managed file cleanup lifecycles
+#   ✅ 047_v2_item_relation_floor: Add Item and Relation truth floor and ContentGroup Item membership
+#   ✅ 048_v2_operation_batches_created_at_timestamp_fix: Normalize operation_batches.created_at values from ISO with Z to SQLite datetime format
+#   ✅ 049_v2_source_imprints: Add Source imprint birth certificates and anchored fragment storage
+#   ✅ 050_v2_source_intake_declarations: Store honest intake declarations on each Source file
+#   ✅ 051_v2_transcriber_lockfile_hash: Add the raw-lockfile SHA-256 identity to Source imprint birth certificates
+#   ✅ 052_v2_imprint_fragment_vectors: Add model-isolated vector identities and sqlite-vec storage for imprint fragments
+#   ✅ 053_v2_template_studio_decommission: Retire the legacy Template Studio table family
+#   ✅ 054_v13_events_ledger: Add the append-only events ledger for V13 migration receipts
+#   ✅ 055_v13_tray_order: Add placement ordering for the note tray
+#   ✅ 056_v13_coordinate_contract: Add database metadata for the explicit coordinate contract switch
+#   ✅ 057_v13_boards: Add library boards and retire note-purpose and maintained membership writers
+#   ✅ 058_v13_board_deleted_event: Allow board_deleted receipts while preserving all existing events
+#   ✅ 059_v13_board_text_ranges: Add board-owned live text ranges independent of annotation replacement
+#   ✅ 060_v13_board_chalk_items: Add board-born Item receipts and board-owned plain-text chalk visuals
+#   ✅ 061_v13_board_staging: Add explicit board member placement and human mount provenance for Staging
+#   ✅ 062_v13_board_layers: Add board layers with nullable Base membership and persistent layer order
+#   ✅ 063_v13_atomic_text_save_revision: Add an optimistic-concurrency revision for atomic note-block text saves
+#   ✅ 064_v13_note_tags: Add flat note tags with retained actor provenance
+#   ✅ 065_v13_board_item_identity: Bridge boards to unique Item identities with honest, atomic backfill receipts
+#   ✅ 066_v13_board_viewport_bookmarks: Add board-owned named viewport snapshots without changing board layout
+#   ✅ 067_v13_paper_skin: Add an inheritable project paper skin; global and note skins use existing JSON storage
+#   ✅ 068_v13_board_skin: Add an inheritable board skin using the shared skin selection shape
+#   ✅ 069_v13_source_reprojection_receipts: Retain append-only user-work and annotation receipts for Source replacement
+#   ✅ 070_v14_palette_colors: Add named palette colors and seed the 24 immutable factory colors per user
+#   ✅ 071_v14_skin_suites: Add complete user appearance suites; factory presets remain code constants
+#   ✅ 072_v14_skin_suite_material: Retain the factory material lineage of user appearance suites
+#   ✅ 073_v14_agent_goal_event: Allow goal_created events for the Agent write door while preserving event history
+#   ✅ 074_v14_agent_planning_events: Allow planning action events while preserving event history
+#   ✅ 075_v14_delete_authorizations: Add single-use time-block delete authorizations and deletion events
+#   ✅ 076_v14_claim_without_receipt_event: Allow claim_without_receipt observations while preserving event history
+#   ✅ 077_v14_agent_message_turn_id: Register agent message turn ownership without inferring historical turns
+#   ✅ 078_v14_board_visuals: Add board stickies and visual arc edges with polymorphic bindings
+#   ✅ 079_v14_note_binding: Add nullable note-owned binding settings without backfilling existing notes
+#   ✅ 080_v14_silk_skin_material: Allow the fifth factory material in existing appearance suites
+#   ✅ 081_v14_board_agent_staging: Extend board Staging to stickies and record board changes
+#   ✅ 082_v14_agent_message_meta: Keep C2 selection anchors and reviewable intent plans on conversation messages
+#   ✅ 083_v14_agent_episodes: Add conversation episode projections and their summary FTS index without changing messages
+#   ✅ 084_v2_material_source_bridge: Let Ready Sources feed source materials and fragments next to legacy documents
+# 📦 Migrations complete (84 applied).
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a Source is also found by its name, and documents keep their own result list
+not ok 2 - a Source is also found by its name, and documents keep their own result list
+  ---
+  duration_ms: 389.3064
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\vpsF5SourceDiscovery.test.ts:1:3983'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:118:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async withFixture (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:43:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:108:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# 📦 Running 84 pending migration(s)...
+#   ✅ 001_baseline: Establish migration baseline for v1.0 schema
+#   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks
+#   ✅ 003_goal_nesting: Add parent_id to goals for nesting support
+#   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking
+#   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder
+#   ✅ 006_onboarding: Add onboarding_completed flag to users
+#   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system
+#   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)
+#   ✅ 009_task_time_block: Add time_block_id foreign key to tasks for explicit block association
+#   ✅ 010_enforce_card_sections: Ensure all cards have a section_id: create "Unsorted" section per deck for orphaned cards
+#   ✅ 011_task_cards: Create task_cards M:N association table for Task-Card linkage
+#   ✅ 012_time_block_templates: Create time_block_template_sets and time_block_templates tables for template system
+#   ✅ 013_time_block_instances: Convert time_blocks from weekly template to date-based instances; drop time_block_overrides
+#   ✅ 014_fix_tasks_fk: Fix tasks.time_block_id FK pointing to dropped time_blocks_old table after migration 013 rename
+#   ✅ 015_v2_note_foundation: Add v2 NoteBlock foundation tables
+#   ✅ 016_v2_material_proposal: Add v2 course material proposal seed tables
+#   ✅ 017_v2_reconciliation_evidence: Add v2 material reconciliation evidence set tables
+#   ✅ 018_v2_reconciliation_safety: Add v2 material reconciliation exclusion, conflict, and recovery tables
+#   ✅ 019_v2_source_snapshots: Add v2 source snapshot viewer foundation tables
+#   ✅ 020_v2_source_anchors: Add v2 source anchor jump-back tables
+#   ✅ 021_v2_source_scopes: Add v2 source scope selection table
+#   ✅ 022_v2_source_boards: Add v2 source board seed tables
+#   ✅ 023_v2_learning_canvas: Add v2 learning canvas document tables
+#   ✅ 024_v2_canvas_relations: Add v2 canvas edge relation and relation layer seed tables
+#   ✅ 025_v2_template_definitions: Add v2 template definition runtime table
+#   ✅ 026_v2_composition_templates: Add v2 composition template runtime tables
+#   ✅ 027_v2_domain_packages: Add v2 domain block set and package manifest runtime tables
+#   ✅ 028_v2_template_migration_proposals: Add v2 template migration proposal governance tables
+#   ✅ 029_v2_package_import_export: Add v2 package export and import preview/runtime records
+#   ✅ 030_v2_domain_refinement_proposals: Add v2 domain refinement proposal governance tables
+#   ✅ 031_v2_content_groups: Add v2 ContentGroup root entity table
+#   ✅ 032_v2_group_folders: Add v2 GroupFolder entity and ContentGroup folder placement tables
+#   ✅ 033_v2_content_group_members: Add v2 ContentGroupMember entity table
+#   ✅ 034_v2_content_group_petals: Add v2 ContentGroupFragment and ContentGroupPetal entity tables
+#   ✅ 035_v2_canvas_objects: Add durable CanvasObject, CanvasPlacement, ContentMount, and PageFrame extension tables
+#   ✅ 036_v2_annotation_truths: Add durable AnnotationTruth and AnnotationRange tables
+#   ✅ 037_v2_canvas_object_block_identity_hardening: Repair block-backed CanvasObject identity to be per placement
+#   ✅ 038_v2_canvas_note_block_mount_uniqueness: Enforce one note_block content mount per CanvasObject
+#   ✅ 039_v2_page_frame_extension_note_scope: Scope PageFrame extension identity by note and frame id
+#   ✅ 040_v2_visual_connector_extensions: Add durable visual connector extension table for visual-only CanvasObject lines
+#   ✅ 041_v2_canvas_image_assets: Add canvas image assets and image CanvasObject extension table
+#   ✅ 042_v2_structured_object_extensions: Add structured CanvasObject extension table for table objects
+#   ✅ 043_v2_page_frame_extension_repair: Repair missing note-scoped PageFrame extension rows after cutover
+#   ✅ 044_v2_purposes: Add purpose frames and move ContentGroup role semantics to purpose edge
+#   ✅ 045_v2_source_identity_floor: Add global Source identity, file, materialization, and Project placement foundation
+#   ✅ 046_v2_source_lifecycle_closure: Close Source receipt, projection deletion, and managed file cleanup lifecycles
+#   ✅ 047_v2_item_relation_floor: Add Item and Relation truth floor and ContentGroup Item membership
+#   ✅ 048_v2_operation_batches_created_at_timestamp_fix: Normalize operation_batches.created_at values from ISO with Z to SQLite datetime format
+#   ✅ 049_v2_source_imprints: Add Source imprint birth certificates and anchored fragment storage
+#   ✅ 050_v2_source_intake_declarations: Store honest intake declarations on each Source file
+#   ✅ 051_v2_transcriber_lockfile_hash: Add the raw-lockfile SHA-256 identity to Source imprint birth certificates
+#   ✅ 052_v2_imprint_fragment_vectors: Add model-isolated vector identities and sqlite-vec storage for imprint fragments
+#   ✅ 053_v2_template_studio_decommission: Retire the legacy Template Studio table family
+#   ✅ 054_v13_events_ledger: Add the append-only events ledger for V13 migration receipts
+#   ✅ 055_v13_tray_order: Add placement ordering for the note tray
+#   ✅ 056_v13_coordinate_contract: Add database metadata for the explicit coordinate contract switch
+#   ✅ 057_v13_boards: Add library boards and retire note-purpose and maintained membership writers
+#   ✅ 058_v13_board_deleted_event: Allow board_deleted receipts while preserving all existing events
+#   ✅ 059_v13_board_text_ranges: Add board-owned live text ranges independent of annotation replacement
+#   ✅ 060_v13_board_chalk_items: Add board-born Item receipts and board-owned plain-text chalk visuals
+#   ✅ 061_v13_board_staging: Add explicit board member placement and human mount provenance for Staging
+#   ✅ 062_v13_board_layers: Add board layers with nullable Base membership and persistent layer order
+#   ✅ 063_v13_atomic_text_save_revision: Add an optimistic-concurrency revision for atomic note-block text saves
+#   ✅ 064_v13_note_tags: Add flat note tags with retained actor provenance
+#   ✅ 065_v13_board_item_identity: Bridge boards to unique Item identities with honest, atomic backfill receipts
+#   ✅ 066_v13_board_viewport_bookmarks: Add board-owned named viewport snapshots without changing board layout
+#   ✅ 067_v13_paper_skin: Add an inheritable project paper skin; global and note skins use existing JSON storage
+#   ✅ 068_v13_board_skin: Add an inheritable board skin using the shared skin selection shape
+#   ✅ 069_v13_source_reprojection_receipts: Retain append-only user-work and annotation receipts for Source replacement
+#   ✅ 070_v14_palette_colors: Add named palette colors and seed the 24 immutable factory colors per user
+#   ✅ 071_v14_skin_suites: Add complete user appearance suites; factory presets remain code constants
+#   ✅ 072_v14_skin_suite_material: Retain the factory material lineage of user appearance suites
+#   ✅ 073_v14_agent_goal_event: Allow goal_created events for the Agent write door while preserving event history
+#   ✅ 074_v14_agent_planning_events: Allow planning action events while preserving event history
+#   ✅ 075_v14_delete_authorizations: Add single-use time-block delete authorizations and deletion events
+#   ✅ 076_v14_claim_without_receipt_event: Allow claim_without_receipt observations while preserving event history
+#   ✅ 077_v14_agent_message_turn_id: Register agent message turn ownership without inferring historical turns
+#   ✅ 078_v14_board_visuals: Add board stickies and visual arc edges with polymorphic bindings
+#   ✅ 079_v14_note_binding: Add nullable note-owned binding settings without backfilling existing notes
+#   ✅ 080_v14_silk_skin_material: Allow the fifth factory material in existing appearance suites
+#   ✅ 081_v14_board_agent_staging: Extend board Staging to stickies and record board changes
+#   ✅ 082_v14_agent_message_meta: Keep C2 selection anchors and reviewable intent plans on conversation messages
+#   ✅ 083_v14_agent_episodes: Add conversation episode projections and their summary FTS index without changing messages
+#   ✅ 084_v2_material_source_bridge: Let Ready Sources feed source materials and fragments next to legacy documents
+# 📦 Migrations complete (84 applied).
+# sqlite-vec loaded: vv0.1.7
+# Subtest: Sources outside the course filter or not yet extracted are not returned
+not ok 3 - Sources outside the course filter or not yet extracted are not returned
+  ---
+  duration_ms: 388.543
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\vpsF5SourceDiscovery.test.ts:4:425'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   'other.txt'
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'other.txt'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:134:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async withFixture (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:43:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\vpsF5SourceDiscovery.test.ts:125:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# 📦 Running 84 pending migration(s)...
+#   ✅ 001_baseline: Establish migration baseline for v1.0 schema
+#   ✅ 002_task_upgrade: Add start_time, end_time, description, checklist to tasks
+#   ✅ 003_goal_nesting: Add parent_id to goals for nesting support
+#   ✅ 004_task_serves_must: Add serves_must column to tasks for priority dependency tracking
+#   ✅ 005_goal_sort_order: Add sort_order to goals for drag-and-drop reorder
+#   ✅ 006_onboarding: Add onboarding_completed flag to users
+#   ✅ 007_time_blocks: Add time_blocks and time_block_overrides tables for weekly template system
+#   ✅ 008_goal_dependencies: Add goal_dependencies table (DAG-compatible, v1.3 linear chain only)
+#   ✅ 009_task_time_block: Add time_block_id foreign key to tasks for explicit block association
+#   ✅ 010_enforce_card_sections: Ensure all cards have a section_id: create "Unsorted" section per deck for orphaned cards
+#   ✅ 011_task_cards: Create task_cards M:N association table for Task-Card linkage
+#   ✅ 012_time_block_templates: Create time_block_template_sets and time_block_templates tables for template system
+#   ✅ 013_time_block_instances: Convert time_blocks from weekly template to date-based instances; drop time_block_overrides
+#   ✅ 014_fix_tasks_fk: Fix tasks.time_block_id FK pointing to dropped time_blocks_old table after migration 013 rename
+#   ✅ 015_v2_note_foundation: Add v2 NoteBlock foundation tables
+#   ✅ 016_v2_material_proposal: Add v2 course material proposal seed tables
+#   ✅ 017_v2_reconciliation_evidence: Add v2 material reconciliation evidence set tables
+#   ✅ 018_v2_reconciliation_safety: Add v2 material reconciliation exclusion, conflict, and recovery tables
+#   ✅ 019_v2_source_snapshots: Add v2 source snapshot viewer foundation tables
+#   ✅ 020_v2_source_anchors: Add v2 source anchor jump-back tables
+#   ✅ 021_v2_source_scopes: Add v2 source scope selection table
+#   ✅ 022_v2_source_boards: Add v2 source board seed tables
+#   ✅ 023_v2_learning_canvas: Add v2 learning canvas document tables
+#   ✅ 024_v2_canvas_relations: Add v2 canvas edge relation and relation layer seed tables
+#   ✅ 025_v2_template_definitions: Add v2 template definition runtime table
+#   ✅ 026_v2_composition_templates: Add v2 composition template runtime tables
+#   ✅ 027_v2_domain_packages: Add v2 domain block set and package manifest runtime tables
+#   ✅ 028_v2_template_migration_proposals: Add v2 template migration proposal governance tables
+#   ✅ 029_v2_package_import_export: Add v2 package export and import preview/runtime records
+#   ✅ 030_v2_domain_refinement_proposals: Add v2 domain refinement proposal governance tables
+#   ✅ 031_v2_content_groups: Add v2 ContentGroup root entity table
+#   ✅ 032_v2_group_folders: Add v2 GroupFolder entity and ContentGroup folder placement tables
+#   ✅ 033_v2_content_group_members: Add v2 ContentGroupMember entity table
+#   ✅ 034_v2_content_group_petals: Add v2 ContentGroupFragment and ContentGroupPetal entity tables
+#   ✅ 035_v2_canvas_objects: Add durable CanvasObject, CanvasPlacement, ContentMount, and PageFrame extension tables
+#   ✅ 036_v2_annotation_truths: Add durable AnnotationTruth and AnnotationRange tables
+#   ✅ 037_v2_canvas_object_block_identity_hardening: Repair block-backed CanvasObject identity to be per placement
+#   ✅ 038_v2_canvas_note_block_mount_uniqueness: Enforce one note_block content mount per CanvasObject
+#   ✅ 039_v2_page_frame_extension_note_scope: Scope PageFrame extension identity by note and frame id
+#   ✅ 040_v2_visual_connector_extensions: Add durable visual connector extension table for visual-only CanvasObject lines
+#   ✅ 041_v2_canvas_image_assets: Add canvas image assets and image CanvasObject extension table
+#   ✅ 042_v2_structured_object_extensions: Add structured CanvasObject extension table for table objects
+#   ✅ 043_v2_page_frame_extension_repair: Repair missing note-scoped PageFrame extension rows after cutover
+#   ✅ 044_v2_purposes: Add purpose frames and move ContentGroup role semantics to purpose edge
+#   ✅ 045_v2_source_identity_floor: Add global Source identity, file, materialization, and Project placement foundation
+#   ✅ 046_v2_source_lifecycle_closure: Close Source receipt, projection deletion, and managed file cleanup lifecycles
+#   ✅ 047_v2_item_relation_floor: Add Item and Relation truth floor and ContentGroup Item membership
+#   ✅ 048_v2_operation_batches_created_at_timestamp_fix: Normalize operation_batches.created_at values from ISO with Z to SQLite datetime format
+#   ✅ 049_v2_source_imprints: Add Source imprint birth certificates and anchored fragment storage
+#   ✅ 050_v2_source_intake_declarations: Store honest intake declarations on each Source file
+#   ✅ 051_v2_transcriber_lockfile_hash: Add the raw-lockfile SHA-256 identity to Source imprint birth certificates
+#   ✅ 052_v2_imprint_fragment_vectors: Add model-isolated vector identities and sqlite-vec storage for imprint fragments
+#   ✅ 053_v2_template_studio_decommission: Retire the legacy Template Studio table family
+#   ✅ 054_v13_events_ledger: Add the append-only events ledger for V13 migration receipts
+#   ✅ 055_v13_tray_order: Add placement ordering for the note tray
+#   ✅ 056_v13_coordinate_contract: Add database metadata for the explicit coordinate contract switch
+#   ✅ 057_v13_boards: Add library boards and retire note-purpose and maintained membership writers
+#   ✅ 058_v13_board_deleted_event: Allow board_deleted receipts while preserving all existing events
+#   ✅ 059_v13_board_text_ranges: Add board-owned live text ranges independent of annotation replacement
+#   ✅ 060_v13_board_chalk_items: Add board-born Item receipts and board-owned plain-text chalk visuals
+#   ✅ 061_v13_board_staging: Add explicit board member placement and human mount provenance for Staging
+#   ✅ 062_v13_board_layers: Add board layers with nullable Base membership and persistent layer order
+#   ✅ 063_v13_atomic_text_save_revision: Add an optimistic-concurrency revision for atomic note-block text saves
+#   ✅ 064_v13_note_tags: Add flat note tags with retained actor provenance
+#   ✅ 065_v13_board_item_identity: Bridge boards to unique Item identities with honest, atomic backfill receipts
+#   ✅ 066_v13_board_viewport_bookmarks: Add board-owned named viewport snapshots without changing board layout
+#   ✅ 067_v13_paper_skin: Add an inheritable project paper skin; global and note skins use existing JSON storage
+#   ✅ 068_v13_board_skin: Add an inheritable board skin using the shared skin selection shape
+#   ✅ 069_v13_source_reprojection_receipts: Retain append-only user-work and annotation receipts for Source replacement
+#   ✅ 070_v14_palette_colors: Add named palette colors and seed the 24 immutable factory colors per user
+#   ✅ 071_v14_skin_suites: Add complete user appearance suites; factory presets remain code constants
+#   ✅ 072_v14_skin_suite_material: Retain the factory material lineage of user appearance suites
+#   ✅ 073_v14_agent_goal_event: Allow goal_created events for the Agent write door while preserving event history
+#   ✅ 074_v14_agent_planning_events: Allow planning action events while preserving event history
+#   ✅ 075_v14_delete_authorizations: Add single-use time-block delete authorizations and deletion events
+#   ✅ 076_v14_claim_without_receipt_event: Allow claim_without_receipt observations while preserving event history
+#   ✅ 077_v14_agent_message_turn_id: Register agent message turn ownership without inferring historical turns
+#   ✅ 078_v14_board_visuals: Add board stickies and visual arc edges with polymorphic bindings
+#   ✅ 079_v14_note_binding: Add nullable note-owned binding settings without backfilling existing notes
+#   ✅ 080_v14_silk_skin_material: Allow the fifth factory material in existing appearance suites
+#   ✅ 081_v14_board_agent_staging: Extend board Staging to stickies and record board changes
+#   ✅ 082_v14_agent_message_meta: Keep C2 selection anchors and reviewable intent plans on conversation messages
+#   ✅ 083_v14_agent_episodes: Add conversation episode projections and their summary FTS index without changing messages
+#   ✅ 084_v2_material_source_bridge: Let Ready Sources feed source materials and fragments next to legacy documents
+# 📦 Migrations complete (84 applied).
+# Subtest: an empty library returns empty lists without an error
+ok 4 - an empty library returns empty lists without an error
+  ---
+  duration_ms: 371.8463
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3011.5542
+# flaky-retries 0

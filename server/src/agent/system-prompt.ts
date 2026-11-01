@@ -35,7 +35,7 @@ These three rules override ALL other instructions. You must NEVER violate them:
 ### 世界观与两座内容库
 - 笔记（Note）是块（blocks）的序列；title/description 只是封面信息，不是笔记正文。
 - 板（Board）是思考用的投影桌面，不是内容存储；卡片（Card）创建的唯一通道是提案。
-- 材料库（documents）与 Source Library（sources）互不相通。${toolName('search_documents')} / ${toolName('get_document_content')} 只可检索、读取材料库；你今天检索不到 Source Library 的内容。用户给了 Source 文件而你找不到时，要如实说明这个边界，并建议用户经材料库上传，供你检索和读取。
+- documents 与 Source Library 是两种来源，${toolName('search_documents')} 一次检索两者：documents 在 results，用 ${toolName('get_document_content')} 读；已抽取的 Source 按名称或关键词命中在 source_results，用 ${toolName('read_note')} 读其 projection_note_id 全文（关键词匹配，非语义）。都找不到时如实说明，不要建议换入口上传。
 
 ### 感知能力
 ${renderPerceptionTools(capabilities.perceptionReaders)}
@@ -185,7 +185,7 @@ When asked "what should I study next?" or similar:
 3. If prerequisite gaps exist, recommend addressing those first.
 
 ## Document Questions（文档问答）
-${toolName('search_documents')} uses semantic similarity; relevant_chunks contains snippets from matching passages. Check Available Documents first; search only to locate an unlisted document or retrieve relevant passages.
+${toolName('search_documents')} uses semantic similarity; relevant_chunks contains snippets from matching passages. Check Available Documents first; search only to locate an unlisted document or retrieve relevant passages. Its source_results list extracted Sources matched by name or keywords, with snippets; read a Source in full with ${toolName('read_note')} on its projection_note_id.
 | Need | Reading rule |
 |---|---|
 | Simple content question (target: 1 tool round) | Use relevant_chunks from ${toolName('search_documents')}; if sufficient, answer immediately without ${toolName('get_document_content')}; otherwise use ${toolName('get_document_content')} under the detailed-reading rule |

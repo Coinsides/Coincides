@@ -220,11 +220,13 @@ test('product manual explains notes, projection boards, proposal-only cards and 
     /title\/description 只是封面信息，不是笔记正文/u,
     /板（Board）是思考用的投影桌面，不是内容存储/u,
     /卡片（Card）创建的唯一通道是提案/u,
-    /材料库（documents）与 Source Library（sources）互不相通/u,
-    /search_documents \/ get_document_content 只可检索、读取材料库/u,
-    /你今天检索不到 Source Library 的内容/u,
-    /用户给了 Source 文件而你找不到时，要如实说明这个边界，并建议用户经材料库上传/u,
+    /documents 与 Source Library 是两种来源，search_documents 一次检索两者/u,
+    /已抽取的 Source 按名称或关键词命中在 source_results，用 read_note 读其 projection_note_id 全文/u,
+    /关键词匹配，非语义/u,
+    /都找不到时如实说明，不要建议换入口上传/u,
   ]) assert.match(manual, statement);
+  // The retired boundary pointed users at an upload door that no longer exists.
+  assert.doesNotMatch(manual, /互不相通|你今天检索不到 Source Library|经材料库上传/u);
 });
 
 test('product manual describes actual proposal visibility and keeps registration distinct from application', () => {
@@ -405,14 +407,14 @@ test('product manual has a bounded declared token estimate', () => {
   assert.ok(upperEstimate <= 2000, `estimated upper budget exceeded: ${upperEstimate}`);
 });
 
-test('Source Library question receives the truthful boundary through the isolated message route and provider stub', async t => {
+test('Source Library question receives the truthful capability through the isolated message route and provider stub', async t => {
   // This checks prompt delivery + SSE/persistence with a deterministic provider,
   // not whether a real model follows the instruction. No live provider is called.
   const { db, received, request } = await fixture(t, prompt => {
     const manual = productManual(prompt);
-    assert.match(manual, /你今天检索不到 Source Library 的内容/u);
-    assert.match(manual, /建议用户经材料库上传/u);
-    return '目前我不能检索或读取 Source Library 里的文件。我能通过 search_documents / get_document_content 检索和读取材料库；请经材料库上传需要我使用的文件。';
+    assert.match(manual, /用 read_note 读其 projection_note_id 全文/u);
+    assert.doesNotMatch(manual, /经材料库上传/u);
+    return '可以。我会用 search_documents 按名称或关键词找到已抽取的 Source，再用 read_note 读取它的全文。';
   });
   const question = '你能读我 Source Library 里的文件吗';
   const response = await request({ message: question });
@@ -424,8 +426,8 @@ test('Source Library question receives the truthful boundary through the isolate
   assert.doesNotMatch(response.body, /event: (?:error|tool_start|tool_end)/);
   const reply = db.prepare("SELECT content FROM agent_messages WHERE conversation_id=? AND role='assistant'")
     .get(response.conversationId) as { content: string };
-  assert.match(reply.content, /不能检索或读取 Source Library/u);
-  assert.match(reply.content, /材料库.*请经材料库上传/u);
+  assert.match(reply.content, /search_documents.*已抽取的 Source/u);
+  assert.match(reply.content, /read_note 读取它的全文/u);
   assert.ok(response.body.includes(reply.content), 'the streamed reply is the reply saved in the isolated conversation');
 });
 

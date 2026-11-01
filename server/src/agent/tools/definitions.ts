@@ -225,7 +225,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'search_documents',
-    description: 'Search uploaded documents using semantic similarity and keyword matching. Returns matching documents with relevant content snippets from the most similar passages. For simple questions, the snippets may contain enough context to answer directly without calling get_document_content.',
+    description: 'Search uploaded documents using semantic similarity and keyword matching. Returns matching documents with relevant content snippets from the most similar passages. For simple questions, the snippets may contain enough context to answer directly without calling get_document_content. Also returns source_results: extracted Source Library files matched by name or keywords, each with snippets and a projection_note_id to read in full with read_note.',
     parameters: {
       type: 'object',
       properties: {

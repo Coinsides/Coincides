@@ -96,14 +96,22 @@ test('the projected fragments stay within both sides of the pre-edit UTF-8 budge
   assert.throws(() => assertBudget(''), /exceeds/);
 });
 
-test('restoring only the authorized roster, C2 and C4a amendment bytes reproduces the entire pre-edit prompt', () => {
+// F5 amendment: Source discovery through search_documents replaced the retired
+// "Source Library is unreachable" boundary and added one source_results sentence.
+const f5SourceLine = '- documents 与 Source Library 是两种来源，search_documents 一次检索两者：documents 在 results，用 get_document_content 读；已抽取的 Source 按名称或关键词命中在 source_results，用 read_note 读其 projection_note_id 全文（关键词匹配，非语义）。都找不到时如实说明，不要建议换入口上传。';
+const preF5SourceLine = '- 材料库（documents）与 Source Library（sources）互不相通。search_documents / get_document_content 只可检索、读取材料库；你今天检索不到 Source Library 的内容。用户给了 Source 文件而你找不到时，要如实说明这个边界，并建议用户经材料库上传，供你检索和读取。';
+const f5SourceResultsSentence = ' Its source_results list extracted Sources matched by name or keywords, with snippets; read a Source in full with read_note on its projection_note_id.';
+
+test('restoring only the authorized roster, C2, C4a and F5 amendment bytes reproduces the entire pre-edit prompt', () => {
   const projection = projectAgentCapabilities();
   const restored = buildSystemPrompt('Manual Agent', context)
     .replace(renderDirectInstructionPrompt(), '')
     .replace(renderUiInstructionPrompt(), '')
     .replace(NOTE_PATCH_PROMPT_BOUNDARY, '不能写改笔记正文；生成笔记只能发 organized_note 提案。不能直接创建卡片，不能碰人类判断记录，不能无仪式做不可逆删除。')
     .replace(renderDoorWriteTools(projection.doorWrite), oldDoorSentence)
-    .replace(renderChannelWriteTools(projection.channelWrite) + '\n', '');
+    .replace(renderChannelWriteTools(projection.channelWrite) + '\n', '')
+    .replace(f5SourceLine, preF5SourceLine)
+    .replace(f5SourceResultsSentence, '');
   // Captured from the pre-edit builder baseline, not from the new implementation.
   assert.equal(createHash('sha256').update(restored).digest('hex'),
     '44affa4b6d7a9aa940e450602900856c567af3ae43fda983b18c3a08820ff2af');
