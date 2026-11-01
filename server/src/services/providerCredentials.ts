@@ -133,6 +133,19 @@ export function resolveProviderCredential(provider: string): string | undefined 
   return effectiveCredential(requireProvider(provider), readCredentials());
 }
 
+// Without an explicit user choice, the first provider with a key on this machine
+// is the effective default, so a fresh account works wherever any key is present.
+const DEFAULT_CHAT_PROVIDER_ORDER = ['anthropic', 'openai', 'deepseek', 'dashscope'] as const;
+const DEFAULT_EMBEDDING_PROVIDER_ORDER = ['voyage', 'dashscope'] as const;
+
+export function resolveDefaultChatProvider(): string | null {
+  return DEFAULT_CHAT_PROVIDER_ORDER.find((provider) => resolveProviderCredential(provider)) ?? null;
+}
+
+export function resolveDefaultEmbeddingProvider(): string | null {
+  return DEFAULT_EMBEDDING_PROVIDER_ORDER.find((provider) => resolveProviderCredential(provider)) ?? null;
+}
+
 export function listProviderCredentialStatuses(): ProviderCredentialStatus[] {
   const credentials = readCredentials();
   return PROVIDER_NAMES.map((provider) => statusFor(provider, credentials));

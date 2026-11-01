@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, Edit2, Trash2, Plus, Target, Layers, FileText,
@@ -6,6 +6,8 @@ import {
   AlertTriangle, Eye, X, RefreshCw,
 } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
+import { useDeckStore } from '@/stores/deckStore';
+import { useGoalStore } from '@/stores/goalStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import { getNoteBlockTemplateLabel } from '@shared/types';
@@ -437,6 +439,24 @@ export default function CourseDetailPage() {
     const response = await api.get(`/notes?course_id=${courseId}&status=${noteStatus}`);
     setNotes(response.data);
   }, [courseId, noteStatus]);
+
+  // Goal and deck dialogs are app-wide; refresh this Project's lists in place
+  // whenever they change the shared stores, without the full-page loading state.
+  const storeGoals = useGoalStore((state) => state.goals);
+  const storeDecks = useDeckStore((state) => state.decks);
+  const storeListsSeen = useRef(false);
+  useEffect(() => {
+    if (!storeListsSeen.current) {
+      storeListsSeen.current = true;
+      return;
+    }
+    if (!courseId) return;
+    let cancelled = false;
+    api.get(`/courses/${courseId}/summary`)
+      .then((response) => { if (!cancelled) setData(response.data); })
+      .catch((err) => console.error('Failed to refresh course summary:', err));
+    return () => { cancelled = true; };
+  }, [courseId, storeGoals, storeDecks]);
 
   const fetchMaterials = useCallback(async () => {
     if (!courseId) return;
@@ -1671,7 +1691,7 @@ export default function CourseDetailPage() {
       <ProjectSourcesPanel
         projectId={course.id}
         legacyDocuments={documents}
-        onSourceDeleted={() => void refreshCovers()}
+        onProjectionNotesChanged={() => void refreshCovers()}
       />
 
       {/* Delete Confirmation */}

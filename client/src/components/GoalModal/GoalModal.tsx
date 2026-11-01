@@ -5,8 +5,9 @@ import { useCourseStore } from '@/stores/courseStore';
 import { useGoalStore } from '@/stores/goalStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useUIStore } from '@/stores/uiStore';
+import api from '@/services/api';
 import { TaskPriority } from '@shared/types';
-import type { Goal } from '@shared/types';
+import type { Goal, Task } from '@shared/types';
 import styles from './GoalModal.module.css';
 
 interface TaskEntry {
@@ -19,7 +20,7 @@ export default function GoalModal() {
   const closeModal = useUIStore((s) => s.closeModal);
   const addToast = useUIStore((s) => s.addToast);
   const courses = useCourseStore((s) => s.courses);
-  const { goals, createGoal } = useGoalStore();
+  const { goals, createGoal, updateGoal } = useGoalStore();
   const { batchCreateTasks } = useTaskStore();
 
   const isEdit = modal?.type === 'goal-edit';
@@ -32,7 +33,21 @@ export default function GoalModal() {
   const [deadline, setDeadline] = useState('');
   const [courseId, setCourseId] = useState('');
   const [taskEntries, setTaskEntries] = useState<TaskEntry[]>([]);
+  const [existingTasks, setExistingTasks] = useState<Task[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // Editing shows the goal's tasks; the task list has no goal filter, so read the course's tasks.
+  useEffect(() => {
+    if (!isEdit || !existing) {
+      setExistingTasks([]);
+      return;
+    }
+    let cancelled = false;
+    api.get<Task[]>('/tasks', { params: { course_id: existing.course_id } })
+      .then(({ data }) => { if (!cancelled) setExistingTasks(data.filter((task) => task.goal_id === existing.id)); })
+      .catch((err) => console.error('Failed to load goal tasks:', err));
+    return () => { cancelled = true; };
+  }, [isEdit, existing?.id, existing?.course_id]);
 
   useEffect(() => {
     if (isEdit && existing) {
@@ -68,13 +83,19 @@ export default function GoalModal() {
     setSaving(true);
 
     try {
-      const goal = await createGoal({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        deadline: deadline || undefined,
-        course_id: courseId,
-        parent_id: parentId,
-      });
+      const goal = isEdit && existing
+        ? await updateGoal(existing.id, {
+          title: title.trim(),
+          description: description.trim() || undefined,
+          deadline: deadline || undefined,
+        })
+        : await createGoal({
+          title: title.trim(),
+          description: description.trim() || undefined,
+          deadline: deadline || undefined,
+          course_id: courseId,
+          parent_id: parentId,
+        });
 
       // Batch create tasks if any
       const validTasks = taskEntries.filter((t) => t.title.trim());
@@ -90,11 +111,11 @@ export default function GoalModal() {
         );
       }
 
-      addToast('success', parentId ? 'Sub-goal created' : 'Goal created');
+      addToast('success', isEdit ? 'Goal saved' : parentId ? 'Sub-goal created' : 'Goal created');
       closeModal();
     } catch (err) {
-      console.error('Failed to create goal:', err);
-      addToast('error', 'Failed to create goal');
+      console.error('Failed to save goal:', err);
+      addToast('error', isEdit ? 'Failed to save goal' : 'Failed to create goal');
     } finally {
       setSaving(false);
     }
@@ -133,7 +154,8 @@ export default function GoalModal() {
 
           <div className={styles.field}>
             <label>Course</label>
-            <select value={courseId} onChange={(e) => setCourseId(e.target.value)} required>
+            {/* A goal cannot move between courses; the update API has no course field. */}
+            <select value={courseId} onChange={(e) => setCourseId(e.target.value)} required disabled={isEdit}>
               <option value="">Select a course</option>
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
@@ -146,9 +168,23 @@ export default function GoalModal() {
             <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
           </div>
 
+          {isEdit && (
+            <div className={styles.taskGenSection}>
+              <div className={styles.taskGenHeader}>Tasks</div>
+              {existingTasks.length === 0 ? (
+                <div className={styles.parentHint}>No tasks yet</div>
+              ) : existingTasks.map((task) => (
+                <div key={task.id} className={styles.taskGenRow}>
+                  <span>{task.title}</span>
+                  <span>{task.date}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Task generation */}
           <div className={styles.taskGenSection}>
-            <div className={styles.taskGenHeader}>Generate Tasks (optional)</div>
+            <div className={styles.taskGenHeader}>{isEdit ? 'Add tasks (optional)' : 'Generate Tasks (optional)'}</div>
             {taskEntries.map((entry, i) => (
               <div key={i} className={styles.taskGenRow}>
                 <input
@@ -178,7 +214,7 @@ export default function GoalModal() {
               Cancel
             </button>
             <button type="submit" className={styles.saveBtn} disabled={saving || !title.trim() || !courseId}>
-              {saving ? 'Saving...' : parentId ? 'Create Sub-Goal' : 'Create Goal'}
+              {saving ? 'Saving...' : isEdit ? 'Save Goal' : parentId ? 'Create Sub-Goal' : 'Create Goal'}
             </button>
           </div>
         </form>

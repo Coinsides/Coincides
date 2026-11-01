@@ -1,7 +1,20 @@
 import type { AIProvider, ProviderConfig } from './types.js';
 import { AnthropicProvider } from './anthropic.js';
 import { OpenAIProvider } from './openai.js';
-import { resolveProviderCredential } from '../../services/providerCredentials.js';
+import { resolveDefaultChatProvider, resolveProviderCredential } from '../../services/providerCredentials.js';
+
+const PROVIDER_LABELS: Record<string, string> = {
+  anthropic: 'Anthropic',
+  openai: 'OpenAI',
+  generic: 'OpenAI Compatible',
+  deepseek: 'DeepSeek',
+  dashscope: 'DashScope',
+};
+
+/** The user's explicit choice wins; otherwise the first provider with a key. */
+export function resolveActiveProvider(userSettings: Record<string, unknown>): string {
+  return (userSettings?.active_provider as string) || resolveDefaultChatProvider() || 'anthropic';
+}
 
 export function createProvider(providerName: string, config: ProviderConfig): AIProvider {
   switch (providerName) {
@@ -21,7 +34,7 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   provider: AIProvider;
   providerName: string;
 } {
-  const activeProvider = (userSettings?.active_provider as string) || 'anthropic';
+  const activeProvider = resolveActiveProvider(userSettings);
   const aiProviders = userSettings?.ai_providers as Record<string, Record<string, string>> | undefined;
   const providerConfig = aiProviders?.[activeProvider];
 
@@ -30,7 +43,10 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   let baseUrl = providerConfig?.base_url;
 
   if (!apiKey) {
-    throw new Error('No API key configured. Go to Settings to add one.');
+    const label = PROVIDER_LABELS[activeProvider] || activeProvider;
+    throw new Error(
+      `The selected AI provider (${label}) has no API key. In Settings, switch to a provider that has a key, or add a key for ${label}.`,
+    );
   }
 
   if (activeProvider === 'deepseek' || activeProvider === 'dashscope') {

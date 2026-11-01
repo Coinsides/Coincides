@@ -99,6 +99,22 @@ export default function SettingsPage() {
     setBaseUrl(settings.ai_providers?.[provider]?.base_url || '');
   };
 
+  // Without a saved choice, show the provider the server actually uses (the first
+  // one with a key), so saving this form never pins a provider that has no key.
+  useEffect(() => {
+    if (settings.active_provider) return;
+    let cancelled = false;
+    api.get<{ default_chat_provider?: string | null }>('/settings/providers')
+      .then(({ data }) => {
+        const provider = data.default_chat_provider;
+        if (!cancelled && provider && providerOptions.some((option) => option.value === provider)) {
+          handleProviderChange(provider);
+        }
+      })
+      .catch(() => { /* Keep the static default when credentials cannot be listed. */ });
+    return () => { cancelled = true; };
+  }, [settings.active_provider]);
+
   const handleSaveProvider = async () => {
     setSaving(true);
     try {
@@ -143,6 +159,12 @@ export default function SettingsPage() {
     try {
       const res = await api.get('/embedding/status');
       setEmbStatus(res.data);
+      // Same rule as chat: without a saved choice, show the provider in effect.
+      const effective = res.data?.provider_name as string | null | undefined;
+      if (!settings.embedding_provider && effective && embeddingModelOptions[effective]) {
+        setEmbProvider(effective);
+        setEmbModel(embeddingModelOptions[effective][0].value);
+      }
     } catch (err) {
       console.error('Failed to load embedding status:', err);
     }

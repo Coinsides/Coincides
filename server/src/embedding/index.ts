@@ -6,7 +6,7 @@ import {
   DASHSCOPE_EMBEDDING_MODEL,
 } from './dashscope.js';
 import { getDb } from '../db/init.js';
-import { resolveProviderCredential } from '../services/providerCredentials.js';
+import { resolveDefaultEmbeddingProvider, resolveProviderCredential } from '../services/providerCredentials.js';
 
 export type { EmbeddingProvider, EmbeddingConfig, SearchResult } from './types.js';
 
@@ -50,7 +50,7 @@ export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null 
  * Get embedding config from user settings object.
  */
 function getConfigFromSettings(settings: Record<string, unknown>): EmbeddingConfig | null {
-  const provider = settings.embedding_provider as string | undefined;
+  const provider = (settings.embedding_provider as string | undefined) || resolveDefaultEmbeddingProvider() || undefined;
   const apiKey = resolveProviderCredential(provider || 'voyage');
   const model = settings.embedding_model as string | undefined;
 

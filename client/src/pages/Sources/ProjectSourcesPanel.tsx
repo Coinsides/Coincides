@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FileText } from 'lucide-react';
 import { SourceDetailDialog } from './SourceDetailDialog';
 import { SourceDeleteDialog } from './SourceDeleteDialog';
@@ -23,11 +23,11 @@ export interface LegacyProjectDocument {
 interface ProjectSourcesPanelProps {
   projectId: string;
   legacyDocuments?: LegacyProjectDocument[];
-  /** Deleting a Source also deletes its extracted note, so the host refreshes its note list. */
-  onSourceDeleted?: () => void;
+  /** A Source's extracted note appears when extraction finishes and goes with the Source on delete. */
+  onProjectionNotesChanged?: () => void;
 }
 
-export function ProjectSourcesPanel({ projectId, legacyDocuments = [], onSourceDeleted }: ProjectSourcesPanelProps) {
+export function ProjectSourcesPanel({ projectId, legacyDocuments = [], onProjectionNotesChanged }: ProjectSourcesPanelProps) {
   const collection = useSourceCollection({
     courseId: projectId,
     originEntryKind: 'project_upload',
@@ -40,6 +40,21 @@ export function ProjectSourcesPanel({ projectId, legacyDocuments = [], onSourceD
   const showDetails = (source: SourceRecordDetail) => setSelectedSourceId(source.id);
   const actions = useSourceActions(showDetails);
 
+  // Uploads finish extracting in the background; tell the host when the set of
+  // extracted notes changes so its note list picks them up without a reload.
+  const projectionNoteKey = collection.sources
+    .map((source) => source.materialization.projection_note_id)
+    .filter(Boolean)
+    .sort()
+    .join(',');
+  const seenProjectionNoteKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (collection.loading) return;
+    const previous = seenProjectionNoteKey.current;
+    seenProjectionNoteKey.current = projectionNoteKey;
+    if (previous !== null && previous !== projectionNoteKey) onProjectionNotesChanged?.();
+  }, [collection.loading, projectionNoteKey, onProjectionNotesChanged]);
+
   const retry = async (source: SourceRecordDetail) => {
     await collection.retry(source.id);
   };
@@ -49,7 +64,6 @@ export function ProjectSourcesPanel({ projectId, legacyDocuments = [], onSourceD
     setDeleteSourceId(null);
     setSelectedSourceId(null);
     await collection.refresh(true);
-    onSourceDeleted?.();
     addToast('success', 'Source permanently deleted; historical receipts were retained');
   };
 

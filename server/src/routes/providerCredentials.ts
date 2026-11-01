@@ -4,6 +4,7 @@ import {
   isCredentialProvider,
   listProviderCredentialStatuses,
   ProviderCredentialError,
+  resolveDefaultChatProvider,
   saveProviderCredential,
   testProviderConnection,
 } from '../services/providerCredentials.js';
@@ -28,7 +29,8 @@ providerCredentialsRouter.param('provider', (_req, res, next, provider: string) 
 
 providerCredentialsRouter.get('/', (_req, res) => {
   try {
-    res.json({ providers: listProviderCredentialStatuses() });
+    // The client shows this when the user has not chosen a provider yet.
+    res.json({ providers: listProviderCredentialStatuses(), default_chat_provider: resolveDefaultChatProvider() });
   } catch (error) {
     sendStoreError(res, error);
   }

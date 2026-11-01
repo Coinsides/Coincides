@@ -49,3 +49,82 @@
 ## 九 · 不在射程
 
 A-07 移动端(独立设计工程,另案);A-08/P3;🅱 文案批(F5 另开);F2 确认框后两段术语文案(并入文案批)。
+
+
+## Result — 2026-11-01 · 临时工程对话1
+
+**执行状态**:F4-1 / F4-3 / F4-4 `done`;**F4-2 `部分修复 + 止损升级候裁`**(已于施工中短讯报 Main_Designer);F4-5 侦察结论 = 与 F4-2 同根,随 F4-2 裁定走,未单修。全部交工作树,未 commit。
+
+### F4-1(A-03)默认提供方 + 报错真话
+
+- **服务端**:`services/providerCredentials.ts` 新增 `resolveDefaultChatProvider()`(anthropic > openai > deepseek > dashscope,取第一家有钥匙的)与 `resolveDefaultEmbeddingProvider()`(voyage > dashscope);`agent/providers/index.ts` 新增 `resolveActiveProvider(settings)` = 显式选择 > 有钥匙的默认 > anthropic,`getProviderFromSettings` 与 `organizedNoteProposals.hasAiKey` 都走它;`embedding/index.ts` 的 settings 解析在未显式选择时同样取有钥匙的默认。
+- **报错**:`No API key configured. Go to Settings to add one.` → `The selected AI provider (<名>) has no API key. In Settings, switch to a provider that has a key, or add a key for <名>.`
+- **客户端**:
+  - **空气泡根因**:路由在 `error` 之后照发 `done`,`done` 再追加一条空内容 assistant 消息。`stores/agentStore.ts` 改为错误已展示、无文本、无待挂回执时,`done` 不再追加;部分文本或晚到回执仍保留(既有语义)。
+  - **设置页与服务端一致**:`GET /settings/providers` 增 `default_chat_provider` 字段;`Settings.tsx` 在用户未选过时显示服务端实际生效的那家;向量栏同理,用 `/embedding/status` 的 `provider_name`。**理由**:否则新用户在设置页点一次 Save,就会把无钥匙的 Anthropic 写成显式选择,服务端的正确默认随即失效。
+- **既有锁定用例改动(申报)**:`AgentPanel.turnReceipt.test.tsx` 的「receipt then error + 空文本」一格原本断言最后一条消息是空串,这恰是 A-03 的空气泡。改为断言最后一条是错误消息,且不存在空 assistant 消息。其余 5 格不变。
+- **未做**:报错里未加可点的设置页链接(文案已指明去 Settings,消息渲染层未改)。
+
+### F4-2(A-04)首段快回车吞字 —— 已复现,根因比工单假设深一层,部分修复,候裁
+
+- **复现环境**:本地临时实例。DB、上传、源件、画布资源、凭据目录全部指向 scratchpad;用一次性启动器 + `.claude/launch.json` 临时条目启动,收工已原样还原(diff 0)。在临时库自建本地测试账号(凭据只记在 scratchpad)。零触用户库与 dev 库,未发任何 Agent 消息。
+- **病理(实证)**:
+  1. 草稿 textarea 的 Enter 设计为换行,快路径下两段被存成**一个 unit 内含 `\n`**;durable 编辑器是一 unit 一段,不承认 unit 内硬换行。
+  2. 草稿保存循环退出后的交接(设 reconciliation、切焦点)不是原子的。窗口内落进草稿的键无人再存;草稿也因焦点回执不匹配而滞留。DOM 实证:草稿层残留 `First\nSecond`,durable 只有 tu-1。
+  3. **致命环节**:durable 编辑器在 create 返回时就挂载,持有 create 时的内容(仅第一段)。之后即使服务器已存全文,它的下一次保存会把旧内容写回。实证:服务器 rev1 有两段 → 继续打字并 blur → rev2 只剩第一段。岛上 Agent 读不到那段,就是这条路径。
+  4. 强时序依赖:create 回得快时,Enter 直接进 durable 编辑器,全链正确(临时探针确认,探针已删,0 残留)。
+- **已落修复**(`hooks/useDraftBlockController.ts`):
+  - `draftTextFlowFromText`:草稿多行按 `\n` 拆成多个 paragraph unit,复用 `splitTextUnitForEnter`,与 durable Enter 同形;交接光标映射到对应 unit 与 offset。
+  - 交接回执放宽为「同 block 任一 unit 获焦即完成」;草稿若有晚于最后一次保存的键,**先重放保存再清草稿**(⛔丢弃)。
+  - 实测:重放后服务器得到正确的 2-unit 全文,离开笔记不再覆盖;刷新后两段正常显示、可编辑。
+  - **未关死**:部分时序下 durable 编辑器会话内仍是陈旧的单 unit 视图,继续打字后 blur 仍会覆盖(实测一次)。探针指向 edit-controller / text history 持有的 flow 草稿未随重放保存刷新。候裁方案 A/B/C 见短讯。
+- **回归用例**:新 `draftFastEnter.test.tsx`(2 条:草稿 create 在途时 Enter + 第二段 → 存成 `['First','Second']` 两 unit;多行拆分形状)。
+
+### F4-3(A-05)新建后列表不刷新
+
+- **根因**:三处都是「宿主页一次性拉取,没有失效信号」。目标/卡组是全局弹窗,项目页只在进入时拉一次 `/courses/:id/summary`;上传后的投影笔记由后台抽取异步产生,项目页的笔记列表无从得知。
+- **修法**:
+  - `CourseDetail.tsx` 订阅 `goalStore.goals` / `deckStore.decks`,变化即静默重拉 summary(不触发整页 loading);
+  - `ProjectSourcesPanel` 以投影笔记 id 集合为键,变化(抽取完成新出笔记,或删除带走笔记)即回调 `onProjectionNotesChanged`,项目页据此 `refreshCovers`;
+  - F2 的 `onSourceDeleted` 并入这个统一信号。删除 failed 件(无笔记)不再触发多余刷新,F2 用例的该断言已相应改写。
+- **浏览器实测**(临时实例):Add Goal / Add Deck 后无需刷新即出现,空态消失。上传 → 笔记出现这一路只有单测覆盖,未在浏览器上传真实文件。
+
+### F4-4(A-06)编辑目标对话框
+
+- **侦察结论**:编辑模式下按「Create Goal」**实际调用 `createGoal`,会新建一条重复目标**(把新填的任务挂到副本上),原目标不变;对话框从不加载已有任务。
+- **修法**(`components/GoalModal/GoalModal.tsx`):
+  - 编辑模式调用 `updateGoal`,按钮文案改为「Save Goal」,toast「Goal saved」;
+  - 打开时按课程拉 `/tasks` 再按 `goal_id` 过滤,列出已有任务(服务端零改动);新增任务挂到原目标;
+  - 课程下拉在编辑模式禁用:`UpdateGoalRequest` 无 `course_id`,目标不能跨课程移动,不让 UI 假装可改。
+- **浏览器实测**:编辑 → Save 后服务器与页面都只有 1 条目标。新 `GoalModal.test.tsx` 2 条。
+
+### F4-5(A-09)离开笔记误报「保存失败」—— 侦察结论,未单修
+
+施工中两次复现:「Changes could not be saved. Please retry before leaving the note.」(`useNoteRouteSaveBoundary.tsx` 中 `flushPendingSaves` 抛错时触发)。两次都发生在 A-04 快路径之后离开笔记,且数据其实已存、没有发出写请求。判断为 durable 编辑器陈旧状态被判为脏(text history flush 拒绝),与 F4-2 同根,随 F4-2 裁定一并处理。
+
+### 测试数字(实跑实报)
+
+- **服务端定向**(正门,cwd=server/):`agent/providers/index.test` + `providerCredentials` + `vpsP1BailianEmbedding` + `v2MaterialLibrary` + `v14OrganizedNoteRichBlocks` → **133 pass / 0 fail / 0 cancelled**,exit 0。证据 `docs/audits/2026-11-01-vps-f4-builder/server-targeted.tap`。
+- **client 定向**:Settings / stores / AgentPanel / GoalModal / Sources / Courses / `Notes/canvasEngine/hooks` / `Notes/canvasEngine/layers` 共 95 文件 → **958 pass / 1 fail**。失败的是 `PaginationProjection.test.tsx`「keeps hidden auto text…after folding a chapter」,报 5000ms 超时;单独连跑两次均 5/5 绿,判为满载超时,与本单无关。证据 `client-targeted-vitest.log`。
+- **阳性对照 ×3**(各自改坏 → 目标用例独红 → 还原):
+  - F4-1:默认解析恒返回 null → 仅「first provider with a key」红(53/1),证据 `positive-control-f4-1-default-off.tap`;
+  - F4-2:不拆分 → `draftFastEnter` 2/2 红,证据 `positive-control-f4-2-no-split.log`;
+  - F4-4:编辑模式回落到 createGoal → 编辑用例红(1/1),证据 `positive-control-f4-4-edit-creates.log`。
+- **类型检查**:server 87 条,等于基线,涉改面零命中;client 0。
+
+### 环境申报
+
+1. **dev 库误触(只读,无内容)**:一次 grep 的射程写成了 `..`,波及 `server/coincides.db`,输出只有「Binary file matches」一行,未读出任何内容。之后的搜索都收窄到源码目录。
+2. **临时启动配置**:为隔离数据,临时在受控文件 `.claude/launch.json` 增加 `f4-scratch-server` 条目;收工前从备份原样还原,`git diff` 为 0。
+3. **工具摩擦**:Bash heredoc 再次因引号解析失败(未写入任何文件),改为落 scratchpad 脚本;浏览器窗格首次输入未落字,改用元素 ref 填写。
+4. **HMR 噪声**:改 hooks 期间,Vite 热更新导致页面报 hook 顺序错误;此后每次实测前都整页重载,结论均取自重载后。
+5. 未读 `.env`;无 git 写操作;未动依赖与锁文件;无真实模型调用。
+
+## Main_Designer 收口(F4-1/3/4 + F4-2 部分修复)— 2026-11-01
+
+- **实质验收**:HQ 复跑服务端定向 **133/133**、client Settings/GoalModal/stores/draftFastEnter **19/19**、AgentPanel/Courses/Sources **116/116**;三处阳性对照照单全收;tsc 基线不变;
+- **锁定用例改动核准**:AgentPanel.turnReceipt 那格断言的恰是 A-03 空气泡本身——断言即病灶,改得对;
+- **顺手战果**:F4-1 的「设置页显示服务端生效者」连带治愈 Tester 的 B-38(显示≠实际);空气泡根因(error 后照发 done)一并拔除;
+- **F4-2/5**:部分修复(多行拆 unit+重放保存)随本批入库上岛——严格优于现状;深挖按 §233 裁定 A+四道箍继续,收口归下一批;
+- **环境申报四条处置**:dev 库 grep 误触(只读零内容)记过即可,射程收窄处置正确;launch.json 还原 diff 0 已核;其余照准;
+- 本批随收口部署上岛。

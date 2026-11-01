@@ -161,6 +161,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     let responseIntentPlan: NonNullable<AgentMessage['meta']>['intent_plan'];
     let responseMessageId: string | undefined;
     let responseContent: string | undefined;
+    let errorShown = false;
 
     try {
       const token = getToken();
@@ -267,6 +268,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
               }
               case 'done': {
                 projectUi({ activities: {} });
+                // The error message already answers this turn; an empty reply would render a blank bubble.
+                if (errorShown && !accumulated && responseContent === undefined && !turnReceipt) {
+                  set({ streaming: false, streamingText: '', streamingReceipt: null, activeToolName: null });
+                  break;
+                }
                 // Add assistant message to messages
                 const assistantMsg: AgentMessage = {
                   id: responseMessageId ?? `resp-${Date.now()}`,
@@ -317,6 +323,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 // The route still sends done after error. This message already
                 // owns the receipt; done preserves model text without copying it.
                 turnReceipt = undefined;
+                errorShown = true;
                 break;
               }
             }

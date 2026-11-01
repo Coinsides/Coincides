@@ -146,3 +146,33 @@ material_segments ←→ material_segment_fragments
 - 悬空 FK 核查:仓外一次性脚本对新建内存库跑 `PRAGMA foreign_key_list` 全表 → 0 条;`sqlite_master` 中含 `_legacy` 字样的只有 `template_definitions`,经核不是 FK 目标。
 - 仓外脚本首次运行因 CJS 不支持顶层 await、Windows 盘符路径不被 ESM 加载器接受而失败,改 `.mts` + `file:///` 后正常;回执追加时 Bash heredoc 引号解析再次失败(同 P1),改为先落文件再追加。均属工具摩擦,与产品无关。
 - 未读 `.env`;无 git 写操作;无用户库接触;无真实模型调用;仓库代码零改动。
+
+
+### Result 补节(段一 · 第四问补证)— 2026-11-01 · 临时工程对话1
+
+依 Main_Designer 补充证据(岛上 `/api/embedding/status` = chunks 0/0、memories 0/0)补查。仍只读、零代码改动。
+
+**① doc_chunk 的完整生成链与触发点**
+
+`POST /api/documents/upload` 与 `/:id/reparse`(`routes/documents.ts:56/164`)→ `parseDocument`(`services/documentParser.ts:281`)→ 抽文本、切块写 `document_chunks`(:354),FTS 表 `document_chunks_fts` 由 init.ts 的触发器同步 → `generateChunkEmbeddings`(:415 起)经 `getEmbeddingProvider` 写 `doc_chunk_vec`(:445/:458)。补齐入口只有 `POST /api/embedding/backfill`,它同样只扫 `document_chunks` / `documents`。
+**唯一触发点是旧上传路由,而它在 UI 上已无入口**:唯一的调用方 `documentStore.upload` 只被 `components/DocumentManager` 使用,全仓**没有任何地方挂载 `DocumentManager`**。所以岛上 chunks 0/0 是必然结果。Agent 的 `search_documents` 三路检索(向量 `doc_chunk_vec` / FTS `document_chunks_fts` / documents LIKE)全部建立在这条死管线上。
+
+**memories 0/0 不是断桥**:`agent_memory_vec` 由 `agent/memory/service.ts:91 generateMemoryEmbedding` 在每条记忆写入时后台生成,与材料管线无关;0/0 只说明该账号还没有 Agent 记忆。有记忆后会走百炼(P1 已接),值得在部署冒烟时顺带验证一次。
+
+**② Source 投影是否进了任何向量索引 → 没有**
+
+- 投影块(`note_blocks`,`source_kind='source_projection'`)不进 `doc_chunk_vec`,不进任何 FTS,也不进 `imprint_fragment_vectors`。
+- `imprint_fragment_vectors` 是另一条孤立管线:VLM 转写产出 `imprint_fragments` → 只由运维脚本 `scripts/embed-imprint-fragments.mjs` 嵌入 → 只由 `GET /api/imprint-retrieval` 消费。该路由**在 client 与 Agent 中都零引用**,不连通 Agent 的记忆检索与材料检索,也不连通 material 体系。只有跑过转写并被接受的 Source 才会有 imprint。
+
+**③ 桥只喂 material,还是 material + 向量索引一起喂 —— 两案代价**
+
+| | 案一:只喂 material(=已核准的段二) | 案二:material + 检索索引两张嘴 |
+|---|---|---|
+| 解决 | Project Material / 三按钮 / `create_proposal` 走通(A-01) | 再加:Agent 能语义检索 Source 内容(A-02 完整版) |
+| 新增工程 | 无(段二原范围) | 需要新建 Source fragment 的向量表(不能复用 `doc_chunk_vec`:它的检索 JOIN `document_chunks`,Source fragment 连不上),建议仿 imprint 的形状(`fragment_id` 主键 + 模型分区);再建 FTS 表;fragment 生成后加后台嵌入任务(外部调用、计费、失败重试);扩 backfill;`search_documents` 增 Source 结果形状(指向投影笔记以接 `read_note`);改 system-prompt:38;重投影时向量随 fragment 重建 |
+| 代价 | 1–1.5 段 | 段二之外**再加约 1–1.5 段**,并引入外部调用与计费面;测试需模拟嵌入供给方 |
+| 风险 | 低(本地 schema + 惰性生成) | 中:fragment 是在 list 时同步惰性生成的,向量必须是异步任务,要处理「材料已现、向量未到」的中间态 |
+
+**荐:段二只喂 material(案一),但为案二预留形状**——`source_fragments.id` 稳定、带 `source_record_id`、`note_block_id`,日后的向量表可直接以 fragment id 为键接上。检索面按你已预批的顺序走:先上 A-02 低配版(LIKE + `read_note`,不要向量,约半天),再视需要把向量版立为独立单。两张嘴合进段二会使段二体量翻倍,并把外部调用面混进一次迁移施工。
+
+**邻近观察(不在本单修)**:测试账号设置页向量栏高亮 Voyage、实际 status 却是 dashscope,即 UI 显示的是默认值而非生效状态。**此项已在 F4-1 一并修掉**:`Settings.tsx` 在用户未显式选择时,用 `/embedding/status` 的 `provider_name` 显示实际生效的那家(聊天提供方同理),见 F4 回执,随 F4 部署即生效。

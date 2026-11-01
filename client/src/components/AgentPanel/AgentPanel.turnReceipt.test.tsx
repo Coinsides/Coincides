@@ -220,7 +220,13 @@ describe('AgentPanel turn receipts from server projections', () => {
     const messages = useAgentStore.getState().messages;
     expect(messages.filter(message => message.turn_receipt)).toHaveLength(1);
     expect(messages.find(message => message.turn_receipt)?.turn_receipt).toEqual(receipt);
-    expect(messages.slice(-1)[0]?.content).toBe(text);
+    if (order === 'receipt then error' && text === '') {
+      // The error already owns the receipt; route done must not add a blank reply.
+      expect(messages.slice(-1)[0]?.content).toBe('⚠️ Interrupted');
+      expect(messages.some((message) => message.role === 'assistant' && message.content === '')).toBe(false);
+    } else {
+      expect(messages.slice(-1)[0]?.content).toBe(text);
+    }
     expect(screen.getAllByRole('note')).toHaveLength(1);
     expect(useAgentStore.getState().streaming).toBe(false);
     expect(useAgentStore.getState().streamingReceipt).toBeNull();

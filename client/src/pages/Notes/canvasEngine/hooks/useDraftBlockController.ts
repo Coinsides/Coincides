@@ -48,9 +48,30 @@ import {
   type DraftBlockCreateResult,
   type DraftRecoveryReceipt,
 } from '../draftBlockPersistence';
+import { splitTextUnitForEnter } from '../textUnitEditorService';
 import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 
 const identityDraftLayout = (layout: BlockBoxLayout): BlockBoxLayout => layout;
+
+// The draft textarea takes Enter as a line break, but a TextFlow unit has no
+// in-unit line breaks: each draft line becomes its own paragraph unit, exactly
+// as Enter splits a unit once the durable editor owns the text.
+export function draftTextFlowFromText(text: string): TextBlockContentV1 {
+  let flow = createTextBlockContentV1(text, 'paragraph');
+  for (;;) {
+    const unit = flow.units.find((candidate) => candidate.text.includes('\n'));
+    if (!unit) return flow;
+    const offset = unit.text.indexOf('\n');
+    flow = splitTextUnitForEnter(flow, unit.id, offset, offset + 1);
+  }
+}
+
+// Maps a textarea caret onto the unit and offset that hold it after splitting.
+function draftCaretInFlow(flow: TextBlockContentV1, text: string, caret: number) {
+  const before = text.slice(0, caret).split('\n');
+  const unit = flow.units[Math.min(before.length - 1, flow.units.length - 1)];
+  return { unitId: unit?.id, offset: before[before.length - 1].length };
+}
 
 export interface DraftSessionAuthority {
   readonly frameId: string | null;
@@ -159,6 +180,7 @@ export function useDraftBlockController({
   const persistPromiseRef = useRef<Promise<void> | null>(null);
   const requestGenerationRef = useRef(0);
   const noteIdRef = useRef(note?.id || null);
+  const persistDraftRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   const syncDraftTextFlow = useCallback((nextText: string) => {
     const current = draftTextFlowRef.current;
@@ -403,7 +425,19 @@ export function useDraftBlockController({
 
   const handleDurableFocusReceipt = useCallback((receipt: TextFocusReceipt) => {
     const pending = pendingReconciliationRef.current;
-    if (!pending || !textFocusReceiptsEqual(receipt, pending.to)) return;
+    // Any unit of the durable block taking focus completes the handoff.
+    if (!pending || receipt.blockId !== pending.to.blockId) return;
+    if (durableSavedRevisionRef.current !== draftRevisionRef.current) {
+      // Keystrokes reached the draft after its last save, while focus was moving.
+      // Replay them through the durable block before the draft goes away.
+      const replay = persistDraftRef.current();
+      void replay.then(() => {
+        if (pendingReconciliationRef.current && durableSavedRevisionRef.current === draftRevisionRef.current) {
+          clearLocalDraft('persist_succeeded', { preserveReconciliation: true });
+        }
+      });
+      return;
+    }
     clearLocalDraft('persist_succeeded', { preserveReconciliation: true });
   }, [clearLocalDraft]);
 
@@ -448,7 +482,7 @@ export function useDraftBlockController({
       if (!persistedBlock) {
         const revisionCreated = draftRevisionRef.current;
         textFlow = options.textFlow
-          || (!explicitTemplate ? createTextBlockContentV1(requestedText, 'paragraph') : null);
+          || (!explicitTemplate ? draftTextFlowFromText(requestedText) : null);
         createAttemptedRef.current = true;
         const authoritativeLayout = sessionCanonicalizeDraftLayoutRef.current(
           options.layout || draftLayoutRef.current || defaultDraftLayout,
@@ -496,7 +530,7 @@ export function useDraftBlockController({
         const latestText = draftTextRef.current.trimEnd();
         if (!hasMeaningfulDraftContent(latestText)) break;
         const latestTextFlow = draftTextFlowRef.current
-          || (!explicitTemplate ? createTextBlockContentV1(latestText, 'paragraph') : null);
+          || (!explicitTemplate ? draftTextFlowFromText(latestText) : null);
         const saveOutcome = await saveBlock(
           persistedBlock,
           latestText,
@@ -522,12 +556,18 @@ export function useDraftBlockController({
       const persistedFlow = getTextFlowContent(persistedBlock.content_json)
         || draftTextFlowRef.current
         || textFlow;
+      const draftText = draftTextRef.current;
+      const rawStart = draftRef.current?.selectionStart ?? draftText.length;
+      const rawEnd = draftRef.current?.selectionEnd ?? rawStart;
+      const caretStart = persistedFlow ? draftCaretInFlow(persistedFlow, draftText, rawStart) : null;
+      const caretEnd = persistedFlow ? draftCaretInFlow(persistedFlow, draftText, rawEnd) : null;
       const durableReceipt = textFocusReceiptForBlock(
         persistedBlock.id,
-        persistedFlow?.units[0]?.id || draftFocusReceiptRef.current.textUnitId,
+        caretStart?.unitId || draftFocusReceiptRef.current.textUnitId,
       );
-      const selectionStart = draftRef.current?.selectionStart ?? draftTextRef.current.length;
-      const selectionEnd = draftRef.current?.selectionEnd ?? selectionStart;
+      // A selection that spans draft lines collapses to its start unit.
+      const selectionStart = caretStart?.offset ?? rawStart;
+      const selectionEnd = caretEnd && caretEnd.unitId === caretStart?.unitId ? caretEnd.offset : selectionStart;
       const reconciliation: TextOwnerReconciliation = {
         from: draftFocusReceiptRef.current,
         to: durableReceipt,
@@ -565,6 +605,8 @@ export function useDraftBlockController({
     setFocusBlockId,
     setInteractionState,
   ]);
+
+  persistDraftRef.current = () => persistDraft();
 
   const resizeDraftFromTextarea = useCallback((textarea: HTMLTextAreaElement) => {
     resizeTextareaToContent(textarea);

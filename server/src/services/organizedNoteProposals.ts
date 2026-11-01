@@ -2,7 +2,7 @@ import { getOwnedCourse } from './courseOwnership.js';
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
-import { getProviderFromSettings } from '../agent/providers/index.js';
+import { getProviderFromSettings, resolveActiveProvider } from '../agent/providers/index.js';
 import { resolveProviderCredential } from './providerCredentials.js';
 import { ensureSegmentsForMaterial, listCourseMaterials } from './courseMaterials.js';
 import { deterministicRichContent, normalizeOrganizedNoteBlock } from './organizedNoteBlocks.js';
@@ -85,8 +85,7 @@ function getUserSettings(db: Database.Database, userId: string): Record<string, 
 }
 
 function hasAiKey(settings: Record<string, unknown>): boolean {
-  const activeProvider = settings.active_provider || 'anthropic';
-  return Boolean(resolveProviderCredential(String(activeProvider)));
+  return Boolean(resolveProviderCredential(resolveActiveProvider(settings)));
 }
 
 function scopedSegments(

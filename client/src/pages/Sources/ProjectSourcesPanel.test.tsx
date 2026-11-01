@@ -87,8 +87,8 @@ describe('ProjectSourcesPanel deletion', () => {
       mocks.sources = [];
       return { data: { deleted: true } };
     });
-    const onSourceDeleted = vi.fn();
-    render(<ProjectSourcesPanel projectId="project-1" onSourceDeleted={onSourceDeleted} />);
+    const onProjectionNotesChanged = vi.fn();
+    const view = render(<ProjectSourcesPanel projectId="project-1" onProjectionNotesChanged={onProjectionNotesChanged} />);
 
     const confirm = await openDeleteDialog();
     expect(within(confirm).getByText(/cannot be undone/)).toBeTruthy();
@@ -102,8 +102,27 @@ describe('ProjectSourcesPanel deletion', () => {
     await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(mocks.refresh).toHaveBeenCalledWith(true);
-    expect(onSourceDeleted).toHaveBeenCalledTimes(1);
+    view.rerender(<ProjectSourcesPanel projectId="project-1" onProjectionNotesChanged={onProjectionNotesChanged} />);
+    // A failed Source never had an extracted note, so the host note list is unchanged.
+    expect(onProjectionNotesChanged).not.toHaveBeenCalled();
     expect(mocks.addToast).toHaveBeenCalledWith('success', expect.stringContaining('permanently deleted'));
+  });
+
+  it('tells the host when extracted notes appear or go away, without a reload', () => {
+    const onProjectionNotesChanged = vi.fn();
+    const view = render(<ProjectSourcesPanel projectId="project-1" onProjectionNotesChanged={onProjectionNotesChanged} />);
+    expect(onProjectionNotesChanged).not.toHaveBeenCalled();
+
+    const ready = failedSource();
+    ready.materialization = { ...ready.materialization, status: 'materialized', error_code: null,
+      projection_note_id: 'synthetic-note', projection_available: true };
+    mocks.sources = [ready];
+    view.rerender(<ProjectSourcesPanel projectId="project-1" onProjectionNotesChanged={onProjectionNotesChanged} />);
+    expect(onProjectionNotesChanged).toHaveBeenCalledTimes(1);
+
+    mocks.sources = [];
+    view.rerender(<ProjectSourcesPanel projectId="project-1" onProjectionNotesChanged={onProjectionNotesChanged} />);
+    expect(onProjectionNotesChanged).toHaveBeenCalledTimes(2);
   });
 
   it('keeps an active extraction undeletable through the server impact, not by hiding the action', async () => {

@@ -45,12 +45,18 @@ export function useBlockDraftAuthority(
 
   const setBlockTextDrafts = useCallback<UseBlockDraftAuthorityResult['setBlockTextDrafts']>((action) => {
     const next = resolveStateAction(action, snapshotRef.current.textDrafts);
+    for (const key of new Set([...Object.keys(next), ...Object.keys(snapshotRef.current.textDrafts)])) {
+      if (next[key] !== snapshotRef.current.textDrafts[key]) console.info('[F4-PROBE] textDraft', key.slice(0, 8), JSON.stringify(snapshotRef.current.textDrafts[key]), '->', JSON.stringify(next[key]), typeof action === 'function' ? 'fn' : 'MAP', new Error().stack?.split('\n').slice(2, 5).map((l) => l.trim().replace(/\?t=\d+/, '').replace(/https?:\/\/[^/]+\/src\/pages\/Notes\/canvasEngine\//, '')).join(' < '));
+    }
     snapshotRef.current = { ...snapshotRef.current, textDrafts: next };
     setTextDraftState(next);
   }, []);
 
   const setBlockTextFlowDrafts = useCallback<UseBlockDraftAuthorityResult['setBlockTextFlowDrafts']>((action) => {
     const next = resolveStateAction(action, snapshotRef.current.textFlowDrafts);
+    for (const key of new Set([...Object.keys(next), ...Object.keys(snapshotRef.current.textFlowDrafts)])) {
+      if (next[key] !== snapshotRef.current.textFlowDrafts[key]) console.info('[F4-PROBE] flowDraft', key.slice(0, 8), JSON.stringify(snapshotRef.current.textFlowDrafts[key]?.units.map((u) => u.text)), '->', JSON.stringify(next[key]?.units.map((u) => u.text)), typeof action === 'function' ? 'fn' : 'MAP', new Error().stack?.split('\n').slice(2, 5).map((l) => l.trim().replace(/\?t=\d+/, '').replace(/https?:\/\/[^/]+\/src\/pages\/Notes\/canvasEngine\//, '')).join(' < '));
+    }
     snapshotRef.current = { ...snapshotRef.current, textFlowDrafts: next };
     setTextFlowDraftState(next);
   }, []);

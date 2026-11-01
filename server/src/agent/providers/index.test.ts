@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test, { afterEach, beforeEach, type TestContext } from 'node:test';
 import { AnthropicProvider } from './anthropic.js';
-import { createProvider, getProviderFromSettings, type AIProvider } from './index.js';
+import { createProvider, getProviderFromSettings, resolveActiveProvider, type AIProvider } from './index.js';
 import { OpenAIProvider } from './openai.js';
 import type { ProviderChatOptions, ProviderMessage, StreamChunk, ToolDefinition } from './types.js';
 import { saveProviderCredential } from '../../services/providerCredentials.js';
@@ -108,8 +108,9 @@ for (const { name, env, baseUrl, model } of newProviders) {
     // Credentials for other providers must not be used as a fallback.
     process.env.ANTHROPIC_API_KEY = 'syn-fake-other';
     process.env[name === 'deepseek' ? 'DASHSCOPE_API_KEY' : 'DEEPSEEK_API_KEY'] = 'syn-fake-other';
+    const label = name === 'deepseek' ? 'DeepSeek' : 'DashScope';
     assert.throws(() => getProviderFromSettings({ active_provider: name }), {
-      message: 'No API key configured. Go to Settings to add one.',
+      message: `The selected AI provider (${label}) has no API key. In Settings, switch to a provider that has a key, or add a key for ${label}.`,
     });
   });
 }
@@ -120,7 +121,7 @@ for (const name of ['openai', 'generic']) {
     process.env.DEEPSEEK_API_KEY = 'syn-fake-other';
     process.env.DASHSCOPE_API_KEY = 'syn-fake-other';
     assert.throws(() => getProviderFromSettings({ active_provider: name }), {
-      message: 'No API key configured. Go to Settings to add one.',
+      message: /^The selected AI provider \((OpenAI|OpenAI Compatible)\) has no API key\./,
     });
     saveProviderCredential(name, settingsKey);
     for (const base_url of [undefined, 'https://provider.example/v1/']) {
@@ -143,6 +144,33 @@ test('anthropic remains the default provider with env fallback', () => {
   const { provider, providerName } = getProviderFromSettings({});
   assert.equal(providerName, 'anthropic');
   assert.ok(provider instanceof AnthropicProvider);
+});
+
+test('without an explicit choice the first provider with a key becomes the default', () => {
+  process.env.DEEPSEEK_API_KEY = 'syn-fake-deepseek';
+  process.env.DASHSCOPE_API_KEY = 'syn-fake-dashscope';
+  assert.equal(getProviderFromSettings({}).providerName, 'deepseek');
+  assert.equal(resolveActiveProvider({}), 'deepseek');
+  process.env.OPENAI_API_KEY = 'syn-fake-openai';
+  assert.equal(getProviderFromSettings({}).providerName, 'openai');
+  process.env.ANTHROPIC_API_KEY = 'syn-fake-anthropic';
+  assert.equal(getProviderFromSettings({}).providerName, 'anthropic');
+});
+
+test('an explicit provider choice wins over the keyed default', () => {
+  process.env.DEEPSEEK_API_KEY = 'syn-fake-deepseek';
+  process.env.DASHSCOPE_API_KEY = 'syn-fake-dashscope';
+  assert.equal(getProviderFromSettings({ active_provider: 'dashscope' }).providerName, 'dashscope');
+  assert.throws(() => getProviderFromSettings({ active_provider: 'anthropic' }), {
+    message: 'The selected AI provider (Anthropic) has no API key. In Settings, switch to a provider that has a key, or add a key for Anthropic.',
+  });
+});
+
+test('with no key anywhere the error names the fallback provider', () => {
+  assert.equal(resolveActiveProvider({}), 'anthropic');
+  assert.throws(() => getProviderFromSettings({}), {
+    message: /^The selected AI provider \(Anthropic\) has no API key\./,
+  });
 });
 
 
