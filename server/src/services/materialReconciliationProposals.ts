@@ -63,7 +63,7 @@ interface FragmentEvidence {
   source_material_id: string;
   source_fragment_id: string;
   material_segment_id: string | null;
-  document_id: string;
+  document_id: string | null;
   document_chunk_id: string | null;
   title: string | null;
   page_start: number | null;
@@ -105,8 +105,10 @@ interface ReconciliationCandidateGroup {
 interface FragmentCandidate {
   id: string;
   source_material_id: string;
-  document_id: string;
+  document_id: string | null;
   document_chunk_id: string | null;
+  source_record_id: string | null;
+  note_block_id: string | null;
   title: string | null;
   content: string;
   page_start: number | null;
@@ -261,6 +263,28 @@ function overlap(a: FragmentCandidate, b: FragmentCandidate): boolean {
   return a.page_start <= b.page_end && b.page_start <= a.page_end;
 }
 
+// Which original a fragment reads. Legacy and Source materials each have exactly
+// one of these ids; two missing ids never make the same original.
+function sourceIdentity(fragment: FragmentCandidate): string {
+  if (fragment.document_id) return `document:${fragment.document_id}`;
+  if (fragment.source_record_id) return `source:${fragment.source_record_id}`;
+  return `material:${fragment.source_material_id}`;
+}
+
+// A Source fragment is one projection block, so blocks of the same material on
+// the same page are neighbours in one partition of the text, not an overlap.
+function sameProjectionPage(left: FragmentCandidate, right: FragmentCandidate): boolean {
+  return Boolean(left.note_block_id && right.note_block_id)
+    && left.source_material_id === right.source_material_id
+    && left.page_start === right.page_start && left.page_end === right.page_end;
+}
+
+// A heading fragment is the title itself; pairing it with the body under that
+// heading is the same section, not evidence of the same concept elsewhere.
+function isHeadingOnly(fragment: FragmentCandidate): boolean {
+  return normalizeText(fragment.content) === normalizeText(fragment.title || '');
+}
+
 function looksConflictPair(fragments: FragmentCandidate[]): boolean {
   const texts = fragments.map((fragment) => normalizeText(fragment.content));
   return texts.some((text) => /\bnot\b|\bexcept\b|\bunless\b|不是|不连续|除非/.test(text))
@@ -352,6 +376,8 @@ function collectScopedFragments(
         source_material_id: fragment.source_material_id,
         document_id: fragment.document_id,
         document_chunk_id: fragment.document_chunk_id,
+        source_record_id: fragment.source_record_id ?? null,
+        note_block_id: fragment.note_block_id ?? null,
         title: fragment.title,
         content: fragment.content,
         page_start: fragment.page_start,
@@ -375,7 +401,7 @@ function buildCandidateGroups(fragments: FragmentCandidate[]) {
       exactContent.set(contentKey, [...(exactContent.get(contentKey) || []), fragment]);
     }
     const titleKey = normalizeText(fragment.title || '');
-    if (titleKey.length > 0) {
+    if (titleKey.length > 0 && !isHeadingOnly(fragment)) {
       byTitle.set(titleKey, [...(byTitle.get(titleKey) || []), fragment]);
     }
   }
@@ -420,8 +446,8 @@ function buildCandidateGroups(fragments: FragmentCandidate[]) {
     for (let j = i + 1; j < fragments.length; j += 1) {
       const left = fragments[i];
       const right = fragments[j];
-      if (left.document_id !== right.document_id || left.id === right.id) continue;
-      if (!overlap(left, right)) continue;
+      if (sourceIdentity(left) !== sourceIdentity(right) || left.id === right.id) continue;
+      if (!overlap(left, right) || sameProjectionPage(left, right)) continue;
       groups.push(candidateGroup(
         'OVERLAP',
         `Possible overlap: ${left.title || 'source range'}`,

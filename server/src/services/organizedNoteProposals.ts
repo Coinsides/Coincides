@@ -217,10 +217,10 @@ async function tryGenerateAiBlocks(
 
   try {
     const { provider } = getProviderFromSettings(settings);
-    const sourceBrief = segments.map((segment) => {
-      const refs = sourceReferencesForSegment(db, segment);
-      const excerpt = refs.map((ref) => ref.source_excerpt).join('\n');
-      return `Segment: ${segment.title}\nPages: ${segment.page_start || '?'}-${segment.page_end || '?'}\nExcerpt:\n${excerpt}`;
+    const refsBySegment = segments.map((segment) => sourceReferencesForSegment(db, segment));
+    const sourceBrief = segments.map((segment, index) => {
+      const excerpt = refsBySegment[index].map((ref) => ref.source_excerpt).join('\n');
+      return `[S${index + 1}] Segment: ${segment.title}\nPages: ${segment.page_start || '?'}-${segment.page_end || '?'}\nExcerpt:\n${excerpt}`;
     }).join('\n\n---\n\n').slice(0, 12000);
     let text = '';
     for await (const chunk of provider.chat(
@@ -234,12 +234,28 @@ async function tryGenerateAiBlocks(
     const parsed = JSON.parse(text) as { blocks?: any[] };
     if (!Array.isArray(parsed.blocks)) return null;
 
-    const fallbackRefs = segments.flatMap((segment) => sourceReferencesForSegment(db, segment)).slice(0, 3);
-    const blocks = parsed.blocks.map((block, index) => ({
-      ...normalizeOrganizedNoteBlock(db, userId, block, index),
-      source_references: block?.block_type === 'toc' ? [] : fallbackRefs,
-      confidence: typeof block?.confidence === 'number' ? block.confidence : 0.7,
-    }));
+    // Each block cites only the segments the model attributed it to. A block with
+    // no valid attribution carries no citation rather than another block's.
+    const refsForBlock = (block: any): SourceReference[] => {
+      const numbers: unknown[] = Array.isArray(block?.source_segments) ? block.source_segments : [];
+      const seen = new Set<unknown>();
+      return numbers
+        .filter((value): value is number => Number.isInteger(value) && (value as number) >= 1 && (value as number) <= segments.length)
+        .flatMap((value) => refsBySegment[value - 1])
+        .filter((ref) => !seen.has(ref.metadata.source_fragment_id) && Boolean(seen.add(ref.metadata.source_fragment_id)))
+        .slice(0, 3);
+    };
+    const blocks = parsed.blocks.map((block, index) => {
+      const normalized = normalizeOrganizedNoteBlock(db, userId, block, index);
+      if (block?.block_type === 'toc') return { ...normalized, source_references: [], confidence: 0.7 };
+      const refs = refsForBlock(block);
+      return {
+        ...normalized,
+        source_references: refs,
+        warnings: refs.length > 0 ? normalized.warnings : [...normalized.warnings, 'No source segment was attributed to this block.'],
+        confidence: typeof block?.confidence === 'number' ? block.confidence : 0.7,
+      };
+    });
     return blocks.length > 0 ? blocks : null;
   } catch {
     return null;

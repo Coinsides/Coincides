@@ -7,7 +7,12 @@ import { normalizeOrganizedNoteBlock, deterministicRichContent } from '../servic
 import { applyOrganizedNoteProposal } from '../services/organizedNoteProposals.js';
 import { createProposal, HUMAN_PROPOSAL_CONTEXT } from '../services/proposals.js';
 import { updateNoteBlockContent } from '../services/noteBlockContent.js';
-import { ORGANIZED_NOTE_BASE_PROMPT, ORGANIZED_NOTE_GENERATION_PROMPT, ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT } from '../services/organizedNotePrompt.js';
+import {
+  ORGANIZED_NOTE_BASE_PROMPT,
+  ORGANIZED_NOTE_GENERATION_PROMPT,
+  ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT,
+  ORGANIZED_NOTE_SOURCE_ATTRIBUTION_AMENDMENT,
+} from '../services/organizedNotePrompt.js';
 
 const userId = 'rich-user';
 const courseId = '11111111-1111-4111-8111-111111111111';
@@ -163,7 +168,15 @@ test('T2 generator amendment removal recovers the original 569-byte SHA-256 with
   assert.equal(hash(ORGANIZED_NOTE_BASE_PROMPT), '2a330527f4d46fff0f1e6bcde4fe308c10b667480a575026c7e6789042cc9274');
   assert.equal(Buffer.byteLength(ORGANIZED_NOTE_BASE_PROMPT), 569);
   assert.equal(ORGANIZED_NOTE_GENERATION_PROMPT.split(ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT).length, 2);
-  assert.equal(hash(ORGANIZED_NOTE_GENERATION_PROMPT.replace(ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT, '')), hash(ORGANIZED_NOTE_BASE_PROMPT));
+  // Amendments are append-only: removing all of them (T2 rich blocks, F6 source
+  // attribution) recovers the frozen base exactly.
+  assert.equal(ORGANIZED_NOTE_GENERATION_PROMPT.split(ORGANIZED_NOTE_SOURCE_ATTRIBUTION_AMENDMENT).length, 2);
+  assert.equal(hash(ORGANIZED_NOTE_GENERATION_PROMPT
+    .replace(ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT, '')
+    .replace(ORGANIZED_NOTE_SOURCE_ATTRIBUTION_AMENDMENT, '')), hash(ORGANIZED_NOTE_BASE_PROMPT));
+  for (const word of ['[S1]', 'source_segments', 'rather than guess']) {
+    assert.ok(ORGANIZED_NOTE_SOURCE_ATTRIBUTION_AMENDMENT.includes(word), word);
+  }
   for (const word of ['table', 'timeline', 'chart_bar', 'chart_line', 'quote', 'callout', 'toc', 'three or more chapters', 'human inbox apply']) {
     assert.ok(ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT.includes(word), word);
   }

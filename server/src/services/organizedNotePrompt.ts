@@ -22,4 +22,11 @@ Payloads contain data and semantics only: no colors, fonts, spacing, CSS, HTML o
 Never propose media, item_ref, note_ref or unknown component kinds. Creation produces a pending proposal only; only the existing human inbox apply action writes the note.
 ## End amendment`;
 
-export const ORGANIZED_NOTE_GENERATION_PROMPT = ORGANIZED_NOTE_BASE_PROMPT + ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT;
+export const ORGANIZED_NOTE_SOURCE_ATTRIBUTION_AMENDMENT = `
+
+## Amendment 2026-11-01 — organized_note source attribution
+The source brief numbers each segment as [S1], [S2], and so on. Give every non-TOC block "source_segments":[1,2] listing only the segment numbers its content comes from. Leave it out rather than guess; a block without it carries no citation.
+## End amendment`;
+
+export const ORGANIZED_NOTE_GENERATION_PROMPT = ORGANIZED_NOTE_BASE_PROMPT + ORGANIZED_NOTE_RICH_BLOCK_AMENDMENT
+  + ORGANIZED_NOTE_SOURCE_ATTRIBUTION_AMENDMENT;
