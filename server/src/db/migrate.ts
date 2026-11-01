@@ -26,6 +26,13 @@ export interface Migration {
   id: string;
   description: string;
   up: (db: Database.Database) => void;
+  /**
+   * Rebuild a table that other tables reference. SQLite cannot toggle
+   * foreign_keys inside a transaction, and with them on, renaming or dropping a
+   * referenced table rewrites or fires every child FK (SET NULL / CASCADE). Such
+   * a migration runs with enforcement off and must leave foreign_key_check clean.
+   */
+  foreignKeysOff?: true;
 }
 
 /**
@@ -91,11 +98,16 @@ async function loadMigrations(): Promise<Migration[]> {
  * @returns Number of migrations applied
  */
 export async function runMigrations(db: Database.Database): Promise<number> {
+  return applyMigrations(db, await loadMigrations());
+}
+
+/**
+ * Apply the given migrations that have not run yet, in order.
+ */
+export function applyMigrations(db: Database.Database, allMigrations: Migration[]): number {
   ensureMigrationsTable(db);
-  
+
   const applied = getAppliedMigrations(db);
-  const allMigrations = await loadMigrations();
-  
   const pending = allMigrations.filter(m => !applied.has(m.id));
   
   if (pending.length === 0) {
@@ -106,10 +118,19 @@ export async function runMigrations(db: Database.Database): Promise<number> {
 
   let count = 0;
   for (const migration of pending) {
+    const restoreForeignKeys = Boolean(migration.foreignKeysOff) && db.pragma('foreign_keys', { simple: true }) === 1;
     try {
+      // The pragma is a no-op inside a transaction, so it is switched outside.
+      if (migration.foreignKeysOff) db.pragma('foreign_keys = OFF');
       // Run each migration in a transaction
       db.transaction(() => {
         migration.up(db);
+        if (migration.foreignKeysOff) {
+          const violations = db.pragma('foreign_key_check') as unknown[];
+          if (violations.length > 0) {
+            throw new Error(`Foreign key check failed with ${violations.length} violation(s)`);
+          }
+        }
         db.prepare(
           'INSERT INTO db_migrations (id, description) VALUES (?, ?)'
         ).run(migration.id, migration.description);
@@ -124,6 +145,8 @@ export async function runMigrations(db: Database.Database): Promise<number> {
         `Database may be in an inconsistent state. ` +
         `Fix the migration and restart the server.`
       );
+    } finally {
+      if (restoreForeignKeys) db.pragma('foreign_keys = ON');
     }
   }
 

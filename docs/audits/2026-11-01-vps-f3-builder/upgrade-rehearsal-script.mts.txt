@@ -1,0 +1,23 @@
+const Database = (await import('file:///D:/Coinsides/v2.x/Coincides/server/node_modules/better-sqlite3/lib/index.js')).default;
+const path = process.argv[2];
+const before = new Database(path, { readonly: true });
+const pre = {
+  migrations: (before.prepare('SELECT COUNT(*) AS c FROM db_migrations').get() as { c: number }).c,
+  materialsDocNotNull: (before.prepare('PRAGMA table_info(source_materials)').all() as Array<{ name: string; notnull: number }>).find((c) => c.name === 'document_id')?.notnull,
+  notes: (before.prepare('SELECT COUNT(*) AS c FROM notes').get() as { c: number }).c,
+  sources: (before.prepare('SELECT COUNT(*) AS c FROM source_records').get() as { c: number }).c,
+};
+before.close();
+const { initDb, closeDb } = await import('file:///D:/Coinsides/v2.x/Coincides/server/src/db/init.ts');
+const db = await initDb(path);
+const post = {
+  migrations: (db.prepare('SELECT COUNT(*) AS c FROM db_migrations').get() as { c: number }).c,
+  has084: Boolean(db.prepare("SELECT 1 FROM db_migrations WHERE id = '084_v2_material_source_bridge'").get()),
+  materialsDocNotNull: (db.prepare('PRAGMA table_info(source_materials)').all() as Array<{ name: string; notnull: number }>).find((c) => c.name === 'document_id')?.notnull,
+  fkCheck: (db.pragma('foreign_key_check') as unknown[]).length,
+  foreignKeys: db.pragma('foreign_keys', { simple: true }),
+  notes: (db.prepare('SELECT COUNT(*) AS c FROM notes').get() as { c: number }).c,
+  sources: (db.prepare('SELECT COUNT(*) AS c FROM source_records').get() as { c: number }).c,
+};
+closeDb();
+console.log(JSON.stringify({ pre, post }));

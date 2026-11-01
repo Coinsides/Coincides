@@ -30,8 +30,9 @@ interface ProposalRow {
 }
 
 interface SourceReference {
-  document_id: string;
+  document_id: string | null;
   document_chunk_id: string | null;
+  source_record_id?: string | null;
   source_page_start: number | null;
   source_page_end: number | null;
   source_excerpt: string;
@@ -165,6 +166,8 @@ function sourceReferencesForSegment(db: Database.Database, segment: any): Source
   return fragments.slice(0, 3).map((fragment) => ({
     document_id: fragment.document_id,
     document_chunk_id: fragment.document_chunk_id,
+    // Source-backed fragments keep their provenance on the Source receipt column.
+    source_record_id: fragment.source_record_id ?? null,
     source_page_start: fragment.page_start,
     source_page_end: fragment.page_end,
     source_excerpt: String(fragment.content || '').slice(0, 500),
@@ -358,8 +361,8 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
   const insertSource = db.prepare(`
     INSERT INTO note_block_sources (
       id, block_id, document_id, document_chunk_id, source_page_start,
-      source_page_end, source_excerpt, reference_type, confidence, metadata
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      source_page_end, source_excerpt, reference_type, confidence, metadata, source_record_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   data.blocks = [...data.blocks].sort((a, b) => a.order_index - b.order_index).map((block, index) => ({
@@ -400,7 +403,8 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
         ref.source_excerpt || null,
         ref.reference_type || 'chunk',
         ref.confidence ?? null,
-        JSON.stringify(ref.metadata || {})
+        JSON.stringify(ref.metadata || {}),
+        ref.source_record_id || null
       );
     }
   }

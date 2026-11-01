@@ -515,7 +515,9 @@ CREATE TABLE IF NOT EXISTS source_materials (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  document_id TEXT REFERENCES documents(id) ON DELETE CASCADE,
+  source_record_id TEXT REFERENCES source_records(id) ON DELETE CASCADE,
+  source_placement_id TEXT REFERENCES source_project_placements(id) ON DELETE CASCADE,
   source_type TEXT NOT NULL DEFAULT 'document',
   title TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active',
@@ -529,8 +531,14 @@ CREATE TABLE IF NOT EXISTS source_materials (
   metadata TEXT NOT NULL DEFAULT '{}',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, document_id)
+  UNIQUE(user_id, document_id),
+  CHECK (
+    (document_id IS NOT NULL AND source_record_id IS NULL AND source_placement_id IS NULL)
+    OR (document_id IS NULL AND source_record_id IS NOT NULL AND source_placement_id IS NOT NULL)
+  )
 );
+-- Indexes on the Source columns live in migration 084: this file also runs on
+-- older databases before their migrations, when those columns do not exist yet.
 CREATE INDEX IF NOT EXISTS idx_source_materials_user_course_status ON source_materials(user_id, course_id, status);
 CREATE INDEX IF NOT EXISTS idx_source_materials_document ON source_materials(document_id);
 
@@ -539,8 +547,10 @@ CREATE TABLE IF NOT EXISTS source_fragments (
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   source_material_id TEXT NOT NULL REFERENCES source_materials(id) ON DELETE CASCADE,
-  document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  document_id TEXT REFERENCES documents(id) ON DELETE CASCADE,
   document_chunk_id TEXT REFERENCES document_chunks(id) ON DELETE SET NULL,
+  source_record_id TEXT REFERENCES source_records(id) ON DELETE CASCADE,
+  note_block_id TEXT,
   fragment_type TEXT NOT NULL DEFAULT 'chunk',
   title TEXT,
   content TEXT NOT NULL,
@@ -551,7 +561,8 @@ CREATE TABLE IF NOT EXISTS source_fragments (
   warnings_json TEXT NOT NULL DEFAULT '[]',
   metadata TEXT NOT NULL DEFAULT '{}',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CHECK ((document_id IS NULL) <> (source_record_id IS NULL))
 );
 CREATE INDEX IF NOT EXISTS idx_source_fragments_material_order ON source_fragments(source_material_id, order_index);
 CREATE INDEX IF NOT EXISTS idx_source_fragments_course ON source_fragments(user_id, course_id);

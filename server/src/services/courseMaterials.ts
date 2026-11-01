@@ -18,7 +18,9 @@ export interface SourceMaterialRow {
   id: string;
   user_id: string;
   course_id: string;
-  document_id: string;
+  document_id: string | null;
+  source_record_id: string | null;
+  source_placement_id: string | null;
   source_type: string;
   title: string;
   status: string;
@@ -49,8 +51,9 @@ interface SourceFragmentRow {
   user_id: string;
   course_id: string;
   source_material_id: string;
-  document_id: string;
+  document_id: string | null;
   document_chunk_id: string | null;
+  source_record_id: string | null;
   fragment_type: string;
   title: string | null;
   content: string;
@@ -164,6 +167,152 @@ export function syncCourseMaterials(db: Database.Database, userId: string, cours
       ensureFragmentsForMaterial(db, userId, courseId, materialId, document);
     }
   }
+
+  syncSourceMaterials(db, userId, courseId);
+}
+
+interface SourcePlacementRow {
+  placement_id: string;
+  source_record_id: string;
+  display_name: string;
+  materialization_status: string;
+  projection_note_id: string | null;
+  attempt_count: number;
+  error_message: string | null;
+}
+
+interface ProjectionBlockRow {
+  id: string;
+  block_type: string;
+  title: string | null;
+  plain_text: string | null;
+  metadata: string | null;
+}
+
+// A Source placed in a Project is that Project's material once extraction is ready.
+function sourceParseStatus(row: SourcePlacementRow): string {
+  if (row.materialization_status === 'materialized') return 'completed';
+  if (row.materialization_status === 'failed') return 'failed';
+  return 'pending';
+}
+
+function sourceWarnings(row: SourcePlacementRow): string[] {
+  if (row.materialization_status === 'failed') return [row.error_message || 'Source extraction failed.'];
+  if (row.materialization_status !== 'materialized') return ['Source is not fully extracted yet.'];
+  return [];
+}
+
+// The projection a material's fragments were built from; a rebuilt projection
+// (new attempt) makes them stale.
+function projectionStamp(row: SourcePlacementRow): string | null {
+  return row.projection_note_id ? `${row.projection_note_id}:${row.attempt_count}` : null;
+}
+
+function syncSourceMaterials(db: Database.Database, userId: string, courseId: string): void {
+  const placements = db.prepare(`
+    SELECT
+      spp.id AS placement_id,
+      sr.id AS source_record_id,
+      sr.display_name,
+      sm.status AS materialization_status,
+      sm.projection_note_id,
+      sm.attempt_count,
+      sm.error_message
+    FROM source_project_placements spp
+    JOIN source_records sr ON sr.id = spp.source_record_id AND sr.user_id = spp.user_id
+    JOIN source_materializations sm ON sm.source_record_id = sr.id AND sm.user_id = sr.user_id
+    WHERE spp.user_id = ? AND spp.course_id = ?
+    ORDER BY spp.created_at ASC
+  `).all(userId, courseId) as SourcePlacementRow[];
+
+  const now = new Date().toISOString();
+  for (const placement of placements) {
+    const existing = db.prepare('SELECT * FROM source_materials WHERE user_id = ? AND source_placement_id = ?')
+      .get(userId, placement.placement_id) as SourceMaterialRow | undefined;
+    const parseStatus = sourceParseStatus(placement);
+    const warnings = JSON.stringify(sourceWarnings(placement));
+    let materialId = existing?.id;
+    if (existing) {
+      db.prepare(`
+        UPDATE source_materials SET title = ?, parse_status = ?, warnings_json = ?, updated_at = ? WHERE id = ?
+      `).run(placement.display_name, parseStatus, warnings, now, existing.id);
+    } else {
+      materialId = uuidv4();
+      db.prepare(`
+        INSERT INTO source_materials (
+          id, user_id, course_id, source_record_id, source_placement_id, source_type, title,
+          parse_status, fragment_status, warnings_json, metadata, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, 'source', ?, ?, 'not_started', ?, '{}', ?, ?)
+      `).run(materialId, userId, courseId, placement.source_record_id, placement.placement_id,
+        placement.display_name, parseStatus, warnings, now, now);
+    }
+    ensureSourceFragmentsForMaterial(db, userId, courseId, materialId!, placement);
+  }
+}
+
+function ensureSourceFragmentsForMaterial(
+  db: Database.Database,
+  userId: string,
+  courseId: string,
+  sourceMaterialId: string,
+  placement: SourcePlacementRow,
+): void {
+  const now = new Date().toISOString();
+  const stamp = projectionStamp(placement);
+  const material = db.prepare('SELECT metadata FROM source_materials WHERE id = ?').get(sourceMaterialId) as { metadata: string };
+  const builtFrom = parseJson<Record<string, unknown>>(material.metadata, {}).projection_stamp ?? null;
+  if (stamp !== null && builtFrom === stamp) return;
+
+  // Rebuilding the projection replaces its blocks, so fragments and the segments
+  // grouped from them are rebuilt as well; accepted segment state does not carry over.
+  db.prepare('DELETE FROM material_segments WHERE source_material_id = ?').run(sourceMaterialId);
+  db.prepare('DELETE FROM source_fragments WHERE source_material_id = ?').run(sourceMaterialId);
+
+  if (stamp && placement.materialization_status === 'materialized') {
+    const blocks = db.prepare(`
+      SELECT b.id, b.block_type, b.title, b.plain_text, b.metadata
+      FROM note_block_placements p
+      JOIN note_blocks b ON b.id = p.block_id
+      WHERE p.note_id = ? AND b.user_id = ? AND b.status = 'active'
+      ORDER BY p.order_index ASC
+    `).all(placement.projection_note_id, userId) as ProjectionBlockRow[];
+    const insertFragment = db.prepare(`
+      INSERT INTO source_fragments (
+        id, user_id, course_id, source_material_id, source_record_id, note_block_id,
+        fragment_type, title, content, page_start, page_end, order_index, confidence,
+        warnings_json, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0.8, '[]', ?, ?, ?)
+    `);
+    // One fragment per projection block; headings title the blocks under them.
+    let heading: string | null = null;
+    let orderIndex = 0;
+    for (const block of blocks) {
+      const text = (block.plain_text || '').trim();
+      if (!text) continue;
+      if (block.block_type === 'heading') heading = (block.title || text).trim();
+      const metadata = parseJson<Record<string, unknown>>(block.metadata, {});
+      const page = typeof metadata.source_page_index === 'number' ? metadata.source_page_index : null;
+      insertFragment.run(
+        uuidv4(), userId, courseId, sourceMaterialId, placement.source_record_id, block.id,
+        page === null ? 'chunk' : 'page_range', heading, text, page, page, orderIndex++,
+        JSON.stringify({ source_locator: metadata.source_locator ?? null, artifact_block_id: metadata.artifact_block_id ?? null }),
+        now, now,
+      );
+    }
+  }
+
+  const count = (db.prepare('SELECT COUNT(*) AS count FROM source_fragments WHERE source_material_id = ?')
+    .get(sourceMaterialId) as { count: number }).count;
+  const fragmentStatus = placement.materialization_status === 'failed'
+    ? 'failed'
+    : placement.materialization_status !== 'materialized'
+      ? 'not_started'
+      : count > 0 ? 'ready' : 'needs_review';
+  db.prepare(`
+    UPDATE source_materials
+    SET fragment_status = ?, segment_status = 'not_started', metadata = json_set(metadata, '$.projection_stamp', ?), updated_at = ?
+    WHERE id = ?
+  `).run(fragmentStatus, stamp, now, sourceMaterialId);
 }
 
 export function ensureFragmentsForMaterial(
@@ -259,9 +408,9 @@ export function listCourseMaterials(db: Database.Database, userId: string, cours
       (SELECT COUNT(*) FROM source_fragments sf WHERE sf.source_material_id = sm.id) AS fragment_count,
       (SELECT COUNT(*) FROM material_segments ms WHERE ms.source_material_id = sm.id) AS segment_count
     FROM source_materials sm
-    JOIN documents d ON d.id = sm.document_id
+    LEFT JOIN documents d ON d.id = sm.document_id
     WHERE sm.user_id = ? AND sm.course_id = ?
-    ORDER BY d.created_at DESC
+    ORDER BY COALESCE(d.created_at, sm.created_at) DESC
   `).all(userId, courseId).map(hydrateMaterial);
 }
 
@@ -273,9 +422,13 @@ export function findOwnedSourceMaterial(db: Database.Database, userId: string, s
 export function listSourceFragments(db: Database.Database, userId: string, sourceMaterialId: string) {
   const material = findOwnedSourceMaterial(db, userId, sourceMaterialId);
   if (!material) return null;
-  const document = db.prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?')
-    .get(material.document_id, userId) as DocumentRow | undefined;
-  if (document) ensureFragmentsForMaterial(db, userId, material.course_id, material.id, document);
+  if (material.document_id) {
+    const document = db.prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?')
+      .get(material.document_id, userId) as DocumentRow | undefined;
+    if (document) ensureFragmentsForMaterial(db, userId, material.course_id, material.id, document);
+  } else {
+    syncSourceMaterials(db, userId, material.course_id);
+  }
 
   return db.prepare(`
     SELECT * FROM source_fragments

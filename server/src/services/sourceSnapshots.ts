@@ -253,8 +253,20 @@ export function generateSourceSnapshots(
   let generatedCount = 0;
   let pagesGenerated = 0;
 
+  // Snapshots page through a legacy document's chunks; a Source has no such pages yet.
+  const sourceMaterials = materials.filter((material) => !material.document_id);
+  if (input.source_material_id && sourceMaterials.length > 0) {
+    throw new AppError(409, 'Snapshots are not available for Source materials yet.', {
+      code: 'source_material_snapshot_unsupported',
+    });
+  }
+  for (const material of sourceMaterials) {
+    warnings.push(`${material.title} is a Source; snapshots are not available for Sources yet.`);
+  }
+
   const generate = db.transaction(() => {
     for (const material of materials) {
+      if (!material.document_id) continue;
       const document = getDocument(db, userId, input.course_id, material.document_id);
       if (!document) {
         warnings.push(`Source material ${material.id} has no accessible document.`);

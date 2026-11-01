@@ -176,3 +176,64 @@ material_segments ←→ material_segment_fragments
 **荐:段二只喂 material(案一),但为案二预留形状**——`source_fragments.id` 稳定、带 `source_record_id`、`note_block_id`,日后的向量表可直接以 fragment id 为键接上。检索面按你已预批的顺序走:先上 A-02 低配版(LIKE + `read_note`,不要向量,约半天),再视需要把向量版立为独立单。两张嘴合进段二会使段二体量翻倍,并把外部调用面混进一次迁移施工。
 
 **邻近观察(不在本单修)**:测试账号设置页向量栏高亮 Voyage、实际 status 却是 dashscope,即 UI 显示的是默认值而非生效状态。**此项已在 F4-1 一并修掉**:`Settings.tsx` 在用户未显式选择时,用 `/embedding/status` 的 `provider_name` 显示实际生效的那家(聊天提供方同理),见 F4 回执,随 F4 部署即生效。
+
+
+## Result（段二 · 施工）— 2026-11-01 · 临时工程对话1
+
+**执行状态**:`done`。按段一六点核准施工,外加三件必修与 ④ 的放置清理。交工作树,未 commit(6 改 + 2 新,+230/−21,不含新文件)。
+
+### 写点
+
+| 文件 | 改动 |
+|---|---|
+| `server/src/db/migrate.ts` | 新增 `Migration.foreignKeysOff?: true`。仅对标记的迁移生效:事务外关外键,事务内 `up` 后跑 `foreign_key_check`,有违规即抛并回滚,`finally` 恢复外键;未标记迁移行为不变。新增导出 `applyMigrations(db, migrations)`(`runMigrations` 委托给它,行为不变)以便注入合成迁移做测试 |
+| **新** `server/src/db/migrations/084_v2_material_source_bridge.ts` | 标 `foreignKeysOff`,按 SQLite 12 步重建 `source_materials` 与 `source_fragments`:<br>· `document_id` 放宽为可空;<br>· material 新增 `source_record_id → source_records CASCADE` 与 `source_placement_id → source_project_placements CASCADE`,CHECK 二选一:document 行,或 Source 行(两列都非空);<br>· fragment 新增 `source_record_id`(CASCADE)与 `note_block_id`(无 FK),CHECK document / Source 恰一;<br>· 旧行全量迁移,复建全部既有索引,新列索引仅在迁移里建;<br>· 幂等:两个新列都在则只补索引并返回 |
+| `server/src/db/schema.sql` | 两张表改为新形状,新库直接生对。**新列索引未写进 schema.sql**:它在老库启动时先于迁移执行,那时新列尚不存在,写进去会崩;已加注释 |
+| `server/src/services/courseMaterials.ts` | `syncCourseMaterials` 末尾接 `syncSourceMaterials`:每个(Source, 项目放置)一条 material(核准 ④),parse 状态由 materialization 映射。<br>`ensureSourceFragmentsForMaterial`:以「投影笔记 id : attempt_count」为戳,戳变则删旧 fragment 与 segment、按投影块一块一条重建(核准 ②③),heading 块为其后段落提供 title,页码与 locator 取自块 metadata。<br>`listCourseMaterials` 的 `JOIN documents` 改为 **LEFT JOIN**;`listSourceFragments` 增 Source 分支 |
+| `server/src/services/organizedNoteProposals.ts` | 生成笔记的 receipt 写入 `note_block_sources.source_record_id`(Source 来源可追溯),`document_id` 允许为空 |
+| `server/src/services/sourceSnapshots.ts` | 显式指定 Source material → **409 `source_material_snapshot_unsupported`**,附人话消息;全项目生成时跳过 Source material,并逐条给出警告(核准 ⑥,⛔500) |
+| `shared/types/index.ts` | `SourceMaterial` / `SourceFragment`:`document_id` 可空,新增 Source 字段,`source_type` 增 `'source'` |
+| **新** `server/src/__tests__/vpsF3MaterialBridge.test.ts` | 8 条,见下 |
+
+**④ 放置移除清理的机制**:由 schema 承担,`source_placement_id … ON DELETE CASCADE` → material → fragment / segment 连锁。注意:**现有产品里没有「单独移除某个项目放置」的入口**(全仓无 `DELETE FROM source_project_placements`,放置只随项目删除或 Source 删除而去),所以测试以直接删除放置行模拟;将来加入口时自动受保护。
+**⑥ client 快照按钮**:未按 source_type 禁用。全项目生成已改为「跳过 + 警告」而非报错,按钮保持可用是合理的,留给文案批。
+
+### 测试(实跑实报)
+
+- **新文件 8/8**(`seg2-bridge.tap`):
+  1. 未标记迁移在 `up` 内外键仍开;
+  2. 标记迁移内外键关、事后恢复,重建父表后子表的 SET NULL / CASCADE 行与 FK 指向都完好;
+  3. 标记迁移若留下 FK 违规 → 抛错、回滚、不记账、外键恢复;
+  4. **084 在旧形状库上**保住全部旧 material / fragment / segment 链接、evidence(SET NULL 型)、snapshot(CASCADE 型),子表 FK 仍指向活表,新列到位,重跑是 no-op;
+  5. **端到端**:上传 → 物化 → 项目 Material 出现(`source_type='source'`,fragment 一块一条,heading 生效)→ 分段 → `createOrganizedNoteProposal`(无任何 provider 钥匙,走确定性起草,⛔真实模型调用)→ 应用 → 生成块的 receipt 全部带 `source_record_id`;
+  6. 重投影 → fragment 换成新正文,accepted 段清零;
+  7. 删 Source → material / fragment / segment 归零;删放置 → material 归零而 Source 保留;
+  8. 快照显式 409 + 全项目跳过警告。
+- **阳性对照 ×2**:
+  - 去掉 084 的 `foreignKeysOff` → 仅用例 4 红,实得**旧 fragment 被删光**(`[]`),比段一实验更狠,证实开关必要。证据 `positive-control-084-fk-on.tap`;
+  - LEFT JOIN 改回 INNER → 用例 5–8 全红(Source material 被静默滤掉)。证据 `positive-control-inner-join.tap`。
+  - 两处均已还原。
+- **邻接回归**:16 文件,含 MaterialLibrary / ProposalUnification / OrganizedNoteRichBlocks / SourceLifecycleClosure / SourceMaterialization / ProjectDeletionReferences / 各 v14 上下文与 episode / NotesLifecycle 等 → **247/247**(`seg2-server-targeted.tap`);`scripts/v13WildernessExecute.test.ts` 27/27。
+- **真实路径升级演练**:复制 F4 临时库(83 个迁移、旧形状、只有我的测试数据),用真实 `initDb` 跑一遍:schema.sql 未崩,只跑了 1 个待办迁移(084);之后 84 个迁移、`document_id` 可空、`foreign_key_check` 0、外键 ON、9 篇笔记原样。证据 `upgrade-rehearsal-real-initdb.json`(脚本副本 `upgrade-rehearsal-script.mts.txt`;演练库已删)。
+- **类型检查**:server 87 条 = 基线(`server-tsc.log`);client 0。
+
+### 部署提示
+
+岛上启动时会自动跑 084(只这一个待办迁移)。已有的 documents 体系 material 不受影响。Source material 在首次打开项目页时由 `listCourseMaterials` 惰性生成,无需回填脚本。岛上那几份 Ready Source 部署后打开项目页即会出现在 Project Material。
+
+### 未做 / 下一张
+
+- A-02 低配版(`search_documents` 增 Source 路 + 修正 system-prompt:38)= 已预批的下一张小单,⛔并入本段;
+- 向量版检索 = 另立单(段一补证 ③ 已报代价)。
+
+### 环境申报
+
+一次 tsc 日志误写到 `/tmp`(应写 scratchpad),之后已改正;scratchpad 脚本解析不到 `better-sqlite3`,改为绝对 `file:///` 路径导入。均属工具摩擦。未读 `.env`;无 git 写操作;无真实模型调用;无用户库接触(演练库是我自己的临时库副本)。
+
+## Main_Designer 收口(段二)— 2026-11-01
+
+- **内容级核阅**(新纪律首单全程执行):084 迁移本体逐行读过——建新/拷贝/**先 DROP 后 RENAME**(正确避雷顺序)/CHECK 二选一/placement 唯一索引/幂等分支(fresh 库走 schema.sql+索引补建);跑器开关=仅标记迁移生效、事务外关、事务内 check 有违规即抛、finally 恢复、restoreForeignKeys 记忆原状——四道箍全在;schema.sql 新列索引不入 schema 的坑有注释自文档;
+- **实质验收**:HQ 复跑桥测试 **8/8**+关键邻接 5 文件 **87/87**;真实 initDb 升级演练证据核阅(83→84/doc NOT NULL 1→0/fkCheck 0/FK 恢复 1/笔记保真);两处阳性对照(去开关→旧 fragment 被删光=雷的实弹复现;INNER JOIN→4 用例红)照单全收;
+- **④ 放置移除现物申报核准**:产品暂无单独移除放置的入口,保护由 schema CASCADE 预埋,将来加入口自动受护——记入 current-state 候补事实;
+- **部署注记**:岛上启动自动跑 084(pre-deploy 备份+幂等+check 回滚三层保险);材料惰性生成零回填;
+- F3 全单闭合。A-02 低配版按预批开下一单。

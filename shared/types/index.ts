@@ -430,8 +430,11 @@ export interface SourceMaterial {
   id: string;
   user_id: string;
   course_id: string;
-  document_id: string;
-  source_type: 'document';
+  /** Legacy document material; null when a Ready Source supplies it. */
+  document_id: string | null;
+  source_record_id: string | null;
+  source_placement_id: string | null;
+  source_type: 'document' | 'source';
   title: string;
   status: SourceMaterialStatus;
   parse_status: DocumentParseStatus;
@@ -451,8 +454,11 @@ export interface SourceFragment {
   user_id: string;
   course_id: string;
   source_material_id: string;
-  document_id: string;
+  document_id: string | null;
   document_chunk_id: string | null;
+  source_record_id: string | null;
+  /** The Source projection block this fragment reads. */
+  note_block_id: string | null;
   fragment_type: 'document' | 'chunk' | 'page_range' | 'heading';
   title: string | null;
   content: string;
