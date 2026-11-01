@@ -10,6 +10,7 @@ import {
   Plus,
   NotebookText,
   LibraryBig,
+  CalendarDays,
   Star,
   Clock3,
   Boxes,
@@ -30,6 +31,7 @@ import { useAgentUiStore } from '@/stores/agentUiStore';
 
 const navItems = [
   { to: '/', icon: Home, labelKey: 'nav.home' },
+  { to: '/calendar', icon: CalendarDays, labelKey: 'nav.calendar' },
   { to: '/projects', icon: BookOpen, labelKey: 'nav.projects' },
   { to: '/sources', icon: LibraryBig, labelKey: 'nav.sources' },
   { to: '/boards', icon: PanelsTopLeft, label: 'Boards' },
