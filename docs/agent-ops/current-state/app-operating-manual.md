@@ -12,7 +12,7 @@
 - **Project(course)**:一切的家。笔记/材料/源/目标/任务/卡组都挂在某个 project 下;
 - **Note(笔记)**:一张纸=**块(blocks)的序列**。块经 placement 排序落页,纸面渲染由布局引擎投影。**title+description 只是封面信息,⛔是笔记内容**;
 - **Board(板)**:思考桌面,纯投影域。居民包括 members(引用 note/content_group/item/text_range)、stickies(板内便签)、edges(带 label 视觉连线)、visuals(粉笔/形状等装饰);板必须有 soul(purpose)。视觉线不写 Relation;
-- **两座内容库(⚠️互不相通)**:**材料库(documents)**——`/documents/upload` 进,Note Proposal 生成、Agent 的 search_documents/get_document_content 吃这里;**Source Library(sources)**——`/sources/upload` 进,引用源/imprint/重投影世界吃这里。**chat Agent 今天检索不到 Source Library 的内容**(已实锤的割裂,修法候拍);
+- **两座内容库(2026-11-01 F3/F5 起已接通)**:**材料库(documents,legacy 停喂)**——`/documents/upload` 进(UI 无入口);**Source Library(sources)**——`/sources/upload` 进,引用源/imprint/重投影世界吃这里,**且 Ready Source 的投影自 F3(迁移 084)起喂进项目材料层**(打开项目页惰性生成),Material Map/Note Proposal/Reconcile 都吃得到;**chat Agent 自 F5 起可经 search_documents 的 source_results 检索到已抽取 Source 并用 read_note 读全文**(关键词匹配非语义,向量版候立);
 - **Deck/Card**:卡组挂 project;卡=知识内容,**创建唯一通道=提案**(create_card 已退役);
 - **提案(proposal)**:Agent 对人说话的信道。pending→人 apply/discard;待处理提案在 **Agent 面板头部「提案」收件箱**可见,显示计数、类型摘要、chat/材料来源与时间,逐条处理;材料三型(material_map/organized_note/material_reconciliation)的 CourseDetail 既有面保留;
 - **Agent 会话**:conversations+SSE 消息流;工具活动经 tool_start/tool_end 事件可见。
@@ -73,7 +73,7 @@
 
 - 要走 **Note Proposal/材料地图/Agent 文档检索** → 材料库:`POST /api/documents/upload`(multipart: file+course_id);
 - 要走 **引用源/快照/重投影** → Source Library:`POST /api/sources/upload`(multipart: file+course_id+origin_entry_kind:'project_upload'|'library_upload');
-- **一致性警示**:两库互不相通;传错门=下游功能全空。给 Agent 材料让它"用",今天只有材料库有效。
+- **一致性警示(2026-11-01 更新)**:给 Agent/项目材料让它"用",走 Source Library 即可(F3 桥+F5 检索已通);材料库 legacy 门仍在但 UI 无入口且停喂(TD-43),⛔新流程依赖它。
 
 ## 三 · 提案生命周期
 
@@ -131,7 +131,7 @@
 
 **UI 呈现两动词(C4a)**:独立 UI 注册组归 `channel_write`,不加入域写集,不新增效果分类。`ui_open_note {note_id}` 打开笔记并挂标签;`ui_focus_object {target}` 支持 `{type:'note_block',note_id,block_id}`、`{type:'note_page',note_id,page_index}`(从0计页)、`{type:'board_member',board_id,member_id}`(已上板且层可见)。例 `ui_focus_object {target:{type:'note_page',note_id:'<note-id>',page_index:0}}` 只滚动定位、短暂高亮,不选中编辑器、不写笔记或板真相。缺失/不匹配目标返回错误。每轮最多发8条,同目标1秒内不重发;重复仍有成功工具结果但 `dispatched:false`。工具调用/结果成对落史后才发 SSE `ui_command`,收据条照记 `✓ ui_open_note` 等;成功表示指令已发出,不是浏览器已显示。用户正持有输入框/输入法组合/对话框焦点时延后,blur稳定150ms后只执行最新待办,不抢正在输入的人。板聚焦仅改会话视口,不调用板保存门;刷新或历史回读不重放旧 UI 命令。此通道只开放导航呈现,不允许模拟点击、预填、预武装确认或取得新写权。
 
-**不能(宪法四禁令+现状)**:写/改笔记正文(③);直建卡片(提案唯一);碰判断域(relation confirm 族);任何不可逆删除无仪式;模拟 UI(④);检索 Source Library(现状缺口);代用户 apply/discard 提案。用户可在 Agent 收件箱处理提案,但 chat 回复确认不等于已应用。
+**不能(宪法四禁令+现状)**:写/改笔记正文(③);直建卡片(提案唯一);碰判断域(relation confirm 族);任何不可逆删除无仪式;模拟 UI(④);列举/搜索用户自写笔记(现状缺口,A-15 候修——它会因此误断"没有笔记",勿信);代用户 apply/discard 提案。用户可在 Agent 收件箱处理提案,但 chat 回复确认不等于已应用。
 
 **操作者纪律**:Agent 宣称做了任何写动作,以收据/events 为准⛔以回复文字为准。让 Agent"记住"某事后,仍应**查一眼记忆表**(`GET /api/settings/agent-memories`)——qwen 有"说存没存"前科(空头支票)。
 
