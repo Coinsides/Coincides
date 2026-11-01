@@ -23,6 +23,20 @@ export function headingBlockSegments(flow: TextBlockContentV1): string[][] {
   return segments;
 }
 
+// A structure commit waits for React to publish each step. Animation frames stop
+// in background or throttled tabs, so every wait also has a short timer: a frame
+// that never comes must not hold the whole note read-only.
+const FRAME_FALLBACK_MS = 100;
+// Last-resort exit when some awaited write never settles at all.
+export const HEADING_STRUCTURE_WATCHDOG_MS = 10_000;
+
+function afterFrame(callback: () => void): void {
+  let done = false;
+  const run = () => { if (!done) { done = true; callback(); } };
+  requestAnimationFrame(run);
+  setTimeout(run, FRAME_FALLBACK_MS);
+}
+
 function isNoteTextEditor(target: EventTarget | null): boolean {
   return target instanceof HTMLTextAreaElement && target.dataset.runtimeTextflowEditor === 'true';
 }
@@ -75,6 +89,8 @@ export function useHeadingStructureController(input: {
   onFocusBlock: (id: string) => void; onFailure: () => void;
   /** The text half of the draft authority; the editor renders from text and flow together. */
   setBlockTextDrafts: Dispatch<SetStateAction<Record<string, string>>>;
+  /** Defaults to HEADING_STRUCTURE_WATCHDOG_MS. */
+  watchdogMs?: number;
 }) {
   const latest = useRef(input); latest.current = input;
   const busyRef = useRef(false);
@@ -99,7 +115,27 @@ export function useHeadingStructureController(input: {
     const current = () => latest.current.noteId === session && activeRun.current === run;
     // Let acknowledged React state become the live input of the next existing
     // unit transfer. No read polling and no independent content cache.
-    const rendered = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const rendered = () => new Promise<void>((resolve) => afterFrame(resolve));
+    // Every exit releases the busy state and gives queued keys somewhere to go:
+    // success replays them at the new caret, any other exit (failure, throw, or
+    // the watchdog) puts them back where the person was typing, beside the toast.
+    const fallbackFocus = { blockId: requests[0].block.id, unitId: requests[0].request.focus.unitId,
+      caret: requests[0].request.focus.caret };
+    const exitQueue = (focus: { blockId: string; unitId: string; caret: number }) => afterFrame(() => {
+      const typed = typing.finish();
+      if (typed && latest.current.noteId === session) void replayTyped(focus, typed);
+    });
+    const release = () => { busyRef.current = false; setBusy(false); };
+    const watchdog = setTimeout(() => {
+      if (!current()) return;
+      // Abandon the run: its later steps see current() === false and stop.
+      activeRun.current = null; release();
+      publishTextHalves(touchedBlockIds());
+      latest.current.onFailure();
+      exitQueue(lastFocus ?? fallbackFocus);
+    }, api.watchdogMs ?? HEADING_STRUCTURE_WATCHDOG_MS);
+    const touched = new Set(changes.map((change) => change.block.id));
+    const touchedBlockIds = () => [...touched];
     try {
       // Pause A1 writes before the existing unit transfers begin and drain any
       // earlier placement save, while its pure full plan remains available.
@@ -112,6 +148,10 @@ export function useHeadingStructureController(input: {
             previousTextFlow: change.previousTextFlow, metadata: change.metadata,
           });
         if (!edited || !current()) return false;
+        // The structural edit bypasses the editor's own text publisher; publish the
+        // text half too, or the editor realigns to the old text and the chapter
+        // tree (built from the flow) names a heading the block does not show.
+        if (!documentEdit) publishTextHalves([change.block.id], change.nextTextFlow);
         await api.textHistory.flush(); await rendered();
         if (!current()) return false;
         for (const { block, request } of requests) {
@@ -127,7 +167,7 @@ export function useHeadingStructureController(input: {
             const target: NoteBlock | null = created;
             if (!target) return false;
             const targetId = (target as NoteBlock).id;
-            segmentBlocks.push(targetId);
+            segmentBlocks.push(targetId); touched.add(targetId);
             for (const unitId of segment.slice(1)) {
               const original = api.textHistory.readLiveBlock(block.id);
               const destination = api.textHistory.readLiveBlock(targetId);
@@ -158,7 +198,7 @@ export function useHeadingStructureController(input: {
           const focusBlockId = segmentBlocks[Math.max(0, focusIndex)];
           lastFocus = { blockId: focusBlockId, unitId: request.focus.unitId, caret: request.focus.caret };
           latest.current.onFocusBlock(focusBlockId);
-          requestAnimationFrame(() => {
+          afterFrame(() => {
             if (!current()) return;
             const editor = [...document.querySelectorAll<HTMLTextAreaElement>('textarea[data-runtime-textflow-editor="true"]')]
               .find((element) => element.dataset.blockId === focusBlockId && element.dataset.textUnitId === request.focus.unitId);
@@ -167,33 +207,53 @@ export function useHeadingStructureController(input: {
         }
         return true;
       });
-      if (!succeeded && current()) latest.current.onFailure();
-      const focus = lastFocus as { blockId: string; unitId: string; caret: number } | null;
-      if (succeeded && focus) {
-        // After the per-request focus frame: the boundary is open again.
-        requestAnimationFrame(() => {
-          const typed = typing.finish();
-          if (typed && current()) void replayTyped(focus, typed);
-        });
+      if (!current()) return false;
+      if (!succeeded) {
+        latest.current.onFailure();
+        publishTextHalves(touchedBlockIds());
       }
+      // After the per-request focus frame: the boundary is open again.
+      exitQueue(succeeded && lastFocus ? lastFocus : fallbackFocus);
       return succeeded;
     } catch {
-      if (current()) latest.current.onFailure();
+      if (current()) {
+        latest.current.onFailure();
+        publishTextHalves(touchedBlockIds());
+        exitQueue(fallbackFocus);
+      }
       return false;
     } finally {
-      if (current()) { busyRef.current = false; setBusy(false); }
-      // A failed structure keeps the toast and its original text; nothing was
-      // committed that the queued keys could follow.
-      if (!lastFocus) typing.finish();
+      clearTimeout(watchdog);
+      if (current()) release();
+      // A run abandoned by its note's unmount has nowhere to replay; stop capturing.
+      if (latest.current.noteId !== session) typing.finish();
     }
   }, [canUseHeading]);
+  // Both halves of the draft authority from the same flow: the live one by default.
+  const publishTextHalves = useCallback((blockIds: string[], flow?: TextBlockContentV1) => {
+    const history = latest.current.textHistory;
+    const texts: Record<string, string> = {};
+    for (const id of blockIds) {
+      const live = flow ?? history.readLiveFlow(id);
+      if (live) texts[id] = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: live }).plain_text;
+    }
+    if (Object.keys(texts).length) latest.current.setBlockTextDrafts((current) => ({ ...current, ...texts }));
+  }, []);
   const replayTyped = useCallback(async (focus: { blockId: string; unitId: string; caret: number }, typed: string) => {
     const history = latest.current.textHistory;
+    // A partial structure may have moved the focus unit into a new block.
+    const holder = history.readLiveFlow(focus.blockId)?.units.some((entry) => entry.id === focus.unitId) ? focus.blockId
+      : latest.current.blocks.find((entry) => history.readLiveFlow(entry.id)?.units.some((unit) => unit.id === focus.unitId))?.id;
+    if (holder && holder !== focus.blockId) focus = { ...focus, blockId: holder };
     const block = history.readLiveBlock(focus.blockId);
     const flow = history.readLiveFlow(focus.blockId);
-    const unit = flow?.units.find((entry) => entry.id === focus.unitId);
+    // A failed structure may not have created the focus unit at all; keep the keys
+    // in the block's last live unit rather than dropping them.
+    const exact = flow?.units.find((entry) => entry.id === focus.unitId);
+    const live = flow?.units.filter((entry) => entry.status !== 'deleted') ?? [];
+    const unit = exact ?? live[live.length - 1];
     if (!block || !flow || !unit) return;
-    const at = Math.min(focus.caret, unit.text.length);
+    const at = exact ? Math.min(focus.caret, unit.text.length) : unit.text.length;
     let next = { ...flow, units: flow.units.map((entry) => entry.id === unit.id
       ? { ...entry, text: unit.text.slice(0, at) + typed + unit.text.slice(at) } : entry) };
     // Enter pressed in the window splits paragraphs exactly as the editor's Enter does.
@@ -208,6 +268,9 @@ export function useHeadingStructureController(input: {
       caretUnitId = next.units[index + 1].id;
       caretOffset -= breakAt + 1;
     }
+    // Refused only while a failed save holds the note for Retry/Undo, as all typing
+    // is; the failure toast is already on screen. No retry: a late replay built from
+    // this snapshot would overwrite whatever the person types next.
     const applied = await history.applyEdit(block, next, { previousTextFlow: flow, metadata: {
       unitId: unit.id, inputType: 'insertText', kind: 'typing', isComposing: false,
       beforeSelection: { unitId: unit.id, start: at, end: at },
@@ -217,7 +280,7 @@ export function useHeadingStructureController(input: {
     // applyEdit publishes the flow; the text half must agree or the editor realigns to the old text.
     const text = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: next }).plain_text;
     latest.current.setBlockTextDrafts((current) => ({ ...current, [focus.blockId]: text }));
-    requestAnimationFrame(() => {
+    afterFrame(() => {
       const editor = [...document.querySelectorAll<HTMLTextAreaElement>('textarea[data-runtime-textflow-editor="true"]')]
         .find((element) => element.dataset.blockId === focus.blockId && element.dataset.textUnitId === caretUnitId);
       editor?.focus(); editor?.setSelectionRange(caretOffset, caretOffset);
