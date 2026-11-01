@@ -78,6 +78,8 @@ async function search(fixture: Fixture, args: Record<string, unknown>) {
   return JSON.parse(await executeTool('search_documents', args, fixture.userId)) as {
     results: Array<Record<string, any>>;
     source_results: Array<Record<string, any>>;
+    document_total?: number;
+    source_total?: number;
     message?: string;
   };
 }
@@ -92,6 +94,9 @@ test('a natural-language question finds a Source by its extracted text and point
 
     const found = await search(fixture, { query: 'what does a socket pair with?' });
     assert.equal(found.source_results.length, 1);
+    // F8: a Sources-only hit must not read as an empty search.
+    assert.equal(found.document_total, 0);
+    assert.equal(found.source_total, 1);
     const [hit] = found.source_results;
     assert.equal(hit.source_record_id, sourceId);
     assert.equal(hit.projection_note_id, projectionNoteId);
@@ -140,6 +145,9 @@ test('an empty library returns empty lists without an error', async () => {
     const found = await search(fixture, { query: 'anything at all' });
     assert.deepEqual(found.results, []);
     assert.deepEqual(found.source_results, []);
-    assert.match(found.message ?? '', /No documents or Sources found/);
+    assert.equal(found.document_total, 0);
+    assert.equal(found.source_total, 0);
+    // F8: an empty search is reported as no match, never as proof of absence.
+    assert.match(found.message ?? '', /No documents or Sources matched these terms\. This is not proof the content does not exist/);
   });
 });

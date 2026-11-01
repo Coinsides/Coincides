@@ -112,3 +112,25 @@ client+server 定向;正门纪律;阳性对照≥1(荐修三:工具摘除→列�
 - **四项申报裁定**:①list_notes 名称保留、走 legacy 定义路径(两个面命名空间不交叉,改名不值得);②诚实条款英文置 Never-Do 段——不擅抬 2000 预算的处置正确,条款位置与断言锁定核准;③目标类提案的宿主刷新与项目页 course 语境提示=两条候补件记档,⛔本轮展开;④说明书与知识指纹的显式更新(含修正 F5 后失效的旧注)正合 steward 规矩;
 - **范围卫生**:Tester 在途重组的 round-02 文件与截图 58-61 不随本批收割(builder 申报提醒生效,分开处理);截图 59 所示 A-16(显示序≠存储序)已在案候 F9;
 - F8 全单闭合,随收口第十轮部署。
+
+### 补充令之一、之二(Main_Designer 2026-11-01,完工后到达)执行情况
+
+**上游**:Main_Designer 补充令两道(源自 Tester 只读复核)。到达时四修已完工并回执;下列为按补充令的增量。
+
+- **③ 修一扩范围**:三处(Provider 写错、Agent 名失焦回写 Mr. Zero、向量模型被重置)本单原交付里已经同修,见上文修一。时序与补充令之二所述一致:请求只在 active_provider 为空时发出,user 晚到后 effect 直接 return。无需增量。按指示不带数据修补(运维侧已核零误写)。
+- **① 修三改「复用」**:Agent 的 `list_notes` 改为**直接调用与项目页、公开 MCP `list_notes` 同一个 `listNotes` 服务**(services/notes.ts),不再自写 SQL,所以 Agent 看到的就是人看到的那张表。在其上只做三件 Agent 专属的事:投影成 id/title/note_class/updated_at(`note_class` 区分 Source 投影与自写);上限 50 加 total/truncated;语境缺省 course_id。
+  - **没有把注册表里那个 public 条目原样开给 chat**,理由:它 course_id 必填、返回整行(含 description/metadata)、无上限,与 F8 原单的「上限 50、超限注明、缺省当前项目」规格冲突,对大项目会把整表塞进上下文。
+  - `get_note` / `list_note_blocks` 未开放:正文已有 `read_note`(分页、截断声明)覆盖,再开一条整块读路会出现两条正文通道。
+  - 名字仍是 legacy 定义路径上的 `list_notes`;注册表重名约束不变。
+  - 标题过滤未加(补充令标「可选」)。
+- **② search_documents 诚实度**:
+  - 定义描述改为如实:documents 有嵌入时语义,另有全文/文件名关键词;Sources **仅名称/关键词,非语义**。query 参数说明同步改。
+  - **`total` 成因坐实**:原返回 `total: results.length` 只数 documents。只有 Source 命中时是 `total: 0` 配非空 `source_results`,模型容易读成「没找到」。现改为分列 `document_total` 与 `source_total`。
+  - 空结果 message 改为「这些词没命中,不能证明内容不存在;Source 按关键词匹配,可换更短或更准的词」。
+  - F5 用例补断言:Source-only 命中时 document_total=0、source_total=1;空库时两个总数皆 0 且新 message。
+  - 阳性对照:回退成单一 `total` 时该用例红(`positive-control-search-totals-reverted.log`),已还原。
+  - 冻结提示词中 Document Questions 段那句「uses semantic similarity; relevant_chunks…」说的是 documents 的 chunk 路,对其仍成立,未动。
+- **④ A-13 分词**:未展开(按令)。空结果 message 只提示「换更短或更准的词」,不改匹配逻辑。
+- **说明书**:list_notes 条目注明复用同一服务,search_documents 注明分列总数。工具名集合未变,知识指纹无漂移(PASS 6db84dc9…)。
+- **复跑**:server 定向 7 文件 101/101;tsc server 87 基线;`git diff --check` 干净。
+- **补充令之二 ③(F7 拖柄 Turn into 补测)**:截至本回执未收到补测结果。如回红,按令在本单附申报,不自行扩射程。
