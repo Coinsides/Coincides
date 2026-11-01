@@ -37,7 +37,10 @@ function block(id: string, flow: TextBlockContentV1, order: number): NoteBlock {
 /** Fake only the existing persistence boundary. Splitting, unit movement,
  * snapshots, batching, history and the heading controller are all real hooks.
  */
-function renderStructure(original: TextBlockContentV1, ending = textFlow([['end', 'End']])) {
+type ControllerInput = Parameters<typeof useHeadingStructureController>[0];
+
+function renderStructure(original: TextBlockContentV1, ending = textFlow([['end', 'End']]),
+  extra: Partial<Pick<ControllerInput, 'whenWritesIdle' | 'watchdogMs'>> = {}) {
   const originalBlocks = [block('source', structuredClone(original), 0), block('ending', structuredClone(ending), 1)];
   const board = createBoardTextRangeEditSession('note', async (_note, updates) => updates);
   board.hydrate([]);
@@ -109,7 +112,8 @@ function renderStructure(original: TextBlockContentV1, ending = textFlow([['end'
     const heading = useHeadingStructureController({ noteId: 'note', blocks: data.blocks,
       layouts: Object.fromEntries(data.blocks.map((entry) => [entry.id, layout])), readOnly: false,
       template, textHistory: editing, reorderBlocks: reorder, onFocusBlock: focus, onFailure: failure,
-      setBlockTextDrafts: (value) => { data.textDrafts = typeof value === 'function' ? value(data.textDrafts) : value; update(); } });
+      setBlockTextDrafts: (value) => { data.textDrafts = typeof value === 'function' ? value(data.textDrafts) : value; update(); },
+      ...extra });
     const selection = useDocumentTextFlowSelection({ noteId: 'note', visibleBlocks: data.blocks,
       applyDocumentEdit: (changes) => {
         documentOperations.push(structuredClone(changes));
@@ -307,6 +311,122 @@ describe('A4 heading isolation through the live TextFlow and Note history', () =
       expect(editor.data.textDrafts[created!.id]).toBe('Body\nNext');
     });
     // Typing after the commit is ordinary input again.
+    expect(typeText('later')).toBe(true);
+    area.remove();
+  });
+});
+
+// F9 / A-17: three invariants of the structure commit.
+describe('heading structure commits always release the note and keep both draft halves equal', () => {
+  const noteEditor = () => {
+    const area = document.createElement('textarea');
+    area.dataset.runtimeTextflowEditor = 'true';
+    document.body.appendChild(area);
+    const typeText = (data: string) => area.dispatchEvent(new InputEvent('beforeinput',
+      { inputType: 'insertText', data, bubbles: true, cancelable: true }));
+    return { area, typeText };
+  };
+  // "# Sec" typed into a standalone empty block: one heading unit, no new block.
+  const emptyBlockHeading = () => {
+    const original = textFlow([['empty', '']]);
+    const next = textFlow([['empty', 'Sec', 'heading_1']]);
+    return { original, request: { previousTextFlow: original, nextTextFlow: next, headingUnitId: 'empty',
+      focus: { unitId: 'empty', caret: 3 }, inputType: 'insertHeading' } as HeadingTextFlowStructureRequest };
+  };
+
+  it('publishes the text half with the flow when "# " converts an empty block, so the editor and chapter tree agree', async () => {
+    const { original, request } = emptyBlockHeading();
+    const editor = renderStructure(original);
+    expect(await editor.run(request)).toBe(true);
+    const flow = editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!;
+    expect(flow.units.map((unit) => [unit.writing_role, unit.text])).toEqual([['heading_1', 'Sec']]);
+    // The chapter tree is built from the flow; the editor renders the text half.
+    expect(editor.data.textDrafts.source).toBe('Sec');
+    expect(editor.result.current.heading.isBusy()).toBe(false);
+  });
+
+  it('completes, releases busy and replays queued keys even when animation frames never arrive', async () => {
+    const { original, request } = emptyBlockHeading();
+    const editor = renderStructure(original);
+    const { area, typeText } = noteEditor();
+    const frames = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 0);
+    try {
+      let pending!: Promise<boolean>;
+      act(() => { pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], request); });
+      expect(editor.result.current.heading.isBusy()).toBe(true);
+      expect(typeText(' more')).toBe(false);
+      expect(await pending).toBe(true);
+      await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+      await waitFor(() => expect(editor.data.textDrafts.source).toBe('Sec more'));
+      expect(editor.data.flowDrafts.source.units.map((unit) => unit.text)).toEqual(['Sec more']);
+      expect(typeText('later')).toBe(true);
+    } finally {
+      frames.mockRestore();
+      area.remove();
+    }
+  });
+
+  const splitHeading = (editor: ReturnType<typeof renderStructure>) => {
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], {
+        previousTextFlow: editor.flows()[0], nextTextFlow: textFlow([['body', 'Intro'], ['title', 'Sec', 'heading_1']]),
+        headingUnitId: 'title', focus: { unitId: 'title', caret: 3 }, inputType: 'insertHeading' });
+    });
+    return pending;
+  };
+  const halvesAgree = (editor: ReturnType<typeof renderStructure>) => {
+    for (const entry of editor.data.blocks) {
+      const live = editor.data.flowDrafts[entry.id] ?? getTextFlowContent(entry.content_json)!;
+      const shown = editor.data.textDrafts[entry.id];
+      if (shown !== undefined) expect(shown).toBe(textOf({ ...live, units: live.units.filter((unit) => unit.status !== 'deleted') }));
+    }
+  };
+
+  it('releases busy on a failed structure step and replays queued keys into the block that holds the caret', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    // The split is saved, but placing it in order fails.
+    editor.reorder.mockResolvedValueOnce(false);
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    expect(typeText('!')).toBe(false);
+    expect(await pending).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    await waitFor(() => expect(editor.data.textDrafts[created.id]).toBe('Sec!'));
+    halvesAgree(editor);
+    expect(typeText('later')).toBe(true);
+    area.remove();
+  });
+
+  it('releases busy and stops capturing keys when the split itself cannot be saved', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    editor.create.mockImplementationOnce(async () => { throw new Error('synthetic create failure'); });
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    expect(typeText('!')).toBe(false);
+    expect(await pending).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    halvesAgree(editor);
+    // A failed save holds the note until Retry or Undo, as for any typing; the
+    // queue no longer swallows keys and the failure is on screen, not silent.
+    await waitFor(() => expect(typeText('later')).toBe(true));
+    area.remove();
+  });
+
+  it('a structure whose writes never settle is abandoned by the watchdog: busy released, failure shown, keys kept', async () => {
+    const { original, request } = emptyBlockHeading();
+    const editor = renderStructure(original, undefined, { whenWritesIdle: () => new Promise<void>(() => {}), watchdogMs: 200 });
+    const { area, typeText } = noteEditor();
+    act(() => { void editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], request); });
+    expect(editor.result.current.heading.isBusy()).toBe(true);
+    expect(typeText('kept')).toBe(false);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.data.textDrafts.source).toBe('kept'));
+    expect(editor.data.flowDrafts.source.units.map((unit) => unit.text)).toEqual(['kept']);
     expect(typeText('later')).toBe(true);
     area.remove();
   });
