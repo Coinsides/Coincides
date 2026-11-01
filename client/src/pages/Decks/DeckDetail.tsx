@@ -200,10 +200,13 @@ export default function DeckDetailPage() {
 
       {loading && cards.length === 0 ? (
         <div className={styles.loading}>Loading cards...</div>
-      ) : cards.length === 0 ? (
+      ) : cards.length === 0 && sections.length === 0 && !showNewSection ? (
+        // Cards need a section, and section creation lives in the list below; an
+        // empty deck must still reach it, or only the Agent can add the first card.
         <div className={styles.empty}>
           <h3>No cards in this deck</h3>
-          <p>Add your first flashcard to start studying.</p>
+          <p>Create a section, then add your first flashcard.</p>
+          <button type="button" onClick={() => setShowNewSection(true)}>Add section</button>
         </div>
       ) : (
         <SectionList

@@ -28,6 +28,10 @@
   3. definitions 工具描述与 read_note 的接法写清。
 - **测试**:list_notes 正常列举/课程过滤/上限与总数注明/不含正文/跨用户隔离(用既有隔离测试同形写法,属功能回归);提示词 amendment 哈希纪律;search_documents 行为不变。
 
+## 三甲 · 修四(F7 侦察转正,Main_Designer 核准):「Source locked」标签错配
+
+- 按 F7 回执建议执行:chrome 锁标签只看 `sourceProjectionPolicy.contentReadOnly`(单独传 `sourceLocked`),瞬时忙态(headingStructure.busy 等)另用无文案 busy 态,⛔再让用户自己的笔记闪「Source locked」;约 5 行+一条用例(转标题期间锁标签不出现)。
+
 ## 四 · 验收与测试面
 
 client+server 定向;正门纪律;阳性对照≥1(荐修三:工具摘除→列举用例红);⛔真实模型调用;⛔全库马拉松。

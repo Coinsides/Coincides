@@ -6,6 +6,7 @@ import { createBoardTextRangeEditSession } from '../boardTextRangeEditSession';
 import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1, TextUnitWritingRole } from '../runtimeDataTypes';
 import { createTextBlockContentV1, getTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import type { HeadingTextFlowStructureRequest } from '../headingRoleService';
+import { splitTextUnitForEnter } from '../textUnitEditorService';
 import { useHeadingStructureController } from './useHeadingStructureController';
 import { usePlacementHistory } from './usePlacementHistory';
 import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
@@ -107,7 +108,8 @@ function renderStructure(original: TextBlockContentV1, ending = textFlow([['end'
     host.current = history;
     const heading = useHeadingStructureController({ noteId: 'note', blocks: data.blocks,
       layouts: Object.fromEntries(data.blocks.map((entry) => [entry.id, layout])), readOnly: false,
-      template, textHistory: editing, reorderBlocks: reorder, onFocusBlock: focus, onFailure: failure });
+      template, textHistory: editing, reorderBlocks: reorder, onFocusBlock: focus, onFailure: failure,
+      setBlockTextDrafts: (value) => { data.textDrafts = typeof value === 'function' ? value(data.textDrafts) : value; update(); } });
     const selection = useDocumentTextFlowSelection({ noteId: 'note', visibleBlocks: data.blocks,
       applyDocumentEdit: (changes) => {
         documentOperations.push(structuredClone(changes));
@@ -273,5 +275,39 @@ describe('A4 heading isolation through the live TextFlow and Note history', () =
     expect(await editor.redo()).toBe(true);
     expect(editor.data.blocks.map((entry) => entry.id)).toEqual(finalOrder);
     expect(editor.flows().map(textOf)).toEqual(['Before', 'First title', 'Later title', 'Tail', 'End']);
+  });
+
+  it('replays text and Enter typed while Enter after a heading is still committing', async () => {
+    const original = textFlow([['title', 'Ports', 'heading_1']]);
+    const next = splitTextUnitForEnter(original, 'title', 5, 5);
+    const paragraph = next.units[1];
+    const editor = renderStructure(original);
+    // A note editor that still holds focus while the structure commits.
+    const area = document.createElement('textarea');
+    area.dataset.runtimeTextflowEditor = 'true';
+    document.body.appendChild(area);
+    const typeText = (data: string) => area.dispatchEvent(new InputEvent('beforeinput',
+      { inputType: 'insertText', data, bubbles: true, cancelable: true }));
+
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks.find((entry) => entry.id === 'source')!, {
+        previousTextFlow: original, nextTextFlow: next, headingUnitId: 'title',
+        focus: { unitId: paragraph.id, caret: 0 }, inputType: 'insertParagraphAfterHeading' });
+    });
+    expect(typeText('Body')).toBe(false);
+    expect(area.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))).toBe(false);
+    expect(typeText('Next')).toBe(false);
+    await waitFor(async () => expect(await pending).toBe(true));
+
+    await waitFor(() => {
+      const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'));
+      expect(created).toBeTruthy();
+      expect(editor.data.flowDrafts[created!.id]?.units.map((unit) => unit.text)).toEqual(['Body', 'Next']);
+      expect(editor.data.textDrafts[created!.id]).toBe('Body\nNext');
+    });
+    // Typing after the commit is ordinary input again.
+    expect(typeText('later')).toBe(true);
+    area.remove();
   });
 });

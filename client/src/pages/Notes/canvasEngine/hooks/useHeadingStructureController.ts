@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { TemplateOption } from '@/services/templateOptions';
 import type { HeadingTextFlowStructureRequest } from '../headingRoleService';
 import { headingLevelForRole } from '../headingRoleService';
 import { headingStructureRequestForEdit } from '../headingInputService';
+import { projectTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { splitTextUnitForEnter } from '../textUnitEditorService';
 import type { DocumentTextFlowEdit, useTextFlowHistory } from './useTextFlowHistory';
 
 /** Headings are ordinary units isolated into ordinary text blocks. */
@@ -21,6 +23,49 @@ export function headingBlockSegments(flow: TextBlockContentV1): string[][] {
   return segments;
 }
 
+function isNoteTextEditor(target: EventTarget | null): boolean {
+  return target instanceof HTMLTextAreaElement && target.dataset.runtimeTextflowEditor === 'true';
+}
+
+// While a heading structure commits, the edit boundary refuses every edit until
+// the new block holds focus, so text typed in that window reached no editor.
+// Queue it instead and replay it into the focused block. Composition input is
+// left alone so an input method keeps working.
+function captureTypingDuringStructure() {
+  let typed = '';
+  const onBeforeInput = (event: Event) => {
+    const input = event as InputEvent;
+    if (!isNoteTextEditor(input.target) || input.isComposing) return;
+    if (input.inputType === 'insertText' && input.data) {
+      typed += input.data;
+      input.preventDefault();
+    }
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (!isNoteTextEditor(event.target) || event.isComposing) return;
+    if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      typed += '\n';
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  };
+  window.addEventListener('beforeinput', onBeforeInput, true);
+  window.addEventListener('keydown', onKeyDown, true);
+  let stopped = false;
+  return {
+    finish: () => {
+      if (!stopped) {
+        stopped = true;
+        window.removeEventListener('beforeinput', onBeforeInput, true);
+        window.removeEventListener('keydown', onKeyDown, true);
+      }
+      const value = typed;
+      typed = '';
+      return value;
+    },
+  };
+}
+
 export function useHeadingStructureController(input: {
   noteId?: string; blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>;
   coverFrameId?: string | null; readOnly: boolean; template: TemplateOption;
@@ -28,6 +73,8 @@ export function useHeadingStructureController(input: {
   reorderBlocks: (ids: readonly string[]) => Promise<boolean>;
   whenWritesIdle?: () => Promise<void>;
   onFocusBlock: (id: string) => void; onFailure: () => void;
+  /** The text half of the draft authority; the editor renders from text and flow together. */
+  setBlockTextDrafts: Dispatch<SetStateAction<Record<string, string>>>;
 }) {
   const latest = useRef(input); latest.current = input;
   const busyRef = useRef(false);
@@ -47,6 +94,8 @@ export function useHeadingStructureController(input: {
     if (requests.some(({ block, request }) => !headingBlockSegments(request.nextTextFlow).length || !api.layouts[block.id])) return false;
     const run = {}; activeRun.current = run;
     busyRef.current = true; setBusy(true);
+    const typing = captureTypingDuringStructure();
+    let lastFocus: { blockId: string; unitId: string; caret: number } | null = null;
     const current = () => latest.current.noteId === session && activeRun.current === run;
     // Let acknowledged React state become the live input of the next existing
     // unit transfer. No read polling and no independent content cache.
@@ -107,6 +156,7 @@ export function useHeadingStructureController(input: {
           }
           const focusIndex = segments.findIndex((segment) => segment.includes(request.focus.unitId));
           const focusBlockId = segmentBlocks[Math.max(0, focusIndex)];
+          lastFocus = { blockId: focusBlockId, unitId: request.focus.unitId, caret: request.focus.caret };
           latest.current.onFocusBlock(focusBlockId);
           requestAnimationFrame(() => {
             if (!current()) return;
@@ -118,14 +168,61 @@ export function useHeadingStructureController(input: {
         return true;
       });
       if (!succeeded && current()) latest.current.onFailure();
+      const focus = lastFocus as { blockId: string; unitId: string; caret: number } | null;
+      if (succeeded && focus) {
+        // After the per-request focus frame: the boundary is open again.
+        requestAnimationFrame(() => {
+          const typed = typing.finish();
+          if (typed && current()) void replayTyped(focus, typed);
+        });
+      }
       return succeeded;
     } catch {
       if (current()) latest.current.onFailure();
       return false;
     } finally {
       if (current()) { busyRef.current = false; setBusy(false); }
+      // A failed structure keeps the toast and its original text; nothing was
+      // committed that the queued keys could follow.
+      if (!lastFocus) typing.finish();
     }
   }, [canUseHeading]);
+  const replayTyped = useCallback(async (focus: { blockId: string; unitId: string; caret: number }, typed: string) => {
+    const history = latest.current.textHistory;
+    const block = history.readLiveBlock(focus.blockId);
+    const flow = history.readLiveFlow(focus.blockId);
+    const unit = flow?.units.find((entry) => entry.id === focus.unitId);
+    if (!block || !flow || !unit) return;
+    const at = Math.min(focus.caret, unit.text.length);
+    let next = { ...flow, units: flow.units.map((entry) => entry.id === unit.id
+      ? { ...entry, text: unit.text.slice(0, at) + typed + unit.text.slice(at) } : entry) };
+    // Enter pressed in the window splits paragraphs exactly as the editor's Enter does.
+    let caretUnitId = unit.id;
+    let caretOffset = at + typed.length;
+    for (;;) {
+      const carrier = next.units.find((entry) => entry.id === caretUnitId);
+      const breakAt = carrier ? carrier.text.indexOf('\n') : -1;
+      if (!carrier || breakAt < 0) break;
+      const index = next.units.findIndex((entry) => entry.id === caretUnitId);
+      next = splitTextUnitForEnter(next, caretUnitId, breakAt, breakAt + 1);
+      caretUnitId = next.units[index + 1].id;
+      caretOffset -= breakAt + 1;
+    }
+    const applied = await history.applyEdit(block, next, { previousTextFlow: flow, metadata: {
+      unitId: unit.id, inputType: 'insertText', kind: 'typing', isComposing: false,
+      beforeSelection: { unitId: unit.id, start: at, end: at },
+      afterSelection: { unitId: caretUnitId, start: caretOffset, end: caretOffset },
+    } });
+    if (!applied || !applied.success) return;
+    // applyEdit publishes the flow; the text half must agree or the editor realigns to the old text.
+    const text = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: next }).plain_text;
+    latest.current.setBlockTextDrafts((current) => ({ ...current, [focus.blockId]: text }));
+    requestAnimationFrame(() => {
+      const editor = [...document.querySelectorAll<HTMLTextAreaElement>('textarea[data-runtime-textflow-editor="true"]')]
+        .find((element) => element.dataset.blockId === focus.blockId && element.dataset.textUnitId === caretUnitId);
+      editor?.focus(); editor?.setSelectionRange(caretOffset, caretOffset);
+    });
+  }, []);
   const onHeadingStructure = useCallback((block: NoteBlock, request: HeadingTextFlowStructureRequest) => {
     const previousUnit = request.previousTextFlow.units.find((unit) => unit.id === request.headingUnitId)
       || request.previousTextFlow.units[0];

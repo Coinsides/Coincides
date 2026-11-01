@@ -28,7 +28,8 @@ export default function CardModal() {
   const addToast = useUIStore((s) => s.addToast);
   const { createCard, updateCard } = useCardStore();
   const decks = useDeckStore((s) => s.decks);
-  const sections = useSectionStore((s) => s.sections);
+  const allSections = useSectionStore((s) => s.sections);
+  const createSection = useSectionStore((s) => s.createSection);
   const tags = useTagStore((s) => s.tags);
   const tagGroups = useTagStore((s) => s.tagGroups);
   const fetchTagGroups = useTagStore((s) => s.fetchTagGroups);
@@ -41,6 +42,10 @@ export default function CardModal() {
   const effectiveDeckId = existing?.deck_id || deckId || '';
   const deck = decks.find((d) => d.id === effectiveDeckId);
   const courseId = deck?.course_id;
+  // The section store holds whichever deck loaded last; only this deck's sections apply.
+  const sections = allSections.filter((section) => section.deck_id === effectiveDeckId);
+  const [newSectionName, setNewSectionName] = useState('');
+  const [creatingSection, setCreatingSection] = useState(false);
 
   const [templateType, setTemplateType] = useState<CardTemplateType>(CardTemplateType.General);
   const [title, setTitle] = useState('');
@@ -158,11 +163,26 @@ export default function CardModal() {
     }
   };
 
+  const handleCreateSection = async () => {
+    if (!newSectionName.trim() || !effectiveDeckId) return;
+    setCreatingSection(true);
+    try {
+      const created = await createSection(effectiveDeckId, newSectionName.trim(), sections.length);
+      setSectionId(created.id);
+      setNewSectionName('');
+    } catch (err) {
+      console.error('Failed to create section:', err);
+      addToast('error', 'Failed to create section');
+    } finally {
+      setCreatingSection(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     if (!sectionId) {
-      addToast('error', 'Please select a section');
+      addToast('error', sections.length === 0 ? 'Create a section for this card first' : 'Please select a section');
       return;
     }
     setSaving(true);
@@ -262,8 +282,22 @@ export default function CardModal() {
                 ))}
               </select>
             ) : (
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>
-                No sections in this deck. Create a section first.
+              // A card needs a section; an empty deck creates its first one here.
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="Name the first section"
+                  aria-label="New section name"
+                  value={newSectionName}
+                  onChange={(e) => setNewSectionName(e.target.value)}
+                />
+                <button
+                  type="button"
+                  disabled={creatingSection || !newSectionName.trim() || !effectiveDeckId}
+                  onClick={() => void handleCreateSection()}
+                >
+                  {creatingSection ? 'Creating...' : 'Create section'}
+                </button>
               </div>
             )}
           </div>
@@ -495,7 +529,7 @@ export default function CardModal() {
             <button type="button" className={styles.cancelBtn} onClick={closeModal}>
               Cancel
             </button>
-            <button type="submit" className={styles.saveBtn} disabled={saving || !title.trim()}>
+            <button type="submit" className={styles.saveBtn} disabled={saving || !title.trim() || !sectionId}>
               {saving ? 'Saving...' : isEdit ? 'Update Card' : 'Create Card'}
             </button>
           </div>

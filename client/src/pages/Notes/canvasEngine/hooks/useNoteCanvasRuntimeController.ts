@@ -388,6 +388,7 @@ export function useNoteCanvasRuntimeController() {
   const headingStructure = useHeadingStructureController({ noteId, blocks: sortedBlocks, layouts: blockLayouts,
     coverFrameId, readOnly: sourceProjectionPolicy.contentReadOnly || chapters.isMoving, template: defaultTextTemplate, textHistory, reorderBlocks,
     onFocusBlock: setFocusBlockId,
+    setBlockTextDrafts,
     whenWritesIdle: whenIdle,
     onFailure: () => addToast('error', 'Heading changes could not be completed. Undo to restore the previous text.'),
   });
