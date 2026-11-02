@@ -25,6 +25,14 @@ Henry 已进入亲自日用期(claude-log §259/§260):订单只从使用摩擦�
 
 **验收**:含公式的 docx 导入 → 徽标与 banner 出现且 N>0;纯文本 docx/PDF → 不出现;旧库已入库的 docx(parser_messages 已存)不重解析也能显示。
 
+**裁定(Main_Designer 2026-11-03,回 builder 停工候裁)**:侦察采信——parser_messages 从未落库(sourceArtifact.ts:342 写进内存 artifact.metadata 后全仓零读者),且 mammoth 对相同告警去重,「真 N」在本层报不准。裁:
+1. **走 A**:发布投影时(publishSourceProjection 同事务)把 messages 原文数组写进投影笔记 notes.metadata;⛔迁移⛔新表⛔新动词;
+2. **文案不带数字**:「本件有内容未能完整转换(含公式/嵌入对象),请以原件为准」;条件=messages 非空才渲染。真 N 不做——「几处」的诚实答案只有转写层(1b)给得起,本层硬数数字=又一个说不准的数,比不说更糟;
+3. Source 详情侧经 projection_note_id 读同一份数据;投影缺失(projection_missing)不出徽标;
+4. **旧库不写新代码补**:既有重投影路径(rematerialize)重走 publish 即自然落库——验收第三条改为「旧库 docx 经一次重投影后能显示 banner」;一次性扫描脚本⛔做;
+5. messages 原文数组照存,将来详情明细有料可读,本单不做明细 UI。
+量级回到单文件级,止血一复工。
+
 ## 2. 止血二 · 投影笔记与手写笔记分流
 
 **现状**:notes.note_class(迁移 045,'user'/'source_projection'/'system')数据齐备,listNotes SELECT * 已回传,但 client 的 NoteSummary 接口不取该字段,ProjectNoteCard 对所有卡硬编码类型字 'Note'(client/src/pages/Courses/noteCover/ProjectNoteCard.tsx:167)——投影与手写混排、外观零区别。Henry 原话:「parsing 下来的东西变成一篇笔记跟我自己创建的笔记并列,这件事情本来就不合适」。
