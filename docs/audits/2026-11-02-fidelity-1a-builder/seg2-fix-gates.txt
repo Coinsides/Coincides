@@ -1,0 +1,21 @@
+# repair round gates
+client tsc errors: 0
+server tsc errors: 0 (shared/dist present: 1)
+check:source-experience exit=0 :: Source experience model contract check passed.
+check:changed-file-secrets exit=0 :: Changed-file secret scan passed: 47 changed file(s) scanned.
+# tracked changes:
+ client/src/locales/en/translation.json             | 24 ++++++
+ client/src/locales/zh/translation.json             | 24 ++++++
+ client/src/pages/Notes/NoteDetail.module.css       | 20 +++++
+ .../pages/Notes/canvasEngine/NoteCanvasRuntime.tsx |  8 +-
+ .../layers/BlockSourceReferenceLayer.tsx           | 18 ++++-
+ .../Notes/canvasEngine/layers/NoteChromeLayer.tsx  |  5 ++
+ .../layers/NoteRuntimeDocumentLayer.tsx            | 52 +++++++++++--
+ client/src/pages/Sources/sourceApi.ts              | 29 +++++++
+ client/src/stores/documentTabsStore.ts             |  3 +-
+ ...6-11-02-fidelity-1a-original-page-view-order.md | 91 ++++++++++++++++++++++
+ .../new-suite-vpsF11.txt                           |  6 +-
+ .../src/__tests__/vpsF11SourcePageImages.test.ts   | 76 +++++++++++++++++-
+ server/src/routes/sources.ts                       | 15 +++-
+ server/src/services/sourcePageImages.ts            | 33 +++++++-
+ 14 files changed, 387 insertions(+), 17 deletions(-)

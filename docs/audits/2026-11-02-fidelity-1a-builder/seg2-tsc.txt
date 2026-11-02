@@ -1,0 +1,3 @@
+client tsc errors: 0
+server tsc errors: 0 (shared/dist present: 1)
+client tsc errors after last change: 0

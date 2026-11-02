@@ -447,14 +447,18 @@ export function sourcePageImageAssetIds(
 
 export function getSourcePages(db: Database.Database, userId: string, sourceRecordId: string) {
   const materialization = db.prepare(`
-    SELECT id, projection_note_id FROM source_materializations
+    SELECT id, parser_key, projection_note_id FROM source_materializations
     WHERE source_record_id = ? AND user_id = ?
-  `).get(sourceRecordId, userId) as { id: string; projection_note_id: string | null } | undefined;
+  `).get(sourceRecordId, userId) as { id: string; parser_key: string; projection_note_id: string | null } | undefined;
   if (!materialization) throw new AppError(404, 'Source not found');
+  const identity = {
+    source_id: sourceRecordId,
+    supported: PAGE_IMAGE_PARSERS.has(materialization.parser_key) && Boolean(materialization.projection_note_id),
+  };
   const progress = readProgress(db, userId, sourceRecordId);
   // Project deletion can remove the projection and its images but keep the Source.
   if (!progress || !materialization.projection_note_id) {
-    return { status: 'none' as const, expected: 0, completed: 0, failed_pages: [] as number[], pages: [] };
+    return { ...identity, status: 'none' as const, expected: 0, completed: 0, failed_pages: [] as number[], pages: [] };
   }
   const pages = db.prepare(`
     SELECT page_number, image_asset_id AS asset_id, image_width, image_height, pdf_width, pdf_height
@@ -470,12 +474,35 @@ export function getSourcePages(db: Database.Database, userId: string, sourceReco
     pdf_height: number;
   }>;
   return {
+    ...identity,
     status: progress.status,
     expected: progress.expected,
     completed: pages.length,
     failed_pages: progress.failed_pages,
     pages,
   };
+}
+
+// The manual door for Sources published before page images existed, and for a
+// failed run. It only fills what is missing, so repeating it is harmless.
+export function requestSourcePageImages(
+  db: Database.Database,
+  userId: string,
+  sourceRecordId: string,
+  options: SourcePageImageOptions = {},
+) {
+  const materialization = db.prepare(`
+    SELECT parser_key FROM source_materializations WHERE source_record_id = ? AND user_id = ?
+  `).get(sourceRecordId, userId) as { parser_key: string } | undefined;
+  if (!materialization) throw new AppError(404, 'Source not found');
+  if (!PAGE_IMAGE_PARSERS.has(materialization.parser_key)) {
+    throw new AppError(409, 'This Source has no original page images', { code: 'source_pages_unsupported' });
+  }
+  if (!pageImageTarget(db, userId, sourceRecordId)) {
+    throw new AppError(409, 'This Source is not ready for original page images', { code: 'source_pages_not_ready' });
+  }
+  void scheduleSourcePageImages(db, userId, sourceRecordId, options);
+  return getSourcePages(db, userId, sourceRecordId);
 }
 
 export function getSourcePagesByProjectionNote(db: Database.Database, userId: string, noteId: string) {

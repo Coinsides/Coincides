@@ -160,5 +160,29 @@
   "dailyBriefPage": {
     "studySchedule": "今日学习时段",
     "noStudyBlocks": "今天没有学习时段"
+  },
+  "sourcePages": {
+    "viewOriginal": "查看原页",
+    "toggleLabel": "阅读视图",
+    "textView": "文本",
+    "pagesView": "原页",
+    "title": "原页",
+    "progress": "已生成 {{completed}} / {{expected}} 页",
+    "loading": "正在加载原页...",
+    "loadFailed": "原页加载失败。",
+    "retryLoad": "重试",
+    "preparing": "正在准备原页...",
+    "pageGenerating": "这一页正在生成...",
+    "pageFailed": "这一页无法生成。",
+    "imageFailed": "这一页的图片加载失败。",
+    "pageLabel": "第 {{page}} 页",
+    "noneTitle": "这份资料还没有原页影像",
+    "noneBody": "生成后可以按原文件的版式阅读。",
+    "generate": "生成原页影像",
+    "generating": "正在开始...",
+    "generateFailed": "无法开始生成,请重试。",
+    "failedSummary": "无法生成的页数:{{count}}",
+    "failedTitle": "原页无法生成。",
+    "retry": "重试"
   }
 }

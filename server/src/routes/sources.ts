@@ -20,7 +20,11 @@ import {
   deleteSourceWithCompensation,
   getSourceDeletionImpact,
 } from '../services/sourceLifecycle.js';
-import { getSourcePages, getSourcePagesByProjectionNote } from '../services/sourcePageImages.js';
+import {
+  getSourcePages,
+  getSourcePagesByProjectionNote,
+  requestSourcePageImages,
+} from '../services/sourcePageImages.js';
 
 const router = Router();
 
@@ -181,6 +185,15 @@ router.get('/:sourceId', (req: AuthRequest, res: Response, next: NextFunction) =
 router.get('/:sourceId/pages', (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     res.json(getSourcePages(getDb(), req.userId!, String(req.params.sourceId)));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/:sourceId/pages/generate', (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const result = requestSourcePageImages(getDb(), req.userId!, String(req.params.sourceId));
+    res.status(result.status === 'complete' ? 200 : 202).json(result);
   } catch (error) {
     next(error);
   }

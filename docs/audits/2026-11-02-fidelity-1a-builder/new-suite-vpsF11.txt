@@ -14,6 +14,8 @@ ok 13 - deleting the Source during rendering stops cleanly and leaves nothing be
 ok 14 - materialization still returns its result when the Source is deleted during rendering
 ok 15 - other formats get no register, and the replacement preview has no page side effects
 ok 16 - Project deletion follows the projection: images leave with it or move home with it
-# tests 16
-# pass 16
+ok 17 - the generate route backfills an older Source once, then does nothing
+ok 18 - the generate route answers by owner, format and readiness
+# tests 18
+# pass 18
 # fail 0

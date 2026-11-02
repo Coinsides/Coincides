@@ -1,0 +1,73 @@
+.noteSourcePagesStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.noteSourcePagesList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--source-page-gap);
+}
+.noteSourcePage {
+  position: relative;
+  flex: none;
+  width: var(--source-page-width);
+  background: var(--paper, #fff);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgb(0 0 0 / 18%));
+}
+.noteSourcePage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+.noteSourcePageNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  padding: 24px;
+  color: #6b6b6b;
+  font-size: 13px;
+  text-align: center;
+}
+.noteSourcePageNumber {
+  position: absolute;
+  right: 0;
+  bottom: -24px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.noteSourcePagesEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 72px 24px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+.noteSourcePagesEmpty h3 { margin: 0; color: var(--text-primary); font-size: 15px; font-weight: 600; }
+.noteSourcePagesEmpty p { margin: 0; }
+.noteSourcePagesAction {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.noteSourcePagesAction:hover:not(:disabled) { background: var(--bg-hover); }
+.noteSourcePagesAction:disabled { opacity: 0.6; cursor: default; }
+@media print { .noteSourcePages { display: none; } }

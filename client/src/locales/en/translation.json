@@ -160,5 +160,29 @@
   "dailyBriefPage": {
     "studySchedule": "Today's Study Schedule",
     "noStudyBlocks": "No study blocks today"
+  },
+  "sourcePages": {
+    "viewOriginal": "Original page",
+    "toggleLabel": "Reading view",
+    "textView": "Text",
+    "pagesView": "Pages",
+    "title": "Original pages",
+    "progress": "{{completed}} of {{expected}} pages ready",
+    "loading": "Loading original pages...",
+    "loadFailed": "Could not load the original pages.",
+    "retryLoad": "Try again",
+    "preparing": "Preparing original pages...",
+    "pageGenerating": "Generating this page...",
+    "pageFailed": "This page could not be generated.",
+    "imageFailed": "This page image could not be loaded.",
+    "pageLabel": "Page {{page}}",
+    "noneTitle": "This source has no original page images yet",
+    "noneBody": "Generate them to read it exactly as the original file lays it out.",
+    "generate": "Generate original page images",
+    "generating": "Starting...",
+    "generateFailed": "Could not start generating. Try again.",
+    "failedSummary": "Pages that could not be generated: {{count}}",
+    "failedTitle": "The original pages could not be generated.",
+    "retry": "Try again"
   }
 }

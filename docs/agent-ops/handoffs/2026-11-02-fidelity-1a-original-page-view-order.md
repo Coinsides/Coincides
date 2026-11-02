@@ -208,3 +208,94 @@ CREATE TABLE source_pages (
 - 服务端一条小路由 `POST /api/sources/:sourceId/pages/generate`(属主校验;幂等——复用现行 fill-missing 调度,登记册完整且文件在则 no-op;非 PDF/无物化返回 4xx);
 - 客户端原页视图对 PDF 源 status='none' 时呈现「生成原页影像」入口,点击调上述路由后轮询进度(渐进可读已在段 1 验真);
 - 验收追加:旧 Source(无页影像)经入口生成后原页视图可用;非 PDF 源不显示该入口。
+
+## Result（段 2 · 客户端 + 回填路由,builder 2026-11-02）
+
+**执行状态**:段 2 射程全部完工,未提交。验收项里有一条未满足字面,见申报 1:工作树上跑全量客户端测试有 1 条超时;同样的代码在干净导出里 247/247 全绿。
+
+**同步说明**:没有执行 `git pull`。本会话与你同一工作树,HEAD 已是 `a0a3bba6`,且 pull 属 git 写操作。
+
+**改动**:
+- 服务端:`routes/sources.ts` 加 `POST /api/sources/:sourceId/pages/generate`;`sourcePageImages.ts` 加 `requestSourcePageImages`,读面响应加 `source_id`、`supported`。
+- 客户端新增:`layers/NoteSourcePagesLayer.tsx/.css`、`layers/SourceViewToggle.tsx`、`hooks/useSourcePageViewController.ts`、`SourcePageJumpContext.tsx`、`sourcePageLayout.ts`,测试 `sourcePageLayout.test.ts`、`layers/NoteSourcePagesLayer.test.tsx`。
+- 客户端修改:`NoteCanvasRuntime.tsx`、`NoteRuntimeDocumentLayer.tsx`、`NoteChromeLayer.tsx`、`BlockSourceReferenceLayer.tsx`、`documentTabsStore.ts`、`sourceApi.ts`、`NoteDetail.module.css`、中英 `translation.json`。
+
+**证据**(同一目录 `docs/audits/2026-11-02-fidelity-1a-builder/`):
+- `seg2-browser-walkthrough.md`、`seg2-legacy-source-generate-entry-zh.jpg`;
+- `seg2-client-suite-summary.txt`、`seg2-client-suite-head-full-export.txt`、`seg2-client-suite-overlay-full-export.txt`、`seg2-client-new-tests.txt`;
+- `seg2-full-suite-summary.txt`、`new-suite-vpsF11.txt`、`seg2-tsc.txt`、`seg2-checks.txt`。
+
+**两侧 tsc**:0 / 0(服务端前提仍是 `shared/dist` 已构建,基线见段 1)。
+
+**测试清单**:
+- 服务端新套件 18/18;全量 1193 条,1192 过,1 红 = 段 1 申报的 agent-eval harness。
+- 客户端新增 16 条全过,`BlockSourceReferenceLayer` 既有 2 条仍过。
+- 客户端全量:工作树 2532 条,2531 过,1 超时(申报 1)。
+- `check:source-experience`、`check:canvas-runtime-boundary`、`check:single-editor-shell`、`check:group-gallery-shell`、`check:groups-rail-shell`、`check:server-shared-runtime-import`、`check:changed-file-secrets` 全过。
+
+**验收对照**:
+| 项 | 结果 |
+|---|---|
+| 功能 1 页数/顺序/比例 | 46 页、顺序正确、1240×1753 与登记册比例一致;公式只在段 1 合成页上肉眼看过,**没有真实教材** |
+| 功能 2 切换往返 + tab 记忆 + 跳转 | 主滚动 3000→3000;离开再回到第 7 页;跳 p.12 距顶 1px |
+| 功能 3 生成中 | 进度 0/33→11/33→29/33→完成,未完成页显示占位 |
+| 功能 5 非 source 笔记 | 单元测试:不发请求、无入口。**浏览器里没走普通笔记** |
+| 功能 7 Agent focus | 第 20 页到位并高亮,命令被消费;他笔记的命令被忽略 |
+| 修订 · 旧 Source 经入口生成 | status=none 显示入口,点击后 33 页全部可看 |
+| 修订 · 非 PDF 无入口 | 文本 Source 无切换、无入口;路由返回 409 `source_pages_unsupported` |
+| 回归 · 既有测试 | **工作树未全绿**(申报 1、2) |
+
+**申报项**:
+1. **`PaginationProjection` 1 条超时,只在工作树的全量里出现,根因未查明。** 该条是 `keeps hidden auto text and a manual box...`,5 秒超时。工作树连跑 5 次全量都失败;已排除以下解释:
+   - 单跑 3/3 过,且单跑耗时与 HEAD 相同(2465ms 对 2459ms);
+   - 排除两个新测试文件仍失败;关掉 vitest 缓存仍失败;
+   - 我起初猜是 `BlockSourceReferenceLayer` 每块调用 `useTranslation`,挪走后仍失败,猜错了。挪走这一改动保留,理由是不让所有笔记为翻译付费。
+   - **决定性对照**:同一 D 盘,`git archive HEAD` 全量导出 245/245 全绿;再叠上段 2 全部 20 个文件,247/247 全绿,该文件 14.9 秒。
+   - 所以判断不是段 2 代码引起,而是这个工作树的环境差异(工作树上该文件约 17.4 秒)。**具体差异没定位**,`server/dist`、`shared/dist` 只是嫌疑。工作树上的 HEAD 无法对照,因为⛔共享树换码。
+   - 需要你裁定是否放行;你的收割环境若是这棵树,很可能会看到同一条红。
+2. **agent-eval harness 红**:同段 1 申报 1,未动。
+3. **两处与单面偏离,都为了不进写作面腹地**:
+   - 跳转数据走 Context(`SourcePageJumpContext`),不走 props。props 链要穿过 `NoteWritingSurfaceLayer`。Provider 只包写作面,所以总览缩略图和打印不出现跳转按钮。
+   - 切换控件在工具栏之外,**原页视图头部也放了一份**。复用总览的隐藏机制时,工具栏随写作面一起 `visibility:hidden`,只放工具栏就回不到文本视图。
+4. **复用总览模式的代价**:原页视图激活时向写作面传 `overviewOpen=true`,由此暂停阅读呈现和墨迹。回调 `onToggleOverview` 被包了一层,原页激活时只响应 focus 请求。导航面板在原页视图下停用。
+5. **单外行为**:
+   - 原页激活时,`note_block` 的 focus 会切回文本视图并定位到块,否则块在隐藏面里看不见。
+   - 全部页失败或部分失败时给「重试」,调同一条 generate 路由。判语说 failed 重试走重物化,这里多了一个手动入口;它只补缺,不自动重试。不合适的话删按钮即可。
+6. **只在 `hostMode='page'` 启用**:白板弹窗里打开的 Source 笔记没有切换入口,也没有跳转按钮。
+7. **小限制**:切到原页后跨 tab 再回来切文本,文本滚动位置不恢复(同一 tab 内往返可以)。图片加载中是白纸,没有骨架屏。
+8. **既有问题,与本单无关**:直接改 `location.hash` 离开笔记会弹「Changes could not be saved」但没有失败写入,也不阻止导航。HEAD 导出上同样复现。应用内切 tab 不弹。**浏览器后退键没测**,它走同一类路径,普通用户可能遇到,建议另看。
+9. **浏览器走查用的是跳转按钮重构前的版本**,重构后由自动测试覆盖,没有重走。
+10. **环境已复原**:`.claude/launch.json` 哈希与备份一致,临时导出目录(含 D 盘的 `D:\Coinsides\_tmp-f12-head`)都已删除。未接触岛和用户库,未调用模型,未动依赖。
+
+## Result（段 2 修复轮,builder 2026-11-02）
+
+**执行状态**:5 项全部修完,未提交。只改客户端,服务端零改动。
+
+**逐条**:
+| 项 | 修法 | 测试 |
+|---|---|---|
+| major · 跳转残留覆盖 tab 记忆 | 层消费 jump 后立即清(`clearJump`),`setMode` 也清。re-entry 只认 `initialPage()` 的 tab 记忆 | `applies a jump once...`:跳 p.3→滚到 p.10→往返两轮,落点和记忆都是 10。另有 `still honours a new jump...` 确认新跳转照常生效 |
+| 簇 1 · 轮询脆断 | 失败后退避重试(2/4/8/16/30 秒),连败 6 次才停;成功即清零。停后:有 register 时 header 给错误和刷新按钮,没有 register 时切换入口也出现,点开是错误和重试 | `keeps polling through...`、`gives up after repeated failures...`、`opens the door with an error...`、`keeps pages on screen...` |
+| 簇 2 · failed 空 failed_pages | `status='failed'` 且 `expected>0` 一律给重试,文案落 `failedTitle`;failed 态缺页占位改失败措辞 | `offers a retry for a failed run that names no pages...`、`sourcePageLayout` 更新 |
+| 簇 3 · header 重试失败无反馈 | header 分支补 `generateFailed` alert | `reports a failed retry from the header` |
+| 簇 4 · 越界跳转卡记忆 | 钳制到末页,并把记忆改写为末页 | `lands a page past the end...`、`survives a remembered page beyond a Source that has shrunk` |
+
+**单外新增一处**:register GET 返回 404 时不重试,按「不是 Source」处理,不给切换入口。否则「首次失败也开门」会让 404 的笔记也出现入口。
+
+**证据**(`docs/audits/2026-11-02-fidelity-1a-builder/`):
+- `seg2-fix-client-tests-full.txt`:29 条测试的完整输出,文件头有标记;
+- `seg2-fix-positive-control.txt`:阳性对照,在 scratch 副本上去掉一次性跳转,回归测试变红(落点差 9231px)。共享树没有换码;
+- `seg2-fix-gates.txt`:两侧 tsc、`check:source-experience`、secrets 的结果,以及 `git diff --stat` 标记本轮内容。
+
+**闸**:客户端新/改测试 29/29;两侧 tsc 0 / 0(服务端前提同前);`check:source-experience`、`check:changed-file-secrets` 过。
+
+**真实浏览器复现 major 场景**(scratch 账号,46 页真实 PDF):
+- 跳 p.3→滚到 p.10→往返两轮:p.10 距顶 0,记忆 10;
+- Agent focus `page_index=500`:落到第 46 页,记忆 46;之后滚到 p.5,记忆 5。
+
+**申报项**:
+1. **浏览器走查的限制**:浏览器面板隐藏时不派发原生 scroll 事件,所以滚动后我手动派发了一次 scroll 事件。第一次没派发时,记忆停在 3,原因就是这个。切换、跳转、focus 都是真实操作。
+2. **没验到**:簇 1、2、3 的失败态只有组件和 hook 测试,没有在浏览器里造网络故障。
+3. **全量测试没有重跑**:本轮按你的清单只跑新/改测试。上一轮裁定放行的 `PaginationProjection` 超时不在其中,工作树全量大概率仍会出现。
+4. **关于重试文案**:连败 6 次的总等待约 1 分钟(2+4+8+16+30 秒),`MAX_LOAD_FAILURES` 的注释与此一致。
+5. **环境已复原**:`.claude/launch.json` 恢复,scratch 副本已删。未碰岛和用户库,未调模型,未动依赖。

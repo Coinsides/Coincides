@@ -1,0 +1,35 @@
+# repair round: client new and changed tests, tree with HEAD a0a3bba6 plus uncommitted segment 2 and the repair
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+ ✓ src/pages/Notes/canvasEngine/sourcePageLayout.test.ts > original page layout > keeps each page at its own shape, including a landscape page 3ms
+ ✓ src/pages/Notes/canvasEngine/sourcePageLayout.test.ts > original page layout > reserves a slot for every expected page and marks what is missing or failed 2ms
+ ✓ src/pages/Notes/canvasEngine/sourcePageLayout.test.ts > original page layout > caps the page width and has no slots before the register is known 1ms
+ ✓ src/pages/Notes/canvasEngine/sourcePageLayout.test.ts > original page layout > reports the page at the reading line 1ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > draws only the pages near the viewport, in order 76ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > shows missing pages as generating and failed pages as failed 22ms
+ ✓ src/pages/Notes/canvasEngine/layers/BlockSourceReferenceLayer.test.tsx > bounded first-fragment source references > retains every source action while sharing its fixed strip budget with pagination 210ms
+ ✓ src/pages/Notes/canvasEngine/layers/BlockSourceReferenceLayer.test.tsx > bounded first-fragment source references > keeps legacy wrapping geometry and no-source behavior unchanged 4ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > offers the generate entry to a PDF without images 15ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > answers a page focus for this note and leaves other commands alone 16ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > failure states > offers a retry for a failed run that names no pages, and words its pages as failed 58ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > failure states > reports a failed retry from the header 13ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > failure states > keeps pages on screen and offers a refresh when loading has given up 10ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > page position > applies a jump once: after scrolling away and switching views, the scrolled page wins 114ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > page position > still honours a new jump after that, and one made from the text view 94ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > page position > lands a page past the end on the last page and keeps remembering afterwards 84ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > page position > survives a remembered page beyond a Source that has shrunk 21ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source strip jump > prefers the original page, and keeps the old action where only an anchor exists 29ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source strip jump > shows no action when there is neither a page image nor an anchor, or no provider 2ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > asks nothing for a note that is not a Source projection 1ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > hides the view for a Source without page images 76ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > polls while pages are generating, then stops 5ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > keeps polling through a failed request and finishes normally 2ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > gives up after repeated failures, keeps what it has, and a refresh starts again 3ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > opens the door with an error when the first load never succeeds 2ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > stops at once and offers nothing when the note has no Source 2ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > starts generating from the entry and resumes polling 156ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > reports a failed start without losing the entry 156ms
+ ✓ src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > source page controller > remembers the view per tab and restores it for that note only 94ms
+ Test Files  3 passed (3)
+      Tests  29 passed (29)
+   Start at  16:47:38
+   Duration  3.06s (transform 346ms, setup 813ms, collect 763ms, tests 1.28s, environment 2.47s, prepare 569ms)

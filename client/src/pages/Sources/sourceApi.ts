@@ -40,6 +40,35 @@ export interface SourceReprojectionResult extends SourceReprojectionPreview {
   receipt_id: string;
 }
 
+export interface SourcePage {
+  page_number: number;
+  asset_id: string;
+  image_width: number;
+  image_height: number;
+  pdf_width: number;
+  pdf_height: number;
+}
+
+export interface SourcePageRegister {
+  source_id: string;
+  supported: boolean;
+  status: 'none' | 'pending' | 'partial' | 'complete' | 'failed';
+  expected: number;
+  completed: number;
+  failed_pages: number[];
+  pages: SourcePage[];
+}
+
+export async function getSourcePagesByProjectionNote(noteId: string): Promise<SourcePageRegister> {
+  const response = await api.get<SourcePageRegister>(`/sources/by-projection-note/${encodeURIComponent(noteId)}/pages`);
+  return response.data;
+}
+
+export async function generateSourcePages(sourceId: string): Promise<SourcePageRegister> {
+  const response = await api.post<SourcePageRegister>(`/sources/${encodeURIComponent(sourceId)}/pages/generate`);
+  return response.data;
+}
+
 export interface SourceDeletionImpact {
   source: { id: string; display_name: string };
   placement_count: number;

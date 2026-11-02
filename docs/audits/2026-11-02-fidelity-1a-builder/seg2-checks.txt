@@ -1,0 +1,10 @@
+check:source-experience exit=0 :: Source experience model contract check passed.
+check:canvas-runtime-boundary exit=0 :: Canvas runtime boundary check passed (175 checks).
+check:single-editor-shell exit=0 :: single editor shell contract passed
+check:group-gallery-shell exit=0 :: group gallery shell contract passed (8 checks)
+check:groups-rail-shell exit=0 :: groups rail shell contract passed
+check:server-shared-runtime-import exit=0 :: [PASS] server shared runtime-import gate: 0 violations across 321 product source file(s); 37 import-type share
+check:changed-file-secrets exit=0 :: - docs/audits/2026-11-02-fidelity-1a-builder/seg2-legacy-source-generate-entry-zh.jpg (binary)
+# reruns after the last client change
+check:source-experience exit=0
+check:changed-file-secrets exit=0

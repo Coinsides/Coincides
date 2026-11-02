@@ -1,0 +1,19 @@
+# segment 2: full client suite after moving translation out of the per-block path, sole load
+ FAIL  src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx > A1 one plan across writing, print and Overview > keeps hidden auto text and a manual box on the
+ Test Files  1 failed | 246 passed (247)
+      Tests  1 failed | 2531 passed (2532)
+   Duration  143.46s (transform 19.93s, setup 88.79s, collect 100.26s, tests 359.44s, environment 304.71s, prepare 48.61s)
+# PaginationProjection file:
+ ❯ src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx (5 tests | 1 failed) 17432ms
+ FAIL  src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx > A1 one plan across writing, print and Overvie
+# HEAD e7/a0a3bba6 export control under the same load:
+ FAIL  src/deadCodeRetirement.test.ts > dead-code retirement contracts > keeps proposalStore absent from client and server code
+ FAIL  src/deadCodeRetirement.test.ts > dead-code retirement contracts > keeps singular loadRelation absent from client and server code
+ Test Files  1 failed | 244 passed (245)
+      Tests  2 failed | 2514 passed (2516)
+ ✓ src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx (5 tests) 14765ms
+
+# working tree, runs 2 to 5 all failed the same test; cache off (run 5):
+ FAIL  src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx > A1 one plan across writing, print and Overview > keeps hidden aut
+ Test Files  1 failed | 246 passed (247)
+      Tests  1 failed | 2531 passed (2532)

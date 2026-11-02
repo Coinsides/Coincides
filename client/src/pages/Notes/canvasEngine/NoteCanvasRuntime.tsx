@@ -1,6 +1,8 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { useNoteCanvasRuntimeController } from './hooks/useNoteCanvasRuntimeController';
+import { useSourcePageViewController } from './hooks/useSourcePageViewController';
+import { sourceProjectionPolicyForNote } from './sourceProjectionPolicy';
 import { NoteChromeLayer } from './layers/NoteChromeLayer';
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './layers/NoteRuntimeDocumentLayer';
 import styles from '../NoteDetail.module.css';
@@ -19,6 +21,8 @@ const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequest
   const { hostMode = 'page', noteId } = useNoteCanvasRuntime();
   const { layerProps, loading, loadError, note, skin, paper, layoutMode, runtimePageFrameCollection, showAppearancePanel, toggleAppearancePanel,
     dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
+  const sourcePageView = useSourcePageViewController({ noteId,
+    enabled: hostMode === 'page' && sourceProjectionPolicyForNote(note ?? null).isSourceProjection });
   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
   const appearanceAnchorRef = useRef<HTMLButtonElement>(null);
   const dismissTransientUI = useCallback(() => {
@@ -41,9 +45,9 @@ const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequest
     <div className={styles.page} data-note-host-mode={hostMode}
       data-note-skin-preset={skin.materialPreset ?? skin.preset} style={skin.style}>
       {skin.error && <div role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></div>}
-      <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps}
+      <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps} sourcePageView={sourcePageView}
         writingSurfaceProps={{ ...layerProps.documentLayerProps.writingSurfaceProps,
-          noteTools: <NoteChromeLayer {...layerProps.chromeProps} mountAppearanceCard={false} appearanceAnchorRef={appearanceAnchorRef} /> }} />
+          noteTools: <NoteChromeLayer {...layerProps.chromeProps} sourcePageView={sourcePageView} mountAppearanceCard={false} appearanceAnchorRef={appearanceAnchorRef} /> }} />
     </div>
     </PaperSkinContext.Provider>
   );

@@ -12,6 +12,7 @@ export interface DocumentTab {
   scroll?: { top: number; left: number };
   reading?: PageReadingViewState;
   boardViewport?: BoardViewport;
+  sourceView?: { mode: 'text' | 'pages'; page: number };
 }
 export const documentKey = (kind: DocumentKind, id: string) => `${kind}:${id}`;
 export const documentPath = (tab: Pick<DocumentTab, 'kind' | 'id'>) =>
@@ -20,7 +21,7 @@ export const documentPath = (tab: Pick<DocumentTab, 'kind' | 'id'>) =>
 interface DocumentTabsState {
   tabs: DocumentTab[];
   open: (tab: Omit<DocumentTab, 'key'>) => void;
-  remember: (key: string, view: Partial<Pick<DocumentTab, 'scroll' | 'reading' | 'boardViewport'>>) => void;
+  remember: (key: string, view: Partial<Pick<DocumentTab, 'scroll' | 'reading' | 'boardViewport' | 'sourceView'>>) => void;
   close: (key: string) => void;
   reorder: (key: string, before: string) => void;
   reset: () => void;

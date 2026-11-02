@@ -16,6 +16,7 @@ import { materializeSourceNow, waitForScheduledSourceMaterializations } from '..
 import {
   getSourcePages,
   getSourcePagesByProjectionNote,
+  requestSourcePageImages,
   resumeSourcePageImages,
   waitForScheduledSourcePageImages,
   type SourcePageRenderer,
@@ -483,7 +484,10 @@ test('other formats get no register, and the replacement preview has no page sid
   await withSource(body, { filename: 'Synthetic.md', mimetype: 'text/markdown', openPageRenderer: renderer.open }, async ({ db, userId, sourceId, materializationId }) => {
     assert.equal(renderer.opens(), 0);
     assert.equal(progressOf(db, sourceId), undefined);
-    assert.deepEqual(getSourcePages(db, userId, sourceId), { status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [] });
+    assert.deepEqual(getSourcePages(db, userId, sourceId), {
+      source_id: sourceId, supported: false, status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [],
+    });
+    assert.throws(() => requestSourcePageImages(db, userId, sourceId), /no original page images/);
     assert.deepEqual(counts(db, materializationId), { pages: 0, assets: 0 });
   });
   await withSource(THREE_PAGES, {}, async ({ db, userId, sourceId, materializationId, canvasAssetRootDir }) => {
@@ -508,5 +512,75 @@ test('Project deletion follows the projection: images leave with it or move home
     const courses = db.prepare("SELECT DISTINCT course_id AS id FROM canvas_assets WHERE id LIKE 'source-page-image:%'").all();
     assert.deepEqual(courses, [{ id: result.home_course_id }]);
     assert.equal(getSourcePages(db, userId, sourceId).status, 'complete');
+  });
+});
+
+test('the generate route backfills an older Source once, then does nothing', async () => {
+  await withSource(THREE_PAGES, {}, async ({ db, userId, sourceId, materializationId, canvasAssetRootDir, sourceRootDir }) => {
+    db.prepare("UPDATE source_records SET metadata = '{}' WHERE id = ?").run(sourceId);
+    db.prepare('DELETE FROM source_pages WHERE materialization_id = ?').run(materializationId);
+    db.prepare("DELETE FROM canvas_assets WHERE id LIKE 'source-page-image:%'").run();
+    rmSync(join(canvasAssetRootDir, userId), { recursive: true, force: true });
+    const before = getSourcePages(db, userId, sourceId);
+    assert.equal(before.status, 'none');
+    assert.equal(before.supported, true, 'the client offers the door only on this flag');
+
+    const first = countingRenderer(3);
+    const options = { sourceRootDir, canvasAssetRootDir, openPageRenderer: first.open };
+    assert.equal(requestSourcePageImages(db, userId, sourceId, options).status, 'pending');
+    await waitForScheduledSourcePageImages();
+    assert.deepEqual(first.rendered, [1, 2, 3]);
+    assert.equal(getSourcePages(db, userId, sourceId).status, 'complete');
+
+    const second = countingRenderer(3);
+    const again = requestSourcePageImages(db, userId, sourceId, { ...options, openPageRenderer: second.open });
+    await waitForScheduledSourcePageImages();
+    assert.equal(again.status, 'complete');
+    assert.equal(second.opens(), 0);
+  });
+});
+
+test('the generate route answers by owner, format and readiness', async () => {
+  const routeApp = (requester: () => string) => {
+    const app = express();
+    app.use((req, _res, next) => { (req as any).userId = requester(); next(); });
+    app.use('/api/sources', sourceRoutes);
+    app.use(errorHandler);
+    return app.listen(0);
+  };
+  await withSource(THREE_PAGES, {}, async ({ db, userId, sourceId, noteId, sourceRootDir, canvasAssetRootDir }) => {
+    let requester = userId;
+    const server = routeApp(() => requester);
+    // The route takes its storage roots from the environment, as in production.
+    process.env.CANVAS_ASSET_DIR = canvasAssetRootDir;
+    process.env.SOURCE_BLOB_DIR = sourceRootDir;
+    try {
+      const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/sources/${sourceId}/pages/generate`;
+      const done = await fetch(url, { method: 'POST' });
+      assert.equal(done.status, 200, 'a complete register is a no-op');
+      assert.equal((await done.json() as any).status, 'complete');
+      requester = uuidv4();
+      assert.equal((await fetch(url, { method: 'POST' })).status, 404);
+      requester = userId;
+      db.prepare('DELETE FROM notes WHERE id = ?').run(noteId);
+      const orphaned = await fetch(url, { method: 'POST' });
+      assert.equal(orphaned.status, 409);
+      assert.equal((await orphaned.json() as any).details.code, 'source_pages_not_ready');
+    } finally {
+      delete process.env.CANVAS_ASSET_DIR;
+      delete process.env.SOURCE_BLOB_DIR;
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+  await withSource(Buffer.from('# Heading\n\nBody.'), { filename: 'Synthetic.md', mimetype: 'text/markdown' }, async ({ userId, sourceId }) => {
+    const server = routeApp(() => userId);
+    try {
+      const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/sources/${sourceId}/pages/generate`;
+      const response = await fetch(url, { method: 'POST' });
+      assert.equal(response.status, 409);
+      assert.equal((await response.json() as any).details.code, 'source_pages_unsupported');
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
   });
 });

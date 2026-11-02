@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Inbox } from 'lucide-react';
 import {
   NoteFloatingPanelLayer,
@@ -14,6 +14,10 @@ import { BlockEditRecoveryQueue } from './BlockEditRecoveryQueue';
 import { NotePrintLayer } from './NotePrintLayer';
 import { createPageGapPresentation } from '../pageFramePresentationService';
 import { NoteOverviewLayer } from './NoteOverviewLayer';
+import { NoteSourcePagesLayer } from './NoteSourcePagesLayer';
+import { SourcePageJumpProvider } from '../SourcePageJumpContext';
+import type { SourcePageViewController } from '../hooks/useSourcePageViewController';
+import { useAgentUiStore } from '@/stores/agentUiStore';
 import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
 import { useNoteNavigationController } from '../hooks/useNoteNavigationController';
 import { useNoteAmbientAgentContextHint } from '../hooks/useNoteAmbientAgentContextHint';
@@ -39,6 +43,7 @@ export interface NoteRuntimeDocumentLayerProps {
   onInspectBlockEditRecovery?: (recoveryKey: string) => Promise<NoteBlock | null>;
   onReplayBlockEditRecovery?: (recoveryKey: string) => Promise<boolean>;
   onSurfacePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  sourcePageView?: SourcePageViewController;
   surfaceMode: 'page' | 'canvas';
   templateWarning: string | null;
   writingSurfaceProps: NoteWritingSurfaceLayerProps;
@@ -66,6 +71,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   onInspectBlockEditRecovery,
   onReplayBlockEditRecovery,
   onSurfacePointerDown,
+  sourcePageView,
   surfaceMode,
   templateWarning,
   writingSurfaceProps,
@@ -93,6 +99,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   const [pendingChapter, setPendingChapter] = useState<{ noteId: string; id: string } | null>(null);
   const [pendingSearchResult, setPendingSearchResult] = useState<NoteNavigationResult | null>(null);
   const [pendingLinkBlock, setPendingLinkBlock] = useState<{ noteId: string; blockId: string } | null>(null);
+  const sourcePagesActive = surfaceMode === 'page' && Boolean(sourcePageView?.active);
   const overview = useNoteOverviewController({
     noteId: writingSurfaceProps.noteId,
     surfaceMode,
@@ -101,11 +108,40 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   });
   const navigation = useNoteNavigationController({
     noteId: writingSurfaceProps.noteId,
-    enabled: surfaceMode === 'page' && !overview.open,
+    enabled: surfaceMode === 'page' && !overview.open && !sourcePagesActive,
     blockListRef: writingSurfaceProps.blockListRef,
     pageFrames: pageGapPresentation.pageFrames,
     headingAnchors,
   });
+  // Original pages take over the same way overview does: the writing surface
+  // stays mounted with its reading presentation suspended. Keep the text
+  // position for the way back, since hiding the text shortens the scroll host.
+  const closeOverview = overview.close;
+  useEffect(() => { if (sourcePagesActive && overview.open) closeOverview(); }, [sourcePagesActive, overview.open]);
+  useLayoutEffect(() => {
+    const blockList = writingSurfaceProps.blockListRef.current;
+    const appMain = blockList?.closest<HTMLElement>('[data-app-main-scroll="true"]');
+    if (!appMain) return;
+    if (sourcePagesActive) {
+      const shell = blockList?.closest<HTMLElement>('[data-note-overview-active]');
+      if (shell) appMain.scrollTo({ top: Math.max(0, appMain.scrollTop + shell.getBoundingClientRect().top - appMain.getBoundingClientRect().top), behavior: 'auto' });
+      return;
+    }
+    const saved = sourcePageView?.takeTextScroll();
+    if (!saved) return;
+    const request = requestAnimationFrame(() => appMain.scrollTo({ ...saved, behavior: 'auto' }));
+    return () => cancelAnimationFrame(request);
+  }, [sourcePagesActive, writingSurfaceProps.blockListRef]);
+  // Hidden while pages are up, so only a focus request can arrive here: a block
+  // target needs the text, and a page target was already answered by the pages.
+  const toggleOverview = () => {
+    if (!sourcePagesActive) { overview.toggle(); return; }
+    if (useAgentUiStore.getState().focusCommand) sourcePageView?.setMode('text');
+  };
+  const sourcePageJump = useMemo(() => sourcePageView?.available ? {
+    hasPage: (page: number) => Boolean(sourcePageView.register?.pages.some((entry) => entry.page_number === page)),
+    viewPage: sourcePageView.jumpToPage,
+  } : null, [sourcePageView?.available, sourcePageView?.register, sourcePageView?.jumpToPage]);
   const presentation = writingSurfaceProps.chapterPresentation;
   const printSource = presentation?.searchSource;
   const chapterNeedsReveal = (id: string) => {
@@ -188,8 +224,8 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     surfaceMode,
     blockListRef: writingSurfaceProps.blockListRef,
     pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
-    overviewOpen: overview.open,
-    overviewFrameId: overview.currentFrameId,
+    overviewOpen: overview.open || sourcePagesActive,
+    overviewFrameId: sourcePagesActive ? null : overview.currentFrameId,
   });
   const linkBlocks = (presentation?.searchSource?.blocks ?? writingSurfaceProps.allBlocks ?? writingSurfaceProps.visibleBlocks)
     .filter((block) => {
@@ -236,8 +272,9 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
     <div
       className={styles.documentShell}
       data-note-overview-active={overview.open ? 'true' : 'false'}
+      data-note-source-pages-active={sourcePagesActive ? 'true' : undefined}
       data-page-reading-target-frame={overview.targetFrameId || undefined}
-      onMouseDown={overview.open ? undefined : onSurfacePointerDown}
+      onMouseDown={overview.open || sourcePagesActive ? undefined : onSurfacePointerDown}
     >
       {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
       <BlockEditRecoveryQueue receipts={blockEditRecoveryReceipts} conflicts={blockEditRecoveryConflicts}
@@ -248,10 +285,13 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       {overview.open && <NoteOverviewLayer writingSurfaceProps={writingSurfaceProps}
         currentPageFrameId={overview.currentFrameId}
         onSelectPage={overview.selectPage} onClose={overview.close} />}
-      <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open} onToggleOverview={overview.toggle}
+      {sourcePagesActive && sourcePageView && <NoteSourcePagesLayer key={sourcePageView.noteId} view={sourcePageView} />}
+      <SourcePageJumpProvider value={sourcePageJump}>
+      <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open || sourcePagesActive} onToggleOverview={toggleOverview}
         pageGapsFolded={pageGapsFolded}
         onPageGapsFoldedChange={(folded) => setGapPreference({ noteId: writingSurfaceProps.noteId, folded })}
         navigationOpen={navigation.open} onToggleNavigation={navigation.toggle} />
+      </SourcePageJumpProvider>
       <NotePrintLayer {...writingSurfaceProps}
         visibleBlocks={printSource ? [...printSource.blocks] : writingSurfaceProps.visibleBlocks}
         noteCanvasRuntime={printSource ? { ...writingSurfaceProps.noteCanvasRuntime, ...printSource.runtime,

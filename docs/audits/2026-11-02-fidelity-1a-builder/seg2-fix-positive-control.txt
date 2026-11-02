@@ -1,0 +1,9 @@
+# positive control: scratch copy of HEAD plus the repair round, with the one-shot jump removed (clearJump call and setMode clear)
+   × page position > applies a jump once: after scrolling away and switching views, the scrolled page wins 96ms
+     → expected { page: 3, nonce: 1 } to be null
+      Tests  1 failed | 22 passed (23)
+
+# same control with the direct null assertion removed, so the behaviour assertions decide
+   × page position > applies a jump once: after scrolling away and switching views, the scrolled page wins 110ms
+     → expected 2661.4451612903226 to be close to 11892.503225806451, received difference is 9231.058064516128, but expected 0.005
+      Tests  1 failed | 22 passed (23)
