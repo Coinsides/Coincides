@@ -1,0 +1,6 @@
+{"phase":"A","killed_at_pages":13,"status":"partial","expected":46,"seconds":4.1,"api_latency":{"requests":12,"p50_ms":39,"p95_ms":236,"max_ms":236,"loop_p99_ms":995,"loop_max_ms":995}}
+phase A exit=1
+{"phase":"B","restart_progress":{"expected":46,"completed":14,"status":"partial","failed_pages":[],"updated_at":"2026-11-02T06:01:26.528Z"},"sweep":{"interrupted_runs_failed":0,"orphan_projection_assets_removed":0},"files_before":14,"files_after_sweep":14,"rows":14,"page_files":14}
+{"phase":"B","resumed":1,"latency":{"requests":21,"p50_ms":158,"p95_ms":246,"max_ms":280,"loop_p99_ms":437,"loop_max_ms":444},"conservation":{"source_pages":46,"expected":46,"null_sizes":0,"status":"complete","numbers_in_order":true,"distinct_ratios":["1.414"],"pixels_match_ratio":true},"blobs":[{"page":1,"http":200,"type":"image/png","disposition":"inline; filename=\"page-1.png\"","bytes":181433,"png":"PNG"},{"page":46,"http":200,"type":"image/png","disposition":"inline; filename=\"page-46.png\"","bytes":77306,"png":"PNG"}],"kb_avg":252,"kb_max":729,"rss_mb":594}
+{"phase":"B","delete":{"before":{"pages":46,"assets":46,"files":46,"jobs":0},"after":{"pages":0,"assets":0,"files":0,"jobs":0}}}
+phase B exit=0

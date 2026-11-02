@@ -1,0 +1,19 @@
+ok 1 - a real PDF gets one image per page with its size, and text publication is untouched
+ok 2 - the orphan sweep keeps aged page images, and the managed_by mark is what protects them
+ok 3 - both page routes return the same list, in order, only to the owner
+ok 4 - deleting the Source clears page rows, asset rows and files
+ok 5 - the register still releases an asset whose origin note was lost
+ok 6 - replacing the projection reuses the images and moves them to the new note
+ok 7 - replacing the projection backfills an older Source and restores a lost file
+ok 8 - a failed page is recorded, the rest continue, and replacement fills only that page
+ok 9 - a document that cannot open marks only the images as failed
+ok 10 - a page pdf.js cannot draw does not stop the document
+ok 11 - restart resume finishes pending and partial registers, rendering only what is missing
+ok 12 - pages become readable one by one while rendering is in progress
+ok 13 - deleting the Source during rendering stops cleanly and leaves nothing behind
+ok 14 - materialization still returns its result when the Source is deleted during rendering
+ok 15 - other formats get no register, and the replacement preview has no page side effects
+ok 16 - Project deletion follows the projection: images leave with it or move home with it
+# tests 16
+# pass 16
+# fail 0

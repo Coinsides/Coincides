@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, renameSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
-import { finalizeCanvasAssetCleanup, releaseNoteCanvasAssets } from './canvasAssets.js';
+import { finalizeCanvasAssetCleanup, releaseAssetReference, releaseNoteCanvasAssets } from './canvasAssets.js';
 import { getProjectionUserWork } from './courseLifecycle.js';
 import {
   enqueueManagedFileTask,
@@ -12,6 +12,7 @@ import {
   type ManagedFileTask,
 } from './managedFileCleanup.js';
 import { getSourceBlobRoot, resolveSourceStorageKey } from './sourceFileIntake.js';
+import { sourcePageImageAssetIds } from './sourcePageImages.js';
 
 interface SourceLifecycleRow {
   id: string;
@@ -163,6 +164,12 @@ export function deleteSourceWithCompensation(
           SET source_sync_status = 'stale', updated_at = datetime('now')
           WHERE user_id = ? AND note_id = ?
         `).run(userId, row.projection_note_id);
+      }
+      // Normally already released through origin_note_id above. The register
+      // also covers an asset whose origin note was lost.
+      for (const assetId of sourcePageImageAssetIds(db, userId, row.materialization_id)) {
+        const decision = releaseAssetReference(db, userId, assetId, '');
+        if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
       }
 
       const deleted = db.prepare('DELETE FROM source_records WHERE id = ? AND user_id = ?')

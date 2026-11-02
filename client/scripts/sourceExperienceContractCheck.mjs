@@ -33,7 +33,7 @@ assert(sourceModel.includes("'projection_missing'"), 'Projection-missing must be
 assert(sourceApi.includes("responseType: 'blob'"), 'Original files must be fetched through authenticated blob requests');
 assert(sourceApi.includes('getSourceDeletionImpact'), 'Source deletion must load server-side impact first');
 assert(sourceApi.includes('deleteSource'), 'Source Library must expose the hard-delete API');
-assert(sourceDetail.includes('onDelete?'), 'Source detail must keep deletion optional outside the global library');
+assert(sourceDetail.includes('onDelete:') && !sourceDetail.includes('onDelete?'), 'Source detail must require a deletion exit everywhere (mandatory onDelete, ledger 230)');
 assert(sourceDelete.includes('retained_receipt_count'), 'Source delete warning must explain retained receipts');
 assert(projectDelete.includes('recommended_action'), 'Project delete must use the server-side dynamic default');
 assert(projectDelete.includes('move_to_home'), 'Project delete must offer move-to-Home');

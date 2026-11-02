@@ -20,6 +20,7 @@ import {
   deleteSourceWithCompensation,
   getSourceDeletionImpact,
 } from '../services/sourceLifecycle.js';
+import { getSourcePages, getSourcePagesByProjectionNote } from '../services/sourcePageImages.js';
 
 const router = Router();
 
@@ -118,6 +119,14 @@ router.get('/', (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 });
 
+router.get('/by-projection-note/:noteId/pages', (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    res.json(getSourcePagesByProjectionNote(getDb(), req.userId!, String(req.params.noteId)));
+  } catch (error) {
+    next(error);
+  }
+});
+
 function scheduleMaterialization(req: AuthRequest, res: Response, next: NextFunction): void {
   try {
     const result = scheduleSourceMaterialization(
@@ -164,6 +173,14 @@ router.delete('/:sourceId', (req: AuthRequest, res: Response, next: NextFunction
 router.get('/:sourceId', (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     res.json(getSourceRecordDetail(getDb(), req.userId!, String(req.params.sourceId)));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:sourceId/pages', (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    res.json(getSourcePages(getDb(), req.userId!, String(req.params.sourceId)));
   } catch (error) {
     next(error);
   }

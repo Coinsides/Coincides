@@ -1,0 +1,1 @@
+Error: Source detail must keep deletion optional outside the global library

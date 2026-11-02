@@ -129,3 +129,82 @@ CREATE TABLE source_pages (
 翻牌通过前零施工;通过后本单直开,建制Ⅰ随后串行。
 
 > **翻牌记录(2026-11-02)**:Henry 答「1.c,2.看和跳先上」——第 1 点认 C 路(服务端栅格化落盘),第 2 点认第一期原页视图只管看和跳。两点全认,本单转 ready,builder 开工段 1。
+
+## Result（段 1 · 服务端,builder 2026-11-02）
+
+**执行状态**:段 1 射程全部完工,未提交(⛔git 写操作,收割归 Main_Designer)。段 2 客户端未碰。两项验收未过 / 未满足字面,见「验收对照」与申报 1、2:全量回归 1 条红、`check:source-experience` 红,均在未改动的 HEAD 上同样复现。
+
+**改动**:
+- 新增 `server/src/db/migrations/085_v2_source_pages.ts`、`server/src/services/sourcePageImages.ts`、`server/src/__tests__/vpsF11SourcePageImages.test.ts`;
+- 修改 `sourceMaterialization.ts`(发布后追加页影像段)、`sourceReprojection.ts`(换投影时收养页影像)、`sourceLifecycle.ts`(按登记册显式释放)、`routes/sources.ts`(两条读路由)、`index.ts`(启动 resume)、`sourceProjectionMaterializer.ts`(仅导出三个现成符号)。
+
+**证据**:`docs/audits/2026-11-02-fidelity-1a-builder/`
+- `full-suite-summary.txt`、`new-suite-vpsF11.txt`、`e2e-real-pdf-kill-restart.txt`;
+- `tsc-server.txt`、`tsc-client.txt`、`tsc-baseline-head.txt`;
+- `check-changed-file-secrets.txt`、`check-source-experience.txt`、`check-source-experience-head.txt`、`agent-eval-harness-head.txt`;
+- `font-variants.txt`、`synthetic-formula-page-standard-fonts.png`,脚本 `fonts.mjs`、`variants.mjs`、`e2e.mts`。
+
+**两侧 tsc**:客户端 0;服务端 0(前提:`shared/dist` 已构建)。
+- 之前说的「87」是 `tsc --noEmit -p .` 的 `error TS` 总数,出现在 `shared/dist` 未构建时:TS6305 58、TS2345 10、TS7006 18、TS2698 1。
+- 基线证据在 `tsc-baseline-head.txt`:HEAD `e7a130cc` 用 `git archive` 导出到 scratch,零改动。未构建 shared 时 87,`tsc -b ../shared` 后 0。两臂都是同一命令。
+- 工作树上 `shared/dist` 于 14:38 出现,所以本树读数是 0。
+
+**测试清单**:
+- 新套件 `vpsF11SourcePageImages.test.ts` 16/16 过:真实 PDF 逐页入册与四件硬契约、扫除安全(含阳性对照:去掉 `managed_by` 后文件确实被删)、两条路由与属主隔离、删除三清、丢 origin 时登记册兜底、重物化复用、旧 Source 补齐与丢文件修复、单页失败续跑、整段失败不打回文本链、pdf.js 画不了的页、重启续跑、渐进可读、渲染中删除两种时序、非 PDF 零副作用、预览零副作用、项目删除两种策略。
+- 全量回归:`src/` 与 `scripts/` 全部 118 个 `*.test.ts`,独占机器,**1191 条,1190 过,1 红**(申报 1)。
+- `npm run check:changed-file-secrets` 过。
+
+**验收对照(段 1 射程内)**:
+| 项 | 结果 |
+|---|---|
+| 功能 4 删除三清 | 真实 46 页:行/资产/文件 46/46/46 → 0/0/0,清理任务 0 |
+| 功能 6 重启续跑 | 真实 46 页:在 14 页处 SIGKILL,重启后补齐到 complete,补跑期间路由可读 |
+| 数据·守恒式 | `source_pages` 46 = expected 46,`getInfo().total` 即 expected 的来源;status=complete,尺寸与资产空值 0 |
+| 数据·扫除安全 | 全部页文件 mtime 置老一天后跑启动扫除:删除 0 |
+| 数据·重物化 | 同 id 复用,登记册/资产与现行物化一致 |
+| 回归·两侧 tsc | 0(前提见上) |
+| 回归·既有测试全绿 | **未全绿**,1 红为既有(申报 1) |
+| 回归·`check:source-experience` | **红**,既有(申报 2) |
+
+功能 1、2、3、5、7 的界面部分归段 2,本段只验到服务端数据。
+
+**申报项**:
+1. **全量回归 1 红,既有,与本单无关**:`server/scripts/agent-eval/harness.test.ts` 的 `real empty-claim journey turns red when its collected claim event is removed`。失败点是 Agent 消息字段的投影对比(`message_meta`),与 Source 无关。HEAD 导出上单跑同样红,见 `agent-eval-harness-head.txt`。我没修。
+2. **`check:source-experience` 红,既有,与本单无关**:报 `Source detail must keep deletion optional outside the global library`,在 HEAD 导出上同样失败。本段零客户端改动。**单内要求它过,这条需你裁定**:修它不在本段射程,我没动。
+3. **两条只在第一轮出现的红,复核后不算回归**:
+   - `K-4`(MinerU 并发时序):第一轮我同时在跑 tsc 等检查,失败断言是采样时子进程数为 0。单跑 3/3 过,独占全量也过。HEAD 导出缺 MinerU 运行条件,**没有做到 HEAD 对照**,所以「负载导致」是推断。代码上 MinerU 闸在页影像段之前就已释放。
+   - `T-1`:绕过 npm 直接跑时缺 `npm_execpath`,HEAD 上同样失败;设上后过。
+4. **重物化取舍 = 同 id 复用,不清旧**。理由:重物化沿用同一条物化行和同一份原文件,影像内容仍然有效,重新栅格化纯属浪费。做法:
+   - 在重物化事务内把资产的 `origin_note_id` / `course_id` 改指新 note(旧 note 删除时该外键已被置 NULL,删除兜底靠它);
+   - 事务提交后触发一次「只补缺」:登记册完整且文件都在则连 PDF 都不打开;缺文件、失败页、旧 Source 只渲染缺的页。
+   - 代价:磁盘上的旧影像不会被校验内容是否过期,依赖「原文件不可变」这一前提。
+5. **单外加了字体数据配置**:`getScreenshot` 默认不给 pdf.js 字体数据,依赖标准字体的 PDF 会落到宿主系统字体。我传了 `standardFontDataUrl` / `cMapUrl`,指向现有传递依赖 `pdfjs-dist` 里的文件,零依赖变动。pdf.js 在 Node 下只认普通路径且必须以 `/` 结尾,`file://` 会被静默忽略(`font-variants.txt` 里 URL 臂与裸臂字节数相同)。文本链的解析配置没动。
+6. **已知渲染缺陷,未触发止损,请你判断**:**未嵌入字体的中文页(STSong-Light + 预定义 CMap)渲染失败**,报 `Convert String to CString failed`,加字体数据也一样。表现是单页 rejected,进程不崩,记入 `failed_pages`,其他页继续。复现件是手工构造的 PDF,手头真实样本没碰到。止损线写的是「真实教材」,所以我继续做了;**但老式中文 PDF 确实可能这样**,命中时该页没有原页影像。我没引新依赖,也没继续深挖。
+7. **真实样本的射程有限**:本机只用了 4 份 IELTS 样题 PDF 中的阅读和听力 2 份(46 / 33 页,字体嵌入),外加合成公式页。**没有真实教材,也没有真实公式教材**。肉眼看过封面、第 5/12/24 页和合成公式页,版式正常。
+8. **性能是本机数,不是岛上数**:每页约 0.17–0.2 秒,PNG 平均 252KB、最大 729KB。全链路实测中事件循环最长停顿约 1 秒(含文本解析),页影像段约 0.44 秒;同时打路由,最慢 280ms。均未超 1.5 秒止损线。进程 RSS 约 594MB(含整个服务端模块)。**岛上速度、1000 页长文档的内存都没测**;岛上未嵌入且非标准字体(如 SimSun)依赖系统字体,也没核。
+9. **等待时长**:页影像段由 `executeClaimedSourceMaterialization` 等待,所以 `scheduled` 占位和 `waitForScheduledSourceMaterializations` 都会变长。既有测试超时预算核过:全量无超时红。生产路由走 `scheduleSourceMaterialization`,不受影响;`materializeSourceNow` 仅测试调用。重物化路由不等待页影像。
+10. **本单新定的两处语义**:
+    - 进度多了 `status='none'`(旧 Source 或投影已不在),路由额外返回 `completed`、`failed_pages`;
+    - 有失败页时最终状态是 `failed`(`partial` 只表示进行中),重启不重试 `failed`,重试走重物化。
+11. **旧 Source 没有自动回填**:已在岛上的 PDF 不会自动生成页影像,重物化才补。段 2 打开时会看到 `none`,需要你决定是否补一个回填入口。另外,项目删除选 `delete_projection` 时影像随投影清掉、Source 保留,路由返回 `none`,登记册留有 `image_asset_id` 为空的行,无害。
+12. **`check:test-wiring` 红**:新套件没有接入 curated 脚本,与 F1/F3/F5/F6/F8/P1 同状,共 7 条。改 `package.json` 不在本段射程。
+13. **工作树状态**:`server/dist`(1728 个文件)和 `shared/dist` 于 14:38 出现,都在 gitignore 内。来源我没查实,可能是你现场核验或某条测试;因不确定没有删。它的副作用:**不带参数跑 `run-server-test-suite` 会把 `dist/__tests__/*.test.js` 一起跑,出现 801 条假红**(`schema.sql` 找不到)。我的全量因此改为显式列文件。
+
+## 段 1 复核判语(Main_Designer,2026-11-02)
+
+**结论:段 1 通过,收割入仓;段 2 即开。** 四路对抗复核+逐 finding 反驳核(8 agents):四件硬契约(id/storage_key/managed_by/origin_note_id)、扫除安全阳性对照、迁移 085 对 D3 DDL、进度写入无竞态(单条 json_set 原子 UPDATE)、删除双保险次序(显式释放先于 CASCADE)、重物化收养次序(FK SET NULL→同事务 adopt)、路由属主隔离、依赖零变动、测试非套套逻辑(真实渲染管线未被桩)——全部验真。三条猜测性 finding(渲染 promise 永不落定的看门狗假设×2、清理任务表断言缺位)被反驳:无可复现触发输入,且同步死循环类故障看门狗本身也救不了。唯一坐实的 minor(工作树臂 check:source-experience 证据截断)已在收割时重采全量输出关闭。
+
+**对申报项的裁定**:
+- **申报 2(check:source-experience 红)→ 已查明真因并修复**:脚本漂移非产品回归——`9d8858fe`(11-01,台账 230)按 Henry 实际使用反馈有意把 onDelete 改为必填,契约脚本断言未随行。断言已更新为守卫新契约(删除出口处处必备),全链三段现绿。本修复为 Main_Designer 点状单文件直改,随本次收割入仓;
+- **申报 1(agent-eval harness 红)**:HEAD 复现,与 Source 无关,既有债记档不阻段——归后续独立处置;
+- **申报 4(重物化同 id 复用不清旧)**:认可,前提「原文件不可变」与现行 Source 域一致;
+- **申报 5(字体数据配置)**:认可——createRequire 解析+缺失降级+文本链零改动,依赖树零变动,不构成锁文件违规;
+- **申报 6(未嵌入字体中文页渲染失败)**:接受为已知限制记档:单页 failed 不崩进程符合 D4 语义;真实样本命中时再议 pdfium 选型(止损线原文照旧);
+- **申报 10(status='none' 与 failed 终态语义)**:认可入典——partial=进行中、failed=终态不自动重试、重试走重物化;
+- **申报 12(check:test-wiring 红)**:与 F1/F3/F5/F6/F8/P1 同状的既有口径问题,随后续 curated 脚本整编一并处置,不在本段改 package.json;
+- **复核标记的一处字面偏离**:by-projection-note 对 2+ 行取「fail-loud 500(source_projection_ambiguous)」而非按最新取行——**认可**,一对一数据被打破时拒答优于猜答。
+
+**段 2 射程修订(回填入口,裁定自申报 11)**:旧 Source 不自动回填维持;段 2 增补:
+- 服务端一条小路由 `POST /api/sources/:sourceId/pages/generate`(属主校验;幂等——复用现行 fill-missing 调度,登记册完整且文件在则 no-op;非 PDF/无物化返回 4xx);
+- 客户端原页视图对 PDF 源 status='none' 时呈现「生成原页影像」入口,点击调上述路由后轮询进度(渐进可读已在段 1 验真);
+- 验收追加:旧 Source(无页影像)经入口生成后原页视图可用;非 PDF 源不显示该入口。

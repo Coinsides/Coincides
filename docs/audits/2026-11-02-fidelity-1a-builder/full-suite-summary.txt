@@ -1,0 +1,9 @@
+# full server suite: every src/ and scripts/ *.test.ts (118 files), sole load, tree with segment 1, npm_execpath set
+# tests 1191
+# pass 1190
+# fail 1
+# cancelled 0
+# skipped 0
+# duration_ms 298582.405
+# flaky-retries 0
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed

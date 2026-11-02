@@ -6,6 +6,7 @@ import { parseSourceArtifact, SourceArtifactError } from './sourceArtifact.js';
 import { getSourceMaterializationFile } from './sourceFileIntake.js';
 import type { SourceMaterializationOptions } from './sourceMaterialization.js';
 import { runWithSourceMaterializationConcurrency } from './sourceMaterializationConcurrency.js';
+import { adoptSourcePageImages, scheduleSourcePageImages } from './sourcePageImages.js';
 import { publishSourceProjection, type PublishedSourceProjection } from './sourceProjectionMaterializer.js';
 
 interface ReadyProjection {
@@ -88,7 +89,7 @@ export async function rematerializeSource(
       throw new SourceArtifactError('parser_failure', 'Parser returned an unsupported SourceArtifact version');
     }
     options.hooks?.afterParse?.(artifact);
-    return db.transaction(() => {
+    const replaced = db.transaction(() => {
       // Recheck under the write lock, including references added while parsing.
       // A concurrent connection may have completed a replacement first.
       const current = readyProjection(db, userId, sourceId);
@@ -131,8 +132,12 @@ export async function rematerializeSource(
       const published = publishSourceProjection(db, source, artifact, {
         canvasAssetRootDir: options.canvasAssetRootDir, now: options.now, hooks: options.hooks,
       });
+      adoptSourcePageImages(db, userId, current.id, published.projection_note_id, current.course_id, now);
       return { ...published, receipt_id: receiptId, user_work: userWork };
     }).immediate();
+    // Fills only what is missing: older Sources, failed pages, lost files.
+    void scheduleSourcePageImages(db, userId, sourceId, options);
+    return replaced;
   } finally {
     running.delete(key);
     if (running.size === 0) inFlight.delete(db);

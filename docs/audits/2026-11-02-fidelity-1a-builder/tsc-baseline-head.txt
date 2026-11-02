@@ -1,0 +1,9 @@
+# baseline: HEAD e7a130cc exported with git archive to scratch, node_modules junctioned, no project changes
+## arm 1: shared/dist not built (fresh checkout): tsc --noEmit -p .
+total error TS: 87
+     10 error TS2345
+      1 error TS2698
+     58 error TS6305
+     18 error TS7006
+## arm 2: after tsc -b ../shared: tsc --noEmit -p .
+total error TS: 0

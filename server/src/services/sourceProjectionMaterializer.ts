@@ -32,7 +32,7 @@ const CONTENT_TOP = 0;
 const CONTENT_BOTTOM = 96;
 const CONTENT_WIDTH = 760;
 const BLOCK_GAP = 18;
-const SOURCE_ASSET_FOLDER = 'source-materializations';
+export const SOURCE_ASSET_FOLDER = 'source-materializations';
 
 interface ProjectionFramePlan {
   frameId: string;
@@ -85,11 +85,11 @@ export interface PublishedSourceProjection {
   canvas_object_count: number;
 }
 
-function canvasAssetRoot(override?: string): string {
+export function canvasAssetRoot(override?: string): string {
   return resolve(override || process.env.CANVAS_ASSET_DIR || join(process.cwd(), 'uploads', 'canvas-assets'));
 }
 
-function resolveCanvasAssetPath(rootDir: string, storageKey: string): string {
+export function resolveCanvasAssetPath(rootDir: string, storageKey: string): string {
   if (isAbsolute(storageKey)) throw new Error('Canvas asset storage key must be relative');
   const root = canvasAssetRoot(rootDir);
   const target = resolve(root, storageKey);

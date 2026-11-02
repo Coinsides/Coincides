@@ -1,0 +1,25 @@
+cjk bare REJECTED Convert String to CString failed
+cjk asPath REJECTED Convert String to CString failed
+cjk asUrl REJECTED Convert String to CString failed
+cjk urlSys REJECTED Convert String to CString failed
+cjk urlFace REJECTED Convert String to CString failed
+helv bare ok 7163
+helv asPath ok 7998
+helv asUrl ok 7163
+helv urlSys ok 7163
+helv urlFace ok 7163
+times bare ok 6279
+times asPath ok 7146
+times asUrl ok 6279
+times urlSys ok 6279
+times urlFace ok 6279
+symbol bare ok 4363
+symbol asPath ok 5669
+symbol asUrl ok 4363
+symbol urlSys ok 4363
+symbol urlFace ok 4363
+unknown bare ok 6314
+unknown asPath ok 6314
+unknown asUrl ok 6314
+unknown urlSys ok 6314
+unknown urlFace ok 6314

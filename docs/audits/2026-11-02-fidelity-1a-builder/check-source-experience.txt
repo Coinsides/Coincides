@@ -1,0 +1,21 @@
+# working-tree arm, FULL capture (recaptured at harvest by Main_Designer; builder's original capture was stack-tail only — review finding, closed here)
+> coincides-client@1.8.0 check:source-experience
+> node scripts/sourceExperienceContractCheck.mjs && tsc -p scripts/tsconfig.source-experience.json && node ../.codex-tmp/source-experience/client/scripts/sourceExperienceModelContractCheck.js
+
+Error: Source detail must keep deletion optional outside the global library
+    at assert (file:///D:/Coinsides/v2.x/Coincides/client/scripts/sourceExperienceContractCheck.mjs:11:25)
+    at file:///D:/Coinsides/v2.x/Coincides/client/scripts/sourceExperienceContractCheck.mjs:36:1
+
+# identity with HEAD arm (check-source-experience-head.txt): same assertion line — pre-existing, confirmed.
+
+# root cause (Main_Designer diagnosis at harvest): script drift, not product regression.
+# Commit 9d8858fe (2026-11-01, ledger 230) deliberately overturned the July rule and made
+# SourceDetailDialog.onDelete MANDATORY ("a prop made mandatory lets the type system catch
+# any future doorway built without an exit"); the contract script's line-36 assertion was
+# not updated in that commit. Red since 11-01, unrelated to fidelity-1a segment 1 (zero
+# client changes in that diff).
+
+# fix at harvest: assertion updated to guard the NEW contract
+# (onDelete present and not optional). Post-fix run, full chain:
+Source experience contract check passed.
+Source experience model contract check passed.

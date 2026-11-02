@@ -66,6 +66,7 @@ import {
   resumeReceivedSourceMaterializations,
   sweepSourceMaterializations,
 } from './services/sourceMaterialization.js';
+import { resumeSourcePageImages } from './services/sourcePageImages.js';
 import { drainManagedFileCleanupJobs } from './services/managedFileCleanup.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
@@ -91,6 +92,10 @@ if (materializationSweep.interrupted_runs_failed || materializationSweep.orphan_
 const resumedMaterializations = resumeReceivedSourceMaterializations(database);
 if (resumedMaterializations) {
   console.log(`Scheduled ${resumedMaterializations} received Source materialization(s) after startup.`);
+}
+const resumedPageImages = resumeSourcePageImages(database);
+if (resumedPageImages) {
+  console.log(`Resumed page images for ${resumedPageImages} Source(s) after startup.`);
 }
 
 const app = express();

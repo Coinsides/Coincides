@@ -1,0 +1,3 @@
+not ok 1 - real empty-claim journey turns red when its collected claim event is removed
+# pass 0
+# fail 1

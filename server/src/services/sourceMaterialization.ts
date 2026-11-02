@@ -21,6 +21,11 @@ import {
   type PublishSourceProjectionHooks,
 } from './sourceProjectionMaterializer.js';
 import { storeSourceImprint, type SourceImprintInput } from './sourceImprints.js';
+import {
+  scheduleSourcePageImages,
+  waitForScheduledSourcePageImages,
+  type SourcePageImageOptions,
+} from './sourcePageImages.js';
 
 const INTERRUPTED_AFTER_MS = 10 * 60 * 1000;
 const SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE = 'server/package-lock.json';
@@ -124,6 +129,7 @@ export interface SourceMaterializationOptions {
   now?: Date;
   parseArtifact?: (input: SourceParserInput) => Promise<SourceArtifact>;
   hooks?: SourceMaterializationHooks;
+  openPageRenderer?: SourcePageImageOptions['openPageRenderer'];
 }
 
 export interface SourceMaterializationResult {
@@ -476,7 +482,10 @@ async function executeClaimedSourceMaterialization(
       now: options.now,
       hooks: options.hooks,
     });
-    return currentResult(db, userId, sourceRecordId);
+    // Read first: the Source may be deleted while its pages are rendering.
+    const published = currentResult(db, userId, sourceRecordId);
+    await scheduleSourcePageImages(db, userId, sourceRecordId, options);
+    return published;
   } catch (error) {
     if (error instanceof SourceArtifactError) {
       return failMaterialization(db, userId, sourceRecordId, error.code, error.message, options.now || new Date());
@@ -540,6 +549,7 @@ export function scheduleSourceMaterialization(
 
 export async function waitForScheduledSourceMaterializations(): Promise<void> {
   await Promise.all([...scheduled.values()]);
+  await waitForScheduledSourcePageImages();
 }
 
 export function sweepSourceMaterializations(
