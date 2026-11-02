@@ -14,6 +14,8 @@ export interface PurposeCaptureOptions {
   channel: string;
   now?: Date;
   drafter?: PurposeDrafter;
+  /** The caller will schedule the draft itself, once a zip's entries have all arrived. */
+  deferDraft?: boolean;
 }
 
 export type PurposeCaptureOutcome =
@@ -31,13 +33,19 @@ function importerCardTitle(displayName: string): string {
 function targetCard(db: Database.Database, userId: string, courseId: string, now: Date): string | null {
   // Note-bound purposes are retired relics of the old note chain, not cards for this Project.
   const active = db.prepare(`
-    SELECT id, created_by, created_at FROM purposes
+    SELECT id, created_by, created_at, user_verbatim, interpretation_locked FROM purposes
     WHERE user_id = ? AND course_id = ? AND status = 'active' AND note_id IS NULL
     ORDER BY created_at DESC, id ASC
-  `).all(userId, courseId) as Array<{ id: string; created_by: string; created_at: string }>;
-  if (active.length === 1) return active[0].id;
-  // Several cards: guessing among them costs more than one extra card the user can
-  // put away. A card this import just opened is not a guess.
+  `).all(userId, courseId) as Array<{
+    id: string; created_by: string; created_at: string; user_verbatim: string | null; interpretation_locked: number;
+  }>;
+  // Only a card a person has stood behind states a standing reason. An untouched
+  // machine card would otherwise pull in every later import in the Project.
+  const adopted = active.filter((card) => card.created_by !== 'importer'
+    || card.user_verbatim !== null || card.interpretation_locked === 1);
+  if (adopted.length === 1) return adopted[0].id;
+  // Guessing among several costs more than one extra card the user can put away.
+  // A card this import just opened is not a guess.
   const recent = active.find((card) => card.created_by === 'importer');
   if (recent && now.getTime() - Date.parse(recent.created_at) < MERGE_WINDOW_MS) return recent.id;
   return null;
@@ -99,14 +107,21 @@ export function capturePurposeForIntake(
     return { outcome: 'created', purpose_id: card.id };
   })();
 
-  if (result.outcome === 'created') {
-    void schedulePurposeDraft(db, userId, result.purpose_id, {
-      drafter: options.drafter ?? providerPurposeDrafter,
-      channel: options.channel,
-      trigger: 'intake_draft',
-    });
-  }
+  if (result.outcome === 'created' && !options.deferDraft) schedulePurposeIntakeDraft(db, userId, result.purpose_id, options);
   return result;
+}
+
+export function schedulePurposeIntakeDraft(
+  db: Database.Database,
+  userId: string,
+  purposeId: string,
+  options: PurposeCaptureOptions,
+): void {
+  void schedulePurposeDraft(db, userId, purposeId, {
+    drafter: options.drafter ?? providerPurposeDrafter,
+    channel: options.channel,
+    trigger: 'intake_draft',
+  });
 }
 
 /** The file is already safely stored: a capture failure must never fail the import. */
@@ -115,10 +130,11 @@ export function capturePurposeAfterIntake(
   userId: string,
   input: { courseId: string; sourceRecordId: string },
   options: PurposeCaptureOptions,
-): void {
+): PurposeCaptureOutcome | null {
   try {
-    capturePurposeForIntake(db, userId, input, options);
+    return capturePurposeForIntake(db, userId, input, options);
   } catch (error) {
     console.warn(`Purpose capture failed for Source ${input.sourceRecordId}: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
   }
 }

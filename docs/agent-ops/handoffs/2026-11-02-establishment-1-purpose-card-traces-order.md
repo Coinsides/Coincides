@@ -258,3 +258,54 @@ events 加 verb 需重建表迁移(范式照 073:建新→按 seq 拷贝→DROP�
 6. **起草结果语言**:prompt 要求跟随文件名语言。title 固定中文「研读《…》」,照单,英文界面下也是中文。
 7. **未碰**:traces 路由、CourseDetail 卡面、文案,归段 3。`check:test-wiring` 同既有口径未改。
 8. **部署前置未变**:迁移 086 仍需在岛库备份副本上跑一次守恒核对。本段没有新迁移。
+
+## Result（段 2 补丁 + 段 3 · 卡面,builder 2026-11-02）
+
+**执行状态**:补丁两条与段 3 全部完工,未提交。全程零真实模型调用。服务端全量 1246 条过 1245,只剩既有 harness;客户端全量 2555/2555 全绿。
+
+**段 2 补丁**:
+- **磁铁修**:`targetCard` 的规则 a 改为只数 `active ∧ note_id IS NULL ∧ (created_by≠'importer' ∨ user_verbatim 非空 ∨ 已锁)`。规则 c 的候选查询和 `already_on_card` 没动。四个指定场景都有测试:孤身未触卡一周后开新卡、用户卡与未触导入卡并存时挂用户卡(窗内窗外都测)、改过原话或锁过的导入卡照常吸附、窗内连传并卡。
+- **zip 起草时点**:方案是 capture 带 `deferDraft`,由 `finishStoredSourceIntake` 在展开结束的 `finally` 里调度。展开失败也会起草,卡不会卡在 pending。**阳性对照**:scratch 副本恢复「创建即调度」后,12 条目的 zip 草稿只看到 1 个成员(`1 !== 13`),修后看到 13 个(`seg3-zip-draft-positive-control.txt`)。
+
+**段 3**:
+- 服务端:`GET /api/purposes/:purposeId/traces`(`limit` 1–50、`before_seq`,对象集=purpose+成员,成员封顶 200);`hydratePurpose` 带 `member_count`,旧注释已改。
+- 客户端:新增 `pages/Courses/ProjectPurposeSection.tsx/.module.css`,挂在 `CourseDetail` 的 `ProjectIdentity` 之后;数据层扩 `purposeRepository.ts`,无新 store;文案 `purposeCards.*` 中英两份。
+- 未碰 ContentGroupPanel、BoardList。
+
+**证据**(`docs/audits/2026-11-02-establishment-1-builder/`):`seg3-browser-walkthrough.md`、`seg3-server-tests-full.txt`、`seg3-client-tests-full.txt`、`seg3-full-suite-summary.txt`、`seg3-client-suite-summary.txt`、`seg3-gates.txt`、`seg3-zip-draft-positive-control.txt`,都带标记行。
+
+**闸**:两侧 tsc 0 / 0(服务端前提同前);`check:source-experience`、secrets、`check:canvas-runtime-boundary`、`check:owned-helper-contract`、`check:agent-knowledge` 都过;v13 两闸未动。
+
+**验收对照**:
+| 项 | 结果 |
+|---|---|
+| 功能 2 锁 | 图标一点即翻、无弹窗;锁后 redraft 409;人改照常;解锁恢复 |
+| 功能 3 第一个读者 | 卡上最近痕迹随 item 编辑出现。评分未在卡上验,照单 |
+| 功能 6 archived 往返 | 收纳后从 section 消失,PATCH 翻回后回到 active 列表,无其他变化 |
+| 解读层编辑 | 按钮「保存并锁定」,保存即落锁 |
+
+**申报项**:
+1. **没验到**:起草成功的卡面。浏览器走查时模型被关掉,只看到 failed 状态;pending 到 ready 只有组件测试。真实模型的回复也仍未验过。中文文案这轮没有在浏览器里重走。
+2. **卡面我定的**:
+   - **人建卡没有原话时**显示「还没有你自己的原话」,不显示「(导入推定)」。单面写「无则徽标」,但把人建的卡标成导入推定是错的,所以徽标只给 importer 卡。
+   - **重新起草只在 pending/failed 时出现**。pending 也给,是为了能手动救起卡住的卡。
+   - **保存解读时一字未改也落锁**:发 `interpretation: {}`,理由是人已确认这段文字。
+   - **卡面轮询**:pending 卡每 3 秒查一次,最多 60 次(3 分钟)后停。之后要刷新页面才会更新,这段时间不提示。
+   - **痕迹里 agent 墨水有小标记**,人墨没有。
+3. **中途抓到一处我引入的问题**:第一版把计数列加进了 `getOwnedPurposeRow`,违反 owned-helper 的「整行」契约,全量和 `check:owned-helper-contract` 都红。已改为单独计数,helper 恢复 `SELECT *`,重跑通过。另外 `PaginationProjection` 的超时这次在工作树上**没有出现**(保真 1a 时连续 5 次),原因同样没查明,不能当成已解决。
+4. **痕迹摘要是英文**:`summary` 是账本里存的机械文本,中文界面下也显示英文,只有 verb 标签随语言。账本 append-only,改显示要另做映射。我顺手把 PATCH 的默认摘要从卡名改成了改动内容,否则连续几条看起来一模一样。这改的是今后的摘要文字,不影响既有事件。
+5. **痕迹不实时**:只在卡片自身更新时重取。别处编辑了卡上的 item,要重进页面才看到。
+6. **成员册没有 UI**:本期卡面只显示计数,没有添加或查看成员的入口,单内也没要求。所以「引用/编辑」痕迹要出现在卡上,前提是 item 或组已在名册里,而目前人的操作路径里没有把 item 加进名册的入口;导入只把 source 入册,而 source 的后续痕迹很少。**这意味着真实使用时,卡上的最近痕迹大多只有开卡和改卡。** 走查里 item 成员是我直接写库加的。这条影响验收 3 的实际观感,请你判断要不要补。
+7. **收纳没有撤销入口**:照单,本期翻回只能走 PATCH,误收纳的卡用户在界面上找不回。
+8. **部署前置未变**:迁移 086 仍需在岛库备份副本上跑守恒核对。
+9. **环境已复原**:`.claude/launch.json` 恢复,scratch 副本已删。走查用的 `f12-scratch-server.mjs` 只在 scratchpad。
+
+## 终局判语(Main_Designer,2026-11-02,全单收口)
+
+**结论:建制Ⅰ三段全部通过,全单收割。** 段 2 补丁(磁铁四场景+zip 缓 draft 含阳性对照)与段 3(traces 路由/member_count 经 owned-helper 契约返工/卡面全件/中英 47 键)收口核验全 pass;两闸台账:服务端 1246/1245(唯一红=既有 harness)、客户端 2555/2555、两侧 tsc 0、cse/secrets/owned-helper 全绿、v13 两闸语义未动、全程零真实模型调用。
+
+**裁定收束**:
+- **申报 6(痕迹面稀疏)→ 不补本期**:领册的门(item/组入册的人类入口、普查建点)本属建制Ⅱ;Ⅰ期职责=读面机器真实可用(已以直写库验全链)。卡面本期如实显示生命周期痕迹,符合第 7 条「记录不裁定」;
+- **builder 四自决全采**:「导入推定」徽标只给 importer 卡/零改保存也落锁(按了即背书)/pending 也给重起草(running 去重保证单飞)/PATCH 摘要带改动字段;
+- **记录型七件归 tech-debt 口袋**(不修,防复燃录于此):①raw PATCH 可以空串 user_verbatim 造成「空串领养」(卡面已 ||null 防,API 面未规范化)②zip 容器捕获失败+展开继续时首条目开卡即时起草只见部分成员(已申报 warn-only 路的退化角)③importerCardTitle slice(0,296) 可切裂代理对(既有,cosmetic)④traces 拉取失败渲染成「暂无痕迹」无错误态(卡列表有 failed+retry,痕迹区没有)⑤重起草连点=多条请求事件对一次修订(append-only 噪音,无害)⑥卡面列表端点不排 note-bound 遗留行(若退役 note 魂带 course_id 会上脸——与磁铁查询的排除不对称)⑦窗内 zip attach 不补起草(与「导入起草一次+手动重起草」规格一致);
+- **部署前置**:086 岛库备份副本守恒演练→部署→真实模型首跑冒烟(起草质量这轮完全未验,岛上首跑时核)。

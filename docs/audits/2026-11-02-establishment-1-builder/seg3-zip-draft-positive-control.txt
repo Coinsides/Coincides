@@ -1,0 +1,6 @@
+# positive control: scratch copy with the draft scheduled at card creation again
+not ok 1 - a zip's draft sees every entry
+  error: |-
+    1 !== 13
+# pass 0
+# fail 1

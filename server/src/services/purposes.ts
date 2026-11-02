@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { recordEvent, type EventActorKind } from '../db/recordEvent.js';
+import { listEventsForObjects } from './eventsLedger.js';
 import {
   addPurposeMemberInputSchema,
   amendPurposeInputSchema,
@@ -36,6 +37,11 @@ interface PurposeRow {
   updated_at: string;
 }
 
+type PurposeRowWithCount = PurposeRow & { member_count: number };
+
+const PURPOSE_COLUMNS = `p.*, (SELECT COUNT(*) FROM purpose_members m WHERE m.purpose_id = p.id) AS member_count`;
+const TRACE_MEMBER_LIMIT = 200;
+
 interface PurposeMemberRow {
   id: string;
   purpose_id: string;
@@ -57,7 +63,7 @@ function parseJson(value: string): Record<string, unknown> {
   }
 }
 
-function hydratePurpose(row: PurposeRow, members: PurposeMemberRow[] = []) {
+function hydratePurpose(row: PurposeRowWithCount, members: PurposeMemberRow[] = []) {
   return {
     id: row.id,
     project_id: row.course_id,
@@ -73,8 +79,9 @@ function hydratePurpose(row: PurposeRow, members: PurposeMemberRow[] = []) {
     interpretation: parseJson(row.interpretation_json),
     interpretation_locked: row.interpretation_locked === 1,
     locked_at: row.locked_at,
-    // Historical membership is exposed only for legacy by-note reads. It is
-    // never the library soul's material set or a newly maintained membership.
+    member_count: row.member_count,
+    // The roster is live and counted above; its rows are only listed for legacy
+    // by-note reads, and they are not the library soul's compiled material set.
     members: members.map((member) => ({
       ...member,
       metadata: parseJson(member.metadata),
@@ -94,8 +101,13 @@ function getOwnedPurposeRow(db: Database.Database, userId: string, purposeId: st
   return row;
 }
 
+function countPurposeMembers(db: Database.Database, purposeId: string): number {
+  return (db.prepare('SELECT COUNT(*) AS n FROM purpose_members WHERE purpose_id = ?').get(purposeId) as { n: number }).n;
+}
+
 export function getPurpose(db: Database.Database, userId: string, purposeId: string): Purpose {
-  return hydratePurpose(getOwnedPurposeRow(db, userId, purposeId));
+  const row = getOwnedPurposeRow(db, userId, purposeId);
+  return hydratePurpose({ ...row, member_count: countPurposeMembers(db, purposeId) });
 }
 
 export function listPurposes(
@@ -103,20 +115,20 @@ export function listPurposes(
   userId: string,
   input: { project_id?: string | null; status?: PurposeStatus | 'all' } = {},
 ): Purpose[] {
-  const clauses = ['user_id = ?'];
+  const clauses = ['p.user_id = ?'];
   const params: Array<string | null> = [userId];
   if (input.project_id !== undefined) {
-    clauses.push('course_id IS ?');
+    clauses.push('p.course_id IS ?');
     params.push(input.project_id);
   }
   if (input.status && input.status !== 'all') {
-    clauses.push('status = ?');
+    clauses.push('p.status = ?');
     params.push(input.status);
   }
   const rows = db.prepare(`
-    SELECT * FROM purposes WHERE ${clauses.join(' AND ')}
-    ORDER BY updated_at DESC, created_at DESC, id ASC
-  `).all(...params) as PurposeRow[];
+    SELECT ${PURPOSE_COLUMNS} FROM purposes p WHERE ${clauses.join(' AND ')}
+    ORDER BY p.updated_at DESC, p.created_at DESC, p.id ASC
+  `).all(...params) as PurposeRowWithCount[];
   return rows.map((row) => hydratePurpose(row));
 }
 
@@ -210,7 +222,7 @@ export function setPurposeLock(
 ): { purpose: Purpose; changed: boolean } {
   if (!db.inTransaction) throw new Error('purpose_transaction_required');
   const row = getOwnedPurposeRow(db, userId, purposeId);
-  if ((row.interpretation_locked === 1) === locked) return { purpose: hydratePurpose(row), changed: false };
+  if ((row.interpretation_locked === 1) === locked) return { purpose: getPurpose(db, userId, purposeId), changed: false };
   const now = new Date().toISOString();
   // Locking ends the machine's turn: a late draft is refused and cannot report back,
   // so nothing may be left waiting. Same settlement as a person's edit.
@@ -327,15 +339,37 @@ export function addPurposeMember(
   return { member: { ...member, metadata: parseJson(member.metadata) }, created: inserted.changes === 1 };
 }
 
+/** What has happened to this card and the things on it. Reports only; concludes nothing. */
+export function getPurposeTraces(
+  db: Database.Database,
+  userId: string,
+  purposeId: string,
+  input: { limit?: number; before_seq?: number } = {},
+) {
+  getOwnedPurposeRow(db, userId, purposeId);
+  const members = db.prepare(`
+    SELECT member_kind AS kind, member_id AS id FROM purpose_members
+    WHERE purpose_id = ? AND user_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(purposeId, userId, TRACE_MEMBER_LIMIT) as Array<{ kind: string; id: string }>;
+  const refs = [{ kind: 'purpose', id: purposeId }, ...members];
+  return {
+    events: listEventsForObjects(db, userId, refs, { limit: input.limit, beforeSeq: input.before_seq }),
+    member_count: countPurposeMembers(db, purposeId),
+    scanned_refs: refs.length,
+  };
+}
+
 /** Legacy note snapshots are read-only. Opening a note never creates a soul. */
 export function listNotePurposes(db: Database.Database, userId: string, noteId: string): Purpose[] {
   const note = db.prepare('SELECT id FROM notes WHERE id = ? AND user_id = ?').get(noteId, userId);
   if (!note) throw new AppError(404, 'Note not found');
   const rows = db.prepare(`
-    SELECT * FROM purposes
-    WHERE user_id = ? AND note_id = ? AND status = 'active'
-    ORDER BY is_note_default DESC, updated_at DESC, created_at DESC, id ASC
-  `).all(userId, noteId) as PurposeRow[];
+    SELECT ${PURPOSE_COLUMNS} FROM purposes p
+    WHERE p.user_id = ? AND p.note_id = ? AND p.status = 'active'
+    ORDER BY p.is_note_default DESC, p.updated_at DESC, p.created_at DESC, p.id ASC
+  `).all(userId, noteId) as PurposeRowWithCount[];
   return rows.map((row) => {
     const members = db.prepare(`
       SELECT id, purpose_id, member_kind, member_id, role, fitness,

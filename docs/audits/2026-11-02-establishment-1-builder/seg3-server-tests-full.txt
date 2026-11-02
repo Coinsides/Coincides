@@ -1,0 +1,57 @@
+# establishment-1 segment 3: establishment1Capture and establishment1Foundation result lines, HEAD 7e0826ed plus uncommitted patch and segment 3
+ok 1 - a Project with no purpose gets an importer card asking nothing, and its draft follows
+ok 2 - exactly one active purpose takes the file with no new card and no event
+ok 3 - several active purposes are not guessed among: a new card opens
+ok 4 - a retired note-bound purpose does not count as a card for the Project
+ok 5 - the merge window gathers a burst, only into an active importer card, and expires
+ok 6 - an untouched importer card stops attracting once its window closes
+ok 7 - a person's card beats an untouched importer card sitting beside it
+ok 8 - an importer card a person has adopted attracts like any card of theirs
+ok 9 - a zip's draft sees every entry
+ok 10 - a zip that cannot expand keeps its card and still gets a draft
+ok 11 - a zip makes one card, named for the zip, holding the zip and every entry
+ok 12 - the library shelf opens no card and attaches to nothing
+ok 13 - a duplicate upload captures in the new Project, and repeating it captures nothing
+ok 14 - precheck captures only when it creates the placement
+ok 15 - a failed rename leaves no card, no member and no event
+ok 16 - an intake without the route option captures nothing
+ok 17 - both real routes pass their own channel
+ok 18 - the card, the member and the event commit or fail together
+ok 19 - a capture failure does not fail the import
+ok 20 - a failed draft marks the card and blocks nothing
+ok 21 - the real drafter sends a short brief with no tools and takes back only the known fields
+ok 22 - an unusable model reply fails the draft
+ok 23 - a provider that never answers times out, fails the card and frees the queue
+ok 24 - under test the default drafter stops before reaching any provider
+ok 25 - drafts run one at a time
+ok 26 - a restart resumes a draft left pending, and skips locked, settled and failed cards
+ok 27 - redraft on an importer card reuses the drafter passed to the router
+ok 28 - an older database rebuilds the ledger and keeps every row, the sequence and append-only
+ok 29 - a fresh database has all twenty-eight words from schema.sql, and the migration skips the rebuild
+ok 30 - the note-purpose triggers stay, while the roster triggers are gone
+ok 31 - every purpose write requires the caller transaction
+ok 32 - the words a person types are stored byte for byte
+ok 33 - a person editing the interpretation locks it in the same write and the machine is refused
+ok 34 - locking and unlocking are recorded, repeat as no-ops, and unlocking hands the card back
+ok 35 - a person can clear an interpretation field, and their edit settles a waiting draft
+ok 36 - status only flips between active and archived, with nothing else attached
+ok 37 - the amend route validates its body and answers only the owner
+ok 38 - redraft stores the stub draft under the machine name
+ok 39 - redraft is refused on a locked card
+ok 40 - a failing drafter marks the card failed and nothing else breaks
+ok 41 - a lock placed while a draft is running wins over the draft and over its failure
+ok 42 - locking a card with no draft under way writes no draft status
+ok 43 - members accept the three kinds, repeat without duplicating, and stay within the owner
+ok 44 - rating writes the card, the activity row and one complete ledger entry
+ok 45 - the three rating writes commit or fail together
+ok 46 - rating another user's card changes nothing
+ok 47 - editing and retiring an item are recorded; a refused edit is not
+ok 48 - an item reference block cites its item once, on both creation paths
+ok 49 - saving a group cites only items new to it
+ok 50 - moving legacy metadata records nothing, and later real edits cite against it
+ok 51 - casting cites the item once, and the group save that follows does not repeat it
+ok 52 - the ledger reader matches objects, filters, pages and stays within the owner
+ok 53 - the traces route reads the card and its members, pages by seq, and counts members
+# tests 53
+# pass 53
+# fail 0

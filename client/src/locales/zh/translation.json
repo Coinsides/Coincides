@@ -184,5 +184,52 @@
     "failedSummary": "无法生成的页数:{{count}}",
     "failedTitle": "原页无法生成。",
     "retry": "重试"
+  },
+  "purposeCards": {
+    "title": "事由",
+    "empty": "还没有事由",
+    "inferred": "(导入推定)",
+    "noWords": "还没有你自己的原话",
+    "members": "卡上 {{count}} 件",
+    "interpretationHeading": "解读",
+    "noInterpretation": "还没有解读",
+    "fields": {
+      "true_goal": "目标",
+      "territory": "范围",
+      "behavior_pattern": "用法",
+      "time_window": "时间"
+    },
+    "drafting": "正在起草...",
+    "draftFailed": "草稿没能生成。",
+    "redraft": "重新起草",
+    "edit": "编辑",
+    "editInterpretation": "编辑解读",
+    "save": "保存",
+    "saveAndLock": "保存并锁定",
+    "cancel": "取消",
+    "archive": "收纳",
+    "lock": "锁定解读",
+    "unlock": "解锁解读",
+    "locked": "已锁定",
+    "titleLabel": "标题",
+    "intentLabel": "意图",
+    "wordsLabel": "你的原话",
+    "tracesHeading": "最近痕迹",
+    "noTraces": "还没有记录",
+    "byAgent": "Agent",
+    "actionFailed": "操作没有成功,请重试。",
+    "lockedRefused": "解读已锁定,不能重新起草。请先解锁。",
+    "loadFailed": "事由加载失败。",
+    "retry": "重试",
+    "verbs": {
+      "purpose_created": "开卡",
+      "purpose_amended": "改卡",
+      "item_cited": "引用",
+      "item_edited": "编辑",
+      "mounted": "上板",
+      "unmounted": "下板",
+      "card_reviewed": "复习",
+      "published": "发布"
+    }
   }
 }

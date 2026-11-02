@@ -226,6 +226,7 @@ test('a person editing the interpretation locks it in the same write and the mac
   assert.equal(event.actor_kind, 'human');
   assert.equal(event.channel, 'PATCH /api/purposes/:purposeId');
   assert.deepEqual(event.meta, { fields: ['interpretation'], lock: 'locked' });
+  assert.equal(event.summary, 'Amended purpose: interpretation, locked');
 
   const before = ledger(db).length;
   assert.throws(
@@ -603,4 +604,35 @@ test('the ledger reader matches objects, filters, pages and stays within the own
   const before = db.prepare('SELECT COUNT(*) AS n FROM events').get();
   listEventsForObjects(db, userId, refs);
   assert.deepEqual(db.prepare('SELECT COUNT(*) AS n FROM events').get(), before);
+});
+
+// ---------------------------------------------------------------- traces route
+
+test('the traces route reads the card and its members, pages by seq, and counts members', async (t) => {
+  const { db, userId, otherUserId, request, purposeId } = await fixture(t);
+  const item = createItem(db, userId, { plain_text: 'Body' });
+  const stranger = createItem(db, userId, { plain_text: 'Not on the card' });
+  db.transaction(() => addPurposeMember(db, userId, purposeId, { member_kind: 'item', member_id: item.id }))();
+  await request('PUT', `/api/items/${item.id}`, { plain_text: 'One' });
+  await request('PUT', `/api/items/${stranger.id}`, { plain_text: 'Elsewhere' });
+  await request('PATCH', `/api/purposes/${purposeId}`, { title: 'Renamed' });
+  const { status, body } = await request('GET', `/api/purposes/${purposeId}/traces`);
+  assert.equal(status, 200);
+  assert.deepEqual(body.events.map((event: any) => event.verb), ['purpose_amended', 'item_edited']);
+  assert.ok(body.events.every((event: any) => !JSON.stringify(event.objects).includes(stranger.id)));
+  assert.equal(body.member_count, 1);
+  assert.equal(body.scanned_refs, 2);
+
+  const paged = await request('GET', `/api/purposes/${purposeId}/traces?limit=1`);
+  assert.equal(paged.body.events.length, 1);
+  const next = await request('GET', `/api/purposes/${purposeId}/traces?limit=1&before_seq=${paged.body.events[0].seq}`);
+  assert.equal(next.body.events[0].verb, 'item_edited');
+
+  assert.equal((await request('GET', `/api/purposes/${purposeId}/traces?limit=0`)).status, 400);
+  assert.equal((await request('GET', `/api/purposes/${purposeId}/traces`, undefined, otherUserId)).status, 404);
+
+  const read = await request('GET', `/api/purposes/${purposeId}`);
+  assert.equal(read.body.purpose.member_count, 1);
+  const list = await request('GET', '/api/purposes?status=active');
+  assert.equal(list.body.purposes[0].member_count, 1);
 });

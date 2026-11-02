@@ -184,5 +184,52 @@
     "failedSummary": "Pages that could not be generated: {{count}}",
     "failedTitle": "The original pages could not be generated.",
     "retry": "Try again"
+  },
+  "purposeCards": {
+    "title": "Purposes",
+    "empty": "No purposes yet",
+    "inferred": "(inferred at import)",
+    "noWords": "Not in your own words yet",
+    "members": "{{count}} on this card",
+    "interpretationHeading": "Interpretation",
+    "noInterpretation": "No interpretation yet",
+    "fields": {
+      "true_goal": "Goal",
+      "territory": "Covers",
+      "behavior_pattern": "Use",
+      "time_window": "Time"
+    },
+    "drafting": "Drafting...",
+    "draftFailed": "The draft could not be generated.",
+    "redraft": "Draft again",
+    "edit": "Edit",
+    "editInterpretation": "Edit interpretation",
+    "save": "Save",
+    "saveAndLock": "Save and lock",
+    "cancel": "Cancel",
+    "archive": "Put away",
+    "lock": "Lock the interpretation",
+    "unlock": "Unlock the interpretation",
+    "locked": "Locked",
+    "titleLabel": "Title",
+    "intentLabel": "Intent",
+    "wordsLabel": "In your own words",
+    "tracesHeading": "Recent activity",
+    "noTraces": "Nothing recorded yet",
+    "byAgent": "Agent",
+    "actionFailed": "That did not go through. Try again.",
+    "lockedRefused": "The interpretation is locked, so it cannot be drafted again. Unlock it first.",
+    "loadFailed": "Could not load purposes.",
+    "retry": "Try again",
+    "verbs": {
+      "purpose_created": "Card opened",
+      "purpose_amended": "Card changed",
+      "item_cited": "Cited",
+      "item_edited": "Edited",
+      "mounted": "Mounted",
+      "unmounted": "Unmounted",
+      "card_reviewed": "Reviewed",
+      "published": "Published"
+    }
   }
 }

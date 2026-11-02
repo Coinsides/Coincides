@@ -1,0 +1,4 @@
+# establishment-1 segment 3: full client suite, working tree, sole load, HEAD 7e0826ed plus uncommitted segment 3
+ Test Files  248 passed (248)
+      Tests  2555 passed (2555)
+   Duration  143.71s (transform 18.30s, setup 89.53s, collect 100.68s, tests 362.19s, environment 304.92s, prepare 48.08s)

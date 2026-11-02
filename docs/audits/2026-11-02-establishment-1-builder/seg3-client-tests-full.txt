@@ -1,0 +1,23 @@
+# establishment-1 segment 3: ProjectPurposeSection and CourseDetail tests, verbose, HEAD 7e0826ed plus uncommitted segment 3
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > asks for this Project and shows an empty section when there are no cards 60ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > quotes the person's words exactly, and marks an importer card without any 36ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > shows the member count and recent traces with their words and ink 54ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > the lock icon flips with one click and no confirmation 38ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > saving the interpretation sends only changes, and is labelled as locking 38ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > saving without changing a word still locks 15ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > edits title and words without touching the lock, sending only what changed 30ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > offers redraft on pending and failed cards only 46ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > explains a locked refusal, and a general failure 107ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > polls a pending card until its draft lands, then stops 15ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > putting a card away removes it from the section 15ms
+ ✓ src/pages/Courses/ProjectPurposeSection.test.tsx > purpose card > reports a failed load with a retry 12ms
+ ✓ src/pages/Courses/CourseDetail.test.tsx > ProjectIdentity > K-3d renders Project identity without a priority weight surface 47ms
+ ✓ src/pages/Courses/CourseDetail.test.tsx > ProjectNotesSection lifecycle actions > creates a project note as A4 without a paper picker 118ms
+ ✓ src/pages/Courses/CourseDetail.test.tsx > ProjectNotesSection lifecycle actions > opens an existing note without creating or changing its paper 21ms
+ ✓ src/pages/Courses/CourseDetail.test.tsx > ProjectNotesSection lifecycle actions > clicking the trash action calls api.delete with the note URL 23ms
+ ✓ src/pages/Courses/CourseDetail.test.tsx > ProjectNotesSection lifecycle actions > clicking the restore action calls api.post with the restore URL 23ms
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+   Start at  18:31:50
+   Duration  2.72s (transform 729ms, setup 484ms, collect 1.32s, tests 701ms, environment 1.51s, prepare 377ms)

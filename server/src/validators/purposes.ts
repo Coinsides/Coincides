@@ -82,6 +82,11 @@ export const addPurposeMemberInputSchema = z.object({
 
 export type AddPurposeMemberInput = z.input<typeof addPurposeMemberInputSchema>;
 
+export const purposeTracesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+  before_seq: z.coerce.number().int().min(1).optional(),
+}).strict();
+
 export const listPurposesQuerySchema = z.object({
   project_id: purposeIdSchema.optional(),
   status: z.enum(['active', 'sealed', 'archived', 'all']).optional(),

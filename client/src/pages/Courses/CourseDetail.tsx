@@ -18,6 +18,7 @@ import {
 } from '../Notes/canvasEngine/canvasObjectRepository';
 import { ProjectSourcesPanel } from '../Sources/ProjectSourcesPanel';
 import { ProjectDeleteDialog } from './ProjectDeleteDialog';
+import { ProjectPurposeSection } from './ProjectPurposeSection';
 import { describeOrganizedNoteBlock } from '@/components/AgentPanel/proposalInboxModel';
 import styles from './CourseDetail.module.css';
 import { ProjectNoteCard } from './noteCover/ProjectNoteCard';
@@ -1005,6 +1006,8 @@ export default function CourseDetailPage() {
 
       {/* Project Info */}
       <ProjectIdentity course={course} />
+
+      <ProjectPurposeSection projectId={course.id} />
 
       {workspaceLandingSection}
 

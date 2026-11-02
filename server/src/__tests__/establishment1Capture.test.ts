@@ -241,6 +241,78 @@ test('the merge window gathers a burst, only into an active importer card, and e
   assert.equal(importers().length, 3, 'nine minutes is still inside');
 });
 
+test('an untouched importer card stops attracting once its window closes', async (t) => {
+  const f = await fixture(t);
+  const a = await f.upload('a.txt', 'Body a');
+  const b = await f.upload('b.txt', 'Body b');
+  const [card] = f.cards();
+  assert.equal(f.cards().length, 1, 'inside the window it gathers');
+  assert.deepEqual(f.members(card.id).map((member) => member.member_id), [a, b]);
+
+  f.db.prepare('UPDATE purposes SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), card.id);
+  const later = await f.upload('a-week-later.txt', 'Body later');
+  assert.equal(f.cards().length, 2, 'a week later it opens a new card');
+  assert.deepEqual(f.members(card.id).map((member) => member.member_id), [a, b]);
+  const fresh = f.cards().find((entry) => entry.id !== card.id)!;
+  assert.deepEqual(f.members(fresh.id).map((member) => member.member_id), [later]);
+});
+
+test('a person\'s card beats an untouched importer card sitting beside it', async (t) => {
+  const f = await fixture(t);
+  const staleImporter = await f.upload('old.txt', 'Body old');
+  const importerCard = f.cards()[0];
+  f.db.prepare('UPDATE purposes SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 60 * 60 * 1000).toISOString(), importerCard.id);
+  const mine = existingCard(f.db, f.userId, f.courseId);
+  const sourceId = await f.upload('new.txt', 'Body new');
+  assert.deepEqual(f.members(mine.id).map((member) => member.member_id), [sourceId]);
+  assert.deepEqual(f.members(importerCard.id).map((member) => member.member_id), [staleImporter]);
+  assert.equal(f.cards().length, 2);
+
+  // Also inside the window: the person's card is the one stated reason.
+  f.db.prepare('UPDATE purposes SET created_at = ? WHERE id = ?').run(new Date().toISOString(), importerCard.id);
+  const second = await f.upload('newer.txt', 'Body newer');
+  assert.deepEqual(f.members(mine.id).map((member) => member.member_id), [sourceId, second]);
+});
+
+test('an importer card a person has adopted attracts like any card of theirs', async (t) => {
+  for (const adopt of [
+    (db: Db, id: string) => db.prepare("UPDATE purposes SET user_verbatim = '我要考过' WHERE id = ?").run(id),
+    (db: Db, id: string) => db.prepare('UPDATE purposes SET interpretation_locked = 1 WHERE id = ?').run(id),
+  ]) {
+    const f = await fixture(t);
+    await f.upload('first.txt', 'Body first');
+    const [card] = f.cards();
+    f.db.prepare('UPDATE purposes SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), card.id);
+    adopt(f.db, card.id);
+    await f.upload('later.txt', 'Body later');
+    assert.equal(f.cards().length, 1);
+    assert.equal(f.members(card.id).length, 2);
+  }
+});
+
+test('a zip\'s draft sees every entry', async (t) => {
+  const seen: string[][] = [];
+  const f = await fixture(t, async (purpose, { db }) => {
+    seen.push((db.prepare("SELECT member_id FROM purpose_members WHERE purpose_id = ? AND member_kind = 'source'").all(purpose.id) as Array<{ member_id: string }>).map((row) => row.member_id));
+    return { true_goal: 'Goal' };
+  });
+  const entries = Array.from({ length: 12 }, (_, index): [string, string] => [`entry-${index}.txt`, `Entry body ${index}`]);
+  await f.upload('pack.zip', storedZip(entries));
+  await waitForScheduledPurposeDrafts();
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].length, 13, 'the zip and all twelve entries');
+});
+
+test('a zip that cannot expand keeps its card and still gets a draft', async (t) => {
+  const f = await fixture(t);
+  await f.upload('broken.zip', Buffer.from('not really a zip')).catch(() => undefined);
+  await waitForScheduledPurposeDrafts();
+  const cards = f.cards();
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].interpretation.draft_status, 'ready');
+  assert.equal(f.drafted.length, 1);
+});
+
 test('a zip makes one card, named for the zip, holding the zip and every entry', async (t) => {
   const f = await fixture(t);
   const zipId = await f.upload('期中资料.zip', storedZip([['one.txt', 'Entry one'], ['two.txt', 'Entry two'], ['three.txt', 'Entry three']]));

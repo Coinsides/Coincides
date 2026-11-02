@@ -14,6 +14,7 @@ import {
   createPurpose,
   getPurpose,
   getPurposeCompiledScope,
+  getPurposeTraces,
   listNotePurposes,
   listPurposes,
   markPurposeDraftPending,
@@ -24,6 +25,7 @@ import {
   amendPurposeRequestSchema,
   createPurposeRequestSchema,
   listPurposesQuerySchema,
+  purposeTracesQuerySchema,
 } from '../validators/purposes.js';
 
 function handleValidationError(err: unknown, res: Response): boolean {
@@ -84,6 +86,16 @@ export function createPurposeRouter(
     replaceNotePurposes(databaseProvider(), req.userId!, String(req.params.noteId), []);
   });
 
+  router.get('/:purposeId/traces', (req: AuthRequest, res: Response) => {
+    try {
+      const input = purposeTracesQuerySchema.parse(req.query);
+      res.json(getPurposeTraces(databaseProvider(), req.userId!, String(req.params.purposeId), input));
+    } catch (err) {
+      if (handleValidationError(err, res)) return;
+      throw err;
+    }
+  });
+
   router.get('/:purposeId/compiled-scope', (req: AuthRequest, res: Response) => {
     res.json(getPurposeCompiledScope(databaseProvider(), req.userId!, String(req.params.purposeId)));
   });
@@ -103,7 +115,8 @@ export function createPurposeRouter(
           events: fields.length || lockChange ? [{
             verb: 'purpose_amended' as const,
             objects: [{ kind: 'purpose', id: purposeId }],
-            summary: summary ?? `Amended purpose: ${lock.purpose.title}`,
+            // The card shows this line, so it names what changed rather than the card.
+            summary: summary ?? `Amended purpose: ${[...fields, ...(lockChange ? [lockChange] : [])].join(', ')}`,
             meta: { fields, lock: lockChange },
           }] : [],
         };

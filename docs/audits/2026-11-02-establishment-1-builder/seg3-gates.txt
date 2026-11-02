@@ -1,0 +1,9 @@
+# establishment-1 segment 3 gates
+client tsc errors: 0
+server tsc errors: 0 (shared/dist present: 1)
+check:source-experience exit=0 :: Source experience model contract check passed.
+check:changed-file-secrets exit=0 :: Changed-file secret scan passed: 35 changed file(s) scanned.
+check:canvas-runtime-boundary exit=0 :: Canvas runtime boundary check passed (175 checks).
+check:owned-helper-contract exit=0 :: [PASS] owned-helper contract: 7 getOwned* / 1 findOwned*, including unexported helpers, ac
+check:agent-knowledge exit=0 :: [PASS] Agent 知识事实无漂移: 6db84dc9324b4794ee877217de0025bb4ff4b8171848be435fe606
+v13 test diffs against HEAD: 0

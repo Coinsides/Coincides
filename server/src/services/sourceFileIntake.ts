@@ -18,7 +18,7 @@ import {
   ensureSourceProjectPlacement,
   findSourceRecordByContentHash,
 } from './sourceRecords.js';
-import { capturePurposeAfterIntake, type PurposeCaptureOptions } from './purposeCapture.js';
+import { capturePurposeAfterIntake, schedulePurposeIntakeDraft, type PurposeCaptureOptions } from './purposeCapture.js';
 import { isSourceArtifactErrorRetryable } from './sourceMaterializationErrors.js';
 import {
   MINERU_PARSER_KEY,
@@ -946,24 +946,38 @@ async function finishStoredSourceIntake(
   stored: SourceFileIntakeResult,
   options: SourceStorageOptions,
 ): Promise<SourceFileIntakeResult> {
-  // The one finish line for a fresh file and a duplicate. It runs after the ready
-  // flip, so a failed rename can never leave a card pointing at a deleted Source;
-  // and before expansion, so a zip's card takes the zip's name.
-  if (options.purposeCapture) {
-    capturePurposeAfterIntake(db, userId, { courseId: target.courseId, sourceRecordId: stored.source.id }, options.purposeCapture);
-  }
   const isZipContainer = inspected.extension === '.zip'
     || stored.source.file.format === 'zip'
     || extname(stored.source.file.original_filename).toLowerCase() === '.zip';
-  if (options.expandContainers === false || !isZipContainer) return stored;
-  setSourceFileIntakeDeclaration(
-    db,
-    userId,
-    stored.source.file.id,
-    'container_expansion_incomplete',
-    true,
-  );
-  return expandStoredZipContainer(db, userId, target, stored, options);
+  const expands = options.expandContainers !== false && isZipContainer;
+  // The one finish line for a fresh file and a duplicate. It runs after the ready
+  // flip, so a failed rename can never leave a card pointing at a deleted Source;
+  // and before expansion, so a zip's card takes the zip's name.
+  const captured = options.purposeCapture
+    ? capturePurposeAfterIntake(
+        db,
+        userId,
+        { courseId: target.courseId, sourceRecordId: stored.source.id },
+        { ...options.purposeCapture, deferDraft: expands },
+      )
+    : null;
+  if (!expands) return stored;
+  try {
+    setSourceFileIntakeDeclaration(
+      db,
+      userId,
+      stored.source.file.id,
+      'container_expansion_incomplete',
+      true,
+    );
+    return await expandStoredZipContainer(db, userId, target, stored, options);
+  } finally {
+    // The draft reads the card's file list, so it waits for the last entry. A failed
+    // expansion still leaves a card that needs one.
+    if (captured?.outcome === 'created' && options.purposeCapture) {
+      schedulePurposeIntakeDraft(db, userId, captured.purpose_id, options.purposeCapture);
+    }
+  }
 }
 
 export function listSourceRecords(
