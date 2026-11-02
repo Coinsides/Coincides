@@ -1,0 +1,213 @@
+{
+ "meta": {
+  "cpu_logical": 8,
+  "cpu_physical": 4,
+  "ram_gb": 15.5,
+  "torch_threads": 4,
+  "cuda": false
+ },
+ "parse": [
+  {
+   "label": "math1-cold",
+   "pages": 1,
+   "seconds": 73.68,
+   "per_page": 73.68,
+   "peak_rss_gb": 3.0,
+   "kinds": {
+    "text": 6,
+    "equation": 5
+   },
+   "inline_math": 36,
+   "latex_sample": [
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$",
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$",
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$"
+   ],
+   "image_files": 5,
+   "output_mb": 0.16
+  },
+  {
+   "label": "math1-warm",
+   "pages": 1,
+   "seconds": 56.2,
+   "per_page": 56.2,
+   "peak_rss_gb": 2.85,
+   "kinds": {
+    "text": 6,
+    "equation": 5
+   },
+   "inline_math": 36,
+   "latex_sample": [
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$",
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$",
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$"
+   ],
+   "image_files": 5,
+   "output_mb": 0.16
+  },
+  {
+   "label": "math5-warm",
+   "pages": 4,
+   "seconds": 243.24,
+   "per_page": 60.81,
+   "peak_rss_gb": 3.23,
+   "kinds": {
+    "text": 32,
+    "equation": 25
+   },
+   "inline_math": 178,
+   "latex_sample": [
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$",
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$",
+    "$$\nf ( x ) = a _ { _ { 0 } } + a _ { _ { 1 } } x + a _ { _ { 2 } } x ^ { 2 } + \\ldots + a _ { _ { n } } x ^ { n }\n$$"
+   ],
+   "image_files": 25,
+   "output_mb": 0.78
+  },
+  {
+   "label": "sample5-warm",
+   "pages": 5,
+   "seconds": 33.97,
+   "per_page": 6.79,
+   "peak_rss_gb": 2.05,
+   "kinds": {
+    "text": 25,
+    "header": 1,
+    "footer": 9,
+    "page_number": 5
+   },
+   "inline_math": 0,
+   "latex_sample": [],
+   "image_files": 0,
+   "output_mb": 0.3
+  }
+ ],
+ "images": [
+  {
+   "pdf": "math5.pdf",
+   "dpi": 110,
+   "format": "PNG",
+   "kb_per_page": 211.7,
+   "ms_per_page": 62
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 110,
+   "format": "WEBP",
+   "kb_per_page": 82.5,
+   "ms_per_page": 279
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 110,
+   "format": "JPEG",
+   "kb_per_page": 144.6,
+   "ms_per_page": 16
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 144,
+   "format": "PNG",
+   "kb_per_page": 304.8,
+   "ms_per_page": 85
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 144,
+   "format": "WEBP",
+   "kb_per_page": 119.3,
+   "ms_per_page": 371
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 144,
+   "format": "JPEG",
+   "kb_per_page": 212.6,
+   "ms_per_page": 27
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 200,
+   "format": "PNG",
+   "kb_per_page": 448.0,
+   "ms_per_page": 155
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 200,
+   "format": "WEBP",
+   "kb_per_page": 167.8,
+   "ms_per_page": 676
+  },
+  {
+   "pdf": "math5.pdf",
+   "dpi": 200,
+   "format": "JPEG",
+   "kb_per_page": 328.9,
+   "ms_per_page": 49
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 110,
+   "format": "PNG",
+   "kb_per_page": 244.4,
+   "ms_per_page": 71
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 110,
+   "format": "WEBP",
+   "kb_per_page": 118.4,
+   "ms_per_page": 258
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 110,
+   "format": "JPEG",
+   "kb_per_page": 194.1,
+   "ms_per_page": 28
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 144,
+   "format": "PNG",
+   "kb_per_page": 335.3,
+   "ms_per_page": 94
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 144,
+   "format": "WEBP",
+   "kb_per_page": 165.8,
+   "ms_per_page": 400
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 144,
+   "format": "JPEG",
+   "kb_per_page": 286.2,
+   "ms_per_page": 37
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 200,
+   "format": "PNG",
+   "kb_per_page": 482.0,
+   "ms_per_page": 164
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 200,
+   "format": "WEBP",
+   "kb_per_page": 240.9,
+   "ms_per_page": 748
+  },
+  {
+   "pdf": "sample5.pdf",
+   "dpi": 200,
+   "format": "JPEG",
+   "kb_per_page": 456.4,
+   "ms_per_page": 73
+  }
+ ]
+}
