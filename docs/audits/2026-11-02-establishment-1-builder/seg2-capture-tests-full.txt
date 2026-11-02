@@ -1,0 +1,26 @@
+# establishment-1 segment 2: establishment1Capture.test.ts result lines, HEAD 26c4667b plus uncommitted segment 2
+ok 1 - a Project with no purpose gets an importer card asking nothing, and its draft follows
+ok 2 - exactly one active purpose takes the file with no new card and no event
+ok 3 - several active purposes are not guessed among: a new card opens
+ok 4 - a retired note-bound purpose does not count as a card for the Project
+ok 5 - the merge window gathers a burst, only into an active importer card, and expires
+ok 6 - a zip makes one card, named for the zip, holding the zip and every entry
+ok 7 - the library shelf opens no card and attaches to nothing
+ok 8 - a duplicate upload captures in the new Project, and repeating it captures nothing
+ok 9 - precheck captures only when it creates the placement
+ok 10 - a failed rename leaves no card, no member and no event
+ok 11 - an intake without the route option captures nothing
+ok 12 - both real routes pass their own channel
+ok 13 - the card, the member and the event commit or fail together
+ok 14 - a capture failure does not fail the import
+ok 15 - a failed draft marks the card and blocks nothing
+ok 16 - the real drafter sends a short brief with no tools and takes back only the known fields
+ok 17 - an unusable model reply fails the draft
+ok 18 - a provider that never answers times out, fails the card and frees the queue
+ok 19 - under test the default drafter stops before reaching any provider
+ok 20 - drafts run one at a time
+ok 21 - a restart resumes a draft left pending, and skips locked, settled and failed cards
+ok 22 - redraft on an importer card reuses the drafter passed to the router
+# tests 22
+# pass 22
+# fail 0

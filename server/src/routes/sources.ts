@@ -76,7 +76,7 @@ function contentDisposition(value: 'inline' | 'attachment', filename: string): s
 router.post('/precheck', (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const input = precheckSchema.parse(req.body);
-    res.json(precheckSourceHash(getDb(), req.userId!, input));
+    res.json(precheckSourceHash(getDb(), req.userId!, input, { purposeCapture: { channel: 'POST /api/sources/precheck' } }));
   } catch (error) {
     nextValidationError(error, next);
   }
@@ -94,7 +94,7 @@ router.post(
         origin_entry_kind: target.origin_entry_kind as SourceOriginEntryKind,
         file: req.file,
         file_mtime: typeof req.body.file_mtime === 'string' ? req.body.file_mtime : null,
-      });
+      }, { purposeCapture: { channel: 'POST /api/sources/upload' } });
       res.status(result.created ? 201 : 200).json(result);
     } catch (error) {
       if (req.file?.path) {

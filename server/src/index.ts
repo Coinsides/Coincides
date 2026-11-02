@@ -66,6 +66,7 @@ import {
   resumeReceivedSourceMaterializations,
   sweepSourceMaterializations,
 } from './services/sourceMaterialization.js';
+import { resumePurposeDrafts } from './services/purposeDrafting.js';
 import { resumeSourcePageImages } from './services/sourcePageImages.js';
 import { drainManagedFileCleanupJobs } from './services/managedFileCleanup.js';
 
@@ -96,6 +97,10 @@ if (resumedMaterializations) {
 const resumedPageImages = resumeSourcePageImages(database);
 if (resumedPageImages) {
   console.log(`Resumed page images for ${resumedPageImages} Source(s) after startup.`);
+}
+const resumedPurposeDrafts = resumePurposeDrafts(database);
+if (resumedPurposeDrafts) {
+  console.log(`Resumed ${resumedPurposeDrafts} purpose interpretation draft(s) after startup.`);
 }
 
 const app = express();

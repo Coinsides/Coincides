@@ -1,0 +1,8 @@
+# establishment-1 segment 2 gates
+client tsc errors: 0
+server tsc errors: 0 (shared/dist present: 1)
+check:changed-file-secrets exit=0 :: Changed-file secret scan passed: 25 changed file(s) scanned.
+check:source-experience exit=0 :: Source experience model contract check passed.
+check:server-shared-runtime-import exit=0 :: [PASS] server shared runtime-import gate: 0 violations across 325 product source file(s); 
+check:owned-helper-contract exit=0 :: [PASS] owned-helper contract: 7 getOwned* / 1 findOwned*, including unexported helpers, ac
+check:agent-knowledge exit=0 :: [PASS] Agent 知识事实无漂移: 6db84dc9324b4794ee877217de0025bb4ff4b8171848be435fe606

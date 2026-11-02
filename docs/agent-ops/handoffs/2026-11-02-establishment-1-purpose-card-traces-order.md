@@ -221,3 +221,40 @@ events 加 verb 需重建表迁移(范式照 073:建新→按 seq 拷贝→DROP�
 **builder 自决四项终裁**:(a) item_id 差集(优于单面写法)、(b) 四写路全包+by-note 纳入、(c) 人改翻 ready、(d) 评分 meta 增 before/scheduled_days/next_state——全认。
 
 **部署前置(未了)**:迁移 086 虽经夹具与零行真启动演练,部署前在岛库备份副本上实跑一次守恒核对(builder 段 1 申报建议,采)。
+
+## Result（段 2 · 导入捕获,builder 2026-11-02）
+
+**执行状态**:单内段 2 全部完工,未提交。全程桩 provider,零真实模型调用。全量回归 1 条红,为既有 harness。
+
+**改动**:
+- 新增 `services/purposeCapture.ts`:`capturePurposeForIntake`(自开事务,createPurpose + addPurposeMember + recordEvent 同笔)、`capturePurposeAfterIntake`(外层兜错)。
+- `services/purposeDrafting.ts`:真接线 `createProviderPurposeDrafter`(`getProviderFromSettings` → `AIProvider.chat`,无工具,60 秒超时)、串行队列、启动恢复 `resumePurposeDrafts`;段 1 的占位 drafter 删除。
+- `services/sourceFileIntake.ts`:新选项 `purposeCapture`,调用点在 `finishStoredSourceIntake` 开头(fresh 与 dedup 共用的收尾处,在 ready 翻转之后、zip 展开之前)和 `precheckSourceHash`(仅 `placement_created=true`)。
+- `routes/sources.ts`:upload、precheck 各传自己的 channel 字面量。`index.ts`:启动恢复。
+
+**证据**(`docs/audits/2026-11-02-establishment-1-builder/`):`seg2-capture-tests-full.txt`、`seg2-full-suite-summary.txt`、`seg2-gates.txt`,都带标记行。
+
+**两侧 tsc**:0 / 0(服务端前提同前)。
+
+**测试清单**:新套件 `establishment1Capture.test.ts`(逐条见证据),段 1 的 `establishment1Foundation.test.ts` 仍全过。全量结果见 `seg2-full-suite-summary.txt`。
+- 功能 1:零 active 出卡、恰一领册且不发事件、多个开新卡、合并窗(窗内并入、archived 不吸、11 分钟过期、9 分钟仍在)、zip 一包一卡、library 与直传 Home 零卡零册、dedup 新 Project 捕获且重复不再开、precheck 只在建 placement 时捕获、rename 失败零残留。
+- 数据:三件同成同败(成员和事件各注入一次失败),回滚后不排起草。
+- 起草:桩跑通真实逻辑、无工具、只取已知字段、不可用回复翻 failed、挂起超时翻 failed 且队列不堵、一次一个。
+- 恢复:pending 续跑,locked/ready/failed/人建卡不动。
+
+**重启恢复方案(段 1 缺口)**:启动时 `resumePurposeDrafts` 把 `draft_status='pending'` 且未锁的卡重新排队,channel `startup:purpose-draft-resume`,trigger `resume`。失败翻 `failed`,所以不会每次重启都反复调模型。下次手动 redraft 也能自愈。
+
+**申报项**:
+1. **没有测到的一跳**:`configuredProvider`,即读用户 settings 再走 `getProviderFromSettings` 这一步。测试替换的正是这里,之后的 prompt、流读取、解析、写回都跑了真代码。这一步与 organized note 共用同一函数,但**真实模型的回复质量、prompt 效果完全没验过**,要等岛上首次真跑。
+2. **单外加了测试硬闸**:`configuredProvider` 开头检查 `NODE_TEST_CONTEXT`,测试环境直接抛错。原因:既有测试会走 upload 路由,而解析凭据时可能读到本机存的真实 key,一个忘了桩的夹具就可能真调模型。这是生产代码里的测试分支,我认为值得,不同意可以改成别的隔离方式。
+3. **捕获失败不阻塞导入**:文件已落盘时事务失败只打 warn,不返回错误。这样卡可能漏开,且 dedup 重传能补,precheck 路不能补(placement 已建)。单内只明确了起草失败不阻塞,这一条是我定的。
+4. **我定的规则**:
+   - **规则 a 排除 note-bound 旧 purpose**(`note_id IS NULL` 才算卡)。否则一个旧笔记魂会让导入错挂到退役对象上。
+   - **合并窗只在「多个 active」时才起作用**:照单内顺序,恰一 active 走规则 a,哪怕是一周前的导入卡也领册。这意味着导入卡开出后,该 Project 后续导入都进这张卡,直到用户再建一张。窗口 10 分钟,未调整。
+   - **防重开**:source 已在本 Project 任何状态的卡上就跳过,所以 dedup 路没有 placement 闸也不会反复开卡,已收纳的卡也不会被重传带回来。
+   - **zip 的容器本身也入册**,卡名取 zip 名;失败的展开不影响已开的卡。
+   - **事件 objects 含 source**,单内只写了 meta。
+5. **起草串行**:所有用户共用一个进程内队列,一次一个,单次最长 60 秒。批量导入多个 Project 时后面的卡会等。
+6. **起草结果语言**:prompt 要求跟随文件名语言。title 固定中文「研读《…》」,照单,英文界面下也是中文。
+7. **未碰**:traces 路由、CourseDetail 卡面、文案,归段 3。`check:test-wiring` 同既有口径未改。
+8. **部署前置未变**:迁移 086 仍需在岛库备份副本上跑一次守恒核对。本段没有新迁移。

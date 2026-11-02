@@ -18,6 +18,7 @@ import {
   ensureSourceProjectPlacement,
   findSourceRecordByContentHash,
 } from './sourceRecords.js';
+import { capturePurposeAfterIntake, type PurposeCaptureOptions } from './purposeCapture.js';
 import { isSourceArtifactErrorRetryable } from './sourceMaterializationErrors.js';
 import {
   MINERU_PARSER_KEY,
@@ -222,6 +223,8 @@ export interface SourceStorageOptions {
   beforeReadyFlip?: (sourceRecordId: string) => void;
   expandContainers?: boolean;
   onContainerExpansion?: (report: SourceContainerExpansionReport) => void;
+  /** Set by the entry route. Absent means no purpose is captured for this intake. */
+  purposeCapture?: PurposeCaptureOptions;
 }
 
 interface SourceInternalRow {
@@ -897,6 +900,7 @@ async function expandStoredZipContainer(
         rootDir: options.rootDir,
         now: options.now,
         expandContainers: false,
+        purposeCapture: options.purposeCapture,
       });
       return {
         source_record_id: child.source.id,
@@ -942,6 +946,12 @@ async function finishStoredSourceIntake(
   stored: SourceFileIntakeResult,
   options: SourceStorageOptions,
 ): Promise<SourceFileIntakeResult> {
+  // The one finish line for a fresh file and a duplicate. It runs after the ready
+  // flip, so a failed rename can never leave a card pointing at a deleted Source;
+  // and before expansion, so a zip's card takes the zip's name.
+  if (options.purposeCapture) {
+    capturePurposeAfterIntake(db, userId, { courseId: target.courseId, sourceRecordId: stored.source.id }, options.purposeCapture);
+  }
   const isZipContainer = inspected.extension === '.zip'
     || stored.source.file.format === 'zip'
     || extname(stored.source.file.original_filename).toLowerCase() === '.zip';
@@ -1338,7 +1348,7 @@ export function precheckSourceHash(
     origin_entry_kind?: SourceOriginEntryKind;
     content_hash: string;
   },
-  options: Pick<SourceStorageOptions, 'rootDir'> = {},
+  options: Pick<SourceStorageOptions, 'rootDir' | 'purposeCapture'> = {},
 ) {
   const hash = String(input.content_hash || '').trim().toLowerCase();
   if (!/^[a-f0-9]{64}$/.test(hash)) {
@@ -1348,6 +1358,10 @@ export function precheckSourceHash(
   const match = findSourceRecordByContentHash(db, userId, hash);
   if (!match) return { exists: false, source: null, placement_created: false };
   const placement = ensureSourceProjectPlacement(db, userId, match.source_record_id, target.courseId);
+  // A file already placed here is not a new arrival: repeating a precheck captures nothing.
+  if (placement.created && options.purposeCapture) {
+    capturePurposeAfterIntake(db, userId, { courseId: target.courseId, sourceRecordId: match.source_record_id }, options.purposeCapture);
+  }
   return {
     exists: true,
     source: getSourceRecordDetail(db, userId, match.source_record_id, options),

@@ -1,0 +1,8 @@
+# establishment-1 segment 2: full server suite, every src/ and scripts/ *.test.ts (120 files), sole load, HEAD 26c4667b plus uncommitted segment 2, includes establishment1Capture: 1
+# tests 1240
+# pass 1239
+# fail 1
+# cancelled 0
+# skipped 0
+# duration_ms 298432.9601
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed

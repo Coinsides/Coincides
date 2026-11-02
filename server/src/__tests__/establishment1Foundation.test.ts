@@ -21,7 +21,7 @@ import { createPurposeRouter } from '../routes/purposes.js';
 import reviewRoutes from '../routes/review.js';
 import { listEventsForObjects } from '../services/eventsLedger.js';
 import { createItem } from '../services/items.js';
-import { unconnectedPurposeDrafter, waitForScheduledPurposeDrafts, type PurposeDrafter } from '../services/purposeDrafting.js';
+import { waitForScheduledPurposeDrafts, type PurposeDrafter } from '../services/purposeDrafting.js';
 import {
   addPurposeMember,
   amendPurpose,
@@ -47,7 +47,9 @@ interface Fixture {
   request: (method: string, path: string, body?: unknown, as?: string) => Promise<{ status: number; body: any }>;
 }
 
-async function fixture(t: TestContext, drafter: PurposeDrafter = unconnectedPurposeDrafter): Promise<Fixture> {
+const failingDrafter: PurposeDrafter = async () => { throw new Error('synthetic drafter failure'); };
+
+async function fixture(t: TestContext, drafter: PurposeDrafter = failingDrafter): Promise<Fixture> {
   const db = await initDb(':memory:');
   const userId = uuidv4();
   const otherUserId = uuidv4();
@@ -332,7 +334,7 @@ test('redraft is refused on a locked card', async (t) => {
   assert.equal(called, 0);
 });
 
-test('without a connected drafter the card reports failed and nothing else breaks', async (t) => {
+test('a failing drafter marks the card failed and nothing else breaks', async (t) => {
   const { db, userId, request, purposeId } = await fixture(t);
   assert.equal((await request('POST', `/api/purposes/${purposeId}/redraft`)).status, 202);
   await waitForScheduledPurposeDrafts();

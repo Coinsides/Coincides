@@ -5,8 +5,8 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { runRecordedAction } from '../middleware/recordedAction.js';
 import {
+  providerPurposeDrafter,
   schedulePurposeDraft,
-  unconnectedPurposeDrafter,
   type PurposeDrafter,
 } from '../services/purposeDrafting.js';
 import {
@@ -36,7 +36,7 @@ function handleValidationError(err: unknown, res: Response): boolean {
 
 export function createPurposeRouter(
   databaseProvider: () => Database.Database = getDb,
-  drafter: PurposeDrafter = unconnectedPurposeDrafter,
+  drafter: PurposeDrafter = providerPurposeDrafter,
 ): Router {
   const router = Router();
 
