@@ -135,3 +135,89 @@ events 加 verb 需重建表迁移(范式照 073:建新→按 seq 拷贝→DROP�
 - **段 2(导入捕获)**:capturePurposeForIntake 三入口收口 + 合并窗 + 异步起草(桩)+ purpose_created 授权锚;
 - **段 3(卡面)**:traces 路由 + CourseDetail purpose section + 锁图标 + redraft 按钮 + 文案;
 - 每段回执追加在本文件尾部 `## Result`,完工发短讯。依赖:无(不等转写);排期:保真 1a 完工后开工。
+
+## Result（段 1 · 地基,builder 2026-11-02）
+
+**执行状态**:单内段 1 全部完工,外加你短讯里的 PATCH 路由与 redraft 骨架;未提交。全量回归 1 条红,为既有问题(申报 1)。
+
+**改动**:
+- 迁移 `086_v2_purpose_card_ink_verbs.ts`(现头 085+1):purposes 四列、DROP `purpose_members_writer_retired_insert/_update`、events 三词重建;`schema.sql` 的 CHECK 修到 28 词,与迁移同序同拼写。
+- `services/purposes.ts`:`amendPurpose`、`setPurposeLock`、`revisePurposeInterpretation`、`addPurposeMember`,以及内部用的 `assertPurposeInterpretationUnlocked`、`markPurposeDraftPending/Failed`。读面带上新列。
+- `validators/purposes.ts`:解读层、amend、member_kind 的 zod。类型同步到 `services/purposes.ts` 与客户端 `runtimeDataTypes.ts`。
+- 新增 `services/eventsLedger.ts`(只读)、`services/purposeDrafting.ts`(骨架)。
+- 路由:`PATCH /api/purposes/:purposeId`、`POST /:purposeId/redraft`;`POST /api/review/:cardId/rate` 焊成一笔并落 `card_reviewed`;`PUT /api/items/:itemId` 与 retire 落 `item_edited`;`POST /api/notes/:id/blocks` 与内容组四条写路落 `item_cited`。
+- `RECORDED_ACTION_VERBS` 加 `purpose_amended`、`card_reviewed`、`item_cited`、`item_edited`;`EVENT_VERBS` 尾部加三词。
+
+**证据**:`docs/audits/2026-11-02-establishment-1-builder/`
+- `new-suite-full.txt`:新套件完整输出,文件头有标记;
+- `full-suite-summary.txt`:全量统计与失败清单;
+- `gates.txt`:两侧 tsc 与各检查的结果;
+- `migration-rehearsal.txt`:迁移在 scratch 库副本上的演练。
+
+**两侧 tsc**:0 / 0(服务端前提仍是 `shared/dist` 已构建)。
+
+**测试清单**:
+- 新套件 `establishment1Foundation.test.ts` 22/22:旧库重建守恒(COUNT、seq、sqlite_sequence、append-only)、新库跳过重建、note-purpose 触发器仍立与 410 墓碑、事务约定、原话逐字、人改落锁与机器 409、锁往返、status 翻转、路由校验与属主、redraft(桩)、锁赢过进行中的起草、成员三类与幂等、评分落账与三件同成同败、item_edited、item_cited 两条建块路与差集、账本读模块。
+- 全量:见 `full-suite-summary.txt`,唯一的红是申报 1。
+
+**改动的既有测试**(都是单内 D6 点名的):
+- `v13EventsLedger.test.ts`:VERBS 副本加三词、夹具加 086 与最小 purposes 表、计数 25→28、标题改 twenty-eight。逐 token 等值闸没动,已通过。
+- `v13ItemFloor.test.ts`:verb 序列在两个 `mounted` 后加两个 `item_edited`(该流程里确实改了一次、退休了一次)。
+
+**申报项**:
+1. **全量 1 红,既有**:agent-eval harness,同保真 1a 段 1 申报 1。
+2. **单面未写明、我定的**:
+   - **item_cited 差集按 `item_id`,不按单内写的成员 `existingIds`。** 按成员 id 差集时,同一 item 换一个成员行 id 再存会被算作新引用,就是灌水。测试有这一条。差集放在路由层,服务不穿 actor。
+   - **内容组四条写路都发射**:POST、PUT `/:id`、PUT `/by-note/:noteId`、POST `/import-note-metadata`。后两条单内没点名,但它们走同一个整册替换,不发射就会漏账。
+   - **item_ref 的两条建块路都发射**:`client_create_key` 路是 UI 实际走的。replay 不重复发射。
+   - **评分 meta 比单内多**:加了 `before`、`scheduled_days`、`next_state`,理由是单内说这条流是重放 FSRS 的唯一原料、别省。
+   - **人改解读时**:若卡上有 `draft_status`,同笔翻成 `ready`。否则人已写定,卡面还会显示 pending/failed。传 `null` 清字段。人不能写 `draft_status`、`drafted_by`、`revision` 这些记账字段。
+   - **sealed 行翻 status 返回 409** `purpose_status_transition_forbidden`。其他字段照常可改。
+   - **redraft 请求本身记一条人墨 `purpose_amended`**(trigger `redraft_requested`),落稿时再记一条 `agent:interpreter`。
+3. **redraft 只是骨架**:默认 drafter `unconnectedPurposeDrafter` 直接抛错,卡翻 `failed`,**代码里不引 provider,所以不可能调到模型**。段 2 换成真接线。现在部署后点 redraft 必然 failed,段 3 前没有 UI 入口。
+4. **服务重启后可能卡在 pending**:redraft 进行中服务重启,卡会留在 `pending`,本段没有恢复逻辑。可以再点一次 redraft 恢复。段 2 接导入起草时要一起考虑。
+5. **`member_count` 与 traces 路由没做**:按单内分段归段 3。`addPurposeMember` 本段只有服务,没有公网路由,单内也没要求。
+6. **迁移演练的射程**:走真实启动流程,在 scratch 库副本上从 085 升到 086,触发器、外键检查、完整性检查都正常(`migration-rehearsal.txt`)。**但那份库 events 是 0 行**,所以有数据时的守恒只由旧库夹具证明(054→081 的真实迁移加最小 companion 表)。没有在岛上数据的副本上演练过。
+7. **`check:test-wiring` 仍红**:新套件未接 curated 脚本,同既有口径,未改 `package.json`。
+8. **未碰**:`toolFace`、`effectClassification`、`fitness` 列、ContentGroupPanel/BoardList;统计页只读 `study_activity_log`,写入形状没变。零模型调用,未读 `.env`,未动依赖。
+
+## Result（段 1 修复轮,builder 2026-11-02）
+
+**执行状态**:2 major + 1 minor 全修,未提交。v13 两闸没动。
+
+**逐条**:
+| 项 | 修法 | 测试 |
+|---|---|---|
+| major 1 · import-note-metadata 灌人墨 | 该路恢复直调 `replaceNoteContentGroups`,搬运照做,不发射。搬运后的行成为差集基线 | `moving legacy metadata records nothing...`:导入零事件,重存零事件,真加新 item 只记那一条 |
+| major 2 · cast 旁门漏账 | `POST /api/items/cast` 走 `runRecordedAction`,发 `item_cited`,meta `{via:'cast'}`,objects 含 item 与 content_group | `casting cites the item once...`:cast 记一条,紧接的组路全量替换(新成员 id)不重复,已被认领的 anchor 再 cast 被拒且不记账 |
+| minor · 图标锁搁浅 pending | `setPurposeLock(true)` 同笔把已有的 `draft_status` 翻 `ready`,与人改落锁一致。卡上没有该键时不写 | 门控 drafter 测试扩成四臂(起草成功/失败 × 人改锁/图标锁);另加无起草时不写状态 |
+
+**cast 触发方核查(墨色依据)**:
+- 服务端:`castItem` 只有 `routes/items.ts` 一个调用方。`toolFace`、`mcp`、`agent` 对 `/items/cast` 零命中。
+- 客户端:`castItemFromAnchors` 只有 `ContentGroupPanel.tsx` 的 `handleCast` 一处,挂在 Cast 按钮上,`created_by`/`claimed_by` 都写 `'human'`。
+- 结论:没有导入或机器流能调到它,所以按人墨发。路由的 `created_by` 字段可由请求方填别的值,但我没拿它定墨色(`recordEvent` 契约禁自报身份),`actor_kind` 由路由盖章。
+
+**证据**(`docs/audits/2026-11-02-establishment-1-builder/`):`fix-new-suite-full.txt`(文件头有标记)、`fix-full-suite-summary.txt`、`fix-gates.txt`。
+
+**闸**:新套件 25/25;服务端全量见 `fix-full-suite-summary.txt`,唯一的红是既有 harness;两侧 tsc 0 / 0(服务端前提同前);secrets 过。
+
+**申报项**:
+1. **同类残口,没修,请你裁定**:`mergeEntityAndLegacyContentGroups`(`contentGroupRepository.ts`)。笔记已有部分 entity 行时不走自动导入,而是把 legacy 组合并进前端状态;用户下一次保存走 `PUT /by-note`,这些 legacy 成员就第一次落库,会被记成今天的人墨 `item_cited`。用户确实按了保存,但引用不是他这次做的。修它要让路由分辨「成员来自 legacy 合并」,比如前端做标记或服务端比对 note metadata,范围超出本轮。触发条件窄:同时有 entity 行和含 item 成员的 legacy metadata。代码读出来的,没有实测复现。
+2. **其他写内容组的路径不发射**:直调 `upsertContentGroup` 的服务内流程(如 organized proposal 应用、Agent 路径)不走这些路由,所以不记 `item_cited`,且写入后成为基线。这符合「三个 verb 全是人门」,但意味着一个机器加的 item 之后被人留在组里,不会再记人墨。
+3. **图标锁翻 `ready` 不区分原值**:`failed` 也翻 `ready`,与人改落锁一致。锁着时 redraft 本来就 409,解锁后卡面显示 `ready` 但解读可能是空的;要重新起草得手动点。
+4. **单内 `by-note` 路的触发方也核过**:`saveContentGroupsForNote` 的调用方是 `useNoteCanvasDataAdapter` 的 `saveContentGroups` 和 `saveGalleryRecord`,都是用户保存动作,不是读触发。
+
+## 段 1 复核判语(Main_Designer,2026-11-02)
+
+**结论:段 1 通过(经一轮修复),收割入仓;段 2 即派。** 首轮对抗复核(10 agents)验真地基全部:迁移 086 守恒(seq 逐行拷贝+sqlite_sequence 高水位恢复+重跑无害)、28 词 verb 表与 schema.sql 逐 token 等值、触发器外科手术精准、rate 焊事务+user_id 旧洞补、append-only 原样;坐实 2 major+1 minor,修复轮全清并经独立核验(核验 agent 亲跑 25/25、v13 两闸 10/10、全量 1218/1217 唯一红=既有 harness)。
+
+**裁定与定案**:
+- **import-note-metadata 零发射**定案:该路是读触发的旧数据搬运,搬运照做、引用零入账,搬运行即差集基线——二性律守住(首轮 major 1);
+- **cast 门人墨入账**定案:route 层 runRecordedAction,objects 形状与组路同构;独立审计确认无机器触达(server 仅 routes/items.ts,client 仅 ContentGroupPanel Cast 按钮;castBoardSticky 归 mounted 已在账不漏)(首轮 major 2);
+- **图标锁同笔结算 draft_status**定案(pending/failed→ready,与人改翻法同构;四臂门控测试);
+- **残口更正(重要)**:builder 修复轮申报 1 所述「混态笔记下次保存灌人墨」**不可达**——mergeEntityAndLegacyContentGroups 名为 merge 实为择一,有 entity 行时 legacy 组整体弃置不进保存载荷;**真残口=混态笔记上未导入的 legacy 组静默不可见、永不迁移**,属既有可见性债(该服务 HEAD 原样),⛔本单修,记 tech-debt;
+- **防复燃记录两件**(不修,记档):①import 路由=零墨全量替换且不验载荷出身于 note.metadata,未来新调用方误用即静默写组+种基线;②迁移后 legacy metadata 键不剥离(stripLegacyContentGroupMetadata 零生产调用方),混态笔记永存——今后若有人恢复「legacy 合并进前端态」,人墨险即重开,动那块前先读本节。
+
+**builder 自决四项终裁**:(a) item_id 差集(优于单面写法)、(b) 四写路全包+by-note 纳入、(c) 人改翻 ready、(d) 评分 meta 增 before/scheduled_days/next_state——全认。
+
+**部署前置(未了)**:迁移 086 虽经夹具与零行真启动演练,部署前在岛库备份副本上实跑一次守恒核对(builder 段 1 申报建议,采)。

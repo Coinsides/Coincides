@@ -3,6 +3,8 @@ import { Router, type Response } from 'express';
 import { ZodError } from 'zod';
 import { getDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
+import { runRecordedAction } from '../middleware/recordedAction.js';
+import { listContentGroupsHoldingItem } from '../services/contentGroups.js';
 import { listItemSummaries } from '../services/itemSummaries.js';
 import {
   castItem,
@@ -65,7 +67,20 @@ export function createItemRouter(database: () => Database.Database = getDb): Rou
   router.post('/cast', (req: AuthRequest, res: Response) => {
     try {
       const data = castItemSchema.parse(req.body);
-      res.status(201).json(castItem(database(), req.userId!, data));
+      // The only caller is a person pressing Cast in the group panel. The member
+      // row is written here, so a later group save already counts it as held.
+      res.status(201).json(runRecordedAction(database(), req, 'POST /api/items/cast', (db, userId) => {
+        const value = castItem(db, userId, data);
+        return {
+          value,
+          events: listContentGroupsHoldingItem(db, userId, value.id).map((groupId) => ({
+            verb: 'item_cited' as const,
+            objects: [{ kind: 'item', id: value.id }, { kind: 'content_group', id: groupId }],
+            summary: 'Cast item into content group',
+            meta: { via: 'cast' },
+          })),
+        };
+      }));
     } catch (err) {
       if (handleValidationError(err, res)) return;
       throw err;
@@ -109,7 +124,16 @@ export function createItemRouter(database: () => Database.Database = getDb): Rou
   router.put('/:itemId', (req: AuthRequest, res: Response) => {
     try {
       const data = updateItemSchema.parse(req.body);
-      res.json(updateItem(database(), req.userId!, String(req.params.itemId), data));
+      const itemId = String(req.params.itemId);
+      res.json(runRecordedAction(database(), req, 'PUT /api/items/:itemId', (db, userId) => ({
+        value: updateItem(db, userId, itemId, data),
+        events: [{
+          verb: 'item_edited' as const,
+          objects: [{ kind: 'item', id: itemId }],
+          summary: 'Edited item',
+          meta: { action: 'update', fields: Object.keys(data) },
+        }],
+      })));
     } catch (err) {
       if (handleValidationError(err, res)) return;
       throw err;
@@ -119,7 +143,16 @@ export function createItemRouter(database: () => Database.Database = getDb): Rou
   router.post('/:itemId/retire', (req: AuthRequest, res: Response) => {
     try {
       const data = retireItemSchema.parse(req.body);
-      res.json(retireItem(database(), req.userId!, String(req.params.itemId), data));
+      const itemId = String(req.params.itemId);
+      res.json(runRecordedAction(database(), req, 'POST /api/items/:itemId/retire', (db, userId) => ({
+        value: retireItem(db, userId, itemId, data),
+        events: [{
+          verb: 'item_edited' as const,
+          objects: [{ kind: 'item', id: itemId }],
+          summary: 'Retired item',
+          meta: { action: 'retire', successor_item_id: data.successor_item_id ?? null },
+        }],
+      })));
     } catch (err) {
       if (handleValidationError(err, res)) return;
       throw err;

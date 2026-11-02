@@ -1,0 +1,5 @@
+# repair round gates
+client tsc errors: 0
+server tsc errors: 0 (shared/dist present: 1)
+check:changed-file-secrets exit=0 :: Changed-file secret scan passed: 39 changed file(s) scanned.
+# v13 test files, diff against HEAD (all from segment 1; the repair round did not edit them):  2 files changed, 7 insertions(+), 3 deletions(-)

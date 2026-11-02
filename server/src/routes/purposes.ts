@@ -5,14 +5,23 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { runRecordedAction } from '../middleware/recordedAction.js';
 import {
+  schedulePurposeDraft,
+  unconnectedPurposeDrafter,
+  type PurposeDrafter,
+} from '../services/purposeDrafting.js';
+import {
+  amendPurpose,
   createPurpose,
   getPurpose,
   getPurposeCompiledScope,
   listNotePurposes,
   listPurposes,
+  markPurposeDraftPending,
   replaceNotePurposes,
+  setPurposeLock,
 } from '../services/purposes.js';
 import {
+  amendPurposeRequestSchema,
   createPurposeRequestSchema,
   listPurposesQuerySchema,
 } from '../validators/purposes.js';
@@ -25,7 +34,10 @@ function handleValidationError(err: unknown, res: Response): boolean {
   return false;
 }
 
-export function createPurposeRouter(databaseProvider: () => Database.Database = getDb): Router {
+export function createPurposeRouter(
+  databaseProvider: () => Database.Database = getDb,
+  drafter: PurposeDrafter = unconnectedPurposeDrafter,
+): Router {
   const router = Router();
 
   router.get('/', (req: AuthRequest, res: Response) => {
@@ -74,6 +86,50 @@ export function createPurposeRouter(databaseProvider: () => Database.Database = 
 
   router.get('/:purposeId/compiled-scope', (req: AuthRequest, res: Response) => {
     res.json(getPurposeCompiledScope(databaseProvider(), req.userId!, String(req.params.purposeId)));
+  });
+
+  router.patch('/:purposeId', (req: AuthRequest, res: Response) => {
+    try {
+      const { summary, interpretation_locked: locked, ...patch } = amendPurposeRequestSchema.parse(req.body);
+      const purposeId = String(req.params.purposeId);
+      const purpose = runRecordedAction(databaseProvider(), req, 'PATCH /api/purposes/:purposeId', (db, userId) => {
+        const amended = amendPurpose(db, userId, purposeId, patch);
+        const lock = locked === undefined ? { purpose: amended.purpose, changed: false } : setPurposeLock(db, userId, purposeId, locked);
+        const fields = amended.changed.filter((field) => field !== 'interpretation_locked');
+        const lockChange = lock.changed || amended.changed.includes('interpretation_locked')
+          ? (lock.purpose.interpretation_locked ? 'locked' : 'unlocked') : null;
+        return {
+          value: lock.purpose,
+          events: fields.length || lockChange ? [{
+            verb: 'purpose_amended' as const,
+            objects: [{ kind: 'purpose', id: purposeId }],
+            summary: summary ?? `Amended purpose: ${lock.purpose.title}`,
+            meta: { fields, lock: lockChange },
+          }] : [],
+        };
+      });
+      res.json({ purpose });
+    } catch (err) {
+      if (handleValidationError(err, res)) return;
+      throw err;
+    }
+  });
+
+  router.post('/:purposeId/redraft', (req: AuthRequest, res: Response) => {
+    const channel = 'POST /api/purposes/:purposeId/redraft';
+    const purposeId = String(req.params.purposeId);
+    const db = databaseProvider();
+    const purpose = runRecordedAction(db, req, channel, (connection, userId) => ({
+      value: markPurposeDraftPending(connection, userId, purposeId),
+      events: [{
+        verb: 'purpose_amended' as const,
+        objects: [{ kind: 'purpose', id: purposeId }],
+        summary: 'Requested a new purpose interpretation draft',
+        meta: { field: 'interpretation', trigger: 'redraft_requested' },
+      }],
+    }));
+    void schedulePurposeDraft(db, req.userId!, purposeId, { drafter, channel, trigger: 'redraft' });
+    res.status(202).json({ purpose });
   });
 
   router.get('/:purposeId', (req: AuthRequest, res: Response) => {

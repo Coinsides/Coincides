@@ -134,7 +134,7 @@ test('13.4 synthetic HTTP Item floor: mount, reopen current body, retire in plac
     assert.equal(missing.x, 25);
     assert.deepEqual(await request('POST', '/api/items/summaries', { item_ids: [item.id] }), []);
     assert.deepEqual((db.prepare('SELECT verb FROM events ORDER BY seq').all() as { verb: string }[])
-      .map((event) => event.verb), ['purpose_created', 'board_created', 'mounted', 'mounted']);
+      .map((event) => event.verb), ['purpose_created', 'board_created', 'mounted', 'mounted', 'item_edited', 'item_edited']);
     console.log('V13_ITEM_FLOOR_PASS db=:memory: mount=PASS reopen_current_body=PASS retire_in_place=PASS missing_in_place=PASS summaries=PASS origin_refs=PASS');
   } finally {
     if (server) await new Promise<void>((resolve, reject) => server!.close((error) => error ? reject(error) : resolve()));

@@ -1,0 +1,29 @@
+# establishment1Foundation.test.ts after the repair round: result lines
+ok 1 - an older database rebuilds the ledger and keeps every row, the sequence and append-only
+ok 2 - a fresh database has all twenty-eight words from schema.sql, and the migration skips the rebuild
+ok 3 - the note-purpose triggers stay, while the roster triggers are gone
+ok 4 - every purpose write requires the caller transaction
+ok 5 - the words a person types are stored byte for byte
+ok 6 - a person editing the interpretation locks it in the same write and the machine is refused
+ok 7 - locking and unlocking are recorded, repeat as no-ops, and unlocking hands the card back
+ok 8 - a person can clear an interpretation field, and their edit settles a waiting draft
+ok 9 - status only flips between active and archived, with nothing else attached
+ok 10 - the amend route validates its body and answers only the owner
+ok 11 - redraft stores the stub draft under the machine name
+ok 12 - redraft is refused on a locked card
+ok 13 - without a connected drafter the card reports failed and nothing else breaks
+ok 14 - a lock placed while a draft is running wins over the draft and over its failure
+ok 15 - locking a card with no draft under way writes no draft status
+ok 16 - members accept the three kinds, repeat without duplicating, and stay within the owner
+ok 17 - rating writes the card, the activity row and one complete ledger entry
+ok 18 - the three rating writes commit or fail together
+ok 19 - rating another user's card changes nothing
+ok 20 - editing and retiring an item are recorded; a refused edit is not
+ok 21 - an item reference block cites its item once, on both creation paths
+ok 22 - saving a group cites only items new to it
+ok 23 - moving legacy metadata records nothing, and later real edits cite against it
+ok 24 - casting cites the item once, and the group save that follows does not repeat it
+ok 25 - the ledger reader matches objects, filters, pages and stays within the owner
+# tests 25
+# pass 25
+# fail 0

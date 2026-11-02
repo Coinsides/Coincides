@@ -1281,7 +1281,8 @@ CREATE TABLE IF NOT EXISTS events (
     'time_block_updated', 'time_block_deleted', 'task_cards_linked', 'task_completed',
     'mounted', 'unmounted', 'purpose_created', 'purpose_amended',
     'purpose_sealed', 'proposal_issued', 'proposal_approved',
-    'proposal_rejected', 'published'
+    'proposal_rejected', 'published', 'claim_without_receipt', 'board_changed',
+    'card_reviewed', 'item_cited', 'item_edited'
   )),
   objects TEXT NOT NULL CHECK (json_valid(objects) AND json_type(objects) = 'array'),
   summary TEXT NOT NULL,

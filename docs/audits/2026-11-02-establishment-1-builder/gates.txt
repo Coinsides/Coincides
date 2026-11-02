@@ -1,0 +1,10 @@
+# gates
+client tsc errors: 0
+server tsc errors: 0 (shared/dist present: 1)
+check:changed-file-secrets exit=0 :: Changed-file secret scan passed: 34 changed file(s) scanned.
+check:source-experience exit=0 :: Source experience model contract check passed.
+check:server-shared-runtime-import exit=0 :: [PASS] server shared runtime-import gate: 0 violations across 324 product source file(s); 37 import-type share
+check:owned-helper-contract exit=0 :: [PASS] owned-helper contract: 7 getOwned* / 1 findOwned*, including unexported helpers, across 1339 first-part
+check:tool-face-parity exit=0 :: [PASS] tool-face necessary-condition gate: 14 public entries checked; human reachability NOT VERIFIED; journey
+check:tool-face-manifest exit=0 :: tool-face manifest 未过期：37 条条目，其中 14 条 public。
+check:agent-knowledge exit=0 :: [PASS] Agent 知识事实无漂移: 6db84dc9324b4794ee877217de0025bb4ff4b8171848be435fe60695340572ea; 说明�

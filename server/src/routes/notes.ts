@@ -9,6 +9,7 @@ import { reorderNoteTraySchema } from '../validators/trayOrder.js';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { runRecordedAction, type RecordedActionEvent } from '../middleware/recordedAction.js';
 import {
   createNoteBlockSchema,
   createNoteSchema,
@@ -231,6 +232,18 @@ router.get('/:id/blocks', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/notes/:id/blocks
+function itemRefCitation(data: { block_type?: string; content_json?: unknown }, noteId: string, blockId: string): RecordedActionEvent[] {
+  if (data.block_type !== 'item_ref') return [];
+  const itemId = (data.content_json as { item_id?: unknown } | undefined)?.item_id;
+  if (typeof itemId !== 'string') return [];
+  return [{
+    verb: 'item_cited',
+    objects: [{ kind: 'item', id: itemId }, { kind: 'note', id: noteId }, { kind: 'note_block', id: blockId }],
+    summary: 'Referenced item in note',
+    meta: { via: 'item_ref' },
+  }];
+}
+
 router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
@@ -239,9 +252,17 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
     const data = createNoteBlockSchema.parse(req.body);
     const db = getDb();
     if (data.client_create_key) {
-      const result = createClientNoteBlock(db, req.userId!, noteId, note.course_id, {
-        ...data,
-        client_create_key: data.client_create_key,
+      const clientCreateKey = data.client_create_key;
+      const result = runRecordedAction(db, req, 'POST /api/notes/:id/blocks', (connection, userId) => {
+        const value = createClientNoteBlock(connection, userId, noteId, note.course_id, {
+          ...data,
+          client_create_key: clientCreateKey,
+        });
+        return {
+          value,
+          // A replayed client key returns the earlier block: nothing new was cited.
+          events: value.status !== 'canceled' && value.created ? itemRefCitation(data, noteId, String(value.block.id)) : [],
+        };
       });
       if (result.status === 'canceled') {
         res.status(409).json({
@@ -273,7 +294,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
       'SELECT COALESCE(MAX(order_index), -1) + 1 AS next_order FROM note_block_placements WHERE note_id = ?'
     ).get(note.id) as { next_order: number }).next_order;
 
-    db.transaction(() => {
+    runRecordedAction(db, req, 'POST /api/notes/:id/blocks', () => {
       db.prepare(`
         INSERT INTO note_blocks (
           id, user_id, course_id, block_type, title, content_json, plain_text,
@@ -334,7 +355,8 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
           stringifyJson(ref.metadata, {})
         );
       }
-    })();
+      return { value: undefined, events: itemRefCitation(data, noteId, id) };
+    });
 
     const created = db.prepare(`
       SELECT nbp.id AS placement_id, nbp.order_index, nbp.display_overrides_json, nb.*

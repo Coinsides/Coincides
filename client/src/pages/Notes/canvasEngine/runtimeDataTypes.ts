@@ -377,7 +377,7 @@ export interface RelationAssessmentV1 {
 
 export type PurposeStatus = 'active' | 'sealed' | 'archived';
 export type PurposeCreatedBy = 'human' | 'ai' | 'system' | 'ai_proposal' | 'importer';
-export type PurposeMemberKind = 'content_group' | 'item';
+export type PurposeMemberKind = 'content_group' | 'item' | 'source';
 
 export interface PurposeMemberV1 {
   id: string;

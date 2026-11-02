@@ -436,6 +436,31 @@ export function getContentGroup(db: Database.Database, userId: string, groupId: 
   );
 }
 
+/** Item members of these groups that still resolve to an Item this user owns. */
+export function listContentGroupItemIds(db: Database.Database, userId: string, groupIds: readonly string[]) {
+  const held = new Map<string, Set<string>>();
+  if (!groupIds.length) return held;
+  const rows = db.prepare(`
+    SELECT m.content_group_id, m.item_id
+    FROM content_group_members m
+    JOIN items i ON i.id = m.item_id AND i.user_id = m.user_id
+    WHERE m.user_id = ? AND m.kind = 'item'
+      AND m.content_group_id IN (${groupIds.map(() => '?').join(', ')})
+  `).all(userId, ...groupIds) as Array<{ content_group_id: string; item_id: string }>;
+  for (const row of rows) {
+    if (!held.has(row.content_group_id)) held.set(row.content_group_id, new Set());
+    held.get(row.content_group_id)!.add(row.item_id);
+  }
+  return held;
+}
+
+export function listContentGroupsHoldingItem(db: Database.Database, userId: string, itemId: string): string[] {
+  return (db.prepare(`
+    SELECT DISTINCT content_group_id FROM content_group_members
+    WHERE user_id = ? AND kind = 'item' AND item_id = ?
+  `).all(userId, itemId) as Array<{ content_group_id: string }>).map((row) => row.content_group_id);
+}
+
 export function upsertContentGroup(db: Database.Database, userId: string, input: Record<string, any>) {
   const note = optionalText(input.note_id) ? ensureNote(db, userId, String(input.note_id)) : undefined;
   const values = contentGroupDbValues(userId, input, note);

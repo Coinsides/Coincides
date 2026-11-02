@@ -1,0 +1,6 @@
+# migration 086 through real startup on a copy of the scratch database
+before {"head":"085_v2_source_pages","events":{"n":0,"max":0,"bytes":0},"sequence":0,"purposes":0,"members":0,"triggers":["events_no_delete","events_no_update","purpose_members_writer_retired_insert","purpose_members_writer_retired_update","purposes_note_writer_retired_insert","purposes_note_writer_retired_update"]}
+  ✅ 086_v2_purpose_card_ink_verbs: Add purpose card layers and lock, reopen purpose membership, and record human ink verbs
+after {"head":"086_v2_purpose_card_ink_verbs","events":{"n":0,"max":0,"bytes":0},"sequence":0,"purposes":0,"members":0,"triggers":["events_no_delete","events_no_update","purposes_note_writer_retired_insert","purposes_note_writer_retired_update"]}
+purpose defaults {"n":0,"empty_json":null,"unlocked":null}
+fk check 0 integrity ok
