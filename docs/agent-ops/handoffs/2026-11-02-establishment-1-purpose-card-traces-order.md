@@ -1,6 +1,6 @@
 > **from**: claude(Main_Designer)
 > **to**: 临时工程对话1(builder)
-> **status**: ready(《知识建制更新 plan》已翻牌射程内直开;单 builder 串行,**排保真 1a 之后开工**;含一条已申报范围收缩候 Henry 认——见 §二 D5 第 6 点)
+> **status**: ready(《知识建制更新 plan》已翻牌射程内直开;单 builder 串行,**排保真 1a 之后开工**;§二 D5 第 6 点申报的范围收缩 Henry 2026-11-02 已认,无未决项)
 > **单号**: 建制Ⅰ · purpose 卡补层 + 导入事由捕获 + 痕迹开读与补墨
 > **上游**: 《知识建制更新 plan》§三缺口 1+3、§四分期表(Henry 2026-11-02 翻牌:①教义铸宪②分期认③锁=UX 图标点选、机理从便、必要用布尔④普查暂落项目页);教义正文见方向宪章增补节;11-02 五路设计侦察(引证散落文内)
 
@@ -66,7 +66,7 @@ services/purposes.ts 新增,全部要求 db.inTransaction(与 createPurpose 同�
    c. **同批合并窗**:若该 course 最近一张 created_by='importer' **且 status='active'** 的卡 created_at 距今 <10 分钟,领册到它、不开新卡(多文件连传不刷屏;刚被 archived 收纳的卡**不吸新件**;窗口大小 builder 可调,回执申报)。zip 展开是对每个条目递归 intakeSourceTempFile(sourceFileIntake.ts:874-907),没有天然的批量钩子——「一包一卡」就靠本合并窗兜住,capture 按单条 source_record 调用;
 4. 授权锚:capturePurposeForIntake **自己的事务**内 recordEvent(purpose_created,actor_kind='human'——**导入是用户亲手动作**,卡由它派生;channel=真实入口路由字面量**由路由层传入**,遵守 recordEvent.ts:60-70「不得自报身份」契约;meta `{via:'intake', source_record_id}`);
 5. **解读层异步起草**:capture 事务提交后 setImmediate(照物化链模式,sourceMaterialization.ts:517-543)调 provider 起一份解读草稿(getProviderFromSettings → AIProvider.chat,providers/index.ts:33-73;无会话依赖,侦察已核);写回走 revisePurposeInterpretation(actor='agent:interpreter'——actor_kind 的 `agent:${string}` 命名空间已预留未用,recordEvent.ts:34;发 purpose_amended 事件,meta `{field:'interpretation', trigger:'intake_draft'}`);失败翻 draft_status='failed',卡面给「重新起草」。⛔起草失败阻塞导入——文件照进,卡照立,解读候补;
-6. **申报的范围收缩(候 Henry 认)**:plan 缺口 1 写的「事件驱动修正(痕迹到账=判断窗口)」本期**降格**为「导入起草一次 + 卡上手动重起草」——按痕迹逐条触发模型调用 = 判断密度与成本失配;真正的事件驱动判断窗口候建制Ⅱ痕迹读面成熟后(普查联查给出「解读 vs 痕迹漂移」的廉价信号)再接。此为对已翻牌 plan 的显式偏离,遵「先报墙」家法记档,已随呈报升 Henry。
+6. **申报的范围收缩(Henry 2026-11-02 已认)**:plan 缺口 1 写的「事件驱动修正(痕迹到账=判断窗口)」本期**降格**为「导入起草一次 + 卡上手动重起草」——按痕迹逐条触发模型调用 = 判断密度与成本失配;真正的事件驱动判断窗口候建制Ⅱ痕迹读面成熟后(普查联查给出「解读 vs 痕迹漂移」的廉价信号)再接。此为对已翻牌 plan 的显式偏离,遵「先报墙」家法记档升 Henry,其答「认」(讲解含三理由:痕迹高频成本失配/普查面未立判断材料薄/二性律锁面压缩有效射程)。
 
 ### D6 · 人墨 verb 窄幅增补(三个,各有五消费者里的买主)+ 评分落账
 
