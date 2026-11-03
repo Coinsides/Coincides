@@ -1,5 +1,7 @@
 {
   "sources": {
+    "conversionIncomplete": "Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original.",
+    "conversionBadge": "Incomplete conversion",
     "reprojection": {
       "action": "Rebuild projection",
       "title": "Rebuild projection: {{name}}",
@@ -39,15 +41,16 @@
     "statistics": "Statistics",
     "settings": "Settings"
   },
+  "projectNotes": {
+    "sourceToggle": "Source projections ({{n}})",
+    "sourceType": "Source"
+  },
   "sidebar": {
     "courses": "Courses",
     "projects": "Projects",
-    "favorites": "Favorites",
     "recent": "Recent",
     "noCourses": "No courses yet",
-    "noProjects": "No projects yet",
-    "noFavorites": "No favorites yet",
-    "noRecent": "No recent projects yet"
+    "noProjects": "No projects yet"
   },
   "common": {
     "save": "Save",

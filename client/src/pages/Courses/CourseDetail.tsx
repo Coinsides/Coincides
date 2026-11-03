@@ -1,5 +1,7 @@
 ﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useRecordLoadedProject } from '@/components/Layout/recentProjects';
 import {
   ArrowLeft, Edit2, Trash2, Plus, Target, Layers, FileText,
   CheckCircle2, Circle, Pause, RotateCcw, BookOpen, Sparkles, MapIcon, GitBranch,
@@ -117,6 +119,7 @@ interface SourceBoardDetail {
 
 interface NoteSummary {
   metadata?: unknown;
+  note_class?: string;
   id: string;
   title: string;
   description: string | null;
@@ -175,7 +178,16 @@ export function ProjectNotesSection({
   refreshCovers = refreshNotes,
   addToast,
 }: ProjectNotesSectionProps) {
+  const { t } = useTranslation();
   const [busyNoteId, setBusyNoteId] = useState<string | null>(null);
+  const [showProjections, setShowProjections] = useState(false);
+  // The trash view stays unsplit: projections never get there.
+  const projectionCount = status === 'active'
+    ? notes.filter((note) => note.note_class === 'source_projection').length
+    : 0;
+  const visibleNotes = status === 'trashed' ? notes : notes.filter((note) => (
+    note.note_class === 'source_projection' ? showProjections : (note.note_class ?? 'user') === 'user'
+  ));
 
   const runNoteAction = async (noteId: string) => {
     setBusyNoteId(noteId);
@@ -193,9 +205,19 @@ export function ProjectNotesSection({
         <div className={styles.sectionTitle}>
           <BookOpen size={18} />
           <span>Notes</span>
-          <span className={styles.sectionCount}>{notes.length}</span>
+          <span className={styles.sectionCount}>{visibleNotes.length}</span>
         </div>
         <div className={styles.workspaceActions}>
+          {projectionCount > 0 && (
+            <button
+              type="button"
+              className={`${styles.noteStatusButton} ${showProjections ? styles.noteStatusButtonActive : ''}`}
+              aria-pressed={showProjections}
+              onClick={() => setShowProjections((shown) => !shown)}
+            >
+              {t('projectNotes.sourceToggle', { n: projectionCount })}
+            </button>
+          )}
           <div className={styles.noteStatusToggle} role="group" aria-label="Note status">
             <button
               type="button"
@@ -221,11 +243,11 @@ export function ProjectNotesSection({
         </div>
       </div>
 
-      {notes.length === 0 ? (
+      {visibleNotes.length === 0 ? (
         <div className={styles.empty}>{status === 'trashed' ? 'Trash is empty.' : 'No notes yet.'}</div>
       ) : (
         <div className={styles.workspaceGrid}>
-          {notes.map((note) => <ProjectNoteCard key={note.id} note={note} status={status}
+          {visibleNotes.map((note) => <ProjectNoteCard key={note.id} note={note} status={status}
             busy={busyNoteId === note.id} onOpen={() => onOpenNote(note.id)}
             onLifecycle={() => void runNoteAction(note.id)} onCoverSaved={refreshCovers} addToast={addToast} />)}
         </div>
@@ -415,6 +437,7 @@ export default function CourseDetailPage() {
   const [proposalBusy, setProposalBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  useRecordLoadedProject(courseId, data?.course.id);
 
   const fetchSummary = useCallback(async () => {
     if (!courseId) return;

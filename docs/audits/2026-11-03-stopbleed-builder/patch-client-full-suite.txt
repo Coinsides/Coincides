@@ -1,0 +1,20 @@
+ARM: working tree after patch P1-P3, full client suite
+ Test Files  1 failed | 249 passed (250)
+      Tests  1 failed | 2572 passed (2573)
+--- every red entry, verbatim
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx > A1 one plan across writing, print and Overview > keeps hidden auto text and a manual box on their complete export pages after folding a chapter
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx:89:3
+     87|   });
+     88| 
+     89|   it('keeps hidden auto text and a manual box on their complete export…
+       |   ^
+     90|     const data = seed();
+     91|     const headingFlow = createTextBlockContentV1('宋代地方社会');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+

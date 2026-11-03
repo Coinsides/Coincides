@@ -11,7 +11,6 @@ import {
   NotebookText,
   LibraryBig,
   CalendarDays,
-  Star,
   Clock3,
   Boxes,
   ListChecks,
@@ -23,6 +22,7 @@ import { useCourseStore } from '@/stores/courseStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useAuthStore } from '@/stores/authStore';
 import Onboarding from '@/components/Onboarding/Onboarding';
+import { useRecentProjectIds } from './recentProjects';
 import styles from './AppLayout.module.css';
 import { DocumentTabs } from './DocumentTabs';
 import { AgentUiBridge } from './AgentUiBridge';
@@ -60,8 +60,8 @@ export default function AppLayout() {
   const toggleAgentPanel = useUIStore((s) => s.toggleAgentPanel);
   const toggleShortcutsPanel = useUIStore((s) => s.toggleShortcutsPanel);
   const { t, i18n } = useTranslation();
-  const favoriteProjects = courses.slice(0, 3);
-  const recentProjects = [...courses].slice(-4).reverse();
+  const recentProjectIds = useRecentProjectIds();
+  const recentProjects = recentProjectIds.flatMap((id) => courses.find((course) => course.id === id) ?? []);
   const contentGroupWorkspace = location.pathname.startsWith('/group-gallery');
   const boardId = location.pathname.match(/^\/boards\/([^/]+)\/?$/)?.[1] ?? null;
   const boardWorkspace = boardId !== null;
@@ -200,42 +200,23 @@ export default function AppLayout() {
                 <div className={styles.emptyHint}>{t('sidebar.noProjects')}</div>
               )}
 
-              <div className={styles.sectionLabel}>
-                <span>{t('sidebar.favorites')}</span>
-                <Star size={13} />
-              </div>
-              {favoriteProjects.length === 0 ? (
-                <div className={styles.emptyHint}>{t('sidebar.noFavorites')}</div>
-              ) : (
-                favoriteProjects.map((project) => (
-                  <button
-                    key={`favorite-${project.id}`}
-                    className={styles.utilityItem}
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                  >
-                    <Star size={13} />
-                    <span>{project.name}</span>
-                  </button>
-                ))
-              )}
-
-              <div className={styles.sectionLabel}>
-                <span>{t('sidebar.recent')}</span>
-                <Clock3 size={13} />
-              </div>
-              {recentProjects.length === 0 ? (
-                <div className={styles.emptyHint}>{t('sidebar.noRecent')}</div>
-              ) : (
-                recentProjects.map((project) => (
-                  <button
-                    key={`recent-${project.id}`}
-                    className={styles.utilityItem}
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                  >
+              {recentProjects.length > 0 && (
+                <>
+                  <div className={styles.sectionLabel}>
+                    <span>{t('sidebar.recent')}</span>
                     <Clock3 size={13} />
-                    <span>{project.name}</span>
-                  </button>
-                ))
+                  </div>
+                  {recentProjects.map((project) => (
+                    <button
+                      key={`recent-${project.id}`}
+                      className={styles.utilityItem}
+                      onClick={() => navigate(`/projects/${project.id}`)}
+                    >
+                      <Clock3 size={13} />
+                      <span>{project.name}</span>
+                    </button>
+                  ))}
+                </>
               )}
             </>
           )}

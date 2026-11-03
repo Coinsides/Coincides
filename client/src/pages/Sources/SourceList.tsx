@@ -81,6 +81,11 @@ export function SourceList({
                 <small>
                   {source.file.format.toUpperCase()} · {formatSourceBytes(source.file.byte_size)} · {formatDate(source.file.uploaded_at)}
                 </small>
+                {source.materialization.has_parser_messages && (
+                  <span className={styles.conversionBadge} title={t('sources.conversionIncomplete')}>
+                    {t('sources.conversionBadge')}
+                  </span>
+                )}
               </span>
             </button>
             <span className={`${styles.statusBadge} ${styles[`status_${state}`]}`}>

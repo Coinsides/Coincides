@@ -599,21 +599,51 @@ export function sweepSourceMaterializations(
   };
 }
 
+const RECEIVED_MATERIALIZATIONS_SQL = `
+  SELECT sm.source_record_id, sm.user_id
+  FROM source_materializations sm
+  JOIN source_files sf ON sf.id = sm.source_file_id AND sf.user_id = sm.user_id
+  WHERE sm.status = 'received'
+    AND sf.storage_state = 'ready'
+    AND sm.parser_key != 'stored-only'
+`;
+
+function scheduleReceivedRows(
+  db: Database.Database,
+  rows: Array<{ source_record_id: string; user_id: string }>,
+  options: SourceMaterializationOptions,
+): number {
+  for (const row of rows) {
+    scheduleSourceMaterialization(db, row.user_id, row.source_record_id, options);
+  }
+  return rows.length;
+}
+
 export function resumeReceivedSourceMaterializations(
   db: Database.Database,
   options: SourceMaterializationOptions = {},
 ): number {
   const rows = db.prepare(`
-    SELECT sm.source_record_id, sm.user_id
-    FROM source_materializations sm
-    JOIN source_files sf ON sf.id = sm.source_file_id AND sf.user_id = sm.user_id
-    WHERE sm.status = 'received'
-      AND sf.storage_state = 'ready'
-      AND sm.parser_key != 'stored-only'
+    ${RECEIVED_MATERIALIZATIONS_SQL}
     ORDER BY sm.created_at ASC, sm.id ASC
   `).all() as Array<{ source_record_id: string; user_id: string }>;
-  for (const row of rows) {
-    scheduleSourceMaterialization(db, row.user_id, row.source_record_id, options);
-  }
-  return rows.length;
+  return scheduleReceivedRows(db, rows, options);
+}
+
+// A zip's entries are never uploaded by the client, so nothing else would start them
+// on a running server. Only 'received' rows qualify: an entry that deduplicated onto a
+// materialized or failed Source stays as it is, and a failed one keeps its manual retry.
+export function scheduleReceivedSourceMaterializationsFor(
+  db: Database.Database,
+  userId: string,
+  sourceRecordIds: string[],
+  options: SourceMaterializationOptions = {},
+): number {
+  const rows = db.prepare(`
+    ${RECEIVED_MATERIALIZATIONS_SQL}
+      AND sm.user_id = ?
+      AND sm.source_record_id IN (SELECT value FROM json_each(?))
+    ORDER BY sm.created_at ASC, sm.id ASC
+  `).all(userId, JSON.stringify(sourceRecordIds)) as Array<{ source_record_id: string; user_id: string }>;
+  return scheduleReceivedRows(db, rows, options);
 }

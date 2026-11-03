@@ -1,5 +1,7 @@
 {
   "sources": {
+    "conversionIncomplete": "本件有内容未能完整转换(含公式/嵌入对象),请以原件为准",
+    "conversionBadge": "未完整转换",
     "reprojection": {
       "action": "重新投影",
       "title": "重新投影：{{name}}",
@@ -39,15 +41,16 @@
     "statistics": "统计",
     "settings": "设置"
   },
+  "projectNotes": {
+    "sourceToggle": "源件投影 ({{n}})",
+    "sourceType": "源件投影"
+  },
   "sidebar": {
     "courses": "课程",
     "projects": "项目",
-    "favorites": "收藏",
     "recent": "最近",
     "noCourses": "暂无课程",
-    "noProjects": "暂无项目",
-    "noFavorites": "暂无收藏",
-    "noRecent": "暂无最近项目"
+    "noProjects": "暂无项目"
   },
   "common": {
     "save": "保存",

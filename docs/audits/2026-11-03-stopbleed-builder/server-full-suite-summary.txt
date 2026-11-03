@@ -1,0 +1,14 @@
+ARM: working tree, full server suite, npm_execpath set, explicit file list (no server/dist)
+# tests 1252
+# pass 1250
+# fail 2
+# cancelled 0
+# skipped 0
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+not ok 1066 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+70600-  failureType: 'testCodeFailure'
+70601-  error: |-
+70602-    native text completed while MinerU still held its slot
+70603-    
+70604-    0 !== 1
+--- K-4 file rerun alone, three times after that: all ok, peak=1

@@ -80,6 +80,28 @@ async function openDeleteDialog() {
   return screen.findByRole('alertdialog');
 }
 
+describe('ProjectSourcesPanel conversion badge', () => {
+  const materialized = (flag: boolean): SourceRecordDetail => {
+    const base = failedSource();
+    return { ...base, materialization: {
+      ...base.materialization, status: 'materialized', projection_note_id: 'synthetic-note',
+      projection_available: true, has_parser_messages: flag, error_code: null, error_message: null, retryable: false,
+    } };
+  };
+  const renderPanel = (source: SourceRecordDetail) => {
+    mocks.sources = [source];
+    return render(<ProjectSourcesPanel projectId="project-1" />);
+  };
+
+  it('shows only when the projection recorded parser messages', () => {
+    const { container, unmount } = renderPanel(materialized(true));
+    expect(container.querySelector('[class*="conversionBadge"]')).toBeTruthy();
+    unmount();
+    const clean = renderPanel(materialized(false));
+    expect(clean.container.querySelector('[class*="conversionBadge"]')).toBeNull();
+  });
+});
+
 describe('ProjectSourcesPanel deletion', () => {
   it('deletes a failed Source from the Project view and refreshes both lists', async () => {
     mocks.get.mockResolvedValue({ data: impact() });

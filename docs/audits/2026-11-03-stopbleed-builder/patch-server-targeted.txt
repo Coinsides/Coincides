@@ -1,0 +1,19 @@
+ARM: working tree, patch round, new suite + MinerU wiring file
+ok 1 - zip entries materialize on a running process, with no restart and no client call
+ok 2 - a nested zip is stored, never expanded, and its stored-only row does not break the batch
+ok 3 - entries that deduplicate onto a settled Source are skipped: materialized and failed alike
+ok 4 - a docx with swallowed formulas records the messages and the detail reports them
+ok 5 - plain docx and text carry no key at all and report nothing
+ok 6 - an older docx projection gains the record through one rebuild, and a lost projection reports nothing
+ok 7 - native parsing holds three slots, queues in order, and a failure gives its slot back
+ok 8 - MinerU stays at one slot of its own and native parsing never waits for it
+ok 9 - a batch of materializations through the real path parses at most three at a time and all finish
+ok 10 - K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+ok 11 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+# [mineru-wiring] K-4 MinerU peak=1, completed=3, final=0
+ok 12 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+ok 13 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+ok 14 - K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+# tests 14
+# pass 14
+# fail 0

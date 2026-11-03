@@ -14,7 +14,10 @@ import {
   precheckSourceHash,
   type SourceOriginEntryKind,
 } from '../services/sourceFileIntake.js';
-import { scheduleSourceMaterialization } from '../services/sourceMaterialization.js';
+import {
+  scheduleReceivedSourceMaterializationsFor,
+  scheduleSourceMaterialization,
+} from '../services/sourceMaterialization.js';
 import { previewSourceReprojection, rematerializeSource } from '../services/sourceReprojection.js';
 import {
   deleteSourceWithCompensation,
@@ -94,7 +97,16 @@ router.post(
         origin_entry_kind: target.origin_entry_kind as SourceOriginEntryKind,
         file: req.file,
         file_mtime: typeof req.body.file_mtime === 'string' ? req.body.file_mtime : null,
-      }, { purposeCapture: { channel: 'POST /api/sources/upload' } });
+      }, {
+        purposeCapture: { channel: 'POST /api/sources/upload' },
+        onContainerExpansion: (report) => {
+          scheduleReceivedSourceMaterializationsFor(
+            getDb(),
+            req.userId!,
+            report.entries.flatMap((entry) => entry.source_record_id ?? []),
+          );
+        },
+      });
       res.status(result.created ? 201 : 200).json(result);
     } catch (error) {
       if (req.file?.path) {

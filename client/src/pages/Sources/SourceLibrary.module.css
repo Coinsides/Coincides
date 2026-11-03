@@ -283,6 +283,28 @@
   font-size: 11px;
 }
 
+.conversionBadge {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, #c9973f 45%, var(--glass-border));
+  border-radius: 4px;
+  background: color-mix(in srgb, #c9973f 10%, transparent);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.conversionNotice {
+  margin-top: 12px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, #c9973f 45%, var(--glass-border));
+  border-radius: 6px;
+  background: color-mix(in srgb, #c9973f 10%, transparent);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
 .statusBadge {
   display: inline-flex;
   align-items: center;

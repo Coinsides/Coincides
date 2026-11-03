@@ -61,6 +61,7 @@ export interface SourceRecordDetail {
     attempt_count: number;
     projection_note_id: string | null;
     projection_available: boolean;
+    has_parser_messages?: boolean;
     error_code: string | null;
     error_message: string | null;
     retryable: boolean;

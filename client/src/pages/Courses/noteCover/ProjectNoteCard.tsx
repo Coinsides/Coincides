@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FileText, RotateCcw, Trash2 } from 'lucide-react';
+import { FileInput, FileText, RotateCcw, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { NOTE_CARD_COVER_ASPECT_RATIO, readNoteCover, type NoteCover, type NoteCoverFrame } from '@shared/types';
 import { loadCanvasImageAssetBlobUrl, uploadCanvasImageAsset } from '../../Notes/canvasEngine/canvasAssetRepository';
 import { NoteCoverEditor } from './NoteCoverEditor';
@@ -14,6 +15,7 @@ export interface ProjectNoteSummary {
   description: string | null;
   updated_at: string;
   metadata?: unknown;
+  note_class?: string;
 }
 
 function useCoverBlob(assetId: string | undefined) {
@@ -90,6 +92,8 @@ export function ProjectNoteCard({ note, status, busy, onOpen, onLifecycle, onCov
   onCoverSaved: () => Promise<void>;
   addToast: (type: 'success' | 'error', message: string) => void;
 }) {
+  const { t } = useTranslation();
+  const sourceProjection = note.note_class === 'source_projection';
   const [cover, setCover] = useState(() => readNoteCover(note.metadata));
   const [modal, setModal] = useState<'upload' | 'crop' | null>(null);
   const [draft, setDraft] = useState<{ assetId: string; frame?: NoteCoverFrame; url?: string } | null>(null);
@@ -162,9 +166,11 @@ export function ProjectNoteCard({ note, status, busy, onOpen, onLifecycle, onCov
     } finally { inFlight.current = false; if (alive.current) setSaving(false); }
   }
   const body = <>
-    <div className={cardStyles.workspaceCardIcon}><FileText size={17} /></div>
+    <div className={cardStyles.workspaceCardIcon}>{sourceProjection ? <FileInput size={17} /> : <FileText size={17} />}</div>
     <div className={cardStyles.workspaceCardBody}>
-      <div className={cardStyles.workspaceCardType}>Note</div>
+      {sourceProjection
+        ? <div className={`${cardStyles.workspaceCardType} ${styles.sourceType}`} data-note-source-badge>{t('projectNotes.sourceType')}</div>
+        : <div className={cardStyles.workspaceCardType}>Note</div>}
       <div className={cardStyles.workspaceCardTitle}>{note.title}</div>
       {note.description && <div className={cardStyles.workspaceCardDesc}>{note.description}</div>}
       <div className={cardStyles.workspaceCardMeta}><span>Updated {new Date(note.updated_at).toLocaleDateString()}</span></div>
@@ -186,10 +192,10 @@ export function ProjectNoteCard({ note, status, busy, onOpen, onLifecycle, onCov
         <div className={styles.content}>{body}</div>
       </> : body}
     </button>
-    <button type="button" className={`${cardStyles.iconBtn} ${cardStyles.workspaceCardAction} ${styles.lifecycle} ${status === 'active' ? cardStyles.workspaceCardDangerAction : ''}`}
+    {!sourceProjection && <button type="button" className={`${cardStyles.iconBtn} ${cardStyles.workspaceCardAction} ${styles.lifecycle} ${status === 'active' ? cardStyles.workspaceCardDangerAction : ''}`}
       aria-label={actionLabel} title={actionLabel} disabled={busy || saving} onClick={onLifecycle}>
       {status === 'trashed' ? <RotateCcw size={13} /> : <Trash2 size={13} />}
-    </button>
+    </button>}
     {status === 'active' && <div className={`${styles.toolbar} ${!cover ? styles.withoutCoverToolbar : ''}`} role="group" aria-label={`封面操作：${note.title}`}>
       {cover && <button type="button" className={styles.tool} disabled={saving} onClick={(e) => open('crop', e.currentTarget)}>重新取景</button>}
       <button type="button" className={styles.tool} disabled={saving} onClick={(e) => open('upload', e.currentTarget)}>{cover ? '更换封面' : '添加封面'}</button>

@@ -1,0 +1,8 @@
+ARM: working tree, full client suite
+      Tests  2 failed | 2570 passed (2572)
+     → Test timed out in 5000ms.
+ FAIL  src/pages/Boards/BoardPage.smoke.test.tsx > V13 S2 board and paper smoke > opens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper
+ FAIL  src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx > A1 one plan across writing, print and Overview > keeps hidden auto text and a manual box on their complete export pages after
+ Test Files  2 failed | 248 passed (250)
+Error: Test timed out in 5000ms.
+--- the two failed files rerun alone: 2 files, 18 tests, all pass

@@ -1,0 +1,17 @@
+ARM: scratch copy with the native cap lifted; test file unchanged
+ok 1 - zip entries materialize on a running process, with no restart and no client call
+ok 2 - a nested zip is stored, never expanded, and its stored-only row does not break the batch
+ok 3 - entries that deduplicate onto a settled Source are skipped: materialized and failed alike
+ok 4 - a docx with swallowed formulas records the messages and the detail reports them
+ok 5 - plain docx and text carry no key at all and report nothing
+ok 6 - an older docx projection gains the record through one rebuild, and a lost projection reports nothing
+not ok 7 - native parsing holds three slots, queues in order, and a failure gives its slot back
+  expected:
+  actual:
+ok 8 - MinerU stays at one slot of its own and native parsing never waits for it
+not ok 9 - a batch of materializations through the real path parses at most three at a time and all finish
+  expected: 3
+  actual: 7
+# tests 9
+# pass 7
+# fail 2

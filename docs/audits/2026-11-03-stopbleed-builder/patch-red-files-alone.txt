@@ -1,0 +1,361 @@
+ARM: each file red in the patch-round full run, run alone on the working tree. Output verbatim except migration progress lines ('Running N pending', per-migration tick, 'Migrations complete'), removed for size.
+
+=== server scripts/agent-eval/harness.test.ts
+TAP version 13
+# Subtest: scenario discovery sees the six shipped files and registers an added file without an index edit
+ok 1 - scenario discovery sees the six shipped files and registers an added file without an index edit
+  ---
+  duration_ms: 574.5532
+  type: 'test'
+  ...
+# Subtest: malformed scenario modules are rejected before execution
+ok 2 - malformed scenario modules are rejected before execution
+  ---
+  duration_ms: 42.8053
+  type: 'test'
+  ...
+# Subtest: explicit scripted-only fixture scenarios permit zero provider turns
+ok 3 - explicit scripted-only fixture scenarios permit zero provider turns
+  ---
+  duration_ms: 8.0468
+  type: 'test'
+  ...
+# Subtest: CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios
+ok 4 - CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios
+  ---
+  duration_ms: 0.6694
+  type: 'test'
+  ...
+# Subtest: live dry-run and list never spawn a worker, fetch, or read the machine credential store
+ok 5 - live dry-run and list never spawn a worker, fetch, or read the machine credential store
+  ---
+  duration_ms: 648.9415
+  type: 'test'
+  ...
+# Subtest: environment allowlist retains OS essentials but drops inherited keys, loaders and database paths
+ok 6 - environment allowlist retains OS essentials but drops inherited keys, loaders and database paths
+  ---
+  duration_ms: 0.7758
+  type: 'test'
+  ...
+# Subtest: two scripted isolations have short synthetic keys, empty dotenv and exclusive assets without cross-contamination
+ok 7 - two scripted isolations have short synthetic keys, empty dotenv and exclusive assets without cross-contamination
+  ---
+  duration_ms: 13.8983
+  type: 'test'
+  ...
+# Subtest: live isolation only preserves the configured store path and never reads it during setup
+ok 8 - live isolation only preserves the configured store path and never reads it during setup
+  ---
+  duration_ms: 5.1549
+  type: 'test'
+  ...
+# Subtest: SSE recording preserves raw chunks and decodes fragmented and multiple frames without losing fields
+ok 9 - SSE recording preserves raw chunks and decodes fragmented and multiple frames without losing fields
+  ---
+  duration_ms: 5.4108
+  type: 'test'
+  ...
+# Subtest: SSE recording rejects an incomplete frame instead of silently discarding evidence
+ok 10 - SSE recording rejects an incomplete frame instead of silently discarding evidence
+  ---
+  duration_ms: 0.7971
+  type: 'test'
+  ...
+# Subtest: scoreboard uses final ledger once, groups failed tool_end, and separates actual durations and tool/user rounds
+ok 11 - scoreboard uses final ledger once, groups failed tool_end, and separates actual durations and tool/user rounds
+  ---
+  duration_ms: 1.4895
+  type: 'test'
+  ...
+# Subtest: empty assertion populations have null rates and execution failures remain visible
+ok 12 - empty assertion populations have null rates and execution failures remain visible
+  ---
+  duration_ms: 0.7129
+  type: 'test'
+  ...
+# Subtest: tool failure aggregation treats prototype property names as ordinary tool names
+ok 13 - tool failure aggregation treats prototype property names as ordinary tool names
+  ---
+  duration_ms: 0.554
+  type: 'test'
+  ...
+# Subtest: unevaluated live evidence keeps null task rate while preserving observed events and transport failures
+ok 14 - unevaluated live evidence keeps null task rate while preserving observed events and transport failures
+  ---
+  duration_ms: 0.5473
+  type: 'test'
+  ...
+# sqlite-vec loaded: vv0.1.7
+# (node:11000) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: real empty-claim journey turns red when its collected claim event is removed
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+  ---
+  duration_ms: 536.5533
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\scripts\\agent-eval\\harness.test.ts:31:6977'
+  failureType: 'testCodeFailure'
+  error: `[{"name":"zero tools and identical live/history zero-write receipt projection","passed":false,"error":"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n  [\\n+   'message_meta',\\n-   'turn_receipt',\\n    'done'\\n  ]\\n"}]`
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\scripts\agent-eval\harness.test.ts:346:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 14
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2206.5667
+# flaky-retries 0
+
+=== server scripts/v13WildernessExecute.test.ts
+TAP version 13
+# Subtest: tag-dispatched candidates: negative local, exact hydrated view, missing frame, nonfinite and metadata exceptions
+ok 1 - tag-dispatched candidates: negative local, exact hydrated view, missing frame, nonfinite and metadata exceptions
+  ---
+  duration_ms: 44.2684
+  type: 'test'
+  ...
+# Subtest: synthetic preview -> execute -> exact census/invariants -> rollback -> full restore -> execute
+ok 2 - synthetic preview -> execute -> exact census/invariants -> rollback -> full restore -> execute
+  ---
+  duration_ms: 27383.5519
+  type: 'test'
+  ...
+# Subtest: existing backup refused without overwrite; out-of-scope formal/workspace rows refuse the global flip
+ok 3 - existing backup refused without overwrite; out-of-scope formal/workspace rows refuse the global flip
+  ---
+  duration_ms: 77.0671
+  type: 'test'
+  ...
+# Subtest: execute atomic rollback after backup, including event and DDL
+ok 4 - execute atomic rollback after backup, including event and DDL
+  ---
+  duration_ms: 3934.7276
+  type: 'test'
+  ...
+# Subtest: execute atomic rollback after normalize, including event and DDL
+ok 5 - execute atomic rollback after normalize, including event and DDL
+  ---
+  duration_ms: 3966.3717
+  type: 'test'
+  ...
+# Subtest: execute atomic rollback after relocate, including event and DDL
+ok 6 - execute atomic rollback after relocate, including event and DDL
+  ---
+  duration_ms: 3953.2519
+  type: 'test'
+  ...
+# Subtest: execute atomic rollback after event, including event and DDL
+ok 7 - execute atomic rollback after event, including event and DDL
+  ---
+  duration_ms: 5852.6974
+  type: 'test'
+  ...
+# Subtest: execute atomic rollback after flag, including event and DDL
+ok 8 - execute atomic rollback after flag, including event and DDL
+  ---
+  duration_ms: 5830.6875
+  type: 'test'
+  ...
+# Subtest: rollback atomic after restore
+ok 9 - rollback atomic after restore
+  ---
+  duration_ms: 7740.1995
+  type: 'test'
+  ...
+# Subtest: rollback atomic after rollback_event
+ok 10 - rollback atomic after rollback_event
+  ---
+  duration_ms: 11672.2884
+  type: 'test'
+  ...
+# Subtest: rollback atomic after archive
+ok 11 - rollback atomic after archive
+  ---
+  duration_ms: 11688.3558
+  type: 'test'
+  ...
+# Subtest: rollback refuses subsequent writes and extension drift without discarding either
+ok 12 - rollback refuses subsequent writes and extension drift without discarding either
+  ---
+  duration_ms: 11631.346
+  type: 'test'
+  ...
+# Subtest: SQLite 64-bit integers survive backup, full-row rollback and exception reports exactly
+ok 13 - SQLite 64-bit integers survive backup, full-row rollback and exception reports exactly
+  ---
+  duration_ms: 11595.9096
+  type: 'test'
+  ...
+# Subtest: untagged formal row whose hydration changes surface is an exception, not a false positive
+ok 14 - untagged formal row whose hydration changes surface is an exception, not a false positive
+  ---
+  duration_ms: 14.3145
+  type: 'test'
+  ...
+# Subtest: production positives: Source x=152 becomes x=0; nonzero origins retain formal and exact live hydrated screen
+ok 15 - production positives: Source x=152 becomes x=0; nonzero origins retain formal and exact live hydrated screen
+  ---
+  duration_ms: 5828.8738
+  type: 'test'
+  ...
+# Subtest: complete frame replay rejects single-frame false positives and refuses incomplete context
+ok 16 - complete frame replay rejects single-frame false positives and refuses incomplete context
+  ---
+  duration_ms: 16.1844
+  type: 'test'
+  ...
+# Subtest: missing page_size applies live A4 geometry while preserving D1 persisted walls and Source origin
+ok 17 - missing page_size applies live A4 geometry while preserving D1 persisted walls and Source origin
+  ---
+  duration_ms: 14.5689
+  type: 'test'
+  ...
+# Subtest: stale untagged boundary receipts do not add a hidden invariant to unchanged screen/surface
+ok 18 - stale untagged boundary receipts do not add a hidden invariant to unchanged screen/surface
+  ---
+  duration_ms: 14.7472
+  type: 'test'
+  ...
+# Subtest: block read-side rounding is replayed, never applied to stored candidates; generic uses its own live consumer
+ok 19 - block read-side rounding is replayed, never applied to stored candidates; generic uses its own live consumer
+  ---
+  duration_ms: 14.4661
+  type: 'test'
+  ...
+# Subtest: hydration fuse: raw-screen-solvable surface failures abort all writes, including old events and archived backups
+ok 20 - hydration fuse: raw-screen-solvable surface failures abort all writes, including old events and archived backups
+  ---
+  duration_ms: 14513.4632
+  type: 'test'
+  ...
+# Subtest: fuse boundary: exactly 50% passes, below 50% refuses, and empty formal denominator is N/A
+ok 21 - fuse boundary: exactly 50% passes, below 50% refuses, and empty formal denominator is N/A
+  ---
+  duration_ms: 1063.1095
+  type: 'test'
+  ...
+# Subtest: one user failing the hydration fuse cannot be masked by the other users positives
+ok 22 - one user failing the hydration fuse cannot be masked by the other users positives
+  ---
+  duration_ms: 4048.5835
+  type: 'test'
+  ...
+# Subtest: independent CLI entry and explicit arguments: full on-disk synthetic flow
+ok 23 - independent CLI entry and explicit arguments: full on-disk synthetic flow
+  ---
+  duration_ms: 29235.1425
+  type: 'test'
+  ...
+# Subtest: repeat/comma user arguments form one nonempty canonical scope; singleton options still refuse duplicates
+ok 24 - repeat/comma user arguments form one nonempty canonical scope; singleton options still refuse duplicates
+  ---
+  duration_ms: 0.5258
+  type: 'test'
+  ...
+# Subtest: two-user scope: incomplete execute/rollback refuse zero-write; all users migrate, restore and repeat exactly
+ok 25 - two-user scope: incomplete execute/rollback refuse zero-write; all users migrate, restore and repeat exactly
+  ---
+  duration_ms: 22231.7296
+  type: 'test'
+  ...
+# Subtest: second user failure undoes both users, backup DDL, receipts and flag in execute and rollback
+ok 26 - second user failure undoes both users, backup DDL, receipts and flag in execute and rollback
+  ---
+  duration_ms: 26502.1898
+  type: 'test'
+  ...
+# Subtest: legacy version-1 single-user journal still rolls back with the exact original scope
+ok 27 - legacy version-1 single-user journal still rolls back with the exact original scope
+  ---
+  duration_ms: 11622.7669
+  type: 'test'
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 220963.0295
+# flaky-retries 0
+
+=== server src/__tests__/v2SourceMineruWiring.test.ts
+TAP version 13
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+ok 1 - K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+  ---
+  duration_ms: 1556.0567
+  type: 'test'
+  ...
+# [mineru-wiring] K-1 tagged Python processes: 0 -> 2 -> 0
+# [mineru-wiring] K-3/K-9 directions: page overflow=resource_limit, timeout=internal_interrupted
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+ok 2 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+  ---
+  duration_ms: 6633.1502
+  type: 'test'
+  ...
+# [mineru-wiring] K-4 MinerU peak=1, completed=3, final=0
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+ok 3 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+  ---
+  duration_ms: 16338.8747
+  type: 'test'
+  ...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+ok 4 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+  ---
+  duration_ms: 21837.6454
+  type: 'test'
+  ...
+# Subtest: K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+ok 5 - K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+  ---
+  duration_ms: 960.4156
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 48950.7413
+# flaky-retries 0
+
+=== client src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx
+
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+
+ ✓ src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx (5 tests) 9409ms
+   ✓ A1 one plan across writing, print and Overview > projects the complete long logical block into the same page slices in both read-only surfaces  1185ms
+   ✓ A1 one plan across writing, print and Overview > frame runtime consumes the supplied plan object without repaginating the projected boxes  936ms
+   ✓ A1 one plan across writing, print and Overview > keeps hidden auto text and a manual box on their complete export pages after folding a chapter  3046ms
+   ✓ A1 one plan across writing, print and Overview > keeps ink on its original page when text starts later and creates continuation pages (print=false)  1948ms
+   ✓ A1 one plan across writing, print and Overview > keeps ink on its original page when text starts later and creates continuation pages (print=true)  2291ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  13:35:38
+   Duration  13.26s (transform 1.27s, setup 306ms, collect 2.09s, tests 9.41s, environment 847ms, prepare 203ms)
+

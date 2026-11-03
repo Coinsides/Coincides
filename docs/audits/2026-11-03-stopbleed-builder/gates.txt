@@ -1,0 +1,34 @@
+--- tsc client
+exit 0
+--- tsc server
+exit 0
+--- check:source-experience
+Source experience contract check passed.
+Source experience model contract check passed.
+exit 0
+--- check:canvas-runtime-boundary
+└─────────┴──────────────────────────────────────────�
+Canvas runtime boundary check passed (175 checks).
+exit 0
+--- check:owned-helper-contract
+[PASS] owned-helper contract: 7 getOwned* / 1 findOwned*, including unexported helpers, across 1348 first-party source files.
+exit 0
+--- check:agent-knowledge
+[PASS] Agent 知识事实无漂移: 6db84dc9324b4794ee877217de0025bb4ff4b8171848be435fe60695340572ea; 说明书 v2 / 2026-11-01
+exit 0
+--- check:changed-file-secrets
+Changed-file secret scan passed: 45 changed file(s) scanned.
+exit 0
+--- check:test-wiring
+[test-wiring] 121 test files; 112 wired; 0 exempted; 9 unwired.
+[FAIL] Tests missing an explicit package.json script reference:
+- server/src/__tests__/establishment1Capture.test.ts
+- server/src/__tests__/establishment1Foundation.test.ts
+- server/src/__tests__/vpsF11SourcePageImages.test.ts
+- server/src/__tests__/vpsF1SourceFirstUse.test.ts
+- server/src/__tests__/vpsF3MaterialBridge.test.ts
+- server/src/__tests__/vpsF5SourceDiscovery.test.ts
+- server/src/__tests__/vpsF6BridgeAftercare.test.ts
+- server/src/__tests__/vpsF8ListNotes.test.ts
+- server/src/__tests__/vpsP1BailianEmbedding.test.ts
+Wire each suite into its curated test script, or add an exact exemption with a reason and follow-up.

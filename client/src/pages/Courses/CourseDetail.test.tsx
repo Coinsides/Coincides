@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Course } from '@shared/types';
+import '@/i18n';
 import { ProjectIdentity, ProjectNotesSection } from './CourseDetail';
 
 const mocks = vi.hoisted(() => ({
@@ -41,6 +42,54 @@ describe('ProjectIdentity', () => {
 
     expect(screen.getByText('Linear Algebra')).toBeTruthy();
     expect(screen.queryByText('High')).toBeNull();
+  });
+});
+
+describe('ProjectNotesSection projection split', () => {
+  const written = { ...note, id: 'written', title: 'Written', note_class: 'user' };
+  const projected = { ...note, id: 'projected', title: 'Projected', note_class: 'source_projection' };
+  const system = { ...note, id: 'system', title: 'System', note_class: 'system' };
+  const renderSection = (notes: typeof note[], status: 'active' | 'trashed' = 'active', onOpenNote = vi.fn()) => render(
+    <ProjectNotesSection notes={notes} status={status} onStatusChange={vi.fn()} onCreateNote={vi.fn()}
+      onOpenNote={onOpenNote} refreshNotes={vi.fn()} addToast={vi.fn()} />,
+  );
+
+  it('lists only handwritten notes until the toggle is on, then badges the projection', () => {
+    const onOpenNote = vi.fn();
+    const { container } = renderSection([written, projected, system], 'active', onOpenNote);
+    expect(screen.getByText('Written')).toBeTruthy();
+    expect(screen.queryByText('Projected')).toBeNull();
+    expect(screen.queryByText('System')).toBeNull();
+    expect(container.querySelector('[data-note-source-badge]')).toBeNull();
+    const toggle = screen.getByRole('button', { name: /\(1\)/ });
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(container.querySelectorAll('[data-note-source-badge]')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'Move Projected to trash' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Move Written to trash' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Open note Projected' }));
+    expect(onOpenNote).toHaveBeenCalledExactlyOnceWith('projected');
+    fireEvent.click(toggle);
+    expect(screen.queryByText('Projected')).toBeNull();
+  });
+
+  it('offers no toggle without projections, and only projections still reads as no notes', () => {
+    const { unmount } = renderSection([written]);
+    expect(screen.queryByRole('button', { name: /\(\d+\)/ })).toBeNull();
+    unmount();
+    renderSection([projected]);
+    expect(screen.getByText('No notes yet.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /\(1\)/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'New Note' })).toBeTruthy();
+  });
+
+  it('leaves the trash view unsplit', () => {
+    renderSection([written, projected], 'trashed');
+    expect(screen.getByText('Written')).toBeTruthy();
+    expect(screen.getByText('Projected')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /\(\d+\)/ })).toBeNull();
   });
 });
 

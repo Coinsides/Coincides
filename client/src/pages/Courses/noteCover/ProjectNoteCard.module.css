@@ -98,3 +98,10 @@
 @media (prefers-reduced-motion: reduce) {
   .toolbar { transition: none; }
 }
+
+.sourceType {
+  border: 1px solid color-mix(in srgb, var(--accent-primary, #6d8fd6) 45%, var(--glass-border));
+  border-radius: 4px;
+  display: inline-block;
+  padding: 1px 6px;
+}

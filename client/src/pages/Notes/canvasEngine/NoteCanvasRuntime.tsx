@@ -10,6 +10,7 @@ import { PaperSkinContext } from './PaperSkinContext';
 import { SkinFloatCard } from '@/components/Skin/SkinFloatCard';
 import { NotePaperControls } from './layers/NotePaperControls';
 import { NoteInsertCommandsProvider } from './NoteInsertCommandsContext';
+import { SourceConversionNotice } from './layers/SourceConversionNotice';
 
 export interface NoteCanvasRuntimeHandle {
   dismissTransientUI: () => void;
@@ -45,6 +46,7 @@ const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequest
     <div className={styles.page} data-note-host-mode={hostMode}
       data-note-skin-preset={skin.materialPreset ?? skin.preset} style={skin.style}>
       {skin.error && <div role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></div>}
+      <SourceConversionNotice note={note} />
       <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps} sourcePageView={sourcePageView}
         writingSurfaceProps={{ ...layerProps.documentLayerProps.writingSurfaceProps,
           noteTools: <NoteChromeLayer {...layerProps.chromeProps} sourcePageView={sourcePageView} mountAppearanceCard={false} appearanceAnchorRef={appearanceAnchorRef} /> }} />

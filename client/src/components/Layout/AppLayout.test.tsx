@@ -1,15 +1,17 @@
 import { StrictMode } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useUIStore } from '@/stores/uiStore';
 import AppLayout from './AppLayout';
+import { recordRecentProject } from './recentProjects';
 
 const mocks = vi.hoisted(() => ({
   loadUser: vi.fn(),
   fetchCourses: vi.fn(),
   fetchTags: vi.fn(),
   changeLanguage: vi.fn(),
+  courses: [] as Array<{ id: string; name: string; color?: string }>,
 }));
 
 vi.mock('@/stores/uiStore', async () => {
@@ -36,7 +38,7 @@ vi.mock('@/stores/uiStore', async () => {
 
 vi.mock('@/stores/courseStore', () => ({
   useCourseStore: (selector: (state: unknown) => unknown) => selector({
-    courses: [],
+    courses: mocks.courses,
     fetchCourses: mocks.fetchCourses,
   }),
 }));
@@ -76,6 +78,50 @@ function expectNavigator(open: boolean) {
   const button = screen.getByRole('button', { name: open ? 'Collapse navigator' : 'Expand navigator' });
   expect(button.getAttribute('aria-expanded')).toBe(String(open));
 }
+
+describe('AppLayout sidebar project shortcuts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.localStorage.clear();
+    useUIStore.setState({ sidebarOpen: true });
+    mocks.courses = [{ id: 'p1', name: 'First' }, { id: 'p2', name: 'Second' }, { id: 'p3', name: 'Third' }];
+  });
+  afterEach(() => { mocks.courses = []; });
+
+  const recentNames = () => [...document.querySelectorAll('button')]
+    .filter((button) => button.className.includes('utilityItem'))
+    .map((button) => button.textContent);
+
+  it('has no favorites and no recent section before anything was opened', () => {
+    renderLayout('/projects');
+    expect(screen.queryByText('sidebar.favorites')).toBeNull();
+    expect(screen.queryByText('sidebar.recent')).toBeNull();
+    expect(recentNames()).toEqual([]);
+  });
+
+  it('lists opened projects newest first and updates as they open', () => {
+    recordRecentProject('p3');
+    renderLayout('/projects');
+    expect(screen.getByText('sidebar.recent')).toBeTruthy();
+    expect(recentNames()).toEqual(['Third']);
+    act(() => recordRecentProject('p1'));
+    expect(recentNames()).toEqual(['First', 'Third']);
+  });
+
+  it('drops a recorded project the user no longer has, and hides the section if none remain', () => {
+    recordRecentProject('gone');
+    renderLayout('/projects');
+    expect(screen.queryByText('sidebar.recent')).toBeNull();
+  });
+
+  it('hides the section when storage is unavailable', () => {
+    recordRecentProject('p1');
+    const read = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
+    renderLayout('/projects');
+    expect(screen.queryByText('sidebar.recent')).toBeNull();
+    read.mockRestore();
+  });
+});
 
 describe('AppLayout board navigator session', () => {
   beforeEach(() => {

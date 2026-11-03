@@ -773,11 +773,14 @@ export function getSourceRecordDetail(
   const definition = definitionForStoredRow(row);
   const blobPath = resolveSourceStorageKey(row.storage_key, options.rootDir);
   const blobAvailable = row.storage_state === 'ready' && existsSync(blobPath);
-  const projectionAvailable = Boolean(row.projection_note_id && db.prepare(`
-    SELECT 1
-    FROM notes
-    WHERE id = ? AND user_id = ? AND note_class = 'source_projection'
-  `).get(row.projection_note_id, userId));
+  const projectionNote = row.projection_note_id
+    ? db.prepare(`
+        SELECT metadata
+        FROM notes
+        WHERE id = ? AND user_id = ? AND note_class = 'source_projection'
+      `).get(row.projection_note_id, userId) as { metadata: string | null } | undefined
+    : undefined;
+  const parserMessages = projectionNote ? parseMetadata(projectionNote.metadata || '{}').parser_messages : undefined;
   const placements = db.prepare(`
     SELECT spp.id, spp.course_id, c.name AS course_name, spp.created_at
     FROM source_project_placements spp
@@ -825,7 +828,8 @@ export function getSourceRecordDetail(
       status: row.materialization_status,
       attempt_count: Number(row.attempt_count),
       projection_note_id: row.projection_note_id,
-      projection_available: projectionAvailable,
+      projection_available: Boolean(projectionNote),
+      has_parser_messages: Array.isArray(parserMessages) && parserMessages.length > 0,
       error_code: row.error_code,
       error_message: row.error_message,
       retryable: row.materialization_status === 'failed'

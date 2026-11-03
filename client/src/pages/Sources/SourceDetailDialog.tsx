@@ -123,6 +123,9 @@ export function SourceDetailDialog({
               <div><dt>Attempts</dt><dd>{source.materialization.attempt_count}</dd></div>
               <div><dt>Completed</dt><dd>{formatTimestamp(source.materialization.completed_at)}</dd></div>
             </dl>
+            {source.materialization.has_parser_messages && (
+              <div className={styles.conversionNotice} role="note">{t('sources.conversionIncomplete')}</div>
+            )}
             {source.materialization.error_message && (
               <div className={styles.errorNotice}>
                 <strong>{source.materialization.error_code || 'Extraction error'}</strong>

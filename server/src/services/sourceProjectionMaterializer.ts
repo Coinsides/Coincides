@@ -307,6 +307,13 @@ function pageStackPayload(frames: ProjectionFramePlan[]) {
   }];
 }
 
+// Kept verbatim; the key is absent when the parser had nothing to report.
+function parserMessagesMetadata(artifact: SourceArtifact): { parser_messages?: unknown[] } {
+  if (artifact.artifact_kind !== 'document') return {};
+  const messages = artifact.metadata.parser_messages;
+  return Array.isArray(messages) && messages.length > 0 ? { parser_messages: messages } : {};
+}
+
 export function publishSourceProjection(
   db: Database.Database,
   source: SourceMaterializationFile,
@@ -386,6 +393,7 @@ export function publishSourceProjection(
           parser_key: source.parser_key,
           parser_version: source.parser_version,
           content_policy: 'source_locked',
+          ...parserMessagesMetadata(artifact),
         }),
         operationBatchId,
         now,

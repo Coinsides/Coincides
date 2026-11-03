@@ -1,0 +1,14 @@
+ARM: scratch copy where the entry scheduler claims every entry id, without the received-only filter
+ok 1 - zip entries materialize on a running process, with no restart and no client call
+not ok 2 - a nested zip is stored, never expanded, and its stored-only row does not break the batch
+  expected: 'materialized'
+  actual: 'received'
+not ok 3 - entries that deduplicate onto a settled Source are skipped: materialized and failed alike
+  expected: 'failed'
+  actual: 'materialized'
+ok 4 - a docx with swallowed formulas records the messages and the detail reports them
+ok 5 - plain docx and text carry no key at all and report nothing
+ok 6 - an older docx projection gains the record through one rebuild, and a lost projection reports nothing
+# tests 6
+# pass 4
+# fail 2

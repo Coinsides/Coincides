@@ -1,0 +1,10 @@
+.notice {
+  align-items: center;
+  background: color-mix(in srgb, #c9973f 14%, var(--glass-surface, transparent));
+  border-bottom: 1px solid color-mix(in srgb, #c9973f 45%, var(--glass-border));
+  color: var(--text-primary);
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  padding: 8px 16px;
+}
