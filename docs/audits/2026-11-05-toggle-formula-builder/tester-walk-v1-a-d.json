@@ -1,0 +1,716 @@
+{
+ "widths": [
+  {
+   "label": "docx",
+   "w": 1440,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 1326,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": []
+   },
+   "errors": 0
+  },
+  {
+   "label": "docx",
+   "w": 1024,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 910,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": [
+     "$C={S}_{0}N\\left({d}_{1}\\right"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "docx",
+   "w": 761,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 647,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": [
+     "第一年"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "docx",
+   "w": 760,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 646,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": [
+     "第一年"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "docx",
+   "w": 700,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 586,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": [
+     "100"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "docx",
+   "w": 400,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 286,
+     "y": 53,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 1
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 53,
+    "mainTop": 0,
+    "pHit": true,
+    "covered": [
+     "R4-金融讲义-公式中文图片"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "pdf",
+   "w": 1440,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 1326,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": []
+   },
+   "errors": 0
+  },
+  {
+   "label": "pdf",
+   "w": 1024,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 910,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": [
+     "容。双栏填充内容。双栏填充内容。双栏填充内\n容。双栏填充内容"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "pdf",
+   "w": 761,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 647,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": []
+   },
+   "errors": 0
+  },
+  {
+   "label": "pdf",
+   "w": 760,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 646,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": []
+   },
+   "errors": 0
+  },
+  {
+   "label": "pdf",
+   "w": 700,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 586,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 0
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 44,
+    "mainTop": 1500,
+    "pHit": true,
+    "covered": [
+     "第七页标题\n第七页正文句：这是倒数第六页。\n填充文字用于撑开"
+    ]
+   },
+   "errors": 0
+  },
+  {
+   "label": "pdf",
+   "w": 400,
+   "startPages": true,
+   "cycles": [
+    "ok",
+    "ok",
+    "ok"
+   ],
+   "errorsBefore": 0,
+   "text": {
+    "pages": false,
+    "float": {
+     "x": 286,
+     "y": 53,
+     "w": 88,
+     "h": 28
+    },
+    "tHit": true,
+    "pHit": true,
+    "pDisabled": false,
+    "covered": 1
+   },
+   "hscroll": false,
+   "scrolled": {
+    "y": 53,
+    "mainTop": 0,
+    "pHit": true,
+    "covered": [
+     "R4-原页走查样张"
+    ]
+   },
+   "errors": 0
+  }
+ ],
+ "layout": {
+  "docx-1440": {
+   "layoutOnHand": "true",
+   "arrive": {
+    "pages": true,
+    "layout": null
+   },
+   "inText": {
+    "pagesBtn": {
+     "d": false,
+     "hit": true
+    },
+    "layout": {
+     "p": "false",
+     "d": true
+    },
+    "frames": 0,
+    "float": {
+     "x": 1326,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    }
+   },
+   "cycles": [
+    "true/true",
+    "true/true",
+    "true/true"
+   ],
+   "backOnHand": {
+    "p": "false",
+    "d": false
+   },
+   "reEnable": "true",
+   "handToHand": {
+    "p": "true",
+    "d": false
+   },
+   "handBack": {
+    "p": "true",
+    "d": false
+   },
+   "off": "false"
+  },
+  "docx-1024": {
+   "layoutOnHand": "true",
+   "arrive": {
+    "pages": true,
+    "layout": null
+   },
+   "inText": {
+    "pagesBtn": {
+     "d": false,
+     "hit": true
+    },
+    "layout": {
+     "p": "false",
+     "d": true
+    },
+    "frames": 0,
+    "float": {
+     "x": 910,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    }
+   },
+   "cycles": [
+    "true/true",
+    "true/true",
+    "true/true"
+   ],
+   "backOnHand": {
+    "p": "false",
+    "d": false
+   },
+   "reEnable": "true",
+   "handToHand": {
+    "p": "true",
+    "d": false
+   },
+   "handBack": {
+    "p": "true",
+    "d": false
+   },
+   "off": "false"
+  },
+  "pdf-1440": {
+   "layoutOnHand": "true",
+   "arrive": {
+    "pages": true,
+    "layout": null
+   },
+   "inText": {
+    "pagesBtn": {
+     "d": false,
+     "hit": true
+    },
+    "layout": {
+     "p": "false",
+     "d": true
+    },
+    "frames": 0,
+    "float": {
+     "x": 1326,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    }
+   },
+   "cycles": [
+    "true/true",
+    "true/true",
+    "true/true"
+   ],
+   "backOnHand": {
+    "p": "false",
+    "d": false
+   },
+   "reEnable": "true",
+   "handToHand": {
+    "p": "true",
+    "d": false
+   },
+   "handBack": {
+    "p": "true",
+    "d": false
+   },
+   "off": "false"
+  },
+  "pdf-1024": {
+   "layoutOnHand": "true",
+   "arrive": {
+    "pages": true,
+    "layout": null
+   },
+   "inText": {
+    "pagesBtn": {
+     "d": false,
+     "hit": true
+    },
+    "layout": {
+     "p": "false",
+     "d": true
+    },
+    "frames": 0,
+    "float": {
+     "x": 910,
+     "y": 44,
+     "w": 88,
+     "h": 28
+    }
+   },
+   "cycles": [
+    "true/true",
+    "true/true",
+    "true/true"
+   ],
+   "backOnHand": {
+    "p": "false",
+    "d": false
+   },
+   "reEnable": "true",
+   "handToHand": {
+    "p": "true",
+    "d": false
+   },
+   "handBack": {
+    "p": "true",
+    "d": false
+   },
+   "off": "false"
+  }
+ },
+ "misc": {
+  "scrollMemory": {
+   "before": 2400,
+   "after": 1342
+  },
+  "leaveAndBack": {
+   "pages": false,
+   "float": true
+  },
+  "hopTarget": {
+   "pages": true
+  },
+  "hopBack": {
+   "pages": false
+  },
+  "reload": {
+   "pages": true
+  },
+  "noToggle-md": {
+   "text": 0,
+   "pages": 0,
+   "float": false,
+   "overview": false
+  },
+  "noToggle-png": {
+   "text": 0,
+   "pages": 0,
+   "float": false,
+   "overview": false
+  },
+  "noToggle-hand": {
+   "text": 0,
+   "pages": 0,
+   "float": false,
+   "overview": false
+  }
+ },
+ "overlays": {
+  "preview": {
+   "pHit": true,
+   "tHit": true,
+   "float": {
+    "x": 1326,
+    "y": 44,
+    "w": 88,
+    "h": 28
+   },
+   "pages": false
+  },
+  "appearance": {
+   "pHit": true,
+   "tHit": true,
+   "float": {
+    "x": 1326,
+    "y": 44,
+    "w": 88,
+    "h": 28
+   },
+   "pages": false
+  },
+  "overview": {
+   "pHit": true,
+   "tHit": true,
+   "float": {
+    "x": 1336,
+    "y": 44,
+    "w": 88,
+    "h": 28
+   },
+   "pages": true
+  },
+  "groups": {
+   "pHit": false,
+   "tHit": false,
+   "float": {
+    "x": 1326,
+    "y": 44,
+    "w": 88,
+    "h": 28
+   },
+   "pages": false
+  },
+  "staging": {
+   "pHit": true,
+   "tHit": true,
+   "float": {
+    "x": 1326,
+    "y": 44,
+    "w": 88,
+    "h": 28
+   },
+   "pages": false
+  },
+  "agent-panel": {
+   "pHit": false,
+   "tHit": false,
+   "float": {
+    "x": 1326,
+    "y": 44,
+    "w": 88,
+    "h": 28
+   },
+   "pages": false
+  },
+  "print": {
+   "display": "flex",
+   "visibility": "hidden",
+   "w": 88.421875,
+   "h": 28,
+   "x": 1145.578125,
+   "y": 44
+  },
+  "printToolbar": {
+   "display": "flex",
+   "visibility": "hidden",
+   "w": 84.578125
+  },
+  "keyboard": {
+   "reached": false,
+   "order": [
+    "R4-金融讲义-公式中文图片",
+    "源文档 · 1 页 · 导入",
+    "Note metadata",
+    "Upstream 1 · D",
+    "公司金融讲义：现值与期权定价",
+    "Source",
+    "第一页 正文 Body te",
+    "Source",
+    "字形比对（中日韩字形差异）：",
+    "Source",
+    "宋体段落 SimSun pa",
+    "Source",
+    "微软雅黑段落 YaHei p",
+    "Source"
+   ]
+  }
+ },
+ "errors": []
+}

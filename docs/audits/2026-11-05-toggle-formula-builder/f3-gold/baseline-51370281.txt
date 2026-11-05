@@ -1,0 +1,57 @@
+
+=== F3-复核样本.docx  notice speaks: true
+WRONG    argmin: argmin：$θ=arg minw1ne2$ 句尾
+         source: θ = arg min over w of (1/n) e²
+         reads ["θ=argminw1ne2"]; gold ["θ=S[argmin|w|]F[1|n]S[e||2]"]
+WRONG    argmax: argmax：$V=argmaxxC1+r$ 句尾
+         source: V = argmax over x of C/(1+r)
+         reads ["V=argmaxxC1+r"]; gold ["V=S[argmax|x|]F[C|1+r]"]
+WRONG    定义等号: 定义等号：$σ2=def1n$ 句尾
+         source: σ² defined-as 1/n, with def stacked over =
+         reads ["σ2=def1n"]; gold ["S[σ||2]S[=||def]F[1|n]"]
+WRONG    iid: iid：$X∼iidNσ2Ci$ 句尾
+         source: X ~ with iid stacked over it, then N σ² C/i
+         reads ["X∼iidNσ2Ci"]; gold ["XS[∼||iid]NS[σ||2]F[C|i]"]
+WRONG    limsup: limsup：$lim supn→∞xn$ 句尾
+         source: lim sup as n→∞ of x_n
+         reads ["limsupn→∞xn"]; gold ["S[limsup|n→∞|]S[x|n|]"]
+WRONG    带标签下括号: 带标签下括号：$a+bn=cd$ 句尾
+         source: a+b under a brace labelled n, = c/d
+         reads ["a+bn=cd"]; gold ["S[B[under|a+b]|n|]=F[c|d]"]
+WRONG    符号w:sym: 符号w:sym：$x$ 句尾
+         source: Δx, the Δ is w:sym Symbol F044
+         reads ["x"]; gold ["Δx"]
+WRONG    修订: 修订：$x=23$ 句尾
+         source: tracked change from x=2 to x=3: the final text is x=3
+         reads ["x=23"]; gold ["x=3"]
+WRONG    式内换行: 式内换行：$a=bc=d$ 句尾
+         source: two lines inside one formula: a=b, then c=d
+         reads ["a=bc=d"]; gold ["a=b","c=d"]
+WRONG    斜分式: 斜分式：$a+b/c+d$ 句尾
+         source: (a+b) over (c+d), written as a skewed fraction
+         reads ["a+b/c+d"]; gold ["F[a+b|c+d]"]
+WRONG    线性分式: 线性分式：$a+b/c+d$ 句尾
+         source: (a+b) over (c+d), written as a linear fraction
+         reads ["a+b/c+d"]; gold ["F[a+b|c+d]"]
+
+=== F1-全结构.docx  notice speaks: false
+INVALID  尖括号: 尖括号：$\left\langlex\right\rangle$ 句尾。
+         source: ⟨x⟩
+         KaTeX parse error: Undefined control sequence: \langlex at position 6: \left\̲l̲
+WRONG    箭头acc: 箭头acc：${v}^{→}$ 句尾。
+         source: v with an arrow above, chr is U+2192
+         reads ["S[v||→]"]; gold ["A[vec|v]"]
+WRONG    下横线bar无pos: 下横线bar无pos：$\overline{x}$ 句尾。
+         source: x with a bar and no pos: bottom by default
+         reads ["A[overline|x]"]; gold ["U[x]"]
+WRONG    箭头组: 箭头组：$\overbrace{a}$ 句尾。
+         source: a with an arrow stacked above, not a brace
+         reads ["B[over|a]"]; gold ["S[a||→]"]
+WRONG    特殊字符: 特殊字符：$50\% + \$100 \& a\_b \#1 \{c\} \backslash d <e> ^f ~g$ 句尾。
+         source: literal characters, none of them LaTeX syntax: 50% + $100 & a_b #1 {c} \d <e> ^f ~g
+         reads ["50%+$100&a_b#1{c}\\d<eS[>||f]spacing[]g"]; gold ["50%+$100&a_b#1{c}\\d<e>^f~g"]
+WRONG    式内修订: 式内修订：$keepgoneadded$
+         source: keep, gone is a tracked deletion, added is a tracked insertion: final text keepadded
+         reads ["keepgoneadded"]; gold ["keepadded"]
+
+ {"ok":54,"degraded":0,"EYE":0,"WRONG":16,"INVALID":1,"MISSING":0}

@@ -1,0 +1,116 @@
+{
+ "E1": {
+  "firstView": "text",
+  "at": 870,
+  "register": "pending",
+  "flippedAt": 8920,
+  "pages": true
+ },
+ "E2": {
+  "firstView": "text",
+  "registerAtClick": "pending",
+  "registerDone": 3,
+  "afterComplete": {
+   "pages": false,
+   "float": true,
+   "pHit": true
+  },
+  "thenPages": true
+ },
+ "E3": {
+  "firstView": "text",
+  "registerAtScroll": "pending",
+  "scrolled": 600,
+  "after": {
+   "pages": false,
+   "mainTop": 600,
+   "pHit": true
+  }
+ },
+ "chips": 0,
+ "chipJump": [],
+ "chipBack": {
+  "leftPages": true,
+  "float": true
+ },
+ "banner": {
+  "F2-仅样式告警.docx": {
+   "pagesBanner": false,
+   "textBanner": false,
+   "bannerY": null,
+   "floatY": 44,
+   "pHit": true
+  },
+  "F2-纯公式.docx": {
+   "pagesBanner": false,
+   "textBanner": false,
+   "bannerY": null,
+   "floatY": 44,
+   "pHit": true
+  },
+  "F2-公式加丢字.docx": {
+   "pagesBanner": false,
+   "textBanner": true,
+   "bannerY": 0,
+   "floatY": 74,
+   "pHit": true,
+   "scrolled": {
+    "bannerY": 0,
+    "floatY": 44,
+    "pHit": true
+   }
+  },
+  "F2-样式加丢字.docx": {
+   "pagesBanner": false,
+   "textBanner": true,
+   "bannerY": 0,
+   "floatY": 74,
+   "pHit": true,
+   "scrolled": {
+    "bannerY": 0,
+    "floatY": 44,
+    "pHit": true
+   }
+  },
+  "R4-日常文档-规整.docx": {
+   "pagesBanner": false,
+   "textBanner": false,
+   "bannerY": null,
+   "floatY": 44,
+   "pHit": true
+  },
+  "F1-全结构.docx": {
+   "pagesBanner": false,
+   "textBanner": false,
+   "bannerY": null,
+   "floatY": 44,
+   "pHit": true
+  }
+ },
+ "keyboard": {
+  "activeAfterClick": "BODY",
+  "order": [
+   "Staging (0)",
+   "Pages"
+  ],
+  "focused": "Pages",
+  "enterToPages": true
+ },
+ "overview": {
+  "inOv": {
+   "overview": true,
+   "pHit": true,
+   "tHit": true
+  },
+  "afterPages": {
+   "pages": true,
+   "overview": false
+  },
+  "backToText": {
+   "pages": false,
+   "overview": false,
+   "float": true
+  }
+ },
+ "errors": []
+}

@@ -1,0 +1,10 @@
+not ok 47 - real empty-claim journey turns red when its collected claim event is removed
+not ok 1158 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+not ok 1159 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+# tests 1352
+# pass 1349
+# fail 3
+--- v2SourceMineruWiring alone
+# tests 5
+# pass 5
+# fail 0
