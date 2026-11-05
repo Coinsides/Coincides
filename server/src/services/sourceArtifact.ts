@@ -1,6 +1,7 @@
 import { readFile, stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import * as mammoth from 'mammoth';
+import { inlineDocxFormulasOrOriginal } from './docxOmmlText.js';
 import { PDFParse } from 'pdf-parse';
 import {
   isSourceArtifactErrorRetryable,
@@ -328,7 +329,7 @@ const docxParser: SourceParser = {
     const buffer = await readFile(input.file_path);
     assertDocxExpansionSafe(buffer, limits);
     try {
-      const result = await mammoth.extractRawText({ buffer });
+      const result = await mammoth.extractRawText({ buffer: await inlineDocxFormulasOrOriginal(buffer) });
       const blocks = splitParagraphs(result.value).map((text, index): SourceArtifactBlock => ({
         artifact_block_id: `docx-paragraph-${index + 1}`,
         kind: 'text',

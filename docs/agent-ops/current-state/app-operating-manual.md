@@ -74,9 +74,89 @@
 - 要走 **Note Proposal/材料地图/Agent 文档检索** → 材料库:`POST /api/documents/upload`(multipart: file+course_id);
 - 要走 **引用源/快照/重投影** → Source Library:`POST /api/sources/upload`(multipart: file+course_id+origin_entry_kind:'project_upload'|'library_upload');
 - **一致性警示(2026-11-01 更新)**:给 Agent/项目材料让它"用",走 Source Library 即可(F3 桥+F5 检索已通);材料库 legacy 门仍在但 UI 无入口且停喂(TD-43),⛔新流程依赖它。
-- **Source 阅读视图(1a、1a-乙,2026-11-05)**:PDF、docx 投影笔记工具栏有「文本/原页」切换。原页可用且本标签页没有记忆时默认进原页;还在生成且读者未滚动时,第一页到达才切。切换记忆只在当前标签页内,刷新后回默认。docx 经服务端转 PDF 后走同一条页影像通路,需配置 `COINCIDES_DOCX_PDF_COMMAND_JSON`;未配置时没有切换入口,`POST /api/sources/:id/pages/generate` 返回 409 `source_pages_converter_unavailable`。旧文件在原页层点生成按钮补页。
+- **Source 阅读视图(1a、1a-乙,2026-11-05)**:PDF、docx 投影笔记有「文本/原页」切换,文本视图在右上角悬浮,原页视图在页头。原页可用且本标签页没有记忆时默认进原页;还在生成且读者未滚动时,第一页到达才切。切换记忆只在当前标签页内,刷新后回默认。docx 经服务端转 PDF 后走同一条页影像通路,需配置 `COINCIDES_DOCX_PDF_COMMAND_JSON`;未配置时没有切换入口,`POST /api/sources/:id/pages/generate` 返回 409 `source_pages_converter_unavailable`。旧文件在原页层点生成按钮补页。
 - **原页视图的边界**:只能看和跳。批注、选字、组、铸 item 都在文本视图;已有批注默认不可见,页面无提示。Ctrl+P 打的是文本投影,公式照丢,要原样打印请下载原件。原页下 Agent 拿不到读者所在页(TD-46)。
-- **内容丢失提示**:mammoth 有转换消息时,Source 行出徽标、详情出提示,投影笔记文本视图顶部出横幅「本件有内容未能完整转换」,不带数字。原页视图不显示横幅。只有告警不等于真丢内容;消息在发布时写入投影笔记 `metadata.parser_messages`,旧 docx 重投影后才有。
+- **docx 文本层公式(2026-11-05)**:Word 公式转成行内 LaTeX 留在原位,如 `PV = $rac{C}{i}> **状态 (Status)**: active(v2,2026-11-01 F8 补 list_notes 读面;2026-09-21 T2 富块提案补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
+> **层 (Layer)**: 现状 / 应用操作说明书
+> **日期 (Updated)**: 2026-11-05
+> **防腐条款**: 交付新面的工单,申报义务含"说明书条目已更新/无涉";每版段收口过一遍 diff。发现缺条错条=当场补(steward: Fable)。
+
+# Coincides 应用操作说明书 v2
+
+**这份文档回答"怎么用",不回答"为什么这样设计"(那是 design/ 的事)。** 每条=对象是什么+界面路径+API 门+最小例+边界。v1 条目优先收录已知的翻车点。
+
+## 〇 · 对象地图(先建世界观)
+
+- **Project(course)**:一切的家。笔记/材料/源/目标/任务/卡组都挂在某个 project 下;
+- **Note(笔记)**:一张纸=**块(blocks)的序列**。块经 placement 排序落页,纸面渲染由布局引擎投影。**title+description 只是封面信息,⛔是笔记内容**;
+- **Board(板)**:思考桌面,纯投影域。居民包括 members(引用 note/content_group/item/text_range)、stickies(板内便签)、edges(带 label 视觉连线)、visuals(粉笔/形状等装饰);板必须有 soul(purpose)。视觉线不写 Relation;
+- **两座内容库(2026-11-01 F3/F5 起已接通)**:**材料库(documents,legacy 停喂)**——`/documents/upload` 进(UI 无入口);**Source Library(sources)**——`/sources/upload` 进,引用源/imprint/重投影世界吃这里,**且 Ready Source 的投影自 F3(迁移 084)起喂进项目材料层**(打开项目页惰性生成),Material Map/Note Proposal/Reconcile 都吃得到;**chat Agent 自 F5 起可经 search_documents 的 source_results 检索到已抽取 Source 并用 read_note 读全文**(关键词匹配非语义,向量版候立);
+- **Deck/Card**:卡组挂 project;卡=知识内容,**创建唯一通道=提案**(create_card 已退役);
+- **提案(proposal)**:Agent 对人说话的信道。pending→人 apply/discard;待处理提案在 **Agent 面板头部「提案」收件箱**可见,显示计数、类型摘要、chat/材料来源与时间,逐条处理;材料三型(material_map/organized_note/material_reconciliation)的 CourseDetail 既有面保留;
+- **Agent 会话**:conversations+SSE 消息流;工具活动经 tool_start/tool_end 事件可见。
+
+## 一 · 笔记:怎么写正文(翻车条目 #1)
+
+- **底部工具条(C4a,2026-09-20)**:四群以发丝线分隔。「纸的状态」=Preview/Layout/外观/装订及既有 More;「手上的笔」=Selection/Pen/Eraser;「+ 插入」=表格/时间线/柱图/折线图/媒体图/引文框/提示框;「看的方式」=View options/导航窗格/Overview/阅读步进,选块时保留「问 Agent」。既有按钮行为、tooltip 和只读禁用条件保留。窄屏先折叠「看」(1100px),再折叠「纸」(760px);笔与插入常驻,折叠菜单可键盘打开,没有功能被删除。
+- **插入双入口(C4a)**:上述七项与同名斜杠命令共用执行器。表格、时间线、柱图、折线图沿既有浮层编辑并保存;媒体图沿既有图片上传插入链。媒体图/引文框/提示框需以已保存的纸上段落为目标,菜单用选中或正在编辑的段落,斜杠用输入段落;条件不满足时显示禁用原因。引文框/提示框打开 B3 段落样式编辑器,仍需保存,取消不写。既有15项斜杠的文案与行为不变;`Source Quote` 仍只转换 TextFlow writing role,与这两个 placement 样式命令不同。
+- **文档标签条(C4a)**:打开笔记或板后,文档区顶部出现身份标签;点击切换,中键或×关闭,拖拽排序。标签可用左右键切换、Alt+左右键排序、Delete关闭。关闭只退出在场,原文档仍在 Project/Boards 列表;最后一张纸关闭回所属Project,最后一块板关闭回Boards。切换/关闭沿既有 blur 自动保存与离页等待,不另设「未保存」标签。每个标签记滚动位/阅读步进或板视口;仅内存会话态,无新表、无localStorage/sessionStorage持久化,刷新只重建当前URL页。当前工具的 note/board 目标由既有 tool_start/tool_end 活动投影为天青徽章,结束即灭;通知计数槽留空等C4b。不与 Staging/Recent/Favorites 合并。
+
+- **UI**:打开笔记→双击纸面开始写;
+- **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:1, units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
+- **建笔记(A5,2026-09-19)**:Project 的「New Note」或 Board 的「New note」直接新建 A4 纵向纸;建纸流程没有纸型选择。API 仍为 `POST /api/notes {course_id, title, description?, page_format:'a4_portrait'}`,页帧使用既有 A4 默认种子;Board 建纸沿用 ceremony-note 原子入口。
+- **纸型调节(A5)**:打开笔记→「笔记外观」浮卡→「纸型」,可选 A5/A4/A3 各纵向或横向、Letter 纵向、Legal 纵向,共 8 项。直接看当前纸面调整,没有另一张预览纸。尺寸读数与输入使用厘米(cm)或毫米(mm),可切换单位。选纸型作用于整本笔记的全部页帧,A1 按新纸面与版心自动重排跨页正文,一次撤销/重做恢复整次换型。
+- **单页异形(A5)**:进入 Layout 态,选中要调整的页,输入物理宽高或拖纸角调尺寸,只覆写该页几何;平时纸角没有编辑命中。「恢复默认」清除该页覆写,回到笔记默认纸型;以后新建页也使用笔记默认,不沿袭邻页异形。单页调节与恢复进入撤销栈,装订段、页码与封面仍按当前页身份共处。
+- **纸型存储与 Web 边界(A5)**:调节经既有页帧集合保存,物理单位在界面换算,存储仍为像素;既有 `page_format` 数据保持原值,不迁移。Web 长页保持独立的单帧向下生长模式,不列入上述纸型族,不提供转为分页纸或单页异形的操作。
+- **标题与章节(A4,2026-09-19)**:正文行首输入 `# `、`## `、`### ` 建一/二/三级标题;在既有段落输入 `/h1`、`/h2`、`/h3` 可升降级,`/body` 还原正文。标题仍是普通 text 块里的 unit `writing_role:'heading_1'|'heading_2'|'heading_3'`,没有 heading 块型。标题占一条硬行、独立成块;Enter/Shift+Enter 在后面续正文块,长标题视觉换行不另造单位。改字号/行高时标题随 Typography 同步。
+- **章操作**:章由标题和后续块序派生,截止下一个同级或更高层标题。删标题块只解散章,不删后文;拖标题旁的章把手搬整章,一次撤销/重做覆盖整批。标题前的文字是前言,缺级不造虚拟章。折叠箭头只改变本次阅读呈现,不存章节归属或折叠字段;隐藏正文不参与阅读分页,展开恢复。已有空页保留;打印仍包含完整正文。
+- **标题导航**:左侧 Navigation→Headings（标题树）,点击标题跳到章锚,阅读位置变化时当前章高亮;隐藏目标先展开再跳。标题与层级随编辑刷新,无需重载。Chapter numbers 开关控制派生编号,不改正文。agenda 是同一标题投影的接口,目录页未实装。
+- **封面与边界**:封面题名/述名仍属笔记身份,封面正文不提供标题升格,也不进入正文章树或 agenda;既有服务端封面白名单仍按 text 家族读取,本单没有增加服务端角色禁令。块正文改写继续走 text-save 门(`PUT /note-blocks/:id/text-save`);**Agent 零笔记直写权**(宪法③,14.4 note_patch 仅提案,人门采纳),不接章级动词——Agent 侧生成笔记的唯一路仍为 organized_note 提案。
+- **纸型自动分页(A1)**:A4/Letter 等纸型中,在流且 auto 的块按正文顺序灌入所属页叠。文字到版心底部按完整渲染行续到下一页,需要时自动续页;同一个逻辑块可以显示在多页,正文仍只存一份。最小例:在 A4 笔记输入一段长正文,超过下墙后继续写,后文自动出现在下页。Web 长页保持单帧向下生长,不转为分页纸。
+- **改版与页籍**:通过「笔记外观」改字号/行高/纸型,或进入 Layout 态调四界墙,会重新分页;每页可用自己的纸型和边距,跨页文字按目标页现宽重新换行。自动宽度来自该页现版心,储存的 x/y/width 不因分页被重写;块的 `frame_id` 只随首片换籍,经既有 placement 门保存。分片范围、后续片位置与行盒是派生数据,没有独立正文或分片写入 API。
+- **跨片编辑**:在任意一片上编辑仍修改原逻辑块;片尾/片头的方向键继续穿行,跨页选区可复制和删除,撤销/重做后重新分页。块把手、标注章等可点击附属件随首片显示,同一件不会在每片重复出现。编辑面、Overview 和打印共用本次分页结果。
+- **整块与溢出**:媒体、投影、组件本版不切片;当前页放不下时整块移到下一页。高于整页版心的块独占一页,保留完整高度并报告结构化溢出,不会静默裁短;应调整块尺寸或该页纸型后再检查成品。
+- **自由摆放与墨水**:manual 块和非流覆盖件保持现有摆放,不随正文重排。墨水属于原页,文字跨页或首片换籍都不迁移墨水。正文回缩后既有页帧保留,以免连带删除原页墨水或手摆内容;空页不表示正文被复制。
+
+- **图片编辑(B5,2026-09-20)**:选中纸面媒体图块→块控制条「编辑图片」→拖动原图定位,用 Zoom 滑杆/滚轮/捏合裁剪,「Rotate 90°」按 0/90/180/270° 顺时针旋转,「Reset」恢复原图。取景保持当前图像或已存窗口的比例,旋转时窗口一起转,暂不提供自由改比例。Esc/Cancel 取消草稿,Save 才保存;失败保留草稿供重试,原图不改写。一次保存进入既有笔记撤销/重做栈;浮层中快捷键不触发背后笔记撤销,关闭后沿原快捷键撤销/重做。只读投影没有编辑入口。
+- **图片参数与消费面**:复用 `PUT /api/note-blocks/:id {metadata:完整metadata}`;只更新 `metadata.media.edit_v1`,其他 metadata 与 `asset_id/naturalWidth/naturalHeight/alt` 保留。例 `{crop:{x:25,y:25,w:50,h:50},zoom:2,rotation:90}`:crop 是旋转后原图包围盒的百分比,窗口不超出 0–100%,w/h>0;zoom=null 或 1–3。crop 非 null 时窗口为准,zoom 仅记编辑姿态,不二次放大;crop=null 时 zoom 派生居中缩放,null zoom 为全图。edit_v1 缺省/null=零编辑,旧媒体零迁移;Reset 保存 null,撤销可恢复编辑前的缺省状态。纸面、Overview 与页面导航缩略共用 MediaBlockProjection,等比呈现裁剪图,不改块布局或资产。**打印与导出预览仍是媒体占位,不输出图像**;本单未新增图像导出、行内媒体或装饰贴纸,未接 image_object_extensions。
+
+- **引文与提示框(B3,2026-09-20)**:选中段落→块工具条「引」(段落样式)→选「引文」或「提示框」→保存。引文显示「引」字签、浅底与右对齐纯文本出处;提示框显示虚线、浅暖底与可改标签(默认「注」)。选「正文」清除本块样式。出处可换行、最多1000字符,标签最多32字符;Esc/取消不保存,Ctrl+Enter/Cmd+Enter 保存,失败保留草稿。一次保存进入既有撤销/重做栈,正文仍在原段落中编辑。
+- **样式存法与分页**:复用 `PUT /api/notes/:id/block-placements/:placementId {display_overrides_json:完整覆写对象}`;仅增删对象内 `paragraph_furniture_v1` 键,例 `{variant:'quote',source:'范仲淹《岳阳楼记》'}` 或 `{variant:'callout',label:'冷知识'}`。其余覆写保留,不新增块型、不改 TextFlow 正文。在流长段按 A1 继续分页,每片有底纹/边线,字签或标签只在首片、出处只在末片;版面为装饰留出空间,不改存储坐标。纸面、缩略投影及打印跟随当前皮。
+- **绢本与表头线(B3)**:「笔记外观」→皮预设「绢本」,沿用全局→Project→本页的三级继承与套装机制;亮暗主题切换时桌面及纸色随绢本亮暗表变化。「部件」中表头分隔线可调显示/隐藏、长短(满幅/版心/短线)、样式(实线/虚线/点线),颜色随皮;不改变四界墙。无封面时显示在题名带下缘,有封面时题名带退出。打印首张无封面内容页带冻结题名/述名及分隔线,为保持原页数,该页正文整体略缩以容纳题名带;后页比例不变。导出前按目标纸型检查首张成品。
+
+- **原生表格(B1,2026-09-20)**:笔记底部工具条→「+ 插入」→「表格」打开表格浮层,保存后入纸;双击现有表格重开。可改 caption、每格文字、增删行列及切换「Header row」。Esc 取消本次草稿,Ctrl+Enter(或 Cmd+Enter)保存。一次保存把全部单元格与结构变更合为一次现役撤销/重做;新建表格也可撤销。失败保留浮层草稿供重试。表头关闭时降为首数据行,打开时首数据行升为表头;已有 64 数据行时须先删一行才能关闭表头。
+- **CSV/TSV 导入**:在编辑器的单元格粘贴多行 CSV/TSV,自动替换整个网格并保留 caption;也可展开「Import CSV / TSV」粘贴后点导入。表头开关决定首导入行是否作表头。解析优先采用引号外的制表符,否则逗号;支持双引号包裹逗号/制表符/换行、双引号转义、CRLF/LF 与首字节 BOM。短行补空字符串;未闭引号、超限等错误显示提示并保留原网格,不截断导入。
+- **表格 API 与边界**:`POST /api/notes/:id/blocks` body=`{block_type:'table',content_json:{caption:'新法表',headers:['新法','措施'],rows:[['青苗法','春贷秋还']]}}`;编辑走既有 `PUT /api/note-blocks/:id {content_json:完整表格,plain_text:null}`。媒体族、模板 `media.table`;真相仅为 `content_json` 的 caption?/headers/rows。1–64 列、0–64 数据行(可另有一行表头),表头与数据至少一行,各数据行列数必须一致,caption+表头+全部单元格总量≤65536 UTF-16 code units。`headers:[]` 表示无表头;单元格只存纯文本,允许换行,没有公式求值、合并单元格、列类型或单元格内 TextFlow/Item 锚。
+- **表格阅读、分页与检索**:表格字体随正文 Typography 低 2px,表头底纹、隔行底色和发丝线随皮 token。宽表仅块内横滚,不撑宽纸面。默认在流表格共用 A1 整块规则:能容纳则原页,页尾放不下则整块下移,超高独占一页并报告 `indivisible_block_exceeds_page`,不跨页断行;封面/manual 表格沿既有自由布局。编辑面、Overview、页面导航与打印共用 flow plan 和表格组件。打印/导出按块宽从左侧裁切宽表,不打印滚动条,超高仍显示既有溢出提示;成品前应调整内容或纸型检查裁切。纸内 Navigation→Results 可搜 caption、表头及各格当前已保存文本。
+- **表格 Agent 读面(B1 补遗一)**:`read_note` 保留实际 `kind:'table'`,仅在既有 `text` 键扁平输出:非空 caption 一行、非空 headers 制表分隔一行、rows 逐行制表分隔;caption/单元格内部 CRLF、TAB、CR、LF 替为空格。它是可检阅的有损文本投影,没有新增结构化 rows/headers 输出键;结构化投影槽归 C 波 14.3/14.4 注册表批,本单未接写动词。
+
+- **内置组件(B2,2026-09-20)**:组件块是第四族,`block_type:'component'`,内容只存 `{component_kind,params}`。内置件为手工闭集 `timeline`、`chart_bar`、`chart_line`;未知 kind 显示名称与「未注册组件」占位,保留原数据。没有动态加载、自由 HTML 或图表 DSL;**内置件=闭集,自由组件候产房**。组件不进入封面住户白名单。
+- **时间线编辑**:笔记底部工具条→「+ 插入」→「时间线」新建,双击已有时间线重开浮层。可改标题、逐条 year/label/detail、增删条目、上下移动。阅读时点条目展开/折叠 detail,仅改变呈现,不保存折叠字段。Esc 取消草稿,Ctrl+Enter/Cmd+Enter 保存;一次保存进入现役撤销/重做栈,保存失败保留草稿。参数例:`{component_kind:'timeline',params:{title:'宋初年表',entries:[{year:'960',label:'北宋建立',detail:'陈桥兵变后建宋'}]}}`。条目 1–64 条,year/label 为必需纯文本,detail/title 可选。
+- **图表编辑**:工具条→「+ 插入」→「柱图」或「折线图」打开浮层,双击已有图表重开。表格式网格可编辑横轴标签、系列名称与各数值,增删列和系列,另可改标题与纵轴标签;保存/取消/撤销规则同时间线。参数例:`{component_kind:'chart_bar',params:{title:'收入示意',x_labels:['前期','后期'],series:[{name:'田赋',values:[70,40]},{name:'工商',values:[30,60]}],y_label:'比例'}}`。1–32 点、1–4 系列,每组 values 数量必须等于 x_labels,数值须有限,支持零、负数及小数。bar/line 共用 SVG 轴、刻度、图例与数值标注,颜色从当前皮的强调/中性 token 派生。
+- **组件边界、分页与读面**:已知 params 只接受声明字段;标题、年份、标签、详情、轴名及系列名合计≤65536 UTF-16 code units。沿 A1 媒体整块规则:原页能放则原页,页尾放不下整块下移,超高独占并报告溢出,不切片。纸面、Overview、页面导航与打印共用组件及 flow plan;时间线在静态投影/打印中保留初始折叠,不强制展开详情改变分页高度。Navigation→Results 检索已保存的时间线详情/条目和图表标题/标签/系列名。`POST /api/notes/:id/blocks {block_type:'component',content_json:完整payload}` 创建,编辑仍走既有 `PUT /api/note-blocks/:id {content_json:完整payload,plain_text:null}`;无新增 Agent 写动词。`read_note` 的 kind 保持 `component`,既有 text 键按行扁平投影,字符串内部 CRLF/TAB/CR/LF 替为空格:时间线为标题+逐条年份/标签/详情,图表为标题/轴名/横轴标签+逐系列名称/数值。没有新增结构化输出键,结构化槽仍候 C 波。
+- **组件成品检查**:Overview/打印的新投影实例不继承纸面的时间线展开态;若阅读时已展开并测高,静态面会保留 flow plan 中的预留高度而出现留白。图表长横轴标签最多显示三行,余文省略,完整文字保留于 SVG 描述和检索;宽图打印缩放至块宽,点数较多时字号会缩小。应按目标纸型检查成品可读性。
+
+- **装订面(A2)**:笔记底部工具条→「装订」。打开「显示装订」后,选装订段、手填眉左/中/右与脚左/中/右文案;页码默认占脚中,可换到任一槽。页码占用槽的手填文案暂不显示,移走或关闭页码后恢复。施工默认开,可整体关闭;页眉页脚与页码也可分别关闭。
+- **装订段与双页码**:首段从机械第 1 页到末页。「新增段」从上一段起点下一页建立新段,可调「起始机械页」;段结束于下一段起点前一页,最后一段覆盖余页。删除非首段后,前段接管其页区间。机械页序只供寻址,不可改;显示起始数可设,制式为阿拉伯/小写罗马/大写罗马。模板只编辑前后缀,中间 N 必留。例:第 3 页新段、起始数 4、罗马大写、前后缀「[」「]」,该页显示 [IV]。换纸型、异形页或 A1 重新分页后自动按当前机械序重投影;段界超出现有页数时留待后续页面,不制造空页。
+- **槽位与样式**:展开某槽可调横移/纵移,单位为纸面逻辑 px;字体/颜色默认继承皮,可逐槽改字族、字号、字重、颜色 token 与斜体。「恢复皮样式」清除该槽覆写。点「保存装订」生效;失败保留输入供重试,取消不写。文案不会自动吸收章名。
+- **装订 API**:`GET /api/notes/:id/binding-settings` 返回 `{binding_settings:null|配置}`;`PUT` 同路径 body=`{binding_settings:配置|null}`。设置住笔记级 `notes.binding_settings_json`,页帧/正文不存副本;null 读为施工默认单段。最小配置可由 `shared/types/noteBinding.ts` 的 `createDefaultNoteBindingSettings()` 取得。A3 使用 v2 配置并兼容 v1;通用 Note 与 Agent 工具响应保持既有形状。
+- **封面页(A3)**:底部「装订」→「添加封面页」,在首内容页之前建立机械第 0 页。封面不显示页眉、页脚和页码,首内容页仍从机械第 1 页起算显示计数。封面全 manual,文字与媒体可自由摆放;组件块不能放入封面,A1 正文不会流入封面。有封面时旧表头标题带退出,无封面时保留原题名/述名输入。
+- **题名件与述名件**:装订面中的「添加题名件」「添加述名件」各添加一个可摆放的真相绑定块;同一封面重复添加聚焦既有件。退档后重建封面可添加新投影,已移交首页的旧投影保留。直接编辑块内文字即修改笔记题名或述名,投影随笔记字段更新,不另存块正文。删除块只移除投影。API 复用 `POST /api/notes/:id/blocks`,body=`{block_type:'note_ref',content_json:{field:'title'}}`(述名用 `description`),随后走既有 placement 门放入封面;改字仍走 `PUT /api/notes/:id {title|description}`。封面的文字与绑定字段可在纸内搜索中命中。
+- **封面图与导出**:在装订面选择封面图或「调整封面取景」,拖动与缩放后保存装订。card/page 两种取景共用同一原图,裁剪只存框参数;page 框随纸型满幅衬底,文字浮在其上。旧卡面封面可直接成为纸页衬底,不用再上传。封面图及框参数统一住 v2 装订 JSON,卡面继续读原有槽的投影。导出默认带封面,取消「导出包含封面」后保存即排除;Overview 仍可查看封面。
+- **移除封面页**:装订面→「移除封面页」。封面上的块和墨水移交首内容页,存储坐标及原图保留,题名/述名真相不删除;移交后的自由块可能重叠,可进入 Layout 整理。添加/移除封面的 API 在同一个 `PUT binding-settings` 请求中携 `collection`(既有页帧集合),与封面身份变化原子提交;返回 `canvas_persistence` 供当前界面刷新。
+- **封面/装订预设(T7,2026-09-21)**:封面必须先有封面页,之后封面语境出现「手册式」「简明式」两款版式按钮——套用只产普通 `note_ref {field}`+manual placement(题名述名⛔复制成文本,后续编辑仍写笔记真相),套后一切可继续编辑,预设是起点⛔锁定;装订面板另有「手册式装订」一键(眉中=套用时笔记题、脚中=第 N 纸、脚右可填),走现役 PUT 落库,保留 cover/coverPage。预设目录=`shared/types/notePresets.ts` 静态出厂件,零持久化表。**设计室→模板抽屉**已从占位转三款只读库存(缩略即预览,⛔抽屉内套用——套用动作只住笔记语境)。
+- **折缝(A2)**:「View options / 视图」中的「Fold page gaps（折叠页间空白）」或纸页之间的开合按钮,切换连续纸面阅读与显缝阅读。它压缩页帧间空白,保留页高与四界墙,不改正文、分页、manual 块或墨水存储坐标;状态只属于当前笔记的阅读视图。Overview 缩略图、打印始终使用原页几何和装订设置。Web 长页没有页间缝,该开关隐藏。
+
+## 二 · 上传:先想清楚去哪座库(翻车条目 #2)
+
+- 要走 **Note Proposal/材料地图/Agent 文档检索** → 材料库:`POST /api/documents/upload`(multipart: file+course_id);
+- 要走 **引用源/快照/重投影** → Source Library:`POST /api/sources/upload`(multipart: file+course_id+origin_entry_kind:'project_upload'|'library_upload');
+- **一致性警示(2026-11-01 更新)**:给 Agent/项目材料让它"用",走 Source Library 即可(F3 桥+F5 检索已通);材料库 legacy 门仍在但 UI 无入口且停喂(TD-43),⛔新流程依赖它。
+- **Source 阅读视图(1a、1a-乙,2026-11-05)**:PDF、docx 投影笔记有「文本/原页」切换,文本视图在右上角悬浮,原页视图在页头。原页可用且本标签页没有记忆时默认进原页;还在生成且读者未滚动时,第一页到达才切。切换记忆只在当前标签页内,刷新后回默认。docx 经服务端转 PDF 后走同一条页影像通路,需配置 `COINCIDES_DOCX_PDF_COMMAND_JSON`;未配置时没有切换入口,`POST /api/sources/:id/pages/generate` 返回 409 `source_pages_converter_unavailable`。旧文件在原页层点生成按钮补页。
+- **原页视图的边界**:只能看和跳。批注、选字、组、铸 item 都在文本视图;已有批注默认不可见,页面无提示。Ctrl+P 打的是文本投影,公式照丢,要原样打印请下载原件。原页下 Agent 拿不到读者所在页(TD-46)。
+,文本视图显示代码不渲染,要看排好版的切原页。无公式文档输出不变。旧文件要在 **Source Library 行尾 Rebuild** 才更新,项目页没有这个入口,重传同一文件会去重不生效。Rebuild 的代价:笔记 ID 变,批注不迁入(留快照回执),标签、链接、外观不保留,弹窗列计数。
+- **Layout 与只读笔记**:Layout 开着进只读笔记会自动关,回可编辑笔记可再开。
+- **内容丢失提示**:mammoth 有转换消息时(样式未定义类已过滤),Source 行出徽标、详情出提示,投影笔记文本视图顶部出横幅「本件有内容未能完整转换」,不带数字。原页视图不显示横幅。只有告警不等于真丢内容;消息在发布时写入投影笔记 `metadata.parser_messages`,旧 docx 重投影后才有。
 - **格式现状**:PDF、docx 文本投影 + 原页;md、txt 只有文本投影(标题层级、列表、围栏缺口见 TD-48);图片投影正文目前是空的(A-19,09-12 起渲染层缺失),原件可下载;pptx、xlsx、csv 只存不读;html 按文本切段。zip 展开后子文件自动解析,原生解析最多同时 3 个。
 
 ## 三 · 提案生命周期

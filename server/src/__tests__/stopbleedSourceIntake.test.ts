@@ -71,7 +71,6 @@ function storedZip(entries: Array<[string, string | Buffer]>): Buffer {
 }
 
 const WORD_NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"';
-const MATH = '<m:oMath><m:r><m:t>x+1</m:t></m:r></m:oMath>';
 
 function docx(body: string): Buffer {
   return storedZip([
@@ -81,7 +80,8 @@ function docx(body: string): Buffer {
   ]);
 }
 
-const MATH_DOCX = docx(`<w:p><w:r><w:t>PV = </w:t></w:r>${MATH}<w:r><w:t> = </w:t></w:r>${MATH}</w:p>`);
+// Formulas no longer warn, so this reaches mammoth's warnings through an element it does not know.
+const WARNED_DOCX = docx('<w:p><w:r><w:t>Body text.</w:t></w:r><w:unknownThing/></w:p>');
 const PLAIN_DOCX = docx('<w:p><w:r><w:t>Plain paragraph.</w:t></w:r></w:p>');
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
@@ -195,15 +195,40 @@ function noteMetadata(db: Db, noteId: string): Record<string, unknown> {
   return JSON.parse((db.prepare('SELECT metadata FROM notes WHERE id = ?').get(noteId) as { metadata: string }).metadata);
 }
 
-test('a docx with swallowed formulas records the messages and the detail reports them', async (t) => {
+test('a docx with content mammoth could not read records the messages and the detail reports them', async (t) => {
   const f = await fixture(t);
-  const { source } = await f.upload('math.docx', MATH_DOCX, DOCX_MIME);
+  const { source } = await f.upload('math.docx', WARNED_DOCX, DOCX_MIME);
   await materializeSourceNow(f.db, f.userId, source.id);
   const detail = getSourceRecordDetail(f.db, f.userId, source.id);
   assert.equal(detail.materialization.has_parser_messages, true);
   const messages = noteMetadata(f.db, detail.materialization.projection_note_id!).parser_messages as Array<{ type: string; message: string }>;
   assert.equal(messages[0].type, 'warning');
-  assert.match(messages[0].message, /oMath/);
+  assert.match(messages[0].message, /unknownThing/);
+});
+
+test('undefined paragraph and run styles alone report nothing', async (t) => {
+  const f = await fixture(t);
+  const { source } = await f.upload('styles.docx', docx(
+    '<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:rPr><w:rStyle w:val="Strong"/></w:rPr><w:t>Styled.</w:t></w:r></w:p>',
+  ), DOCX_MIME);
+  const published = await materializeSourceNow(f.db, f.userId, source.id);
+  assert.equal(published.status, 'materialized', published.error_message ?? undefined);
+  const detail = getSourceRecordDetail(f.db, f.userId, source.id);
+  assert.equal(detail.materialization.has_parser_messages, false);
+  assert.equal('parser_messages' in noteMetadata(f.db, detail.materialization.projection_note_id!), false);
+});
+
+test('a real warning still reports next to a style one, and only the real one is kept', async (t) => {
+  const f = await fixture(t);
+  const { source } = await f.upload('both.docx', docx(
+    '<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Text.</w:t></w:r><w:unknownThing/></w:p>',
+  ), DOCX_MIME);
+  await materializeSourceNow(f.db, f.userId, source.id);
+  const detail = getSourceRecordDetail(f.db, f.userId, source.id);
+  assert.equal(detail.materialization.has_parser_messages, true);
+  const messages = noteMetadata(f.db, detail.materialization.projection_note_id!).parser_messages as Array<{ message: string }>;
+  assert.equal(messages.length, 1);
+  assert.match(messages[0].message, /^An unrecognised element was ignored: .*unknownThing/);
 });
 
 test('plain docx and text carry no key at all and report nothing', async (t) => {
@@ -219,7 +244,7 @@ test('plain docx and text carry no key at all and report nothing', async (t) => 
 
 test('an older docx projection gains the record through one rebuild, and a lost projection reports nothing', async (t) => {
   const f = await fixture(t);
-  const { source } = await f.upload('old.docx', MATH_DOCX, DOCX_MIME);
+  const { source } = await f.upload('old.docx', WARNED_DOCX, DOCX_MIME);
   await materializeSourceNow(f.db, f.userId, source.id);
   const first = getSourceRecordDetail(f.db, f.userId, source.id).materialization.projection_note_id!;
   const older = noteMetadata(f.db, first);

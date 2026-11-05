@@ -1,0 +1,6 @@
+ARM: working tree after F2, targeted suites
+# tests 72
+# pass 72
+# fail 0
+--- tsc server
+exit 0

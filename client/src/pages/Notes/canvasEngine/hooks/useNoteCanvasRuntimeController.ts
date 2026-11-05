@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
@@ -53,6 +53,7 @@ export function useNoteCanvasRuntimeController() {
     beginTemporaryLayoutMode,
     blockListRef,
     clearTemporaryLayoutMode,
+    disableLayoutMode,
     clearBlockSelection,
     closeOverlay,
     focusBlockId,
@@ -213,6 +214,12 @@ export function useNoteCanvasRuntimeController() {
     hostMode,
   });
   presetScope.current = { noteId, generation: textHistoryGeneration };
+
+  // The runtime is not remounted between notes, so Layout can follow the reader into a
+  // read-only note, whose Layout button is disabled and could never turn it off.
+  useEffect(() => {
+    if (layoutMode && sourceProjectionPolicy.contentReadOnly) disableLayoutMode();
+  }, [layoutMode, sourceProjectionPolicy.contentReadOnly, disableLayoutMode]);
 
   const walls = usePageFrameWalls({
     noteId, generation: textHistoryGeneration, enabled: layoutMode && surfaceMode === 'page' && !loading && !sourceProjectionPolicy.contentReadOnly,

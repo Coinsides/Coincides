@@ -26,6 +26,7 @@ const rootBridgeContract = vi.hoisted(() => ({
   contentWidth: 0,
   loading: true,
   layoutMode: false,
+  disableLayoutMode: vi.fn(),
   contentReadOnly: false,
   wallOptions: null as { enabled: boolean; boundary: () => boolean } | null,
   note: undefined as { id: string; metadata?: Record<string, unknown> } | undefined,
@@ -65,6 +66,7 @@ vi.mock('./useRuntimeSurfaceStateController', async () => {
       return new Proxy({
         ...surface,
         layoutMode: rootBridgeContract.layoutMode,
+        disableLayoutMode: rootBridgeContract.disableLayoutMode,
         markBlockSelected: rootBridgeContract.markBlockSelected,
         setFocusBlockId: rootBridgeContract.setFocusBlockId,
         blockListRef,
@@ -398,6 +400,19 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     expect(rootBridgeContract.markBlockSelected).toHaveBeenCalledExactlyOnceWith('current-binding');
     expect(rootBridgeContract.setFocusBlockId).toHaveBeenCalledExactlyOnceWith('current-binding');
     expect(tray.canvas_layout).toMatchObject({ surface: 'tray', frame_id: 'rebuilt-cover' });
+  });
+
+  it('turns Layout off when it follows the reader into a read-only note, and only there', () => {
+    rootBridgeContract.disableLayoutMode.mockClear();
+    rootBridgeContract.layoutMode = true;
+    const view = render(<RootBridgeHarness />);
+    expect(rootBridgeContract.disableLayoutMode).not.toHaveBeenCalled();
+    rootBridgeContract.contentReadOnly = true;
+    view.rerender(<RootBridgeHarness />);
+    expect(rootBridgeContract.disableLayoutMode).toHaveBeenCalledTimes(1);
+    rootBridgeContract.contentReadOnly = false;
+    rootBridgeContract.layoutMode = false;
+    view.unmount();
   });
 
   it('gates both wall hook and runtime boundary with the current Layout state', () => {

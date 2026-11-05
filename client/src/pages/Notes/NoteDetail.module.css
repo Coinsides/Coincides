@@ -1128,6 +1128,17 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .noteToolbarActions .modePill { min-height: 28px; font-size: 12px; padding: 0 8px; }
 .noteToolbarActions .sourceProjectionLock { color: var(--text-secondary); border-color: var(--border-subtle); }
+/* Zero height, so the text below keeps its exact position in this view. */
+.sourceViewFloat {
+  position: sticky;
+  top: 8px;
+  z-index: 30;
+  display: flex;
+  justify-content: flex-end;
+  height: 0;
+  padding-right: 16px;
+}
+.sourceViewFloat .sourceViewToggle { align-self: flex-start; background: var(--bg-primary); }
 .sourceViewToggle {
   display: inline-flex;
   flex: none;

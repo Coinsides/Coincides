@@ -1,0 +1,5 @@
+ARM: working tree after V1 and F1, full client suite
+ Test Files  251 passed (251)
+      Tests  2588 passed (2588)
+--- every red entry, verbatim
+(none)

@@ -143,6 +143,7 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     activeBlockId,
     blockListRef,
     clearTemporaryLayoutMode,
+    disableLayoutMode,
     clearBlockSelection,
     closeOverlay,
     focusBlockId,

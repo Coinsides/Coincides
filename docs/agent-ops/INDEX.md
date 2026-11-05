@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 451 份文档。
+共 454 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -439,6 +439,9 @@
 | [handoffs/2026-11-02-fidelity-1a-original-page-view-order.md](handoffs/2026-11-02-fidelity-1a-original-page-view-order.md) | 保真 1a · 页影像层 + 原页视图(PDF 第一期) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-03-stopbleed-four-order.md](handoffs/2026-11-03-stopbleed-four-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-04-fidelity-1a2-docx-pages-snapshot-order.md](handoffs/2026-11-04-fidelity-1a2-docx-pages-snapshot-order.md) | (无标题) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-05-a18-first-block-text-loss-order.md](handoffs/2026-11-05-a18-first-block-text-loss-order.md) | (无标题) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md](handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md) | (无标题) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md](handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

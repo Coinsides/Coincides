@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SourcePageViewController } from '../hooks/useSourcePageViewController';
-import { SourceViewToggle } from './SourceViewToggle';
 import type { ChangeEvent, RefObject } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note, NoteBlock } from '../runtimeDataTypes';
@@ -46,7 +45,6 @@ export interface SurfacePolicyView {
 }
 
 export interface NoteChromeLayerProps {
-  sourcePageView?: SourcePageViewController;
   bindingError?: string | null;
   onRetryBinding?: () => void;
   onSaveBindingSettings?: (value: import('@shared/types/noteBinding').NoteBindingSettings, collection?: PageFrameCollectionModel) => Promise<void>;
@@ -124,7 +122,6 @@ export function NoteChromeLayer({
   blockTrashLoading,
   contentReadOnly,
   sourceLocked,
-  sourcePageView,
   exportPreview,
   layoutMode,
   layoutModeKind,
@@ -420,7 +417,6 @@ export function NoteChromeLayer({
           {sourceLocked && <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
             <LockKeyhole size={13} /> Source locked
           </span>}
-          {sourcePageView?.available && <SourceViewToggle view={sourcePageView} pagesDisabled={layoutMode} />}
             <button
               className={`${styles.modePill} ${showExportPreview ? styles.modePillActive : ''}`}
               onClick={onToggleExportPreview}

@@ -1,0 +1,57 @@
+All arms: scratch copy, test files unchanged. Shared tree not swapped.
+
+ARM baseline client
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+
+ARM V1: no floating toggle in the text view
+ FAIL  src/pages/Notes/canvasEngine/NoteCanvasRuntime.sourceView.test.tsx > getting back to the original pages from the text > offers the pages control in the text view, 
+ FAIL  src/pages/Notes/canvasEngine/NoteCanvasRuntime.sourceView.test.tsx > getting back to the original pages from the text > holds the manual choice through a later reg
+ Test Files  1 failed (1)
+      Tests  2 failed | 4 passed (6)
+
+ARM baseline server
+# tests 32
+# pass 32
+# fail 0
+
+ARM F1-A: the conservation guard always passes
+not ok 23 - an unknown structure gives up its text, and no m:t is ever dropped
+# tests 32
+# pass 31
+# fail 1
+
+ARM F1-B: a handler failure is not caught
+not ok 28 - any failure in formula handling returns the original
+# tests 32
+# pass 31
+# fail 1
+
+ARM F1-C: the parser does not call the formula handler
+not ok 30 - through the real publish: the note reads the formula, no = =, no warning banner
+not ok 32 - an older note gets the formula through one rebuild, on a new note
+# tests 32
+# pass 30
+# fail 2
+
+ARM V1-Layout: Layout is not turned off on a read-only note (scratch copy, final code otherwise; baseline run first)
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+ FAIL  src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx > useNoteCanvasRuntimeController Page runtime assembly after bridge removal > turns Layo
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+
+ARM F2-A: scratch copy, no style filter
+not ok 5 - undefined paragraph and run styles alone report nothing
+not ok 6 - a real warning still reports next to a style one, and only the real one is kept
+# tests 11
+# pass 9
+# fail 2
+
+ARM F2-B: scratch copy, the filter also drops the unrecognised-element message
+not ok 4 - a docx with content mammoth could not read records the messages and the detail reports them
+not ok 6 - a real warning still reports next to a style one, and only the real one is kept
+not ok 8 - an older docx projection gains the record through one rebuild, and a lost projection reports nothing
+# tests 11
+# pass 8
+# fail 3

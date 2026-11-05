@@ -1,0 +1,26 @@
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+not ok 4 - scripts\\v14OwnershipContract.test.ts
+not ok 295 - media create stores metadata in a NoteBlock, replays its receipt, and discard releases the last asset
+not ok 297 - image edits round-trip through the existing metadata save door without changing the asset
+not ok 298 - media delete keeps another block reference, restores while shared, and releases the final blob
+not ok 299 - replacing media metadata releases the previous asset and malformed changes leave the reference intact
+not ok 300 - archived blocks and trashed Notes retain media references until their block or container is removed
+not ok 301 - Note cleanup preserves a shared block placement and reclaims an upload that never acquired a block
+not ok 302 - Project cleanup counts media references across Projects and rolls back without unlinking blobs
+not ok 303 - caller-owned update rollback preserves assets; committed cleanup uses the existing queue
+not ok 304 - media reclamation includes the existing image-extension and Board visual references
+not ok 305 - media physical cleanup failure leaves a retryable managed job after the database release
+not ok 306 - ordinary HTTP media create, edit, reopen, reset and delete use NoteBlock routes and reclaim the blob
+not ok 508 - original live specimen replays byte-for-byte with prior successful save receipts and zero flags
+not ok 1146 - T-1 manifest copy recreates a missing dist target byte-for-byte
+# tests 1301
+# pass 1286
+# fail 15
+--- rerun of the environment reds with CANVAS_ASSET_DIR, npm_execpath and .eval-runs
+# tests 30
+# pass 29
+# fail 1
+--- ownership contract with a real shared/dist
+# tests 12
+# pass 12
+# fail 0

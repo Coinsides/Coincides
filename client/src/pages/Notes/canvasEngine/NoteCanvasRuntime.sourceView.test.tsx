@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { documentKey, useDocumentTabsStore } from '@/stores/documentTabsStore';
 import NoteCanvasRuntime from './NoteCanvasRuntime';
@@ -68,6 +68,43 @@ describe('source view while the route moves between projections', () => {
     expect(memory('b')).toEqual({ mode: 'pages', page: 1 });
     act(() => mocks.view?.rememberPage(4));
     expect(memory('b')).toEqual({ mode: 'pages', page: 4 });
+  });
+});
+
+describe('getting back to the original pages from the text', () => {
+  // The note toolbar is mocked out above, so these find the control only if it lives outside it.
+  it('offers the pages control in the text view, and a click returns to the pages', async () => {
+    useDocumentTabsStore.getState().open({ kind: 'note', id: 'a', title: 'A' });
+    render(runtime('a'));
+    await waitFor(() => expect(mocks.view?.active).toBe(true));
+    expect(screen.queryByRole('button', { name: 'sourcePages.pagesView' })).toBeNull();
+    act(() => mocks.view?.setMode('text'));
+    fireEvent.click(screen.getByRole('button', { name: 'sourcePages.pagesView' }));
+    expect(mocks.view?.active).toBe(true);
+    expect(memory('a')?.mode).toBe('pages');
+    expect(screen.queryByRole('button', { name: 'sourcePages.pagesView' })).toBeNull();
+  });
+
+  it('holds the manual choice through a later register read', async () => {
+    useDocumentTabsStore.getState().open({ kind: 'note', id: 'a', title: 'A' });
+    render(runtime('a'));
+    await waitFor(() => expect(mocks.view?.active).toBe(true));
+    act(() => mocks.view?.setMode('text'));
+    act(() => mocks.view?.reload());
+    await waitFor(() => expect(mocks.read).toHaveBeenCalledTimes(2));
+    await act(async () => { await Promise.resolve(); });
+    expect(mocks.view?.active).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'sourcePages.pagesView' }));
+    expect(mocks.view?.active).toBe(true);
+  });
+
+  it('offers nothing where the Source has no pages', async () => {
+    mocks.read.mockResolvedValue({ ...pages('a'), supported: false, status: 'none', expected: 0, completed: 0, pages: [] });
+    useDocumentTabsStore.getState().open({ kind: 'note', id: 'a', title: 'A' });
+    render(runtime('a'));
+    await waitFor(() => expect(mocks.read).toHaveBeenCalled());
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.queryByRole('button', { name: 'sourcePages.pagesView' })).toBeNull();
   });
 });
 

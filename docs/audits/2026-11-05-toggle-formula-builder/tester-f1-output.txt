@@ -1,0 +1,65 @@
+F1 全结构
+分式：$\frac{C}{i}$ 句尾。
+嵌套分式：$\frac{1}{\frac{1}{1+x}}$ 句尾。
+线性分式：$x/y$ 句尾。
+斜分式：$x/y$ 句尾。
+无线分式：${x \atop y}$ 句尾。
+上标：${x}^{2}$ 句尾。
+下标：${x}_{i}$ 句尾。
+上下标：${x}_{i}^{2}$ 句尾。
+前置：${}_{i}^{n}{x}$ 句尾。
+根号：$\sqrt{{σ}^{2}}$ 句尾。
+n次根：$\sqrt[n]{x}$ 句尾。
+求和：$\sum_{t=1}^{T}{\frac{{C}_{t}}{{\left(1+i\right)}^{t}}}$ 句尾。
+默认积分：$\int_{0}^{1}{x dx}$ 句尾。
+连乘：$\prod_{i}^{n}{x}$ 句尾。
+环积分：$\oint_{C}{x}$ 句尾。
+圆括号：$\left(x\right)$ 句尾。
+方括号：$\left[x\right]$ 句尾。
+花括号：$\left\{x\right\}$ 句尾。
+绝对值：$\left|x\right|$ 句尾。
+条件概率：$\left(x | y\right)$ 句尾。
+尖括号：$\left\langlex\right\rangle$ 句尾。
+单边：$\left\{x²,x≥0\right.$ 句尾。
+函数：$\sin{θ}$ 句尾。
+对数：$\ln{x}$ 句尾。
+自定义函数：$\operatorname{Var}{x}$ 句尾。
+极限：$\lim_{n→∞}{{\left(1+\frac{1}{n}\right)}^{n}}$ 句尾。
+上极限：$\max^{x}{y}$ 句尾。
+矩阵：$\left[\begin{matrix} σ₁² & ρσ₁σ₂ \\ ρσ₁σ₂ & σ₂² \end{matrix}\right]$ 句尾。
+方程组：$\left\{\begin{aligned} x+y=1 \\ x−y=0 \end{aligned}\right.$ 句尾。
+帽：$\hat{β}$ 句尾。
+默认帽：$\hat{β}$ 句尾。
+波浪：$\tilde{θ}$ 句尾。
+上横线acc：$\bar{x}$ 句尾。
+向量：$\vec{v}$ 句尾。
+箭头acc：${v}^{→}$ 句尾。
+点：$\dot{x}$ 句尾。
+上横线bar：$\overline{x}$ 句尾。
+下横线bar显式：$\underline{x}$ 句尾。
+下横线bar无pos：$\overline{x}$ 句尾。
+下括号组：$\underbrace{a+b}$ 句尾。
+上括号组：$\overbrace{a+b}$ 句尾。
+箭头组：$\overbrace{a}$ 句尾。
+box：$x$ 句尾。
+borderBox：$x$ 句尾。
+phant：$x$ 句尾。
+普通文本：$\text{收益率}=\frac{\text{净利润}}{\text{总资产}}$ 句尾。
+希腊与符号：$α β γ ≤ ≥ ≠ ≈ ∈ ∉ ⊂ ∪ ∩ ∞ ∇ ∂ ∀ ∃ ⇒ ⇔$ 句尾。
+特殊字符：$50\% + \$100 \& a\_b \#1 \{c\} \backslash d <e> ^f ~g$ 句尾。
+空底：${}^{2}$ 句尾。
+一段两式：$x$ 与 $y$。
+Henry 路径：PV = $\frac{C}{i}$ = 面值。
+$\frac{a}{b}$ $c=d$
+段内独立式前：$E=mc²$段内独立式后。
+$正文直挂式$
+$正文直挂独立式$
+表内：$tableformula$
+链接内：$linkformula$
+控件内：$sdtformula$
+$insertedformula$
+删除的式子不应出现：。
+式内修订：$keepgoneadded$
+空公式：。
+正文里的美元 $100 和式子 $x$ 同行。
+末句：全结构到此。

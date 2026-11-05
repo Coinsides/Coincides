@@ -307,11 +307,22 @@ function pageStackPayload(frames: ProjectionFramePlan[]) {
   }];
 }
 
-// Kept verbatim; the key is absent when the parser had nothing to report.
+// A style with no definition loses no text. Anything not recognised here still counts,
+// because a message read as harmless by mistake would hide lost content.
+const STYLE_ONLY_MESSAGE = /^\w+ style with ID .* was referenced but not defined in the document$/;
+
+function isStyleOnlyMessage(message: unknown): boolean {
+  const text = (message as { message?: unknown } | null)?.message;
+  return typeof text === 'string' && STYLE_ONLY_MESSAGE.test(text);
+}
+
+// Kept verbatim; the key is absent when the parser had nothing worth reporting.
 function parserMessagesMetadata(artifact: SourceArtifact): { parser_messages?: unknown[] } {
   if (artifact.artifact_kind !== 'document') return {};
   const messages = artifact.metadata.parser_messages;
-  return Array.isArray(messages) && messages.length > 0 ? { parser_messages: messages } : {};
+  if (!Array.isArray(messages)) return {};
+  const kept = messages.filter((message) => !isStyleOnlyMessage(message));
+  return kept.length > 0 ? { parser_messages: kept } : {};
 }
 
 export function publishSourceProjection(
