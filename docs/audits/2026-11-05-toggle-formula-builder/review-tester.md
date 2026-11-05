@@ -47,8 +47,9 @@ Agent 面板打开时切换按钮不可点，但这个面板是带遮罩的模�
 | 无 `= =` | ✅ 全结构样本 65 式、金融讲义、公式压力：都没有 `= =` | `tester-f1-output.txt` |
 | 单据点名的结构 | ✅ 分式、上下标、根号、求和积分、括号、函数、矩阵、重音都对，另测了前置上下标、极限、方程组、线性和无线分式 | 同上 |
 | 字符守恒 | ✅ 我另写的按序核对（去掉转换器加的命令名后比对原始 `m:t`）：只差 `w:del` 里本来就该去掉的内容。第二来源（LibreOffice 重导出的 OMML）65 式 280 字全部保留 | `f1_oracle.mjs` 在 scratch，结论见此 |
-| 无公式文档不变 | ✅ `xml` 不含 `oMath` 时返回同一个 buffer（读码），规整文档投影正常 | |
-| 预处理失败不影响导入 | ✅ builder 的阳性对照已证，我未另造失败 | `positive-controls.txt` |
+| 无公式文档不变 | ✅ 实跑 4 份：返回同一个 buffer，文本与纯 mammoth 逐字相同。**比的是文本和块数，没有和修改前的代码逐块对照 ID**；同一 buffer 进同一 mammoth，这一步是读码推出的 | `f1_diff.mjs` 在 scratch，结论见第八节 |
+| 公式外的文字不变 | ✅ 金融讲义、公式压力、长讲义（126687 字）去掉公式后与纯 mammoth 逐字相同 | 同上 |
+| 预处理失败不影响导入 | ✅ 注入失败：回到原 buffer，mammoth 正常，`oMath` 告警回来。真实抛错见第八节 | 同上，`positive-controls.txt` |
 | 文件形态 | ✅ BOM、无声明头、CRLF、未声明前缀属性、非 `m` 前缀、严格命名空间、注释和 PI、控制字符，都正常转换 | |
 | 特殊位置 | ✅ 表格、超链接、内容控件、修订插入都保留；修订删除的整个公式正确消失；空公式不留 `$$`；同段多式；正文直挂的公式 | `tester-f1-output.txt` |
 | `assertDocxExpansionSafe` | ✅ 对原文件执行（读码：`sourceArtifact.ts:330`） | |
@@ -139,6 +140,38 @@ builder 申报的 Table 样式无端到端测试，这里补上了：带 `styles
 2. `server/package-lock.json` 变了，岛上要 `npm ci`。此后新解析的文档会记录新的转写器指纹（builder 已申报，既有机制）。
 3. **Henry 的旧文档要手动 Rebuild 才有公式**，重传没用。入口只在 Source Library 的行尾图标。代价：批注不迁入（留快照回执），标签、链接、外观不保留，内容组失去实时链接，笔记 ID 变；被其他笔记或白板引用时会被拦住。弹窗会列出计数。**是否对他的文档执行由他本人决定。**
 4. 上岛后我再走一遍：Layout 路径、窄窗口、含公式 docx 新导入、横幅矩阵、一次 Rebuild（只在我自己的账号）。
+
+## 八、补答 Main_Designer 的点名项
+
+这些问题来自一条晚到的短讯，第一版报告没有逐条答。
+
+**全量红按 TD-45 归类**：名单内的条目（`v2SourceMineruWiring`、`v13WildernessExecute`、`useChapterPresentation`、`BoardPage.selection`、`BoardPage.smoke`、`PaginationProjection`）这一轮**都没红**。
+
+**名单外的红有 1 条，要报**：`real empty-claim journey turns red when its collected claim event is removed`（`server/scripts/agent-eval/harness.test.ts`）。
+
+- 期望事件序列含 `turn_receipt`，实际是 `message_meta`。单跑也红，所以不是载荷敏感。
+- 与本单无关：builder 回执里同签名，1a-乙复核时也在。
+- `tech-debt.md` 里没有登记（搜 `agent-eval`、`empty-claim`、`harness.test` 都是 0 处）。建议登记，否则每次全量都要重新解释一遍。
+
+**依赖没有版本漂移**：lock 里 `jszip` 3.10.1、`@xmldom/xmldom` 0.8.11，修改前后相同，只在根依赖多 2 行。岛上 `npm ci` 后实装版本也是这两个。
+
+**`m:acc` 结论**：页影像和文本层都对。U+0302 帽、U+0303 波浪、U+0305 上横线、U+20D7 向量、U+0307 点，缺省按帽，都转成对应命令。`→` 这种没有映射的字符写成 `{v}^{→}`，字符不丢，只是不好看（T-F1-4）。裸 U+0304 合字不是 `m:acc`，在岛上页影像里仍错位，见 round-04 第九节。
+
+**真实预处理抛错**：`xmldom` 很宽容，缺引号、标签错配都不抛，直接转换。3 万层嵌套能让预处理真抛（`Maximum call stack size exceeded`），回退日志也如实打出；但 mammoth 自己接着也解析失败，导入报 `invalid_or_corrupt`。这条是 mammoth 的上限，与本单无关。所以「预处理抛错、导入成功」这个组合我只用注入方式验到，真实文档里没造出来。
+
+**没有 `styles.xml` 且含 `w:tblStyle` 导致导入失败，入 tech-debt 够吗：够，但要把条目写宽。**
+
+- 这个具体触发确实少见。我手边的样本里，LibreOffice 重导出的文件和正常文档都带 `styles.xml`。真实 Word 没法在这里验证，所以「撞不到」只是合理推断。
+- 真正要记的是这一类：**只要 mammoth 抛错，整个 Source 就失败，没有原页，文案还是 `invalid_or_corrupt`，而同一文件 LibreOffice 可能转得出来**。我撞到过两种：`tblStyle` 无 `styles.xml`、裸 `<`；另外 VML、OLE 的悬空 `r:id` 样本也会抛。
+- 用户不丢数据，原件还在，所以不必现在修。建议按这一类入 tech-debt：文本层失败不该拖垮原页（即 round-04 的 B-70）。
+
+**新增一条小发现**：
+
+- **T-F1-5（minor，设计问题）**：**正文里的 `$` 不转义**，与公式定界符有歧义。`正文里的美元 $100 和式子 $x$ 同行`，我自己按 `$…$` 剥公式的正则就被骗了，把 `$100 和式子 $` 当成公式。今天文本视图不渲染，所以看不出。但 Henry 的是金融文档，`$` 很常见；Agent 读这种文本、或者以后要渲染公式时都会碰上。改正文违背「公式外不动」，所以这是定界符怎么选的问题（比如 `\(…\)`），归 Main_Designer 判。
+
+## 九、上岛复核（第十八轮 `51370281`）
+
+清单全部通过，明细见 `docs/brainstorm/field-tests/round-04/2026-11-05-r04-report.md` 第九节：切换 6 档宽度、Layout 路径、转换窗口、含公式 docx 新导入、横幅矩阵、一次真旧笔记 Rebuild、转换失败不走死路、字体别名。
 
 ## 过程留痕
 

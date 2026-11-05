@@ -1,0 +1,422 @@
+[
+ {
+  "name": "k120-0",
+  "enterAfter": 120,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k120-1",
+  "enterAfter": 120,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k120-2",
+  "enterAfter": 120,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k120-3",
+  "enterAfter": 120,
+  "dom": [
+   "abcde",
+   "xyf"
+  ],
+  "server": [
+   "abcde",
+   "xyf"
+  ],
+  "ro": 0,
+  "ok": false
+ },
+ {
+  "name": "k120-4",
+  "enterAfter": 120,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k220-0",
+  "enterAfter": 220,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k220-1",
+  "enterAfter": 220,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k220-2",
+  "enterAfter": 220,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k220-3",
+  "enterAfter": 220,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k220-4",
+  "enterAfter": 220,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k260-0",
+  "enterAfter": 260,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k260-1",
+  "enterAfter": 260,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k260-2",
+  "enterAfter": 260,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k260-3",
+  "enterAfter": 260,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k260-4",
+  "enterAfter": 260,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k300-0",
+  "enterAfter": 300,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k300-1",
+  "enterAfter": 300,
+  "dom": [
+   "abcde",
+   "xyf"
+  ],
+  "server": [
+   "abcde",
+   "xyf"
+  ],
+  "ro": 0,
+  "ok": false
+ },
+ {
+  "name": "k300-2",
+  "enterAfter": 300,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k300-3",
+  "enterAfter": 300,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k300-4",
+  "enterAfter": 300,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k340-0",
+  "enterAfter": 340,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k340-1",
+  "enterAfter": 340,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k340-2",
+  "enterAfter": 340,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k340-3",
+  "enterAfter": 340,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k340-4",
+  "enterAfter": 340,
+  "dom": [
+   "abcde",
+   "xy"
+  ],
+  "server": [
+   "abcde",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": false
+ },
+ {
+  "name": "k400-0",
+  "enterAfter": 400,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k400-1",
+  "enterAfter": 400,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k400-2",
+  "enterAfter": 400,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k400-3",
+  "enterAfter": 400,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ },
+ {
+  "name": "k400-4",
+  "enterAfter": 400,
+  "dom": [
+   "abcdef",
+   "xy"
+  ],
+  "server": [
+   "abcdef",
+   "xy"
+  ],
+  "ro": 0,
+  "ok": true
+ }
+]

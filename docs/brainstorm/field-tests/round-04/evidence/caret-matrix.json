@@ -1,0 +1,106 @@
+[
+ {
+  "arm": "A wait 0 after create, type whole, Enter +300",
+  "trace": "afterType+0:\"第一段甲乙丙\"@6 | afterType+100:\"第一段甲乙丙\"@6 | afterType+200:\"第一段甲乙丙\"@6 | afterEnter:\"第一段甲乙丙\"@0 | afterEnter+1.5s:\"第一段甲乙丙\"@0",
+  "dom": [
+   "标题甲第一段甲乙丙"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段甲乙丙"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "B wait 1500 after create, Enter +300",
+  "trace": "afterType+0:\"第一段甲乙丙\"@6 | afterType+100:\"第一段甲乙丙\"@6 | afterType+200:\"第一段甲乙丙\"@6 | afterEnter:\"第一段甲乙丙\"@0 | afterEnter+1.5s:\"第一段甲乙丙\"@0",
+  "dom": [
+   "标题甲第一段甲乙丙"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段甲乙丙"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "C wait 3000 after create, Enter +300",
+  "trace": "afterType+0:\"第一段甲乙丙\"@6 | afterType+100:\"第一段甲乙丙\"@6 | afterType+200:\"第一段甲乙丙\"@6 | afterEnter:\"第一段甲乙丙\\n\"@7 | afterEnter+1.5s:\"第一段甲乙丙\"@0",
+  "dom": [
+   "标题甲第一段甲乙丙"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段甲乙丙"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "D wait 8000 after create, Enter +300",
+  "trace": "afterType+0:\"第一段甲乙丙\"@6 | afterType+100:\"第一段甲乙丙\"@6 | afterType+200:\"第一段甲乙丙\"@6 | afterEnter:\"第一段甲乙丙\\n\"@7 | afterEnter+1.5s:\"第一段甲乙丙\"@0",
+  "dom": [
+   "标题甲第一段甲乙丙"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段甲乙丙"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "E wait 0, char by char, Enter +300",
+  "trace": "afterType+0:\"第一段甲乙丙\"@6 | afterType+100:\"第一段甲乙丙\"@6 | afterType+200:\"第一段甲乙丙\"@6 | afterEnter:\"\"@0 | afterEnter+1.5s:\"\"@0",
+  "dom": [
+   "第一段甲乙丙",
+   "标题甲"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "第一段甲乙丙"
+    ]
+   },
+   {
+    "o": 1,
+    "units": [
+     "[heading_1]标题甲"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "F wait 3000, char by char, Enter +150",
+  "trace": "afterType+0:\"第一段甲乙丙\"@6 | afterType+100:\"第一段甲乙丙\"@6 | afterType+200:\"第一段甲乙丙\"@6 | afterEnter:\"\"@0 | afterEnter+1.5s:\"\"@0",
+  "dom": [
+   "第一段甲乙丙",
+   "标题甲"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "第一段甲乙丙"
+    ]
+   },
+   {
+    "o": 1,
+    "units": [
+     "[heading_1]标题甲"
+    ]
+   }
+  ]
+ }
+]

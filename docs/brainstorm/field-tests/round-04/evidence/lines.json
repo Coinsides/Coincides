@@ -1,0 +1,44 @@
+{
+ "g60": {
+  "bad": [],
+  "extra": [],
+  "serverSame": true,
+  "n": 16,
+  "ro": 0
+ },
+ "g120": {
+  "bad": [],
+  "extra": [],
+  "serverSame": true,
+  "n": 16,
+  "ro": 0
+ },
+ "g220": {
+  "bad": [],
+  "extra": [],
+  "serverSame": true,
+  "n": 16,
+  "ro": 0
+ },
+ "g300": {
+  "bad": [],
+  "extra": [],
+  "serverSame": true,
+  "n": 16,
+  "ro": 0
+ },
+ "g340": {
+  "bad": [],
+  "extra": [],
+  "serverSame": true,
+  "n": 16,
+  "ro": 0
+ },
+ "g500": {
+  "bad": [],
+  "extra": [],
+  "serverSame": true,
+  "n": 16,
+  "ro": 0
+ }
+}

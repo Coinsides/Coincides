@@ -1,0 +1,106 @@
+{
+ "G4_blur": 177,
+ "G4_writes": [
+  {
+   "m": "PUT",
+   "u": "/api/note-blocks/8c94ca98-4fc1-4941-949f-16e581812fd8/text-save",
+   "rev": "\"base_revision\":2",
+   "has": true,
+   "status": 200
+  }
+ ],
+ "links": [
+  {
+   "h": "#/",
+   "t": "Home",
+   "x": 130,
+   "y": 90
+  },
+  {
+   "h": "#/calendar",
+   "t": "Calendar",
+   "x": 130,
+   "y": 134
+  },
+  {
+   "h": "#/projects",
+   "t": "Projects",
+   "x": 130,
+   "y": 177
+  },
+  {
+   "h": "#/sources",
+   "t": "Source Library",
+   "x": 130,
+   "y": 220
+  },
+  {
+   "h": "#/boards",
+   "t": "Boards",
+   "x": 130,
+   "y": 264
+  },
+  {
+   "h": "#/group-gallery",
+   "t": "Group Gallery",
+   "x": 130,
+   "y": 307
+  },
+  {
+   "h": "#/design-studio",
+   "t": "设计室",
+   "x": 130,
+   "y": 351
+  },
+  {
+   "h": "#/settings",
+   "t": "Settings",
+   "x": 130,
+   "y": 394
+  },
+  {
+   "h": "#/tool-receipts",
+   "t": "Tool Receipts",
+   "x": 130,
+   "y": 485
+  }
+ ],
+ "G1_link": "Home",
+ "G1_saved": 151,
+ "G1_hash": "#/",
+ "G1_writes": [
+  {
+   "m": "PUT",
+   "u": "/api/note-blocks/29f582a8-3b9c-472d-831d-d8fde27007ae/text-save",
+   "rev": "\"base_revision\":4",
+   "has": true,
+   "status": 200
+  }
+ ],
+ "G2_saved": 243,
+ "G2_hash": "#/",
+ "G2_writes": [
+  {
+   "m": "PUT",
+   "u": "/api/note-blocks/4a408733-1cae-4ec2-ab20-9f7d0c850486/text-save",
+   "rev": "\"base_revision\":4",
+   "has": true,
+   "status": 200
+  }
+ ],
+ "G3_saved": null,
+ "G3_hash": "#/",
+ "G3_body": "Thursday, November 5\nGood afternoon\nChat with Agent\nToday's Minimum\n🎯 0 Must tasks\n📚 0 cards to review\nHOW ARE YOU FEE",
+ "G3_writes": [],
+ "G5_saved": 185,
+ "G5_hash": "#/",
+ "G5_writes": [
+  {
+   "m": "PUT",
+   "u": "/api/note-blocks/48bf4ca5-3e32-449b-81be-77d19bccc734/text-save",
+   "rev": "\"base_revision\":6",
+   "has": false,
+   "status": 200
+  }
+ ]
+}

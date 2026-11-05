@@ -1,0 +1,168 @@
+{
+ "canvasObjects": [
+  {
+   "object_id": "canvas-object:95a151e1-6ab6-450d-9c6a-7e4a86733273:source-image:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293",
+   "canvas_id": "95a151e1-6ab6-450d-9c6a-7e4a86733273",
+   "kind": "image",
+   "backing": "asset",
+   "object_class": "asset_backed",
+   "status": "active",
+   "source": {
+    "source": "source_materialization",
+    "source_record_id": "477e7268-0cbc-4c79-a5c2-887ac7af678a",
+    "source_materialization_id": "38502a6a-9358-4e4b-b1a9-f6f3e2d1a293"
+   },
+   "metadata": {
+    "content_policy": "source_locked"
+   }
+  },
+  {
+   "object_id": "canvas-object:95a151e1-6ab6-450d-9c6a-7e4a86733273:page-frame:source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+   "canvas_id": "95a151e1-6ab6-450d-9c6a-7e4a86733273",
+   "kind": "page_frame",
+   "backing": "none",
+   "object_class": "pure",
+   "status": "active",
+   "source": {
+    "source": "source_materialization"
+   },
+   "metadata": {
+    "frame_id": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+    "source_page_index": null
+   }
+  }
+ ],
+ "canvasPlacements": [
+  {
+   "placement_id": "canvas-placement:95a151e1-6ab6-450d-9c6a-7e4a86733273:page-frame:source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+   "object_id": "canvas-object:95a151e1-6ab6-450d-9c6a-7e4a86733273:page-frame:source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+   "canvas_id": "95a151e1-6ab6-450d-9c6a-7e4a86733273",
+   "x": 80,
+   "y": 80,
+   "width": 904,
+   "height": 1278,
+   "rotation": 0,
+   "frame_id": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+   "surface": "formal_page",
+   "boundary_role": "inside",
+   "z_index": 0,
+   "order_index": null,
+   "snap_state": {},
+   "visibility_state": "normal",
+   "render_visibility": "visible",
+   "metadata": {
+    "placement_kind": "page_frame"
+   }
+  },
+  {
+   "placement_id": "canvas-object:95a151e1-6ab6-450d-9c6a-7e4a86733273:source-image:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293:placement",
+   "object_id": "canvas-object:95a151e1-6ab6-450d-9c6a-7e4a86733273:source-image:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293",
+   "canvas_id": "95a151e1-6ab6-450d-9c6a-7e4a86733273",
+   "x": 0,
+   "y": 0,
+   "width": 760,
+   "height": 1182,
+   "rotation": 0,
+   "frame_id": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+   "surface": "formal_page",
+   "boundary_role": "inside",
+   "z_index": 10,
+   "order_index": null,
+   "snap_state": {},
+   "visibility_state": "normal",
+   "render_visibility": "visible",
+   "metadata": {
+    "placement_kind": "source_image",
+    "layout_policy": {
+     "coordinate_space": "page_frame_local"
+    }
+   }
+  }
+ ],
+ "contentMounts": [],
+ "visualConnectors": [],
+ "imageObjects": [
+  {
+   "object_id": "canvas-object:95a151e1-6ab6-450d-9c6a-7e4a86733273:source-image:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293",
+   "canvas_id": "95a151e1-6ab6-450d-9c6a-7e4a86733273",
+   "asset_id": "source-materialization-asset:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293",
+   "fit": "contain",
+   "alt_text": "识图测试-路由器.png",
+   "metadata": {
+    "source_record_id": "477e7268-0cbc-4c79-a5c2-887ac7af678a",
+    "source_materialization_id": "38502a6a-9358-4e4b-b1a9-f6f3e2d1a293"
+   },
+   "asset": {
+    "asset_id": "source-materialization-asset:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293",
+    "kind": "image",
+    "storage_kind": "local_file",
+    "storage_key": "6c68579e-9244-4f3b-b32e-f37cf8e0f5e3/source-materializations/38502a6a-9358-4e4b-b1a9-f6f3e2d1a293.png",
+    "filename": "识图测试-路由器.png",
+    "mime_type": "image/png",
+    "byte_size": 18976,
+    "sha256": "9bb2a280b59a6cba74a7808bf1d7ae76f072c6c1b7f2fc6c0fe074086036d4be",
+    "blob_url": "/api/canvas-assets/source-materialization-asset:38502a6a-9358-4e4b-b1a9-f6f3e2d1a293/blob",
+    "metadata": {
+     "managed_by": "source_materialization",
+     "source_record_id": "477e7268-0cbc-4c79-a5c2-887ac7af678a",
+     "source_file_id": "766e9760-492f-4dcf-b054-766e1f2afe0c",
+     "source_materialization_id": "38502a6a-9358-4e4b-b1a9-f6f3e2d1a293"
+    }
+   }
+  }
+ ],
+ "structuredObjects": [],
+ "pageFrameCollection": {
+  "pageFrames": [
+   {
+    "id": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+    "role": "primary_page_frame",
+    "templateId": "a4_portrait",
+    "pageSize": "A4",
+    "background": {},
+    "exportable": true,
+    "contentInset": {
+     "top": 0,
+     "right": 72,
+     "bottom": 96,
+     "left": 72
+    },
+    "x": 80,
+    "y": 80,
+    "width": 904,
+    "height": 1278,
+    "metadata": {
+     "role": "primary_page_frame",
+     "source_page_index": null
+    }
+   }
+  ],
+  "pageStacks": [
+   {
+    "id": "source-page-stack-1",
+    "displayName": "Source projection",
+    "frameIds": [
+     "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow"
+    ],
+    "primaryFrameId": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+    "selectedFrameId": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+    "collapsed": false,
+    "numbering": {
+     "enabled": true,
+     "startAt": 1
+    },
+    "layout": {
+     "direction": "vertical",
+     "gap": 36,
+     "collapsedPreviewPages": 1
+    },
+    "createdFrom": "source_materialization"
+   }
+  ],
+  "primaryFrameId": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+  "primaryStackId": "source-page-stack-1",
+  "selectedFrameId": "source-c208c319-4094-588c-974d-7786edc298bc:source-page-flow",
+  "selectedStackId": "source-page-stack-1"
+ },
+ "blockLayouts": []
+}

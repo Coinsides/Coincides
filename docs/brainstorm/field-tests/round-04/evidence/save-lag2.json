@@ -1,0 +1,19 @@
+{
+ "A_focus_60s": null,
+ "A_writes": [],
+ "B_blur": 534,
+ "B_writes": [
+  {
+   "t": 1793861533208,
+   "m": "PUT",
+   "u": "/api/note-blocks/821b8564-b72b-460b-923b-a42bd9e15f02/text-save",
+   "body": "{\"note_id\":\"adfa9974-c9fe-429f-850e-dbace6b275df\",\"base_revision\":1,\"block\":{\"content_json\":{\"body\":\"baseline\",\"text_flo"
+  }
+ ],
+ "C_focus_30s": null,
+ "C_writes": [],
+ "localDraftKeys": [],
+ "idb": [],
+ "D_nav": null,
+ "D_writes": []
+}

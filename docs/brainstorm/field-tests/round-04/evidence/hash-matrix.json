@@ -1,0 +1,149 @@
+[
+ {
+  "arm": "one para, gap 300",
+  "dom": [
+   "标题甲第一段"
+  ],
+  "active": "标题甲第一段",
+  "chapters": [
+   "标题甲第一段"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "one para, gap 800",
+  "dom": [
+   "标题甲第一段"
+  ],
+  "active": "标题甲第一段",
+  "chapters": [
+   "标题甲第一段"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "one para, gap 3000",
+  "dom": [
+   "标题甲第一段"
+  ],
+  "active": "标题甲第一段",
+  "chapters": [
+   "标题甲第一段"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "one para, gap 8000",
+  "dom": [
+   "标题甲第一段"
+  ],
+  "active": "标题甲第一段",
+  "chapters": [
+   "标题甲第一段"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "[heading_1]标题甲第一段"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "two paras, gap 300",
+  "dom": [
+   "第二段",
+   "标题甲第一段"
+  ],
+  "active": "标题甲第一段",
+  "chapters": [
+   "标题甲第一段"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "第二段"
+    ]
+   },
+   {
+    "o": 1,
+    "units": [
+     "[heading_1]标题甲第一段"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "two paras, gap 3000",
+  "dom": [
+   "第二段",
+   "标题甲第一段"
+  ],
+  "active": "标题甲第一段",
+  "chapters": [
+   "标题甲第一段"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "第二段"
+    ]
+   },
+   {
+    "o": 1,
+    "units": [
+     "[heading_1]标题甲第一段"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "one para, typed slowly then wait 3000 before Enter",
+  "dom": [
+   "第一段",
+   "标题甲"
+  ],
+  "active": "标题甲",
+  "chapters": [
+   "标题甲"
+  ],
+  "server": [
+   {
+    "o": 0,
+    "units": [
+     "第一段"
+    ]
+   },
+   {
+    "o": 1,
+    "units": [
+     "[heading_1]标题甲"
+    ]
+   }
+  ]
+ }
+]

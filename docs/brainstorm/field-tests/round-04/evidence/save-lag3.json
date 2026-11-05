@@ -1,0 +1,32 @@
+{
+ "F_first_blur": 180,
+ "F_dom": [
+  "alphabeta"
+ ],
+ "F_focus_12s": null,
+ "F_nav": null,
+ "E_dom_before": [
+  "lineone",
+  "linetwo",
+  "linethree",
+  "unfinishedparagraph"
+ ],
+ "E_server_before_kill": [
+  "lineone",
+  "linetwo",
+  "linethree",
+  ""
+ ],
+ "E_server_after_kill": [
+  "lineone",
+  "linetwo",
+  "linethree",
+  ""
+ ],
+ "E_dom_after_reopen": [
+  "lineone",
+  "linetwo",
+  "linethree"
+ ],
+ "E_restore_ui": []
+}

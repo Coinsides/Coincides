@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 178 份文档。
+共 180 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -57,6 +57,8 @@
 | [field-tests/round-02/README.md](field-tests/round-02/README.md) | 实测 round-02 · 目录 | `active` | 2026-11-01 | — |
 | [field-tests/round-03/2026-11-01-r03-report.md](field-tests/round-03/2026-11-01-r03-report.md) | 实测 round-03 · 报告（迷你复测） | `active` | 2026-11-01 | — |
 | [field-tests/round-03/README.md](field-tests/round-03/README.md) | 实测 round-03 · 目录（迷你复测） | `active` | 2026-11-01 | — |
+| [field-tests/round-04/2026-11-05-r04-report.md](field-tests/round-04/2026-11-05-r04-report.md) | 实测 round-04 · 报告 | `active` | 2026-11-05 | — |
+| [field-tests/round-04/README.md](field-tests/round-04/README.md) | 实测 round-04 · 目录 | `active` | 2026-11-05 | — |
 | [v2.1-direction_research/v2.x-ai-proposal-ux-reference.md](v2.1-direction_research/v2.x-ai-proposal-ux-reference.md) | v2.x AI Proposal UX 调研 | `(缺状态头)` | — | — |
 | [v2.1-direction_research/v2.x-block-architecture-reference.md](v2.1-direction_research/v2.x-block-architecture-reference.md) | v2.x Block Architecture Reference Review | `(缺状态头)` | — | — |
 | [v2.1-direction_research/v2.x-document-canvas-mode-reference.md](v2.1-direction_research/v2.x-document-canvas-mode-reference.md) | v2.x Document / Canvas 双模式调研 | `(缺状态头)` | — | — |
