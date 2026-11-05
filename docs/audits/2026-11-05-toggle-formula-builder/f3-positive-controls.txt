@@ -1,0 +1,74 @@
+# F3 positive controls. Every mutation is applied to a scratch copy, never the shared tree.
+# copy: C:/Users/henry/AppData/Local/Temp/f3c
+
+== unmutated copy
+[('tests', '50'), ('pass', '50'), ('fail', '0')]
+
+== conservation check removed
+[('tests', '50'), ('pass', '49'), ('fail', '1')]
+  not ok: a stray child of a known structure is declared, never written as a formula
+
+== unknown structure flattened instead of refused (the F1 behaviour)
+[('tests', '50'), ('pass', '47'), ('fail', '3')]
+  not ok: an unknown structure is declared, never written as a formula
+  not ok: a declared formula keeps its original characters as a note, outside any delimiter
+  not ok: a declared formula raises the notice through the real publish
+
+== xmldom warnings ignored (V-unclosed)
+[('tests', '50'), ('pass', '48'), ('fail', '2')]
+  not ok: an unclosed body with a formula fails exactly like the same damage without one, not as an empty note
+  not ok: an unclosed paragraph with a formula fails exactly like the same damage without one, not as an empty note
+
+== no warning written for a declared formula
+[('tests', '50'), ('pass', '49'), ('fail', '1')]
+  not ok: a declared formula raises the notice through the real publish
+
+== delimiter back to dollars
+[('tests', '50'), ('pass', '16'), ('fail', '34')]
+  not ok: OMML fraction
+  not ok: OMML nested fraction
+  not ok: OMML linear fraction keeps its grouping
+  not ok: OMML skewed fraction keeps its grouping
+  not ok: OMML superscript
+  not ok: OMML subscript
+  not ok: OMML both scripts
+  not ok: OMML square root
+  not ok: OMML nth root
+  not ok: OMML sum
+  not ok: OMML integral by default
+  not ok: OMML parentheses
+  not ok: OMML custom delimiters
+  not ok: OMML open delimiter
+  not ok: OMML a named delimiter does not swallow the next letter
+  not ok: OMML function
+  not ok: OMML unknown function
+  not ok: OMML limit
+  not ok: OMML arg min
+  not ok: OMML symbol stacked over a relation
+  not ok: OMML labelled brace
+  not ok: OMML matrix
+  not ok: OMML equation array keeps alignment
+  not ok: OMML accent
+  not ok: OMML bar on top
+  not ok: OMML bar without pos sits below, as the standard says
+  not ok: OMML symbol font
+  not ok: OMML tracked change keeps only the final text
+  not ok: OMML special characters
+  not ok: a formula stays where it was, in the running text, and a dollar in prose is left alone
+  not ok: display formulas: in a paragraph, several in one, and directly in the body
+  not ok: a line break inside a formula makes two formulas instead of gluing them
+  not ok: through the real publish: the note reads the formula, no = =, no warning banner
+  not ok: an older note gets the formula through one rebuild, on a new note
+
+== tracked deletion read as text
+[('tests', '50'), ('pass', '49'), ('fail', '1')]
+  not ok: OMML tracked change keeps only the final text
+
+== named delimiter may touch the next letter
+[('tests', '50'), ('pass', '49'), ('fail', '1')]
+  not ok: OMML a named delimiter does not swallow the next letter
+
+== bar without pos reads as top
+[('tests', '50'), ('pass', '49'), ('fail', '1')]
+  not ok: OMML bar without pos sits below, as the standard says
+

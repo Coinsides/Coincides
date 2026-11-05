@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import test from 'node:test';
 import JSZip from 'jszip';
 import * as mammoth from 'mammoth';
@@ -29,80 +31,103 @@ async function docx(body: string): Promise<Buffer> {
 }
 
 async function textOf(body: string): Promise<string> {
-  return (await mammoth.extractRawText({ buffer: await inlineDocxFormulas(await docx(body)) })).value.trim();
+  return (await mammoth.extractRawText({ buffer: (await inlineDocxFormulas(await docx(body))).buffer })).value.trim();
 }
 
 const formula = async (body: string) => textOf(p(om(body)));
+const math = (latex: string) => `\\(${latex}\\)`;
+const katex = createRequire(new URL('../../../client/package.json', import.meta.url)).resolve('katex');
+const parsesInKatex = async (text: string) => {
+  const { default: engine } = await import(pathToFileURL(katex).href);
+  for (const match of text.matchAll(/\\\(([\s\S]*?)\\\)/g)) engine.__parse(match[1], { throwOnError: true, strict: 'ignore', displayMode: true });
+};
 
 const STRUCTURES: Array<[string, string, string]> = [
-  ['fraction', frac(r('C'), r('i')), '$\\frac{C}{i}$'],
-  ['nested fraction', frac(r('1'), frac(r('1'), r('1+x'))), '$\\frac{1}{\\frac{1}{1+x}}$'],
-  ['linear fraction', `<m:f><m:fPr><m:type m:val="lin"/></m:fPr><m:num>${r('a')}</m:num><m:den>${r('b')}</m:den></m:f>`, '$a/b$'],
-  ['superscript', `<m:sSup><m:e>${r('x')}</m:e><m:sup>${r('2')}</m:sup></m:sSup>`, '${x}^{2}$'],
-  ['subscript', `<m:sSub><m:e>${r('C')}</m:e><m:sub>${r('t')}</m:sub></m:sSub>`, '${C}_{t}$'],
-  ['both scripts', `<m:sSubSup><m:e>${r('x')}</m:e><m:sub>${r('i')}</m:sub><m:sup>${r('2')}</m:sup></m:sSubSup>`, '${x}_{i}^{2}$'],
-  ['square root', `<m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg/><m:e>${r('x')}</m:e></m:rad>`, '$\\sqrt{x}$'],
-  ['nth root', `<m:rad><m:deg>${r('3')}</m:deg><m:e>${r('x')}</m:e></m:rad>`, '$\\sqrt[3]{x}$'],
-  ['sum', `<m:nary><m:naryPr><m:chr m:val="∑"/></m:naryPr><m:sub>${r('t=1')}</m:sub><m:sup>${r('T')}</m:sup><m:e>${r('x')}</m:e></m:nary>`, '$\\sum_{t=1}^{T}{x}$'],
-  ['integral by default', `<m:nary><m:sub>${r('0')}</m:sub><m:sup>${r('1')}</m:sup><m:e>${r('f')}</m:e></m:nary>`, '$\\int_{0}^{1}{f}$'],
-  ['parentheses', `<m:d><m:e>${r('a')}</m:e></m:d>`, '$\\left(a\\right)$'],
-  ['custom delimiters', `<m:d><m:dPr><m:begChr m:val="["/><m:endChr m:val="}"/></m:dPr><m:e>${r('a')}</m:e><m:e>${r('b')}</m:e></m:d>`, '$\\left[a | b\\right\\}$'],
-  ['open delimiter', `<m:d><m:dPr><m:begChr m:val="{"/><m:endChr m:val=""/></m:dPr><m:e>${r('a')}</m:e></m:d>`, '$\\left\\{a\\right.$'],
-  ['function', `<m:func><m:fName>${r('ln')}</m:fName><m:e>${r('x')}</m:e></m:func>`, '$\\ln{x}$'],
-  ['unknown function', `<m:func><m:fName>${r('Var')}</m:fName><m:e>${r('x')}</m:e></m:func>`, '$\\operatorname{Var}{x}$'],
-  ['limit', `<m:func><m:fName><m:limLow><m:e>${r('lim')}</m:e><m:lim>${r('n→∞')}</m:lim></m:limLow></m:fName><m:e>${r('x')}</m:e></m:func>`, '$\\lim_{n→∞}{x}$'],
-  ['matrix', `<m:m><m:mr><m:e>${r('a')}</m:e><m:e>${r('b')}</m:e></m:mr><m:mr><m:e>${r('c')}</m:e><m:e>${r('d')}</m:e></m:mr></m:m>`, '$\\begin{matrix} a & b \\\\ c & d \\end{matrix}$'],
-  ['accent', `<m:acc><m:accPr><m:chr m:val="̂"/></m:accPr><m:e>${r('β')}</m:e></m:acc>`, '$\\hat{β}$'],
-  ['bar', `<m:bar><m:barPr><m:pos m:val="top"/></m:barPr><m:e>${r('x')}</m:e></m:bar>`, '$\\overline{x}$'],
-  ['special characters', r('a_b%c#d&amp;e$f'), '$a\\_b\\%c\\#d\\&e\\$f$'],
+  ['fraction', frac(r('C'), r('i')), '\\frac{C}{i}'],
+  ['nested fraction', frac(r('1'), frac(r('1'), r('1+x'))), '\\frac{1}{\\frac{1}{1+x}}'],
+  ['linear fraction keeps its grouping', `<m:f><m:fPr><m:type m:val="lin"/></m:fPr><m:num>${r('a+b')}</m:num><m:den>${r('c+d')}</m:den></m:f>`, '\\frac{a+b}{c+d}'],
+  ['skewed fraction keeps its grouping', `<m:f><m:fPr><m:type m:val="skw"/></m:fPr><m:num>${r('a+b')}</m:num><m:den>${r('c+d')}</m:den></m:f>`, '\\frac{a+b}{c+d}'],
+  ['superscript', `<m:sSup><m:e>${r('x')}</m:e><m:sup>${r('2')}</m:sup></m:sSup>`, '{x}^{2}'],
+  ['subscript', `<m:sSub><m:e>${r('C')}</m:e><m:sub>${r('t')}</m:sub></m:sSub>`, '{C}_{t}'],
+  ['both scripts', `<m:sSubSup><m:e>${r('x')}</m:e><m:sub>${r('i')}</m:sub><m:sup>${r('2')}</m:sup></m:sSubSup>`, '{x}_{i}^{2}'],
+  ['square root', `<m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg/><m:e>${r('x')}</m:e></m:rad>`, '\\sqrt{x}'],
+  ['nth root', `<m:rad><m:deg>${r('3')}</m:deg><m:e>${r('x')}</m:e></m:rad>`, '\\sqrt[3]{x}'],
+  ['sum', `<m:nary><m:naryPr><m:chr m:val="∑"/></m:naryPr><m:sub>${r('t=1')}</m:sub><m:sup>${r('T')}</m:sup><m:e>${r('x')}</m:e></m:nary>`, '\\sum_{t=1}^{T}{x}'],
+  ['integral by default', `<m:nary><m:sub>${r('0')}</m:sub><m:sup>${r('1')}</m:sup><m:e>${r('f')}</m:e></m:nary>`, '\\int_{0}^{1}{f}'],
+  ['parentheses', `<m:d><m:e>${r('a')}</m:e></m:d>`, '\\left(a\\right)'],
+  ['custom delimiters', `<m:d><m:dPr><m:begChr m:val="["/><m:endChr m:val="}"/></m:dPr><m:e>${r('a')}</m:e><m:e>${r('b')}</m:e></m:d>`, '\\left[a | b\\right\\}'],
+  ['open delimiter', `<m:d><m:dPr><m:begChr m:val="{"/><m:endChr m:val=""/></m:dPr><m:e>${r('a')}</m:e></m:d>`, '\\left\\{a\\right.'],
+  ['a named delimiter does not swallow the next letter', `<m:d><m:dPr><m:begChr m:val="⟨"/><m:endChr m:val="⟩"/></m:dPr><m:e>${r('x')}</m:e></m:d>${r('y')}`, '\\left\\langle x\\right\\rangle y'],
+  ['function', `<m:func><m:fName>${r('ln')}</m:fName><m:e>${r('x')}</m:e></m:func>`, '\\ln{x}'],
+  ['unknown function', `<m:func><m:fName>${r('Var')}</m:fName><m:e>${r('x')}</m:e></m:func>`, '\\operatorname{Var}{x}'],
+  ['limit', `<m:func><m:fName><m:limLow><m:e>${r('lim')}</m:e><m:lim>${r('n→∞')}</m:lim></m:limLow></m:fName><m:e>${r('x')}</m:e></m:func>`, '\\lim_{n→∞}{x}'],
+  ['arg min', `${r('θ=')}<m:func><m:fName><m:limLow><m:e>${r('arg min')}</m:e><m:lim>${r('w')}</m:lim></m:limLow></m:fName><m:e>${frac(r('1'), r('n'))}</m:e></m:func>`, 'θ=\\operatorname*{arg min}_{w}{\\frac{1}{n}}'],
+  ['symbol stacked over a relation', `<m:limUpp><m:e>${r('=')}</m:e><m:lim>${r('def')}</m:lim></m:limUpp>`, '\\overset{def}{=}'],
+  ['labelled brace', `<m:limLow><m:e><m:groupChr><m:e>${r('a+b')}</m:e></m:groupChr></m:e><m:lim>${r('n')}</m:lim></m:limLow>`, '\\underbrace{a+b}_{n}'],
+  ['matrix', `<m:m><m:mr><m:e>${r('a')}</m:e><m:e>${r('b')}</m:e></m:mr><m:mr><m:e>${r('c')}</m:e><m:e>${r('d')}</m:e></m:mr></m:m>`, '\\begin{matrix} a & b \\\\ c & d \\end{matrix}'],
+  ['equation array keeps alignment', `<m:eqArr><m:e>${r('x&amp;=1')}</m:e><m:e>${r('y&amp;=2')}</m:e></m:eqArr>`, '\\begin{aligned} x&=1 \\\\ y&=2 \\end{aligned}'],
+  ['accent', `<m:acc><m:accPr><m:chr m:val="̂"/></m:accPr><m:e>${r('β')}</m:e></m:acc>`, '\\hat{β}'],
+  ['bar on top', `<m:bar><m:barPr><m:pos m:val="top"/></m:barPr><m:e>${r('x')}</m:e></m:bar>`, '\\overline{x}'],
+  ['bar without pos sits below, as the standard says', `<m:bar><m:e>${r('x')}</m:e></m:bar>`, '\\underline{x}'],
+  ['symbol font', `<m:r><w:sym w:font="Symbol" w:char="F044"/></m:r>${r('x')}`, 'Δx'],
+  ['tracked change keeps only the final text', `${r('x=')}<w:del w:id="1"><m:r><m:t>2</m:t></m:r></w:del><w:ins w:id="2">${r('3')}</w:ins>`, 'x=3'],
+  ['special characters', r('a_b%c#d&amp;e$f'), 'a\\_b\\%c\\#d\\&e\\$f'],
 ];
 
 for (const [name, body, expected] of STRUCTURES) {
   test(`OMML ${name}`, async () => {
-    assert.equal(await formula(body), expected);
+    const text = await formula(body);
+    assert.equal(text, math(expected));
+    await parsesInKatex(text);
   });
 }
 
-test('a formula stays where it was, in the running text, with Chinese around it', async () => {
+test('a formula stays where it was, in the running text, and a dollar in prose is left alone', async () => {
   assert.equal(
-    await textOf(p(t('永续年金 PV = '), om(frac(r('C'), r('i'))), t(' = 面值,'), om(r('x')), t(' 结束。'))),
-    '永续年金 PV = $\\frac{C}{i}$ = 面值,$x$ 结束。',
+    await textOf(p(t('永续年金 $100 的 PV = '), om(frac(r('C'), r('i'))), t(' = 面值,'), om(r('x')), t(' 结束。'))),
+    '永续年金 $100 的 PV = \\(\\frac{C}{i}\\) = 面值,\\(x\\) 结束。',
   );
 });
 
 test('display formulas: in a paragraph, several in one, and directly in the body', async () => {
-  assert.equal(await textOf(p(`<m:oMathPara><m:oMathParaPr><m:jc m:val="center"/></m:oMathParaPr>${om(r('a'))}${om(r('b'))}</m:oMathPara>`)), '$a$ $b$');
-  assert.equal(await textOf(`${p(t('前'))}<m:oMathPara>${om(r('c'))}</m:oMathPara>${p(t('后'))}`), '前\n\n$c$\n\n后');
+  assert.equal(await textOf(p(`<m:oMathPara><m:oMathParaPr><m:jc m:val="center"/></m:oMathParaPr>${om(r('a'))}${om(r('b'))}</m:oMathPara>`)), '\\(a\\) \\(b\\)');
+  assert.equal(await textOf(`${p(t('前'))}<m:oMathPara>${om(r('c'))}</m:oMathPara>${p(t('后'))}`), '前\n\n\\(c\\)\n\n后');
 });
 
-test('an unknown structure gives up its text, and no m:t is ever dropped', async () => {
-  assert.equal(await formula(`<m:futureThing><m:deep>${r('αβ')}<m:deeper>${r('γ')}</m:deeper></m:deep></m:futureThing>`), '$αβγ$');
-  assert.equal(await formula(`<m:box><m:e>${r('x')}</m:e></m:box>${r('y')}`), '$xy$');
-  // Children of a known structure outside its named slots are not read by the converter.
-  const stray = await formula(`<m:f><m:num>${r('a')}</m:num><m:den>${r('b')}</m:den><m:stray>${r('LOST')}</m:stray></m:f>`);
-  assert.equal(stray, '$abLOST$', 'the guard falls back to plain text rather than lose LOST');
+test('a line break inside a formula makes two formulas instead of gluing them', async () => {
+  assert.equal(await formula(`${r('a=b')}<m:r><w:br/></m:r>${r('c=d')}`), '\\(a=b\\) \\(c=d\\)');
 });
 
-test('every m:t character survives across all structures, in order', async () => {
-  const everything = STRUCTURES.map(([, body]) => body).join('');
-  const source = [...everything.matchAll(/<m:t>([^<]*)<\/m:t>/g)].map((match) => match[1].replace('&amp;', '&')).join('').replace(/\s/g, '');
-  const output = (await formula(everything)).replace(/\s/g, '');
-  let position = 0;
-  for (const char of source) {
-    position = output.indexOf(char, position);
-    assert.notEqual(position, -1, `lost ${char}`);
-    position += char.length;
-  }
+const DECLARES = /^\[公式未能转换,见原页(;原文字符:.*)?\]$/;
+
+for (const [name, body] of [
+  ['an unknown structure', `<m:futureThing><m:deep>${r('αβ')}</m:deep></m:futureThing>`],
+  ['a stray child of a known structure', `<m:f><m:num>${r('a')}</m:num><m:den>${r('b')}</m:den><m:stray>${r('LOST')}</m:stray></m:f>`],
+  ['a font it cannot read', '<m:r><w:sym w:font="Wingdings" w:char="F044"/></m:r>'],
+  ['an unknown delimiter', `<m:d><m:dPr><m:begChr m:val="⟦"/></m:dPr><m:e>${r('x')}</m:e></m:d>`],
+  ['an unknown operator', `<m:nary><m:naryPr><m:chr m:val="⨁"/></m:naryPr><m:e>${r('x')}</m:e></m:nary>`],
+  ['an unknown accent', `<m:acc><m:accPr><m:chr m:val="★"/></m:accPr><m:e>${r('x')}</m:e></m:acc>`],
+  ['a line break it cannot place', `<m:f><m:num>${r('a')}<m:r><w:br/></m:r>${r('b')}</m:num><m:den>${r('c')}</m:den></m:f>`],
+] as const) {
+  test(`${name} is declared, never written as a formula`, async () => {
+    const text = await formula(body);
+    assert.match(text, DECLARES);
+    assert.doesNotMatch(text, /\\\(/);
+  });
+}
+
+test('a declared formula keeps its original characters as a note, outside any delimiter', async () => {
+  assert.equal(await formula(`<m:futureThing>${r('αβ')}</m:futureThing>`), '[公式未能转换,见原页;原文字符:αβ]');
 });
 
 test('an empty formula leaves nothing behind, and mammoth no longer warns', async () => {
   assert.equal(await textOf(p(t('文本'), '<m:oMath/>')), '文本');
-  const buffer = await inlineDocxFormulas(await docx(p(t('a '), om(frac(r('1'), r('2'))))));
+  const { buffer } = await inlineDocxFormulas(await docx(p(t('a '), om(frac(r('1'), r('2'))))));
   assert.deepEqual((await mammoth.extractRawText({ buffer })).messages, []);
 });
 
 test('other warnings still stand after formulas are handled', async () => {
-  const buffer = await inlineDocxFormulas(await docx(p(t('a '), om(r('x')), '<w:unknownThing/>')));
+  const { buffer } = await inlineDocxFormulas(await docx(p(t('a '), om(r('x')), '<w:unknownThing/>')));
   const { messages } = await mammoth.extractRawText({ buffer });
   assert.equal(messages.length, 1);
   assert.match(messages[0].message, /unknownThing/);
@@ -111,9 +136,9 @@ test('other warnings still stand after formulas are handled', async () => {
 
 test('a document with no formula is returned untouched, byte for byte', async () => {
   const buffer = await docx(`${p(t('标题 oMathlike words'))}${p(t('正文'))}`);
-  assert.equal(await inlineDocxFormulas(buffer), buffer);
+  assert.equal((await inlineDocxFormulas(buffer)).buffer, buffer);
   const plain = await docx(p(t('正文')));
-  assert.equal(await inlineDocxFormulas(plain), plain);
+  assert.equal((await inlineDocxFormulas(plain)).buffer, plain);
 });
 
 test('any failure in formula handling returns the original', async () => {
@@ -122,20 +147,13 @@ test('any failure in formula handling returns the original', async () => {
   const warned: string[] = [];
   console.warn = (...args: unknown[]) => { warned.push(args.join(' ')); };
   try {
-    assert.equal(await inlineDocxFormulasOrOriginal(buffer, async () => { throw new Error('synthetic failure'); }), buffer);
+    assert.equal((await inlineDocxFormulasOrOriginal(buffer, async () => { throw new Error('synthetic failure'); })).buffer, buffer);
     const notAZip = Buffer.from('not a zip');
-    assert.equal(await inlineDocxFormulasOrOriginal(notAZip), notAZip);
+    assert.equal((await inlineDocxFormulasOrOriginal(notAZip)).buffer, notAZip);
   } finally {
     console.warn = original;
   }
   assert.ok(warned.some((line) => line.includes('synthetic failure')));
-});
-
-test('malformed XML that mentions a formula is refused by the handler, not swallowed into bad text', async () => {
-  const zip = new JSZip();
-  zip.file('word/document.xml', `<w:document ${NS}><w:body><m:oMath></w:body>`);
-  const buffer = await zip.generateAsync({ type: 'nodebuffer' });
-  await assert.rejects(inlineDocxFormulas(buffer));
 });
 
 interface Fixture { db: Awaited<ReturnType<typeof initDb>>; userId: string; courseId: string; root: string; sourceRootDir: string; canvasAssetRootDir: string }
@@ -189,12 +207,59 @@ test('through the real publish: the note reads the formula, no = =, no warning b
   await withDb(async (f) => {
     const { id, noteId } = await upload(f, await docx(FINANCE_BODY));
     assert.deepEqual(blocks(f, noteId), [
-      '现值公式 PV = $\\frac{C}{i}$ = 结果',
-      '$\\sum_{t=1}^{T}{\\frac{{C}_{t}}{{(1+i)}^{t}}}$',
+      '现值公式 PV = \\(\\frac{C}{i}\\) = 结果',
+      '\\(\\sum_{t=1}^{T}{\\frac{{C}_{t}}{{(1+i)}^{t}}}\\)',
     ]);
     assert.equal(getSourceRecordDetail(f.db, f.userId, id, { rootDir: f.sourceRootDir }).materialization.has_parser_messages, false);
   });
 });
+
+test('a declared formula raises the notice through the real publish', async () => {
+  await withDb(async (f) => {
+    const { id, noteId } = await upload(f, await docx(p(t('前 '), om(`<m:futureThing>${r('αβ')}</m:futureThing>`), t(' 后'))));
+    assert.deepEqual(blocks(f, noteId), ['前 [公式未能转换,见原页;原文字符:αβ] 后']);
+    assert.equal(getSourceRecordDetail(f.db, f.userId, id, { rootDir: f.sourceRootDir }).materialization.has_parser_messages, true);
+  });
+});
+
+for (const [name, damage] of [
+  ['an unclosed body', (xml: string) => xml.replace('</w:body>', '')],
+  ['an unclosed paragraph', (xml: string) => xml.replace('</w:p>', '')],
+] as const) {
+  test(`${name} with a formula fails exactly like the same damage without one, not as an empty note`, async () => {
+    const damaged = async (body: string) => {
+      const zip = await JSZip.loadAsync(await docx(body));
+      const xml = await zip.file('word/document.xml')!.async('string');
+      const broken = damage(xml);
+      assert.notEqual(broken, xml);
+      zip.file('word/document.xml', broken);
+      return zip.generateAsync({ type: 'nodebuffer' });
+    };
+    await assert.rejects(inlineDocxFormulas(await damaged(p(t('正文'), om(r('x'))))), /could not be read/);
+    const original = console.warn;
+    console.warn = () => undefined;
+    try {
+      await withDb(async (f) => {
+        const publish = async (body: Buffer) => {
+          const path = join(f.sourceRootDir, '.tmp', `${uuidv4()}.upload`);
+          writeFileSync(path, body);
+          const intake = await intakeSourceTempFile(f.db, f.userId, {
+            course_id: f.courseId,
+            origin_entry_kind: 'project_upload',
+            file: { path, originalname: 'finance.docx', mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: body.length },
+          }, { rootDir: f.sourceRootDir });
+          const { status, projection_note_id: note, error_code: code } = await materializeSourceNow(f.db, f.userId, intake.source.id, { sourceRootDir: f.sourceRootDir, canvasAssetRootDir: f.canvasAssetRootDir });
+          return { status, note, code };
+        };
+        const withFormula = await publish(await damaged(p(t('正文'), om(r('x')))));
+        assert.deepEqual(withFormula, { status: 'failed', note: null, code: 'invalid_or_corrupt' });
+        assert.deepEqual(withFormula, await publish(await damaged(p(t('正文')))));
+      });
+    } finally {
+      console.warn = original;
+    }
+  });
+}
 
 test('paragraph locators and blocks of a formula-free document match plain mammoth', async () => {
   const body = await docx(`${p(t('第一段'))}${p(t('第二段'))}${p(t('第三段'))}`);
@@ -220,6 +285,6 @@ test('an older note gets the formula through one rebuild, on a new note', async 
     f.db.prepare("UPDATE note_blocks SET plain_text = '现值公式 PV =  = 结果' WHERE id IN (SELECT block_id FROM note_block_placements WHERE note_id = ?) AND plain_text LIKE '现值%'").run(noteId);
     const rebuilt = await rematerializeSource(f.db, f.userId, id, { sourceRootDir: f.sourceRootDir, canvasAssetRootDir: f.canvasAssetRootDir });
     assert.notEqual(rebuilt.projection_note_id, noteId);
-    assert.equal(blocks(f, rebuilt.projection_note_id)[0], '现值公式 PV = $\\frac{C}{i}$ = 结果');
+    assert.equal(blocks(f, rebuilt.projection_note_id)[0], '现值公式 PV = \\(\\frac{C}{i}\\) = 结果');
   });
 });

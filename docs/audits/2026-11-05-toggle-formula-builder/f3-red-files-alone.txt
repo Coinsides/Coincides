@@ -1,0 +1,171 @@
+== src/__tests__/v2SourceMineruWiring.test.ts
+TAP version 13
+# sqlite-vec loaded: vv0.1.7
+# 📦 Running 86 pending migration(s)...
+# Subtest: K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+ok 1 - K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+  ---
+  duration_ms: 1708.6251
+  type: 'test'
+  ...
+# [mineru-wiring] K-1 tagged Python processes: 0 -> 2 -> 0
+# [mineru-wiring] K-3/K-9 directions: page overflow=resource_limit, timeout=internal_interrupted
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+ok 2 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+  ---
+  duration_ms: 6592.6735
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# [mineru-wiring] K-4 MinerU peak=1, completed=3, final=0
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+ok 3 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+  ---
+  duration_ms: 16135.7805
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+ok 4 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+  ---
+  duration_ms: 20173.3657
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Subtest: K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+ok 5 - K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+  ---
+  duration_ms: 470.015
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 47009.0437
+# flaky-retries 0
+== scripts/agent-eval/harness.test.ts
+TAP version 13
+# Subtest: scenario discovery sees the six shipped files and registers an added file without an index edit
+ok 1 - scenario discovery sees the six shipped files and registers an added file without an index edit
+  ---
+  duration_ms: 829.812
+  type: 'test'
+  ...
+# Subtest: malformed scenario modules are rejected before execution
+ok 2 - malformed scenario modules are rejected before execution
+  ---
+  duration_ms: 56.0874
+  type: 'test'
+  ...
+# Subtest: explicit scripted-only fixture scenarios permit zero provider turns
+ok 3 - explicit scripted-only fixture scenarios permit zero provider turns
+  ---
+  duration_ms: 10.2457
+  type: 'test'
+  ...
+# Subtest: CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios
+ok 4 - CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios
+  ---
+  duration_ms: 0.6506
+  type: 'test'
+  ...
+# Subtest: live dry-run and list never spawn a worker, fetch, or read the machine credential store
+ok 5 - live dry-run and list never spawn a worker, fetch, or read the machine credential store
+  ---
+  duration_ms: 931.3578
+  type: 'test'
+  ...
+# Subtest: environment allowlist retains OS essentials but drops inherited keys, loaders and database paths
+ok 6 - environment allowlist retains OS essentials but drops inherited keys, loaders and database paths
+  ---
+  duration_ms: 0.8653
+  type: 'test'
+  ...
+# Subtest: two scripted isolations have short synthetic keys, empty dotenv and exclusive assets without cross-contamination
+ok 7 - two scripted isolations have short synthetic keys, empty dotenv and exclusive assets without cross-contamination
+  ---
+  duration_ms: 19.3271
+  type: 'test'
+  ...
+# Subtest: live isolation only preserves the configured store path and never reads it during setup
+ok 8 - live isolation only preserves the configured store path and never reads it during setup
+  ---
+  duration_ms: 6.3152
+  type: 'test'
+  ...
+# Subtest: SSE recording preserves raw chunks and decodes fragmented and multiple frames without losing fields
+ok 9 - SSE recording preserves raw chunks and decodes fragmented and multiple frames without losing fields
+  ---
+  duration_ms: 6.317
+  type: 'test'
+  ...
+# Subtest: SSE recording rejects an incomplete frame instead of silently discarding evidence
+ok 10 - SSE recording rejects an incomplete frame instead of silently discarding evidence
+  ---
+  duration_ms: 0.8673
+  type: 'test'
+  ...
+# Subtest: scoreboard uses final ledger once, groups failed tool_end, and separates actual durations and tool/user rounds
+ok 11 - scoreboard uses final ledger once, groups failed tool_end, and separates actual durations and tool/user rounds
+  ---
+  duration_ms: 1.555
+  type: 'test'
+  ...
+# Subtest: empty assertion populations have null rates and execution failures remain visible
+ok 12 - empty assertion populations have null rates and execution failures remain visible
+  ---
+  duration_ms: 0.6481
+  type: 'test'
+  ...
+# Subtest: tool failure aggregation treats prototype property names as ordinary tool names
+ok 13 - tool failure aggregation treats prototype property names as ordinary tool names
+  ---
+  duration_ms: 0.6264
+  type: 'test'
+  ...
+# Subtest: unevaluated live evidence keeps null task rate while preserving observed events and transport failures
+ok 14 - unevaluated live evidence keeps null task rate while preserving observed events and transport failures
+  ---
+  duration_ms: 0.5654
+  type: 'test'
+  ...
+# sqlite-vec loaded: vv0.1.7
+# 📦 Running 86 pending migration(s)...
+# (node:24340) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: real empty-claim journey turns red when its collected claim event is removed
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+  ---
+  duration_ms: 661.2073
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\scripts\\agent-eval\\harness.test.ts:31:6977'
+  failureType: 'testCodeFailure'
+  error: `[{"name":"zero tools and identical live/history zero-write receipt projection","passed":false,"error":"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n  [\\n+   'message_meta',\\n-   'turn_receipt',\\n    'done'\\n  ]\\n"}]`
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\scripts\agent-eval\harness.test.ts:346:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 14
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3105.59
+# flaky-retries 0

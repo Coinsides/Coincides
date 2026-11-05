@@ -1,0 +1,238 @@
+{
+ "oldImport": {
+  "name": "复核样本.docx",
+  "id": "f2877d54-8a97-4bd3-a45a-1606d506cb85",
+  "dedup": false,
+  "note": "a0f3fafa-f3e8-4c45-8790-6993619388ef",
+  "status": "materialized",
+  "code": null,
+  "messages": true
+ },
+ "oldText": [
+  "对照·lim：$1/2=\\lim_{x}{y}$ 句尾",
+  "argmin：$θ=arg minw1ne2$ 句尾",
+  "argmax：$V=argmaxxC1+r$ 句尾",
+  "定义等号：$σ2=def1n$ 句尾"
+ ],
+ "reupload": {
+  "dedup": true,
+  "sameNote": true,
+  "text": [
+   "对照·lim：$1/2=\\lim_{x}{y}$ 句尾",
+   "argmin：$θ=arg minw1ne2$ 句尾"
+  ]
+ },
+ "rebuild": {
+  "status": 200,
+  "noteChanged": true,
+  "messagesBefore": true,
+  "messagesAfter": true,
+  "text": [
+   "F3 复核样本",
+   "对照·lim：\\(1/2=\\lim_{x}{y}\\) 句尾",
+   "argmin：\\(θ=\\operatorname*{arg min}_{w}{\\frac{1}{n}{e}^{2}}\\) 句尾",
+   "argmax：\\(V=\\operatorname*{argmax}_{x}{\\frac{C}{1+r}}\\) 句尾",
+   "定义等号：\\({σ}^{2}\\overset{def}{=}\\frac{1}{n}\\) 句尾",
+   "iid：\\(X\\overset{iid}{∼}N{σ}^{2}\\frac{C}{i}\\) 句尾",
+   "limsup：\\(\\operatorname*{lim sup}_{n→∞}{{x}_{n}}\\) 句尾",
+   "带标签下括号：\\(\\underbrace{a+b}_{n}=\\frac{c}{d}\\) 句尾",
+   "符号w:sym：\\(Δx\\) 句尾",
+   "修订：\\(x=3\\) 句尾",
+   "式内换行：\\(a=b\\) \\(c=d\\) 句尾",
+   "方程组对齐：\\(\\begin{aligned} x&=1 \\\\ y&=2 \\end{aligned}\\) 句尾",
+   "斜分式：\\(\\frac{a+b}{c+d}\\) 句尾",
+   "线性分式：\\(\\frac{a+b}{c+d}\\) 句尾",
+   "OLE 公式：PV =  = 面值",
+   "有脚注的句子 继续。"
+  ],
+  "newNote": "c12cffcb-1024-4b57-a5e3-41a2d41f892b"
+ },
+ "cases": {
+  "只有一条未知公式": {
+   "name": "只有一条未知公式.docx",
+   "id": "683b815a-d8a9-4291-a8aa-c6aaa82958b2",
+   "dedup": false,
+   "note": "260234d4-3052-4555-b572-0642c45f0ee7",
+   "status": "materialized",
+   "code": null,
+   "messages": true,
+   "text": [
+    "前文 [公式未能转换,见原页;原文字符:q] 后文"
+   ],
+   "parser_messages": [
+    "1 formula(s) could not be converted to text"
+   ]
+  },
+  "同段一好一未知": {
+   "name": "同段一好一未知.docx",
+   "id": "b6fef0ba-c0bf-4834-a58d-8163f36611be",
+   "dedup": false,
+   "note": "166dc92f-1074-4109-9ff4-1f13578b6fbe",
+   "status": "materialized",
+   "code": null,
+   "messages": true,
+   "text": [
+    "好的 \\(\\frac{C}{i}\\) 坏的 [公式未能转换,见原页;原文字符:q] 收尾"
+   ],
+   "parser_messages": [
+    "1 formula(s) could not be converted to text"
+   ]
+  },
+  "正文美元和公式": {
+   "name": "正文美元和公式.docx",
+   "id": "2c95e95b-9611-4c6d-8847-cc59e7e7ae6b",
+   "dedup": false,
+   "note": "7ab99192-fd8e-444b-a57e-6449ac87ab08",
+   "status": "materialized",
+   "code": null,
+   "messages": false,
+   "text": [
+    "美元 $100 和式子 \\(x\\) 又花了 $5。",
+    "纯正文 $1 到 $2。"
+   ],
+   "parser_messages": []
+  },
+  "正文字面定界符": {
+   "name": "正文字面定界符.docx",
+   "id": "53eabb56-3acb-4104-9be4-125325f6202d",
+   "dedup": false,
+   "note": "23f590de-1c21-4363-9654-04c35e02ec9e",
+   "status": "materialized",
+   "code": null,
+   "messages": false,
+   "text": [
+    "字面写法 \\(不是公式\\) 与真公式 \\(y\\)。"
+   ],
+   "parser_messages": []
+  },
+  "表格里未知公式": {
+   "name": "表格里未知公式.docx",
+   "id": "a6ed16ef-179c-423e-8249-5a4414ad3a40",
+   "dedup": false,
+   "note": "e045027a-052d-4cdb-8910-a235fb4914c6",
+   "status": "materialized",
+   "code": null,
+   "messages": true,
+   "text": [
+    "表内 [公式未能转换,见原页;原文字符:q]",
+    "表后"
+   ],
+   "parser_messages": [
+    "1 formula(s) could not be converted to text"
+   ]
+  },
+  "整段都是好公式": {
+   "name": "整段都是好公式.docx",
+   "id": "ae32faf7-1e99-4444-87de-4cce2b217269",
+   "dedup": false,
+   "note": "ce70b7ab-dcad-4c12-b8ec-c5b2402083e4",
+   "status": "materialized",
+   "code": null,
+   "messages": false,
+   "text": [
+    "\\(\\frac{C}{i}\\)"
+   ],
+   "parser_messages": []
+  }
+ },
+ "damaged": {
+  "name": "V-未闭合.docx",
+  "id": "653e5ff2-db79-46f4-9296-fbac05a82f6b",
+  "dedup": false,
+  "note": null,
+  "status": "failed",
+  "code": "invalid_or_corrupt",
+  "messages": false
+ },
+ "damagedNoFormula": {
+  "name": "V-未闭合-无公式.docx",
+  "id": "085b180a-1230-465f-be78-c292e06c4bed",
+  "dedup": false,
+  "note": null,
+  "status": "failed",
+  "code": "invalid_or_corrupt",
+  "messages": false
+ },
+ "newSample": {
+  "name": "F3-新样本.docx",
+  "id": "d90c3b9e-a107-4017-8e55-05e0bc308c26",
+  "dedup": false,
+  "note": "472569dc-fe3c-4c00-97d5-594347ceb8ed",
+  "status": "materialized",
+  "code": null,
+  "messages": true
+ },
+ "full": {
+  "name": "F1-全结构.docx",
+  "id": "df875b3c-f446-4089-af52-7b1e86792c16",
+  "dedup": false,
+  "note": "70fe7099-6e69-470e-b641-738301b3b144",
+  "status": "materialized",
+  "code": null,
+  "messages": false
+ },
+ "screens": {
+  "同段一好一未知": {
+   "onPages": {
+    "pages": false,
+    "banner": "Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original."
+   },
+   "banner": "Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original.",
+   "pages": false,
+   "texts": [
+    "好的 \\(\\frac{C}{i}\\) 坏的 [公式未能转换,见原页;原文字符:q] 收尾"
+   ]
+  },
+  "正文美元和公式": {
+   "onPages": {
+    "pages": false,
+    "banner": ""
+   },
+   "banner": "",
+   "pages": false,
+   "texts": [
+    "美元 $100 和式子 \\(x\\) 又花了 $5。"
+   ]
+  },
+  "只有一条未知公式": {
+   "onPages": {
+    "pages": false,
+    "banner": "Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original."
+   },
+   "banner": "Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original.",
+   "pages": false,
+   "texts": [
+    "前文 [公式未能转换,见原页;原文字符:q] 后文"
+   ]
+  },
+  "整段都是好公式": {
+   "onPages": {
+    "pages": false,
+    "banner": ""
+   },
+   "banner": "",
+   "pages": false,
+   "texts": [
+    "\\(\\frac{C}{i}\\)"
+   ]
+  },
+  "Rebuild后": {
+   "onPages": {
+    "pages": true,
+    "banner": ""
+   },
+   "banner": "Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original.",
+   "pages": false,
+   "texts": [
+    "对照·lim：\\(1/2=\\lim_{x}{y}\\) 句尾",
+    "argmin：\\(θ=\\operatorname*{arg min}_{w}{\\frac{1}{n}{e}^{2}}\\) 句尾",
+    "argmax：\\(V=\\operatorname*{argmax}_{x}{\\frac{C}{1+r}}\\) 句尾",
+    "定义等号：\\({σ}^{2}\\overset{def}{=}\\frac{1}{n}\\) 句尾",
+    "iid：\\(X\\overset{iid}{∼}N{σ}^{2}\\frac{C}{i}\\) 句尾",
+    "limsup：\\(\\operatorname*{lim sup}_{n→∞}{{x}_{n}}\\) 句尾"
+   ]
+  }
+ },
+ "library": 5,
+ "errors": []
+}

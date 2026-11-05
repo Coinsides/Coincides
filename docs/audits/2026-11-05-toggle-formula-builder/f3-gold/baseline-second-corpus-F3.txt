@@ -1,0 +1,56 @@
+EYE      箭头标注: 箭头标注：\(x\overset{→}{r}y\) 句尾
+         source: an arrow with r stacked above, between x and y (groupChr chr is the arrow, base is r)
+         reads ["xS[r||→]y"]; gold ["xS[→||r]y"]
+WRONG    修订在rPr: 修订在rPr：\(x=23\) 句尾
+         source: x= then run 2 marked deleted in its own w:rPr, then run 3 marked inserted: final x=3
+         reads ["x=23"]; gold ["x=3"]
+WRONG    分母修订rPr: 分母修订rPr：\(\frac{1}{23}\) 句尾
+         source: 1 over 3, a run 2 in the denominator is marked deleted in w:rPr
+         reads ["F[1|23]"]; gold ["F[1|3]"]
+WRONG    结构删除真形状: 结构删除真形状：\(a\frac{}{}\) 句尾
+         source: a, then a fraction deleted: its ctrlPr holds w:del and its runs sit in w:del wrappers: final a
+         reads ["aF[|]"]; gold ["a"]
+WRONG    结构标记删除: 结构标记删除：\(a\frac{1}{2}\) 句尾
+         source: a, then a fraction whose control and runs are all marked deleted in rPr: final a
+         reads ["aF[1|2]"]; gold ["a"]
+WRONG    双线体: 双线体：\(R\) 句尾
+         source: R in double-struck: the reals
+         reads ["R"]; gold ["mathbb(R)"]
+WRONG    花体: 花体：\(L\) 句尾
+         source: L in script
+         reads ["L"]; gold ["mathcal(L)"]
+WRONG    幻影off: 幻影off：\(\begin{matrix} -1 \\ -1 \end{matrix}\) 句尾
+         source: matrix rows: an invisible minus then 1, and -1. Reads 1 over -1
+         reads ["M[-1;-1]"]; gold ["M[1;-1]"]
+WRONG    幻影false: 幻影false：\(x+y\) 句尾
+         source: x+ then y invisible (show=false). Reads x+
+         reads ["x+y"]; gold ["x+"]
+WRONG    根号隐藏次数: 根号隐藏次数：\(\sqrt[3]{x}\) 句尾
+         source: degHide on, with 3 still in deg. Reads root of x
+         reads ["R[3|x]"]; gold ["R[|x]"]
+WRONG    求和隐藏上限有内容: 求和隐藏上限有内容：\(\sum_{i}^{n}{x}\) 句尾
+         source: supHide on, with n still in sup. Reads sum over i of x
+         reads ["S[∑|i|n]x"]; gold ["S[∑|i|]x"]
+WRONG    Symbol字体文本: Symbol字体文本：\(\text{a+b}\) 句尾
+         source: a normal-text run in Symbol font holding a+b. Reads α+β
+         reads ["a+b"]; gold ["α+β"]
+WRONG    符号非F0码: 符号非F0码：\(aδb\) 句尾
+         source: a, w:sym Symbol 2264, b. The code means ≤
+         reads ["aδb"]; gold ["a≤b"]
+WRONG    分式结构删除求和: 分式结构删除求和：\(y=\sum{}x\) 句尾
+         source: y= then a sum tracked deleted through ctrlPr, then x inserted. Reads y=x
+         reads ["y=∑x"]; gold ["y=x"]
+WRONG    公式编号: 公式编号：\(\begin{aligned} E=mc²\#(1) \end{aligned}\) 句尾
+         source: E=mc² with a right-flushed (1): the # is the numbering mark and is not visible
+         reads ["M[E=mS[c||2]#(1)]"]; gold ["M[E=mS[c||2](1)]"]
+WRONG    粗体大写: 粗体大写：\(X=X\) 句尾
+         source: bold X then X: two different symbols
+         reads ["X=X"]; gold ["mathbf(X)=X"]
+WRONG    期望双线: 期望双线：\(E\left[x\right]\) 句尾
+         source: E in double-struck then [x]
+         reads ["E[x]"]; gold ["mathbb(E)[x]"]
+
+messages: ["18 formula(s) could not be converted to text"]
+degraded: 修订Word形状=修订Word形状：[公式未能转换,见原页;原文字符:x=3] 句尾 | 修订Word形状分母=修订Word形状分母：[公式未能转换,见原页;原文字符:13] 句尾 | 修订delText=修订delText：[公式未能转换,见原页;原文字符:x=3] 句尾 | 符号Wingdings=符号Wingdings：[公式未能转换,见原页;原文字符:x] 句尾 | 符号MTExtra=符号MTExtra：[公式未能转换,见原页;原文字符:x] 句尾 | 式内不换行连字符=式内不换行连字符：[公式未能转换,见原页;原文字符:ab] 句尾 | 式内图片=式内图片：[公式未能转换,见原页;原文字符:x] 句尾 | 分子里换行=分子里换行：[公式未能转换,见原页;原文字符:abc] 句尾 | 大写函数=大写函数：[公式未能转换,见原页;原文字符:Covxy] 句尾 | 直和=直和：[公式未能转换,见原页;原文字符:inA] 句尾 | 间隔上横=间隔上横：[公式未能转换,见原页;原文字符:x] 句尾 | 未知重音=未知重音：[公式未能转换,见原页;原文字符:x] 句尾 | 半开区间=半开区间：[公式未能转换,见原页;原文字符:ab] 句尾 | 分号分隔=分号分隔：[公式未能转换,见原页;原文字符:ab] 句尾 | 双括号=双括号：[公式未能转换,见原页;原文字符:x] 句尾 | 未知结构=未知结构：[公式未能转换,见原页;原文字符:q] 句尾 | 未知结构带值=未知结构带值：[公式未能转换,见原页;原文字符:z12] 句尾 | 式内替代内容=式内替代内容：[公式未能转换,见原页;原文字符:abb] 句尾
+
+ {"ok":46,"degraded":18,"EYE":1,"WRONG":16,"INVALID":0,"MISSING":0}

@@ -169,3 +169,77 @@ Henry 已被告知:现在 Rebuild 的文档,F3 后要再 Rebuild 才是新格式
 **部署**:不回滚第十八轮(原页正确,回滚也要走一轮部署,已提醒 Henry 不要 Rebuild),F3 过 Tester 后尽快上岛。脚注静默丢失(既有)入 TD-49,本单不做。
 
 **F3 补充(2026-11-05)**:①验收直接用 Tester 金标准 `docs/audits/2026-11-05-toggle-formula-builder/f3-gold/`(比 KaTeX 解析树,只有 ok 和诚实降级算过关,基线已上线版本 54 对、16 错、1 非法);占位符措辞若另选,改脚本一处并在回执写明;金标准有异议提给 Main_Designer,⛔直接改。②并入 `V-未闭合`:`w:body` 未闭合且含公式时入库 0 块的空笔记且无提示,xmldom 警告要让预处理失败回退,回退后走现有路径。
+
+## F3 Result(builder 2026-11-05)
+
+**执行状态**:完工,未提交。未碰岛和 Henry 的文件,零真实模型,无新依赖。
+
+### 本单文件清单(收割用,和 A-18 分开)
+- `server/src/services/docxOmmlText.ts`
+- `server/src/services/sourceArtifact.ts`(只改告警写入点)
+- `server/src/__tests__/docxOmmlText.test.ts`
+- `docs/audits/2026-11-05-toggle-formula-builder/f3-*`(新:`f3-gold-after.txt`、`f3-positive-controls.txt`、`f3-server-full-suite.txt`、`f3-red-files-alone.txt`、`f3-gates.txt`)
+
+### 金标准(未改 `gold.json`,占位符措辞在脚本认可范围内,脚本也未改)
+
+| 版本 | ok | 诚实降级 | 待目检 | 错 | 非法 | 缺失 |
+|---|---|---|---|---|---|---|
+| 已上线 51370281 | 54 | | | 16 | 1 | |
+| F3 | 70 | 0 | 1 | **0** | **0** | **0** |
+
+**这条待目检请 Tester 或你看一眼**:`特殊字符`,产物 `\(50\% + \$100 \& a\_b \#1 \{c\} \backslash d <e> \text{\textasciicircum}f \text{\textasciitilde}g\)`,读出来和金标准同串。我判对,但这条按脚本设计要人看。
+
+**金标准里的降级数是 0**:样本里的公式现在都能转,所以诚实降级这条路金标准没走到,只有下面的合成用例在测它。
+
+横幅:F3 样本出(OLE 警告仍在);F1 全结构样本不出,因为 71 式全部转对。
+
+### 改了什么
+1. **诚实降级**:不认识的结构、字体、定界符、算符、重音,和够不到的式内换行,都拒绝转换,**不再压平**。原位写 `[公式未能转换,见原页;原文字符:…]`,在定界符外。同时写一条非样式 `parser_messages`(`N formula(s) could not be converted to text`),横幅由此出现。
+2. **守恒检查**改为不看顺序的字符计数,极限结构不再误退。`^` `~` 不参与计数,因为它们变成了命名命令。它只能抓丢字,**抓不到结构错**,结构错靠拒绝未知和金标准。
+3. **结构**:argmin 类、堆叠关系符、带标签括号、修订只取最终文字(`w:del` 不读)、`w:sym`(只认 Symbol 字体,其他降级)、顶层式内换行拆成两式、方程组 `&` 对齐、斜/线性分式保分组、无线分式。
+4. **定界符改 `\(…\)`**,正文 `$` 不动。`永续年金 $100 的 PV = \(\frac{C}{i}\)` 有用例钉住,产物过 KaTeX。
+5. **TD-49 两条**:`\langle`、`\lfloor`、`\lceil` 后紧跟字母不再非法;`m:bar` 无 `pos` 按规范在下方。
+6. **OLE/MathType**:确认仍出横幅,文案「本件有内容未能完整转换(含公式/嵌入对象),请以原件为准」不误导,没改。
+
+### V-未闭合
+xmldom 警告现在让预处理失败,回退原文件,mammoth 自己拒绝。只缺 `</w:body>`、只缺 `</w:p>` 两种,走真实入库后都是 `failed / invalid_or_corrupt`,没有笔记,和同样损坏但不含公式的结果逐字段相同。修前是 `materialized`、0 块、无横幅(Tester T-R-12)。
+
+**未用 Tester 原文件**:`V-未闭合.docx` 和 `f1_extra.mjs` 在 Tester 的 scratch 里,仓库和本机搜不到。我按描述自造了样本。请 Tester 用原样本复核。
+
+### 验证
+- 目标测试 50/50,tsc 0。
+- **阳性对照 8 组**,全在 scratch 副本(`f3-positive-controls.txt`):去守恒、未知结构压平、忽略 xmldom 警告、不写告警、定界符改回 `$`、读入 `w:del`、定界符贴字母、bar 默认在上,各自红在对应用例。
+- 闸:`source-experience`、`changed-file-secrets`、`agent-knowledge` 过。没跑 `canvas-runtime-boundary`,本单没动 client。
+- **服务端全量 1330 过 1327**(`f3-server-full-suite.txt`):`harness real empty-claim journey` 既有红;`K-4`、`K-5/K-7-on/K-2` 全量红,`v2SourceMineruWiring` 单跑 5/5(`f3-red-files-alone.txt`)。K-4 在已知载荷敏感族。**K-5 这条的载荷敏感是我按同文件单跑全绿推断的,没查根因**,报错是 `internal_interrupted` 对 `parser_failure`。
+
+### 我自己踩到的,照实记
+第一轮对照有两个假象,都已修正后重跑:
+- scratch 副本缺 `package-lock.json` 和 `uv.lock`,未改动的基线就红 3 条,「不写告警」那组因此是假红。脚本现在要求基线全绿才开始。
+- 「忽略 xmldom 警告」补好环境后 **0 红**,说明我写的未闭合测试没测到东西:我的样本把 `</w:document>` 也删了,走的是 error 而不是 warning。按 Tester 描述的坏法重写后才红在目标用例上。
+
+### 行为变化
+- **旧文档要 Rebuild 才是新格式**(你已告知 Henry)。此前上线版本写的 `$…$` 和错误公式不会自己变。
+- 产物是字面文本 `\(\frac{C}{i}\)`,和之前的 `$…$` 一样靠以后的渲染。**我没有在浏览器里看文本视图**,也没查客户端现在是否解析这种定界符。本单没动客户端。
+
+### 没验到
+1. **真实的降级文档**:没有哪份真实 docx 走到过降级路径,只有合成用例和真实发布链路的合成件。
+2. **Tester 原样本**:见上。
+3. **岛上**:只在本地。
+4. `\operatorname*{arg min}` 的空格:KaTeX 解析树和金标准判等,**渲染后是否显示空格没看**。
+
+### 未做(未扩修)
+- 脚注里的公式仍静默丢失,按单留在 TD-49。页眉、页脚等 `word/document.xml` 之外的 part 也不处理。
+- `w:sym` 只映射 Symbol 字体常用码位,其余诚实降级。
+
+## F3 判语与 F3b(Main_Designer 2026-11-05,依 Tester review-tester.md 第十一节)
+
+Tester 判 F3 作为终版阻断:压平已修,但金标准外第二语料 81 条里仍有第三种结果,且换定界符带来卡片回归。**裁:F3 先上线止血,不是放行为终版。** 线上正把新导入公式压平写错且不提示,这比 `ℝ` 写成 `R` 严重得多;卡片回归可接受,Henry 现有 0 张卡片、不用 Agent。Rebuild 继续压住,F3b 后一次到位。
+
+**F3b(builder,小修,排在手上矩阵之后、编辑器交付之前)**:
+1. `m:scr`、`m:sty`:`ℝ` 变 `R`、`𝔼[x]` 变 `E[x]`、粗体 `X=X` 合成一个符号。ISO 29500 标准存法,econ 和金融常见。
+2. 修订删除的结构残留:`y=` 删求和再插 `x` 变 `(y=sum{}x)`。修订只取最终内容,含结构。
+3. `m:phant` 的 `show=off`、`false`:隐形减号变真减号,`1` 变 `-1`。
+4. **卡片回归(要动客户端)**:formula 卡片 `(rac{C}{i})` 显示红色 KaTeX 错误,definition 卡片显示原始反斜杠。卡片要认 `(…)`。
+5. 报告中其余确认项:`w:sym` 低字节、公式编号 `#`、花体。Tester 反驳否掉的 3 类别修。
+
+**验收**:`f3-gold/` 金标准与 `check_second_corpus.mjs` 第二语料都只有 ok 或诚实降级;拿不准的走占位符,⛔再硬猜。Tester 复核后上线。

@@ -1,0 +1,4 @@
+HEAD=8f9da86c38e29ffa2a45b59f48411a328ea6c343
+5663a2a07501452f46c34bfa42d9eeb7bce3ef9aef910b9facc1dfe0676d25d2 *server/src/services/docxOmmlText.ts
+6ba2b73a18a4ca95df2965b6ba2960983f013e593130cae8e4d60dc66579ae82 *server/src/services/sourceArtifact.ts
+f56d37f69f878cb97baf91628e75cb476dcfa4508b8630e4c3d759c8b3915b88 *server/src/__tests__/docxOmmlText.test.ts

@@ -329,7 +329,8 @@ const docxParser: SourceParser = {
     const buffer = await readFile(input.file_path);
     assertDocxExpansionSafe(buffer, limits);
     try {
-      const result = await mammoth.extractRawText({ buffer: await inlineDocxFormulasOrOriginal(buffer) });
+      const inlined = await inlineDocxFormulasOrOriginal(buffer);
+      const result = await mammoth.extractRawText({ buffer: inlined.buffer });
       const blocks = splitParagraphs(result.value).map((text, index): SourceArtifactBlock => ({
         artifact_block_id: `docx-paragraph-${index + 1}`,
         kind: 'text',
@@ -340,7 +341,12 @@ const docxParser: SourceParser = {
         metadata: {},
       }));
       return documentArtifact(input, assertBlockLimit(blocks, limits), {
-        parser_messages: result.messages.map((message) => ({ type: message.type, message: message.message })),
+        parser_messages: [
+          ...result.messages.map((message) => ({ type: message.type, message: message.message })),
+          ...(inlined.unconverted > 0
+            ? [{ type: 'warning', message: `${inlined.unconverted} formula(s) could not be converted to text` }]
+            : []),
+        ],
       });
     } catch (error) {
       if (error instanceof SourceArtifactError) throw error;

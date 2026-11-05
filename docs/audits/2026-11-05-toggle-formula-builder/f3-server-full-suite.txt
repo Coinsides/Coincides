@@ -1,0 +1,81 @@
+# tests 1330
+# suites 0
+# pass 1327
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 351714.6111
+# flaky-retries 0
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+  ---
+  duration_ms: 1605.9473
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\scripts\\agent-eval\\harness.test.ts:31:6977'
+  failureType: 'testCodeFailure'
+  error: `[{"name":"zero tools and identical live/history zero-write receipt projection","passed":false,"error":"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n  [\\n+   'message_meta',\\n-   'turn_receipt',\\n    'done'\\n  ]\\n"}]`
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\scripts\agent-eval\harness.test.ts:346:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: tag-dispatched candidates: negative local, exact hydrated view, missing frame, nonfinite and metadata exceptions
+not ok 1144 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+  ---
+  duration_ms: 6344.4156
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:2914'
+  failureType: 'testCodeFailure'
+  error: |-
+    native text completed while MinerU still held its slot
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:489:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async withDbAndStorage (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:291:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:443:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+not ok 1145 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+  ---
+  duration_ms: 8366.2671
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:4916'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'internal_interrupted'
+    - 'parser_failure'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'parser_failure'
+  actual: 'internal_interrupted'
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:552:16)
+    async withDbAndStorage (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:291:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:509:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# 📦 Running 86 pending migration(s)...
+# Subtest: K-8 rejects a registered parser with no identity instead of falling back to package-lock.json

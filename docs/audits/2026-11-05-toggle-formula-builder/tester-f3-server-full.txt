@@ -1,0 +1,13 @@
+not ok 47 - real empty-claim journey turns red when its collected claim event is removed
+not ok 38 - src\\__tests__\\v13MediaBlocks.test.ts
+not ok 1167 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+# tests 1361
+# pass 1358
+# fail 3
+--- v2SourceMineruWiring, no-F3 baseline then F3, same machine state
+not ok 3 - K-4 keeps three production MinerU materializations at concu # pass 4 # fail 1  (base 1)
+not ok 3 - K-4 keeps three production MinerU materializations at concu # pass 4 # fail 1  (base 2)
+not ok 3 - K-4 keeps three production MinerU materializations at concu # pass 4 # fail 1  (F3 1)
+not ok 3 - K-4 keeps three production MinerU materializations at concu # pass 4 # fail 1  (F3 2)
+--- v13MediaBlocks alone
+# tests 13 # pass 13 # fail 0 

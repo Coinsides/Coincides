@@ -1,0 +1,7 @@
+== check:source-experience
+Source experience contract check passed.
+Source experience model contract check passed.
+== check:changed-file-secrets
+Changed-file secret scan passed: 36 changed file(s) scanned.
+== check:agent-knowledge
+[PASS] Agent 知识事实无漂移: 6db84dc9324b4794ee877217de0025bb4ff4b8171848be435fe60695340572ea; 说明书 v2 / 2026-11-05

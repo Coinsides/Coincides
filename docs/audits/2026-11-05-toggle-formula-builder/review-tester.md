@@ -238,6 +238,70 @@ builder 申报的 Table 样式无端到端测试，这里补上了：带 `styles
 
 **走查清单再加两条**：验收比语义，不只比字符；每条结果都要问「它盖住了什么、换掉了什么」。
 
+## 十一、F3 核验（Tester(1)，2026-11-05）
+
+**判语：阻断当前版本，差一轮小修（F3b）。** 压平这个主问题确实修好了，诚实降级、横幅、Rebuild、`V-未闭合` 都实测通过。但金标准之外还有第三种结果，换定界符还带来一条新回归。
+
+对象：HEAD `8cefed62` 系列加 F3 三个文件，哈希见 `tester-f3-snapshot-hashes.txt`，开工和交报告前都核过，一致。
+
+### 通过的（都亲手跑过）
+
+| Main_Designer 点名项 | 结果 |
+|---|---|
+| 金标准 | 70 对、0 错、0 非法、1 条待目检。`特殊字符` 我看过，读法与金标准相同，语义对 |
+| 1. 诚实降级走真实链路 | ✅ 只有未知公式、同段一好一坏、表格内：占位符在定界符外，`parser_messages` 写 `N formula(s) could not be converted to text`，`has_parser_messages=true`，Source 行徽标和文本视图横幅都出现。真 Chrome 实看，见 `tester-screenshots/F3-S-mixed.jpg` |
+| 3. `V-未闭合` 原样本 | ✅ `failed / invalid_or_corrupt`，无笔记，与去掉公式的同样损坏文件字段相同 |
+| 4. 定界符 | ✅ `美元 $100 和式子 \(x\) 又花了 $5。` 能无歧义剥出，正文 `$` 原样；文本视图 `\(…\)` 原样显示，客户端没有另行解析。⚠️ 正文里本来就有字面 `\(不是公式\)` 时仍有歧义，少见，记录 |
+| 5. OLE、MathType | ✅ 仍是 `PV =  = 面值` 加横幅，文案「Some content in this file could not be fully converted (including formulas and embedded objects). Rely on the original.」不误导。**F3 不让 OLE 公式变成文字**，Henry 的文档若是这种，Rebuild 也没有公式 |
+| 真实旧笔记 Rebuild | ✅ 用线上解析器同库造旧笔记（内容是 `$θ=arg minw1ne2$` 这种压平结果）。重传去重，还是旧笔记；Rebuild 后全部正确，压平消失。这份样本含 OLE 公式，所以 Rebuild 前后横幅都在 |
+| 6. 全量 | 见下 |
+
+**全量**（`8cefed62` 加 F3 的完整快照，环境补齐）：服务端加根 `scripts` 共 1361 条，1358 过，3 红，都与 F3 无关：
+
+- `real empty-claim journey`：TD-50。
+- `K-4`：TD-45。这轮单跑也红，所以我拿**不含 F3 的基线同时对照，同样 2/2 红**，同签名（`expected 1, actual 0`）。此时机器上有 builder 和复核工作流在跑。
+- `v13MediaBlocks`：文件级 `Unable to deserialize cloned data`，是测试运行器的 IPC 错（`run-server-test-suite.mjs` 专门处理的那个），我用裸 `node --test` 跑才露出来，单跑 13/13。
+
+**K-5**：负载判断现在有依据。测试给假进程的超时只有 1 秒（`useFixture(fixture, 1_000)`），负载高时进程还没崩就先超时，所以报 `internal_interrupted` 而不是 `parser_failure`。它在不含 F3 的 `51370281` 上也红过，这一轮全量没红，测试文件未改。**我的加压实验没有结论**（两次都被我设的超时切断），按 Main_Designer「够下结论就行」到此为止。归 TD-45。
+
+### 阻断项（反驳后站住，都亲手复现）
+
+第二语料 `f3-gold/check_second_corpus.mjs`，71 条加 10 条，builder 没见过。结果 46 对、18 诚实降级、1 EYE（我核过，符合规范）、16 错，其中 3 条是我的样本形状存疑（`w:rPr` 里放 `w:del`，反驳认为没有真实生产者，**不算**），`根号隐藏次数`、`求和隐藏上限有内容`、`Symbol字体文本` 反驳后也不算。
+
+| # | 现象 | 为什么算 | 修法方向 |
+|---|---|---|---|
+| F3b-1 | **`m:scr`、`m:sty` 被忽略**：`ℝ` → `\(x∈R\)`，`𝔼[x]` → `\(E[x]\)`，`ℒ=L+M` → `\(L=L+M\)`，粗体 `X=X` → `\(X=X\)`，两个不同符号合成一个 | ISO 29500 规定这是标准存法（基字母加样式）；texmath 写的就是这个形状。econ、金融里 `𝔼`、`ℝ`、粗体矩阵很常见 | 映射 `\mathbb`、`\mathcal`、`\mathfrak`、`\mathbf`、`\boldsymbol`，或者降级。**`m:sty p` 不能拒绝**，函数名常带它。`ommlLines` 是第二条路径，也要改 |
+| F3b-2 | **修订删除的结构还在**：`y=` 删掉一个求和再插入 `x` → `\(y=\sum{}x\)`；`\(C\frac{}{}\)`、`\(\sqrt{}x\)` | `m:ctrlPr/w:del` 是 XSD 合法位置。内容已删、结构还在，意思变了 | 见到这个标记就去掉结构，或者降级 |
+| F3b-3 | **`m:phant` 的 `show=off`、`false` 让隐形内容变真**：对齐用的隐形减号 → `\begin{matrix} -1 \\ -1 \end{matrix}`，符号翻转 | 代码只比较字符串 `0`，模块里已有 `propIsOn`。反驳确认主流生产者会写这个值 | 一行 |
+| F3b-4 | **卡片回归**：formula 卡片里的 `\(\frac{C}{i}\)` 显示红色 KaTeX 错误；definition 卡片显示原始反斜杠。旧 `$…$` 都正常 | `server/src/agent/tools/normalizeContent.ts:16`、`client/.../CardTemplateContent.tsx:18` 都只剥 `$`，`KaTeXRenderer` 也只认 `$`。**F1 的目标写着「Agent 读、制卡、铸 item 都拿得到」**，这条直接打到它。频率没量过 | 两处剥定界符加 `\(…\)`、`\[…\]`，`KaTeXRenderer` 认新定界符。**要动客户端**，部署不再是纯服务端 |
+
+### 建议一起修，不算阻断
+
+- `w:sym` 只取低字节：`w:char="2264"`（≤）→ `\(aδb\)`。一行：只认 `F0xx`、`00xx`，其余降级。
+- 公式编号 `#`：`E=mc²#(1)` 里 `#` 变成字面字符。形状来自记忆，没有 Word 验证。
+- 占位符内的原文字符不转义：里面含 `\(` 时会打断后面的真公式。
+- 统计把 `w:del` 里的公式也算进去，整个公式被修订删除时会有假横幅。方向是安全的（多报）。
+
+### 可以缓
+
+- **`m:t` 里的空格渲染时消失**：`\(\left[1 2; 3 4\right]\)` 渲染成 `[12;34]`。反驳确认真实存在，但今天文本视图不渲染，存的文字还有空格。以后要渲染公式时必须处理。入 TD-49。
+- 其余只有 agent 跑过、没有经反驳的 23 条，在 `tester-f3-independent-review.json` 的 `unverified`。
+
+### 被否的（别修）
+
+`degHide` 等隐藏标记配有内容的槽、`w:rPr` 里的 `w:del`、`w:rFonts` Symbol 字体文本：机制成立，但都没有找到真实生产者，其中隐藏标记那条连「人读到什么」都说反了。
+
+### 部署建议，你来定
+
+- **我的建议：等 F3b 再部署。** 都是小修；Henry 已暂停 Rebuild；一次到位他只需 Rebuild 一次。
+- **如果 F3b 当天出不来**：可以先部署当前 F3 止血，因为压平比 `R` 代 `ℝ` 严重得多，但卡片回归会上线，而且 Rebuild 要继续压住。
+- F3b 复核我跑同样两份语料加真实链路，不重做已通过的项。
+
+### 这轮我踩到的
+
+- 第一次全量偷懒只打包了服务端，68 条假红，作废重跑。
+- 手写第二语料时 3 条样本形状不对，一条箭头标注写反了，都被反驳和规范纠正。**金标准也会错**，所以有异议走 Main_Designer。
+
 ## 过程留痕
 
 - 为了按规定用 preview 工具起验证服务器，我两次在 `.claude/launch.json` 临时加一条配置，起完立刻撤回。现在这个文件里只剩 builder 的改动。
