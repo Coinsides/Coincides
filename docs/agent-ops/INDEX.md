@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-10-09
+> **日期 (Updated)**: 2026-11-05
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 432 份文档。
+共 451 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -99,6 +99,7 @@
 | [analysis/2026-09-21-paper-line-walk-report.md](analysis/2026-09-21-paper-line-walk-report.md) | 纸面线专项走查报告(Q1/Q2/Q3/G7/G9 + T1 冒烟) | `active` | — | — |
 | [analysis/2026-09-22-flip-day-briefing.md](analysis/2026-09-22-flip-day-briefing.md) | 翻牌日呈批案(九件) | `active` | — | — |
 | [analysis/2026-09-23-knowledge-architecture-target-design.md](analysis/2026-09-23-knowledge-architecture-target-design.md) | 知识架构目标态设计稿 v2(候拍) | `draft` | — | — |
+| [analysis/2026-11-02-knowledge-establishment-plan.md](analysis/2026-11-02-knowledge-establishment-plan.md) | 知识建制更新 —— 原子 / 透镜 / 事由 / 痕迹 | `**已翻牌(Henry 2026-11-02 亲拍)** —— 翻牌点①认(教义已铸宪章增补节)②认(分期顺序照表)③锁 UX=图标点选,机理从便(必要用布尔,施工单定)④普查暂落项目页;**附加令**:日历入口随本更新暴露(侧栏,外观候后期统一动刀,「现在重要的是能不能服务学习」)` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -145,11 +146,11 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-09-23 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-05 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-09-20(D3a 二轮 TD-15/16 施工实况更新；清债判定留 HQ) | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-05(1a-乙收割,新增 TD-45 至 TD-48) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
@@ -420,6 +421,24 @@
 | [handoffs/2026-09-22-v14-t9-spec-extractor-order.md](handoffs/2026-09-22-v14-t9-spec-extractor-order.md) | T9 · 规格提取器 + 首航 | `done(2026-09-22 HQ 收官:唯一红项=文档索引,HQ 重生成后 docs:check 绿;client 2464/2464 逐字对上;双门绿。76 项 delta 对照表=采值候拍材料,并入翻牌日呈批案)` | — | — |
 | [handoffs/2026-09-23-v14-answer-card-demolition-order.md](handoffs/2026-09-23-v14-answer-card-demolition-order.md) | 答卡 v1 拆除单 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-23-v14-page-repairs-order.md](handoffs/2026-09-23-v14-page-repairs-order.md) | 纸页两修单 | `(缺状态头)` | — | — |
+| [handoffs/2026-10-11-v14-test-fragility-repair-order.md](handoffs/2026-10-11-v14-test-fragility-repair-order.md) | 测试脆弱性两修单(云机首单) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f1-source-first-use-bugs-order.md](handoffs/2026-11-01-vps-f1-source-first-use-bugs-order.md) | VPS-F1 · Source 首用三虫修理单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f10-coordinate-contract-order.md](handoffs/2026-11-01-vps-f10-coordinate-contract-order.md) | VPS-F10 · 坐标契约缺行单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f11-page-fidelity-order.md](handoffs/2026-11-01-vps-f11-page-fidelity-order.md) | VPS-F11 · 页对页保真线 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f2-source-delete-reach-order.md](handoffs/2026-11-01-vps-f2-source-delete-reach-order.md) | VPS-F2 · Source 删除可达性单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f3-material-bridge-order.md](handoffs/2026-11-01-vps-f3-material-bridge-order.md) | VPS-F3 · 材料断桥单(两段式) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f4-four-small-fixes-order.md](handoffs/2026-11-01-vps-f4-four-small-fixes-order.md) | VPS-F4 · 四小修批 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f5-agent-source-discovery-order.md](handoffs/2026-11-01-vps-f5-agent-source-discovery-order.md) | VPS-F5 · Agent 源料发现低配单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f6-reconcile-refs-order.md](handoffs/2026-11-01-vps-f6-reconcile-refs-order.md) | VPS-F6 · 桥后遗症两修单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f7-heading-enter-deck-order.md](handoffs/2026-11-01-vps-f7-heading-enter-deck-order.md) | VPS-F7 · 标题回车吞字 + 空卡组死锁两修单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f8-settings-race-adoption-list-order.md](handoffs/2026-11-01-vps-f8-settings-race-adoption-list-order.md) | VPS-F8 · 三修单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-f9-heading-structure-order.md](handoffs/2026-11-01-vps-f9-heading-structure-order.md) | VPS-F9 · 标题结构提交两虫单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-p0-deepseek-supply-order.md](handoffs/2026-11-01-vps-p0-deepseek-supply-order.md) | VPS-P0 · DeepSeek 供给线接骨单(新工人开工测试) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-01-vps-p1-bailian-embedding-order.md](handoffs/2026-11-01-vps-p1-bailian-embedding-order.md) | VPS-P1 · 百炼向量接线单 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-02-establishment-1-purpose-card-traces-order.md](handoffs/2026-11-02-establishment-1-purpose-card-traces-order.md) | 建制Ⅰ · 事由领册 + 痕迹开读 | `(缺状态头)` | — | — |
+| [handoffs/2026-11-02-fidelity-1a-original-page-view-order.md](handoffs/2026-11-02-fidelity-1a-original-page-view-order.md) | 保真 1a · 页影像层 + 原页视图(PDF 第一期) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-03-stopbleed-four-order.md](handoffs/2026-11-03-stopbleed-four-order.md) | (无标题) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-04-fidelity-1a2-docx-pages-snapshot-order.md](handoffs/2026-11-04-fidelity-1a2-docx-pages-snapshot-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

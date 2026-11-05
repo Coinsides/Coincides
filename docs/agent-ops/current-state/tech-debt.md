@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-09-20(D3a 二轮 TD-15/16 施工实况更新；清债判定留 HQ)
+> **日期 (Updated)**: 2026-11-05(1a-乙收割,新增 TD-45 至 TD-48)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -55,3 +55,7 @@
 | TD-42 | **server `tsc --noEmit` 红 87 条**,全部在 v13*/v14* 测试与 agent/attentionContext.ts、agent/claimObservation.ts 等文件;运行时零影响(服务端测试经 tsx 跑,不查类型);11-01 VPS-P0 单 7 涉改文件零命中(该单只增可选字段,无外溢可能,"既存"判定成立) | 2026-11-01 VPS-P0 builder(临时工程对话1)附加申报 server-tsc.log;HQ 收口认定 | 触发器=下一次动涉红文件的单顺手清该文件的红;或部署线稳定后专项小单一次清;⛔当通过门槛卡单(现行门=测试实跑) | 未清(触发器) |
 | TD-43 | **旧 documents 管线停喂(Henry 11-01 亲拍)**:documentParser.ts(461 行,OCR/识图/摘要三步写死 Anthropic)+ 路由 /api/documents 活着,但 DocumentManager UI 全仓零挂载=用户不可达;文档摄入正路=Source 方向 | VPS 改动清单 P2-7 + HQ 11-01 普查(挂载点全仓 grep 零命中);Henry 本会话亲拍「停喂」 | **停喂纪律**:不维护/不跑其测试/不派单/不进 P1 射程,挡路再拆;**止血例外已批**:摘要失败写字面量 "Summary generation failed." 入库并注入每轮系统提示→改写 NULL,收编进 P1 单 | 停喂(裁定在案;止血已落地,P1 单 11-01) |
 | TD-44 | **imprint 运维脚本双缺口**:①`scripts/cite-imprint-pages.mjs:41` 硬编码 intl 聊天端点(全仓第 6 处 intl 字面量,不在 P1 五处射程)——岛上以北京 key 跑会 401;②无服务器 CLI(如 query-imprint-fragments.mjs)撞挂死对端时,`AbortSignal.timeout` 计时器不持事件循环,进程可能在超时触发前静默退出而非报超时 | 2026-11-01 VPS-P1 builder 未做清单+环境申报 1;HQ 收口归并 | 触发器=部署日首次在岛上跑 imprint 运维脚本前顺手修;或下一次动这些脚本的单收编 | 未清(触发器) |
+| TD-45 | **载荷敏感测试族(全量偶红、单跑绿)**:`v2SourceMineruWiring` K-2/K-4/K-5/K-7(K-4 为点采样踩串行任务间隙);`v13WildernessExecute` 首条(两个合成库各自 CURRENT_TIMESTAMP 跨整秒);`useChapterPresentation`(`runWithRender` 后直读 `result.current`);`BoardPage.selection`(`viewportRef` 写入前按指针);`BoardPage.smoke`、`PaginationProjection`(5 秒超时)。修法:K-4 改组合断言;wilderness 剥离或写死 created_at;两个时序条目先等目标状态再断言 | 2026-11-03 止血单、2026-11-05 Tester 1a-乙复核 review-tester.md(第三次独立重发现) | 修测试单一次清;在此之前全量红只对名单内条目放行,且须单跑绿 | 未清 |
+| TD-46 | **默认原页下的 Agent 面缺口**:①Agent 聚焦远处块落空(恢复滚动排在聚焦滚动之后,HEAD 既有,D2 推上默认路径,重发即中);修法 `NoteRuntimeDocumentLayer.tsx:139` 在 `setMode('text')` 前调 `takeTextScroll()`,回归测试须用按帧先进先出的 rAF 桩。②原页视图下上下文提示无所在页,`read_note` 默认读第 1 页(T-D2-2) | 2026-11-05 Tester 1a-乙复核 | Agent 面板退役庭裁定后再定;留存则同批修 | 未清(候裁) |
+| TD-47 | **1a-乙留下的小缺口**:T-P-6 文本 800→切原页→切 tab→切回→点文本落回约 35(`textScroll` 不按笔记分,修法按笔记分开);T-P-7、T-P-8 切换闪一帧旧正文或旧横幅;T-P-1 持有输出时转换器输出不打印;T-D2-D1 Ctrl+P 打的是文本投影,公式照丢且无提示;T-D2-D3、D4 默认原页下看不到批注且无提示,刷新后切文本的选择失效;N2-N5 见报告 | 2026-11-05 Tester 1a-乙复核;Main_Designer 判语不进本轮 | 按 Henry 使用摩擦触发,不主动开单 | 未清(触发器) |
+| TD-48 | **md/txt 解析缺口(既有,D4 钉现状)**:标题层级全落一级(h1-h3 映射进 writing_role 量级小,改在投影边界 `sourceProjectionMaterializer.ts:273`,仅 md 受益,对 docx、PDF 零效果);列表不分块;代码围栏和引用字面保留,围栏内空行拆块丢缩进;标题紧贴正文不识别。后两类要改切块,会变块 ID,不与层级补丁合并 | 2026-11-05 builder D4 申报+Tester 复核 T-D4-1 至 T-D4-8 | 第十七轮后另开 md 解析小单,层级先行 | 未清 |

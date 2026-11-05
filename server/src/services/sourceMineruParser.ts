@@ -337,14 +337,14 @@ interface ChildExit {
   signal: NodeJS.Signals | null;
 }
 
-function waitForExit(child: ChildProcess): Promise<ChildExit> {
+export function waitForExit(child: ChildProcess): Promise<ChildExit> {
   return new Promise((resolve, reject) => {
     child.once('error', reject);
     child.once('exit', (code, signal) => resolve({ code, signal }));
   });
 }
 
-function waitForClose(child: ChildProcess): Promise<void> {
+export function waitForClose(child: ChildProcess): Promise<void> {
   return new Promise((resolve) => {
     child.once('close', () => resolve());
   });
@@ -404,7 +404,11 @@ while ($queue.Count -gt 0) {
   };
 }
 
-async function terminateProcessTree(
+// A descendant that escaped the kill can hold the child's output open forever, and
+// the page image queue would stop behind it.
+const PROCESS_CLOSE_WAIT_MS = 5_000;
+
+export async function terminateProcessTree(
   child: ChildProcess,
   closePromise: Promise<void>,
 ): Promise<void> {
@@ -430,7 +434,18 @@ async function terminateProcessTree(
       if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
     }
   }
-  await closePromise;
+  let timer: NodeJS.Timeout | undefined;
+  const gaveUp = new Promise<'gave_up'>((resolve) => {
+    timer = setTimeout(() => resolve('gave_up'), PROCESS_CLOSE_WAIT_MS);
+    timer.unref?.();
+  });
+  const settled = await Promise.race([closePromise, gaveUp]);
+  if (timer) clearTimeout(timer);
+  if (settled === 'gave_up') {
+    child.stdout?.destroy();
+    child.stderr?.destroy();
+    throw new Error(`A process still held PID ${child.pid}'s output ${PROCESS_CLOSE_WAIT_MS}ms after it ended`);
+  }
 }
 
 async function runMineruChild(

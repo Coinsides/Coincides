@@ -22,8 +22,10 @@ const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequest
   const { hostMode = 'page', noteId } = useNoteCanvasRuntime();
   const { layerProps, loading, loadError, note, skin, paper, layoutMode, runtimePageFrameCollection, showAppearancePanel, toggleAppearancePanel,
     dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
+  // The note lags the route while the next one hydrates, so a projection's class must
+  // not stand in for the note the route has already moved to.
   const sourcePageView = useSourcePageViewController({ noteId,
-    enabled: hostMode === 'page' && sourceProjectionPolicyForNote(note ?? null).isSourceProjection });
+    enabled: hostMode === 'page' && note?.id === noteId && sourceProjectionPolicyForNote(note ?? null).isSourceProjection });
   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
   const appearanceAnchorRef = useRef<HTMLButtonElement>(null);
   const dismissTransientUI = useCallback(() => {
@@ -46,7 +48,7 @@ const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequest
     <div className={styles.page} data-note-host-mode={hostMode}
       data-note-skin-preset={skin.materialPreset ?? skin.preset} style={skin.style}>
       {skin.error && <div role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></div>}
-      <SourceConversionNotice note={note} />
+      {!sourcePageView.active && <SourceConversionNotice note={note} />}
       <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps} sourcePageView={sourcePageView}
         writingSurfaceProps={{ ...layerProps.documentLayerProps.writingSurfaceProps,
           noteTools: <NoteChromeLayer {...layerProps.chromeProps} sourcePageView={sourcePageView} mountAppearanceCard={false} appearanceAnchorRef={appearanceAnchorRef} /> }} />

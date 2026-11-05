@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useAgentUiStore } from '@/stores/agentUiStore';
 import { documentKey, useDocumentTabsStore } from '@/stores/documentTabsStore';
 import {
   generateSourcePages,
@@ -18,9 +19,12 @@ const NOT_A_SOURCE: SourcePageRegister = {
   source_id: '', supported: false, status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [],
 };
 
+function storedView(noteId?: string) {
+  return useDocumentTabsStore.getState().tabs.find((tab) => tab.key === documentKey('note', noteId ?? ''))?.sourceView;
+}
+
 function rememberedView(noteId?: string) {
-  return useDocumentTabsStore.getState().tabs.find((tab) => tab.key === documentKey('note', noteId ?? ''))?.sourceView
-    ?? { mode: 'text' as SourceViewMode, page: 1 };
+  return storedView(noteId) ?? { mode: 'text' as SourceViewMode, page: 1 };
 }
 
 export interface SourcePageViewController {
@@ -112,6 +116,32 @@ export function useSourcePageViewController({ noteId, enabled }: {
     void load();
     return () => { cancelled = true; if (timer) clearTimeout(timer); };
   }, [enabled, noteId, reloadKey]);
+
+  // A Source opens on its original pages when the tab has no say of its own. Settled
+  // once per note, so it never overrides the reader: while pages are still being
+  // made it keeps waiting, but a reader who has moved on stays in the text.
+  const defaultSettledFor = useRef<string | undefined>();
+  useEffect(() => {
+    if (!enabled || !noteId || !register || defaultSettledFor.current === noteId) return;
+    if (storedView(noteId) || !register.supported) {
+      defaultSettledFor.current = noteId;
+      return;
+    }
+    if (!register.pages.length) {
+      if (register.status !== 'pending' && register.status !== 'partial') defaultSettledFor.current = noteId;
+      return;
+    }
+    defaultSettledFor.current = noteId;
+    const { focusCommand, pending } = useAgentUiStore.getState();
+    const main = document.querySelector<HTMLElement>('[data-app-main-scroll="true"]');
+    if (focusCommand || pending || (main?.scrollTop ?? 0) > 0) {
+      remember({ mode: 'text' });
+      return;
+    }
+    keepTextScroll();
+    setScoped({ noteId, mode: 'pages' });
+    remember({ mode: 'pages' });
+  }, [enabled, noteId, register, remember, keepTextScroll]);
 
   const setMode = useCallback((next: SourceViewMode) => {
     if (next === 'pages') keepTextScroll();

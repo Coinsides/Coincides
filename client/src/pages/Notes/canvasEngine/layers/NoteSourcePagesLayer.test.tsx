@@ -125,6 +125,112 @@ describe('failure states', () => {
   });
 });
 
+describe('original pages as the default reading view', () => {
+  const stored = () => useDocumentTabsStore.getState().tabs.find((tab) => tab.key === documentKey('note', 'note'))?.sourceView;
+  const openHook = () => {
+    useDocumentTabsStore.getState().open({ kind: 'note', id: 'note', title: 'Note' });
+    return renderHook(() => useSourcePageViewController({ noteId: 'note', enabled: true }));
+  };
+
+  it('opens a Source with pages on its pages, and the choice is the tab\'s memory from then on', async () => {
+    api.read.mockResolvedValue(complete(3));
+    const { result } = openHook();
+    await waitFor(() => expect(result.current.active).toBe(true));
+    expect(stored()).toEqual({ mode: 'pages', page: 1 });
+  });
+
+  it('never overrides a remembered text view, and switching back and forth holds', async () => {
+    api.read.mockResolvedValue(complete(3));
+    useDocumentTabsStore.getState().open({ kind: 'note', id: 'note', title: 'Note' });
+    useDocumentTabsStore.getState().remember(documentKey('note', 'note'), { sourceView: { mode: 'text', page: 2 } });
+    const { result } = renderHook(() => useSourcePageViewController({ noteId: 'note', enabled: true }));
+    await waitFor(() => expect(result.current.available).toBe(true));
+    expect(result.current.active).toBe(false);
+    act(() => result.current.setMode('pages'));
+    expect(result.current.active).toBe(true);
+    act(() => result.current.setMode('text'));
+    expect(result.current.active).toBe(false);
+    act(() => result.current.reload());
+    await waitFor(() => expect(api.read).toHaveBeenCalledTimes(2));
+    await act(async () => { await Promise.resolve(); });
+    expect(result.current.active).toBe(false);
+  });
+
+  it('leaves the reader in the text once they chose it, even as a later reload brings pages', async () => {
+    api.read.mockResolvedValue(complete(3));
+    const { result } = openHook();
+    await waitFor(() => expect(result.current.active).toBe(true));
+    act(() => result.current.setMode('text'));
+    act(() => result.current.reload());
+    await waitFor(() => expect(api.read).toHaveBeenCalledTimes(2));
+    await act(async () => { await Promise.resolve(); });
+    expect(result.current.active).toBe(false);
+    expect(stored()?.mode).toBe('text');
+  });
+
+  it('stays in the text with no pages, unsupported or failed, and writes no memory', async () => {
+    for (const next of [
+      register({ status: 'none' }),
+      register({ supported: false, status: 'none' }),
+      register({ status: 'failed', expected: 2 }),
+    ]) {
+      useDocumentTabsStore.getState().reset();
+      api.read.mockResolvedValue(next);
+      const { result, unmount } = openHook();
+      await waitFor(() => expect(result.current.register).not.toBeNull());
+      expect(result.current.active).toBe(false);
+      expect(stored()).toBeUndefined();
+      unmount();
+    }
+  });
+
+  it('moves to the pages when the first one arrives, if the reader has not moved', async () => {
+    vi.useFakeTimers();
+    api.read.mockResolvedValueOnce(register({ status: 'pending' }))
+      .mockResolvedValue(register({ status: 'partial', expected: 3, completed: 1, pages: [page(1)] }));
+    const { result } = openHook();
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(result.current.active).toBe(false);
+    expect(stored()).toBeUndefined();
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(result.current.active).toBe(true);
+  });
+
+  it('does not pull away a reader who has scrolled the text while pages were being made', async () => {
+    vi.useFakeTimers();
+    const main = document.createElement('div');
+    main.setAttribute('data-app-main-scroll', 'true');
+    document.body.append(main);
+    api.read.mockResolvedValueOnce(register({ status: 'pending' }))
+      .mockResolvedValue(register({ status: 'partial', expected: 3, completed: 1, pages: [page(1)] }));
+    const { result } = openHook();
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    main.scrollTop = 300;
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(result.current.active).toBe(false);
+    expect(stored()?.mode).toBe('text');
+    main.remove();
+  });
+
+  it('leaves a queued focus request its text too', async () => {
+    useAgentUiStore.setState({ pending: { kind: 'focus_object', target: { type: 'note_block', note_id: 'note', block_id: 'b' } } as never });
+    api.read.mockResolvedValue(complete(3));
+    const { result } = openHook();
+    await waitFor(() => expect(result.current.available).toBe(true));
+    expect(result.current.active).toBe(false);
+    expect(stored()?.mode).toBe('text');
+  });
+
+  it('leaves a waiting focus request its text', async () => {
+    useAgentUiStore.setState({ focusCommand: { kind: 'focus_object', target: { type: 'note_block', note_id: 'note', block_id: 'b' } } as never });
+    api.read.mockResolvedValue(complete(3));
+    const { result } = openHook();
+    await waitFor(() => expect(result.current.available).toBe(true));
+    expect(result.current.active).toBe(false);
+    expect(stored()?.mode).toBe('text');
+  });
+});
+
 describe('page position', () => {
   const harness = {} as { controller: SourcePageViewController };
   function Harness() {
@@ -345,6 +451,7 @@ describe('source page controller', () => {
     act(() => result.current.jumpToPage(3));
     expect(result.current.active).toBe(true);
     expect(useDocumentTabsStore.getState().tabs.find((tab) => tab.key === documentKey('note', 'a'))?.sourceView).toEqual({ mode: 'pages', page: 3 });
+    tabs.remember(documentKey('note', 'b'), { sourceView: { mode: 'text', page: 1 } });
     rerender({ noteId: 'b' });
     await waitFor(() => expect(result.current.noteId).toBe('b'));
     expect(result.current.active).toBe(false);

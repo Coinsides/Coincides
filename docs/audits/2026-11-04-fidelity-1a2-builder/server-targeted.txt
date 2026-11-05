@@ -1,0 +1,4 @@
+ARM: after fixing the lifecycle reds from the full run; working tree
+# tests 47
+# pass 47
+# fail 0

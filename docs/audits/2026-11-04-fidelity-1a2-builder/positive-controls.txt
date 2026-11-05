@@ -1,0 +1,42 @@
+ARM A: scratch copy, stillWanted always true
+not ok 15 - a Source deleted during its conversion gets no derived file
+# tests 16
+# pass 15
+# fail 1
+
+ARM B: scratch copy, Source deletion does not remove the derived PDF
+not ok 13 - deleting the Source leaves no derived PDF, page row, asset row or image file
+not ok 14 - a derived PDF that cannot be removed at deletion leaves a cleanup job
+# tests 16
+# pass 14
+# fail 2
+
+ARM C: scratch copy, converter inherits the full environment
+not ok 1 - with a converter, a docx gets real page images from its derived PDF and keeps its text projection
+# tests 16
+# pass 15
+# fail 1
+
+ARM D: scratch copy, a whole derived PDF is never reused
+not ok 9 - resume after a crash: a truncated derived PDF is rebuilt, a whole one is reused, finished pages stay
+# tests 16
+# pass 15
+# fail 1
+
+ARM E: scratch copy, page images do not recognise docx
+not ok 1 - with a converter, a docx gets real page images from its derived PDF and keeps its text projection
+not ok 4 - an older docx goes through the generate route once a converter exists
+not ok 5 - a converter that ends as fail fails only the images, leaves no derived file, and can be retried
+not ok 6 - a converter that ends as silent fails only the images, leaves no derived file, and can be retried
+not ok 7 - a converter that ends as garbage fails only the images, leaves no derived file, and can be retried
+not ok 8 - a converter past its time limit is killed and reads as a failure
+not ok 9 - resume after a crash: a truncated derived PDF is rebuilt, a whole one is reused, finished pages stay
+not ok 10 - a derived PDF that passes the quick check but will not open is rebuilt once
+not ok 11 - the startup sweep clears crashed run folders and orphans, and keeps a live derived PDF
+not ok 12 - rebuilding the projection keeps the pages and the derived PDF; a lost derived PDF is converted again only if pages need it
+not ok 13 - deleting the Source leaves no derived PDF, page row, asset row or image file
+not ok 15 - a Source deleted during its conversion gets no derived file
+not ok 16 - conversions wait in the one page image queue, so two documents never convert at once
+# tests 16
+# pass 3
+# fail 13

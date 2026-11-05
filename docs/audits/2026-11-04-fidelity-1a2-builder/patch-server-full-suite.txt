@@ -1,0 +1,24 @@
+ARM: working tree after patch P1-P5, full server suite, explicit file list (no server/dist)
+# tests 1278
+# pass 1277
+# fail 1
+# cancelled 0
+# skipped 0
+--- every red entry, TAP segment verbatim
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+  ---
+  duration_ms: 1238.345
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\scripts\\agent-eval\\harness.test.ts:31:6977'
+  failureType: 'testCodeFailure'
+  error: `[{"name":"zero tools and identical live/history zero-write receipt projection","passed":false,"error":"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n  [\\n+   'message_meta',\\n-   'turn_receipt',\\n    'done'\\n  ]\\n"}]`
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\scripts\agent-eval\harness.test.ts:346:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...

@@ -1,6 +1,6 @@
 > **状态 (Status)**: active(v2,2026-11-01 F8 补 list_notes 读面;2026-09-21 T2 富块提案补齐;2026-09-14 Henry 令建;**操作应用前必读**——读者=产品内 Agent/Fable/builder,不是最终用户)
 > **层 (Layer)**: 现状 / 应用操作说明书
-> **日期 (Updated)**: 2026-11-01
+> **日期 (Updated)**: 2026-11-05
 > **防腐条款**: 交付新面的工单,申报义务含"说明书条目已更新/无涉";每版段收口过一遍 diff。发现缺条错条=当场补(steward: Fable)。
 
 # Coincides 应用操作说明书 v2
@@ -74,6 +74,10 @@
 - 要走 **Note Proposal/材料地图/Agent 文档检索** → 材料库:`POST /api/documents/upload`(multipart: file+course_id);
 - 要走 **引用源/快照/重投影** → Source Library:`POST /api/sources/upload`(multipart: file+course_id+origin_entry_kind:'project_upload'|'library_upload');
 - **一致性警示(2026-11-01 更新)**:给 Agent/项目材料让它"用",走 Source Library 即可(F3 桥+F5 检索已通);材料库 legacy 门仍在但 UI 无入口且停喂(TD-43),⛔新流程依赖它。
+- **Source 阅读视图(1a、1a-乙,2026-11-05)**:PDF、docx 投影笔记工具栏有「文本/原页」切换。原页可用且本标签页没有记忆时默认进原页;还在生成且读者未滚动时,第一页到达才切。切换记忆只在当前标签页内,刷新后回默认。docx 经服务端转 PDF 后走同一条页影像通路,需配置 `COINCIDES_DOCX_PDF_COMMAND_JSON`;未配置时没有切换入口,`POST /api/sources/:id/pages/generate` 返回 409 `source_pages_converter_unavailable`。旧文件在原页层点生成按钮补页。
+- **原页视图的边界**:只能看和跳。批注、选字、组、铸 item 都在文本视图;已有批注默认不可见,页面无提示。Ctrl+P 打的是文本投影,公式照丢,要原样打印请下载原件。原页下 Agent 拿不到读者所在页(TD-46)。
+- **内容丢失提示**:mammoth 有转换消息时,Source 行出徽标、详情出提示,投影笔记文本视图顶部出横幅「本件有内容未能完整转换」,不带数字。原页视图不显示横幅。只有告警不等于真丢内容;消息在发布时写入投影笔记 `metadata.parser_messages`,旧 docx 重投影后才有。
+- **格式现状**:PDF、docx 文本投影 + 原页;md、txt 只有文本投影(标题层级、列表、围栏缺口见 TD-48);图片可看不可引;pptx、xlsx、csv 只存不读;html 按文本切段。zip 展开后子文件自动解析,原生解析最多同时 3 个。
 
 ## 三 · 提案生命周期
 

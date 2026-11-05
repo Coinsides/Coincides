@@ -1,0 +1,181 @@
+ARM: each file red in the patch-round full run, run alone on the working tree. Output verbatim except migration progress lines ('Running N pending', per-migration tick, 'Migrations complete'), removed for size.
+
+=== server scripts/agent-eval/harness.test.ts
+TAP version 13
+# Subtest: scenario discovery sees the six shipped files and registers an added file without an index edit
+ok 1 - scenario discovery sees the six shipped files and registers an added file without an index edit
+  ---
+  duration_ms: 630.355
+  type: 'test'
+  ...
+# Subtest: malformed scenario modules are rejected before execution
+ok 2 - malformed scenario modules are rejected before execution
+  ---
+  duration_ms: 47.6114
+  type: 'test'
+  ...
+# Subtest: explicit scripted-only fixture scenarios permit zero provider turns
+ok 3 - explicit scripted-only fixture scenarios permit zero provider turns
+  ---
+  duration_ms: 8.7593
+  type: 'test'
+  ...
+# Subtest: CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios
+ok 4 - CLI defaults to scripted and distinguishes live, dry-run, list and selected scenarios
+  ---
+  duration_ms: 0.5761
+  type: 'test'
+  ...
+# Subtest: live dry-run and list never spawn a worker, fetch, or read the machine credential store
+ok 5 - live dry-run and list never spawn a worker, fetch, or read the machine credential store
+  ---
+  duration_ms: 785.0129
+  type: 'test'
+  ...
+# Subtest: environment allowlist retains OS essentials but drops inherited keys, loaders and database paths
+ok 6 - environment allowlist retains OS essentials but drops inherited keys, loaders and database paths
+  ---
+  duration_ms: 0.745
+  type: 'test'
+  ...
+# Subtest: two scripted isolations have short synthetic keys, empty dotenv and exclusive assets without cross-contamination
+ok 7 - two scripted isolations have short synthetic keys, empty dotenv and exclusive assets without cross-contamination
+  ---
+  duration_ms: 15.4917
+  type: 'test'
+  ...
+# Subtest: live isolation only preserves the configured store path and never reads it during setup
+ok 8 - live isolation only preserves the configured store path and never reads it during setup
+  ---
+  duration_ms: 5.4656
+  type: 'test'
+  ...
+# Subtest: SSE recording preserves raw chunks and decodes fragmented and multiple frames without losing fields
+ok 9 - SSE recording preserves raw chunks and decodes fragmented and multiple frames without losing fields
+  ---
+  duration_ms: 5.7413
+  type: 'test'
+  ...
+# Subtest: SSE recording rejects an incomplete frame instead of silently discarding evidence
+ok 10 - SSE recording rejects an incomplete frame instead of silently discarding evidence
+  ---
+  duration_ms: 0.8779
+  type: 'test'
+  ...
+# Subtest: scoreboard uses final ledger once, groups failed tool_end, and separates actual durations and tool/user rounds
+ok 11 - scoreboard uses final ledger once, groups failed tool_end, and separates actual durations and tool/user rounds
+  ---
+  duration_ms: 1.5322
+  type: 'test'
+  ...
+# Subtest: empty assertion populations have null rates and execution failures remain visible
+ok 12 - empty assertion populations have null rates and execution failures remain visible
+  ---
+  duration_ms: 0.6505
+  type: 'test'
+  ...
+# Subtest: tool failure aggregation treats prototype property names as ordinary tool names
+ok 13 - tool failure aggregation treats prototype property names as ordinary tool names
+  ---
+  duration_ms: 0.5998
+  type: 'test'
+  ...
+# Subtest: unevaluated live evidence keeps null task rate while preserving observed events and transport failures
+ok 14 - unevaluated live evidence keeps null task rate while preserving observed events and transport failures
+  ---
+  duration_ms: 0.5838
+  type: 'test'
+  ...
+# sqlite-vec loaded: vv0.1.7
+# (node:16272) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: real empty-claim journey turns red when its collected claim event is removed
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+  ---
+  duration_ms: 672.2619
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\scripts\\agent-eval\\harness.test.ts:31:6977'
+  failureType: 'testCodeFailure'
+  error: `[{"name":"zero tools and identical live/history zero-write receipt projection","passed":false,"error":"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n  [\\n+   'message_meta',\\n-   'turn_receipt',\\n    'done'\\n  ]\\n"}]`
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\scripts\agent-eval\harness.test.ts:346:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 14
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2665.9529
+# flaky-retries 0
+
+=== client src/pages/Boards/BoardPage.selection.test.tsx
+
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+
+ ✓ src/pages/Boards/BoardPage.selection.test.tsx (7 tests) 3002ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ① accumulates two Ctrl marquees, drags all four objects in one history step and moves the same selection to a layer  797ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ③ groups all card kinds, chalk, mount-ordered strokes and labeled connections, following Ctrl/Shift toggles immediately  588ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ④ emphasizes only the hovered stroke in either direction, scrolls its row into view and locates without changing selection  499ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ⑥ clears selection with Escape from a sidebar button and cancels an active marquee without restoring it on pointerup  361ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  11:59:01
+   Duration  9.09s (transform 2.94s, setup 257ms, collect 4.50s, tests 3.00s, environment 762ms, prepare 186ms)
+
+
+=== client src/pages/Boards/BoardPage.smoke.test.tsx
+
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+
+stdout | src/pages/Boards/BoardPage.smoke.test.tsx > V13.5 B3 board identity details > reads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes
+V13_5_B3_CLIENT_IDENTITY {"title":"Renamed board","identity_item_id":"identity-identity","description":"A place to compare field observations.\nQuestions remain open.","rename_request":["/boards/identity",{"title":"Renamed board"}],"reopened":true}
+
+stdout | src/pages/Boards/BoardPage.smoke.test.tsx > V13 S4 board polish smoke > opens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker
+V13_S4_BOARD_POLISH_SMOKE {"boardName":"Exam revision","soulTitle":"Exam revision","navigator":"collapsed on entry, manual expansion retained, restored on exit","picker":"open, mount, close, reopen with search retained, Escape, focus returned","members":1}
+
+stdout | src/pages/Boards/BoardPage.smoke.test.tsx > V13 S2 board and paper smoke > opens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper
+V13_S2_BOARD_PAPER_SMOKE {"boardZoom":1.2,"members":3,"edges":2,"freehand":1,"paper":{"stored":[{"id":"block-a","canvas_layout":{"x":0,"y":40,"width":760,"height":88,"surface":"formal_page","coordinate_space":"page_frame_local","frame_id":"frame-a","boundary_role":"inside","surface_authority":{"coordinateSpace":"page_frame_local","pageBoundary":{"left":0,"right":760,"frameId":"frame-a"}}}}],"resolved":{"block-a":{"x":0,"y":40,"width":760,"height":88,"surface":"formal_page","coordinate_space":"page_frame_local","frame_id":"frame-a","boundary_role":"inside","surface_authority":{"coordinateSpace":"page_frame_local","pageBoundary":{"left":0,"right":760,"frameId":"frame-a"}}}},"typography":{"fontSizePx":15.2,"lineHeightPx":25.1},"reading":[{"gear":"fit_width","baseScale":1.25,"displayScale":1.25,"stepFactor":1,"paperWidth":904,"paperHeight":1350,"layoutWidth":760},{"gear":"fit_page","baseScale":0.6666666666666666,"displayScale":0.6666666666666666,"stepFactor":1,"paperWidth":904,"paperHeight":1350,"layoutWidth":760},{"gear":"physical","baseScale":0.8779875966831581,"displayScale":0.8779875966831581,"stepFactor":1,"paperWidth":904,"paperHeight":1350,"layoutWidth":760}]}}
+
+ ✓ src/pages/Boards/BoardPage.smoke.test.tsx (13 tests) 10317ms
+   ✓ V13.5 B3 board identity details > reads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes  928ms
+   ✓ V13.4 wave 1 wiring smoke > A1 renames in the board, rejects a blank name and reopens the saved title  338ms
+   ✓ V13.4 wave 1 wiring smoke > A2 moves every visual kind, resizes a scaled shape, respects Pin and reopens geometry  1654ms
+   ✓ V13.4 wave 1 wiring smoke > A3 saves and clears a label, persists three arrow states and renders arrowheads outside cards  1163ms
+   ✓ V13.4 wave 1 wiring smoke > A4 shows fresh counts from both menus, cancels safely, deletes and reuses the retained purpose  447ms
+   ✓ V13 S4 board polish smoke > opens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker  960ms
+   ✓ V13 S2 board and paper smoke > opens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper  2344ms
+   ✓ V13 S2 board and paper smoke > deletes drawn ink and resizes a hosted group through a zoomed viewport before reopening its paper  1493ms
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  11:59:14
+   Duration  16.44s (transform 3.02s, setup 265ms, collect 4.49s, tests 10.32s, environment 792ms, prepare 213ms)
+
+
+=== client src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx
+
+ RUN  v3.2.7 D:/Coinsides/v2.x/Coincides/client
+
+ ✓ src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx (5 tests) 8542ms
+   ✓ A1 one plan across writing, print and Overview > projects the complete long logical block into the same page slices in both read-only surfaces  1127ms
+   ✓ A1 one plan across writing, print and Overview > frame runtime consumes the supplied plan object without repaginating the projected boxes  1023ms
+   ✓ A1 one plan across writing, print and Overview > keeps hidden auto text and a manual box on their complete export pages after folding a chapter  2596ms
+   ✓ A1 one plan across writing, print and Overview > keeps ink on its original page when text starts later and creates continuation pages (print=false)  1938ms
+   ✓ A1 one plan across writing, print and Overview > keeps ink on its original page when text starts later and creates continuation pages (print=true)  1834ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  11:59:35
+   Duration  12.02s (transform 1.14s, setup 268ms, collect 1.87s, tests 8.54s, environment 783ms, prepare 172ms)
+

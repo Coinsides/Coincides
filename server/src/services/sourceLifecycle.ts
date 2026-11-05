@@ -12,9 +12,11 @@ import {
   type ManagedFileTask,
 } from './managedFileCleanup.js';
 import { getSourceBlobRoot, resolveSourceStorageKey } from './sourceFileIntake.js';
+import { derivedDocxPdfStorageKey } from './sourceDocxPdf.js';
 import { sourcePageImageAssetIds } from './sourcePageImages.js';
 
 interface SourceLifecycleRow {
+  source_file_id: string;
   id: string;
   display_name: string;
   storage_key: string;
@@ -47,6 +49,7 @@ function sourceRow(db: Database.Database, userId: string, sourceRecordId: string
     SELECT
       sr.id,
       sr.display_name,
+      sf.id AS source_file_id,
       sf.storage_key,
       sf.storage_state,
       sm.id AS materialization_id,
@@ -225,6 +228,15 @@ export function deleteSourceWithCompensation(
         source_storage_key: quarantineKey,
       }, options)
     : { completed: true, cleanup_job_id: null };
+  const derivedKey = derivedDocxPdfStorageKey(userId, row.source_file_id);
+  const derivedCleanup = existsSync(resolveSourceStorageKey(derivedKey, rootDir))
+    ? settleManagedFileTask(db, {
+        user_id: userId,
+        storage_domain: 'source_blob',
+        operation: 'delete',
+        source_storage_key: derivedKey,
+      }, options)
+    : { completed: true, cleanup_job_id: null };
 
   return {
     source_record_id: sourceRecordId,
@@ -233,6 +245,7 @@ export function deleteSourceWithCompensation(
     receipts_degraded: impact.retained_receipt_count,
     original_was_missing: !originalExists,
     cleanup_jobs_created: assetCleanup.filter((result) => !result.completed).length
-      + (sourceCleanup.completed ? 0 : 1),
+      + (sourceCleanup.completed ? 0 : 1)
+      + (derivedCleanup.completed ? 0 : 1),
   };
 }

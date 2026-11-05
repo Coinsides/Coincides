@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { PDFParse } from 'pdf-parse';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
+import { docxPdfConverterConfigured, ensureDocxPdf } from './sourceDocxPdf.js';
 import { resolveSourceStorageKey } from './sourceFileIntake.js';
 import { MINERU_PARSER_KEY } from './sourceMineruParser.js';
 import {
@@ -17,6 +18,7 @@ import {
 
 const PAGE_IMAGE_WIDTH = 1240;
 const PAGE_IMAGE_PARSERS = new Set(['native-pdf', MINERU_PARSER_KEY]);
+const DOCX_PARSER = 'native-docx';
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export type SourcePageImageStatus = 'none' | 'pending' | 'partial' | 'complete' | 'failed';
@@ -110,6 +112,11 @@ export async function openPdfPageRenderer(filePath: string): Promise<SourcePageR
   }
 }
 
+// A docx has pages only where this host can convert it.
+function pageImagesSupported(parserKey: string): boolean {
+  return PAGE_IMAGE_PARSERS.has(parserKey) || (parserKey === DOCX_PARSER && docxPdfConverterConfigured());
+}
+
 function pngSize(png: Buffer): { width: number; height: number } {
   if (png.length < 24 || !png.subarray(0, 8).equals(PNG_SIGNATURE)) {
     throw new Error('Rendered page is not a PNG image');
@@ -137,7 +144,7 @@ function pageImageTarget(
     JOIN notes n ON n.id = sm.projection_note_id AND n.user_id = sm.user_id
     WHERE sm.source_record_id = ? AND sm.user_id = ? AND sm.status = 'materialized'
   `).get(sourceRecordId, userId) as PageImageTarget | undefined;
-  return row && PAGE_IMAGE_PARSERS.has(row.parser_key) && row.storage_state === 'ready' ? row : null;
+  return row && pageImagesSupported(row.parser_key) && row.storage_state === 'ready' ? row : null;
 }
 
 function readProgress(
@@ -273,6 +280,38 @@ function errorMessage(error: unknown): string {
   return (error instanceof Error ? error.message : String(error)).slice(0, 200);
 }
 
+// A docx is converted here, inside the one page image queue, so conversions run one
+// at a time like everything else in it. A derived PDF that will not open is rebuilt once.
+async function openRenderer(
+  db: Database.Database,
+  userId: string,
+  sourceRecordId: string,
+  target: PageImageTarget,
+  options: SourcePageImageOptions,
+): Promise<SourcePageRenderer | null> {
+  const open = options.openPageRenderer || openPdfPageRenderer;
+  if (target.parser_key !== DOCX_PARSER) {
+    return open(resolveSourceStorageKey(target.storage_key, options.sourceRootDir));
+  }
+  const ensure = (force: boolean) => ensureDocxPdf({
+    userId,
+    sourceFileId: target.source_file_id,
+    docxStorageKey: target.storage_key,
+    rootDir: options.sourceRootDir,
+    force,
+    stillWanted: () => pageImageTarget(db, userId, sourceRecordId) !== null,
+  });
+  const pdf = await ensure(false);
+  if (!pdf) return null;
+  try {
+    return await open(pdf.path);
+  } catch (error) {
+    if (!pdf.reused) throw error;
+    const rebuilt = await ensure(true);
+    return rebuilt ? open(rebuilt.path) : null;
+  }
+}
+
 async function renderMissingPages(
   db: Database.Database,
   userId: string,
@@ -283,9 +322,8 @@ async function renderMissingPages(
   if (!first) return;
   let renderer: SourcePageRenderer | null = null;
   try {
-    renderer = await (options.openPageRenderer || openPdfPageRenderer)(
-      resolveSourceStorageKey(first.storage_key, options.sourceRootDir),
-    );
+    renderer = await openRenderer(db, userId, sourceRecordId, first, options);
+    if (!renderer) return;
     const expected = renderer.total;
     const failedPages: number[] = [];
     const report = (materializationId: string, status: PageImageProgress['status']) => writeProgress(db, userId, sourceRecordId, {
@@ -453,11 +491,12 @@ export function getSourcePages(db: Database.Database, userId: string, sourceReco
   if (!materialization) throw new AppError(404, 'Source not found');
   const identity = {
     source_id: sourceRecordId,
-    supported: PAGE_IMAGE_PARSERS.has(materialization.parser_key) && Boolean(materialization.projection_note_id),
+    supported: pageImagesSupported(materialization.parser_key) && Boolean(materialization.projection_note_id),
   };
   const progress = readProgress(db, userId, sourceRecordId);
   // Project deletion can remove the projection and its images but keep the Source.
-  if (!progress || !materialization.projection_note_id) {
+  // A docx whose host lost its converter also reads as none, or its reader would poll forever.
+  if (!progress || !identity.supported) {
     return { ...identity, status: 'none' as const, expected: 0, completed: 0, failed_pages: [] as number[], pages: [] };
   }
   const pages = db.prepare(`
@@ -495,7 +534,10 @@ export function requestSourcePageImages(
     SELECT parser_key FROM source_materializations WHERE source_record_id = ? AND user_id = ?
   `).get(sourceRecordId, userId) as { parser_key: string } | undefined;
   if (!materialization) throw new AppError(404, 'Source not found');
-  if (!PAGE_IMAGE_PARSERS.has(materialization.parser_key)) {
+  if (materialization.parser_key === DOCX_PARSER && !docxPdfConverterConfigured()) {
+    throw new AppError(409, 'This server cannot convert documents to original pages', { code: 'source_pages_converter_unavailable' });
+  }
+  if (!pageImagesSupported(materialization.parser_key)) {
     throw new AppError(409, 'This Source has no original page images', { code: 'source_pages_unsupported' });
   }
   if (!pageImageTarget(db, userId, sourceRecordId)) {

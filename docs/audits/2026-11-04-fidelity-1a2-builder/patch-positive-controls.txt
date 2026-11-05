@@ -1,0 +1,38 @@
+All arms: scratch copy, test files unchanged. Shared tree not swapped.
+
+ARM P5: terminateProcessTree waits for close with no limit
+not ok 18 - a process left holding the converter output cannot stop the queue: the wait ends, the run fails, the next one works
+  expected: 'failed'
+  actual: 'complete'
+# tests 18
+# pass 17
+# fail 1
+
+ARM P4: converter output is not printed when validation fails
+not ok 17 - a converter that exits 0 with no PDF still leaves its output in the log
+# tests 18
+# pass 17
+# fail 1
+
+The first run of the three client arms failed to start (the scratch copy lacked client/test), so it proved nothing. Rerun below on a complete copy whose baseline passes 3/3.
+
+ARM P2: enabled without the note id check
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/pages/Notes/canvasEngine/NoteCanvasRuntime.sourceView.test.tsx > source view while the route moves between projections > waits for the next note to hydrate, so
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+
+ARM P3: notice renders in both views
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/pages/Notes/canvasEngine/NoteCanvasRuntime.sourceView.test.tsx > conversion notice > shows over the text and not over the original pages
+AssertionError: expected <div class="_notice_bfb612" …(2)>…(2)</div> to be null
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+
+ARM T-D2-N6: rule 3 ignores the queued request
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original pages as the default reading view > leaves a queued focus request its text too
+AssertionError: expected true to be false // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 30 passed (31)

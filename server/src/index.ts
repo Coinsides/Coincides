@@ -67,6 +67,7 @@ import {
   sweepSourceMaterializations,
 } from './services/sourceMaterialization.js';
 import { resumePurposeDrafts } from './services/purposeDrafting.js';
+import { sweepDerivedDocxPdfs } from './services/sourceDocxPdf.js';
 import { resumeSourcePageImages } from './services/sourcePageImages.js';
 import { drainManagedFileCleanupJobs } from './services/managedFileCleanup.js';
 
@@ -85,6 +86,10 @@ if (cleanupSweep.completed || cleanupSweep.pending) {
 const sourceSweep = sweepSourceStorage(database);
 if (sourceSweep.removed_temp_orphans || sourceSweep.recovered_staging || sourceSweep.removed_stale_staging) {
   console.log('Source storage startup sweep:', sourceSweep);
+}
+const removedDerivedPdfs = sweepDerivedDocxPdfs(database);
+if (removedDerivedPdfs) {
+  console.log(`Removed ${removedDerivedPdfs} leftover derived document file(s) at startup.`);
 }
 const materializationSweep = sweepSourceMaterializations(database);
 if (materializationSweep.interrupted_runs_failed || materializationSweep.orphan_projection_assets_removed) {

@@ -1,0 +1,48 @@
+ARM: working tree, full server suite, explicit file list (no server/dist)
+# tests 1276
+# pass 1274
+# fail 2
+# cancelled 0
+# skipped 0
+--- every red entry, TAP segment verbatim
+not ok 15 - real empty-claim journey turns red when its collected claim event is removed
+  ---
+  duration_ms: 1570.6564
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\scripts\\agent-eval\\harness.test.ts:31:6977'
+  failureType: 'testCodeFailure'
+  error: `[{"name":"zero tools and identical live/history zero-write receipt projection","passed":false,"error":"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n  [\\n+   'message_meta',\\n-   'turn_receipt',\\n    'done'\\n  ]\\n"}]`
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\scripts\agent-eval\harness.test.ts:346:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+not ok 1090 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+  ---
+  duration_ms: 6849.8997
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:2914'
+  failureType: 'testCodeFailure'
+  error: |-
+    native text completed while MinerU still held its slot
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:489:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async withDbAndStorage (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:291:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:443:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
