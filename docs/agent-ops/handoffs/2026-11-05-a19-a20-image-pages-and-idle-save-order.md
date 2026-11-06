@@ -178,3 +178,97 @@ builder 判断采信:窗口是共同地点,不是共同根因。A-21 是 `render
 **要做**:块的创建与交接不能打断正在进行的输入法组合。组合中不挪焦点、不换主,等 `compositionend` 后再交接,或交接后接回组合。修根因,⛔靠延迟绕过。
 **验收**:同一模拟矩阵修后 0/24,修前要红;中文、日文输入法各一组;A-18 和编辑器组路径不回归。真输入法留给 Henry 实测,回执写明。
 **排序**:动的是编辑器组同一批文件(`useDraftBlockController` 等),**编辑器组收割后才动工**,排在 V2 之后、A-19 之前。
+
+## V2 Result(builder 2026-11-07,B-78、B-79、A-22)
+
+**执行状态**:完工,未提交。未碰岛和 Henry 的文件,零真实模型,无新依赖。没动编辑器组清单内的文件。
+
+**一句话**:三项都在本地复现并修好,修前修后两份构建在同库同条件下对比;客户端全量 2626/2626,闸全过。**没上岛**,岛上真鼠标复测归 Tester。
+
+### 文件清单(收割用,与编辑器组、F3b、A-19 分开)
+- B-78、B-79:`client/src/pages/Notes/NoteDetail.module.css`(只有 CSS)
+- A-22:`client/src/pages/GroupGallery/GroupGallery.tsx`、`groupGalleryData.ts`、`GroupGallery.module.css`、`GroupGallery.test.tsx`
+- A-22 新增:`client/src/pages/GroupGallery/groupGalleryUnattached.test.tsx`
+- A-22 文案:`client/src/locales/en/translation.json`、`client/src/locales/zh/translation.json`(只改了 Rebuild 弹窗那一句)
+- 证据:`docs/audits/2026-11-06-v2-builder/`(走查记录 `walkthrough.md`、4 张截图、`client-full.txt`、`gates.txt`)
+
+### 复现与修法
+走查环境:本地 scratch 库,内嵌浏览器 1440×900。上传一份 PDF,生成原页,在投影笔记上建一个内容组,再 Rebuild。`pre` 是去掉本单 CSS 的构建,在 scratch 副本里去掉,没碰共享树。
+
+| 项 | 修前(pre) | 修后(post) | 修法 |
+|---|---|---|---|
+| **B-78** 悬浮切换盖住 Overview 关闭键 | 关闭键中心实际命中 `Pages` | 命中关闭键;关掉 Overview 后切换回来 | Overview 打开时隐藏悬浮切换,用 `.page:has([data-note-overview-root])`,照 Overview 已有的写法 |
+| **B-79** 原页头部可被滚走 | 头部滚 8 格,切换到 y=-110,主区滚 180px | 切换停在 y=70,主区不动 | 原页打开时主区 `overflow: hidden`,照 Overview 已有那条规则 |
+| **A-22** Rebuild 后内容组找不到 | Gallery 0 个组;新笔记 Groups 面板为空 | Gallery 底部「Not in any note」区列出该组,只读无按钮;Rebuild 弹窗写明后果和去处 | 新增只读加载,按项目列出 `note_id` 为空的 active 组;按裁定不尝试挂回新笔记 |
+
+**B-79 根因**:原页模式下写作面只是 `visibility: hidden`,仍占约 120px 版面,加上间距,主区可滚 180px。原页视口自己 `overscroll-behavior: contain`,但滚轮落在头部时会交给主区。
+
+**A-22 机理**:Gallery 按「项目 → 笔记 → 该笔记的组」加载。Rebuild 后旧笔记 404,组的 `note_id` 变空字符串,`course_id` 保留,所以挂不到任何笔记下。
+
+### 验证
+- 走查:修前修后两份构建在同库同条件下对比,数字见上表和 `walkthrough.md`。
+- 定向:Gallery、原页、Overview 相关 6 个测试文件 71/71。
+- **客户端全量 256 个文件 2626/2626**,tsc 0;`changed-file-secrets`、`canvas-runtime-boundary`、`source-experience` 过。
+- **全量跑在共享树上,当时树里还有编辑器组(冻结版)、F3b 和 A-19 的改动**,所以这个数字是四单合在一起的结果,不能单独代表 V2。V2 是纯 CSS 加 Gallery,和另外三单没有文件重叠。
+- **B-78、B-79 没有单测**:jsdom 不算布局,`:has` 也测不了。证据只有浏览器里的修前修后对比。
+
+### 顺带看到(未改)
+- 打开带原页的笔记时,主区有 26px 初始滚动;pre、post 一样,不是本单引入。头部仍在屏内。
+- 原页模式下右侧「Groups」入口不可见:它在写作面里,写作面整体隐藏。pre、post 一样。
+- Gallery 有时长时间停在「Loading content groups」,与本单无关,未查。
+- 「Not in any note」入口只读,没有编辑、移动、删除,按裁定以后再说。
+- Gallery 的界面文案原本就是英文硬编码,新入口照此写;Rebuild 弹窗中英文都改了。
+
+### 没验到
+- 岛上真鼠标复测。
+- 多个项目、大量组时「Not in any note」区的表现。
+
+## 编辑器组判语与返修裁定(Main_Designer 2026-11-07)
+
+**判语:不放行,这一版不收割。** 依据 Tester 报告 `docs/audits/2026-11-05-a21-builder/review-tester.md` 第零、十一节(真浏览器、真后端、修前修后并排)。主矩阵 76 → 4、卡 12 秒后成功 6/6 这些改善要保住,返修不得退。
+
+### 必修(放行条件)
+
+| 条目 | Tester 实测 |
+|---|---|
+| 第 1 条:转交后第二个结构失败,标题字和正文全丢 | 修后全丢(reorder 500 2/2、改角色保存 500 2/2、卡 12 秒断开 4/4);修前字在 |
+| 第 2 条:窗口内回车后在应用内离开 | 约 350ms 修后 4/4 丢,修前 2/4;1 秒 4/4 对。人手碰得到 |
+| 留字写进别的段落(buffer-2) | 复现,新的错位 |
+| 行首打的字被挪到行尾(buffer-4) | 复现,新的错位 |
+| 新开标题抹掉留住的字(buffer-3) | 读码加 hook 复现 |
+| `/` 选 Text 后光标不回来(handoff-1) | 修后 1/7 光标不回、两键全丢 |
+| 提交等待被同步点击提前放行(commit-1) | 未跑(毫秒级竞态),比修前窄但未关死 |
+| **页面卸载时同步存档(新增)** | U 做法:修后 3/3 丢,修前 3/3 字在 |
+
+**关于「页面卸载」这一条,我改判。** 11-06 我裁 ① 不阻断,理由是修前也有同样的终态。Tester 的 U 对照显示同一时刻修前不丢、修后丢,那条理由不成立。要求:`pagehide` 时把框里未落地的字同步写进留字存档;重开后按条件 a 处理(单元里已有就丢弃记录,否则留住并提示),⛔盲写。
+
+### 搭车(不是放行条件;出红即整条撤掉,不在本轮里调)
+
+- commit-2:每个标题窗口多一次失焦保存(修后 3 次,修前 2 次),把窗口拉长一个往返。优先做。
+- leads-2:只建块、无保存循环的路径上交接不原子。限定同前。
+- leads-3:撤销后光标少两格。限定同前(只加 `beforeCaret`)。
+- 回显框盖到前面的块上(buffer-5)随 buffer-2 的根因一起修,不单列。
+
+### 处置照 Tester
+
+- 驳回:buffer-6、handoff-0;leads-1 本批驳回。
+- 既有记债、另立单:leads-0、leads-4、leads-6、leads-8(丢字或结构错),leads-5、leads-7(错位),handoff-2 与「`/` 选 Text 把多行并成一个带换行的单元」(同属「一个单元里藏着换行」)。
+
+### 验收
+
+1. Tester 第十一节第 7 小节的场景表 A1、A2、B、C、K1–K5、I、E、F、J、G、H,修前构建作对照,脚本在 `tester-evidence/repro-2026-11-07/`。H 现在是必过项。
+2. 字守恒测试:事件集加「页面卸载」和「改角色保存 500(未按回车)」;记号带目标块;在冻结版本上对第 1 条、第 2 条、buffer-3 各红至少一次。
+3. 此前所有矩阵同 CPU 上限重跑,干净的臂不得变差。
+4. 条件 a–d 不变(恢复不盲写、离开等待以看门狗为上限、对不上锚点不默默换位、不新增落库状态)。
+
+### A-25 追加约束(来自 Tester 对 leads-1、handoff-0 的处置)
+
+A-25 把交接推迟到输入法组合结束之后,下面两条会从走不到变成走得到,动工时必须带上:
+
+- `flushSync` 发布回显必须跳过补播那一轮,否则补播的保存回来会覆盖新打的字(leads-1)。
+- 迟到的焦点补播不得把块重置成回显(handoff-0)。
+
+### 作业安排
+
+- 返修在 builder 的 scratch 整份副本里做;共享树冻结到 F3b、V2 验完收割;拷回候令。
+- 多路工作流不论只读与否,一律先取 `heavy-job.lock`(Tester 自报 02:30 一次未取锁,已自纠)。
