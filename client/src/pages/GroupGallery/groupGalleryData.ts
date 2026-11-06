@@ -140,6 +140,24 @@ export async function loadGroupGalleryRecords(): Promise<GalleryRecord[]> {
   return records.map((record) => ({ ...record, itemSummaries }));
 }
 
+/** A group whose note is gone: a Rebuild from Source replaces the note, and its groups keep their saved contents. */
+export interface UnattachedGalleryGroup {
+  project: Course;
+  group: ContentGroupV1;
+}
+
+// Read only for now: the blocks these groups pointed at were replaced, so nothing re-attaches them by guessing.
+export async function loadUnattachedContentGroups(): Promise<UnattachedGalleryGroup[]> {
+  const courseResponse = await api.get<Course[]>('/courses');
+  const lists = await Promise.all((courseResponse.data || []).map(async (project) => {
+    const response = await api.get<ContentGroupV1[]>('/content-groups', { params: { course_id: project.id } });
+    return (response.data || [])
+      .filter((group) => !group.note_id && (group.status ?? 'active') === 'active')
+      .map((group) => ({ project, group: normalizeContentGroup(group) }));
+  }));
+  return lists.flat();
+}
+
 export async function saveGalleryRecord(
   record: GalleryRecord,
   groups: ContentGroupV1[],

@@ -9,6 +9,7 @@ import type { GalleryRecord } from './groupGalleryData';
 const mocks = vi.hoisted(() => ({
   loadGroupGalleryRecords: vi.fn(),
   saveGalleryRecord: vi.fn(),
+  loadUnattachedContentGroups: vi.fn(async () => []),
 }));
 
 vi.mock('./groupGalleryData', async () => {
@@ -17,6 +18,7 @@ vi.mock('./groupGalleryData', async () => {
     ...actual,
     loadGroupGalleryRecords: mocks.loadGroupGalleryRecords,
     saveGalleryRecord: mocks.saveGalleryRecord,
+    loadUnattachedContentGroups: mocks.loadUnattachedContentGroups,
   };
 });
 

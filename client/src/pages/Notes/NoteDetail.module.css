@@ -1071,6 +1071,11 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 .page:has([data-note-overview-root]) .contentGroupLauncher,
 .page:has([data-note-overview-root]) .traySidebar { display: none; }
 :global([data-app-main-scroll='true']):has([data-note-overview-root]) { overflow: hidden; }
+/* Original pages scroll inside their own viewport, as the overview does. A wheel over their
+   header must not scroll the work area, or the only way back to the text scrolls away. */
+:global([data-app-main-scroll='true']):has([data-note-source-pages]) { overflow: hidden; }
+/* The floating text/pages switch sits where the overview puts its close button. */
+.page:has([data-note-overview-root]) .sourceViewFloat { display: none; }
 
 /* Global form-control transition:all would animate inherited visibility and
    leave the resumed caret unfocusable after the reading DOM has returned. */

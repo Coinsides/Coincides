@@ -2083,3 +2083,17 @@
     min-width: 232px;
   }
 }
+
+.unattachedSection {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px dashed var(--border-default);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.unattachedSection h2 { margin: 0; color: var(--text-secondary); font-size: 13px; font-weight: 780; }
+.unattachedSection p { margin: 0; }
+.unattachedSection ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.unattachedSection li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }

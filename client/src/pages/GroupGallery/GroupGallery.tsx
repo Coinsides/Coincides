@@ -38,6 +38,7 @@ import {
   activeGroups,
   cleanLabel,
   folderPathText,
+  loadUnattachedContentGroups,
   loadGroupGalleryRecords,
   makeFolderKey,
   makeGroupKey,
@@ -45,6 +46,7 @@ import {
   saveGalleryRecord,
   splitKey,
   type GalleryMode,
+  type UnattachedGalleryGroup,
   type GalleryRecord,
   type GroupRef,
 } from './groupGalleryData';
@@ -137,6 +139,7 @@ export default function GroupGalleryPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [records, setRecords] = useState<GalleryRecord[]>([]);
+  const [unattached, setUnattached] = useState<UnattachedGalleryGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<GalleryMode>(normalizeGalleryMode(searchParams.get('mode')));
@@ -160,6 +163,11 @@ export default function GroupGalleryPage() {
   const loadGallery = useCallback(async () => {
     setLoading(true);
     setError(null);
+    // A failure here must not hide the groups that do have a note.
+    void loadUnattachedContentGroups().then(setUnattached, (err) => {
+      console.error('Failed to load groups that are not in any note:', err);
+      setUnattached([]);
+    });
     try {
       setRecords(await loadGroupGalleryRecords());
     } catch (err) {
@@ -795,6 +803,7 @@ export default function GroupGalleryPage() {
                 </div>
               </section>
             ))}
+            <UnattachedGroups groups={unattached} query={query} />
           </div>
         </main>
       </section>
@@ -803,5 +812,32 @@ export default function GroupGalleryPage() {
         <span>{galleryModeLabel(mode)} · {visibleGroups.length} visible groups · {destinationLabel} destination</span>
       </footer>
     </div>
+  );
+}
+
+// Shown so they can be found, and nothing more: no edit, move or delete until the product decides what they become.
+function UnattachedGroups({ groups, query }: { groups: UnattachedGalleryGroup[]; query: string }) {
+  const needle = query.trim().toLowerCase();
+  const shown = needle
+    ? groups.filter(({ group, project }) => [group.title, group.identity.topic || '', project.name]
+      .join(' ').toLowerCase().includes(needle))
+    : groups;
+  if (!shown.length) return null;
+  return (
+    <section className={styles.unattachedSection} aria-label="Not in any note" data-gallery-unattached="true">
+      <h2>Not in any note</h2>
+      <p>
+        These groups belonged to a note that was rebuilt from its Source. They keep the contents they had then,
+        but are no longer in any note's Groups panel. Shown here so they can be found; they cannot be edited yet.
+      </p>
+      <ul>
+        {shown.map(({ project, group }) => (
+          <li key={group.id} data-unattached-group-id={group.id}>
+            <span className={styles.cardTitle}>{group.title}</span>
+            <span>{project.name}{group.identity.topic ? ` · ${group.identity.topic}` : ''}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

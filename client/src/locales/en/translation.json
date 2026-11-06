@@ -8,7 +8,7 @@
       "description": "Rebuild the reading view from the original file and replace the current projection. The original file stays available.",
       "loading": "Checking work attached to this projection...",
       "annotationWarning": "Annotations will be removed, with a snapshot receipt retained. The snapshot is saved before replacement; annotations are not moved to the new projection.",
-      "otherWorkWarning": "Tags, links, and appearance changes on this projection will not carry over. Content groups retain their snapshots but lose their live link to this projection.",
+      "otherWorkWarning": "Tags, links, and appearance changes on this projection will not carry over. Content groups keep their saved contents but leave this note: they will not be in the new note's Groups panel. Find them in Group Gallery under \"Not in any note\".",
       "blockedExternalRefs": "This projection is referenced by another note or board. Remove those references before rebuilding it.",
       "inProgress": "This source is currently being parsed or published. Wait for it to finish, then try again.",
       "notReady": "This source is no longer ready to rebuild. Refresh the Source Library to see its current state.",
