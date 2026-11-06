@@ -1,0 +1,9 @@
+
+=== F3-复核样本.docx  notice speaks: true
+
+=== F1-全结构.docx  notice speaks: false
+EYE      特殊字符: 特殊字符：\(50\% + \$100 \& a\_b \#1 \{c\} \backslash d <e> \text{\textasciicircum}f \text{\textasciitilde}g\) 句尾。
+         source: literal characters, none of them LaTeX syntax: 50% + $100 & a_b #1 {c} \d <e> ^f ~g
+         reads ["50%+$100&a_b#1{c}\\d<e>^f~g"]; gold ["50%+$100&a_b#1{c}\\d<e>^f~g"]
+
+ {"ok":70,"degraded":0,"EYE":1,"WRONG":0,"INVALID":0,"MISSING":0}

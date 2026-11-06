@@ -15,6 +15,12 @@ import styles from './CardFlip.module.css';
  * but the rendering code adds its own delimiters, causing double-wrapping
  * like "$$$S = ...$$$" which KaTeX cannot parse.
  */
+function isOneBackslashFormula(s: string): boolean {
+  const inline = s.startsWith('\\(') && s.endsWith('\\)') && !s.slice(2, -2).includes('\\(');
+  const display = s.startsWith('\\[') && s.endsWith('\\]') && !s.slice(2, -2).includes('\\[');
+  return s.length > 4 && (inline || display);
+}
+
 function stripLatexDelimiters(text: string): string {
   let s = text.trim();
   // Strip $$ ... $$ first (display mode)
@@ -24,6 +30,10 @@ function stripLatexDelimiters(text: string): string {
   // Strip $ ... $ (inline mode)
   else if (s.startsWith('$') && s.endsWith('$') && s.length > 2) {
     s = s.slice(1, -1).trim();
+  }
+  // Document imports write \(...\): one delimited formula, not two with text between.
+  else if (isOneBackslashFormula(s)) {
+    s = s.slice(2, -2).trim();
   }
   return s;
 }

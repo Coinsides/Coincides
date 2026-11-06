@@ -1,0 +1,84 @@
+# F3b positive controls. Each mutation is applied to a scratch copy, never the shared tree.
+# [APPLIED] means the target text was found and replaced.
+
+== unmodified server
+([('tests', '84'), ('pass', '84'), ('fail', '0')], [])
+== unmodified client
+(['Tests  8 passed (8)'], [])
+
+== m:scr ignored [APPLIED]
+[('tests', '84'), ('pass', '79'), ('fail', '5')]
+  red: OMML double-struck keeps the reals apart from R
+  red: OMML script
+  red: OMML fraktur
+  red: OMML bold double-struck
+  red: an alphabet on letters it does not cover is declared, never written as a formula
+
+== m:sty ignored [APPLIED]
+[('tests', '84'), ('pass', '78'), ('fail', '6')]
+  red: OMML bold is a different symbol
+  red: OMML bold italic
+  red: OMML bold Greek
+  red: OMML only the letters of a styled run take the style
+  red: OMML bold double-struck
+  red: a break in a styled run keeps the style on both lines
+
+== deleted structure kept [APPLIED]
+[('tests', '84'), ('pass', '82'), ('fail', '2')]
+  red: OMML a structure deleted through its control mark is gone
+  red: OMML a deleted fraction leaves no shell
+
+== phantom only hides on 0 [APPLIED]
+[('tests', '84'), ('pass', '82'), ('fail', '2')]
+  red: OMML phantom hidden with off
+  red: OMML phantom hidden with false
+
+== symbol low byte only [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a symbol outside the font ranges is declared, never written as a formula
+
+== numbering # kept as text [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a numbering mark in an equation array is declared, never written as a formula
+
+== strike ignored [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a struck-through box is declared, never written as a formula
+
+== placeholder keeps delimiters [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a delimiter among the original characters cannot open a formula inside the note
+
+== break path skips the style [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a break in a styled run keeps the style on both lines
+
+== run deletion marks ignored [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a run marked deleted in its own properties is declared, never written as a formula
+
+== symbol fonts ignored [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: text in a symbol-encoded font is declared, never written as a formula
+
+== hidden degree ignored [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a hidden degree that still holds text is declared, never written as a formula
+
+== hidden limits ignored [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a hidden upper limit that still holds text is declared, never written as a formula
+
+== server card keeps \( [APPLIED]
+[('tests', '84'), ('pass', '83'), ('fail', '1')]
+  red: a card keeps the bare LaTeX whichever delimiter the formula came with
+
+== renderer ignores \( [APPLIED]
+['Tests  2 failed | 6 passed (8)', 'Tests 2 ⎯⎯⎯⎯⎯⎯⎯']
+  red: × KaTeXRenderer delimiters > renders the \(...\) a document import writes, with no raw backslash left 41ms
+  red: × KaTeXRenderer delimiters > an escaped dollar inside \(...\) does not start a $...$ formula 23ms
+
+== card keeps \( [APPLIED]
+['Tests  1 failed | 7 passed (8)', 'Tests 1 ⎯⎯⎯⎯⎯⎯⎯']
+  red: × formula cards hold formulas from document imports > renders \(...\) without a red KaTeX error 63ms
+

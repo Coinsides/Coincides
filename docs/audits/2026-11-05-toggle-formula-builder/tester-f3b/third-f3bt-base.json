@@ -1,0 +1,256 @@
+{
+ "tally": {
+  "ok": 15,
+  "degraded": 3,
+  "EYE": 0,
+  "WRONG": 16,
+  "INVALID": 0,
+  "MISSING": 0
+ },
+ "rows": [
+  {
+   "label": "示性函数",
+   "source": "double-struck 1 (indicator) then x",
+   "verdict": "WRONG",
+   "text": "示性函数：\\(1x\\) 句尾",
+   "note": "reads [\"1x\"]; gold [\"mathbb(1)x\"]"
+  },
+  {
+   "label": "期望作底带下标",
+   "source": "double-struck E with subscript x, then [f]",
+   "verdict": "WRONG",
+   "text": "期望作底带下标：\\({E}_{x}\\left[f\\right]\\) 句尾",
+   "note": "reads [\"S[E|x|][f]\"]; gold [\"S[mathbb(E)|x|][f]\"]"
+  },
+  {
+   "label": "实数上标",
+   "source": "R double-struck to the n",
+   "verdict": "WRONG",
+   "text": "实数上标：\\({R}^{n}\\) 句尾",
+   "note": "reads [\"S[R||n]\"]; gold [\"S[mathbb(R)||n]\"]"
+  },
+  {
+   "label": "粗体希腊",
+   "source": "beta in bold (sty b): a bold Greek symbol",
+   "verdict": "WRONG",
+   "text": "粗体希腊：\\(β\\) 句尾",
+   "note": "reads [\"β\"]; gold [\"boldsymbol(β)\"]"
+  },
+  {
+   "label": "粗斜体",
+   "source": "x in bold italic (sty bi)",
+   "verdict": "WRONG",
+   "text": "粗斜体：\\(x\\) 句尾",
+   "note": "reads [\"x\"]; gold [\"boldsymbol(x)\"]"
+  },
+  {
+   "label": "粗体两字母",
+   "source": "AB in one bold run",
+   "verdict": "WRONG",
+   "text": "粗体两字母：\\(AB\\) 句尾",
+   "note": "reads [\"AB\"]; gold [\"mathbf(AB)\"]"
+  },
+  {
+   "label": "粗体带运算符",
+   "source": "a+b in one bold run: letters bold, operator plain",
+   "verdict": "WRONG",
+   "text": "粗体带运算符：\\(a+b\\) 句尾",
+   "note": "reads [\"a+b\"]; gold [\"mathbf(a)+mathbf(b)\"]"
+  },
+  {
+   "label": "无衬线",
+   "source": "x in sans-serif",
+   "verdict": "WRONG",
+   "text": "无衬线：\\(x\\) 句尾",
+   "note": "reads [\"x\"]; gold [\"mathsf(x)\"]"
+  },
+  {
+   "label": "等宽",
+   "source": "x in monospace",
+   "verdict": "WRONG",
+   "text": "等宽：\\(x\\) 句尾",
+   "note": "reads [\"x\"]; gold [\"mathtt(x)\"]"
+  },
+  {
+   "label": "函数名sty p",
+   "source": "sin with sty p as the function name, of x",
+   "verdict": "ok",
+   "text": "函数名sty p：\\(\\sin{x}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "花体作下标",
+   "source": "x with script L as subscript",
+   "verdict": "WRONG",
+   "text": "花体作下标：\\({x}_{L}\\) 句尾",
+   "note": "reads [\"S[x|L|]\"]; gold [\"S[x|mathcal(L)|]\"]"
+  },
+  {
+   "label": "哥特体",
+   "source": "g in fraktur",
+   "verdict": "WRONG",
+   "text": "哥特体：\\(g\\) 句尾",
+   "note": "reads [\"g\"]; gold [\"mathfrak(g)\"]"
+  },
+  {
+   "label": "双线体分式",
+   "source": "double-struck P over n",
+   "verdict": "WRONG",
+   "text": "双线体分式：\\(\\frac{P}{n}\\) 句尾",
+   "note": "reads [\"F[P|n]\"]; gold [\"F[mathbb(P)|n]\"]"
+  },
+  {
+   "label": "scr roman",
+   "source": "x with scr roman: no style",
+   "verdict": "ok",
+   "text": "scr roman：\\(x\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "上标里分式删除",
+   "source": "x to the power of a deleted fraction 1/2, with 2 inserted: x squared",
+   "verdict": "WRONG",
+   "text": "上标里分式删除：\\({x}^{\\frac{}{}2}\\) 句尾",
+   "note": "reads [\"S[x||F[|]2]\"]; gold [\"S[x||2]\"]"
+  },
+  {
+   "label": "插入分式内删字",
+   "source": "an inserted fraction whose numerator had a deleted then b inserted: b over c",
+   "verdict": "ok",
+   "text": "插入分式内删字：\\(\\frac{b}{c}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "函数结构删除",
+   "source": "y= then sin x tracked deleted as a structure, then x inserted: y=x",
+   "verdict": "ok",
+   "text": "函数结构删除：\\(y={}x\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "根号结构删除",
+   "source": "a then root of b tracked deleted as a structure: a",
+   "verdict": "WRONG",
+   "text": "根号结构删除：\\(a\\sqrt{}\\) 句尾",
+   "note": "reads [\"aR[|]\"]; gold [\"a\"]"
+  },
+  {
+   "label": "移走整个分式",
+   "source": "a, a fraction 1/2 moved away, b, the same fraction moved in: a b 1/2",
+   "verdict": "ok",
+   "text": "移走整个分式：\\(ab\\frac{1}{2}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "上下标结构删除",
+   "source": "x_i tracked deleted as a structure, then y inserted: y",
+   "verdict": "WRONG",
+   "text": "上下标结构删除：\\({}_{}y\\) 句尾",
+   "note": "reads [\"S[||]y\"]; gold [\"y\"]"
+  },
+  {
+   "label": "幻影0",
+   "source": "x+ then y invisible (show=0)",
+   "verdict": "ok",
+   "text": "幻影0：\\(x+\\phantom{y}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "幻影on",
+   "source": "x+ then y shown (show=on): x+y",
+   "verdict": "ok",
+   "text": "幻影on：\\(x+y\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "幻影1",
+   "source": "x+ then y shown (show=1): x+y",
+   "verdict": "ok",
+   "text": "幻影1：\\(x+y\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "幻影true",
+   "source": "x+ then y shown (show=true): x+y",
+   "verdict": "ok",
+   "text": "幻影true：\\(x+y\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "幻影矩阵0",
+   "source": "matrix rows: invisible minus (show=0) then 1, and -1",
+   "verdict": "ok",
+   "text": "幻影矩阵0：\\(\\begin{matrix} \\phantom{-}1 \\\\ -1 \\end{matrix}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号小于等于",
+   "source": "a, Symbol F0A3 (≤ in the Symbol font), b",
+   "verdict": "ok",
+   "text": "符号小于等于：\\(a≤b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号pi",
+   "source": "Symbol F070 (π) then r",
+   "verdict": "ok",
+   "text": "符号pi：\\(πr\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号小写字体名",
+   "source": "font name written in lower case: symbol F061 (α) then x",
+   "verdict": "degraded",
+   "text": "符号小写字体名：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号Wingdings2",
+   "source": "a Wingdings 2 symbol then x: cannot be known",
+   "verdict": "degraded",
+   "text": "符号Wingdings2：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号缺码",
+   "source": "w:sym in Symbol with no w:char, then x: cannot be known",
+   "verdict": "degraded",
+   "text": "符号缺码：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "普通井号",
+   "source": "the literal characters a#b in an ordinary formula",
+   "verdict": "ok",
+   "text": "普通井号：\\(a\\#b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "占位后接公式",
+   "source": "an unknown element holding \\(q\\), then the real formula x",
+   "verdict": "WRONG",
+   "text": "占位后接公式：[公式未能转换,见原页;原文字符:\\(q\\)]，然后 \\(x\\) 句尾",
+   "note": "reads [\"q\",\"x\"]; gold [\"x\"]"
+  },
+  {
+   "label": "方框",
+   "source": "x in a plain border box",
+   "verdict": "ok",
+   "text": "方框：\\(x\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "方框斜删",
+   "source": "x in a box struck through bottom-left to top-right: cancelled",
+   "verdict": "ok",
+   "text": "方框斜删：\\(x\\) 句尾",
+   "note": ""
+  }
+ ],
+ "messages": [
+  {
+   "type": "warning",
+   "message": "4 formula(s) could not be converted to text"
+  }
+ ]
+}

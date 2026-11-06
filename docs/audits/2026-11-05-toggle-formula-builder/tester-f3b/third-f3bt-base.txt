@@ -1,0 +1,53 @@
+WRONG    示性函数: 示性函数：\(1x\) 句尾
+         source: double-struck 1 (indicator) then x
+         reads ["1x"]; gold ["mathbb(1)x"]
+WRONG    期望作底带下标: 期望作底带下标：\({E}_{x}\left[f\right]\) 句尾
+         source: double-struck E with subscript x, then [f]
+         reads ["S[E|x|][f]"]; gold ["S[mathbb(E)|x|][f]"]
+WRONG    实数上标: 实数上标：\({R}^{n}\) 句尾
+         source: R double-struck to the n
+         reads ["S[R||n]"]; gold ["S[mathbb(R)||n]"]
+WRONG    粗体希腊: 粗体希腊：\(β\) 句尾
+         source: beta in bold (sty b): a bold Greek symbol
+         reads ["β"]; gold ["boldsymbol(β)"]
+WRONG    粗斜体: 粗斜体：\(x\) 句尾
+         source: x in bold italic (sty bi)
+         reads ["x"]; gold ["boldsymbol(x)"]
+WRONG    粗体两字母: 粗体两字母：\(AB\) 句尾
+         source: AB in one bold run
+         reads ["AB"]; gold ["mathbf(AB)"]
+WRONG    粗体带运算符: 粗体带运算符：\(a+b\) 句尾
+         source: a+b in one bold run: letters bold, operator plain
+         reads ["a+b"]; gold ["mathbf(a)+mathbf(b)"]
+WRONG    无衬线: 无衬线：\(x\) 句尾
+         source: x in sans-serif
+         reads ["x"]; gold ["mathsf(x)"]
+WRONG    等宽: 等宽：\(x\) 句尾
+         source: x in monospace
+         reads ["x"]; gold ["mathtt(x)"]
+WRONG    花体作下标: 花体作下标：\({x}_{L}\) 句尾
+         source: x with script L as subscript
+         reads ["S[x|L|]"]; gold ["S[x|mathcal(L)|]"]
+WRONG    哥特体: 哥特体：\(g\) 句尾
+         source: g in fraktur
+         reads ["g"]; gold ["mathfrak(g)"]
+WRONG    双线体分式: 双线体分式：\(\frac{P}{n}\) 句尾
+         source: double-struck P over n
+         reads ["F[P|n]"]; gold ["F[mathbb(P)|n]"]
+WRONG    上标里分式删除: 上标里分式删除：\({x}^{\frac{}{}2}\) 句尾
+         source: x to the power of a deleted fraction 1/2, with 2 inserted: x squared
+         reads ["S[x||F[|]2]"]; gold ["S[x||2]"]
+WRONG    根号结构删除: 根号结构删除：\(a\sqrt{}\) 句尾
+         source: a then root of b tracked deleted as a structure: a
+         reads ["aR[|]"]; gold ["a"]
+WRONG    上下标结构删除: 上下标结构删除：\({}_{}y\) 句尾
+         source: x_i tracked deleted as a structure, then y inserted: y
+         reads ["S[||]y"]; gold ["y"]
+WRONG    占位后接公式: 占位后接公式：[公式未能转换,见原页;原文字符:\(q\)]，然后 \(x\) 句尾
+         source: an unknown element holding \(q\), then the real formula x
+         reads ["q","x"]; gold ["x"]
+
+messages: ["4 formula(s) could not be converted to text"]
+degraded: 符号小写字体名=符号小写字体名：[公式未能转换,见原页;原文字符:x] 句尾 | 符号Wingdings2=符号Wingdings2：[公式未能转换,见原页;原文字符:x] 句尾 | 符号缺码=符号缺码：[公式未能转换,见原页;原文字符:x] 句尾
+
+ {"ok":15,"degraded":3,"EYE":0,"WRONG":16,"INVALID":0,"MISSING":0}

@@ -42,6 +42,9 @@ const parsesInKatex = async (text: string) => {
   for (const match of text.matchAll(/\\\(([\s\S]*?)\\\)/g)) engine.__parse(match[1], { throwOnError: true, strict: 'ignore', displayMode: true });
 };
 
+const styled = (text: string, props: string) => `<m:r><m:rPr>${props}</m:rPr><m:t>${text}</m:t></m:r>`;
+const phantom = (show: string) => `<m:phant><m:phantPr><m:show m:val="${show}"/></m:phantPr><m:e>${r('y')}</m:e></m:phant>`;
+
 const STRUCTURES: Array<[string, string, string]> = [
   ['fraction', frac(r('C'), r('i')), '\\frac{C}{i}'],
   ['nested fraction', frac(r('1'), frac(r('1'), r('1+x'))), '\\frac{1}{\\frac{1}{1+x}}'],
@@ -72,6 +75,27 @@ const STRUCTURES: Array<[string, string, string]> = [
   ['symbol font', `<m:r><w:sym w:font="Symbol" w:char="F044"/></m:r>${r('x')}`, 'Δx'],
   ['tracked change keeps only the final text', `${r('x=')}<w:del w:id="1"><m:r><m:t>2</m:t></m:r></w:del><w:ins w:id="2">${r('3')}</w:ins>`, 'x=3'],
   ['special characters', r('a_b%c#d&amp;e$f'), 'a\\_b\\%c\\#d\\&e\\$f'],
+  ['double-struck keeps the reals apart from R', styled('R', '<m:scr m:val="double-struck"/>'), '\\mathbb{R}'],
+  ['script', styled('L', '<m:scr m:val="script"/>'), '\\mathcal{L}'],
+  ['fraktur', styled('g', '<m:scr m:val="fraktur"/>'), '\\mathfrak{g}'],
+  ['bold is a different symbol', `${styled('X', '<m:sty m:val="b"/>')}${r('=X')}`, '\\mathbf{X}=X'],
+  ['bold italic', styled('x', '<m:sty m:val="bi"/>'), '\\boldsymbol{x}'],
+  ['bold Greek', styled('β', '<m:sty m:val="b"/>'), '\\boldsymbol{β}'],
+  ['only the letters of a styled run take the style', styled('X+Y', '<m:sty m:val="b"/>'), '\\mathbf{X}+\\mathbf{Y}'],
+  ['bold double-struck', styled('R', '<m:scr m:val="double-struck"/><m:sty m:val="b"/>'), '\\boldsymbol{\\mathbb{R}}'],
+  ['upright and roman change nothing', `${styled('sin', '<m:sty m:val="p"/>')}${styled('x', '<m:scr m:val="roman"/>')}`, 'sinx'],
+  ['normal text is not restyled', styled('price', '<m:nor/><m:sty m:val="b"/>'), '\\text{price}'],
+  ['a structure deleted through its control mark is gone', `${r('y=')}<m:nary><m:naryPr><m:chr m:val="∑"/><m:ctrlPr><w:del w:id="1"/></m:ctrlPr></m:naryPr><m:sub/><m:sup/><m:e/></m:nary><w:ins w:id="2">${r('x')}</w:ins>`, 'y=x'],
+  ['a deleted fraction leaves no shell', `${r('a')}<m:f><m:fPr><m:ctrlPr><w:del w:id="1"/></m:ctrlPr></m:fPr><m:num><w:del w:id="2">${r('1')}</w:del></m:num><m:den><w:del w:id="3">${r('2')}</w:del></m:den></m:f>`, 'a'],
+  ['phantom hidden with 0', phantom('0'), '\\phantom{y}'],
+  ['phantom hidden with off', phantom('off'), '\\phantom{y}'],
+  ['phantom hidden with false', phantom('false'), '\\phantom{y}'],
+  ['phantom shown', phantom('1'), 'y'],
+  ['a symbol in the private range', '<m:r><w:sym w:font="Symbol" w:char="F0A3"/></m:r>', '≤'],
+  ['a plain box', `<m:borderBox><m:e>${r('x')}</m:e></m:borderBox>`, 'x'],
+  ['an insertion mark in run properties keeps the text', `${r('x=')}<m:r><w:rPr><w:ins w:id="1" w:author="a"/></w:rPr><m:t>3</m:t></m:r>`, 'x=3'],
+  ['an ordinary font keeps the text', '<m:r><w:rPr><w:rFonts w:ascii="Cambria Math" w:hAnsi="Cambria Math"/></w:rPr><m:t>x</m:t></m:r>', 'x'],
+  ['a hidden empty degree is a square root', `<m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg/><m:e>${r('x')}</m:e></m:rad>`, '\\sqrt{x}'],
 ];
 
 for (const [name, body, expected] of STRUCTURES) {
@@ -107,6 +131,15 @@ for (const [name, body] of [
   ['an unknown delimiter', `<m:d><m:dPr><m:begChr m:val="⟦"/></m:dPr><m:e>${r('x')}</m:e></m:d>`],
   ['an unknown operator', `<m:nary><m:naryPr><m:chr m:val="⨁"/></m:naryPr><m:e>${r('x')}</m:e></m:nary>`],
   ['an unknown accent', `<m:acc><m:accPr><m:chr m:val="★"/></m:accPr><m:e>${r('x')}</m:e></m:acc>`],
+  ['a script it does not know', styled('R', '<m:scr m:val="unknown-alphabet"/>')],
+  ['an alphabet on letters it does not cover', styled('β', '<m:scr m:val="double-struck"/>')],
+  ['a symbol outside the font ranges', '<m:r><w:sym w:font="Symbol" w:char="2264"/></m:r>'],
+  ['a numbering mark in an equation array', `<m:eqArr><m:e>${r('E=mc#(1)')}</m:e></m:eqArr>`],
+  ['a struck-through box', `<m:borderBox><m:borderBoxPr><m:strikeBLTR m:val="1"/></m:borderBoxPr><m:e>${r('x')}</m:e></m:borderBox>`],
+  ['a run marked deleted in its own properties', `${r('x=')}<m:r><w:rPr><w:del w:id="1" w:author="a"/></w:rPr><m:t>2</m:t></m:r>${r('3')}`],
+  ['text in a symbol-encoded font', '<m:r><m:rPr><m:nor/></m:rPr><w:rPr><w:rFonts w:ascii="Symbol" w:hAnsi="Symbol"/></w:rPr><m:t>a+b</m:t></m:r>'],
+  ['a hidden degree that still holds text', `<m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg>${r('3')}</m:deg><m:e>${r('x')}</m:e></m:rad>`],
+  ['a hidden upper limit that still holds text', `<m:nary><m:naryPr><m:chr m:val="∑"/><m:supHide m:val="1"/></m:naryPr><m:sub>${r('i')}</m:sub><m:sup>${r('n')}</m:sup><m:e>${r('x')}</m:e></m:nary>`],
   ['a line break it cannot place', `<m:f><m:num>${r('a')}<m:r><w:br/></m:r>${r('b')}</m:num><m:den>${r('c')}</m:den></m:f>`],
 ] as const) {
   test(`${name} is declared, never written as a formula`, async () => {
@@ -118,6 +151,16 @@ for (const [name, body] of [
 
 test('a declared formula keeps its original characters as a note, outside any delimiter', async () => {
   assert.equal(await formula(`<m:futureThing>${r('αβ')}</m:futureThing>`), '[公式未能转换,见原页;原文字符:αβ]');
+});
+
+test('a delimiter among the original characters cannot open a formula inside the note', async () => {
+  const text = await formula(`<m:futureThing>${r('\\(x\\)')}</m:futureThing>`);
+  assert.match(text, /^\[公式未能转换/);
+  assert.doesNotMatch(text, /\\\(/);
+});
+
+test('a break in a styled run keeps the style on both lines', async () => {
+  assert.equal(await formula(`<m:r><m:rPr><m:sty m:val="b"/></m:rPr><m:t>X</m:t><w:br/><m:t>Y</m:t></m:r>`), '\\(\\mathbf{X}\\) \\(\\mathbf{Y}\\)');
 });
 
 test('an empty formula leaves nothing behind, and mammoth no longer warns', async () => {

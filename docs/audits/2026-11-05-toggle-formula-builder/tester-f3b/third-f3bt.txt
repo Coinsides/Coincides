@@ -1,0 +1,5 @@
+
+messages: ["5 formula(s) could not be converted to text"]
+degraded: 符号小写字体名=符号小写字体名：[公式未能转换,见原页;原文字符:x] 句尾 | 符号Wingdings2=符号Wingdings2：[公式未能转换,见原页;原文字符:x] 句尾 | 符号缺码=符号缺码：[公式未能转换,见原页;原文字符:x] 句尾 | 方框斜删=方框斜删：[公式未能转换,见原页;原文字符:x] 句尾
+
+ {"ok":30,"degraded":4,"EYE":0,"WRONG":0,"INVALID":0,"MISSING":0}

@@ -1,0 +1,407 @@
+== v2SourceMineruWiring.test.ts alone
+TAP version 13
+# sqlite-vec loaded: vv0.1.7
+# 📦 Running 86 pending migration(s)...
+# Subtest: K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+ok 1 - K-7 off preserves native-pdf selection and K-8 preserves its package-lock identity bytes
+  ---
+  duration_ms: 1570.4551
+  type: 'test'
+  ...
+# [mineru-wiring] K-1 tagged Python processes: 0 -> 2 -> 0
+# [mineru-wiring] K-3/K-9 directions: page overflow=resource_limit, timeout=internal_interrupted
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+ok 2 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+  ---
+  duration_ms: 14050.1278
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+not ok 3 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+  ---
+  duration_ms: 6987.9742
+  type: 'test'
+  location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:2914'
+  failureType: 'testCodeFailure'
+  error: |-
+    native text completed while MinerU still held its slot
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:489:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async withDbAndStorage (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:291:5)
+    async TestContext.<anonymous> (D:\Coinsides\v2.x\Coincides\server\src\__tests__\v2SourceMineruWiring.test.ts:443:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+ok 4 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+  ---
+  duration_ms: 40774.6997
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Subtest: K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+ok 5 - K-8 rejects a registered parser with no identity instead of falling back to package-lock.json
+  ---
+  duration_ms: 380.4023
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 65875.8795
+# flaky-retries 0
+== fidelity1a2DocxPages.test.ts alone, run 1
+TAP version 13
+# sqlite-vec loaded: vv0.1.7
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: with a converter, a docx gets real page images from its derived PDF and keeps its text projection
+ok 1 - with a converter, a docx gets real page images from its derived PDF and keeps its text projection
+  ---
+  duration_ms: 5882.9467
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: without a converter a docx behaves as before, and an older docx cannot start one
+ok 2 - without a converter a docx behaves as before, and an older docx cannot start one
+  ---
+  duration_ms: 331.9145
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# COINCIDES_DOCX_PDF_COMMAND_JSON is unusable: Unexpected token 'o', "not json" is not valid JSON
+# sqlite-vec loaded: vv0.1.7
+# Subtest: an unusable command setting reads as no converter rather than breaking the reader
+ok 3 - an unusable command setting reads as no converter rather than breaking the reader
+  ---
+  duration_ms: 318.5828
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter failure
+# Source page images failed: 9de0b554-f372-4648-a5af-21179588d4a3: The document converter exited abnormally (code 3)
+# sqlite-vec loaded: vv0.1.7
+# Subtest: an older docx goes through the generate route once a converter exists
+ok 4 - an older docx goes through the generate route once a converter exists
+  ---
+  duration_ms: 8652.1684
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter failure
+# Source page images failed: e694b01b-7e83-4922-93b3-f0a2715264b3: The document converter exited abnormally (code 3)
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that ends as fail fails only the images, leaves no derived file, and can be retried
+ok 5 - a converter that ends as fail fails only the images, leaves no derived file, and can be retried
+  ---
+  duration_ms: 8496.3737
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter diagnostic
+# Source page images failed: ce6d6a13-3429-43a8-bf42-1cdc04f778a7: The document converter produced no usable PDF
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that ends as silent fails only the images, leaves no derived file, and can be retried
+ok 6 - a converter that ends as silent fails only the images, leaves no derived file, and can be retried
+  ---
+  duration_ms: 8714.7277
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Source page images failed: 56094871-0fb7-4b46-a88a-637cfee34072: The document converter produced no usable PDF
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that ends as garbage fails only the images, leaves no derived file, and can be retried
+ok 7 - a converter that ends as garbage fails only the images, leaves no derived file, and can be retried
+  ---
+  duration_ms: 8463.0946
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Source page images failed: 18177cfd-52be-4d94-99b5-4213659e25ff: The document converter timed out after 1500ms
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter past its time limit is killed and reads as a failure
+ok 8 - a converter past its time limit is killed and reads as a failure
+  ---
+  duration_ms: 5998.5418
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: resume after a crash: a truncated derived PDF is rebuilt, a whole one is reused, finished pages stay
+ok 9 - resume after a crash: a truncated derived PDF is rebuilt, a whole one is reused, finished pages stay
+  ---
+  duration_ms: 8897.6431
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a derived PDF that passes the quick check but will not open is rebuilt once
+ok 10 - a derived PDF that passes the quick check but will not open is rebuilt once
+  ---
+  duration_ms: 8797.7554
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: the startup sweep clears crashed run folders and orphans, and keeps a live derived PDF
+ok 11 - the startup sweep clears crashed run folders and orphans, and keeps a live derived PDF
+  ---
+  duration_ms: 4537.5358
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: rebuilding the projection keeps the pages and the derived PDF; a lost derived PDF is converted again only if pages need it
+ok 12 - rebuilding the projection keeps the pages and the derived PDF; a lost derived PDF is converted again only if pages need it
+  ---
+  duration_ms: 8643.5593
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: deleting the Source leaves no derived PDF, page row, asset row or image file
+ok 13 - deleting the Source leaves no derived PDF, page row, asset row or image file
+  ---
+  duration_ms: 4490.6708
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a derived PDF that cannot be removed at deletion leaves a cleanup job
+ok 14 - a derived PDF that cannot be removed at deletion leaves a cleanup job
+  ---
+  duration_ms: 4584.5288
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter failure
+# Source page images failed: 6fe6818b-1f0c-4c1d-b7ea-c1b135b9aec2: The document converter exited abnormally (code 3)
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a Source deleted during its conversion gets no derived file
+ok 15 - a Source deleted during its conversion gets no derived file
+  ---
+  duration_ms: 8630.0698
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: conversions wait in the one page image queue, so two documents never convert at once
+ok 16 - conversions wait in the one page image queue, so two documents never convert at once
+  ---
+  duration_ms: 17993.5559
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that exits 0 with no PDF still leaves its output in the log
+ok 17 - a converter that exits 0 with no PDF still leaves its output in the log
+  ---
+  duration_ms: 4272.7147
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Source page images failed: 97b5bde4-abde-4b01-97eb-3268f73f5f26: A process still held PID 10016's output 5000ms after it ended
+# Subtest: a process left holding the converter output cannot stop the queue: the wait ends, the run fails, the next one works
+ok 18 - a process left holding the converter output cannot stop the queue: the wait ends, the run fails, the next one works
+  ---
+  duration_ms: 13674.4195
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 133099.0201
+# flaky-retries 0
+== fidelity1a2DocxPages.test.ts alone, run 2
+TAP version 13
+# sqlite-vec loaded: vv0.1.7
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: with a converter, a docx gets real page images from its derived PDF and keeps its text projection
+ok 1 - with a converter, a docx gets real page images from its derived PDF and keeps its text projection
+  ---
+  duration_ms: 5686.4592
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: without a converter a docx behaves as before, and an older docx cannot start one
+ok 2 - without a converter a docx behaves as before, and an older docx cannot start one
+  ---
+  duration_ms: 331.7997
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# COINCIDES_DOCX_PDF_COMMAND_JSON is unusable: Unexpected token 'o', "not json" is not valid JSON
+# sqlite-vec loaded: vv0.1.7
+# Subtest: an unusable command setting reads as no converter rather than breaking the reader
+ok 3 - an unusable command setting reads as no converter rather than breaking the reader
+  ---
+  duration_ms: 310.5419
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter failure
+# Source page images failed: f28bfc8a-6eaf-48bb-b454-e300ed6c1f46: The document converter exited abnormally (code 3)
+# sqlite-vec loaded: vv0.1.7
+# Subtest: an older docx goes through the generate route once a converter exists
+ok 4 - an older docx goes through the generate route once a converter exists
+  ---
+  duration_ms: 8711.0938
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter failure
+# Source page images failed: 050fd5a7-2e7b-472c-883b-f6c55a8d9076: The document converter exited abnormally (code 3)
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that ends as fail fails only the images, leaves no derived file, and can be retried
+ok 5 - a converter that ends as fail fails only the images, leaves no derived file, and can be retried
+  ---
+  duration_ms: 8494.5803
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter diagnostic
+# Source page images failed: 22e8a011-be74-4048-b29c-5a14437cb42a: The document converter produced no usable PDF
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that ends as silent fails only the images, leaves no derived file, and can be retried
+ok 6 - a converter that ends as silent fails only the images, leaves no derived file, and can be retried
+  ---
+  duration_ms: 8555.917
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Source page images failed: d0f33628-afa8-4dea-a5e5-6d7cfbb8fa40: The document converter produced no usable PDF
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that ends as garbage fails only the images, leaves no derived file, and can be retried
+ok 7 - a converter that ends as garbage fails only the images, leaves no derived file, and can be retried
+  ---
+  duration_ms: 8658.3009
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Source page images failed: 991d024f-069e-4a86-ac44-f402453b1197: The document converter timed out after 1500ms
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter past its time limit is killed and reads as a failure
+ok 8 - a converter past its time limit is killed and reads as a failure
+  ---
+  duration_ms: 6021.0474
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: resume after a crash: a truncated derived PDF is rebuilt, a whole one is reused, finished pages stay
+ok 9 - resume after a crash: a truncated derived PDF is rebuilt, a whole one is reused, finished pages stay
+  ---
+  duration_ms: 8933.3777
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a derived PDF that passes the quick check but will not open is rebuilt once
+ok 10 - a derived PDF that passes the quick check but will not open is rebuilt once
+  ---
+  duration_ms: 8843.533
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: the startup sweep clears crashed run folders and orphans, and keeps a live derived PDF
+ok 11 - the startup sweep clears crashed run folders and orphans, and keeps a live derived PDF
+  ---
+  duration_ms: 4627.7158
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: rebuilding the projection keeps the pages and the derived PDF; a lost derived PDF is converted again only if pages need it
+ok 12 - rebuilding the projection keeps the pages and the derived PDF; a lost derived PDF is converted again only if pages need it
+  ---
+  duration_ms: 9162.1325
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: deleting the Source leaves no derived PDF, page row, asset row or image file
+ok 13 - deleting the Source leaves no derived PDF, page row, asset row or image file
+  ---
+  duration_ms: 4585.2303
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a derived PDF that cannot be removed at deletion leaves a cleanup job
+ok 14 - a derived PDF that cannot be removed at deletion leaves a cleanup job
+  ---
+  duration_ms: 4590.1524
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Document converter output: synthetic converter failure
+# Source page images failed: e61b1dec-20ab-4381-b5bb-f9e38e7d3979: The document converter exited abnormally (code 3)
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a Source deleted during its conversion gets no derived file
+ok 15 - a Source deleted during its conversion gets no derived file
+  ---
+  duration_ms: 9073.4168
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: conversions wait in the one page image queue, so two documents never convert at once
+ok 16 - conversions wait in the one page image queue, so two documents never convert at once
+  ---
+  duration_ms: 19445.9461
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# sqlite-vec loaded: vv0.1.7
+# Subtest: a converter that exits 0 with no PDF still leaves its output in the log
+ok 17 - a converter that exits 0 with no PDF still leaves its output in the log
+  ---
+  duration_ms: 4320.1335
+  type: 'test'
+  ...
+# 📦 Running 86 pending migration(s)...
+# Source page images failed: eecc41a3-424d-4a66-bc04-7ef3d412d135: A process still held PID 16740's output 5000ms after it ended
+# Subtest: a process left holding the converter output cannot stop the queue: the wait ends, the run fails, the next one works
+ok 18 - a process left holding the converter output cannot stop the queue: the wait ends, the run fails, the next one works
+  ---
+  duration_ms: 13572.4553
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 135590.3423
+# flaky-retries 0

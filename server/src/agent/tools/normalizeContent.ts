@@ -13,12 +13,21 @@
  * The Agent sometimes includes delimiters (e.g. "$S = ...$") but the frontend
  * adds its own, causing double-wrapping that KaTeX cannot parse.
  */
+function isOneBackslashFormula(s: string): boolean {
+  const inline = s.startsWith('\\(') && s.endsWith('\\)') && !s.slice(2, -2).includes('\\(');
+  const display = s.startsWith('\\[') && s.endsWith('\\]') && !s.slice(2, -2).includes('\\[');
+  return s.length > 4 && (inline || display);
+}
+
 function stripLatexDelimiters(text: string): string {
   let s = text.trim();
   if (s.startsWith('$$') && s.endsWith('$$') && s.length > 4) {
     s = s.slice(2, -2).trim();
   } else if (s.startsWith('$') && s.endsWith('$') && s.length > 2) {
     s = s.slice(1, -1).trim();
+  } else if (isOneBackslashFormula(s)) {
+    // Document imports write \(...\): one delimited formula, not two with text between.
+    s = s.slice(2, -2).trim();
   }
   return s;
 }

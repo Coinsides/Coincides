@@ -1,0 +1,585 @@
+{
+ "tally": {
+  "ok": 46,
+  "degraded": 18,
+  "EYE": 1,
+  "WRONG": 16,
+  "INVALID": 0,
+  "MISSING": 0
+ },
+ "rows": [
+  {
+   "label": "max文本基底",
+   "source": "max over x of f, with max set as normal text",
+   "verdict": "ok",
+   "text": "max文本基底：\\(\\underset{x}{\\text{max}}{f}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "argmax集合",
+   "source": "argmax over x∈X of f(x)",
+   "verdict": "ok",
+   "text": "argmax集合：\\(\\operatorname*{argmax}_{x∈X}{f(x)}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "基底带下标",
+   "source": "x_i with y stacked below",
+   "verdict": "ok",
+   "text": "基底带下标：\\(\\underset{y}{{x}_{i}}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "上下都堆",
+   "source": "A with a below and b above",
+   "verdict": "ok",
+   "text": "上下都堆：\\(\\overset{b}{\\underset{a}{A}}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "箭头标注",
+   "source": "an arrow with r stacked above, between x and y (groupChr chr is the arrow, base is r)",
+   "verdict": "EYE",
+   "text": "箭头标注：\\(x\\overset{→}{r}y\\) 句尾",
+   "note": "reads [\"xS[r||→]y\"]; gold [\"xS[→||r]y\"]"
+  },
+  {
+   "label": "约等标注",
+   "source": "≈ with n→∞ stacked below",
+   "verdict": "ok",
+   "text": "约等标注：\\(a\\underset{n→∞}{≈}b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "期望下标",
+   "source": "E with x∼p stacked below, of f",
+   "verdict": "ok",
+   "text": "期望下标：\\(\\underset{x∼p}{E}\\left[f\\right]\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "上括号标签",
+   "source": "a+b over a brace labelled n",
+   "verdict": "ok",
+   "text": "上括号标签：\\(\\overbrace{a+b}^{n}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "下括号带字",
+   "source": "a+b under a brace labelled 共n项",
+   "verdict": "ok",
+   "text": "下括号带字：\\(\\underbrace{a+b}_{\\text{共n项}}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "修订在rPr",
+   "source": "x= then run 2 marked deleted in its own w:rPr, then run 3 marked inserted: final x=3",
+   "verdict": "WRONG",
+   "text": "修订在rPr：\\(x=23\\) 句尾",
+   "note": "reads [\"x=23\"]; gold [\"x=3\"]"
+  },
+  {
+   "label": "分母修订rPr",
+   "source": "1 over 3, a run 2 in the denominator is marked deleted in w:rPr",
+   "verdict": "WRONG",
+   "text": "分母修订rPr：\\(\\frac{1}{23}\\) 句尾",
+   "note": "reads [\"F[1|23]\"]; gold [\"F[1|3]\"]"
+  },
+  {
+   "label": "修订Word形状",
+   "source": "x= then a run holding w:del around its text, then a run holding w:ins: final x=3 (shape reported from Word Compare)",
+   "verdict": "degraded",
+   "text": "修订Word形状：[公式未能转换,见原页;原文字符:x=3] 句尾",
+   "note": ""
+  },
+  {
+   "label": "修订Word形状分母",
+   "source": "1 over 3, the 2 in the denominator deleted in that shape",
+   "verdict": "degraded",
+   "text": "修订Word形状分母：[公式未能转换,见原页;原文字符:13] 句尾",
+   "note": ""
+  },
+  {
+   "label": "修订标记空元素",
+   "source": "x= then a run with an empty w:del marker before its text",
+   "verdict": "ok",
+   "text": "修订标记空元素：\\(x=23\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "修订delText",
+   "source": "x= then a deleted run stored as w:delText, then 3",
+   "verdict": "degraded",
+   "text": "修订delText：[公式未能转换,见原页;原文字符:x=3] 句尾",
+   "note": ""
+  },
+  {
+   "label": "结构删除真形状",
+   "source": "a, then a fraction deleted: its ctrlPr holds w:del and its runs sit in w:del wrappers: final a",
+   "verdict": "WRONG",
+   "text": "结构删除真形状：\\(a\\frac{}{}\\) 句尾",
+   "note": "reads [\"aF[|]\"]; gold [\"a\"]"
+  },
+  {
+   "label": "结构插入真形状",
+   "source": "a, then a fraction inserted with ctrlPr w:ins: final a and 1/2",
+   "verdict": "ok",
+   "text": "结构插入真形状：\\(a\\frac{1}{2}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "根号内被删",
+   "source": "root of x, with the x tracked deleted and y inserted: root of y",
+   "verdict": "ok",
+   "text": "根号内被删：\\(\\sqrt{y}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "整个分式删除",
+   "source": "a, then a whole fraction tracked deleted: final a",
+   "verdict": "ok",
+   "text": "整个分式删除：\\(a\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "结构标记删除",
+   "source": "a, then a fraction whose control and runs are all marked deleted in rPr: final a",
+   "verdict": "WRONG",
+   "text": "结构标记删除：\\(a\\frac{1}{2}\\) 句尾",
+   "note": "reads [\"aF[1|2]\"]; gold [\"a\"]"
+  },
+  {
+   "label": "移走移入",
+   "source": "moved-away b and moved-in c: final ac",
+   "verdict": "ok",
+   "text": "移走移入：\\(ac\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号alpha",
+   "source": "α then x",
+   "verdict": "ok",
+   "text": "符号alpha：\\(αx\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号加减",
+   "source": "a ± b",
+   "verdict": "ok",
+   "text": "符号加减：\\(a±b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号求和",
+   "source": "∑ then x",
+   "verdict": "ok",
+   "text": "符号求和：\\(∑x\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号无F0前缀",
+   "source": "Δx with w:char 0044",
+   "verdict": "ok",
+   "text": "符号无F0前缀：\\(Δx\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号Wingdings",
+   "source": "a symbol from Wingdings then x: cannot be known",
+   "verdict": "degraded",
+   "text": "符号Wingdings：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "符号MTExtra",
+   "source": "a symbol from MT Extra then x: cannot be known",
+   "verdict": "degraded",
+   "text": "符号MTExtra：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "式内不换行连字符",
+   "source": "a, a no-break hyphen, b",
+   "verdict": "degraded",
+   "text": "式内不换行连字符：[公式未能转换,见原页;原文字符:ab] 句尾",
+   "note": ""
+  },
+  {
+   "label": "式内图片",
+   "source": "x with a picture in the run: the picture cannot be text",
+   "verdict": "degraded",
+   "text": "式内图片：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "同run换行",
+   "source": "a=b, a break, c=d inside one run",
+   "verdict": "ok",
+   "text": "同run换行：\\(a=b\\) \\(c=d\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "分子里换行",
+   "source": "a break inside a numerator: a then b over c",
+   "verdict": "degraded",
+   "text": "分子里换行：[公式未能转换,见原页;原文字符:abc] 句尾",
+   "note": ""
+  },
+  {
+   "label": "算符断行brk",
+   "source": "a=b with m:brk on the =: same formula",
+   "verdict": "ok",
+   "text": "算符断行brk：\\(a\\) \\(=b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "对齐aln",
+   "source": "two rows aligned with m:aln on =",
+   "verdict": "ok",
+   "text": "对齐aln：\\(\\begin{aligned} x=1 \\\\ y=2 \\end{aligned}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "三行方程组",
+   "source": "open brace over 3 rows",
+   "verdict": "ok",
+   "text": "三行方程组：\\(\\left\\{\\begin{aligned} x=1 \\\\ y=2 \\\\ z=3 \\end{aligned}\\right.\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "普通与号",
+   "source": "a literal & outside any array: a&b",
+   "verdict": "ok",
+   "text": "普通与号：\\(a\\&b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "线性单字",
+   "source": "a/b linear, single atoms",
+   "verdict": "ok",
+   "text": "线性单字：\\(\\frac{a}{b}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "线性带前缀",
+   "source": "2 then (a+b)/c linear",
+   "verdict": "ok",
+   "text": "线性带前缀：\\(2\\frac{a+b}{c}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "斜分式含分式",
+   "source": "skewed fraction of (1/2) over x",
+   "verdict": "ok",
+   "text": "斜分式含分式：\\(\\frac{\\frac{1}{2}}{x}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "二项式",
+   "source": "n choose k, parenthesised no-bar",
+   "verdict": "ok",
+   "text": "二项式：\\(\\left({n \\atop k}\\right)\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "三角平方",
+   "source": "sin² x",
+   "verdict": "ok",
+   "text": "三角平方：\\({sin}^{2}{x}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "函数含分式",
+   "source": "ln of (a/b)",
+   "verdict": "ok",
+   "text": "函数含分式：\\(\\ln{\\left(\\frac{a}{b}\\right)}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "大写函数",
+   "source": "Cov(x,y)",
+   "verdict": "degraded",
+   "text": "大写函数：[公式未能转换,见原页;原文字符:Covxy] 句尾",
+   "note": ""
+  },
+  {
+   "label": "隐藏上限",
+   "source": "sum over i of x_i, sup hidden",
+   "verdict": "ok",
+   "text": "隐藏上限：\\(\\sum_{i}{{x}_{i}}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "并集",
+   "source": "union i..n of A",
+   "verdict": "ok",
+   "text": "并集：\\(\\bigcup_{i}^{n}{A}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "直和",
+   "source": "direct sum i..n of A, chr not common",
+   "verdict": "degraded",
+   "text": "直和：[公式未能转换,见原页;原文字符:inA] 句尾",
+   "note": ""
+  },
+  {
+   "label": "撇号",
+   "source": "x prime as sup",
+   "verdict": "ok",
+   "text": "撇号：\\({x}^{′}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "间隔上横",
+   "source": "x with U+00AF",
+   "verdict": "degraded",
+   "text": "间隔上横：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "宽帽",
+   "source": "x+y with a hat",
+   "verdict": "ok",
+   "text": "宽帽：\\(\\hat{x+y}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "未知重音",
+   "source": "x with U+0361 above: unusual",
+   "verdict": "degraded",
+   "text": "未知重音：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "取整",
+   "source": "⌊x⌋",
+   "verdict": "ok",
+   "text": "取整：\\(\\left\\lfloor x\\right\\rfloor \\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "上取整后接字母",
+   "source": "⌈x⌉y",
+   "verdict": "ok",
+   "text": "上取整后接字母：\\(\\left\\lceil x\\right\\rceil y\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "半开区间",
+   "source": "(a,b]",
+   "verdict": "degraded",
+   "text": "半开区间：[公式未能转换,见原页;原文字符:ab] 句尾",
+   "note": ""
+  },
+  {
+   "label": "范数",
+   "source": "‖x‖",
+   "verdict": "ok",
+   "text": "范数：\\(\\left\\|x\\right\\|\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "分号分隔",
+   "source": "(a;b)",
+   "verdict": "degraded",
+   "text": "分号分隔：[公式未能转换,见原页;原文字符:ab] 句尾",
+   "note": ""
+  },
+  {
+   "label": "双括号",
+   "source": "⟦x⟧",
+   "verdict": "degraded",
+   "text": "双括号：[公式未能转换,见原页;原文字符:x] 句尾",
+   "note": ""
+  },
+  {
+   "label": "双线体",
+   "source": "R in double-struck: the reals",
+   "verdict": "WRONG",
+   "text": "双线体：\\(R\\) 句尾",
+   "note": "reads [\"R\"]; gold [\"mathbb(R)\"]"
+  },
+  {
+   "label": "花体",
+   "source": "L in script",
+   "verdict": "WRONG",
+   "text": "花体：\\(L\\) 句尾",
+   "note": "reads [\"L\"]; gold [\"mathcal(L)\"]"
+  },
+  {
+   "label": "黑体向量",
+   "source": "x bold",
+   "verdict": "ok",
+   "text": "黑体向量：\\(x\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "实数符号",
+   "source": "x ∈ ℝ",
+   "verdict": "ok",
+   "text": "实数符号：\\(x∈ℝ\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "数学斜体字符",
+   "source": "U+1D465 math italic x squared",
+   "verdict": "ok",
+   "text": "数学斜体字符：\\({𝑥}^{2}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "文本百分号",
+   "source": "the normal-text run 收益率%",
+   "verdict": "ok",
+   "text": "文本百分号：\\(\\text{收益率\\%}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "文本下划线",
+   "source": "the normal-text run a_b",
+   "verdict": "ok",
+   "text": "文本下划线：\\(\\text{a\\_b}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "文本反斜杠",
+   "source": "the normal-text run a\\b",
+   "verdict": "ok",
+   "text": "文本反斜杠：\\(\\text{a\\textbackslash{}b}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "文本尖帽",
+   "source": "the normal-text run a^b",
+   "verdict": "ok",
+   "text": "文本尖帽：\\(\\text{a\\textasciicircum{}b}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "连续两帽",
+   "source": "literal characters a^^b",
+   "verdict": "ok",
+   "text": "连续两帽：\\(a\\text{\\textasciicircum}\\text{\\textasciicircum}b\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "结尾尖帽",
+   "source": "literal characters x^",
+   "verdict": "ok",
+   "text": "结尾尖帽：\\(x\\text{\\textasciicircum}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "幻影off",
+   "source": "matrix rows: an invisible minus then 1, and -1. Reads 1 over -1",
+   "verdict": "WRONG",
+   "text": "幻影off：\\(\\begin{matrix} -1 \\\\ -1 \\end{matrix}\\) 句尾",
+   "note": "reads [\"M[-1;-1]\"]; gold [\"M[1;-1]\"]"
+  },
+  {
+   "label": "幻影false",
+   "source": "x+ then y invisible (show=false). Reads x+",
+   "verdict": "WRONG",
+   "text": "幻影false：\\(x+y\\) 句尾",
+   "note": "reads [\"x+y\"]; gold [\"x+\"]"
+  },
+  {
+   "label": "根号隐藏次数",
+   "source": "degHide on, with 3 still in deg. Reads root of x",
+   "verdict": "WRONG",
+   "text": "根号隐藏次数：\\(\\sqrt[3]{x}\\) 句尾",
+   "note": "reads [\"R[3|x]\"]; gold [\"R[|x]\"]"
+  },
+  {
+   "label": "求和隐藏上限有内容",
+   "source": "supHide on, with n still in sup. Reads sum over i of x",
+   "verdict": "WRONG",
+   "text": "求和隐藏上限有内容：\\(\\sum_{i}^{n}{x}\\) 句尾",
+   "note": "reads [\"S[∑|i|n]x\"]; gold [\"S[∑|i|]x\"]"
+  },
+  {
+   "label": "Symbol字体文本",
+   "source": "a normal-text run in Symbol font holding a+b. Reads α+β",
+   "verdict": "WRONG",
+   "text": "Symbol字体文本：\\(\\text{a+b}\\) 句尾",
+   "note": "reads [\"a+b\"]; gold [\"α+β\"]"
+  },
+  {
+   "label": "符号非F0码",
+   "source": "a, w:sym Symbol 2264, b. The code means ≤",
+   "verdict": "WRONG",
+   "text": "符号非F0码：\\(aδb\\) 句尾",
+   "note": "reads [\"aδb\"]; gold [\"a≤b\"]"
+  },
+  {
+   "label": "分式结构删除求和",
+   "source": "y= then a sum tracked deleted through ctrlPr, then x inserted. Reads y=x",
+   "verdict": "WRONG",
+   "text": "分式结构删除求和：\\(y=\\sum{}x\\) 句尾",
+   "note": "reads [\"y=∑x\"]; gold [\"y=x\"]"
+  },
+  {
+   "label": "公式编号",
+   "source": "E=mc² with a right-flushed (1): the # is the numbering mark and is not visible",
+   "verdict": "WRONG",
+   "text": "公式编号：\\(\\begin{aligned} E=mc²\\#(1) \\end{aligned}\\) 句尾",
+   "note": "reads [\"M[E=mS[c||2]#(1)]\"]; gold [\"M[E=mS[c||2](1)]\"]"
+  },
+  {
+   "label": "粗体大写",
+   "source": "bold X then X: two different symbols",
+   "verdict": "WRONG",
+   "text": "粗体大写：\\(X=X\\) 句尾",
+   "note": "reads [\"X=X\"]; gold [\"mathbf(X)=X\"]"
+  },
+  {
+   "label": "期望双线",
+   "source": "E in double-struck then [x]",
+   "verdict": "WRONG",
+   "text": "期望双线：\\(E\\left[x\\right]\\) 句尾",
+   "note": "reads [\"E[x]\"]; gold [\"mathbb(E)[x]\"]"
+  },
+  {
+   "label": "空分母",
+   "source": "1 over nothing",
+   "verdict": "ok",
+   "text": "空分母：\\(\\frac{1}{}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "空根号",
+   "source": "root of nothing",
+   "verdict": "ok",
+   "text": "空根号：\\(\\sqrt{}\\) 句尾",
+   "note": ""
+  },
+  {
+   "label": "未知结构",
+   "source": "an element nobody knows, holding q",
+   "verdict": "degraded",
+   "text": "未知结构：[公式未能转换,见原页;原文字符:q] 句尾",
+   "note": ""
+  },
+  {
+   "label": "未知结构带值",
+   "source": "a fraction with an unknown child holding z",
+   "verdict": "degraded",
+   "text": "未知结构带值：[公式未能转换,见原页;原文字符:z12] 句尾",
+   "note": ""
+  },
+  {
+   "label": "式内替代内容",
+   "source": "mc:AlternateContent inside a formula with the same text in both branches",
+   "verdict": "degraded",
+   "text": "式内替代内容：[公式未能转换,见原页;原文字符:abb] 句尾",
+   "note": ""
+  }
+ ],
+ "messages": [
+  {
+   "type": "warning",
+   "message": "18 formula(s) could not be converted to text"
+  }
+ ]
+}

@@ -22,13 +22,15 @@ function renderSegment(segment: string, isDisplay: boolean): string {
 }
 
 function parseAndRender(text: string): string {
-  // First handle display mode: $$...$$
-  const parts = text.split(/(\$\$[\s\S]*?\$\$)/g);
+  // First the unambiguous forms: $$...$$, \[...\] and \(...\). A \(...\) body may hold \$, so these go before $...$.
+  const parts = text.split(/(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\\\([^\n]*?\\\))/g);
   const rendered = parts.map((part) => {
     if (part.startsWith('$$') && part.endsWith('$$')) {
       const latex = part.slice(2, -2).trim();
       return renderSegment(latex, true);
     }
+    if (part.startsWith('\\[') && part.endsWith('\\]')) return renderSegment(part.slice(2, -2).trim(), true);
+    if (part.startsWith('\\(') && part.endsWith('\\)')) return renderSegment(part.slice(2, -2).trim(), false);
     // Handle inline: $...$
     let result = part.replace(/\$([^$\n]+?)\$/g, (_match, latex: string) => {
       return renderSegment(latex.trim(), false);

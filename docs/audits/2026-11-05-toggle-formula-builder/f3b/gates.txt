@@ -1,0 +1,7 @@
+check:source-experience exit 0
+check:changed-file-secrets exit 0
+check:agent-knowledge exit 0
+check:canvas-runtime-boundary exit 0
+client tsc exit 0
+server tsc exit 0
+finished

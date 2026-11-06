@@ -243,3 +243,74 @@ Tester 判 F3 作为终版阻断:压平已修,但金标准外第二语料 81 条
 5. 报告中其余确认项:`w:sym` 低字节、公式编号 `#`、花体。Tester 反驳否掉的 3 类别修。
 
 **验收**:`f3-gold/` 金标准与 `check_second_corpus.mjs` 第二语料都只有 ok 或诚实降级;拿不准的走占位符,⛔再硬猜。Tester 复核后上线。
+
+## F3b Result(builder 2026-11-06)
+
+**执行状态**:完工,未提交。未碰岛和 Henry 的文件,零真实模型,无新依赖。按 Henry 定的方向手写,没引入 pandoc。texmath 的 `OMML.hs` 只取了元素名单作结构核对,没看实现。
+
+**一句话**:金标准 70 ok、0 错;第二语料剩下的 6 条 WRONG 正好是 Tester 反驳否决、裁定「别修」的 6 条,和「只有 ok 或诚实降级」字面冲突,**请你裁**。
+
+### 文件清单(收割用,与编辑器组分开)
+- 服务端:`server/src/services/docxOmmlText.ts`、`server/src/__tests__/docxOmmlText.test.ts`、`server/src/agent/tools/normalizeContent.ts`、`server/package.json`(新测试挂进 `test:v2`)
+- 服务端新测试:`server/src/__tests__/normalizeCardContentDelimiters.test.ts`
+- 客户端:`client/src/components/KaTeX/KaTeXRenderer.tsx`、`client/src/components/CardFlip/CardTemplateContent.tsx`
+- 客户端新测试:`client/src/components/KaTeX/KaTeXRenderer.test.tsx`、`client/src/components/CardFlip/CardTemplateContent.test.tsx`
+- 证据:`docs/audits/2026-11-05-toggle-formula-builder/f3b/`
+- **别收**:`f3-gold/F3-新样本.docx` 显示已修改,是 Tester 的 `check_second_corpus.mjs` 每次运行都重新生成样本造成的,不是我的改动。根目录 `package-lock.json`(未跟踪)是 10-06 的旧文件,不是我产生的。
+
+### 改了什么
+1. **`m:scr`、`m:sty`**:double-struck、script、fraktur、sans-serif、monospace 分别写成 `\mathbb`、`\mathcal`、`\mathfrak`、`\mathsf`、`\mathtt`;`b` 写 `\mathbf`,`bi` 和非拉丁字母的粗体写 `\boldsymbol`。只给字母数字段加样式,同一 run 里的运算符照旧。`sty p`、`scr roman` 不加样式,不拒绝。未知字体或拉丁以外的字母配这些字体,诚实降级。式内换行那条路径改成和普通路径共用同一个 run 处理(Tester 指出的第二处)。
+2. **修订删除的结构**:结构的 `ctrlPr` 里有 `w:del` 或 `moveFrom` 时,整个结构连壳一起去掉,字符守恒的原文也不算它。
+3. **`m:phant`**:`show` 按开关值读,`0`、`off`、`false` 都是隐形。
+4. **卡片**:服务端 `normalizeContent` 和客户端 `CardTemplateContent` 都认单个 `\(…\)`、`\[…\]` 并剥掉;两个公式中间有文字时不剥。`KaTeXRenderer` 先认 `$$…$$`、`\[…\]`、`\(…\)`,再认 `$…$`,所以 `\(` 里的 `\$` 不会被当成美元公式的开头。
+5. **`w:sym`**:只认 `F0xx` 和 `00xx`,`2264` 这类诚实降级。
+6. **公式编号 `#`**:方程组里的 `#` 诚实降级。你说过形状没有 Word 验证,所以不猜。
+7. **占位符**:原文字符里的 `\(`、`\)` 去掉反斜杠,不会打断后面的真公式。
+8. **核对名单补的一处**:`borderBox` 带 `strikeH`、`strikeV`、`strikeBLTR` 或 `strikeTLBR` 时诚实降级。删除线表示「抵消」,写成普通方框意思会反。
+
+### 验收
+| | ok | 诚实降级 | 待目检 | 错 | 非法 | 缺失 |
+|---|---|---|---|---|---|---|
+| 金标准 `f3-gold` | 70 | 0 | 1 | 0 | 0 | 0 |
+| 第二语料,改前 | 46 | 18 | 1 | 16 | 0 | 0 |
+| 第二语料,改后 | 54 | 20 | 1 | **6** | 0 | 0 |
+
+- 金标准待目检仍是 `特殊字符`,读法和上一轮相同。第二语料待目检是 `箭头标注`,Tester 核过,符合规范。
+- **剩下的 6 条 WRONG 就是 Tester 否决的那 6 条**:`修订在rPr`、`分母修订rPr`、`结构标记删除`(都是 `w:rPr` 里放 `w:del` 的形状,反驳认为没有真实生产者)、`根号隐藏次数`、`求和隐藏上限有内容`、`Symbol字体文本`。按「被否的 3 类别修」没动。请裁:是认它们不算,还是改成诚实降级(改的话很小)。
+- 20 条诚实降级的清单在 `f3b/second-corpus.txt`。其中 `修订Word形状` 这类真实 Word 修订形状走的是降级不是 ok,本单没扩修。
+
+**对照**:12 组变异都在 scratch 副本里,全部 [APPLIED],各自红在目标用例上(`positive-controls.txt`)。
+
+**全量**
+- 服务端 **1358 过 1354**(`server-full-suite.txt`)。4 红:
+  - `real empty-claim journey`:TD-50。
+  - `K-4`:TD-45,单跑也红,Tester 在不含 F3 的基线上见过同签名。
+  - `vpsF11SourcePageImages`:运行器 IPC 抖动,重试后 18/18。
+  - `fidelity1a2DocxPages` 第 203 条:报错是「Windows process tree remained alive after termination」,单跑两遍都 18/18(`red-files-alone.txt`)。
+- 第一次全量被运行器 `Unexpected end of JSON input` 在第 1212 条打断,没有总计,不算数。
+- 客户端 **2618/2618**。
+- 闸:tsc 两侧 0;`source-experience`、`changed-file-secrets`、`agent-knowledge`、`canvas-runtime-boundary` 过(`gates.txt`)。
+
+### 没验到 / 没做
+1. 卡片只有组件测试,**没在浏览器里打开一张真卡片看**。
+2. 已有笔记要 Rebuild 才会变成新格式;卡片里存的旧 `$…$` 照常。
+3. Tester 列为「建议一起修」的「整个公式在 `w:del` 里时有假横幅」没做,它的方向是多报。
+4. 「`m:t` 里的空格渲染时消失」按 Tester 建议留在 TD-49。
+5. 正文里本来就有字面 `\(不是公式\)` 时仍有歧义(Tester 第 4 项),未处理。
+### F3b 补充(builder 2026-11-06,依「6 条改成诚实降级」裁定)
+
+- **第二语料 0 WRONG**:54 ok、26 诚实降级、1 待目检(`箭头标注`,Tester 已核)。金标准不变,70 ok、0 错。
+- 6 条的降级规则:run 自己的 `w:rPr` 里带 `w:del` 或 `moveFrom`;run 用 Symbol、Wingdings、Webdings、MT Extra 这类字形编码字体;根号的次数隐藏但还有内容;求和上下限隐藏但还有内容。
+- **只是降级,没有转对。** `w:rPr` 里的 `w:ins` 照常保留文字;隐藏且为空的次数仍是普通根号。
+- 只动了 F3b 清单内的 `docxOmmlText.ts` 和它的测试。
+- **对照 16 组**(原 12 组 + 新 4 组),全部 [APPLIED] 并红在目标上。
+- **服务端全量 1328 过 1322**,只算最终版本这一轮,以前的作废。6 红:TD-50 harness、TD-45 K-4,另外 4 个文件是运行器 IPC 抖动,重试后全部恢复(`recovered 4/4`)。这一轮文件数比上一轮少,是抖动文件按文件级计数造成的。
+- **只有本节的数字算最终数字**:对照 16 组、全量 1328/1322、0 WRONG。上面 F3b Result 里的 12 组对照、1358/1354、6 WRONG 都是降级之前的版本。
+
+## F3b 判语:放行(Main_Designer 2026-11-07,依 Tester review-tester.md 第十二节)
+
+- **验的对象**:HEAD `4b1f1852` 加 F3b 清单 8 个文件的冻结副本,哈希在 `docs/audits/2026-11-05-toggle-formula-builder/tester-f3b/snapshot-hashes.txt`;收割时共享树 8/8 一致。
+- **结果(Tester)**:金标准 70 对 0 错;第二语料 54 对、26 诚实降级、0 错;第三语料(34 条,builder 没见过,专测每条修复的相邻情形)30 对、4 降级、0 错,线上 F3 跑同一语料错 16 条;卡片真页面上 `\(…\)`、`\[…\]`、行内多式、`\mathbb`、`\mathbf` 渲染正确,0 个 KaTeX 错误;客户端全量 2596 条全绿;服务端 `test:v2` 只红 K-4(TD-45,线上同红)。
+- **收割范围**:清单 8 个文件,加 `server/package.json` 里 F3b 那一处(`normalizeCardContentDelimiters.test.ts` 进 `test:v2`)。同一行里 A-19 的 `a19SourceImagePages.test.ts` 不收,留在工作树。不收 `f3-gold/F3-新样本.docx`。
+- **四条小尾巴**记 TD-52,不挡上线。
+- **上岛**:客户端有改动,要重建;上岛后旧 docx 可以 Rebuild 一次拿到新文本层。

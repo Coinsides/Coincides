@@ -28,7 +28,7 @@ const FUNCTIONS = new Set([
 ]);
 const LIMIT_OPERATORS = new Set(['lim', 'max', 'min', 'sup', 'inf']);
 // Children that only hold other content, with no structure of their own.
-const WRAPPERS = new Set(['e', 'num', 'den', 'sub', 'sup', 'deg', 'lim', 'fName', 'box', 'borderBox', 'ins', 'moveTo', 'sdt', 'sdtContent', 'smartTag', 'customXml', 'hyperlink']);
+const WRAPPERS = new Set(['e', 'num', 'den', 'sub', 'sup', 'deg', 'lim', 'fName', 'box', 'ins', 'moveTo', 'sdt', 'sdtContent', 'smartTag', 'customXml', 'hyperlink']);
 // Nothing a reader sees: tracked deletions and bookkeeping marks.
 const SILENT = new Set(['del', 'moveFrom', 'bookmarkStart', 'bookmarkEnd', 'proofErr', 'commentRangeStart', 'commentRangeEnd', 'commentReference', 'lastRenderedPageBreak']);
 const SYMBOL_FONT: Record<string, string> = {
@@ -37,6 +37,11 @@ const SYMBOL_FONT: Record<string, string> = {
   '£': '≤', '³': '≥', '¹': '≠', '»': '≈', '±': '±', '´': '×', '¸': '÷', '¥': '∞', 'Ö': '√',
   'å': '∑', 'ò': '∫', 'Õ': '∏', '®': '→', '¬': '←', 'Þ': '⇒', 'Î': '∈', '¶': '∂', 'Ñ': '∇',
 };
+// m:scr stores the base letter and names the alphabet: ℝ is an R with double-struck. roman is the default.
+const SCRIPT_FONTS: Record<string, string> = {
+  'double-struck': '\\mathbb', script: '\\mathcal', fraktur: '\\mathfrak', 'sans-serif': '\\mathsf', monospace: '\\mathtt',
+};
+const BORDER_STRIKES = ['strikeH', 'strikeV', 'strikeBLTR', 'strikeTLBR'];
 const UNCONVERTED_NOTE = '公式未能转换,见原页';
 const DELIMITER_OPEN = '\\(';
 const DELIMITER_CLOSE = '\\)';
@@ -100,6 +105,8 @@ function escapeLatex(text: string, context: LatexContext = {}): string {
   return text.replace(/[\\$%&#_{}^~]/g, (char) => {
     if (char === '\\') return '\\backslash ';
     if (char === '&' && context.aligned) return '&';
+    // In an equation array # may be Word's numbering mark. Its shape is not certain, so it is not guessed.
+    if (char === '#' && context.aligned) refuse('# in an equation array');
     if (char === '^') return '\\text{\\textasciicircum}';
     if (char === '~') return '\\text{\\textasciitilde}';
     return `\\${char}`;
@@ -115,12 +122,21 @@ function escapeText(text: string): string {
   });
 }
 
+// A whole structure can be tracked as deleted through its control properties, leaving only its shell.
+function isDeletedStructure(element: Element): boolean {
+  return childElements(element).some((part) => {
+    if (!localName(part).endsWith('Pr')) return false;
+    const control = child(part, 'ctrlPr');
+    return Boolean(control && childElements(control).some((mark) => SILENT.has(localName(mark))));
+  });
+}
+
 // The characters a reader would see, skipping tracked deletions.
 function textOf(element: Element): string[] {
   const parts: string[] = [];
   const visit = (current: Element) => {
     const name = localName(current);
-    if (SILENT.has(name)) return;
+    if (SILENT.has(name) || isDeletedStructure(current)) return;
     if (name === 't') parts.push(current.textContent ?? '');
     else childElements(current).forEach(visit);
   };
@@ -152,24 +168,61 @@ function closeWord(latex: string): string {
 function symbolCharacter(element: Element): string {
   if (attribute(element, 'font') !== 'Symbol') refuse('symbol font');
   const code = Number.parseInt(attribute(element, 'char') ?? '', 16);
-  const mapped = Number.isFinite(code) ? SYMBOL_FONT[String.fromCharCode(code & 0xff)] : undefined;
+  // Symbol's private range and its plain bytes only: 2264 is not "the byte 64".
+  const inFont = Number.isFinite(code) && (code >> 8 === 0xf0 || code >> 8 === 0);
+  const mapped = inFont ? SYMBOL_FONT[String.fromCharCode(code & 0xff)] : undefined;
   if (!mapped) refuse('symbol character');
   return mapped;
 }
 
-function runToLatex(element: Element, context: LatexContext): string {
-  const normal = propIsOn(element, 'rPr', 'nor');
-  let out = '';
-  for (const part of childElements(element)) {
-    const name = localName(part);
-    if (name.endsWith('Pr') || SILENT.has(name)) continue;
-    if (name === 't') {
-      const text = part.textContent ?? '';
-      out += normal ? (text ? `\\text{${escapeText(text)}}` : '') : escapeLatex(text, context);
-    } else if (name === 'sym') out += symbolCharacter(part);
-    else refuse(name);
+// Each alphanumeric stretch takes the run's alphabet and weight; an operator in the same run stays as it is.
+function styledText(run: Element, text: string, context: LatexContext): string {
+  const script = prop(run, 'rPr', 'scr');
+  const style = prop(run, 'rPr', 'sty');
+  if (script && script !== 'roman' && !SCRIPT_FONTS[script]) refuse(`script ${script}`);
+  const font = script ? SCRIPT_FONTS[script] : undefined;
+  const bold = style === 'b' || style === 'bi';
+  if (!font && !bold) return escapeLatex(text, context);
+  return text.split(/([\p{L}\p{N}]+)/u).map((piece, index) => {
+    if (index % 2 === 0) return escapeLatex(piece, context);
+    const ascii = /^[A-Za-z0-9]+$/.test(piece);
+    // These alphabets exist for Latin letters; another script under them cannot be drawn faithfully.
+    if (font && !ascii) refuse(`${script} on ${piece}`);
+    const inner = font ? `${font}{${piece}}` : piece;
+    if (!bold) return inner;
+    return font || !ascii || style === 'bi' ? `\\boldsymbol{${inner}}` : `\\mathbf{${inner}}`;
+  }).join('');
+}
+
+function runPieceToLatex(run: Element, piece: Element, context: LatexContext): string {
+  const name = localName(piece);
+  if (name.endsWith('Pr') || SILENT.has(name)) return '';
+  if (name === 't') {
+    const text = piece.textContent ?? '';
+    if (propIsOn(run, 'rPr', 'nor')) return text ? `\\text{${escapeText(text)}}` : '';
+    return styledText(run, text, context);
   }
-  return out;
+  if (name === 'sym') return symbolCharacter(piece);
+  return refuse(name);
+}
+
+// Fonts whose bytes are pictures, not the letters stored: Symbol's "a" is α.
+const SYMBOL_ENCODED_FONTS = /^(Symbol|Wingdings( \d)?|Webdings|MT Extra)$/i;
+
+// Rare shapes that are not worth converting, but must never be written wrong: a run
+// marked deleted in its own w:rPr, or text in a font that changes what its letters mean.
+function checkRunMarks(run: Element): void {
+  // m:rPr and w:rPr share a local name; the Word one carries revisions and fonts.
+  const wordProps = children(run, 'rPr').find((props) => props.namespaceURI !== run.namespaceURI);
+  if (!wordProps) return;
+  if (childElements(wordProps).some((mark) => SILENT.has(localName(mark)))) refuse('run marked deleted in its properties');
+  const fonts = child(wordProps, 'rFonts');
+  if (fonts && Array.from(fonts.attributes).some((font) => SYMBOL_ENCODED_FONTS.test(font.value))) refuse('symbol-encoded font');
+}
+
+function runToLatex(element: Element, context: LatexContext): string {
+  checkRunMarks(element);
+  return childElements(element).map((part) => runPieceToLatex(element, part, context)).join('');
 }
 
 function limit(element: Element, script: '_' | '^'): string {
@@ -183,7 +236,7 @@ function limit(element: Element, script: '_' | '^'): string {
 
 function toLatex(element: Element, context: LatexContext = {}): string {
   const name = localName(element);
-  if (name.endsWith('Pr') || SILENT.has(name)) return '';
+  if (name.endsWith('Pr') || SILENT.has(name) || isDeletedStructure(element)) return '';
   if (WRAPPERS.has(name)) return childElements(element).map((part) => toLatex(part, context)).join('');
   switch (name) {
     case 'r':
@@ -203,6 +256,8 @@ function toLatex(element: Element, context: LatexContext = {}): string {
       return `{}_{${arg(element, 'sub')}}^{${arg(element, 'sup')}}{${arg(element, 'e')}}`;
     case 'rad': {
       const degree = arg(element, 'deg');
+      // A hidden degree that still holds text: which one the reader saw is not certain.
+      if (degree && propIsOn(element, 'radPr', 'degHide')) refuse('hidden degree with content');
       return `\\sqrt${degree ? `[${degree}]` : ''}{${arg(element, 'e')}}`;
     }
     case 'nary': {
@@ -211,6 +266,7 @@ function toLatex(element: Element, context: LatexContext = {}): string {
       if (!command) refuse(`operator ${char}`);
       const sub = arg(element, 'sub');
       const sup = arg(element, 'sup');
+      if ((sub && propIsOn(element, 'naryPr', 'subHide')) || (sup && propIsOn(element, 'naryPr', 'supHide'))) refuse('hidden limit with content');
       return `${command}${sub ? `_{${sub}}` : ''}${sup ? `^{${sup}}` : ''}{${arg(element, 'e')}}`;
     }
     case 'd': {
@@ -254,8 +310,14 @@ function toLatex(element: Element, context: LatexContext = {}): string {
       if (char.length !== 1 || /[A-Za-z0-9\\{}$%&#_^~]/.test(char)) refuse(`group character ${char}`);
       return `${above ? '\\overset' : '\\underset'}{${char}}{${arg(element, 'e')}}`;
     }
+    case 'borderBox':
+      // A struck-through box says the content is cancelled; plain text would say the opposite.
+      if (BORDER_STRIKES.some((strike) => propIsOn(element, 'borderBoxPr', strike))) refuse('struck-through box');
+      return arg(element, 'e');
     case 'phant':
-      return prop(element, 'phantPr', 'show') === '0' ? `\\phantom{${arg(element, 'e')}}` : arg(element, 'e');
+      // show is an on/off value: 0, off and false all hide the content.
+      return prop(element, 'phantPr', 'show') !== null && !propIsOn(element, 'phantPr', 'show')
+        ? `\\phantom{${arg(element, 'e')}}` : arg(element, 'e');
     default:
       return refuse(name);
   }
@@ -291,15 +353,12 @@ function ommlLines(oMath: Element): string[] {
       lines[lines.length - 1] += toLatex(part);
       continue;
     }
+    checkRunMarks(part);
     const manualBreak = propIsOn(part, 'rPr', 'brk');
     if (manualBreak) lines.push('');
     for (const piece of childElements(part)) {
-      const name = localName(piece);
-      if (name === 'br') lines.push('');
-      else if (name === 't') lines[lines.length - 1] += propIsOn(part, 'rPr', 'nor')
-        ? `\\text{${escapeText(piece.textContent ?? '')}}` : escapeLatex(piece.textContent ?? '');
-      else if (name === 'sym') lines[lines.length - 1] += symbolCharacter(piece);
-      else if (!name.endsWith('Pr') && !SILENT.has(name)) refuse(name);
+      if (localName(piece) === 'br') lines.push('');
+      else lines[lines.length - 1] += runPieceToLatex(part, piece, {});
     }
   }
   return lines.filter(Boolean);
@@ -311,7 +370,8 @@ export interface ConvertedFormula {
 }
 
 function unconvertedText(source: string): string {
-  const original = source.trim();
+  // A delimiter among the original characters must not read as the start of a formula.
+  const original = source.trim().replace(/\\([()])/g, '$1');
   return original ? `[${UNCONVERTED_NOTE};原文字符:${original}]` : `[${UNCONVERTED_NOTE}]`;
 }
 
