@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-11-05
+> **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -146,7 +146,7 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-05 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-07 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
