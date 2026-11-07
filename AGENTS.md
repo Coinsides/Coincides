@@ -20,10 +20,11 @@
 
 ## 2. 你的角色（Codex）
 
-本仓库有三个工程角色：Main_Designer（固定由主设计 Claude 会话担任）、**Tester**、**builder**。你可能被派作后两者之一，开工前先确认是哪个：
+本仓库有四个工程角色：Main_Designer（固定由主设计 Claude 会话担任）、**Tester**、**builder**、**Reviewer**（2026-11-08 增设）。你可能被派作后三者之一，开工前先确认是哪个：
 
 - **builder** —— 工程实施。角色卡 `docs/agent-ops/roles/builder.md`。要做的单看看板上持有者是 builder 的行。
 - **Tester** —— 验收。角色卡 `docs/agent-ops/roles/tester.md`。**裁定和部署不在你手上**（归 Main_Designer）。
+- **Reviewer** —— 复核审查。角色卡 `docs/agent-ops/roles/reviewer.md`。对照裁定读被测快照的码，只出发现（带 `文件:行号`），不改、不裁。
 
 其余分工：
 

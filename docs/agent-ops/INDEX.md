@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 470 份文档。
+共 474 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -475,10 +475,14 @@
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
 | [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-26 | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
+| [records/reviewer/README.md](records/reviewer/README.md) | Reviewer 的记录（records/reviewer/） | `active` | 2026-11-08 | — |
+| [records/reviewer/STATUS.md](records/reviewer/STATUS.md) | Reviewer 状态 | `active` | 2026-11-08 | — |
+| [records/reviewer/findings.md](records/reviewer/findings.md) | Reviewer 发现台账 | `active` | 2026-11-08 | — |
 | [records/tester/METHOD.md](records/tester/METHOD.md) | Tester 方法与坑 | `active` | 2026-11-07 | — |
 | [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `active` | 2026-11-07 | — |
 | [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-07 | — |
 | [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `active` | 2026-11-07 | — |
 | [roles/builder.md](roles/builder.md) | 角色卡：builder（工程实施） | `active` | 2026-11-07 | — |
 | [roles/main-designer.md](roles/main-designer.md) | 角色卡：Main_Designer（主设计） | `active` | 2026-11-07 | — |
+| [roles/reviewer.md](roles/reviewer.md) | 角色卡：Reviewer（复核审查） | `active` | 2026-11-08 | — |
 | [roles/tester.md](roles/tester.md) | 角色卡：Tester（验收） | `active` | 2026-11-07 | — |

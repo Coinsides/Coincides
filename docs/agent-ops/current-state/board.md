@@ -7,7 +7,7 @@
 
 # 看板：岛上是什么、在办什么、等谁
 
-> **这张看板是三个角色共同的事实来源。** Main_Designer、Tester、builder 都从这里读同一组事实，不各自另记一份。
+> **这张看板是四个角色共同的事实来源。** Main_Designer、Tester、builder、Reviewer 都从这里读同一组事实，不各自另记一份。
 > **谁写**：前三块（白话、岛上、等 Henry 拍板）只有 Main_Designer 手写；「在办的单」现在暂由 Main_Designer 手抄，门禁脚本上线后由脚本从各单单卡生成。
 > **每一行都指向证据**：看板只放结论和指针，细节在被指的文件里。
 > 设计依据：`docs/agent-ops/analysis/2026-11-07-role-records-design.md`。
