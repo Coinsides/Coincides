@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.1 已交(builder 2026-11-07):留字框重放跟随单元(只改 `structureTypingBuffer.ts`,控制器与 r2 逐字节同,K / H-L / 注入矩阵沿用 r2);包 = ops `packages/editor-rework-r2.1/`;回执在尾部「编辑器组 r2.1 Result:留字框跟随版面」;复测 acc12 那一路 + 〇节余项 | 2026-11-07 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 返修 | builder | **r2.3**(只动控制器:留住字「空等于空」自动落加角色一致条件,拿回建块/放位/看门狗三条恢复的 ①)。r2.2 回执合格(`index-sNlfO3uB.js`,m7);Tester 现在在 r2.2 上跑 GEO 全套(框终版,沿用到 r2.3),行为臂等 r2.3。裁定见尾部「r2.2 回执收讫 + ⚠️ 裁定」 | 2026-11-07 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -69,6 +69,7 @@
   - 新增 `hooks/headingStructureWatchdog.realAdapter.test.tsx`:真适配器 K1
 - 包:ops `packages/editor-rework-r2/`(`dist/` 主 JS `index-BlJnjQci.js` + `src/` + 两份哈希);纯 21 文件包的源码快照在 `packages/editor-rework-pure21/src/`。
 - **r2.1**(留字框跟随版面):对 r2 只改 `structureTypingBuffer.ts` 和 `hooks/useHeadingStructureController.test.tsx`,其余 20 个逐字节同(控制器不变);sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/source-sha256-r21.txt`;包 ops `packages/editor-rework-r2.1/`(主 JS `index-Ck4z0VFS.js`)。
+- **r2.2**:对 r2.1 改控制器、框和两个测试文件,其余 18 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/source-sha256-r22.txt`;包 ops `packages/editor-rework-r2.2/`(主 JS `index-sNlfO3uB.js`)。
 
 ### 自报数字(builder)
 
@@ -87,10 +88,12 @@
 | 第一轮旧数(纯包 ②5、「慢回包卸载 冻结③→修复②」)按修正 harness 重出,结论不变,但原数作废 | 同上 | 纯包 / 冻结版 | `m5/per-note/enter-pure.json`、`enter-frozen.json` |
 | r2.1:构建 exit 0;类型检查净;客户端全量 2654/2654;三个检查脚本 exit 0 | 同上 | r2.1 副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/summary.txt` |
 | r2.1:「定位后改版面」几何测试在 r2 框代码上红(300≠396)、r2.1 上绿 | `vitest run … -t "r2.1"`,换入 r2 的 `structureTypingBuffer.ts`(副本内,trap 复原) | 副本 | `matrix-6-r2.1/red-controls.txt` |
+| r2.2:构建 exit 0;类型检查净;客户端全量 2667/2667;三个检查脚本 exit 0;r04@57 156 行坏 0;8 条阳性对照 r2.1 上红、r2.2 上绿 | 同上 | r2.2 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/summary.txt`、`red-controls-full.txt` |
+| r2.2 浏览器:注入矩阵 ①14 ②12 ③0;K ①2 / ②′2 / ②2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.2 包,延迟 57 | `matrix-7-r2.2/enter-r22.json`、`k-r22.json`、`hl-r22.json` |
 
 ### 待办(builder)
 
-- 已交 Tester(r2.1 包),等判语。拷回共享树候 Main_Designer 令。
+- 已交 Tester(r2.2 包),等判语;回执文首 ⚠️ 候 Main_Designer 裁。拷回共享树候 Main_Designer 令。
 - 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
@@ -1240,3 +1243,120 @@ Tester 在真浏览器坐实核读指出的 3b(其 H-L 臂):`warmup` 回车 → 
 - **裁定**:按预先说好的尺——闸两种形状都到不了 GEO-long-0 的「记录空、零保存、库里无」,浏览器侧 11 轮一次,**入 A-25 第二条**(「结构非原子」之下,标「一次实见、机理指向 409 后状态卡死;闸两臂绿」),不挡放行。builder 的代码回答(409 时 batch 收尾 / 失败保持 / 记录何处 forget / 只读状态位)照进回执,作 A-25 的起点。
 - **KRO 冻结版对照**(Tester,冻结 13142,2 轮):与 r2 一样——readOnly、` zz`/` xx` 进窗口、放行后 `body zz xx` 2/2。**A-18 时期窗口已有的行为,非本轮引入**,坐实;报告观察项,不挡;另开单与否:**并入 A-25 的设计题**,不单开。
 - **r2.2 封包放行**:清单 1、2、3、5、6 + 闸两条 409 臂;代码回答进回执;逐文件 sha256 标「同 r2.1 / r2.2 改」(buffer 与控制器都变 → GEO、K、H-L、矩阵、地址栏、冒烟在 r2.2 上全跑,无沿用);包 ops `packages/editor-rework-r2.2/`。Tester 的 r2 行为臂结果作「早期信号」记,r2.2 判语以 r2.2 上的数为准。
+
+## 编辑器组 r2.2 Result(builder 2026-11-07)
+
+答 r2.2 定稿清单 1、2、3、5、6 + 闸 409 两臂 + GEO-long-0 复合臂 + 代码回答。证据 `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/`(下称 m7)。
+
+### ⚠️ 先请裁一处:第 5 条让三个常见失败恢复由 ① 变 ②
+
+- 浏览器注入矩阵(r2.2 包)里,下面三臂由 r2 的 ① 2 变成 ② 2:
+  - `enter_create`(建块失败)
+  - `enter_placement`(放位置失败)
+  - `enter_hangWatchdog`(转移卡死,看门狗放手)
+- K 臂「卡住 + 整页卸载」也由 ① 2 变成 ② 2。
+- 实见(`m7/enter-r22.json` 的 `reopened`):字都在框里,本笔记存档在(`initialText: ''`、`text: 'kept\nbody'`),没丢、没双写,只是不再自动落回。
+- 原因:这些臂里,窗口所在的单元都是 `# ` 刚变出来的空标题单元。按第 5 条,来自空单元的留字不再凭「空等于空」自动落。
+- 是第 5 条字面要的结果(② 替 ③),但面比 Y1 宽:建块 / 放位置失败、看门狗之后的常规恢复,都要用户自己从框里复制。
+- 可选的收窄(未做,候裁):存档记下留住时单元的 `writing_role`。空对空时角色一致才放行。Y1 是回车新建的普通段落,`# ` 之后是标题,两者分得开。另外,第 6 条让记录跟着结构搬走的单元走,Y1 那种「原块里同号新单元」已经认不上旧记录。若准,进 r2.3,只动控制器。
+
+### 包与同源
+
+- 源码 = `9bc45e69` + 22 个文件,副本−基线仍是这 22 个。逐文件 sha256 对 r2.1(`m7/source-sha256-r22.txt`):
+  - `r2.2改`:
+    - `hooks/useHeadingStructureController.ts`(`693f9c9d9443…`)
+    - `structureTypingBuffer.ts`(`bc12bcdebd55…`)
+    - `hooks/useHeadingStructureController.test.tsx`(`d78e0e01f5c7…`)
+    - `hooks/structureTypingConservation.test.tsx`(`ca2ab6424bfa…`)
+  - 其余 18 个与 r2.1 逐字节同。
+- 包:ops `packages/editor-rework-r2.2/`。`dist/` 主 JS `index-sNlfO3uB.js`,63 个文件;`src/` 22 个文件;两份哈希与 m7 一致。r2 和 r2.1 的包都没动,`edfix` 没动。
+- 控制器和框都变了,这次没有沿用任何臂,下表全部在 r2.2 包上重跑。
+
+### 全量、检查、阳性对照
+
+| 数 | 证据 |
+|---|---|
+| 构建 exit 0;类型检查净;客户端全量 2667/2667;守恒闸 40 种子绿(边界断言在跑) | `m7/summary.txt`、`client-full.raw` |
+| 三个检查脚本 exit 0 | `m7/check-*.txt` |
+| 本轮 8 条阳性对照,在 r2.1 的控制器 + 框上全红(对照形状那条照应绿),在 r2.2 上全绿 | `m7/red-controls-full.txt` A 段(第 1–20 行)、C 段(第 34–39 行) |
+| 闸的 4 条路径臂(409 ×2、GEO-long-0 ×2)在 r2.1 和 r2.2 上都绿,只记颜色,不是先红后绿 | 同上 B 段、C 段 |
+| r04@57:156 行坏 0;dist 跑前跑后一致 | `m7/r04-r22-57.log`、`summary.txt` |
+
+### 每条修了什么
+
+1. **重试拍零副作用 + 有界**:`placeTyped` 先算 `mergeTypedText`,算出可落结果才调 `history.boundary()`。对不上就 keep(),不切撤销、不发保存、不碰 history。
+   - 重试间隔从 800ms 起,每次拒绝后翻倍,上限 10 秒(`RETRY_MAX_MS`)。
+   - 测试:卡住的记录 + 另一块里有一个没封的打字组。200ms 内保存调用数不变,提示条在;手动封界后保存恰好 +1。r2.1 上红(第一拍就封界、发了保存)。
+2. **跨行界**:`typedTextIsPlaced` 只认整段打下的字在行界处收口。从锚单元往前读须以它开头,且后面紧接行界或结尾;往回读对称。
+   - `mergeTypedText` 加一道只留不删的闸:锚点解释不了的那段现文本里若已含这些字,就 keep()(可能已落过又被续打)。
+   - 测试是 Tester 的四个形状:S-b1 落成 `warmup|Title|Body|Body text`;S-b2 落成 `See the Note|Note|Intro`;S-a1 留住(存档、框都在,笔记不变);对照落成 `Title|Body|Other`。r2.1 上前三个红,对照绿。
+3. **lastBatch 归位**:被看门狗放弃的等待者,若槽仍指它在等的那个 batch,就把槽换成已落定。下一个结构直接到 history,history 当场拒绝,立刻 onFailure,不再白等一个看门狗。
+   - 测试:第一个 batch 的 reorder 永不返回;第二次结构被自己的看门狗放弃;第三次 <250ms 失败。r2.1 上 356ms(红)。
+5. **Y1**:`mergeTypedText` 的「空等于空」捷径只给活窗口用,留住的字(重试、恢复)要真锚。
+   - 测试:原块里回车新建同号空单元、打 `next`。新单元只含 `next`,存档、框都在。r2.1 上红(存档被吃掉)。
+   - 影响见文首 ⚠️。
+6. **记录跟单元走 + 无锚不压行**:
+   - 控制器:结构把单元搬进新块时,同笔记里锚在这个单元(原块 + 单元号)上的留住条目,内存里的 focus 和存档里的 blockId 都改成新块。只认结构自己知道的搬动,⛔ 全笔记按单元号搜。
+   - `retainWords` 的存档改为写入时读 `entry.focus`(原来用的是留住那一刻的解构值)。
+   - 框(只对留住的框;活窗口照旧压在单元上):每次放置后自检,框与自己单元以外的任何编辑器相交,或单元找不到,就停靠到文本栏外,先右后左。两侧都放不下,就折成只剩提示条,带 `Show words`,字一步可见。按钮顺序是 Discard 在前。⛔ 删 DOM。
+   - 测试:(i)结构把单元搬进新块后,存档 blockId 为新块,框顶跟到新块编辑器(420);(ii)单元消失、下一行顶上来,框与所有编辑器不相交,框在、字在、Discard 可用。r2.1 上都红(存档仍是 `source`;框压在 `below` 上)。
+
+### 浏览器(r2.2 包;每臂注入层写明)
+
+| 臂 | 注入层 | r2.2 | 对照(r2 按笔记 harness) |
+|---|---|---|---|
+| 注入矩阵 26 行 | 代理层(浏览器已发出) | ①14 ②12 ③0 | ①20 ②6 ③0 |
+| 其中地址栏三臂:改地址离开、慢回包改地址、慢回包卸载 | 同上 | ② 2 / ② 2 / ② 2 | 同 |
+| 其中 create / placement / hangWatchdog | 同上 | ② 2 / ② 2 / ② 2 | ① 2 / ① 2 / ① 2(见文首 ⚠️) |
+| K:卡 12 秒后成功 / 失败 / 卡住 + 卸载 / 卡 25 秒后成功 | 代理层扣改角色那次 text-save | ① 2 / ②′ 2 / ② 2 / ②′ 2 | ① 2 / ②′ 2 / ① 2 / ②′ 2 |
+| H-L(`h_HL`,**不是 Tester 的 H-L 时序**,见 r2 回执) | 浏览器请求阶段(CDP Fetch) | ② 3 | ② 3 |
+| r04@57(冒烟) | 无注入 | 156 行坏 0 | 同 |
+
+- 证据:`m7/enter-r22.json`、`k-r22.json`、`hl-r22.json`。
+- **GEO**:Tester r2.2 复测。我这边的单元证据是三条 jsdom 几何测试:
+  - `r2.1 #4: the kept box follows its unit when the layout moves after it was placed, and covers no line`(定位后移版面;r2 上红见 `matrix-6-r2.1/red-controls.txt` 第 2 行,r2.2 全量绿)
+  - `r2.2 #6 (i): kept words whose unit a structure moves to a new block go with it, in storage and on screen`(m7 `red-controls-full.txt` 第 9 行红、C 段绿)
+  - `r2.2 #6 (ii): when its unit is nowhere on screen, a kept box leaves every line uncovered and stays reachable`(同上第 10 行红、C 段绿)
+
+### 代码回答(行号对 ops `editor-rework-r2.1/src/` 快照;适配器不在 22 个文件里,行号对基线 `9bc45e69`,未改)
+
+- **transfer 回 409 时 batch 怎么收尾**:
+  - 适配器 `transferTextUnit` 的 catch 弹「The unit could not be moved. Retry saving or undo before leaving the note.」,返回 null(`useNoteCanvasDataAdapter.ts:3091`)。
+  - history 的 `persistUnitTransfer` 拿到 null 返回 null(`useTextFlowHistory.ts:328` 一带)。
+  - `persistExtraction` 在 `:440` 返回 false。进函数就设的 `documentFailures.set(transaction, side)`(`:383`)只在成功时删(`:457`)。finally 里 `onSaveFailure`(`:463`)弹第二个提示。
+  - **没有回滚**:已建的块留着(空),源块里那份已应用的本地编辑不撤,单元文本不写回原块。`extraction.unresolvedTransfer` 留在 side 上,等 Retry / Undo 再走 `:393-397` 那段先补齐。
+- **失败保持**:有。`documentFailures` 非空时,`canApplyEdit()` 为假(`:637`,含 `!scope.documentFailures.size`),`isEditHeld()` 为真(`:640`),`replaying` 为真(`:955`)。
+  - 打字被拒、不发保存,要等 Retry 或 Undo。这就是那 15 秒零保存、打字被吞的状态位。
+  - 可见的只有两条临时提示(适配器那条和 `useNoteCanvasRuntimeController.ts:391` 那条),没有常驻的 Retry 控件。⛔ 无提示只读的顾虑成立,入 A-25。
+- **留住记录在哪 forget 的**:控制器里删存档只有四处:
+  - `:203` Discard
+  - `:427` `finish()`,字落地那一刻
+  - `:501` 3b,`history.flush()` 落定之后
+  - `:544` 恢复时判「已在笔记里」
+  - GEO-long-0 的空存档,只能是 `:427`(恢复回来的字落地)接 `:501`(3b 的 flush 落定),或 `:544`(恢复时按本地草稿判已在)。前者要求那次落地保存被确认,与库里没有那些字矛盾。后者在 SPA 路由回来、适配器草稿还在时可能发生:r2.1 的「已在」比的是子串式的前缀,r2.2 第 2 条已收紧到行界。
+  - 闸复现不出(两版皆绿),所以分不清实际走了哪一处。作 A-25 的起点。
+
+### 已知、未修
+
+- 文首 ⚠️ 那一项候裁。
+- 第 6 条只认本次挂载里结构自己做的搬动。页面在「搬单元」和「改写存档」之间消失时,存档仍指旧块,框按无锚处理(停靠,不压行)。
+- 409 后的失败保持没有常驻控件(见上),入 A-25。
+
+## 编辑器组 r2.2 回执收讫 + ⚠️ 裁定:准 r2.3 角色收窄(只动控制器);Tester 先在 r2.2 上跑 GEO,行为臂等 r2.3(Main_Designer 2026-11-07)
+
+**回执核对**(只读 m7):22 文件里改 4(控制器、框、两测试),18 同 r2.1;2667/2667、tsc 净、三检查 exit 0、r04@57 156/0、dist 不变;8 条阳性对照 r2.1 上红 r2.2 上绿(`red-controls-full.txt` A/C 段);闸 4 条路径臂两版绿;注入层逐臂写明;浏览器矩阵 ③ 0、K 四臂 ③ 0、`h_HL` ② 3;代码回答四处 forget 与状态位(`documentFailures` → `canApplyEdit` 假 / `isEditHeld` 真 / `replaying` 真)写清,409 后无常驻 Retry 控件 → A-25。**合格。**
+
+**⚠️ 第 5 条的面太宽——准 builder 提的收窄,进 r2.3**:
+- 事实:第 5 条把「空等于空」捷径对留住的字一刀关掉,建块失败 / 放位置失败 / 看门狗放手这三个**常见**失败恢复和 K「卡住 + 卸载」都从 ① 变 ②(矩阵 ①20→14、②6→12):字在框里、存档在,但**不再自己落回**,用户得从框里复制。这不是 Y1 的形状——这些单元是 `# ` 刚变出来的空标题单元,记录就该落回去。
+- 为什么能收窄:Y1 的真机理(原块里回车新建同号段落)第 6 条已挡住(记录跟着搬走的单元走,原块同号新单元认不上);第 5 条剩下的价值是兜第 6 条的缺口(页面在「搬单元」和「改写存档」之间消失,存档仍指旧块)。**角色一致**正好兜这个缺口:回车新建的是段落,记录锚的是标题。
+- **r2.3 要求**(只动控制器 + 测试;`structureTypingBuffer.ts` ⛔ 动):
+  1. 留住时记录写入单元当时的 `writing_role`;第 6 条改写记录 blockId 时角色不变。
+  2. 留住字的「空等于空」自动落只在三者同时成立时放行:记录的 (blockId, unitId) 当前确有其单元;单元文本为空;单元 `writing_role` 等于记录的角色。旧记录无角色字段 → 不放行(keep)。活窗口照旧。
+  3. 测试:(a)Y1 原测试仍 r2.1 红 / r2.3 绿;(b)Y1 变体——存档仍指旧块(模拟第 6 条缺口)+ 原块回车新建同号空段落 → keep,r2.2 之前的代码上红;(c)**回归守卫**——建块失败后的恢复(空标题单元、同角色)→ 自动落 ①:r2 上绿、r2.2 上红、r2.3 上绿——这条证明收窄把失去的恢复拿回来了。
+  4. 矩阵 r2.3:create / placement / hangWatchdog / K 卸载回到 ① 2;地址栏三臂仍 ②;③ 0。
+  5. 回执逐文件 sha256 标「同 r2.2 / r2.3 改」;框不变 → **Tester 在 r2.2 上跑的 GEO 沿用到 r2.3**(文件级同源,与 r2.1→r2.2 的规则对称)。
+- **残余风险写明**:同块内 id 复用 + 同角色 + 空——三重巧合才误落;记 A-25「单元 id 可复用」那条下。
+
+**Tester 现在**:r2.2 包的 **GEO 全套**(横幅 / Dismiss 改序 / 滚动 / 改尺寸 / 搬走单元形状 GEO-enter、GEO-long-1 / 无锚停靠 / TWO2)现在就跑——框是终版;行为臂(K、H-L、矩阵、地址栏、冒烟、acc12/13/14、Y1、EDGE)等 r2.3 包。单卡状态行改回「返修 · builder(r2.3)」,看板同。
+
+**给 Henry 的一句**:r2.3 是我这边要的——r2.2 为了堵一个巧合把三条常见恢复路都堵了,builder 自己看出来、给了收窄法。我准了,代价是 builder 一小时和 Tester 行为臂推后;不准的话你每次标题建块失败都会多出一个要手动处理的框。
