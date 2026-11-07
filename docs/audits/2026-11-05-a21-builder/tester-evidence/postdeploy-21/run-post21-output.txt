@@ -1,0 +1,21 @@
+island main: assets/index-BVrO4Ql1.js  css: assets/index-sq1LDYsi.css
+post21: 63 same, 0 different, 0 not served (of 63)
+step 1 post21-acc10 exit 0 21:39:50
+DONE post21-acc10: 6 rows, bad 0
+step 1 post21-y exit 0 21:41:00
+DONE post21-y: 9 rows, bad 0
+step 2 post21-two2 exit 0 21:43:58
+DONE post21-two2: 3 rows, bad 0
+step 2 post21-acc18 exit 0 21:45:16
+DONE post21-acc18: 6 rows, bad 0
+step 3 post21-acc13 exit 0 21:51:55
+DONE post21-acc13: 10 rows, bad 0
+step 3 post21-acc1 exit 0 21:53:08
+DONE post21-acc1: 16 rows, bad 0
+step 4 post21-J exit 0 21:54:36
+DONE post21-J: 4 rows, bad 0
+step 4 post21-retry exit 0 21:55:49
+DONE post21-retry: 1 rows, bad 0
+post-deploy check done 21:55:49
+
+[exited with code 0]

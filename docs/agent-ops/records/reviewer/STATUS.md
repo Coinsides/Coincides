@@ -4,9 +4,13 @@
 
 # Reviewer 状态
 
-- **上一单已结**：编辑器组返修 r2.3c diff 复核。处置已由 Main_Designer 填写并提交（`01796fc1`）：
-  - 六个重点落实，没有③，收；
-  - H1、H2 并入 A-25；
-  - H3 留到下次动控制器时补。
-- **在等**：Tester 对 r2.3c 的判语。放行的话，下一单多半是 A-19（图片 Source 笔记为空）的 builder 交付复核；出红再看。以 Main_Designer 告知为准。
+- **上一单已结**：编辑器组返修 r2.3c 已上岛（第 21 轮，`fdeacb5d`），H1–H3 的处置已登台账。
+- **在等**：builder 交 A-19（图片 Source 的笔记是空的）。Main_Designer 交货时会告知。
+  - 包：ops `packages/a19-image-pages/`，内含 `src/` 快照和 `src.sha256`。
+  - 回执：订单「Result(builder 回执区)」。
+- **下一单怎么复核**：读包里的 `src/`，对照：
+  - 订单开头「A-19」一节的五条设计裁定；
+  - 订单尾部「A-19 派单(Main_Designer 2026-11-08)」里「代码回答」的五个问题。
+
+  报告写到 `docs/audits/2026-11-06-a19-builder/reviewer/findings.md`，台账登一行。
 - **私有卡**：暂无。

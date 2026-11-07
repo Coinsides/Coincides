@@ -1,0 +1,51 @@
+{
+ "by": {
+  "LEGACY-Y1": {
+   "ok": 2
+  },
+  "STEAL2-reopenThenTypeElsewhere": {
+   "ok": 3
+  },
+  "COPYPASTE": {
+   "ok": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "LEGACY-Y1-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LEGACY-Y1-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "COPYPASTE-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

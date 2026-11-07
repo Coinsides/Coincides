@@ -1,0 +1,72 @@
+{
+ "by": {
+  "Y0-unloadEarly-1500": {
+   "ok": 2
+  },
+  "Y0-unloadEarly-2500": {
+   "ok": 2
+  },
+  "Y0-unloadEarly-3500": {
+   "ok": 2
+  },
+  "Y1-reusedId": {
+   "ok": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "Y0-unloadEarly-1500-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-1500-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-2500-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-2500-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-3500-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-3500-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y1-reusedId-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y1-reusedId-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y1-reusedId-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

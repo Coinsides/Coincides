@@ -1,0 +1,48 @@
+{
+ "by": {
+  "HL-saveNotSentThenClose": {
+   "3u": 3
+  },
+  "TWO-discardOne": {
+   "ok": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "HL-saveNotSentThenClose-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "HL-saveNotSentThenClose-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "HL-saveNotSentThenClose-2",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "TWO-discardOne-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "TWO-discardOne-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "TWO-discardOne-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

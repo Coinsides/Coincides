@@ -1,0 +1,107 @@
+{
+ "by": {
+  "A1-natural-300": {
+   "1": 1,
+   "3u": 3
+  },
+  "A1-natural-1000": {
+   "1": 4
+  },
+  "G-draftUndo": {
+   "ok": 2
+  },
+  "H-unloadU": {
+   "1": 3
+  },
+  "H-unloadW": {
+   "1": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "A1-natural-300-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A1-natural-300-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A1-natural-300-2",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A1-natural-300-3",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "A1-natural-1000-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "A1-natural-1000-1",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "A1-natural-1000-2",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "A1-natural-1000-3",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "G-draftUndo-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "G-draftUndo-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "H-unloadU-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadU-1",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadU-2",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadW-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadW-1",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadW-2",
+   "cls": "1",
+   "ok": true
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "by": {
+  "RETRY-schedule-70s": {
+   "ok": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "RETRY-schedule-70s-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}
