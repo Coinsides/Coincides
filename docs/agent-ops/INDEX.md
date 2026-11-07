@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 454 份文档。
+共 455 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -100,6 +100,7 @@
 | [analysis/2026-09-22-flip-day-briefing.md](analysis/2026-09-22-flip-day-briefing.md) | 翻牌日呈批案(九件) | `active` | — | — |
 | [analysis/2026-09-23-knowledge-architecture-target-design.md](analysis/2026-09-23-knowledge-architecture-target-design.md) | 知识架构目标态设计稿 v2(候拍) | `draft` | — | — |
 | [analysis/2026-11-02-knowledge-establishment-plan.md](analysis/2026-11-02-knowledge-establishment-plan.md) | 知识建制更新 —— 原子 / 透镜 / 事由 / 痕迹 | `**已翻牌(Henry 2026-11-02 亲拍)** —— 翻牌点①认(教义已铸宪章增补节)②认(分期顺序照表)③锁 UX=图标点选,机理从便(必要用布尔,施工单定)④普查暂落项目页;**附加令**:日历入口随本更新暴露(侧栏,外观候后期统一动刀,「现在重要的是能不能服务学习」)` | — | — |
+| [analysis/2026-11-07-role-records-design.md](analysis/2026-11-07-role-records-design.md) | 三个角色的常设记录体系（设计稿） | `draft` | 2026-11-07 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
