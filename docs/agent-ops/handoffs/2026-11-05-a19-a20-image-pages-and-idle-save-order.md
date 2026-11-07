@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.3 已交(builder 2026-11-08):控制器角色收窄 + 框第 7–9 条;包 = ops `packages/editor-rework-r2.3/`(主 JS `index-CUqxwHSs.js`);回执在尾部「编辑器组 r2.3 Result」;行为臂与 GEO 全在 r2.3 上复测 | 2026-11-08 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.3b 已交(builder 2026-11-08):角色定一次 / 后台落地只落字 / `transition: none` / 提示文案 + F3 回执更正;包 = ops `packages/editor-rework-r2.3b/`(主 JS `index-bobNSNGx.js`);回执在尾部「编辑器组 r2.3b Result」;Reviewer 复核 diff 与 Tester 全跑并行 | 2026-11-08 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -71,6 +71,7 @@
 - **r2.1**(留字框跟随版面):对 r2 只改 `structureTypingBuffer.ts` 和 `hooks/useHeadingStructureController.test.tsx`,其余 20 个逐字节同(控制器不变);sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/source-sha256-r21.txt`;包 ops `packages/editor-rework-r2.1/`(主 JS `index-Ck4z0VFS.js`)。
 - **r2.2**:对 r2.1 改控制器、框和两个测试文件,其余 18 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/source-sha256-r22.txt`;包 ops `packages/editor-rework-r2.2/`(主 JS `index-sNlfO3uB.js`)。
 - **r2.3**:对 r2.2 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/source-sha256-r23.txt`;包 ops `packages/editor-rework-r2.3/`(主 JS `index-CUqxwHSs.js`)。
+- **r2.3b**:对 r2.3 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/source-sha256-r23b.txt`;包 ops `packages/editor-rework-r2.3b/`(主 JS `index-bobNSNGx.js`)。
 
 ### 自报数字(builder)
 
@@ -93,10 +94,12 @@
 | r2.2 浏览器:注入矩阵 ①14 ②12 ③0;K ①2 / ②′2 / ②2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.2 包,延迟 57 | `matrix-7-r2.2/enter-r22.json`、`k-r22.json`、`hl-r22.json` |
 | r2.3:构建 exit 0;类型检查净;客户端全量 2673/2673;三个检查脚本 exit 0;r04@57 156 行坏 0;阳性对照见 red-controls A–D 段 | 同上 | r2.3 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/summary.txt`、`red-controls-r23.txt` |
 | r2.3 浏览器:注入矩阵 ①20 ②6 ③0;K ①2 / ②′2 / ①2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3 包,延迟 57 | `matrix-8-r2.3/enter-r23.json`、`k-r23.json`、`hl-r23.json` |
+| r2.3b:构建 exit 0;类型检查净;客户端全量 2677/2677;三个检查脚本 exit 0;r04@57 156 行坏 0;4 条阳性对照 r2.3 上红、r2.3b 上绿 | 同上 | r2.3b 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/summary.txt`、`red-controls-r23b.txt` |
+| r2.3b 浏览器:注入矩阵 ①21 ②5 ③0;K ①2 / ②′2 / ②′2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3b 包,延迟 57 | `matrix-9-r2.3b/enter-r23b.json`、`k-r23b.json`、`hl-r23b.json` |
 
 ### 待办(builder)
 
-- 已交 Tester(r2.3 包),等判语。拷回共享树候 Main_Designer 令。
+- 已交 Tester / Reviewer(r2.3b 包),等判语。拷回共享树候 Main_Designer 令;拷回清单用 r2.3b 包的 `src.sha256` 与 `files22.list`。
 - 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
@@ -1546,3 +1549,92 @@ Reviewer(复核审查)报告 `docs/audits/2026-11-05-a21-builder/reviewer/findin
 - **第 4 条(折叠条右上角叠放)2/2 过**:侧栏收起、1100×1000、40 行滚中段、两条无锚存档 → 两条折叠条竖向错开(776–794 / 800–818)不叠不压行;点 seed-a 的 Discard 删的是 seed-a。右上角兜底没走到。**附带观察**:编辑器栏 571–1015、左侧 571px 不该折却折了——与 F4 (i) 吻合(transition 让停靠检查读旧矩形误折),r2.3b 去 transition 后复看。
 - **第 2 条(单元号复用 + 旧记录)2/2 过**:注入 `{tu-3, heading_1, '', 'Old'}`,用户在 `second` 行尾回车新单元拿到 tu-3、打 `# New` 建块扣 12 秒放行 → `Old` 没落进新标题,仍在框与存档;`New` 留住(②)。
 - **裁定**:⑤⑥ **不进 r2.3b**;第 2 条机理记 A-25「单元 id 可复用」;第 4 条「误折」归 F4,r2.3b 复看。**r2.3b 以 ①–④ 封包**(角色定一次 / 后台落地只落字不起结构不碰焦点 / `transition:none` / 提示文案)+ F3 回执更正。
+
+## 编辑器组 r2.3b Result(builder 2026-11-08)
+
+答「Reviewer 首单发现的裁定」与「r2.3b 清单定稿」:补丁,不算新一圈。封进去的是 ①–④ 和 F3 回执更正。⑤⑥ Tester 在 r2.3 上已验绿,按裁定不进包。证据 `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/`(下称 m9)。
+
+### 包与同源
+
+- 源码 = `9bc45e69` + 22 个文件,副本−基线仍是这 22 个。逐文件 sha256 对 r2.3(`m9/source-sha256-r23b.txt`):
+  - `r2.3b改`:
+    - `hooks/useHeadingStructureController.ts`(`61dce9cccc43…`)
+    - `structureTypingBuffer.ts`(`69fd3957380f…`)
+    - `hooks/useHeadingStructureController.test.tsx`(`f424d2d60fbf…`)
+  - 其余 19 个与 r2.3 逐字节同。
+- 包:ops `packages/editor-rework-r2.3b/`。`dist/` 主 JS `index-bobNSNGx.js`,63 个文件;`src/` 22 个文件;两份哈希加 `files22.list`,与 m9 一致。r2.3 及更早的包都没动,`edfix` 没动。
+
+### 全量、检查、阳性对照
+
+| 数 | 证据 |
+|---|---|
+| 构建 exit 0;类型检查净;客户端全量 2677/2677;守恒闸 40 种子绿 | `m9/summary.txt`、`client-full.raw` |
+| 三个检查脚本 exit 0;r04@57 156 行坏 0;dist 跑前跑后一致 | `m9/check-*.txt`、`r04-r23b-57.log`、`summary.txt` |
+| 本轮 4 条阳性对照(F1、F2、②、③④)在 r2.3 的控制器 + 框上全红,在 r2.3b 上全绿;round 2 / r2.1 / r2.2 / r2.3 各条在 r2.3b 上 28/28 绿 | `m9/red-controls-r23b.txt` A、B 段 |
+
+### 修了什么
+
+1. **角色只定一次**(F1/F2):
+   - 留住那一刻从笔记里读一次;重开时只取记录里的,不读笔记。之后不再补,没读到也算定了,定成「无角色」→ keep。
+   - 开着的窗口还没留住,pagehide 存档时现读,不算定。
+   - 测试:F1(记录无角色、眼前有同号空单元)在 r2.3 上落进去了(红),r2.3b keep。F2(留住时单元不在,之后出现同号空段落,框里打字)在 r2.3 上落成 `kept!`(红),r2.3b keep,存档仍无角色。
+2. **后台落地只落字**:重试拍、重开恢复、3b 记录,这三种落地不再请求结构,也就不开窗口、不动焦点和光标、不进 busy。
+   - 标题和正文同块的补拆,留到用户下次编辑那一块时,由编辑器自己的标题识别去请求。活窗口随结构落地照旧。
+   - 测试:另一个输入框持焦点、选中 4–7 时,后台落进空标题。字落对(`Intro | kept(标题) | body`,同块),create 和 transfer 都没调,全程不 busy,没有框,焦点和选区不变。r2.3 上红:结构跑了,标题被搬走。
+3. **`transition: none`**:写在框的内联样式里,**活窗口和留住的框都加**。活窗口同样每拍跟随单元,过渡一样会让它落后、让自检读到半路位置。
+   - 测试:框的 `style.transition` 为 `none`,r2.3 上为空(红)。
+   - Tester 记的「左侧还剩 571px 却折了」,候它在 r2.3b 上复看。
+4. **提示文案**:不再叫人先复制。现在是「These words are not in the note yet. Left here, they go back on their own when they can. Discard deletes them.」(多条时同义)。可见标签「Not in the note yet」不变,title 和 aria 同步。
+   - 测试:title 不含 copy,含「go back on their own」「Discard deletes them」;r2.3 上红。
+
+### F3 回执更正(撤回)
+
+- r2.3 回执里「r2.2 的框是 content-box,padding 把它撑宽、伸进文本栏」**撤回**。`global.css` 对所有元素设了 `box-sizing: border-box`,框本来就是 border-box,r2.3 加的 border-box 在浏览器里没有效果。
+- (d) 在 r2.2 上红,是 jsdom 测试里版面模型按 content-box 自己算出来的,不是浏览器。测试注释已改。
+- 真因按裁定写:**待 F4 速验;修掉红 1 的是锚上框高上限**(r2.3 第 9 条)。F4(全局 textarea 过渡让自检读到半路位置)已由第 3 条处理。
+
+### 浏览器(r2.3b 包;注入层写明)
+
+| 臂 | 注入层 | r2.3b | r2.3 |
+|---|---|---|---|
+| 注入矩阵 26 行 | 代理层(浏览器已发出) | ①21 ②5 ③0 | ①20 ②6 ③0 |
+| 其中 create / placement / hangWatchdog | 同上 | ① 2 / ① 2 / ① 2 | 同 |
+| 其中地址栏三臂:改地址离开、慢回包改地址、慢回包卸载 | 同上 | ①1 ②1 / ② 2 / ② 2 | ② 2 / ② 2 / ② 2 |
+| K:卡 12 秒后成功 / 失败 / 卡住 + 卸载 / 卡 25 秒后成功 | 代理层扣改角色那次 text-save | ① 2 / ②′ 2 / **②′ 2** / ②′ 2 | ① 2 / ②′ 2 / ① 2 / ②′ 2 |
+| H-L(`h_HL`,不是 Tester 的 H-L 时序) | 浏览器请求阶段(CDP Fetch) | ② 3 | ② 3 |
+| r04@57(冒烟) | 无注入 | 156 行坏 0 | 同 |
+
+- K「卡住 + 卸载」由 ① 变 ②′:字在库里,标题与正文同块。这是第 2 条要的结果:重开后后台落地只落字,不起结构,补拆等用户下次编辑那一块。
+- 改地址离开 ①1 ②1 是自然时序下的落地波动(r2 起这一臂在 ① 2 和 ② 2 之间来回)。
+- 证据:`m9/enter-r23b.json`、`k-r23b.json`、`hl-r23b.json`。
+
+### 代码回答(行号对 ops `editor-rework-r2.3/src/` 快照)
+
+- **F1/F2 机理**:
+  - `useHeadingStructureController.ts:202` 用 `entry.role ??= …` 从眼前的单元现补角色。
+  - 它在 `:207`(`storedWords` 的 `writingRole: roleOf(entry)`)被调。`:218` 每次框里 input 存档都调它,`:250` pagehide 也调。
+  - 重开时 `:602` 把记录里的 `writingRole` 赋给 `entry.role`。记录没有这个字段时是 undefined,随后 `retainWords` → `:218` → `:202` 立刻从同号单元补上。
+  - `:509` 比的正是这个单元,必然相等,于是空对空放行(F1)。F2 同理:补角色发生在之后某次 input。
+  - r2.3b 拆成 `liveRole`(只读)和 `fixRole`(只定一次),`:509` 的条件加了「角色已定」。
+- **TWO2 抢焦点**:
+  - 后台落地在 `:566` 请求结构,`commitStructure` 在 `:288` 用 `openEntry` 开窗口。
+  - 窗口默认带焦点:`structureTypingBuffer.ts:326` `input.focus !== false` 时 focus,`:331` 起 `held` 抢回焦点。
+  - 所以重开恢复或重试落地会把焦点从用户正在写的地方拿走。r2.3b 第 2 条在 `:566` 加了 `live` 条件。
+- **F4**:`global.css` 对 textarea 设了 `transition: all var(--transition-fast)`(150ms)。框是 textarea,`:131` 的内联样式没覆盖它。自检在同一任务里读 `getBoundingClientRect`,读到的是过渡中的位置。
+
+### 已知、未修
+
+- 后台落地后,标题与正文可能同块,直到用户编辑那一块(K 卸载臂即此)。按裁定是预期行为。
+- F5(锚上放不下时每拍回单元再停靠)、F6(每拍 1–3 次全扫)入边栏单;重开时旧框没调 `close()` 的泄漏入 A-25。都没动。
+- r2.3 回执的残余风险照旧:id 复用 + 同角色 + 空;极窄窗口右上角;折叠路径浏览器臂没触达。
+
+### 待 Tester / Reviewer
+
+- 包:ops `packages/editor-rework-r2.3b/`。Reviewer 复核 diff,Tester 并行全跑,含「左侧 571px 却折了」复看。拷回清单换成 r2.3b 的 `src.sha256` 与 `files22.list`(同目录)。
+- 拷回共享树候 Main_Designer 令。
+
+## r2.3b 回执收讫:四条阳性对照 r2.3 红 r2.3b 绿;K 卸载臂 ①→②′ 为裁定预期;转 Tester 复测 + Reviewer 复核并行(Main_Designer 2026-11-08)
+
+- **核**(只读 m9):改 3 文件(控制器、框、控制器测试),19 同 r2.3;2677/2677、tsc 净、三检查、r04@57 156/0、dist 不变;4 条阳性对照(F1、F2、后台落地不扰人、transition)在 r2.3 上红、r2.3b 绿;历次 28 条在 r2.3b 全绿。矩阵 ①21 ②5 ③0(create / placement / hangWatchdog 仍 ①);**K「卡住 + 卸载」① → ②′**——重开后后台落地只落字不起结构,字在库里同块未拆,等用户下次编辑那块补拆,**是第 2 条裁定要的结果**,照记。`transition: none` 活窗口与留住框都加(活窗口也每拍跟随,过渡同样让它落后),理由成立。F3 撤回已写。代码回答三处带行号。拷回计划更新为 r2.3b 的三份新哈希,未执行。**合格。**
+- **转 Tester**(包 `editor-rework-r2.3b/`,主 JS `index-bobNSNGx.js`):行为臂全跑 + acc18 两条阳性对照形状在 r2.3b 上须绿 + Y1 变体 + TWO2 时序 + acc14 加 boundary 臂 + 第 3 条自然一次 + GEO 复看(noEnter、误折)。判语按 Henry 11-08 尺。
+- **转 Reviewer**(并行):r2.3b diff 对 r2.3 快照——F1/F2 两测试是否真盖到(尤其 `C:221` input 监听那条路不再补角色);后台落地三个入口是否都不再走 `:566` 后续结构、焦点与 busy 有无别路被碰;`transition:none` 加在活窗口是否带来跟随抖动以外的副作用。发现发我。
