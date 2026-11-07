@@ -35,15 +35,26 @@ Tester 部署后核对: 已核（F3b 见 docs/audits/2026-11-05-toggle-formula-b
 
 阶段只用：`排队 | 施工 | 待验 | 返修 | 待裁 | 待收割 | 待部署 | 已上岛 | 已核 | 关闭`。持有者只用：`Main_Designer | Tester | builder | Henry`。
 
+<!-- board:items:start -->
 | 单号 | 项 | 阶段 | 持有者 | 下一步 | 现行正本 | 更新 |
 |---|---|---|---|---|---|---|
-| a19-a20-image-pages-and-idle-save | 编辑器组返修（A-18 残留、A-21、A-24） | 返修 | builder | 矩阵跑完，出修后包交 Tester | 订单尾部「编辑器组返修裁定:「改地址离开」一臂定性为退步;做法 2 否,给做法 4(Main_Designer 2026-11-07)」 | 2026-11-07 |
+| a19-a20-image-pages-and-idle-save | 编辑器组返修（A-18 残留、A-21、A-24） | 返修 | builder | 做法 4 已撤;最终包上重跑注入矩阵与 r04@57 后出回执、交 Tester | 订单尾部「编辑器组返修收尾裁定:做法 4 撤回成立,按做法 3 收;出包前先证同源(Main_Designer 2026-11-07)」 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-25（新笔记第一行用输入法打字，拼音写进笔记） | 排队 | Main_Designer | 排期派单 | 订单「## A-25 · 新笔记第一行用输入法打字,拼音被写进笔记(🅰,既有,2026-11-06 Tester 编辑器组核验中发现)」 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-19（图片页面） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-19 规格 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-20（闲置保存） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-20 规格 | 2026-11-07 |
-| （待开单） | 编辑器旧债单（leads-0/4/6/8、leads-5/7、handoff-2、「/」转文本把多行并成一单元） | 排队 | Main_Designer | 编辑器组收割后开单 | 订单尾部「编辑器组判语与返修裁定」的处置表 | 2026-11-07 |
-| （触发时开单） | TD-53 Group Gallery 按笔记逐篇发请求 | 排队 | Main_Designer | 触发条件到了再开单 | `current-state/tech-debt.md` 的 TD-53 行 | 2026-11-07 |
-| view-toggle-and-docx-text-formula | F3b（Word 公式导入） | 关闭 | Main_Designer | — | `docs/audits/2026-11-05-toggle-formula-builder/review-tester.md` 第十二、十三节 | 2026-11-07 |
-| a19-a20-image-pages-and-idle-save | V2（B-78、B-79、A-22） | 关闭 | Main_Designer | — | 订单尾部「V2 判语:放行(Main_Designer 2026-11-07,依 Tester `docs/audits/2026-11-06-v2-builder/review-tester.md`)」 | 2026-11-07 |
+| role-records-gates | 门禁脚本 check-role-records（R1–R9）与重活锁脚本 | 排队 | Main_Designer | 编辑器组之后派 builder | 订单「2026-11-07-role-records-gates-order.md」规格 A/B | 2026-11-07 |
+<!-- board:items:end -->
+
+### 未建卡的事项（手写）
+
+| 项 | 阶段 | 持有者 | 下一步 | 正本 | 更新 |
+|---|---|---|---|---|---|
+| 编辑器旧债单（leads-0/4/6/8、leads-5/7、handoff-2、「/」转文本把多行并成一单元） | 待开单 | Main_Designer | 编辑器组收割后开单 | 订单尾部「编辑器组判语与返修裁定」的处置表 | 2026-11-07 |
+| TD-53 Group Gallery 按笔记逐篇发请求 | 触发时开单 | Main_Designer | 触发条件到了再开单 | `current-state/tech-debt.md` 的 TD-53 行 | 2026-11-07 |
+
+### 本周关闭
+
+- F3b（Word 公式导入）· 2026-11-07 岛上复走全过 → `docs/audits/2026-11-05-toggle-formula-builder/review-tester.md` 第十三节
+- V2（B-78、B-79、A-22）· 2026-11-07 岛上复走全过 → `docs/audits/2026-11-06-v2-builder/review-tester.md`「部署后岛上复走」
 
 > 单号 = 订单文件名去掉日期和 `-order.md`。一个订单文件里有几项的，按项分行。

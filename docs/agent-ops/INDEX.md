@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 466 份文档。
+共 468 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -445,8 +445,10 @@
 | [handoffs/2026-11-03-stopbleed-four-order.md](handoffs/2026-11-03-stopbleed-four-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-04-fidelity-1a2-docx-pages-snapshot-order.md](handoffs/2026-11-04-fidelity-1a2-docx-pages-snapshot-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-05-a18-first-block-text-loss-order.md](handoffs/2026-11-05-a18-first-block-text-loss-order.md) | (无标题) | `(缺状态头)` | — | — |
-| [handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md](handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md) | (无标题) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md](handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md) | (无标题) | `active` | 2026-11-07 | — |
 | [handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md](handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md) | (无标题) | `(缺状态头)` | — | — |
+| [handoffs/2026-11-07-role-records-gates-order.md](handoffs/2026-11-07-role-records-gates-order.md) | (无标题) | `active` | 2026-11-07 | — |
+| [handoffs/ORDER-TEMPLATE.md](handoffs/ORDER-TEMPLATE.md) | 订单模板（复制下面整段，另存为 `YYYY-MM-DD-<单号>-order.md`；本模板文件名故意不以 -orde… | `active` | 2026-11-07 | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— 订单区(Main_Designer × Tester × builder) | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
