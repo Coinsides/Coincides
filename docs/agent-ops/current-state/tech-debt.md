@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56 至 TD-59)
+> **日期 (Updated)**: 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -70,3 +70,4 @@
 | TD-57 | **服务端监听地址写死 `0.0.0.0`**(`server/src/index.ts:206`),无环境变量可改。本地起的临时后端(验收、草稿、代理)因此默认对所在网络可达,只能靠启动预加载或系统防火墙兜底。修法:`HOST` 环境变量,缺省保持现值不改线上行为;岛上 env 显式写明 | 2026-11-08 Tester(1) A-19 准备中发现,只报不动(系统防火墙设置归 Henry) | 按使用摩擦触发;可随下一次 server 小单顺带 | 未清 |
 | TD-58 | **留字框跟随定时器在测试环境拆掉后仍跑**:`structureTypingBuffer.ts:292` 每 50ms 读 `document.hidden`,`useHeadingStructureController.test.tsx` 拆环境后 jsdom 无 `document`,client 全量偶发 2 个 unhandled error、exit 1(2686/2686 全过)。基线 `fdeacb5d` 与 A-19 包上都间歇出现。浏览器里 `document` 一直在,不丢字、不影响线上;但「卸载后定时器仍跑」与 Reviewer F5/F6 的泄漏同根 | 2026-11-08 builder A-19 第一、二趟全量;Main_Designer 裁 A-19 不修 | A-25(卸载时清跟随定时器 + `document` 守卫,与 H3 同批) | 未清 |
 | TD-59 | **图片 Source 存三份字节,物化器 canvas image 对象画面上已死**:原件 blob(`source_files.storage_key`)、物化器投影副本(`source-materialization-asset:<mid>`,无任何层画它,只有 AI 树 `canvasAiTreeService.ts:170` 与空笔记判断 `writingEntryVisibility.ts:28` 读)、A-19 原页图(`source-page-image:<mid>:1`,原页层画)。合并为引用要改 `source_pages.image_asset_id` 约定、`adoptSourcePageImages` 迁移规则与 `sourcePageImageAssetIds` 释放顺序(1a 契约)。另:尺寸读取器两缺口——jpeg SOF 高度 0 靠 DNL 段者读 null 该页失败;webp 内 EXIF 方向不读;PNG eXIf 方向同样不读(Reviewer J3) | 2026-11-08 builder A-19 回执「物化器 canvas image 对象:申报」与「代码回答①」 | 1a 契约下一次打开时合并;物化器副本是否退役随 AI 树去向定 | 未清 |
+| TD-60 | **图片尺寸读取器四分支无测试**(`sourceImageSize.ts`:SOF2 渐进式 JPEG、webp VP8L、webp VP8 有损、小端 EXIF;读码皆对,测试只造 SOF0 / VP8X / 大端)。builder 若已写好四条,存 ops `packages/a19-image-pages/extras/j2-reader-tests.patch` | 2026-11-08 Reviewer A-19 J2;A-19b 撤销后未入包 | 下次动 server 的单随手入 | 未清 |
