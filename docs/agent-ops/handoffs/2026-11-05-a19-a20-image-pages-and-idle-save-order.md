@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.3b 已交(builder 2026-11-08):角色定一次 / 后台落地只落字 / `transition: none` / 提示文案 + F3 回执更正;包 = ops `packages/editor-rework-r2.3b/`(主 JS `index-bobNSNGx.js`);回执在尾部「编辑器组 r2.3b Result」;Reviewer 复核 diff 与 Tester 全跑并行 | 2026-11-08 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.3c 已交(builder 2026-11-08):后台落地按笔记串行(TWO2 丢失更新)/ G1 框内有焦点不落 / G2 守卫 / G4 文案(框文件只差两个字符串);包 = ops `packages/editor-rework-r2.3c/`(主 JS `index-BVrO4Ql1.js`);回执在尾部「编辑器组 r2.3c Result」 | 2026-11-08 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -72,6 +72,7 @@
 - **r2.2**:对 r2.1 改控制器、框和两个测试文件,其余 18 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/source-sha256-r22.txt`;包 ops `packages/editor-rework-r2.2/`(主 JS `index-sNlfO3uB.js`)。
 - **r2.3**:对 r2.2 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/source-sha256-r23.txt`;包 ops `packages/editor-rework-r2.3/`(主 JS `index-CUqxwHSs.js`)。
 - **r2.3b**:对 r2.3 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/source-sha256-r23b.txt`;包 ops `packages/editor-rework-r2.3b/`(主 JS `index-bobNSNGx.js`)。
+- **r2.3c**:对 r2.3b 改控制器和控制器测试,框文件只改两个提示字符串,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-10-r2.3c/source-sha256-r23c.txt`;包 ops `packages/editor-rework-r2.3c/`(主 JS `index-BVrO4Ql1.js`)。
 
 ### 自报数字(builder)
 
@@ -96,10 +97,12 @@
 | r2.3 浏览器:注入矩阵 ①20 ②6 ③0;K ①2 / ②′2 / ①2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3 包,延迟 57 | `matrix-8-r2.3/enter-r23.json`、`k-r23.json`、`hl-r23.json` |
 | r2.3b:构建 exit 0;类型检查净;客户端全量 2677/2677;三个检查脚本 exit 0;r04@57 156 行坏 0;4 条阳性对照 r2.3 上红、r2.3b 上绿 | 同上 | r2.3b 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/summary.txt`、`red-controls-r23b.txt` |
 | r2.3b 浏览器:注入矩阵 ①21 ②5 ③0;K ①2 / ②′2 / ②′2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3b 包,延迟 57 | `matrix-9-r2.3b/enter-r23b.json`、`k-r23b.json`、`hl-r23b.json` |
+| r2.3c:构建 exit 0;类型检查净;客户端全量 2680/2680;三个检查脚本 exit 0;r04@57 156 行坏 0;TWO2 在 r2.3b 上 3/3 红、r2.3c 上 3/3 绿 | 同上 | r2.3c 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-10-r2.3c/summary.txt`、`red-controls-r23c.txt` |
+| r2.3c 浏览器:注入矩阵 ①22 ②4 ③0;K ①2 / ②′2 / ②′2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3c 包,延迟 57 | `matrix-10-r2.3c/enter-r23c.json`、`k-r23c.json`、`hl-r23c.json` |
 
 ### 待办(builder)
 
-- 已交 Tester / Reviewer(r2.3b 包),等判语。拷回共享树候 Main_Designer 令;拷回清单用 r2.3b 包的 `src.sha256` 与 `files22.list`。
+- 已交 Tester / Reviewer(r2.3c 包),等判语。拷回共享树候 Main_Designer 令;拷回清单用 r2.3c 包的 `COPY-BACK.md`。
 - 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
@@ -1682,3 +1685,100 @@ Tester 推断:第二次落地拿第一次落地**之前**的文本流算合并�
 **Tester 调度**:行为臂在步骤边界停;BOXTYPE 阳性对照照出数(定 G1 的红度);GEO / acc14 / BAN 已成,沿用。
 
 **给 Henry 的一句**:我上一条说「r2.3b 后再出控制器红就先报再动」——这就是那条。它是我自己上一个裁定的副作用,修法清楚(落地排队),半天。顺延半天的账算在我头上。
+
+## 编辑器组 r2.3c Result(builder 2026-11-08)
+
+答「同块两条留字…丢失更新」裁定。证据 `docs/audits/2026-11-05-a21-builder/builder/matrix-10-r2.3c/`(下称 m10)。
+
+### 包与同源
+
+- 源码 = `9bc45e69` + 22 个文件,副本−基线仍是这 22 个。逐文件 sha256 对 r2.3b(`m10/source-sha256-r23c.txt`):
+  - `r2.3c改`:
+    - `hooks/useHeadingStructureController.ts`(`2ffc1eea79c7…`)
+    - `hooks/useHeadingStructureController.test.tsx`(`b2c33f82a248…`)
+    - `structureTypingBuffer.ts`(`a8551d597481…`,只改两个字符串,见下)
+  - 其余 19 个与 r2.3b 逐字节同。
+- **`structureTypingBuffer.ts` r2.3b → r2.3c 的 diff 原文**(`m10/structureTypingBuffer.r23b-to-r23c.diff`):
+
+```diff
+--- r2.3b/client/src/pages/Notes/canvasEngine/structureTypingBuffer.ts
++++ r2.3c/client/src/pages/Notes/canvasEngine/structureTypingBuffer.ts
+@@ -14,8 +14,8 @@
+ const NOT_YET_IN_NOTE = 'Not in the note yet';
+ const TOO_MANY_KEPT = 'Many kept words waiting, not in the note';
+ // They go back by themselves when they can: copying them in meanwhile would put them in the note twice.
+-const NOT_YET_IN_NOTE_FULL = 'These words are not in the note yet. Left here, they go back on their own when they can. Discard deletes them.';
+-const TOO_MANY_KEPT_FULL = 'Many kept words are waiting for this note. They are not in it yet; left here, they go back on their own when they can. Discard deletes them.';
++const NOT_YET_IN_NOTE_FULL = 'These words are not in the note yet. They may go back on their own; if they do not, copy them or discard them. Discard deletes them.';
++const TOO_MANY_KEPT_FULL = 'Many kept words are waiting for this note. They are not in it yet and may go back on their own; if they do not, copy them or discard them. Discard deletes them.';
+ /** Kept entries per note before the notice asks for attention. Nothing is dropped past it. */
+ export const UNPLACED_WORDS_LIMIT = 20;
+ // Room the box keeps at its right end for its notice, when the notice cannot be measured.
+```
+
+  - **除这两处字符串常量(第 17、18 行)外,字节无差。** 两个字符串变长,后面的字节整体后移,所以要按行比:这份 diff 就是全部差异。
+  - 这两个常量只用作提示条的 `title` 和 `aria-label`(第 395–396 行)。可见标签来自 `NOT_YET_IN_NOTE` / `TOO_MANY_KEPT`(第 394 行),没变,所以提示条的可见文字和宽度与 r2.3b 相同。
+  - 第 16 行的注释没改(它说的是「放着会自己回去,其间复制会写两份」,仍成立)。
+- 包:ops `packages/editor-rework-r2.3c/`。`dist/` 主 JS `index-BVrO4Ql1.js`,63 个文件;`src/`;两份哈希加 `files22.list`。拷回计划 `COPY-BACK.md` 已更新,取代 r2.3 和 r2.3b 那两份,未执行。r2.3b 及更早的包都没动,`edfix` 没动。
+
+### 全量、检查、阳性对照
+
+| 数 | 证据 |
+|---|---|
+| 构建 exit 0;类型检查净;客户端全量 2680/2680;守恒闸 40 种子绿 | `m10/summary.txt`、`client-full.raw` |
+| 三个检查脚本 exit 0;r04@57 156 行坏 0;dist 跑前跑后一致 | `m10/check-*.txt`、`r04-r23c-57.log`、`summary.txt` |
+| 阳性对照在 r2.3b 的控制器 + 框上:TWO2 **3/3 红**(终态 `warmup\|two\|bbb\|`),G1 红,文案红;G2 是守卫,两版都绿 | `m10/red-controls-r23c.txt` A、C 段 |
+| 在 r2.3c 上:TWO2 3/3 绿;round 2 至 r2.3c 各条 31/31 绿 | 同上 B、D 段 |
+
+### 机理(按代码确认;行号对 ops `editor-rework-r2.3b/src/` 快照)
+
+- 重开时,恢复 effect(`useHeadingStructureController.ts` 恢复循环,`:615-617` 一带)对每条存档同步依次做 `openEntry` → `retainWords` → `placeTypedRef.current(entry)`,全在同一个 React effect 的同一次循环里。
+- `placeTyped` 从读到写没有 await:`history.readLiveFlow(blockId)` → `mergeTypedText` → `flushSync(applyEdit + setBlockTextDrafts)`。
+- 问题在于 effect 里调 `flushSync` 提交不了(React 警告「flushSync was called from inside a lifecycle method」)。history 的 `latest.current`(`readLiveFlow` 读的就是它)要等这个 effect 返回、下一次渲染才更新。
+- 所以同一循环里的第二条读到的仍是第一条落地之前的流,在它上面合并,`applyEdit` 的 `previousTextFlow` 也是这份旧流。块按整块保存,第一条落下的单元(`one`、它拆出来的 `aaa`)被写没了。
+- r2.3 时第一条落地会起结构,`busyRef` 为真,第二条在 `if (busyRef.current) … setTimeout` 处轮询,到下一轮才读到新流,所以没撞上。r2.3b 后台落地不再起结构,竞态才露出来。
+
+### 修了什么
+
+1. **后台落地按笔记串行**:留住的字(重开恢复、重试拍)都经同一个队列(`landKept`)落地,一条一个任务,都在 effect 之外,上一条的 `flushSync` 提交了,下一条才开始。读流 → 合并 → `applyEdit` 仍在 `placeTyped` 一个同步步骤里,中间没有 await。
+   - 测试 TWO2:同块两条可落的存档一起重开,两条都在,各在各位,存的和显示的一致;`one` 仍是标题。
+2. **G1**:`placeTyped` 对留住的字,在 `document.activeElement` 是框时本拍不落,按原间隔再问,不翻倍。判断写在 `placeTyped` 里,输入法组字结束的回调也走这里,一并盖住。不搬焦点。焦点一直在框里就一直不落,是裁定接受的 ②。
+   - 测试:框持焦点时多个重试拍,不落,框和字都在;焦点离开后下一拍落地。
+   - 原有两条测试(「失败保存放行后字落进笔记」「被拒后继续重试、放行后落地」)人一直在框里,改为放行后先让框失焦,这是 G1 的预期行为。
+3. **G2**:新测试守留住那一刻定角色。建块失败留住时记录角色为 `heading_1`;撤销把单元变回段落之后,框里再打字、重写存档,角色仍是 `heading_1`。
+4. **G4 文案**:提示的完整说法改为「可能会自己回去;没回去就复制或丢弃;Discard 删除它们」(原文见上面 diff)。测试改为断言含「may go back on their own」和「copy them or discard them」,不再以复制开头。
+
+### 浏览器(r2.3c 包;注入层写明)
+
+| 臂 | 注入层 | r2.3c | r2.3b |
+|---|---|---|---|
+| 注入矩阵 26 行 | 代理层(浏览器已发出) | ①22 ②4 ③0 | ①21 ②5 ③0 |
+| 其中 create / placement / hangWatchdog | 同上 | ① 2 / ① 2 / ① 2 | 同 |
+| 其中地址栏三臂:改地址离开、慢回包改地址、慢回包卸载 | 同上 | ① 2 / ② 2 / ② 2 | ①1 ②1 / ② 2 / ② 2 |
+| K:卡 12 秒后成功 / 失败 / 卡住 + 卸载 / 卡 25 秒后成功 | 代理层扣改角色那次 text-save | ① 2 / ②′ 2 / ②′ 2 / ②′ 2 | 同 |
+| H-L(`h_HL`,不是 Tester 的 H-L 时序) | 浏览器请求阶段(CDP Fetch) | ② 3 | ② 3 |
+| r04@57(冒烟) | 无注入 | 156 行坏 0 | 同 |
+
+- 改地址离开这一臂在 ①/② 之间的来回是自然时序波动(见前几版)。
+
+### 代码回答
+
+- TWO2 机理见上节(行号对 r2.3b 快照)。
+- 其余无待答。
+
+### 已知、未修
+
+- G1:焦点一直留在框里,字就一直不落(②,按裁定)。
+- r2.3b 回执的已知项照旧(后台落地后标题与正文同块,等用户编辑那一块;F5、F6、重开旧框泄漏;r2.3 残余风险)。F3 撤回保留。
+
+### 待 Tester / Reviewer
+
+- 包:ops `packages/editor-rework-r2.3c/`。框文件只差上面两个字符串,Tester 自己 diff 核过再沿用 GEO,核不过就重跑。
+- 拷回共享树候 Main_Designer 令,清单用 r2.3c 包的 `COPY-BACK.md`。
+
+## r2.3c 回执收讫:TWO2 机理坐实(effect 内 flushSync 不提交)、串行队列修;阳性对照 r2.3b 红 r2.3c 绿;框只差两字符串;转 Tester + Reviewer(Main_Designer 2026-11-08)
+
+- **核**(只读 m10):控制器 + 控制器测试改;`structureTypingBuffer.ts` 的 diff 原文贴在回执且存为 `m10/structureTypingBuffer.r23b-to-r23c.diff`——**只第 17、18 行两个 title/aria 字符串常量**,可见标签与宽度不变;其余 19 文件同 r2.3b。2680/2680、tsc 净、三检查、r04@57 156/0、dist 不变。阳性对照在 r2.3b 上:TWO2 **3/3 红**(`warmup|two|bbb|`)、G1 红、文案红;r2.3c 上 TWO2 3/3 绿、相关 31/31 绿。矩阵 ①22 ②4 ③0;K、H-L 同 r2.3b。
+- **机理**(builder 按代码坐实,与 Tester 推断一致):重开恢复循环在一个 effect 里对每条记录同步 `openEntry → retainWords → placeTyped`;`placeTyped` 读→合→`flushSync(applyEdit)` 之间无 await,**但 effect 内 `flushSync` 不提交**,history `latest.current` 仍是落地前的流,下一条读到旧流、以旧 `previousTextFlow` 整块写回。r2.3 时第一条起结构置 busy,第二条轮询等到新流,所以没撞。修:`landKept` 每笔记一条队列,一条一个任务、在 effect 之外,上一条 flushSync 提交后下一条才读。G1:`placeTyped` 对留住字在 `activeElement` 为框时本拍不落、不翻倍,盖住组字回调。G2 守卫测试。G4 文案。F3 撤回保留。拷回计划更新为 r2.3c。**合格。**
+- **转 Tester**(包 `editor-rework-r2.3c/`,主 JS `index-BVrO4Ql1.js`):控制器臂全跑(矩阵、K、H-L 0/N、Y1 ×6、acc13、acc18 两形状、TWO2 ×6 撞覆盖写、BOXTYPE 三形状丢 0、LANDFAIL2、EDGE、NA);GEO / acc14 / BAN / 先 Dismiss **自己 diff 核过框文件只差两字符串后沿用**,否则重跑。判语按 Henry 11-08 尺。
+- **转 Reviewer**(并行):落地三入口是否都进 `landKept` 队列;读流与 apply 之间无残留 await;队列中一条 keep 不卡后面;G1 盖住 `C:456` 组字路;队列任务在 effect 之外是否有卸载 / 换笔记时的清理。
