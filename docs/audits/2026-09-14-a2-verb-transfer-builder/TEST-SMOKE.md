@@ -16,7 +16,7 @@ node node_modules/typescript/bin/tsc --noEmit
 exit 0
 ```
 
-原始运行输出留在 OS 临时目录 `C:\Users\70208\AppData\Local\Temp\coincides-a2-targeted.log`；本目录不收构建产物或原始日志。全库、静态门与构建结果由主 builder 另行汇总。
+原始运行输出留在 OS 临时目录 `<tmp>\coincides-a2-targeted.log`；本目录不收构建产物或原始日志。全库、静态门与构建结果由主 builder 另行汇总。
 
 | 功能断言组 | 测试数 | 结果 |
 |---|---:|---|

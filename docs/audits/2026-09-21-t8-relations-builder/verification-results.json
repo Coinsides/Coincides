@@ -790,7 +790,7 @@
     "pythonProbe": {
       "status": null,
       "error": "EPERM",
-      "message": "spawnSync C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe EPERM",
+      "message": "spawnSync <home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe EPERM",
       "log": ".codex-tmp/t8-relations/python-probe.json"
     },
     "finalPresetDependencyRecheck": {

@@ -38,7 +38,7 @@ Run timestamps: **2026-09-21 21:14:57.497 UTC → 21:16:38.952 UTC**. Node: **v2
 The Python launch error named:
 
 ```text
-C:\Users\70208\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\python.exe
+<home>\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\python.exe
 ```
 
 Read-only follow-up at **21:17:21–21:17:22 UTC** established the stop-line condition:

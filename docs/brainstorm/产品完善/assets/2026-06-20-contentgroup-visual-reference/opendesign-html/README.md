@@ -5,7 +5,7 @@
 原始来源：
 
 ```text
-C:\Users\70208\OneDrive\Desktop\Working\Open design\Coincides_Content_group_design
+<home>\OneDrive\Desktop\Working\Open design\Coincides_Content_group_design
 ```
 
 归档文件：

@@ -9,8 +9,8 @@ const require = createRequire(`${SERVER}/package.json`);
 const JSZip = require('jszip');
 const mammoth = require('mammoth');
 const { parseSourceArtifact } = await import(pathToFileURL(`${SERVER}/src/services/sourceArtifact.ts`).href);
-const HERE = 'C:/Users/henry/AppData/Local/Temp/claude/363545182cb476c7/5f423a4a-8153-4287-865a-65e4015ae36d/scratchpad/verify-island';
-const SEED = 'C:/Users/henry/AppData/Local/Temp/claude/363545182cb476c7/5f423a4a-8153-4287-865a-65e4015ae36d/scratchpad/verify-v1f1/docs/F2-纯公式.docx';
+const HERE = '<session-tmp>/scratchpad/verify-island';
+const SEED = '<session-tmp>/scratchpad/verify-v1f1/docs/F2-纯公式.docx';
 
 const WR = '<w:rPr><w:rFonts w:ascii="Cambria Math" w:hAnsi="Cambria Math"/><w:i/></w:rPr>';
 const CT = `<m:ctrlPr>${WR}</m:ctrlPr>`;

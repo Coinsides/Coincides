@@ -63,7 +63,7 @@
 
 1. **编码**：PowerShell 5.1 默认读取使中文显示乱码；显式 `-Encoding UTF8` 重读正常。回执/证据以 UTF-8 写入，未修改系统编码。
 2. **检索**：`rg` 不在 PATH，报 `CommandNotFoundException`；改用 PowerShell 文件/文本检索。无 `.codegraph/`，未建索引。
-3. **运行时定位**：`node`、`npm` 均报找不到命令。PATH 中 `C:\nvm4w\nodejs` 是指向 `C:\Users\henry\AppData\Local\nvm\v22.22.1` 的符号链接，node.exe 元信息可读；未声称已确认运行版本。
+3. **运行时定位**：`node`、`npm` 均报找不到命令。PATH 中 `C:\nvm4w\nodejs` 是指向 `<home>\AppData\Local\nvm\v22.22.1` 的符号链接，node.exe 元信息可读；未声称已确认运行版本。
 4. **执行阻塞**：枚举 nvm 父目录被拒；直接执行 node.exe 的 `--version` 与只读时区探针均报 `Access is denied` / `NativeCommandFailed`。沙箱/宿主 ACL 的具体根因未判定；本会话不允许提权，未通过替代启动通道、复制运行时或修改权限绕过。此项阻塞所有定向实跑。
 5. **时区**：系统实测 `China Standard Time`、UTC+08:00、无 DST；进程 TZ 未设置，系统时区保持原状。Node 时区探针未执行，不冒充已验证 Node 内部时区。
 6. **目录差异**：`.codex-tmp/a3-cover` 含 18 个 `fixture-*` 子目录，各有 1 个条目，并非手建空目录。只枚举元信息，未读数据库内容；在不能运行对照的情况下保留原状。待恢复执行环境后先保留这些内容，再验证父目录不存在时的目标测试。

@@ -23,7 +23,7 @@
 ### K-1 数据只能来自 canonical JSON
 
 - 两表内容**必须从 canonical JSON 重新生成**。取数二选一,**在回执里写明用了哪个**:
-  - (a) 仓外 `C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v3-20260831/divergence-census-v3.json`(SHA-256 `2bfc5b892a107cd5fb79e7cbf1cf8f005d3b769b621eaceb3b395dd54f1e0dab`);
+  - (a) 仓外 `<tmp>/codex-c2-divergence-census-v3-20260831/divergence-census-v3.json`(SHA-256 `2bfc5b892a107cd5fb79e7cbf1cf8f005d3b769b621eaceb3b395dd54f1e0dab`);
   - (b) 从 §6 的 `CANONICAL_JSON_GZIP_BASE64_V3_START/END` 块解出(Base64 decode → gzip decompress,须得同一 SHA)。
 - ⛔ **不许手改现有表格的字符**;⛔ **不许从 §3 叙述或 §4 现有破损文本反推**。
 
@@ -74,7 +74,7 @@
 
 ### 取数来源与写入方式
 
-- 采用来源 **(a)**：`C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v3-20260831/divergence-census-v3.json`。
+- 采用来源 **(a)**：`<tmp>/codex-c2-divergence-census-v3-20260831/divergence-census-v3.json`。
 - 原始字节 SHA-256 实测：`2bfc5b892a107cd5fb79e7cbf1cf8f005d3b769b621eaceb3b395dd54f1e0dab`（与工单目标逐位相同）。
 - 未从 §3 叙述或旧 §4 破损文本反推数据；按 `$.gate_pass.existence_differences` 与 `$.gate_pass.taxonomy_differences` 原序生成全部数据行。
 - 目标档案使用 Node `fs.writeFileSync(target, output, 'utf8')` 显式写 UTF-8；回读为无 BOM、UTF-8 encode/decode 字节 round-trip 相等，原 LF 行尾保持不变。

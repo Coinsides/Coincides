@@ -70,7 +70,7 @@
 
 **实跑时间**：`2026-08-29T04:47:00.419565-04:00` 至 `04:47:01.110922-04:00`。口径只跑这一轮；跑完后没有改阈值、没有另起第二轮。
 
-**执行环境**：Python `3.12.11`、`pypdfium2 5.10.1`、Pillow `12.3.0`，Windows 11。评分器与报告均在 `C:/Users/70208/AppData/Local/Temp/codex-c1c-per-type-rulers-20260829-0442/`，不在本仓，也不在证据本体目录。
+**执行环境**：Python `3.12.11`、`pypdfium2 5.10.1`、Pillow `12.3.0`，Windows 11。评分器与报告均在 `<tmp>/codex-c1c-per-type-rulers-20260829-0442/`，不在本仓，也不在证据本体目录。
 
 - 评分器：`score_per_type.py`，23,680 字节，SHA-256 `e64685e3058af73c9a39ddc96c7008ae66c7f409b36090f3bbd42879680cc073`
 - 全量报告：`per-type-report.json`，232,138 字节，SHA-256 `cd82932f9a970a76c17f9d0cac445a59581077e05d2f186fd3ce992c80872137`
@@ -731,7 +731,7 @@ if __name__ == "__main__":
 
 ```powershell
 $env:PYTHONDONTWRITEBYTECODE = '1'
-& 'D:\Coinsides\v12.9-selection\tools\mineru\.venv\Scripts\python.exe' -B 'C:\Users\70208\AppData\Local\Temp\codex-c1c-per-type-rulers-20260829-0442\score_per_type.py' --evidence-root 'D:\Coinsides\v12.9-selection' --output 'C:\Users\70208\AppData\Local\Temp\codex-c1c-per-type-rulers-20260829-0442\per-type-report.json'
+& 'D:\Coinsides\v12.9-selection\tools\mineru\.venv\Scripts\python.exe' -B '<tmp>\codex-c1c-per-type-rulers-20260829-0442\score_per_type.py' --evidence-root 'D:\Coinsides\v12.9-selection' --output '<tmp>\codex-c1c-per-type-rulers-20260829-0442\per-type-report.json'
 ```
 
 ## 8. 收尾复核

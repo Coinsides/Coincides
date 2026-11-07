@@ -37,11 +37,11 @@ Wilderness 外层实际耗时 **448296 ms（448.296 s）**，TAP 耗时448180.26
 - C3 RegionCells：`.codex-tmp/c3-episode/server-full-2026-09-20T09-51-16-479Z-31344/103-server_src___tests___v2SourceRegionCells.test.ts.log:9` 为code101与无法启动路径，`:19`/`:21`/`:22` 为1 test / 0 pass / 1 fail。
 - C2 RegionCells：`.codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/101-server_src___tests___v2SourceRegionCells.test.ts.log:9` 为同code101与路径，`:19`/`:21`/`:22` 为相同计数。
 
-两次RegionCells指向的基础解释器均为 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`。两失败均 `timedOut:false`、`flaky-retries:0`，未触发也未滥用IPC限定重试。
+两次RegionCells指向的基础解释器均为 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`。两失败均 `timedOut:false`、`flaky-retries:0`，未触发也未滥用IPC限定重试。
 
 ## 环境保留项
 
-只读检查 `Get-Command python,python3,py` 未找到现役命令；常见候选 `C:/Users/70208/AppData/Local/Programs/Python`、`C:/Program Files/Python`、`C:/Python311`、`C:/Python312`、`C:/Python313` 均不存在。`C:/Users/70208/AppData/Roaming/uv/python` 存在但未列出安装目录，当前仓库 `_external_tools/mineru/.venv/Scripts/python.exe` 不存在。该有界检查未找到可直接替换的兼容解释器，不作全磁盘不存在Python的推论。
+只读检查 `Get-Command python,python3,py` 未找到现役命令；常见候选 `<home>/AppData/Local/Programs/Python`、`C:/Program Files/Python`、`C:/Python311`、`C:/Python312`、`C:/Python313` 均不存在。`<home>/AppData/Roaming/uv/python` 存在但未列出安装目录，当前仓库 `_external_tools/mineru/.venv/Scripts/python.exe` 不存在。该有界检查未找到可直接替换的兼容解释器，不作全磁盘不存在Python的推论。
 
 此外 `server/src/__tests__/v2SourceMineruWiring.test.ts:60` 在模块加载时直接调用 `python.exe`；`v2SourceRegionCells.test.ts:38` 固定 `D:/Coinsides/v12.9-selection`，`:40` 构造其venv路径，`:196` 在测试内覆写 `COINCIDES_MINERU_PYTHON` 为该固定路径，`:128` 也直接调用该解释器。因此仅从外层给RegionCells设置另一个 `COINCIDES_MINERU_PYTHON` 不能改变它实际采用的固定运行时。
 

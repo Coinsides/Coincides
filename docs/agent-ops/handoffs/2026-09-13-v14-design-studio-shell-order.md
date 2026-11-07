@@ -71,7 +71,7 @@ Result 必含:交付清单+numstat(基于编辑前镜像)、复用点申报(缩�
 
 - 新增上述停线判据文件；本工单末尾追加本 Result。原工单正文及 `ready` 状态保留。
 - 业务代码交付 0；新增挂载期 API 0。
-- 编辑前工单镜像为 `C:/Users/70208/AppData/Local/Temp/ds-before-VTKHEv/order.md`，5077 bytes / 58 行，SHA-256 为 `cce3ef033c92a6cb8dadac7079220215dc2ba98a74f58e3806d571d8a4d6d066`。
+- 编辑前工单镜像为 `<tmp>/ds-before-VTKHEv/order.md`，5077 bytes / 58 行，SHA-256 为 `cce3ef033c92a6cb8dadac7079220215dc2ba98a74f58e3806d571d8a4d6d066`。
 - 以下计数基于编辑前字节镜像与写后回读，仅为本轮文档变更；未使用 git。
 
 | 文件 | 新增 | 删除 |
@@ -120,7 +120,7 @@ Result 必含:交付清单+numstat(基于编辑前镜像)、复用点申报(缩�
 
 - 新增二轮停线判据；本工单仅追加二轮 Result，正文、上轮 Result 与补遗一保留。
 - 业务交付净变更 0。停线前写入的导航／路由已恢复二轮镜像并逐字节验证；两份未完成壳文件撤回业务目录，留在临时目录供后续续工，不申报为交付。
-- 二轮编辑前镜像：`C:/Users/70208/AppData/Local/Temp/ds2-before-a994aff3/`，其中 `order.md` 是本轮追加前的完整工单字节镜像。新增判据文件基线为空。numstat 只按这些镜像与写后回读计算，零 git。
+- 二轮编辑前镜像：`<tmp>/ds2-before-a994aff3/`，其中 `order.md` 是本轮追加前的完整工单字节镜像。新增判据文件基线为空。numstat 只按这些镜像与写后回读计算，零 git。
 
 | 文件 | 新增 | 删除 |
 | --- | ---: | ---: |

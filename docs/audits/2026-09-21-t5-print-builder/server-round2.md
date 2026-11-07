@@ -52,7 +52,7 @@ Wilderness 用既有合成库执行预览、执行和回滚；未传真实用户
 | `server/src/__tests__/v2SourceMineruWiring.test.ts:60` | 模块加载时调用 PATH 中 `python.exe`，返回 `spawnSync python.exe ENOENT`，该文件以测试失败退出。此文件后续测试无法进入。 | **61783–61814**；suite 失败 **61806** |
 | `server/src/__tests__/v2SourceRegionCells.test.ts:183`（调用点 203） | 真实 OCR 进入 pinned MinerU，launcher 返回 **101**：无法创建它所配置的 base Python 进程。`SourceArtifactError` / `parser_failure`，用例实耗 **1978.2574 ms**，不是文件超时。 | **62646–62659**；完整 101 错误 **62652** |
 
-第二项仍指向 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`。上一轮已记录直接启动该 base Python 的 Access denied；本轮不重复修改或试图修复权限。依据补遗一，如实归类环境阻断，并继续施工和其余验证；不主张 OCR 已通过。
+第二项仍指向 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`。上一轮已记录直接启动该 base Python 的 Access denied；本轮不重复修改或试图修复权限。依据补遗一，如实归类环境阻断，并继续施工和其余验证；不主张 OCR 已通过。
 
 `v13WildernessExecute` 的入口测试与合成 preview → execute → rollback 路径均通过（stdout **180–191**）。该路径实耗可以超过单个短测试的常见耗时，本轮完整保留 600000 ms 文件预算。
 

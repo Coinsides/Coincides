@@ -54,9 +54,9 @@ Local copied references:
 
 Original user-provided OpenDesign files:
 
-- `C:/Users/70208/OneDrive/Desktop/Working/Open design/Coincides_Content_group_design/group-gallery.html`
-- `C:/Users/70208/OneDrive/Desktop/Working/Open design/Coincides_Content_group_design/groups-rail.html`
-- `C:/Users/70208/OneDrive/Desktop/Working/Open design/Coincides_Content_group_design/single-contentgroup-editor.html`
+- `<home>/OneDrive/Desktop/Working/Open design/Coincides_Content_group_design/group-gallery.html`
+- `<home>/OneDrive/Desktop/Working/Open design/Coincides_Content_group_design/groups-rail.html`
+- `<home>/OneDrive/Desktop/Working/Open design/Coincides_Content_group_design/single-contentgroup-editor.html`
 
 ### Current implementation references
 

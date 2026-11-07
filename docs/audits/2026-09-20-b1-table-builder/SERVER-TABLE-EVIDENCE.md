@@ -73,13 +73,13 @@ B1 专项覆盖：模板与 shared 对齐（第 60 行）、行列/矩形边界�
 
 - 入口：`server/src/__tests__/v2SourceMineruWiring.test.ts:59–61` 在 Windows 顶层初始化中调用 `execFileSync('python.exe', ['-c', 'import sys; print(sys.executable)'])`。
 - 初次日志第 **52964–53000 行**：`spawnSync python.exe ENOENT`，该测试文件整体以 exit 1 结束，未成功进入文件内测试。
-- 环境只读核对：`Get-Command python.exe,python3.exe,py.exe` 未发现可调用 Python；`uv.exe` 存在于 `C:\Users\70208\.local\bin\uv.exe`。这不是跳过用例或业务断言通过。
+- 环境只读核对：`Get-Command python.exe,python3.exe,py.exe` 未发现可调用 Python；`uv.exe` 存在于 `<home>\.local\bin\uv.exe`。这不是跳过用例或业务断言通过。
 
 ### 4.3 未消解：固定 MinerU venv 的基座 Python 拒绝访问
 
 - 固定解释器定义：`server/src/__tests__/v2SourceRegionCells.test.ts:38–40`，路径为 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`；第 **196 行**写入该次测试的 `COINCIDES_MINERU_PYTHON`，第 **203 行**调用 `parseSourceArtifact`。
 - 初次日志第 **53795–53808 行**：`V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable` 失败；MinerU exit code **101**，无法创建底层 Python 进程。
-- 该既有 venv 的 `pyvenv.cfg` 指定 home 为 `C:\Users\70208\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none`。
+- 该既有 venv 的 `pyvenv.cfg` 指定 home 为 `<home>\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none`。
 - 已知基座 `python.exe` 存在（91648 bytes），但直接以完整路径执行 `--version` 返回 **拒绝访问**；固定 venv 的 `python.exe --version` 同样无法创建该基座进程；`uv --no-cache python find --offline` 读取该安装目录也返回 **Access denied**。
 
 这些观察表明，单纯为 runner 增补 PATH 不能恢复固定 Python 基座的访问。没有安装依赖、搬移/复制运行时、修改已有 MinerU 测试以规避失败或申请权限绕过；runner、产品解析器与 MinerU 测试均未修改。环境观察单独保存在 [server-python-environment.log](../../../.codex-tmp/b1-table/server-python-environment.log)，它是诊断观察记录；首次真实失败的原始进程输出保留在初次全量日志中。Python 可执行环境恢复后仍需亲跑上述失败项，结果留后续收口。

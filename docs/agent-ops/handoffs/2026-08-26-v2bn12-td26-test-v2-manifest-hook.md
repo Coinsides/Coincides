@@ -115,7 +115,7 @@
 | 2 | client `npm.cmd exec tsc -- --noEmit` | 0 | 无诊断 |
 | 3 | server `npm.cmd exec tsc -- --noEmit` | 0 | 无诊断 |
 | 4 | root `npm.cmd run test:unit` | 0 | 22 files / 222 tests |
-| 5 | server `npm.cmd run test:v2`（隔离资产目录） | 0 | 278/278；隔离根 `C:\Users\70208\AppData\Local\Temp\coincides-td26-final-v2-52d42ab37e5e419db64d75178c4ee795`，收尾 `TEMP_EXISTS_AFTER=False` |
+| 5 | server `npm.cmd run test:v2`（隔离资产目录） | 0 | 278/278；隔离根 `<tmp>\coincides-td26-final-v2-52d42ab37e5e419db64d75178c4ee795`，收尾 `TEMP_EXISTS_AFTER=False` |
 | 6 | server `npm.cmd run test:mcp-transport` | 0 | 40/40 |
 | 7 | root `npm.cmd run test:tool-face-registry` | 0 | 5/5 |
 | 8 | root `npm.cmd run test:tool-face-manifest` | 0 | 10/10 |

@@ -46,7 +46,7 @@
         "  type: 'test'",
         "  location: 'D:\\\\Coinsides\\\\v2.x\\\\Coincides\\\\server\\\\src\\\\__tests__\\\\v2SourceRegionCells.test.ts:28:2231'",
         "  failureType: 'testCodeFailure'",
-        "  error: `MinerU exited abnormally (code 101): Unable to create process using '\"C:\\\\Users\\\\70208\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.12.11-windows-x86_64-none\\\\python.exe\" -B C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\runner.py --input C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-source-region-cells-aBHYFf\\\\listening-page-30.pdf --output C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\output --result C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\result.json --lang en'`",
+        "  error: `MinerU exited abnormally (code 101): Unable to create process using '\"<home>\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.12.11-windows-x86_64-none\\\\python.exe\" -B <tmp>\\\\coincides-mineru-E850gJ\\\\runner.py --input <tmp>\\\\coincides-source-region-cells-aBHYFf\\\\listening-page-30.pdf --output <tmp>\\\\coincides-mineru-E850gJ\\\\output --result <tmp>\\\\coincides-mineru-E850gJ\\\\result.json --lang en'`",
         "  code: 'parser_failure'",
         "  name: 'SourceArtifactError'",
         "  stack: |-",
@@ -75,7 +75,7 @@
     },
     {
       "line": 62652,
-      "text": "  error: `MinerU exited abnormally (code 101): Unable to create process using '\"C:\\\\Users\\\\70208\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.12.11-windows-x86_64-none\\\\python.exe\" -B C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\runner.py --input C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-source-region-cells-aBHYFf\\\\listening-page-30.pdf --output C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\output --result C:\\\\Users\\\\70208\\\\AppData\\\\Local\\\\Temp\\\\coincides-mineru-E850gJ\\\\result.json --lang en'`"
+      "text": "  error: `MinerU exited abnormally (code 101): Unable to create process using '\"<home>\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.12.11-windows-x86_64-none\\\\python.exe\" -B <tmp>\\\\coincides-mineru-E850gJ\\\\runner.py --input <tmp>\\\\coincides-source-region-cells-aBHYFf\\\\listening-page-30.pdf --output <tmp>\\\\coincides-mineru-E850gJ\\\\output --result <tmp>\\\\coincides-mineru-E850gJ\\\\result.json --lang en'`"
     }
   ]
 }

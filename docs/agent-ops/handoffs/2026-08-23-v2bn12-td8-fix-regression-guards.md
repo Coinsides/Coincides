@@ -275,7 +275,7 @@ PowerShell 直接调用 `npm` 会被 execution policy 拦截,故正式收据一�
 反面分则的非自写阳性如下:
 
 - 产品零差分前,同一 `git diff --numstat` 探针先在历史 TD-8 实现范围 `ee4edec..81198f1` 的 `learningCanvases.ts` 命中 `3/2`;该阳性来自既有实现 commit,不是 reviewer mutation。
-- reparse 阴性前,同一属性探针先在系统维护的 `C:\Users\70208\AppData\Local\Application Data` 看见 `ReparsePoint`,再对隔离 clone 得到 0;该阳性由系统目录写入。
+- reparse 阴性前,同一属性探针先在系统维护的 `<home>\AppData\Local\Application Data` 看见 `ReparsePoint`,再对隔离 clone 得到 0;该阳性由系统目录写入。
 - trigger 范围阴性前,同一 audit 计数器先见目标表 UPDATE 产生的 1;字符串/行由已提交测试夹具触发 TEMP trigger 写入,不是 S4/S5 mutation 伪造。
 - 清理阴性前,同一路径探针先确认 clone `exists=True` 且 HEAD 为 `32d929e`,删除后才记 `exists_after=False`。
 
@@ -324,7 +324,7 @@ Reviewer 未改产品代码、常驻测试、schema、048 本体或 client;未�
 
 原生 `git worktree add` 因共享 `.git/worktrees` 只读而在创建前 exit 128,未留下 worktree 注册或目标目录;随后按 charter fallback 使用独立 clone:
 
-- 路径:`C:\Users\70208\AppData\Local\Temp\coincides-td8-fix-review-1787467246410-9192eeb0`;
+- 路径:`<tmp>\coincides-td8-fix-review-1787467246410-9192eeb0`;
 - detached HEAD:`32d929ece5a707031e522cbb14b3a94aa4d33e4a`;
 - client/server 均执行独立 `npm.cmd ci --offline`;安装前后递归 reparse count 都为 0,未建 junction/symlink,未共享 `node_modules`;
 - 每刀均反向 patch;最终 filtered 内容 diff 为零。临时 Vite dependency shim 恢复原 hash,所有 `subst` 映射已删;

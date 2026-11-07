@@ -38,7 +38,7 @@
 
 ## 编辑前镜像与 numstat
 
-- 工单编辑前镜像：`C:/Users/70208/AppData/Local/Temp/ds-before-VTKHEv/order.md`。
+- 工单编辑前镜像：`<tmp>/ds-before-VTKHEv/order.md`。
 - 原文件：5077 bytes、58 行；SHA-256：`cce3ef033c92a6cb8dadac7079220215dc2ba98a74f58e3806d571d8a4d6d066`。
 - 本文件编辑前不存在，按空文件镜像计数。numstat 只统计本轮两份文档，不推断工作区其他变更。
 - 测量方法：直接比较临时字节镜像与回读文件；验证工单仅追加；按新增／删除行计数，不使用 git。

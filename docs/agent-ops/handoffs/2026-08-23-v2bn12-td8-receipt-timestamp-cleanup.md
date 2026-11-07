@@ -327,7 +327,7 @@ Spark / 调度方归属沿用 Result 的他方 receipt，并以最终语义自�
 
 ### 5-9 隔离树卫生与自清收据
 
-- 正式 clone：`C:\Users\70208\AppData\Local\Temp\coincides-td8-review-61f11293d6954e61a22112668456197f`，detached `81198f1`；`core.autocrlf=false`；client/server 各自 `npm ci --offline`；**0 reparse point、无 junction/symlink 共享依赖**。
+- 正式 clone：`<tmp>\coincides-td8-review-61f11293d6954e61a22112668456197f`，detached `81198f1`；`core.autocrlf=false`；client/server 各自 `npm ci --offline`；**0 reparse point、无 junction/symlink 共享依赖**。
 - mutation 完成后 tracked diff 为空、`git diff --check` exit 0；仅有 reviewer 临时 harness 为 untracked，随 clone 一并删除。
 - 上述 clone、migration 副本目录、隔离 asset/source 目录均已递归删除，逐路径 `exists_after=False`；`subst` 无残留，`$TMPDIR` 下无 `coincides-td8-review-*` 残留。临时删除不可恢复，但只包含 disposable clone、测试资产和 DB 副本。
 - 共享依赖清理前后目录项数保持 client 153 / server 183；未触碰 `.codex-tmp/builder.lock.d`。未 commit、未 push、未碰 main、未改 header。共享树唯一真实写入为本 `## Review`。

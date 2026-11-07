@@ -104,7 +104,7 @@
 - 字节边界：从 `FROZEN_CLASSIFIER_V2_START` 标记起始 `<` 到 `FROZEN_CLASSIFIER_V2_END` 标记末尾 `>`；**两枚 HTML 标记均计入**。
 - 冻结段字节数：**18,690 UTF-8 bytes**。
 - 冻结段 SHA-256：`3d49b12ab0ac5a356da10223ecb924612346423edbf51198f916d816ffdbc1d3`。
-- 冻结时计划使用的仓外脚本路径 `C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v2-20260831/run_divergence_census_v2.py` 尚不存在（`exists_at_freeze=false`）；因此冻结时刻严格早于该脚本的第一个字节。
+- 冻结时计划使用的仓外脚本路径 `<tmp>/codex-c2-divergence-census-v2-20260831/run_divergence_census_v2.py` 尚不存在（`exists_at_freeze=false`）；因此冻结时刻严格早于该脚本的第一个字节。
 
 ## 3. 实测记录
 
@@ -112,7 +112,7 @@
 
 - 冻结完成时刻为 `2026-08-31T01:26:05.6468630-04:00`；脚本文件的 CreationTime（本轮用作首字节时刻）为 `2026-08-31T01:27:37.1516898-04:00`。严格不等式为 `2026-08-31T01:26:05.6468630-04:00 < 2026-08-31T01:27:37.1516898-04:00`。脚本由封存 v1 源码复制后再实现 v2；复制保留了 LastWriteTime，故不拿 LastWriteTime 冒充首字节时刻。
 - 最终脚本：86,093 bytes、2,135 个 LF、SHA-256 `1d7eecd6d25c2757b51c6cad4d54483ca7af72f93a6547d9b600355bcfa0122d`。AST-only 解析通过后才放行；实跑前再次精确复核同一 SHA。
-- 唯一执行命令：`python -B C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v2-20260831/run_divergence_census_v2.py`。执行窗口为 `2026-08-31T01:38:01.9281883-04:00` 至 `2026-08-31T01:38:02.4380103-04:00`。没有执行第二次，也没有重跑任何转写器。
+- 唯一执行命令：`python -B <tmp>/codex-c2-divergence-census-v2-20260831/run_divergence_census_v2.py`。执行窗口为 `2026-08-31T01:38:01.9281883-04:00` 至 `2026-08-31T01:38:02.4380103-04:00`。没有执行第二次，也没有重跑任何转写器。
 - 程序控制返回值为 `2`，stdout 与 canonical JSON 都记 `status="unclassified_stop"`。外层 PowerShell 为继续读取现有收据而正常结束为 `0`；两者射程不同，本档案不把外层值冒充程序值，也不为追码重跑。
 - 运行时实测 CPython=`3.14.2`、Unicode database=`16.0.0`；8 个输入文件全部通过 strict preflight，其 byte length 与 SHA-256 均同 §1.1。
 - 文件写入域精确限于仓外 `divergence-census.json.tmp` 与同目录最终 `divergence-census.json`（原子 `os.replace`）；证据树、仓内文件和脚本自身均只读。`-B` 封死 `.pyc` 写入。

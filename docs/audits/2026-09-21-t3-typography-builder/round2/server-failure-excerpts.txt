@@ -56,7 +56,7 @@
 62649:   type: 'test'
 62650:   location: 'D:\\Coinsides\\v2.x\\Coincides\\server\\src\\__tests__\\v2SourceRegionCells.test.ts:28:2231'
 62651:   failureType: 'testCodeFailure'
-62652:   error: `MinerU exited abnormally (code 101): Unable to create process using '"C:\\Users\\70208\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none\\python.exe" -B C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-mineru-NEeS9E\\runner.py --input C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-source-region-cells-icei44\\listening-page-30.pdf --output C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-mineru-NEeS9E\\output --result C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-mineru-NEeS9E\\result.json --lang en'`
+62652:   error: `MinerU exited abnormally (code 101): Unable to create process using '"<home>\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none\\python.exe" -B <tmp>\\coincides-mineru-NEeS9E\\runner.py --input <tmp>\\coincides-source-region-cells-icei44\\listening-page-30.pdf --output <tmp>\\coincides-mineru-NEeS9E\\output --result <tmp>\\coincides-mineru-NEeS9E\\result.json --lang en'`
 62653:   code: 'parser_failure'
 62654:   name: 'SourceArtifactError'
 62655:   stack: |-

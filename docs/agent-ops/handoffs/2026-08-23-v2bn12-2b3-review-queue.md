@@ -351,7 +351,7 @@ b-3 会新建路由并让 apply/revert 走既有执行体 ⇒ **新消费者须�
 | npm.cmd run check:tool-face-parity | PASS；脚本明确写 human reachability NOT VERIFIED，本 Review 不扩大其含义。 |
 | server npm.cmd run test:trash-notes-tool | PASS，36/36。 |
 
-沙箱适配说明：esbuild 从 user temp 的深路径向上枚举时会在 C:/Users/70208 触发 ACL，首轮 verify 在 Vitest 启动前停止，不是测试红。最终收据使用临时 R: DOS 映射只映射 reviewer temp base，并在 finally 中删除；node_modules 是物理副本、不是 junction/symlink。隔离副本的 node_modules/.bin/vitest.cmd 只临时追加 config/root 路径参数，tracked tree 未变；结束后从另一份物理依赖副本恢复，SHA-256 前后均为 F5959CE11885ED044BF1883D9A991D4DB2A4690C255681D2E635991D34B393F1，R: 最终不存在。
+沙箱适配说明：esbuild 从 user temp 的深路径向上枚举时会在 <home> 触发 ACL，首轮 verify 在 Vitest 启动前停止，不是测试红。最终收据使用临时 R: DOS 映射只映射 reviewer temp base，并在 finally 中删除；node_modules 是物理副本、不是 junction/symlink。隔离副本的 node_modules/.bin/vitest.cmd 只临时追加 config/root 路径参数，tracked tree 未变；结束后从另一份物理依赖副本恢复，SHA-256 前后均为 F5959CE11885ED044BF1883D9A991D4DB2A4690C255681D2E635991D34B393F1，R: 最终不存在。
 
 ### 6. 5-1 完备性与显式范围排除
 

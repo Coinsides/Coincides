@@ -12,7 +12,7 @@
 | 项目 | 现场事实 | 处置与边界 |
 |---|---|---|
 | `v2SourceMineruWiring.test.ts` | 文件启动时 `spawnSync python.exe ENOENT`；测试的 Windows fixture 在模块顶层调用 PATH 上的 Python | 未修改既有测试或制造 skip，待运行环境提供可用 Python |
-| `v2SourceRegionCells.test.ts` | 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe` 退出 101，不能启动其基础 Python | 该 venv 的 `pyvenv.cfg` 指向 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none`；目录枚举返回访问拒绝。未绕过权限、未安装依赖、未修外部 venv |
+| `v2SourceRegionCells.test.ts` | 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe` 退出 101，不能启动其基础 Python | 该 venv 的 `pyvenv.cfg` 指向 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none`；目录枚举返回访问拒绝。未绕过权限、未安装依赖、未修外部 venv |
 | `docs:check` | `docs/agent-ops/INDEX.md` 过期 | 未自行重写整库文档索引，交 HQ/steward 收口 |
 | 文档门独立子检查 | `docs/generated/object-inventory.md` 过期 | `docs-index` 短路后单独执行 inventory 发现；glossary 子检查通过。未把短路伪报为后两项通过 |
 

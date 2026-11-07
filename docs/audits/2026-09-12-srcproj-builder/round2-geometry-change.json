@@ -1,7 +1,7 @@
 {
   "round": 2,
   "method": "Line LCS against two-file pre-edit byte snapshots; no Git or .git access.",
-  "baselineRoot": "C:/Users/70208/AppData/Local/Temp/coincides-srcproj-round2-geometry-5d99948171d94badb5fcb49c46922722",
+  "baselineRoot": "<tmp>/coincides-srcproj-round2-geometry-5d99948171d94badb5fcb49c46922722",
   "files": [
     {
       "file": "server/src/services/sourceProjectionMaterializer.ts",

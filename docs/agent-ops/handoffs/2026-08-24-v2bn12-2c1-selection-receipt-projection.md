@@ -166,7 +166,7 @@ K-5 的接受证据使用上面真实 `canvasEngine/{hooks,blocks,layers}` 路�
 - `client: npx.cmd tsc --noEmit`：通过。
 - `server: npx.cmd tsc --noEmit`：通过。
 - `npm.cmd run test:unit`：`22 files / 218 passed`。
-- `server: npm.cmd run test:v2`：`270 passed / 0 failed`；按 TD-12 使用 OS temp `CANVAS_ASSET_DIR=C:\Users\70208\AppData\Local\Temp\coincides-c1-assets-6ed093f51a06491aa885640ea1bf4287`，未改测试或产品语义。
+- `server: npm.cmd run test:v2`：`270 passed / 0 failed`；按 TD-12 使用 OS temp `CANVAS_ASSET_DIR=<tmp>\coincides-c1-assets-6ed093f51a06491aa885640ea1bf4287`，未改测试或产品语义。
 - `npm.cmd run test:tool-face-registry`：`4/4 passed`。
 - `npm.cmd run test:tool-face-manifest`：`10/10 passed`。
 - `npm.cmd run check:tool-face-manifest`：通过，artifact 未过期（2 entries / 2 public）。

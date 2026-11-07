@@ -169,7 +169,7 @@ Fable 口述形状时写的是「默认换内联 revert ⇒ **四条 K-5b 须红
 | root npm run verify:v2-bn8-runtime | PASS；完整链运行至 changed-file secret scan 并通过 |
 | client / server tsc --noEmit | PASS，双方 exit 0 |
 | root npm run test:unit | PASS，20 files / 211 tests |
-| server npm run test:v2 | PASS，270/270；CANVAS_ASSET_DIR 指向 C:/Users/70208/AppData/Local/Temp/coincides-v2bn12-2b3-fix-assets 的 OS temp 实体目录。首次带递归清理的包装命令在测试启动前被执行策略拒绝，随后只改运行环境、不改测试或产品语义。 |
+| server npm run test:v2 | PASS，270/270；CANVAS_ASSET_DIR 指向 <tmp>/coincides-v2bn12-2b3-fix-assets 的 OS temp 实体目录。首次带递归清理的包装命令在测试启动前被执行策略拒绝，随后只改运行环境、不改测试或产品语义。 |
 | test:tool-face-registry | PASS，4/4 |
 | test:tool-face-manifest | PASS，10/10 |
 | check:tool-face-manifest | PASS，inventory fresh，2 public tools |
@@ -312,7 +312,7 @@ Mutation 与门禁均在仓库外 OS temp 的 detached physical clone 中完成�
 
 过程偏差（不计 builder finding）：第一次尝试把 `subst R:` 与后续命令分成两个进程，映射未跨进程可见，命令误从共享树启动 verify；发现 cwd 不对后在 server build 阶段中断。随后复验共享树 routes / services / mcp numstat 为空，`toolReceipts.ts`、两项已知 EOL 假阳性 clean-filter blobs 均等于 HEAD；未留下 tracked 产品改动，至多刷新 ignored build 输出。
 
-Reviewer temp base 为 `C:\Users\70208\AppData\Local\Temp\coincides-review-1236a19-2942ac42e47f4851b259f04df44fa195`。删除前已确认：位于 OS temp、与 workspace 不重叠、零 reparse、tracked tree 干净；但本环境执行策略拒绝了递归 `Remove-Item`，命令在执行前被拦截，因此该物理 clone 仍需由调度方按此精确路径清理。它不含未还原 mutation，也不连接共享依赖。
+Reviewer temp base 为 `<tmp>\coincides-review-1236a19-2942ac42e47f4851b259f04df44fa195`。删除前已确认：位于 OS temp、与 workspace 不重叠、零 reparse、tracked tree 干净；但本环境执行策略拒绝了递归 `Remove-Item`，命令在执行前被拦截，因此该物理 clone 仍需由调度方按此精确路径清理。它不含未还原 mutation，也不连接共享依赖。
 
 未取锁、未读写 `owner.json`、未删锁、未改 header、未 commit / push / 切 main。共享树中既有 `.claude/settings.local.json` untracked 与两项 EOL 假阳性均非 reviewer 产物；本轮唯一保留的共享树写入是本 `## Review`。
 

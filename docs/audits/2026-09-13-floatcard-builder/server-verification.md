@@ -27,7 +27,7 @@
 原 460 项全量没有补称为全绿；manifest 单独补跑后仍有以下两项环境阻断，均位于本单未修改的 Python / MinerU 测试：
 
 1. `src/__tests__/v2SourceMineruWiring.test.ts` 在模块初始化执行 `python.exe -c ...` 时失败：`spawnSync python.exe ENOENT`。该文件未能进入内部用例枚举，Node 将文件作为一个失败项记录。
-2. `V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable`（`v2SourceRegionCells.test.ts`）返回 `parser_failure`：MinerU Python 启动器退出码 101，无法启动其引用的 `C:\Users\70208\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\python.exe`。
+2. `V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable`（`v2SourceRegionCells.test.ts`）返回 `parser_failure`：MinerU Python 启动器退出码 101，无法启动其引用的 `<home>\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\python.exe`。
 
 原第三项失败 `T-1 manifest copy recreates a missing dist target byte-for-byte` 是直接调用 Node 时没有 npm 生命周期注入的 `npm_execpath`；仅补齐当前 npm CLI 路径后该文件 2/2 PASS。未为这些环境问题改写被测代码或跳过失败断言。
 

@@ -46,8 +46,8 @@ node node_modules/vitest/vitest.mjs run src/pages/Courses/Courses.test.tsx src/p
 
 1. **默认文本编码**：Windows PowerShell 5.1 首次不带 `-Encoding UTF8` 读取中文文档出现乱码；显式 UTF-8 重读后正常。源码、工单回执及本证据按 UTF-8 写入；未改系统编码。
 2. **检索工具**：`rg` 返回 `CommandNotFoundException`；改用 PowerShell `Get-ChildItem` / `Select-String`。仓库无 `.codegraph/`，按入口指令未调用或创建索引。
-3. **运行时路径**：`node --version`、`npm --version` 均返回 `CommandNotFoundException`。PATH 包含 `C:\nvm4w\nodejs`；该符号链接指向 `C:\Users\henry\AppData\Local\nvm\v22.22.1`，目标 node.exe 文件元信息可读取。不将路径中的版本号冒充实际运行版本。
-4. **访问/执行阻塞**：枚举 `C:\Users\henry\AppData\Local\nvm` 返回 Access denied；显式执行上述 node.exe 的 `--version` 和只读时区探针均返回 `Program 'node.exe' failed to run: Access is denied` / `NativeCommandFailed`。当前会话不允许提权；未更换启动通道、复制运行时、修改 ACL/PATH/权限配置或下载安装来绕开拒绝。具体是沙箱还是宿主 ACL 的根因未能进一步判定。需 HQ 在可执行 Node 的合规会话中接续定向验证。
+3. **运行时路径**：`node --version`、`npm --version` 均返回 `CommandNotFoundException`。PATH 包含 `C:\nvm4w\nodejs`；该符号链接指向 `<home>\AppData\Local\nvm\v22.22.1`，目标 node.exe 文件元信息可读取。不将路径中的版本号冒充实际运行版本。
+4. **访问/执行阻塞**：枚举 `<home>\AppData\Local\nvm` 返回 Access denied；显式执行上述 node.exe 的 `--version` 和只读时区探针均返回 `Program 'node.exe' failed to run: Access is denied` / `NativeCommandFailed`。当前会话不允许提权；未更换启动通道、复制运行时、修改 ACL/PATH/权限配置或下载安装来绕开拒绝。具体是沙箱还是宿主 ACL 的根因未能进一步判定。需 HQ 在可执行 Node 的合规会话中接续定向验证。
 5. **时区**：`Get-TimeZone` 实测 `China Standard Time`，UTC+08:00，无 DST，进程 TZ 未设置，符合工单要求；Node 自身时区探针因第 4 项未执行，故不作 Node 运行时确认或多时区验证声明。未改时区。
 6. **父目录现状**：`.codex-tmp/a3-cover` 存在，含 18 个 `fixture-*` 子目录，各有 1 个条目，与“手建空目录”假设不同。只枚举目录元信息，未读取数据库内容，未删除或搬移。列表见 `environment-snapshot.json`。
 7. **夹具现物差异**：工单病灶描述写笔记 12:00Z；源码的 `recent_note.updated_at` 实际是 13:00Z（course 自身 updated_at 是 12:00Z）。假 now 仍为 16:00Z；CST 下分别为 8/29 21:00 与 8/30 00:00，跨日病灶仍成立。

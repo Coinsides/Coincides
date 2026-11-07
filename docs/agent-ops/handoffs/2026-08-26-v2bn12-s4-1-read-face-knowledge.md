@@ -292,7 +292,7 @@ unrecognized_keys: plain_text
 | 2 | client `npm.cmd exec tsc -- --noEmit` | 0 | 无诊断 |
 | 3 | server `npm.cmd exec tsc -- --noEmit` | 0 | 无诊断 |
 | 4 | `npm.cmd run test:unit` | 0 | 22 files / 222 tests |
-| 5 | server `npm.cmd run test:v2`（隔离资产目录） | 0 | 277/277；隔离根 `C:\Users\70208\AppData\Local\Temp\coincides-s4-1-green-e04fa7100488403caafdf2242c122922` |
+| 5 | server `npm.cmd run test:v2`（隔离资产目录） | 0 | 277/277；隔离根 `<tmp>\coincides-s4-1-green-e04fa7100488403caafdf2242c122922` |
 | 6 | server `npm.cmd run test:mcp-transport` | 0 | 40/40，含三条 S4-1 正控 |
 | 7 | `npm.cmd run test:tool-face-registry` | 0 | 5/5 |
 | 8 | `npm.cmd run test:tool-face-manifest` | 0 | 10/10 |

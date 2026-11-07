@@ -67,7 +67,7 @@ server 全量覆盖清单见 [server-test-files.json](server-test-files.json)，
 两项环境红原样申报给 HQ：
 
 1. `server/src/__tests__/v2SourceMineruWiring.test.ts:60`：模块加载时 `spawnSync python.exe ENOENT`，整文件加载失败。
-2. `v2SourceRegionCells.test.ts` 的 `V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable`：`parser_failure` / MinerU exit 101。虚拟环境启动器引用缺失的 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`，无法创建进程。
+2. `v2SourceRegionCells.test.ts` 的 `V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable`：`parser_failure` / MinerU exit 101。虚拟环境启动器引用缺失的 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`，无法创建进程。
 
 三份索引在本单尚未写入任何文档前已被 `docs:check` 判为过期：`docs/agent-ops/INDEX.md`、`docs/agent-ops/current-state/INDEX.md`、`docs/brainstorm/INDEX.md`。本单不扩大范围再生索引；Result 状态回写后亦复查申报。**不能据此宣称总验证门全绿。**
 

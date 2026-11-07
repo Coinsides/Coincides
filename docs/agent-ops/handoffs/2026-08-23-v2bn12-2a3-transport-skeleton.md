@@ -667,8 +667,8 @@ HTTP 500
 
 ### 隔离树自清收据
 
-- 主 mutation 根：`C:\Users\70208\AppData\Local\Temp\coincides-review-51a0ac2-20260823`；含 CRLF 诊断树、实际 LF mutation 树及独立 bare admin。两树均 detached 精确 `51a0ac2`；client `npm ci --offline` 各装 202 packages、server 各装 212 packages；全根 reparse point count 0。
-- 终态补绿根：`C:\Users\70208\AppData\Local\Temp\coincides-review-post-51a0ac2-20260823`；detached 精确 `51a0ac2`，client/server offline install exit 0，reparse point count 0。
+- 主 mutation 根：`<tmp>\coincides-review-51a0ac2-20260823`；含 CRLF 诊断树、实际 LF mutation 树及独立 bare admin。两树均 detached 精确 `51a0ac2`；client `npm ci --offline` 各装 202 packages、server 各装 212 packages；全根 reparse point count 0。
+- 终态补绿根：`<tmp>\coincides-review-post-51a0ac2-20260823`；detached 精确 `51a0ac2`，client/server offline install exit 0，reparse point count 0。
 - 两根均先确认 worktree clean、路径位于系统 Temp、无 junction/symlink，再用各自 bare repo `git worktree remove --force` 删除 worktree；随后删除 bare admin 与空资产目录。最终两根 `Test-Path=False`。
 - 共享树 `client/node_modules` 前后顶层 count 153、`server/node_modules` 前后 186，均非 reparse point；未安装/卸载共享包。隔离资产目录测试后 count 0 并已删除。
 - 除本节 UTF-8 追加外，没有共享树写入；未改产品代码、常驻测试、header、builder lock 或生产 DB；未 commit、未 push、未碰 main。

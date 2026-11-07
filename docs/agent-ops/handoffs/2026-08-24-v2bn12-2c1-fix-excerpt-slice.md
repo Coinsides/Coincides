@@ -247,7 +247,7 @@ c-1 复核判 **FAIL 0B/1H/0M/0L**,唯一 **HIGH-1**:
 
 ### 隔离树、边界与合取扫描
 
-- Mutation 位于仓外系统临时 clone `C:\Users\70208\AppData\Local\Temp\coincides-review-2c1-ef4ad11f48f943dfacf3873b12566d06`，HEAD `602d0a0`；client/server 依赖各自 `npm ci --offline`，没有 junction/symlink 到共享 `node_modules`。每刀反向恢复并取 `git diff --exit-code=0`；收尾工作区/索引双空、`0` reparse 后已删除该 clone。
+- Mutation 位于仓外系统临时 clone `<tmp>\coincides-review-2c1-ef4ad11f48f943dfacf3873b12566d06`，HEAD `602d0a0`；client/server 依赖各自 `npm ci --offline`，没有 junction/symlink 到共享 `node_modules`。每刀反向恢复并取 `git diff --exit-code=0`；收尾工作区/索引双空、`0` reparse 后已删除该 clone。
 - 临时 clone 中 esbuild 首次因沙箱拒绝读取高层父目录而在测试启动前退出；该输出未计证据。有效定点运行临时隐藏 clone 自身的 Vite/Vitest config，依赖测试文件的 `@vitest-environment node` 与相对 import；每次均在 finally 中恢复 config。生产配置下的专项 `9/9`、unit `222/222` 与总 runtime 门另在共享树亲跑通过。
 - 未取锁、未读写 `owner.json`、未删锁；未查询、终止或干扰 PID 8292；未触碰 `server/src/services/items.ts`。
 - 跨条耦合扫描唯一命中即 HIGH-1：K-1' 与 K-2' 职责重复，使 R1 的阴性反事实被另一条断言劫持。其余合取未见新增缺口：类型更名 + 源码枚举 + 双 tsc 同意零消费者；切片 + 长度不变式同意常规 UTF-16 窗口。emoji / grapheme、畸形 offset、RTL 仍是工单已登记的 P2，不扩；P3 自由巡猎不做。

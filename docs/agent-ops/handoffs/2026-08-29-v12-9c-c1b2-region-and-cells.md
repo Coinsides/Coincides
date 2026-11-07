@@ -143,7 +143,7 @@ TD-30 的「单元格**几何**可寻址」记为 **本转写器不可达**,触�
 ### K-1 / K-3 / K-4 只读实录（证明为何不能交差）
 
 - 原件：`D:/Coinsides/v12.9-selection/samples/ielts-listening-sample-tasks-2023.pdf`，原 PDF 第 30 页（zero-based `page_idx=29`），真表为 4 行 × 5 列，20 个非空 `<td>`；抽取对象候选为 row 2 / col 3 的 `Cinema 2`（row/col 均 zero-based）。
-- 探针只把该页复制到系统 TEMP，再用 pinned MinerU 3.4.5、`pipeline + parse_method='ocr' + table_enable=True` 跑一页；唯一写入在 `C:/Users/70208/AppData/Local/Temp/coincides-mineru-cell-probe-1cd3891275204687a4b638fe9a26b5aa/**`，没有写 selection。
+- 探针只把该页复制到系统 TEMP，再用 pinned MinerU 3.4.5、`pipeline + parse_method='ocr' + table_enable=True` 跑一页；唯一写入在 `<tmp>/coincides-mineru-cell-probe-1cd3891275204687a4b638fe9a26b5aa/**`，没有写 selection。
 - 同一次真实 MinerU 输出的坐标面：
   - `content_list`：整表 bbox=`[94,156,892,386]`，不带 `page_size`；
   - `middle`：`page_size=[595,841]`，整表 bbox=`[56,132,531,325]`；

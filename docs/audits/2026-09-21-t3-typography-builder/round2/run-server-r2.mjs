@@ -19,7 +19,7 @@ writeFileSync(join(out, 'server-inventory.json'), JSON.stringify({ count: tests.
 const env = { ...process.env, DB_PATH: ':memory:', COINCIDES_APP_DATA_DIR: mkdtempSync(join(tmpdir(), 'coincides-t3-appdata-')), COINCIDES_VALIDATION_ENV_DIR: join(out, 'empty-env'), npm_execpath: join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js') };
 for (const key of ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GENERIC_API_KEY', 'DEEPSEEK_API_KEY', 'DASHSCOPE_API_KEY', 'VOYAGE_API_KEY']) delete env[key];
 const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path');
-env[pathKey || 'PATH'] = `C:\\Users\\70208\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none;${env[pathKey] || ''}`;
+env[pathKey || 'PATH'] = `<home>\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none;${env[pathKey] || ''}`;
 const commands = [
   ['manifest-check', ['--import', 'tsx', '../scripts/generate-tool-face-manifest.ts', '--check']],
   ['manifest-copy', ['../scripts/copy-tool-face-manifest.mjs']],

@@ -33,7 +33,7 @@
 080 落地后的最终 `test:v2` 日志为 `.codex-tmp/b3-furniture/server-full-test-v2-final.log`：主批 **761 项，757 通过、4 失败、0 skipped/0 cancelled**。两个失败是 Node IPC 反序列化异常；既有 wrapper 自动分别单次重跑 `v2MaterialLibrary.test.ts`（**59/59**）与 `v2NoteBlockLifecycle.test.ts`（**25/25**），都恢复。最终总体仍为 **FAIL**，剩余两项是当前运行环境的 Python 启动问题：
 
 - `v2SourceMineruWiring.test.ts:60` 顶层 `execFileSync('python.exe',...)` 为 **ENOENT**；当前进程 PATH 无 python.exe。
-- `v2SourceRegionCells.test.ts` 的 MinerU 原生解析回归启动既有 `.venv` 时，uv Python `C:\Users\70208\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\python.exe` 无法创建进程。该文件存在，但直接启动得到 **Access denied**。未安装依赖、未复制解释器、未绕过权限、未更改这些测试。
+- `v2SourceRegionCells.test.ts` 的 MinerU 原生解析回归启动既有 `.venv` 时，uv Python `<home>\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\python.exe` 无法创建进程。该文件存在，但直接启动得到 **Access denied**。未安装依赖、未复制解释器、未绕过权限、未更改这些测试。
 
 第一轮 `test:v2` 运行日志另保留 `server-full-test-v2.log`：主批 816 项（813/3），一个 IPC 文件自动 59/59 恢复，同样剩上述 Python 两红。这轮发生在新增表头/套装测试与080之前，不充当最终代码通过证明。
 

@@ -58,7 +58,7 @@ b-2a 主单 `2026-08-23-v2bn12-2b2a-human-trash-restore-doors.md` 复核唯一 M
 | 3 | client `.\\node_modules\\.bin\\tsc.cmd --noEmit` → exit `0` |
 | 4 | server `.\\node_modules\\.bin\\tsc.cmd --noEmit` → exit `0` |
 | 5 | root `npm.cmd run test:unit` → exit `0`，`20/20` files、`211/211` tests |
-| 6 | server `npm.cmd run test:v2`，独立 `CANVAS_ASSET_DIR=C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-v2-assets-a1-final-20260823-0940` → exit `0`，`270/270`；收尾 entry `0`、ReparsePoint `0`，核实路径位于 OS temp 后以非递归空目录删除，`assetCleanupExists=False` |
+| 6 | server `npm.cmd run test:v2`，独立 `CANVAS_ASSET_DIR=<tmp>\\coincides-v2-assets-a1-final-20260823-0940` → exit `0`，`270/270`；收尾 entry `0`、ReparsePoint `0`，核实路径位于 OS temp 后以非递归空目录删除，`assetCleanupExists=False` |
 | 7 | server `node --import tsx --test src/__tests__/v2NotesListService.test.ts` → exit `0`，`3/3` |
 
 PowerShell 首次直接调用 `npm` 被本机 ExecutionPolicy 在 `npm.ps1` 启动前拒绝，未执行门内脚本；正式门统一使用同一 Node 安装的 `npm.cmd`，上表只记实际执行结果。
@@ -164,7 +164,7 @@ b-2a Review 的唯一 MED（R5）已经封住：原 canonical alias + 独立复�
 
 ### 隔离树自清收据
 
-- 使用一份 OS temp local bare clone 管理两棵真实 detached worktree：mutation tree 与 LF gates tree，均位于 `C:/Users/70208/AppData/Local/Temp`、精确 HEAD `9c7190c`，不在 repo 内，无 junction/symlink。
+- 使用一份 OS temp local bare clone 管理两棵真实 detached worktree：mutation tree 与 LF gates tree，均位于 `<tmp>`、精确 HEAD `9c7190c`，不在 repo 内，无 junction/symlink。
 - 两树分别在 client/server 执行 `npm ci --offline`：各为 `202 / 212` packages；安装前后递归 ReparsePoint count 均为 `0`，未指向共享 `node_modules`。
 - 删除前两树 `git status --porcelain --untracked-files=all` count 均为 `0`、`git diff --exit-code` 均为 `0`、HEAD 相同；三处独立资产目录均 entry `0`、ReparsePoint `0`。
 - 先由 local bare clone 对两树执行 `git worktree remove --force`，再非递归删除三个已核空资产目录；bare pack 的只读属性在已核绝对 temp 路径内归一后删除。最终 mutation tree、gates tree、三资产目录与 bare clone 共 6 个精确路径的 `Test-Path` 全为 `False`，无遗留需调度方代清，也未触碰共享依赖。

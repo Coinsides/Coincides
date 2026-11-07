@@ -57,9 +57,9 @@
 1. server/src/__tests__/v2SourceMineruWiring.test.ts:60：模块导入时执行 execFileSync('python.exe', ...)；原始 server-all.log:61215 报 spawnSync python.exe ENOENT，:61238 文件 not ok，:61247 ERR_TEST_FAILURE。当前 PowerShell Get-Command python.exe -All 同样找不到命令。
 2. server/src/__tests__/v2SourceRegionCells.test.ts:196：测试强制使用固定 D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe，覆盖外层 COINCIDES_MINERU_PYTHON。原始 server-all.log:62078 not ok；:62084 MinerU code 101，无法启动 uv CPython base；:62090 回到测试 parseSourceArtifact 调用。
 
-固定 venv 的 pyvenv.cfg 指向 C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none；venv launcher 和 base 文件均存在。对 base 仅执行 -B -c "import sys; print(sys.executable); print(sys.version)" 的只读启动探测，返回“程序 python.exe 无法运行: 拒绝访问”，ApplicationFailedException / NativeCommandFailed，exit 1。未执行外部库、未访问用户数据库。
+固定 venv 的 pyvenv.cfg 指向 <home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none；venv launcher 和 base 文件均存在。对 base 仅执行 -B -c "import sys; print(sys.executable); print(sys.version)" 的只读启动探测，返回“程序 python.exe 无法运行: 拒绝访问”，ApplicationFailedException / NativeCommandFailed，exit 1。未执行外部库、未访问用户数据库。
 
-uv.exe 可定位到 C:/Users/70208/.local/bin/uv.exe；发现权限拒绝后未用 uv、复制执行体、切换 shell 或其他运行时绕过。仅增加 PATH 不能解决固定 runtime 的拒绝，外层 runtime 环境变量也会被测试覆盖。此处保留环境阻断，未修测试、未删除/过滤/skip 用例，不能将 1107 pass 报成全量绿。
+uv.exe 可定位到 <home>/.local/bin/uv.exe；发现权限拒绝后未用 uv、复制执行体、切换 shell 或其他运行时绕过。仅增加 PATH 不能解决固定 runtime 的拒绝，外层 runtime 环境变量也会被测试覆盖。此处保留环境阻断，未修测试、未删除/过滤/skip 用例，不能将 1107 pass 报成全量绿。
 
 ## 隔离与原始证据
 

@@ -58,7 +58,7 @@
 
 随后以不覆写 PATH 的标准 `npm.cmd --prefix server run test:v2` 再次执行完整名单，使既有启动环境失败正常退出而保留其余用例结果；原始日志 `.codex-tmp/a1-pagination/server-final-standard.log`，**exit 1**。首遍 **779 测试、776 通过、3 失败、0 skipped、0 cancelled**，46.62 秒；同样三项失败，其中 MaterialLibrary 的 Node IPC 错误经现役 runner 一次隔离复跑 **59/59 通过**，38.51 秒，最终仍留两个已存在的 Python/MinerU 环境失败。IPC 会截断某文件的初始测试输出，不把两个阶段的测试数机械相加或改写成全量绿。
 
-环境取证：`v2SourceRegionCells.test.ts` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，该 venv 的 `pyvenv.cfg` 固定不存在的 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none`。仅进程 `PYTHONHOME` 指向现有 Python 也仍无法创建旧目标进程。Builder 没有改外部环境、测试断言或测试名单来绕过此项。
+环境取证：`v2SourceRegionCells.test.ts` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，该 venv 的 `pyvenv.cfg` 固定不存在的 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none`。仅进程 `PYTHONHOME` 指向现有 Python 也仍无法创建旧目标进程。Builder 没有改外部环境、测试断言或测试名单来绕过此项。
 
 ## 交 HQ 欠项
 

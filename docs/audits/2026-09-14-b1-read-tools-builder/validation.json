@@ -109,11 +109,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\prepare-1789292093904-44320.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-VacRhJ",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-VacRhJ\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-VacRhJ\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-VacRhJ\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -150,7 +150,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:34:53.910Z",
           "durationMs": 360,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\logs\\01-docs_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-VacRhJ\\logs\\01-docs_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -164,7 +164,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:34:54.271Z",
           "durationMs": 183,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-VacRhJ\\logs\\02-copy_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-VacRhJ\\logs\\02-copy_tool-face-manifest.log",
           "exitCode": 0
         }
       ],
@@ -183,11 +183,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\prepare-1789292218176-25348.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-yiNLJK",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-yiNLJK\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-yiNLJK\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-yiNLJK\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -224,7 +224,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:36:58.181Z",
           "durationMs": 413,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\logs\\01-docs_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-yiNLJK\\logs\\01-docs_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -238,7 +238,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:36:58.595Z",
           "durationMs": 180,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-yiNLJK\\logs\\02-copy_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-yiNLJK\\logs\\02-copy_tool-face-manifest.log",
           "exitCode": 0
         }
       ],
@@ -257,11 +257,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\typecheck-1789292229291-21656.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-NAk2Qm",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-NAk2Qm\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-NAk2Qm\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-NAk2Qm\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -299,7 +299,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:37:09.295Z",
           "durationMs": 274,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\01-shared-typecheck.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-NAk2Qm\\logs\\01-shared-typecheck.log",
           "exitCode": 0
         },
         {
@@ -313,7 +313,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:37:09.571Z",
           "durationMs": 65,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\02-shared-build.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-NAk2Qm\\logs\\02-shared-build.log",
           "exitCode": 0
         },
         {
@@ -326,7 +326,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:37:09.637Z",
           "durationMs": 5114,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\03-server-typecheck.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-NAk2Qm\\logs\\03-server-typecheck.log",
           "exitCode": 0
         },
         {
@@ -339,7 +339,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\client",
           "startedAt": "2026-09-13T09:37:14.751Z",
           "durationMs": 8568,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-NAk2Qm\\logs\\04-client-typecheck.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-NAk2Qm\\logs\\04-client-typecheck.log",
           "exitCode": 0
         }
       ],
@@ -358,11 +358,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\prepare-1789292324298-32912.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-q3yVwq",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-q3yVwq\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-q3yVwq\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-q3yVwq\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -399,7 +399,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:38:44.302Z",
           "durationMs": 422,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\logs\\01-docs_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-q3yVwq\\logs\\01-docs_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -413,7 +413,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:38:44.725Z",
           "durationMs": 193,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-q3yVwq\\logs\\02-copy_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-q3yVwq\\logs\\02-copy_tool-face-manifest.log",
           "exitCode": 0
         }
       ],
@@ -432,11 +432,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\targeted-1789292328693-14704.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-mHj3f9",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-mHj3f9\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-mHj3f9\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-mHj3f9\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -475,7 +475,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:38:48.701Z",
           "durationMs": 363,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\logs\\01-check_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-mHj3f9\\logs\\01-check_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -489,7 +489,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:38:49.066Z",
           "durationMs": 180,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\logs\\02-copy_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-mHj3f9\\logs\\02-copy_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -502,7 +502,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:38:49.247Z",
           "durationMs": 2098,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-mHj3f9\\logs\\03-targeted.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-mHj3f9\\logs\\03-targeted.log",
           "exitCode": 0,
           "counts": {
             "tests": 11,
@@ -530,11 +530,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\server-full-1789292362903-37380.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-GCVz7B",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-GCVz7B\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-GCVz7B\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-GCVz7B\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -655,7 +655,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:39:22.911Z",
           "durationMs": 346,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\logs\\01-check_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-GCVz7B\\logs\\01-check_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -669,7 +669,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:39:23.259Z",
           "durationMs": 190,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\logs\\02-copy_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-GCVz7B\\logs\\02-copy_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -764,7 +764,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides\\server",
           "startedAt": "2026-09-13T09:39:23.450Z",
           "durationMs": 124614,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-GCVz7B\\logs\\03-server-full.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-GCVz7B\\logs\\03-server-full.log",
           "exitCode": 1,
           "counts": {
             "tests": 763,
@@ -800,11 +800,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\gate-1789292369796-14148.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-w10jvW",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-w10jvW\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-w10jvW\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-w10jvW\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -844,7 +844,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:39:29.807Z",
           "durationMs": 142,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\01-shared-build.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\01-shared-build.log",
           "exitCode": 0
         },
         {
@@ -858,7 +858,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:39:29.951Z",
           "durationMs": 532,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\02-check_test-wiring.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\02-check_test-wiring.log",
           "exitCode": 0,
           "counts": {
             "testFilesTotal": 83,
@@ -878,7 +878,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:39:30.486Z",
           "durationMs": 476,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\03-check_tech-debt-table.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\03-check_tech-debt-table.log",
           "exitCode": 0
         },
         {
@@ -892,7 +892,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:39:30.964Z",
           "durationMs": 37899,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\04-test_unit.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\04-test_unit.log",
           "exitCode": 0,
           "counts": {
             "testFilesPassed": 167,
@@ -916,7 +916,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:08.866Z",
           "durationMs": 981,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\05-test_tool-face-registry.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\05-test_tool-face-registry.log",
           "exitCode": 0,
           "counts": {
             "tests": 5,
@@ -939,7 +939,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:09.850Z",
           "durationMs": 4382,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\06-test_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\06-test_tool-face-manifest.log",
           "exitCode": 0,
           "counts": {
             "tests": 10,
@@ -962,7 +962,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:14.232Z",
           "durationMs": 612,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\07-check_tool-face-manifest.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\07-check_tool-face-manifest.log",
           "exitCode": 0
         },
         {
@@ -976,7 +976,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:14.845Z",
           "durationMs": 5647,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\08-test_tool-face-parity.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\08-test_tool-face-parity.log",
           "exitCode": 0,
           "counts": {
             "tests": 10,
@@ -999,7 +999,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:20.492Z",
           "durationMs": 550,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\09-check_tool-face-parity.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\09-check_tool-face-parity.log",
           "exitCode": 0
         },
         {
@@ -1013,7 +1013,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:21.043Z",
           "durationMs": 572,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\10-check_server-shared-runtime-import.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\10-check_server-shared-runtime-import.log",
           "exitCode": 0
         },
         {
@@ -1027,7 +1027,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:21.615Z",
           "durationMs": 481,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\11-check_canvas-runtime-boundary.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\11-check_canvas-runtime-boundary.log",
           "exitCode": 0
         },
         {
@@ -1041,7 +1041,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:22.097Z",
           "durationMs": 460,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\12-check_group-gallery-shell.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\12-check_group-gallery-shell.log",
           "exitCode": 0
         },
         {
@@ -1055,7 +1055,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:22.558Z",
           "durationMs": 470,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\13-check_groups-rail-shell.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\13-check_groups-rail-shell.log",
           "exitCode": 0
         },
         {
@@ -1069,7 +1069,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:23.029Z",
           "durationMs": 529,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\14-check_single-editor-shell.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\14-check_single-editor-shell.log",
           "exitCode": 0
         },
         {
@@ -1083,7 +1083,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:23.559Z",
           "durationMs": 987,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\15-check_source-experience.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\15-check_source-experience.log",
           "exitCode": 0
         },
         {
@@ -1097,7 +1097,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:24.547Z",
           "durationMs": 460,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\16-check_v2-bn11-legacy-shutdown.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\16-check_v2-bn11-legacy-shutdown.log",
           "exitCode": 0
         },
         {
@@ -1111,7 +1111,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:25.008Z",
           "durationMs": 437,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\17-check_v2-bn11-relation-freshness.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\17-check_v2-bn11-relation-freshness.log",
           "exitCode": 0
         },
         {
@@ -1125,7 +1125,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:25.445Z",
           "durationMs": 2105,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\18-smoke_canvas-engine-model-contract.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\18-smoke_canvas-engine-model-contract.log",
           "exitCode": 0
         },
         {
@@ -1139,7 +1139,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:27.550Z",
           "durationMs": 14234,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\19-build_client.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\19-build_client.log",
           "exitCode": 0
         },
         {
@@ -1153,7 +1153,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:41.784Z",
           "durationMs": 7654,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\20-build.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\20-build.log",
           "exitCode": 0
         },
         {
@@ -1167,7 +1167,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:49.438Z",
           "durationMs": 1263,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\21-smoke_canvas-engine-performance.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\21-smoke_canvas-engine-performance.log",
           "exitCode": 0
         },
         {
@@ -1181,7 +1181,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:40:50.701Z",
           "durationMs": 294,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-w10jvW\\logs\\22-docs_check.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-w10jvW\\logs\\22-docs_check.log",
           "exitCode": 1
         }
       ],
@@ -1205,11 +1205,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-generate-1789292521602-22112.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-RGf1JO",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-RGf1JO\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-RGf1JO\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-RGf1JO\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -1246,7 +1246,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:42:01.606Z",
           "durationMs": 288,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\logs\\01-docs_index.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-RGf1JO\\logs\\01-docs_index.log",
           "exitCode": 0
         },
         {
@@ -1260,7 +1260,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:42:01.895Z",
           "durationMs": 190,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-RGf1JO\\logs\\02-docs_inventory.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-RGf1JO\\logs\\02-docs_inventory.log",
           "exitCode": 0
         }
       ],
@@ -1279,11 +1279,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-check-1789292547169-36032.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-lN4l24",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-lN4l24\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-lN4l24\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-lN4l24\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -1320,7 +1320,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:42:27.176Z",
           "durationMs": 585,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-lN4l24\\logs\\01-docs_check.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-lN4l24\\logs\\01-docs_check.log",
           "exitCode": 0
         }
       ],
@@ -1339,11 +1339,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-generate-1789292749497-38884.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-EK1ZEP",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-EK1ZEP\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-EK1ZEP\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-EK1ZEP\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -1380,7 +1380,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:45:49.501Z",
           "durationMs": 269,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\logs\\01-docs_index.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-EK1ZEP\\logs\\01-docs_index.log",
           "exitCode": 0
         },
         {
@@ -1394,7 +1394,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:45:49.771Z",
           "durationMs": 195,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-EK1ZEP\\logs\\02-docs_inventory.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-EK1ZEP\\logs\\02-docs_inventory.log",
           "exitCode": 0
         }
       ],
@@ -1413,11 +1413,11 @@
       "metadataPath": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\v14-b1-validation\\docs-check-1789292750443-33164.json",
       "scope": "Execution metadata and parsed test counts only; raw logs stay in system TEMP.",
       "isolation": {
-        "temporaryRoot": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8",
+        "temporaryRoot": "<tmp>\\coincides-b1-validation-3K14R8",
         "database": ":memory: or existing test-owned disposable databases",
-        "dotenv": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\environment\\empty.env",
-        "viteEnvDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\environment",
-        "appDataDir": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\app-data",
+        "dotenv": "<tmp>\\coincides-b1-validation-3K14R8\\environment\\empty.env",
+        "viteEnvDir": "<tmp>\\coincides-b1-validation-3K14R8\\environment",
+        "appDataDir": "<tmp>\\coincides-b1-validation-3K14R8\\app-data",
         "inheritedEnvironment": [
           "PATH",
           "Path",
@@ -1454,7 +1454,7 @@
           "cwd": "D:\\Coinsides\\v2.x\\Coincides",
           "startedAt": "2026-09-13T09:45:50.446Z",
           "durationMs": 573,
-          "rawLogPath": "C:\\Users\\70208\\AppData\\Local\\Temp\\coincides-b1-validation-3K14R8\\logs\\01-docs_check.log",
+          "rawLogPath": "<tmp>\\coincides-b1-validation-3K14R8\\logs\\01-docs_check.log",
           "exitCode": 0
         }
       ],

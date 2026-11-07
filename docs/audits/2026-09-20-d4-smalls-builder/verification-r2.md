@@ -30,7 +30,7 @@ server 总计中包含无法加载的 `v2SourceMineruWiring.test.ts` 文件级�
 ### 两项仍受阻，一项编排问题已纠正
 
 1. `server/src/__tests__/v2SourceMineruWiring.test.ts:60` 在模块加载时用 `execFileSync('python.exe', ...)` 取得解释器。当前 PATH 无 `python.exe`，两轮均 **spawnSync python.exe ENOENT**，尚未进入该文件内部测试。证据：首跑和重跑 `server-full*-r2.log` 第 60834–60865 行；`python-path-r2.log`。
-2. `server/src/__tests__/v2SourceRegionCells.test.ts:40` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，`:191` 用该固定值，`:203` 启动真实既有解析回归。venv 文件存在，底层 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe` 也存在，但对后者执行 **`--version` 返回 Access is denied / NativeCommandFailed**；venv `--version` 返回 **Unable to create process**。原回归因解释器不能启动返回 `parser_failure`，不是 D4 断言不符或 120s 超时。证据：重跑日志第 61696–61709 行；`python-base-r2.log`、`python-venv-r2.log`。没有改固定解释器、外部配置、权限或安装依赖，也没有复制解释器绕过执行限制。
+2. `server/src/__tests__/v2SourceRegionCells.test.ts:40` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，`:191` 用该固定值，`:203` 启动真实既有解析回归。venv 文件存在，底层 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe` 也存在，但对后者执行 **`--version` 返回 Access is denied / NativeCommandFailed**；venv `--version` 返回 **Unable to create process**。原回归因解释器不能启动返回 `parser_failure`，不是 D4 断言不符或 120s 超时。证据：重跑日志第 61696–61709 行；`python-base-r2.log`、`python-venv-r2.log`。没有改固定解释器、外部配置、权限或安装依赖，也没有复制解释器绕过执行限制。
 3. 首跑 `server/src/__tests__/v2TestV2ManifestHook.test.ts:32` 缺 `npm_execpath`：由临时编排器直接用 Node 调现役 runner 所致。只给子进程补已核存在的 npm CLI 路径 `C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js`，不改机器环境、代码或断言；然后**完整重跑原 109 文件**。原 T-1 断言在重跑日志第 62766 行通过。此有因重跑不计为生产 runner 的自动 flaky retry，亦不抹去首跑红。
 
 ### 非 git/secrets 25 组件清单

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
 
 const server = 'file:///D:/Coinsides/v2.x/Coincides/server/src';
-const root = 'C:/Users/henry/AppData/Local/Temp/claude/D--Coinsides-v2-x-Coincides/6c1f3217-aa7b-468f-9d9c-882490faf4ae/scratchpad/f12/e2e';
+const root = '<tmp>/claude/D--Coinsides-v2-x-Coincides/6c1f3217-aa7b-468f-9d9c-882490faf4ae/scratchpad/f12/e2e';
 const [phase, pdf] = process.argv.slice(2);
 const data = join(root, 'data');
 const sourceRootDir = join(data, 'sources');

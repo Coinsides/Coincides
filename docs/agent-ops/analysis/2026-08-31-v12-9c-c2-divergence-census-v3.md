@@ -98,7 +98,7 @@
 
 ### 2.1 冻结收据（待本段落盘后立即回读计算）
 
-- 计划脚本路径：`C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v3-20260831/run_divergence_census_v3.py`；冻结时该路径必须不存在。
+- 计划脚本路径：`<tmp>/codex-c2-divergence-census-v3-20260831/run_divergence_census_v3.py`；冻结时该路径必须不存在。
 - SHA 边界：从唯一的 `FROZEN_CLASSIFIER_V3_START` 标记起始 `<` 到唯一的 `FROZEN_CLASSIFIER_V3_END` 标记末尾 `>`；**两枚 HTML 标记均计入**。
 - 回读计算窗口：`2026-08-31T02:55:39.4451819-04:00` 至 `2026-08-31T02:55:39.4894801-04:00`（America/Toronto）；以后者为冻结时刻。
 - 唯一性与边界：START/END 各 1 处；起始 byte offset=3,778，结束 inclusive offset=17,498；冻结段共 **13,721 UTF-8 bytes**。
@@ -8516,7 +8516,7 @@ dbVsHEkwzRZkZNyY6DTd/v/2b//l/wP6ukRY8sJNAA==
 从 §1.1 的 8 个只读输入重导时，先从 §7 两枚唯一脚本标记间恢复 UTF-8/LF 原文并核 SHA，再在 CPython 3.14.2 / Unicode 16.0.0 下执行：
 
 ```powershell
-python -B C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v3-20260831/run_divergence_census_v3.py
+python -B <tmp>/codex-c2-divergence-census-v3-20260831/run_divergence_census_v3.py
 ```
 
 脚本只把 `divergence-census-v3.json` 原子写到自身同目录；不得写证据树。重导前必须先复核冻结段、脚本和 8 个输入的 SHA；这是一条可重导配方，不授权在本回填轮重跑。

@@ -183,7 +183,7 @@ schema 断言位于 `server/src/__tests__/v2McpTransport.test.ts:423`，消息�
 
 另跑 `git diff --check`，exit `0`；只有已知 LF→CRLF 提示，无 whitespace error。独立只读 diff 复核结论为 PASS，并复跑 MCP transport 43/43、registry 5/5、manifest 10/10 与 freshness 皆绿。
 
-有效 `test:v2` 取证使用隔离根 `C:\Users\70208\AppData\Local\Temp\coincides-s4-2-green-6a54d046608248d8a1b18b9d77399d19`。首轮因没有保留 exec session id 而未拿到最终 exit，待其自然结束后重新完整取证，未把半截输出冒充 PASS。沙箱拒绝递归清理两个已确认位于 OS Temp 的测试根，故未换 shell 绕过；它们在仓库外，不形成 diff。
+有效 `test:v2` 取证使用隔离根 `<tmp>\coincides-s4-2-green-6a54d046608248d8a1b18b9d77399d19`。首轮因没有保留 exec session id 而未拿到最终 exit，待其自然结束后重新完整取证，未把半截输出冒充 PASS。沙箱拒绝递归清理两个已确认位于 OS Temp 的测试根，故未换 shell 绕过；它们在仓库外，不形成 diff。
 
 ### `git diff --numstat` 与边界
 

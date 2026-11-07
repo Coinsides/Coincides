@@ -29,7 +29,7 @@
 runner 最终报告 `recovered 3/3; result FAIL`，保留下面两项 Python 环境失败；不能将全量称为通过。原始完整日志：`.codex-tmp/b5-image/round2-server-full.log`（初轮汇总 45179 起；最终状态 58939–58940）。
 
 1. `v2SourceMineruWiring.test.ts:60` 文件顶层直接 `execFileSync('python.exe', ...)`，当前命令环境找不到 Python：`spawnSync python.exe ENOENT`；日志 42996 起。
-2. `v2SourceRegionCells.test.ts:196,203` 在测试内部覆盖解释器路径为既有 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`。MinerU 子进程 code 101，无法启动 pyvenv 所指向的 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`；日志 43836 起。
+2. `v2SourceRegionCells.test.ts:196,203` 在测试内部覆盖解释器路径为既有 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`。MinerU 子进程 code 101，无法启动 pyvenv 所指向的 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`；日志 43836 起。
 
 只读调查未找到当前 PATH 中的 python/python3/py；uv 存在。固定 venv 的 `pyvenv.cfg` 确认上述基址；该基址目录及用户 Local Programs 目录访问被拒绝。测试内部硬编码覆盖 `COINCIDES_MINERU_PYTHON`，外部设置该变量不能替换 RegionCells 的固定解释器。没有修改 Python 配置、Source 代码或测试，也没有安装或绕过访问限制。调查记录：`.codex-tmp/b5-image/round2-python-environment.txt`。
 

@@ -188,7 +188,7 @@ R2 mutation 的 reviewer-only 聚合 probe 又把 foreign 放在不会被首个 
 
 ### 隔离树自清收据
 
-- 使用一棵 gates tree 与一棵专用 mutation tree，均位于 `C:/Users/70208/AppData/Local/Temp`，detached 于精确 `6e4a544`；另用 local bare clone 管理，未在 repo 内建临时树。
+- 使用一棵 gates tree 与一棵专用 mutation tree，均位于 `<tmp>`，detached 于精确 `6e4a544`；另用 local bare clone 管理，未在 repo 内建临时树。
 - 两树各自 `npm ci --offline`：gates client/server 安装 `202 / 212` packages，mutation client/server 亦为 `202 / 212`；递归 ReparsePoint count 均为 `0`，没有 junction/symlink 指向共享 `node_modules`。
 - 清理前 gates/mutation 两树均 `git status --porcelain --untracked-files=all` count `0`、`git diff --exit-code` 为 `0`、HEAD 精确相同；mutation 间也逐刀恢复到 clean。
 - 已依次由 local bare clone 执行 `git worktree remove --force`，再删除空资产目录与 bare clone；最终四个精确路径 `cr6e-g-f3250846`、`cr6e-m-f3250846`、`cr6e-f3250846.git`、`cr6e-assets-f3250846` 的 `Test-Path` 均为 `False`。无遗留需调度方代清。

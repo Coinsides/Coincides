@@ -2,7 +2,7 @@
 > **层 (Layer)**: 研究 / Research
 > **日期 (Updated)**: 2026-07-24
 > **权威 (Authoritative)**: 否(全部内容为**停车场**级构想;8/17 期末季结束前不启动;拍板待未来概念稿)
-> **上游**: Henry 本周纸面交易实验(私人档案《增删》卦录,仓外 `C:\Users\70208\study\HANDOFF-hexagram-log.md`——本卷多数概念的手工原型);2026-07-11 telos 卷(奇点/痕迹层);2026-06-28 prosthetic-for-thinking 卷
+> **上游**: Henry 本周纸面交易实验(私人档案《增删》卦录,仓外 `<home>\study\HANDOFF-hexagram-log.md`——本卷多数概念的手工原型);2026-07-11 telos 卷(奇点/痕迹层);2026-06-28 prosthetic-for-thinking 卷
 
 # 2026-07-24 Better Notebook:决策台账、复盘视图与痕迹的克制
 

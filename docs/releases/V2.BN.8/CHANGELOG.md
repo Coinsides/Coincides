@@ -1663,7 +1663,7 @@
 - 空 ContentGroup 的 stability label 在三层界面可见，Single Editor 对空 group 禁用 `Accept`。
 - Petal 创建保持在 Single Editor 的 `Local roles` 区域，没有 source-text Label 投射或 CanvasObject 行为。
 - 控制台未观察到新增 app error；仅存在 React Router v7 future-flag warnings。
-- 截图已保存到 `C:\Users\70208\AppData\Local\Temp\bn87-contentgroup-gate\`。
+- 截图已保存到 `<tmp>\bn87-contentgroup-gate\`。
 
 ## Fixed - V2.BN.8.1 Browser Harness Page Canvas Switch Crash
 

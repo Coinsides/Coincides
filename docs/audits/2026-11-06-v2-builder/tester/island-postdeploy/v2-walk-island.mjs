@@ -6,7 +6,7 @@ const HERE = '<scratch>';
 const OUT = `${HERE}/v2-runs-island`; fs.mkdirSync(OUT, { recursive: true });
 const LOCAL = process.env.LOCAL === '1';
 const API = LOCAL ? 'http://127.0.0.1:13121/api' : 'http://127.0.0.1:13002/api';
-const lc = LOCAL ? JSON.parse(fs.readFileSync('<home>/AppData/Local/Temp/r04a/cred.json', 'utf8')) : null;
+const lc = LOCAL ? JSON.parse(fs.readFileSync('<tmp>/r04a/cred.json', 'utf8')) : null;
 const cells = LOCAL ? [null, null, lc.email, lc.password] : fs.readFileSync('<home>/.claude/ops/island-test-accounts.md', 'utf8').split('\n').find((l) => l.includes('<my-test-account>')).split('|').map((c) => c.trim());
 const { token } = await (await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: cells[2], password: cells[3] }) })).json();
 const data = JSON.parse(fs.readFileSync(`${HERE}/${LOCAL ? 'v2-data-local.json' : 'v2-data.json'}`, 'utf8'));

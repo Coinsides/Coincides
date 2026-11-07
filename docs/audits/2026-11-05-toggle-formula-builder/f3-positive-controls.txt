@@ -1,5 +1,5 @@
 # F3 positive controls. Every mutation is applied to a scratch copy, never the shared tree.
-# copy: C:/Users/henry/AppData/Local/Temp/f3c
+# copy: <tmp>/f3c
 
 == unmutated copy
 [('tests', '50'), ('pass', '50'), ('fail', '0')]

@@ -133,7 +133,7 @@ server 全量清点 **109 = test:v2 主集 82 + 补集 27**，全部现役 `.tes
 剩余两项证据：
 
 1. `server/src/__tests__/v2SourceMineruWiring.test.ts:60` 在模块加载时执行 `python.exe`，当前 PATH 无此命令，`ENOENT`，该文件内部回归未能加载。
-2. `server/src/__tests__/v2SourceRegionCells.test.ts:40` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，`:203` 真实解析入口启动失败。venv 的 `--version` 同样 `Unable to create process`；所指向的 `C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe` 直接 `--version` 为 **Access is denied / NativeCommandFailed**。原始 `python-path-r2.log`、`python-venv-r2.log`、`python-base-r2.log` 均保留非空错误证据。
+2. `server/src/__tests__/v2SourceRegionCells.test.ts:40` 固定 `D:/Coinsides/v12.9-selection/tools/mineru/.venv/Scripts/python.exe`，`:203` 真实解析入口启动失败。venv 的 `--version` 同样 `Unable to create process`；所指向的 `<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe` 直接 `--version` 为 **Access is denied / NativeCommandFailed**。原始 `python-path-r2.log`、`python-venv-r2.log`、`python-base-r2.log` 均保留非空错误证据。
 
 **停止扩面处理这两项环境失败**：当前权限不允许修解释器执行权限，本单又禁止新依赖/扩面；未替换固定 runtime、未改机器环境/权限、未弱化断言或排除文件。其余可独立运行的验收已执行。两项须在可执行原固定 Python 的环境补验，不能在本回执中洗成通过。完整组件清单/命令/时间/退出码及限制见 [verification-r2.md](../../audits/2026-09-20-d4-smalls-builder/verification-r2.md)。
 

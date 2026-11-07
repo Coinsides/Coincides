@@ -244,7 +244,7 @@
 
 ### K-b0…K-b8 逐刀
 
-每刀均在 C:\Users\70208\AppData\Local\Temp 下的 detached f1cedf9 worktree 施加；RED 后用反向同补丁还原，重跑同一探针为 GREEN，且每刀后 git status tracked/untracked 计数为 0。
+每刀均在 <tmp> 下的 detached f1cedf9 worktree 施加；RED 后用反向同补丁还原，重跑同一探针为 GREEN，且每刀后 git status tracked/untracked 计数为 0。
 
 | 位点 | 对抗结果（RED） | 还原 / 结论 |
 |---|---|---|
@@ -349,5 +349,5 @@ Vite 两个标准入口的 nonzero 如实保留，不冒充标准命令绿；其
 
 - 正式 gate/tree 与 mutation/tree 均为仓外 $TMPDIR 普通目录，reparse count 0；client/server 各自 npm ci --offline，分别安装 202 / 212 packages，无共享 node_modules junction。
 - reviewer-only T1、T3、digest、5-2 probe 均临时注入、运行后删除；所有 mutation 恢复后精确 HEAD=f1cedf9、tracked/untracked status 0。沙箱拒绝其外部 worktree 使用 apply_patch executable，故源码探针以 Git patch stdin 施加并以同补丁 -R 还原；未用 reset/checkout 或直接写文件。
-- 删除前 LF gate 与 LF mutation 树 status 均为空，隔离 CANVAS/SOURCE 资产目录各 0 entries；4 棵 worktree、bare clone、两个资产目录与临时 patch-tool 空目录均逐一解析为 C:\Users\70208\AppData\Local\Temp 下的精确目标且 reparse 0。
+- 删除前 LF gate 与 LF mutation 树 status 均为空，隔离 CANVAS/SOURCE 资产目录各 0 entries；4 棵 worktree、bare clone、两个资产目录与临时 patch-tool 空目录均逐一解析为 <tmp> 下的精确目标且 reparse 0。
 - 自清后复验 8 个点名路径 Test-Path 全为 false（REMAIN=0）。未删除共享树或生产数据。

@@ -11,7 +11,7 @@
 仓外证据根：
 
 ```text
-C:\Users\70208\AppData\Local\Temp\coincides-mineru-probe-20260829-012536
+<tmp>\coincides-mineru-probe-20260829-012536
 ```
 
 ## 1. K-0：证据本体前后四哈希
@@ -71,9 +71,9 @@ EXIT_CODE=0
 实际运行命令（脚本落在仓外；SHA-256 `b778c4461179aa1932f398dae4e4a67191019cb4091a56c7f6d6030e2639ff19`）：
 
 ```powershell
-$env:PROBE_PDF = 'C:\Users\70208\AppData\Local\Temp\coincides-mineru-probe-20260829-012536\ielts-page-001-image-only.pdf'
-$env:PROBE_ROOT = 'C:\Users\70208\AppData\Local\Temp\coincides-mineru-probe-20260829-012536'
-$env:MINERU_MODEL_REPO = 'C:\Users\70208\.cache\huggingface\hub\models--opendatalab--PDF-Extract-Kit-1.0'
+$env:PROBE_PDF = '<tmp>\coincides-mineru-probe-20260829-012536\ielts-page-001-image-only.pdf'
+$env:PROBE_ROOT = '<tmp>\coincides-mineru-probe-20260829-012536'
+$env:MINERU_MODEL_REPO = '<home>\.cache\huggingface\hub\models--opendatalab--PDF-Extract-Kit-1.0'
 $env:TEMP = $env:PROBE_ROOT
 $env:TMP = $env:PROBE_ROOT
 $env:PYTHONDONTWRITEBYTECODE = '1'
@@ -263,7 +263,7 @@ print(json.dumps({
 
 ```powershell
 $env:SOURCE_PDF = 'D:\Coinsides\v12.9-selection\samples\ielts-academic-reading-sample-tasks-2023.pdf'
-$env:PROBE_ROOT = 'C:\Users\70208\AppData\Local\Temp\coincides-mineru-probe-20260829-012536'
+$env:PROBE_ROOT = '<tmp>\coincides-mineru-probe-20260829-012536'
 & 'D:\Coinsides\v12.9-selection\tools\mineru\.venv\Scripts\python.exe' -B -c '<上方 payload>'
 ```
 
@@ -291,7 +291,7 @@ EXIT_CODE=0
 先走生产适配器本体（无 DB、无写库）：
 
 ```powershell
-$env:PROBE_PDF = 'C:\Users\70208\AppData\Local\Temp\coincides-mineru-probe-20260829-012536\ielts-page-001-image-only.pdf'
+$env:PROBE_PDF = '<tmp>\coincides-mineru-probe-20260829-012536\ielts-page-001-image-only.pdf'
 Push-Location server
 node --import tsx --input-type=module -e "import {basename} from 'node:path'; import {parseSourceArtifact} from './src/services/sourceArtifact.ts'; const p=process.env.PROBE_PDF; const a=await parseSourceArtifact({parser_key:'native-pdf',parser_version:'2.4.5',file_path:p,original_filename:basename(p),mime_type:'application/pdf'}); const chars=a.blocks.reduce((n,b)=>n+b.text.trim().length,0); console.log(JSON.stringify({page_count:a.metadata.page_count,block_count:a.blocks.length,text_chars:chars,blocks:a.blocks},null,2));"
 Pop-Location

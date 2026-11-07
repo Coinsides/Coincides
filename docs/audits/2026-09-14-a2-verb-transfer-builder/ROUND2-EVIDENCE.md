@@ -51,7 +51,7 @@ server 第一次全量遍历 server/src + server/scripts 的全部 80 个 .test.
 1. v2SourceMineruWiring.test.ts：收集阶段 `spawnSync python.exe ENOENT`，解释器发现失败；文件内子测试未能运行。
 2. v2SourceRegionCells.test.ts 的 MinerU table regions 用例：`MinerU exited abnormally (code 101)`，本地 uv CPython 3.12.11 目标进程无法创建。
 
-没有安装、替换 Python/MinerU 或新增依赖。原始日志在 `C:\Users\70208\AppData\Local\Temp\coincides-a2-validation-L8amM4`，首次及最终全量分别为 server-all-initial.log / server-all.log；本目录不复制这些原始日志。
+没有安装、替换 Python/MinerU 或新增依赖。原始日志在 `<tmp>\coincides-a2-validation-L8amM4`，首次及最终全量分别为 server-all-initial.log / server-all.log；本目录不复制这些原始日志。
 
 运行隔离：显式 :memory: 数据库/测试自产临时库；asset/blob 临时目录；Vite envDir 指向空临时目录，dotenv 指向空临时文件；应用凭据路径为临时目录，真实 provider 调用由 stub 替代。未读取仓内 .env key 或用户库。原始日志只在 OS temp，审计目录仅放整理后的证据。
 

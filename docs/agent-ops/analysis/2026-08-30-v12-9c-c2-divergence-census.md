@@ -242,7 +242,7 @@ v1 冻结完成并取证于 `2026-08-31T00:11:51.3116115-04:00`（America/Toront
 
 以下源码在任何两家正文比较实跑之前归档并静态放行。归档时刻：`2026-08-31T00:35:42.5451608-04:00`（America/Toronto）。
 
-- 仓外实跑路径：`C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176/run_divergence_census.py`
+- 仓外实跑路径：`<tmp>/codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176/run_divergence_census.py`
 - 字节数：**72,999**（UTF-8 无 BOM；纯 LF；末尾 LF）
 - 行数：**1,801**
 - 实跑前 SHA-256：`072e5f7280aa53f18d7be9fc2cf3d8050c8b06e26a85ca9d06e7730857375269`
@@ -2059,7 +2059,7 @@ if __name__ == "__main__":
 ### 7.2 唯一实跑命令
 
 ```powershell
-$scriptPath = 'C:\Users\70208\AppData\Local\Temp\codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176\run_divergence_census.py'
+$scriptPath = '<tmp>\codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176\run_divergence_census.py'
 python -B $scriptPath
 ```
 
@@ -2089,8 +2089,8 @@ $source | python -B -
 ### 7.4 实跑后产物收据
 
 - 控制结果：`unclassified_stop`；唯一实跑，没有换规则重跑。
-- stdout 收据：`{"frozen_classifier_sha256_after":"bafeb260088b036eb2be8e6f85a1d22073db8c5c1c3fa24a274d66ec49cb50be","json_sha256":"afdc9479311f5419f3a563073d8fc06bd12c49aab58cfd748e61283800c73045","output_path":"C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176/divergence-census.json","script_sha256":"072e5f7280aa53f18d7be9fc2cf3d8050c8b06e26a85ca9d06e7730857375269","status":"unclassified_stop"}`
-- JSON 路径：`C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176/divergence-census.json`；119,456 bytes；canonical UTF-8 + 单 LF；SHA-256 `afdc9479311f5419f3a563073d8fc06bd12c49aab58cfd748e61283800c73045`。
+- stdout 收据：`{"frozen_classifier_sha256_after":"bafeb260088b036eb2be8e6f85a1d22073db8c5c1c3fa24a274d66ec49cb50be","json_sha256":"afdc9479311f5419f3a563073d8fc06bd12c49aab58cfd748e61283800c73045","output_path":"<tmp>/codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176/divergence-census.json","script_sha256":"072e5f7280aa53f18d7be9fc2cf3d8050c8b06e26a85ca9d06e7730857375269","status":"unclassified_stop"}`
+- JSON 路径：`<tmp>/codex-c2-divergence-census-0dfc2d319c5f40e9a80bb6505ba05176/divergence-census.json`；119,456 bytes；canonical UTF-8 + 单 LF；SHA-256 `afdc9479311f5419f3a563073d8fc06bd12c49aab58cfd748e61283800c73045`。
 - 源码收尾 SHA-256：`072e5f7280aa53f18d7be9fc2cf3d8050c8b06e26a85ca9d06e7730857375269`，与实跑前及本文源码块相同。
 - 冻结 v1 收尾 SHA-256：`bafeb260088b036eb2be8e6f85a1d22073db8c5c1c3fa24a274d66ec49cb50be`，与实跑前相同。
 

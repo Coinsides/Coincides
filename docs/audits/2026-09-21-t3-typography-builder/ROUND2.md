@@ -60,7 +60,7 @@ Chrome 153，隔离合成页，只导入生产纯函数和CSS；未连接应用�
 **剩余阻塞（未绕过）**：
 
 1. `server/src/__tests__/v2SourceMineruWiring.test.ts:60` 模块载入调用`python.exe`。第二次原始日志`server-rerun/server-all.log:61783`为 **spawnSync python.exe EPERM**；模块文件失败位于`:61806`。
-2. `server/src/__tests__/v2SourceRegionCells.test.ts:203` 已实际进入真MinerU解析调用，约1937ms即返回 **code101 / Unable to create process**（同日志`:62646`、`:62652`），固定venv无法启动它绑定的`C:/Users/70208/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`。直接执行该基础解释器`--version`也收到“拒绝访问”。此处不能声称OCR已成功运行。
+2. `server/src/__tests__/v2SourceRegionCells.test.ts:203` 已实际进入真MinerU解析调用，约1937ms即返回 **code101 / Unable to create process**（同日志`:62646`、`:62652`），固定venv无法启动它绑定的`<home>/AppData/Roaming/uv/python/cpython-3.12.11-windows-x86_64-none/python.exe`。直接执行该基础解释器`--version`也收到“拒绝访问”。此处不能声称OCR已成功运行。
 
 这不是120秒/600秒预算耗尽；未改产品现有MINERU_TIMEOUT_MS=120000，也未增加文件排除、mock、skip、换模型/解释器或改权限。当前会话不能提权，**到此保留环境失败，待HQ在可执行该固定Python的环境复验server全量**。代码与client可以复核，但全量验收缺口尚在，header不翻done。
 

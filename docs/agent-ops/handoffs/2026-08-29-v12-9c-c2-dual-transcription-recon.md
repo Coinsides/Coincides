@@ -560,8 +560,8 @@ c-1c 刚刚证明了这件事有多难:**同一批碎片,不同的尺子给出�
 
 ### R-v2.2 唯一实跑与产物
 
-- 唯一命令为 `python -B C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v2-20260831/run_divergence_census_v2.py`；窗口 `2026-08-31T01:38:01.9281883-04:00` 至 `2026-08-31T01:38:02.4380103-04:00`。程序返回 `2` 并落 `status=unclassified_stop`；外层 PowerShell 为继续读取既有收据而正常结束 `0`，没有把两种射程混写，也没有执行第二次。
-- canonical JSON：`C:/Users/70208/AppData/Local/Temp/codex-c2-divergence-census-v2-20260831/divergence-census.json`；106,504 bytes；SHA-256 `f1a31c48db5e7c40418e3961a936d90f90f8e80fded94a8427122e6e0285a555`；创建 `2026-08-31T01:38:02.0886967-04:00`，末写 `2026-08-31T01:38:02.4237306-04:00`。整份 JSON 经结构化复核：无重复 object key、canonical 重编码逐字节相同、末尾恰一个 LF。
+- 唯一命令为 `python -B <tmp>/codex-c2-divergence-census-v2-20260831/run_divergence_census_v2.py`；窗口 `2026-08-31T01:38:01.9281883-04:00` 至 `2026-08-31T01:38:02.4380103-04:00`。程序返回 `2` 并落 `status=unclassified_stop`；外层 PowerShell 为继续读取既有收据而正常结束 `0`，没有把两种射程混写，也没有执行第二次。
+- canonical JSON：`<tmp>/codex-c2-divergence-census-v2-20260831/divergence-census.json`；106,504 bytes；SHA-256 `f1a31c48db5e7c40418e3961a936d90f90f8e80fded94a8427122e6e0285a555`；创建 `2026-08-31T01:38:02.0886967-04:00`，末写 `2026-08-31T01:38:02.4237306-04:00`。整份 JSON 经结构化复核：无重复 object key、canonical 重编码逐字节相同、末尾恰一个 LF。
 - 运行时 CPython `3.14.2` / Unicode DB `16.0.0`；四卷、两家共 8 个既有 `.fragments.json` 通过 strict preflight。没有重跑转写器。文件写入域只有仓外 JSON 的 `.tmp` 原子 sibling 与最终 JSON；证据树只读。
 - 程序级零成本自证为 `model_calls=0,api_keys_used=0,cost=0,scope="census_program_only; excludes builder-session reasoning"`，不覆盖 builder 会话自身推理开销。
 

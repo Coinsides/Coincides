@@ -340,8 +340,8 @@ C6 指令中的示例 `getOwnedNote` 并不是 `services/notes.ts` 的 export；
 
 ### 隔离树自清收据
 
-- mutation：`C:/Users/70208/AppData/Local/Temp/Coincides-review-canonical-1ce79ac70378434089ee8fe7bfb0ba4d/worktree`，由同 base 下 `repo.git` 管理，精确 HEAD `1de332b`；client/server `npm ci --offline` 分别安装 `202 / 212` packages。每刀后 status / worktree diff / index diff 均为 `0`，整树 ReparsePoint `0`，node_modules 都是普通 Directory。
-- gates：`C:/Users/70208/AppData/Local/Temp/cgw-4d56a1a7`，由独立 `cgr-4d56a1a7.git` 管理；client/server 同样 `npm ci --offline` 为 `202 / 212`，整树 ReparsePoint `0`。隔离资产目录为同层 `cga-4d56a1a7` / `cgs-4d56a1a7`，删除前均为空且 ReparsePoint `0`。
+- mutation：`<tmp>/Coincides-review-canonical-1ce79ac70378434089ee8fe7bfb0ba4d/worktree`，由同 base 下 `repo.git` 管理，精确 HEAD `1de332b`；client/server `npm ci --offline` 分别安装 `202 / 212` packages。每刀后 status / worktree diff / index diff 均为 `0`，整树 ReparsePoint `0`，node_modules 都是普通 Directory。
+- gates：`<tmp>/cgw-4d56a1a7`，由独立 `cgr-4d56a1a7.git` 管理；client/server 同样 `npm ci --offline` 为 `202 / 212`，整树 ReparsePoint `0`。隔离资产目录为同层 `cga-4d56a1a7` / `cgs-4d56a1a7`，删除前均为空且 ReparsePoint `0`。
 - 两棵 worktree 删除前 HEAD 都是精确目标、status count `0`、`git diff --exit-code = 0`。均先由各自 bare clone 执行原生 `git worktree remove --force`；沙箱拒绝 PowerShell `Remove-Item` 后，只在已核绝对 OS temp 路径、前缀与 ReparsePoint 的条件下用 .NET 等价删除空资产目录 / 独立 bare clone。
 - 最终 mutation base/worktree/bare 与 gates worktree/bare/两资产目录的 `Test-Path` 全为 `False`；共享 `git worktree list` 只余 `D:/Coinsides/v2.x/Coincides`。未建临时分支，无遗留需调度方代清，未 junction 到共享 `node_modules`，也未触碰共享依赖。
 

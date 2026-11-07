@@ -20,6 +20,6 @@
 
 主 runner 第一遍服务端非安全全量 56 文件 / 462 项为 446 通过、16 失败。逐条定位后，14 项新增失败来自测试环境：主 runner 将 `TEMP` 与 `COINCIDES_APP_DATA_DIR` 都设在仓库 `.tmp/` 内，而 `server/src/services/providerCredentials.ts:72` 拒绝仓库内的凭证目录。因而 PDF 两项、Embedding 两项、MaterialLibrary 十项在本来要验证的行为前被 `store_unavailable` 截断。此问题与 materialPreset 修约无关，生产实现和测试断言均未修改。
 
-独立补验脚本 `.tmp/floatcard-material-server-supplement.mjs` 改用系统 temp 下本单新建随机目录 `C:\Users\70208\AppData\Local\Temp\coincides-mat-3uXYgn`，继续仅传系统启动环境变量、空 dotenv、短合成 JWT 与本单隔离 DB/资产目录；不读取真实凭证或既有用户目录数据。原主 runner 保持不动。完整允许清单仍为相同 56 文件，三个 HQ 安全文件继续排除，测试没有跳过或削弱。
+独立补验脚本 `.tmp/floatcard-material-server-supplement.mjs` 改用系统 temp 下本单新建随机目录 `<tmp>\coincides-mat-3uXYgn`，继续仅传系统启动环境变量、空 dotenv、短合成 JWT 与本单隔离 DB/资产目录；不读取真实凭证或既有用户目录数据。原主 runner 保持不动。完整允许清单仍为相同 56 文件，三个 HQ 安全文件继续排除，测试没有跳过或削弱。
 
 补验 **462 项 / 460 通过 / 2 失败 / 0 skipped**，耗时 95.581 秒；上述 14 项全绿。仅剩 HQ 补遗允许申报的两处既档环境失败：`v2SourceMineruWiring.test.ts` 的 `python.exe ENOENT`，以及 `v2SourceRegionCells.test.ts` 的 MinerU Python launcher exit 101。机器回执及全部失败原文见 [material-server-supplement.json](material-server-supplement.json)，原日志见 [server-full-allowed](material-logs/coincides-mat-3uXYgn-server-full-allowed.log)。

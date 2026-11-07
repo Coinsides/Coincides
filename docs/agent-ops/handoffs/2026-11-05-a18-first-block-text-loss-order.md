@@ -13,7 +13,7 @@
 - `# 标题甲` 路径:第一段回车、打标题,300ms 内回车,结果 `[heading_1]标题甲第一段`,光标复位到 0。
 - **射程**:只在新笔记首块、首次落库窗口内。同一块先存过(等 4 秒)再连打,90 行 0 错。
 
-证据目录:`C:\Users\henry\AppData\Local\Temp\claude\363545182cb476c7\5f423a4a-8153-4287-865a-65e4015ae36d\scratchpad\f9`(keys.log、enter-window.json、enter-matrix.json、hash-matrix.json、lines.json)。Tester 未查根因,也未确认是否本版引入。
+证据目录:`<tmp>\claude\<session>\scratchpad\f9`(keys.log、enter-window.json、enter-matrix.json、hash-matrix.json、lines.json)。Tester 未查根因,也未确认是否本版引入。
 
 ## 要做
 

@@ -13,7 +13,7 @@
 | 失败文件 | 原始日志的直接原因 | 实际失败边界 |
 |---|---|---|
 | `v2SourceMineruWiring.test.ts` | `spawnSync python.exe ENOENT` | 测试文件第60行在模块顶层执行 Python discovery，未进入测试正文；TAP记录一个模块失败 |
-| `v2SourceRegionCells.test.ts` | `MinerU exited abnormally (code 101): Unable to create process using '"C:\\Users\\70208\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none\\python.exe" -B …'` | 固定虚拟环境的 Python 启动失败；服务在 `sourceMineruParser.ts:495` 将非零进程退出转为 `parser_failure`，不是本轮数据断言差异 |
+| `v2SourceRegionCells.test.ts` | `MinerU exited abnormally (code 101): Unable to create process using '"<home>\\AppData\\Roaming\\uv\\python\\cpython-3.12.11-windows-x86_64-none\\python.exe" -B …'` | 固定虚拟环境的 Python 启动失败；服务在 `sourceMineruParser.ts:495` 将非零进程退出转为 `parser_failure`，不是本轮数据断言差异 |
 
 上述原始日志分别位于 `.codex-tmp/c2-intent/server-full-2026-09-20T09-18-15-875Z-32056/099-server_src___tests___v2SourceMineruWiring.test.ts.log` 与同目录 `101-server_src___tests___v2SourceRegionCells.test.ts.log`。
 
