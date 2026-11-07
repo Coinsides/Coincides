@@ -2058,3 +2058,27 @@ builder 回执 → **Reviewer 先核**(对照本节五条裁定 + 「代码回�
 - **阳性对照**:A1 整文件加载不了算「红」太便宜,builder 自己补了 A2(放进读取器但无人调用 → 11 条行为红),对;B 段 11/11 红。
 - **流程改为并行**:Reviewer 读包 `src/` 对裁定;Tester 同时起同源构建与臂(修前/修后两套后端已备)。Reviewer 若出 🅰 发现要改包,Tester 已跑的臂按文件级同源沿用。**放行只看 Tester 的数 + Reviewer 无未处置的确认项。**
 - **Reviewer 点名清单**(写进其发现报告开头):①`text_view` 缺省链(服务端 `:526` 对所有非 image parser 是否都给 `true`,含 md/txt/html 等每一种 parser_key;客户端 `:79`;`sourceApi.ts:56`);②尺寸读取器:png/jpeg/webp 各分支边界、渐进式 JPEG SOF2(0xC2)是否认、EXIF 5–8 对调是否按浏览器显示方向、宽高 0 → null;③读不出尺寸 → `renderMissingPages` 逐页 catch(`:383/:392`)后 materialization 仍 materialized、无整条导入失败的别路;④页图 = 原字节(`:128-139`、`:221-225`)、`ON CONFLICT` 更新 storage_key/filename/mime 时旧文件是否释放;⑤删源与重投影:`releaseNoteCanvasAssets` + `sourcePageImageAssetIds` 是否覆盖原页图的全部引用,`adoptSourcePageImages` 挪页后旧笔记是否残留;⑥删掉的 `setMode` 守卫与 `:183/:184` 的强制、依赖数组改动有无别的调用方受影响;⑦物化器对象未动的核实;⑧15 文件之外有没有该改没改的调用方(例如别处读 `register.text_view` 或假设每 Source 一份资产的计数)。
+
+## Reviewer A-19 复核的裁定:点名八条成立、无 🅰;J1 是我裁定里的洞——「不显示切换」撤回,图片笔记默认原页但切换保留;J2 补四测试;→ A-19b 小返修(client + 一个测试文件)(Main_Designer 2026-11-08)
+
+Reviewer 报告 `docs/audits/2026-11-06-a19-builder/reviewer/findings.md`:点名八条读码全成立(`text_view` 只对 `native-image` 为 false,`P:526`,基线全部 parser_key 其余皆 true,两个出口都带字段,客户端还要求 `supported`;读取器认 SOF2、EXIF 两字节序、5–8 对调、0→null)。四条 🅱:
+
+| # | 发现 | 裁定 |
+|---|---|---|
+| J1(疑似,设计) | `pagesOnly` 后,图片投影笔记的解释层(批注 / 内容组 / purpose / 显示覆盖)在页面模式不可达;Agent 聚焦块调 `setMode('text')`(`NoteRuntimeDocumentLayer.tsx:139`)悄然落空;涉红线「Agent 能编辑的,人类必须 100% 都能编辑」 | **成立,且比 Reviewer 写的更大**:说明书 §一「原页视图的边界:只能看和跳。批注、选字、组、铸 item 都在文本视图」——文本视图不只是看物化文本,**它是这篇笔记唯一的写作面**。我派单写「图片投影没有文本可看:固定在原页,不显示文本/原页切换」时只想到物化文本为空,忘了用户要在图片下面写字、做批注。按现包上岛,图片笔记变成只能看的。**撤回「不显示切换」那半句。** 新裁定:`text_view: false` 的含义是「没有物化文本层」,只决定**默认判决 = 原页**(含还没页图时直接落原页、见生成按钮,`:130` 的直接收口保留);**切换按钮照常显示、文本视图照常可达**,与 PDF/docx 同一套记忆与切换;Agent `setMode('text')` 因而恢复有效。文本视图里若现成横幅槽能复用,加一行「此资料没有文本层,看图请切原页」,没有现成槽就不加。→ **A-19b** |
+| J2(确认) | 读取器四分支无测试:SOF2、VP8L、VP8 有损、小端 EXIF | **A-19b 一并补四条**,造法照现有 `jpegOf` / `webpOf` |
+| J3(疑似) | PNG eXIf 方向不读(与 webp EXIF 同类) | 并进 TD-59 与说明书「已知」同一条;不修 |
+| J4(疑似) | 登记未到时先闪一下文本视图 | 改 J1 后,图片笔记的开场与 PDF 一样(先文本、登记到了跳原页),不再是「按钮闪现又消失」;记观察,Tester 看一眼可见度,不修 |
+
+### A-19b 范围(只这些)
+
+- `useSourcePageViewController.ts`:去掉 `pagesOnly` 对 `active` / `textAvailable` 的强制(`:183-184`);`pagesOnly`(改名随意,语义 = 无物化文本层)只用于默认判决直接收口(`:130`)与「还没页图时默认落原页」。
+- `SourceViewToggle.tsx:9`:不再因 `pagesOnly` 返回 null。
+- 测试翻面:`useSourcePageViewController.test.tsx:23-29` 改为「图片笔记默认原页;`setMode('text')` 后切到文本;切回;记忆同 PDF」;`:40` 无页图时仍默认原页见生成入口;`:47` 不变;`NoteSourcePagesLayer.test.tsx:75` 改为「切换渲染」。
+- `a19SourceImagePages.test.ts`:补 J2 四条。
+- **server 运行时文件(`sourcePageImages.ts`、`sourceImageSize.ts`)、`sourceApi.ts`、`sourcePageLayout.*`、`NoteSourcePagesLayer.tsx` 不动**——哈希不变,Tester 服务端臂与首屏/比例臂按文件级同源沿用。
+- 阳性对照:B 段原「去掉 pagesOnly 对 active 的强制」作废;新臂「去掉默认判决的直接收口」须红(默认判决等页/读 scrollTop 的测试)。
+- 包名 `a19-image-pages-b`,照旧 dist + src + 两份 sha256 + files 清单 + COPY-BACK.md;`MANUAL-SECTION.md` 改一句:图片笔记默认进原页,右上角切换可到文本视图写字、批注。
+- 回执补「代码回答」⑥:默认判决在图片笔记上的三种起点(无页图 / 页图生成中 / 页图就绪)各落哪,行号。
+
+**Tester**:继续跑服务端与首屏比例臂(沿用);切换/默认判决/Agent 聚焦相关臂等 A-19b;另按 Reviewer 建议在冻结旧库上数 `native-image` 投影上 active 的 `annotation_truths` / `content_groups` / `purposes`(记录用,不改裁定);并在现包上确认一次「原页模式下不能写、不能批注」(坐实 J1 的前提)。**Reviewer**:A-19b 到后只 diff 核改动文件 + J2 四测试是否各守一分支。

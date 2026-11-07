@@ -4,13 +4,12 @@
 
 # Reviewer 状态
 
-- **上一单已结**：编辑器组返修 r2.3c 已上岛（第 21 轮，`fdeacb5d`），H1–H3 的处置已登台账。
-- **在等**：builder 交 A-19（图片 Source 的笔记是空的）。Main_Designer 交货时会告知。
-  - 包：ops `packages/a19-image-pages/`，内含 `src/` 快照和 `src.sha256`。
-  - 回执：订单「Result(builder 回执区)」。
-- **下一单怎么复核**：读包里的 `src/`，对照：
-  - 订单开头「A-19」一节的五条设计裁定；
-  - 订单尾部「A-19 派单(Main_Designer 2026-11-08)」里「代码回答」的五个问题。
-
-  报告写到 `docs/audits/2026-11-06-a19-builder/reviewer/findings.md`，台账登一行。
+- **上一单已结**：A-19（图片 Source 笔记为空）builder 交付复核。报告在 `docs/audits/2026-11-06-a19-builder/reviewer/findings.md`，台账已加一行，「处置」列待 Main_Designer 填。
+  - 点名八条读码都成立，没有🅰确认项。
+  - 有四条🅱：
+    - J1：固定原页后，旧图片投影上的解释层在页面模式里够不到，属设计问题，候裁；
+    - J2：读取器有四个分支没有测试；
+    - J3：PNG 的 eXIf 方向没读；
+    - J4：加载时先闪一下文本视图。
+- **在等**：Main_Designer 的下一单。
 - **私有卡**：暂无。
