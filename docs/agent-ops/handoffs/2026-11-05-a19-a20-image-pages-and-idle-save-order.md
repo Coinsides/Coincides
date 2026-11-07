@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 返修 | builder | **第二轮**。Tester 判语:阻断(review-tester.md 〇节)。必修四条:K1/K2 看门狗退步、留字框重复、第二窗口补打字被子串判断误删、提示条盖住上一行(`pointer-events:none` 不够,须不压任何笔记行);必补守恒闸边界断言 + 阳性对照;回执改掉「冻结版 H 单元测试红」。builder 在 `ed21` 副本上改,矩阵补三臂,证据进 `builder/matrix-5-round2/`;交货改本行为「待验 · Tester」。复测范围=〇节九项 | 2026-11-07 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | 第二轮已交(builder 2026-11-07):包 = ops `packages/editor-rework-r2/`(dist + src + 哈希),回执在尾部「编辑器组返修第二轮 Result(builder 2026-11-07)」;复测范围 = Tester 〇节九项 + H-L 0/N 丢 + K 三臂与 25 秒臂 + 留字框「关一条另一条在」+ 提示条几何 | 2026-11-07 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -58,36 +58,36 @@
 - A-20:第二个写者:否 ← 「A-20 · 打字只在回车或失焦时落库(🅱 偏重,修)」
 - A-19:为页图另起转换队列:否;改写 media 块:否 ← 「A-19 · 图片 Source 的笔记是空的(🅰,功能失效,不丢数据)」
 
-### 改动清单(builder,待 builder 填)
+### 改动清单(builder)
 
-- 基线 commit:`9bc45e69`(与现分支头 `c74d4b86` 之间只有 docs 提交,代码相同)。改动只在 scratch 副本里,共享树一字未动,拷回候 Main_Designer 令。
-- 改了哪些文件(相对共享树工作树,15 个,sha256 在回执里):`blocks/PaginatedTextBlockProjection.tsx` 及 `.test.tsx`、`blocks/TextBlockProjection.tsx` 及 `.input.test.tsx`、`headingInputService.ts` 及 `.test.ts`、`.draftText.test.ts`、`headingRoleService.ts`、`hooks/structureTypingConservation.test.tsx`(新)、`hooks/useHeadingStructureController.ts` 及 `.test.tsx`、`layers/BlockEditorLayer.tsx` 及 `.test.tsx`、`structureTypingBuffer.ts`、`structureTypingFocus.ts`(都在 `client/src/pages/Notes/canvasEngine/` 下)
-- 冻结清单外的文件:`headingRoleService.ts`(加 `beforeCaret?`)、`BlockEditorLayer.test.tsx`、`headingInputService.test.ts`、`TextBlockProjection.input.test.tsx`、`PaginatedTextBlockProjection.test.tsx`、`structureTypingConservation.test.tsx`(新)。`useTextFlowHistory.ts`、`useDraftBlockController.ts` 与共享树相同(做法 4、leads-2 都已撤)。
+- 基线 commit:`9bc45e69`。改动只在 scratch 副本 `ed21` 里;共享树一字未动;`edfix`(第一轮被测源码)未动。拷回候 Main_Designer 令。
+- 第二轮源码 = 基线 + 22 个文件(都在 `client/src/pages/Notes/canvasEngine/` 下),sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-5-round2/final/source-sha256-r2.txt`。17 个与第一轮相同;本轮改 4 个、新增 1 个:
+  - `hooks/useHeadingStructureController.ts`:K1 的 `lastBatch`(按笔记)、留字框记录 id、`typedTextIsPlaced`、3a 锚点、3b 落地即写档 flush 落定才删
+  - `structureTypingBuffer.ts`:提示条进框内、Discard
+  - `hooks/useHeadingStructureController.test.tsx`
+  - `hooks/structureTypingConservation.test.tsx`:边界断言 + 阳性对照
+  - 新增 `hooks/headingStructureWatchdog.realAdapter.test.tsx`:真适配器 K1
+- 包:ops `packages/editor-rework-r2/`(`dist/` 主 JS `index-BlJnjQci.js` + `src/` + 两份哈希);纯 21 文件包的源码快照在 `packages/editor-rework-pure21/src/`。
 
-### 自报数字(builder,待 builder 填)
+### 自报数字(builder)
 
-> 一个数字一行,出处写全;没有出处的数字不写。证据文件写仓库内相对路径(在 `docs/audits/` 下),⛔ 会话临时目录和本机路径。
+> 一个数字一行,出处写全。m5 = `docs/audits/2026-11-05-a21-builder/builder/matrix-5-round2/`,哪些算数见其 `README.md`。
 
 | 数字 | 命令 | 环境/版本 | 证据文件 |
 |---|---|---|---|
-| 纯 21 文件包:副本−基线 = 21 个文件(`21 files changed`),sha256 21/21 相符 | `git archive 9bc45e69` 两份;`git diff --no-index --stat` | 纯副本 / 原样基线 | `docs/audits/2026-11-05-a21-builder/builder/matrix-4-pure21/copy-minus-baseline.diffstat.txt` |
-| 纯包:全量 2643/2643,类型检查净 | 同下 | 纯 21 文件包(主 JS `index-TKMm6sxh.js`) | `builder/matrix-4-pure21/summary.txt`、`client-full.raw` |
-| 纯包:注入矩阵 26 行 ①21 ②5 ③0;r04@57 156 行坏 0;dist 跑前跑后一致 | `matrix25.mjs … 2 57 '^enter_'`;`matrix_r04.mjs pure57 …` | 纯 21 文件包,延迟 57 | `builder/matrix-4-pure21/enter-fix.json`、`r04-pure57.log`、`dist-pure21.sha256` |
-| (以下各行出自混包:编辑器组 + A-19,见尾部「包的构成更正」) | | | |
-| 客户端全量 2649/2649(含守恒闸 40 种子) | `vitest run --pool=forks --poolOptions.forks.maxForks=3` | 混包源码,副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-3-final/client-full.raw` |
-| 类型检查净;三个检查脚本 exit 0 | `tsc --noEmit -p .`;`npm run -s check:canvas-runtime-boundary / check:source-experience / check:owned-helper-contract`(根目录) | 同上 | `matrix-3-final/summary.txt`、`tsc.txt` |
-| 守恒闸 7 条脚本冻结版全红、修复版全绿 | `vitest run hooks/structureTypingConservation.test.tsx` | 冻结副本 / 修复副本 | `builder/gate/conservation-frozen-*.raw`、`gate/frozen-controls-and-gate-run.txt` |
-| 注入矩阵 26 行:①21 ②5 ③0 | `node matrix25.mjs <fix 代理> <out> 2 57 '^enter_'` + `classify.mjs` | 最终包,本地后端,往返 57ms | `matrix-3-final/enter-fix.json`、`summary.txt` |
-| 同批对照:冻结版 ①18 ③8;修前版 ①11 ③15 | 同上,冻结/修前代理 | 冻结包 / A-18 前包,延迟 57 | `matrix-2-opt4/enter-frozen.json`、`enter-before.json` |
-| r04@57:156 行坏 0 | `node matrix_r04.mjs final57 … N,R,V,D,L,K,H 1` | 最终包,延迟 57 | `matrix-3-final/r04-final57.log`、`final57.rows.jsonl` |
-| 地址栏离开(自然时序)修复版 7/10 自动落、其余第②类;冻结版 10/10 | `matrix25.mjs … '^enter_leaveAddressBar$'` | 第一批修复包 / 冻结包 | `matrix-1/addr-fix.json`、`addr-frozen.json`、`enter-*.json` |
-| 慢回包地址栏离开:修复版 0/6 自动落(全②);冻结版 6/6 | `matrix25.mjs … '^enter_slowReply'` | 代理 slowreply 回包迟 3s | `matrix-2-opt4/slow-*.json`、`matrix-3-final/enter-fix.json` |
-| 回车到字落地:修复版中位 1238 ms 最大 1304;冻结版 1370 / 1419;修前版没测到 | `matrix25.mjs … 6 57 '^enter_clean$'` | 三版同批 | `matrix-3-final/timing-*.json` |
-| dist 跑前跑后 sha256 一致 | `sha256sum` | 最终包 | `matrix-3-final/dist-edfix.sha256`、`summary.txt` |
+| 副本−基线 = 22 个文件,sha256 与 ops 包 `src/` 22/22 一致 | `diff -rq`(排除 node_modules、构建产物、检查脚本临时输出);`sha256sum` | 第二轮副本 / 原样基线 | `m5/final/source-sha256-r2.txt`、`files22.list` |
+| 类型检查净;客户端全量 2653/2653;守恒闸 40 种子绿,边界断言在跑 | `tsc --noEmit -p .`;`vitest run --pool=forks --poolOptions.forks.maxForks=3` | 最终文件集 | `m5/client3/summary.txt`、`client-full.raw` |
+| 三个检查脚本 exit 0;r04@57 156 行坏 0;dist 跑前跑后一致 | `npm run -s check:…`(根目录);`matrix_r04.mjs r2final57 …` | 第二轮包,延迟 57 | `m5/final/summary.txt`、`r04-r2final57.log` |
+| 阳性对照:本轮 8 条测试在第二轮前的源码上全红;3b 在 3b 改动前红;K1 真适配器修前 5/5 红、修后 20/20 绿 | `vitest run … -t "round 2"`,换入修前源码(副本内,trap 复原) | 副本 | `m5/client3/red-controls.txt`、`k1-repeat/` |
+| K 臂(卡 12 秒后成功):第二轮 ①2,冻结版 ①2,纯包 ②′2 | `matrix25.mjs … '^k_'`,代理层 `stall` | 三版,延迟 57 | `m5/final/k-r2.json`、`m5/per-note/k-frozen.json`、`m5/k1-early/k-pure.json` |
+| 注入矩阵 26 行(修正 harness):第二轮 ①20 ②6 ③0;纯包 ①20 ②6 ③0;冻结版 ①18 ③8;修前 ①11 ③15 | `matrix25b.mjs … 2 57 '^enter_'` + `classifyb.mjs` | 四版同批 | `m5/per-note/enter-*.json`、`summary.txt` |
+| H-L(浏览器请求阶段扣住):第二轮 ②3,冻结版 ③3,纯包 ③3 | `matrix25b.mjs … 3 57 '^h_HL$'` | 三版 | `m5/per-note/hl-*.json` |
+| 度量器自测:真丢一行加别的笔记的同字存档,旧 harness ②2(误判)、新 harness ③2 | `SEED_OTHER=1 matrix25(b).mjs … '^enter_slowReplyUnload$'` | 冻结版 | `m5/harness-control/summary.txt` |
+| 第一轮旧数(纯包 ②5、「慢回包卸载 冻结③→修复②」)按修正 harness 重出,结论不变,但原数作废 | 同上 | 纯包 / 冻结版 | `m5/per-note/enter-pure.json`、`enter-frozen.json` |
 
-### 待办(builder,待 builder 填)
+### 待办(builder)
 
-- 已交 Tester,等判语。拷回共享树候 Main_Designer 令。
+- 已交 Tester(第二轮包),等判语。拷回共享树候 Main_Designer 令。
 - 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
@@ -825,3 +825,165 @@ Tester 在真浏览器坐实核读指出的 3b(其 H-L 臂):`warmup` 回车 → 
 - **受影响的声明**:第一轮回执「慢回包整页卸载:冻结版 ③、修复版 ②(净改进)」——**作废,不得再引**;纯 21 文件包 26 行 ①21 ②5 ③0 里的 ②5 同样待重出。单卡「现行有效的裁定」已加注。
 - **修法**:matrix25b / classifyb 只认以本行笔记 id 结尾的键;每行另记重开页面实见(框、提示、本笔记的记录),归类以实见为准。排在当前全量之后、同一最终源上重跑:注入矩阵(r2 / 冻结 / 修前)+ h_HL(r2 / 冻结 / 纯);再跑两行诊断(完整代理请求日志 + 重开前读库),回答「失败臂字在哪」「黑洞臂哪个请求带字」。
 - **裁定**:①回执只用修正后的数,第一轮那行标撤回,写明哪些旧数受影响、哪些不受;②Tester 的判语与复测不受影响(它按真浏览器重开后屏上与库里实见归类),复测范围不改;③这是 TD-55「假适配器没有闸的绿不算数」同一类——**度量器自己要过阳性对照**:harness 加一条自测——往别的笔记键里塞同样的字,本行必须仍判 ③;写进回执。
+
+## 编辑器组返修第二轮 Result(builder 2026-11-07)
+
+答「编辑器组返修第二轮裁定」及其后各节(补充裁定、机理核读四条、H-L 裁定、harness 自查)。证据目录 `docs/audits/2026-11-05-a21-builder/builder/matrix-5-round2/`(下称 m5;`README.md` 写明哪些数算数)。
+
+### 包与同源
+
+- 源码 = `9bc45e69` + 22 个文件。副本−基线 = 22 个文件,全在 `client/src/pages/Notes/canvasEngine/` 下;`node_modules`、构建产物和检查脚本的临时输出不计。逐文件 sha256 见 `m5/final/source-sha256-r2.txt`。
+- 22 个文件里,17 个与第一轮逐字节相同;本轮改 4 个、新增 1 个:
+  - `hooks/useHeadingStructureController.ts`
+  - `structureTypingBuffer.ts`
+  - `hooks/useHeadingStructureController.test.tsx`
+  - `hooks/structureTypingConservation.test.tsx`
+  - 新增 `hooks/headingStructureWatchdog.realAdapter.test.tsx`
+- 包:主 JS `index-BlJnjQci.js`,63 个文件。ops 里的 `packages/editor-rework-r2/` 带 `dist/` + `src/`,另有 `dist.sha256`、`src.sha256`,与 m5 的哈希一致。
+- dist 在注入矩阵、K、H-L、r04 前后各核一次哈希,结果不变(`m5/final/summary.txt`、`m5/per-note/summary.txt`)。
+- `edfix` 没动。它的 21 个文件连同 sha256 已放进 `packages/editor-rework-pure21/src/`,与第一轮回执 21/21 相符。
+
+### 全量与检查(最终文件集)
+
+| 数 | 证据 |
+|---|---|
+| 类型检查净;客户端全量 2653/2653(257 个文件) | `m5/client3/summary.txt`、`client-full.raw` |
+| 守恒闸 40 种子全绿;豁免记号 10 个种子,其中进过窗口的为 0(边界断言在跑,没红) | 同上(`UNSAVED AT UNLOAD` 一行) |
+| 三个检查脚本 exit 0(根目录跑) | `m5/final/check-*.txt`、`summary.txt` |
+| r04@57:156 行坏 0 | `m5/final/r04-r2final57.log`、`r2final57.rows.jsonl` |
+| K1 真适配器测试在最终源码上连跑 20/20 | `m5/client3/k1-repeat/` |
+| 阳性对照全部先红后绿(见下各条) | `m5/client3/red-controls.txt` |
+
+### 每条红:根因一句、修法、测试、浏览器数
+
+**第 1 条 K1/K2(改角色那次保存卡住后成功,同块未拆)**
+- 根因(真浏览器打点坐实,`m5/k1-early/k-diag.log`):看门狗放手后,被放弃的 run 还停在 history 的 batch 里,等那次被扣的保存。字落地后请求的下一个结构等的是同一个 flush。flush 一落定,新结构立刻调 `runBatch`,而旧 run 还要再等一帧。history 在旧 batch 没关时拒绝第二个 batch(`if (batchEntries || …) return false`)。打点里新结构的 batch 没进 operation 就返回 false,比旧 batch 关闭早 19ms。冻结版能成,是因为它先发结构、后落字,抢先拿到了闩。
+- 修法:新结构在 `runStructureBatch` 前,先等**同一笔记**上一个结构 batch 落定(`lastBatch`,按笔记作用域,别的笔记的 batch 不等)。
+  - 等待写在等待者自己的 run 里,由它自己的看门狗封顶:从打 `#` 起约 20 秒恢复界。超出就字留在笔记里、同块未拆。
+  - 等待期间整篇第二次只读,和任何结构进行中一样。
+  - 「看门狗后不放弃 run」没用。
+- 测试:`headingStructureWatchdog.realAdapter.test.tsx`。真 `useNoteCanvasDataAdapter`(带它自己的 `current()` 检查)+ 真 history + 控制器。合成服务端每次写入往返 120ms(没有往返时延,这场竞态打不开)。
+  - 修前 5/5 红,`server ["warmup|H:kept"]`,结构请求一个没发。
+  - 修后 20/20 绿。
+- 浏览器(K 臂,代理层扣「改角色那次」text-save,内容 `warmup|[heading_1]`,每臂 2 轮):
+
+| 臂 | 纯 21 文件 | 冻结版 | 第二轮 |
+|---|---|---|---|
+| 卡 12 秒后成功 | ②′ 2 | ① 2 | **① 2** |
+| 卡 12 秒后失败(500) | ②′ 2 | ③ 2 | ②′ 2 |
+| 卡住 + 整页卸载 | ① 2 | ③ 2 | ① 2 |
+| 卡 25 秒后成功(界外) | — | ③ 2 | ②′ 2 |
+
+  - 失败那一臂第二轮的 ②′,字在库里,不是草稿或框。依据是诊断行 `m5/per-note/diag-kfail.log`(完整请求日志 + 重开前读库):
+    - 被扣的 `warmup|[heading_1]` 在代理里 12 秒后回 500,没到服务端。
+    - 随后客户端又发了 `warmup|[heading_1]`(19904ms)和 `warmup|[heading_1]kept`(20040ms),两次都到了服务端。text-save 带整块内容。
+    - 重开前库里是 `warmup|[heading_1]kept`。
+    - 保存失败后不再发结构,是设计。
+  - 证据:第二轮与冻结版 `m5/final/k-r2.json`、`m5/per-note/k-frozen.json`;纯包 `m5/k1-early/k-pure.json`。
+
+**第 2 条 留字框重复**
+- 根因:从存档恢复时,框的 DOM 记号用的是新生成的 id,`entry.id = words.id` 是开框之后才改的。路由重进时找不到上一个框,于是两个框叠在一起,关任一个都会删掉共用的那条存档。
+- 修法:`openEntry` 接收记录自己的 id,一记录一框一存档。卸载时删 DOM 的保险带没加(按裁定)。
+- 测试:「一记录一框,关一条另一条在」。两条不同的记录,第二次挂载后屏上仍是 2 个框;关 `kept-a` 后存档只剩 `kept-b`。修前屏上 4 个框(红)。
+
+**第 3 条 `od`(第二窗口补打的字卸载后丢)**
+- 根因:Tester 坐实了。重开时用 `'body'.includes('od')` 判「已在笔记里」,把存档删了。
+- 修法:`typedTextIsPlaced`。字在原锚点(打字处一侧的原文紧挨着字)才算已在笔记里;Enter 分出去的行接着往后读。⛔ 子串。
+- 测试:`od` 落成 `bodyod`、存档清掉(修前 `['Intro','body']`,红);锚点比对的真假表。
+- 3a(条件 d):`mergeTypedText` 里空的一侧不再当锚点。
+  - 改前 `live.endsWith('')` 恒真,往空单元打的字会被追加到它现在内容的末尾。
+  - 现在:两侧原文都对不上就 keep()。在末尾打的字,只要它前面那段原文仍是单元的结尾,照常落。
+  - 测试:修前 `'other textkept'`(红)。
+  - 旧测试「看门狗放弃的结构」改了期望:那个单元还是空的,`Seckept` 无锚,由「掉了 `Sec` 落进去」改为「留住(②)」。
+- 3b(H-L,第③类,裁定本轮修):
+  - 修法:字从窗口落地的同一任务里写一条存档,锚在落地前那一刻的单元原文上(`initialText` = 当时单元文本,`text` = 合并后文本)。
+  - `history.flush()` 落定,也就是承载这些字的保存已确认,才删这条存档。flush 被拒(失败保存待 Retry/Undo,或输入法组合中)时,每 800ms 再问,最多 30 次;之后交给下次打开,按 `typedTextIsPlaced` 判:已在就删,不在就落或留,不双写、不盲写。
+  - 不新增可落库状态,不动 history 记账点。
+  - 测试(Tester 步骤的 jsdom 版):结构走完、字落地、承载保存永不返回、pagehide。修前存档为空(红);修后存档里是 `Seckept`,锚 `new-1 / title / 'Sec'`。另一条:保存确认后存档消失。
+
+**第 4 条 提示条盖住上一行**
+- 改后的几何:提示条在框内,贴框首行右端:`top` = 框顶 + 2,`left` = 框右 − 提示条宽 − 2,单行 16px 高,不超出框的矩形。框用 `padding-right` 让出这块宽度,框里的字不在提示条底下。
+- 框本身跟随它代表的那个单元的编辑器(框顶 = 该单元顶,不低于上一行的底)。所以上一行没被任何东西盖住,点上一行就直接点在那一行的编辑器上。
+- 「点击穿透」指提示条自身:`pointer-events: none`,点在提示条上落到它下面的框(框里的字),只有按钮接点击。
+- 按钮改名 Discard。可见文字是 `Not in the note yet`;按钮和提示条的 title / aria 写全句,含「Discard deletes them」。
+- 几何测试断言:提示条 top ≥ 框顶,top + 16 ≤ 框底,left 在框的左右之间;框的 `padding-right` ≥ 框右 − 提示条 left;提示条 `pointer-events: none`、按钮 `auto`;按钮文字 Discard;title 含「Discard deletes them」。修前 top = 272px(框顶 300,在框上方 28px,红)。
+- 已知:框里的字加上让出的宽度若折行,框会往下长,盖住它下面一行的一部分。框对长字一直如此,本轮未改。
+
+**第 5 条 gamma(真笔记 29 篇里 1 篇没落库)**
+- 读码线索:「Changes could not be saved」只有一个出处,`useNoteRouteSaveBoundary.tsx` 的离开屏障。`flushPendingSaves` 被拒,也就是 `textHistory.flush` 抛错:有失败保存、模板 / 文档失败,或输入法组合中。
+- 「`text_save_revision` 停在 1」与它能并存的路径:那次打字保存在客户端失败或被拒,失败态挂着,离开时 flush 抛错弹提示,之后没落库。没找到确定的触发点。
+- 本轮 3b 修的是「字从窗口落地后未确认就关页」,gamma 是普通打字,不在这条路上。
+
+**守恒闸边界断言**
+- 用测试里已记的 `… in window` 步骤,把进过窗口的记号记成一个集合。被豁免为 `UNSAVED AT UNLOAD` 的记号若在这个集合里,就报问题。
+- 闸里字只能从窗口进留字框,没有单独的 carry 路径,所以这一个集合同时覆盖了窗口、留字框和 carry。
+- 阳性对照:`exemptEverything` 把所有字(含窗口里打的)都推进豁免,断言必须红,实测红。
+
+**回执更正**:第一轮回执引的「冻结版 H 单元测试红」是接口错(`null.map`),不是行为红,作废。H 的有效对照是闸里的 H 脚本(冻结版 `LOST`)。
+
+### 注入矩阵(修正 harness,按笔记读存档,`m5/per-note/`)
+
+每臂 2 轮。注入层:代理层,浏览器已发出,由代理扣、拖或回 500。
+
+| 版本 | ① | ② | ③ | 说明 |
+|---|---|---|---|---|
+| 第二轮 | 20 | 6 | 0 | ② = 改地址离开 2、慢回包改地址 2、慢回包卸载 2(重开后框里有字、本笔记有存档) |
+| 纯 21 文件包 | 20 | 6 | 0 | 同上三臂 |
+| 冻结版 | 18 | 0 | 8 | ③ = reorder 2、save3 2、离开 350ms 2、慢回包卸载 2 |
+| 修前(A-18 前) | 11 | 0 | 15 | |
+
+- **harness 更正**(Main_Designer 裁定)。第一轮纯包「26 行 ①21 ②5 ③0」用的是旧 harness:
+  - 受影响的只有字不在服务端的行,即慢回包两臂和改地址离开那一行。
+  - 修正 harness 重出:纯包 ①20 ②6 ③0。旧的 5 个 ② 重开后实见仍是 ②(框 + 本笔记存档),没有一个变 ③。①21 变 ①20,是改地址离开这一臂自然时序下的落地波动(本次 2 轮都没自动落)。
+  - 第一轮「慢回包卸载:冻结版 ③、修复版 ②」按修正 harness 重出,结论相同:纯包 ② 2,冻结版 ③ 2。但第一轮那行原数仍作废,以本表为准。
+- **度量器自测**(`m5/harness-control/`):冻结版慢回包卸载一臂(真丢),同样的字塞进别的笔记的存档键。旧 harness 判 ② 2(误判),新 harness 判 ③ 2。
+- 回车到字落地(clean 臂):第二轮中位 1194ms、最大 1286ms;冻结版 1356 / 1392。
+
+### H-L 与 3b 各臂(注入层逐臂写明)
+
+| 臂 | 注入层 | 第二轮 | 冻结版 | 纯包 |
+|---|---|---|---|---|
+| `h_HL`:扣住带 `body` 的 text-save,150ms 后整页离开,12 秒后重开 | **浏览器请求阶段**(CDP Fetch,请求没送出) | ② 3 | ③ 3 | ③ 3 |
+| `h_landedUnload`:所有 text-save 在代理处拖 3 秒,字落地后立刻离开 | 代理层(浏览器已发出) | ① 2 | — | — |
+| `h_landedThenDrop`:字落地后代理吞掉之后所有 text-save,100ms 后离开 | 代理层(浏览器已发出) | ① 2 | — | — |
+
+- `h_HL` 第二轮的 ②:
+  - 本臂扣住的是第一次带 `body` 的保存,第一个结构没走完,库里只剩 `warmup|#`。
+  - 存档锚的 `initialText` 是空串,库里那个单元现在是 `#`。空的一侧不是锚(3a),所以重开后字留在框里(3/3,框里是 `head\nbody`,本笔记存档在),没落进笔记。没丢、没双写。
+  - Tester 的 H-L 时序是第一个结构走完、字作普通编辑落地。那条走的是「锚对得上就落」,由 Tester 复测。
+- 代理层两臂 0 丢的原因(诊断行 `m5/per-note/diag-blackhole.log`):承载落地字的那次打字 persist 是 `text-save [heading_1]head|body`,8571ms 发出,早于第二个结构的建块和转移(8739、9026ms),也比黑洞打开(9373ms)早约 800ms。臂里「落地」的探测要等第二个结构走完才成立,所以黑洞罩不到那次保存。我之前说的「结构自己的写入携带了字」不对,更正为:是那次打字 text-save 带的字,而且它在黑洞之前就到了服务端。
+
+### 已知、未修、记债
+
+- 保存失败 + 结构搬走单元 + 关页 → 重开时框里有字、笔记里也有。Main_Designer 定为 ②:笔记里没有双写,框是留住的副本,Discard 是显式动作。步骤:字从窗口落地、承载保存失败待 Retry/Undo、结构把单元搬到新块、关页、重开。请 Tester 复测时碰一次。
+- 约 10.1 秒落下的打字编辑被 `pushEntry` 塞进被放弃 batch 的复合条目(撤销分组怪,不丢字):记旧债,不修。
+- 「快离开后同块未拆」(②′)、乱序、空残块:按裁定入 A-25,本轮没碰结构事务化。
+- 第 4 条框的折行增高(见上)。
+
+### 待 Tester
+
+- 包:ops `packages/editor-rework-r2/`,`dist/` + `src/` + 两份哈希。复测范围按 Tester 〇节九项,另加 H-L 0/N 丢、K 三臂与 25 秒臂、留字框重复「两条不同记录关一条另一条在」、提示条几何。
+- 拷回共享树候 Main_Designer 令。
+
+## 编辑器组第二轮回执收讫:放行条件逐条核对,转 Tester 复测(Main_Designer 2026-11-07)
+
+对照「第二轮补充裁定」汇总的放行条件 + H-L 裁定第 5 条,逐条核回执与 m5 证据(只读,未跑任何测试):
+
+| 条件 | 回执 | 核 |
+|---|---|---|
+| 必修 1–4 修好,各带先红后绿的测试 | K1 `lastBatch`(按笔记)+ 真适配器测试修前 5/5 红 / 修后 20/20 绿;留字框一记录一框;`typedTextIsPlaced` 锚点比对;提示条进框内 + Discard | `m5/client3/red-controls.txt` A 段 8 条在第二轮前源码上全红,E 段最终源全绿;B 段 K1 5 次 `server ["warmup\|H:kept"]`。**对** |
+| 3a(无锚点不追加末尾)/ 3b(H-L,落地即写档、flush 落定才删) | 各有测试;3b 在 3b 改动前单独红(C 段) | **对**。3b 隔离对照是本回执里最干净的一条 |
+| 边界断言 + 阳性对照 | 进过窗口的记号集合;`exemptEverything` 必红 | D 段 1 passed(对照红=测试绿)。**对** |
+| 注入层逐臂写明;至少一臂发出前拦 | `h_HL` = CDP Fetch 请求阶段;K 四臂与 3b 旧两臂 = 代理层 | **对**。黑洞臂 0 丢的原因已更正为「打字 text-save 在黑洞前 800ms 已到服务端」 |
+| 修正 harness + 自测;第一轮旧数标作废 | `per-note/` 四版同批;`harness-control/` 旧 ②2 → 新 ③2;旧 ②5 重出仍 ②,原数作废 | **对** |
+| 恢复界 ~20 秒 + K25 臂;第二次只读写明 | 25 秒臂 ②′ 2(字在、未拆);等待期间整篇第二次只读 | **对**,Tester 看是否可忍 |
+| 第③类为零(乱序除外,已入 A-25) | 矿阵 r2 ①20 ②6 ③0;K 四臂 ③0;`h_HL` ②3 | builder 侧 **0**;终数以 Tester 真浏览器为准 |
+| 同源:`src/` 快照 + 哈希;dist 跑前跑后不变 | `editor-rework-r2/{dist,src}` + 两份哈希;`edfix` 未动,纯 21 文件 `src/` 已归档 | **对** |
+| 第 5 条 gamma 观察项 | 读码线索写了(离开屏障 flush 抛错路径),「没找到确定触发点」 | 照观察项记,不挡 |
+
+**两处要 Tester 知道的**:
+
+1. **builder 的 `h_HL` 臂不是 Tester 的 H-L 时序**。builder 扣的是**第一次**带 `body` 的保存,此时第一个结构没走完,库里只剩 `warmup|#`,字留在框里(② 3/3)——走的是 3a「空的一侧不是锚 → keep」。Tester 的 H-L 是**第一个结构走完、字作普通编辑落地、承载保存被扣、关页**——走的是 3b「锚对得上就落」。3b 的这条路径只有 jsdom 测试,**真浏览器证据只有 Tester 的 H-L 臂**,放行条件「0/N 丢」的 N 请不少于第一轮(3),且三版都跑(修前对照已有,不必再跑)。
+2. **第 4 条的已知残留**:框里的字加上让出的提示条宽度若折行,框往下长,会盖住它**下面**一行的一部分(长字一直如此,本轮未改)。Tester 的验收路线是「上一行看得见、点得到、接着打的字落库」——按此验;下面一行若被盖,记现象、归 ②(视觉),不当 ③。
+
+**裁定**:回执合格,包转 Tester 复测。单卡状态行「待验 · Tester」有效;看板行已翻。复测范围 = 〇节九项 + 第 10 项四臂(K25、H-L、两条记录关一条、无锚点),外加 builder 请求的一次「保存失败 + 结构搬走单元 + 关页」(已定 ②,碰一次核实不双写)。builder 待命,⛔ 动共享树,⛔ 动 `edfix`;Tester 期间若出红,先发短讯给 Main_Designer 再动。
