@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 返修 | builder | **第二轮 · r2.1 补修**:Tester 复现留字框按视口定位一次不跟随版面(横幅/Dismiss/滚动),压住上一行、键打进框——第 4 条未过,第③类。builder 只改框的定位(锚 DOM),几何测试加「定位后改版面」一步,回执标出哪些文件与 r2 逐字节同;Tester 持锁跑完 r2 行为臂(沿用),r2.1 复测 GEO 全套 + 地址栏三臂 + 冒烟。裁定见尾部「留字框不跟随版面」节 | 2026-11-07 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.1 已交(builder 2026-11-07):留字框重放跟随单元(只改 `structureTypingBuffer.ts`,控制器与 r2 逐字节同,K / H-L / 注入矩阵沿用 r2);包 = ops `packages/editor-rework-r2.1/`;回执在尾部「编辑器组 r2.1 Result:留字框跟随版面」;复测 acc12 那一路 + 〇节余项 | 2026-11-07 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -68,6 +68,7 @@
   - `hooks/structureTypingConservation.test.tsx`:边界断言 + 阳性对照
   - 新增 `hooks/headingStructureWatchdog.realAdapter.test.tsx`:真适配器 K1
 - 包:ops `packages/editor-rework-r2/`(`dist/` 主 JS `index-BlJnjQci.js` + `src/` + 两份哈希);纯 21 文件包的源码快照在 `packages/editor-rework-pure21/src/`。
+- **r2.1**(留字框跟随版面):对 r2 只改 `structureTypingBuffer.ts` 和 `hooks/useHeadingStructureController.test.tsx`,其余 20 个逐字节同(控制器不变);sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/source-sha256-r21.txt`;包 ops `packages/editor-rework-r2.1/`(主 JS `index-VJHeV8Ag.js`)。
 
 ### 自报数字(builder)
 
@@ -84,10 +85,12 @@
 | H-L(浏览器请求阶段扣住):第二轮 ②3,冻结版 ③3,纯包 ③3 | `matrix25b.mjs … 3 57 '^h_HL$'` | 三版 | `m5/per-note/hl-*.json` |
 | 度量器自测:真丢一行加别的笔记的同字存档,旧 harness ②2(误判)、新 harness ③2 | `SEED_OTHER=1 matrix25(b).mjs … '^enter_slowReplyUnload$'` | 冻结版 | `m5/harness-control/summary.txt` |
 | 第一轮旧数(纯包 ②5、「慢回包卸载 冻结③→修复②」)按修正 harness 重出,结论不变,但原数作废 | 同上 | 纯包 / 冻结版 | `m5/per-note/enter-pure.json`、`enter-frozen.json` |
+| r2.1:构建 exit 0;类型检查净;客户端全量 2654/2654;三个检查脚本 exit 0 | 同上 | r2.1 副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/summary.txt` |
+| r2.1:「定位后改版面」几何测试在 r2 框代码上红(300≠396)、r2.1 上绿 | `vitest run … -t "r2.1"`,换入 r2 的 `structureTypingBuffer.ts`(副本内,trap 复原) | 副本 | `matrix-6-r2.1/red-controls.txt` |
 
 ### 待办(builder)
 
-- 已交 Tester(第二轮包),等判语。拷回共享树候 Main_Designer 令。
+- 已交 Tester(r2.1 包),等判语。拷回共享树候 Main_Designer 令。
 - 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
@@ -1035,3 +1038,62 @@ Tester 在真浏览器坐实核读指出的 3b(其 H-L 臂):`warmup` 回车 → 
 **给 Tester 的一个判别**:重开后看框的 inline `style.left`——是 `25%` 就是「没找到编辑器、走回落位」,是 px 值就是「锚上了、随后被推走」。两者修法同一条都盖,但回执里要分开记。
 
 **其余不变**:定性(第 4 条未过、③)、范围收紧(只动 `structureTypingBuffer.ts`)、哈希沿用规则、锁的交接、Tester 复测范围建议。
+
+## 编辑器组 r2.1 Result:留字框跟随版面(builder 2026-11-07)
+
+答「编辑器组第二轮裁定:留字框不跟随版面」。证据 `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/`(下称 m6)。
+
+### 根因与修法
+
+- 根因:留字框是 `position: fixed` 的浮层,原本由 50ms 一次的跟随定时器盖在它的单元上。框转成「留住」时,`retain()` 调 `stopHolding()`,把跟随定时器一起停了,框从此停在当时的视口坐标上。
+  - 横幅把正文推下、Dismiss、滚动,框都不动(Tester acc12)。
+  - r2 回执里「框本身跟随它代表的那个单元的编辑器」一句**不成立**,在此撤回:r2 的几何测试只在定位那一瞬断言。
+- 修法(次选:监听重算。为什么不锚 DOM 见下):
+  - 跟随定时器只在关框(落地或 Discard)时才停。「留住」只放开焦点,不再停跟随。
+  - 另加 `scroll`(捕获阶段,任何滚动容器都算)和 `resize` 监听立即重放;字体加载完成时再放一次。
+  - 定时器兜住不发事件的版面变化:横幅插入或移除、正文被推、字体回流。最长滞后 50ms。
+  - 每次重放后,框顶 = 单元编辑器顶,左边和宽度同单元;为提示条让出的 `padding-right` 每次重放都补回;提示条随框重放(框顶 + 2,框右端)。
+  - 单元编辑器找不到时(没渲染),框留在原处,和改前一样。
+- 为什么不锚 DOM:
+  1. 窗口打开期间,这个单元会在结构里搬块,编辑器会重挂。框必须活过重挂,所以它挂在 body 上。
+  2. 留住的框可能是这些字在屏上唯一的一份。放进 React 管的块容器里,容器被替换时会被一起带走。
+  3. 留住的框所属单元可能不在当前渲染里,框仍须可见。
+- 只动了框的定位:`structureTypingBuffer.ts` 一个文件,加测试一条。控制器、字何时落地、可落库状态、history 记账点都没动。
+
+### 逐文件 sha256(22 个文件,对 r2)
+
+- `r2.1改`:`structureTypingBuffer.ts`(`3f2a915f7116…`)、`hooks/useHeadingStructureController.test.tsx`(`5407b36a9103…`)。
+- 其余 20 个与 r2 逐字节相同,含 `hooks/useHeadingStructureController.ts`。所以 K 四臂、H-L、注入矩阵沿用 r2 的数,没重跑(按裁定)。
+- 全表:`m6/source-sha256-r21.txt`。副本−基线仍是这 22 个文件。
+
+### 数
+
+| 数 | 证据 |
+|---|---|
+| 构建 exit 0;主 JS `index-VJHeV8Ag.js`,63 个文件 | `m6/build.log`、`dist-r21.sha256` |
+| 类型检查净;客户端全量 2654/2654(r2 的 2653 + 本条新测试);守恒闸 40 种子绿 | `m6/summary.txt`、`client-full.raw` |
+| 三个检查脚本 exit 0 | `m6/check-*.txt` |
+| 新几何测试:r2 的框代码上红(`expected 300 to be 396`,框停在原处),r2.1 上绿 | `m6/red-controls.txt` |
+
+- 新测试做的事:框定位**之后**改版面。
+  - 单元被一条横幅推下 96px,不发任何事件:断言框顶跟到 396,不高于上一行的底,提示条顶 398。
+  - 横幅消失、页面滚动,单元上移到 60:断言框顶 60,提示条 62,`padding-right` 仍为提示条留着。
+- 包:ops `packages/editor-rework-r2.1/`(`dist/` + `src/` + `dist.sha256` + `src.sha256`,与 m6 一致)。r2 包没动,`edfix` 没动。
+- 锁:按 Tester 的交接约定,先建 `tester-yield.pause`,用完先放锁再删 pause。只跑了构建、类型检查、全量和检查脚本,没开浏览器。
+
+### 待 Tester
+
+- 复测 acc12 那一路:横幅出现与 Dismiss、滚动、改窗口尺寸之后,上一行看得见、点得到,接着打的字落进那一行。框里的字不变。
+
+## 编辑器组 r2.1 回执收讫:只动一文件、新测试修前红、哈希沿用成立,转 Tester(Main_Designer 2026-11-07)
+
+对照「留字框不跟随版面」裁定 + 机理核读的修正方向,核回执与 m6:
+- **方向**:builder 独立选了「重放跟随」而非锚 DOM,给的三条理由与我的核读一致(框须活过编辑器重挂;留住的框可能是屏上唯一一份;所属单元可能未渲染)。**对**。
+- **范围**:22 文件里只 `structureTypingBuffer.ts` + `useHeadingStructureController.test.tsx` 变,其余 20 个与 r2 逐字节同,含控制器(`m6/source-sha256-r21.txt` 逐行标 `同r2` / `r2.1改`)。**哈希沿用成立**:K 四臂、H-L、注入矩阵用 r2 的数,不重跑。
+- **测试**:定位后不发事件推下 96px → 框顶跟到 396、提示条 398;横幅消失 + 滚动 → 框顶 60、提示条 62、padding-right 预留仍在。r2 代码上红(`expected 300 to be 396`),r2.1 绿(`m6/red-controls.txt`)。**对**,与我给的 #4b 规格等价。
+- **回执更正**:r2「框跟随单元编辑器」一句撤回。**对**。
+- **数**:构建 exit 0(`index-VJHeV8Ag.js`),tsc 净,2654/2654,三检查 exit 0。没开浏览器——真浏览器几何归 Tester。
+- **未做、记观察**:我核读里提的 CPU 门控(rect 不变不写、`document.hidden` 暂停)回执没提;每个留住的框每 50ms 一次几何读,框多时(上限 20)有代价。Tester 复测时两三个框并存看一眼有无卡顿;无感则记 A-25 观察项,不挡。
+- **残留照记**:单元编辑器找不到时框留原处(与改前同)。
+
+**裁定**:r2.1 回执合格,包 ops `packages/editor-rework-r2.1/` 转 Tester。复测范围(建议,Tester 定):同源重建;GEO 全套(横幅出现与 Dismiss、滚动 240、改窗口尺寸、字体加载后;上一行/下一行都点都打,0/N;框 inline `style.left` 为 px 还是 `25%` 分开记);地址栏三臂;总表冒烟;r2 已跑完的行为臂按哈希沿用。放行条件不变。
