@@ -1882,3 +1882,11 @@ builder 回执 → **Reviewer 先核**(对照本节五条裁定 + 「代码回�
 - **第一趟**:client tsc 净、vite 构建 exit 0;阳性对照 A 段在 `fdeacb5d` 上红,B 段 11 臂 10 红、各红对应条。server build / tsc / test:v2 因副本缺 `docs/generated/tool-face-manifest.json` 与未建 `shared/dist` 而失败——副本没建全,与 A-19 无关,补齐后在锁下补跑;server 若仍有红再在 `fdeacb5d` 上对照。
 - **client 全量 2686/2686 过但 exit 1**:2 个 unhandled error 来自 `structureTypingBuffer.ts:292` 跟随定时器里的 `document.hidden`——`useHeadingStructureController.test.tsx` 环境拆掉后定时器还在跑。这是编辑器组(已上岛的 `fdeacb5d`)的定时器生命周期尾巴:浏览器里 `document` 一直在,不丢字、不影响线上;但「卸载后定时器仍跑」与 Reviewer F5/F6 记的泄漏同根。**裁:A-19 不修;builder 在包与 `fdeacb5d` 两副本各跑一次全量,基线上同样出现则记 TD(全量偶红族,与 TD-45 同列)并把「卸载时清跟随定时器 + `document` 守卫」挂到 A-25(下次动控制器一并补,与 H3 同批);基线上不出现则回报,我再看。**
 - **B 段没红的一臂**:删掉 `setMode` 里 `if (next === 'text' && pagesOnly) return;` 测试照样全绿。builder 解释:图片 Source 的 active 由 `pagesOnly` 强制为真、切换按钮已隐藏,这行只拦住往标签页记忆里写一个用不上的 `'text'`,看得见的行为没有测试守它。**裁:删这行**——改坏测不出的守卫就是没人知道它守不守得住的守卫,留着只会在下次有人改 `pagesOnly` 逻辑时制造假安全;真正的不变量是「pagesOnly 的笔记:无论 `setMode` 被谁调成 `'text'`,active 仍是原页、切换不渲染」——回执里指出守这条不变量的测试在哪一行(没有就补一条,这才是 B 段该红的那臂)。删行后重新封包、重算 `src.sha256`,阳性对照 B 段此臂改为「去掉 pagesOnly 强制」须红。
+
+### A-19 验收做法变更:Tester 自起修前 / 修后两套本地后端,3001 只作一次交叉核对(Tester 提,Main_Designer 2026-11-08 准)
+
+- Tester 不接 builder 的 3001 作主后端,改为自起两套:**修前** = `fdeacb5d` 原样;**修后** = `fdeacb5d` + 包 `src/`(sha256 对过);各用临时库与临时目录,docx 用 1a-乙的假转换器,只用临时账号,不连岛、不用真实模型。3001 只拿同一张图做一次「表现一致」交叉核对。
+- 理由(准):①同源可核——3001 跑的是 builder 副本,Tester 核不了它与包一致;②「删源无残留」要直接列后端页图目录、查库,不该翻 builder 的目录;③「旧图片点生成后可见」要先用修前服务端导入、再用修后服务端开同一个库,3001 做不出这个「旧」状态。**这比派单写的更对,派单那句作废。**
+- Tester 的臂(包到后按 src 再细化):首屏与比例(自造 png 横/竖/超宽/超大/16×16/透明;jpeg 普通/EXIF 方向 6 与 3/超大;webp VP8/VP8L/VP8X+ICC/ALPH/无损;量首屏可见、比例与原图一致、不撑破、无切换、页图字节等于原件);读不出尺寸(乱码 png、截断 png、png 改名 .jpg → 导入成功、笔记在、该页「无法生成」+重试;另列「上传收而读取器读不出」清单);旧图片(修前导入、修后开、点生成、可见);删源与 Rebuild(前后列目录查库);血缘标(图片笔记来源区修前后对比;PDF p.N 跳页照 round-04);1a 原页通路回归(PDF/docx 切换、默认判决、转换窗口、记忆与跳页、转换失败出口,修前修后各一遍)。
+- **未覆盖**:渐进式 JPEG(本机无编码器)。→ **Reviewer 读码时看尺寸读取器认不认 SOF2(0xC2)**,写进 Reviewer 的点名清单。
+- 锁:builder 封包期间 Tester 不抢锁,只造图片和脚本。
