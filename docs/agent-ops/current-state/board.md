@@ -38,7 +38,7 @@ Tester 部署后核对: 已核（F3b 见 docs/audits/2026-11-05-toggle-formula-b
 <!-- board:items:start -->
 | 单号 | 项 | 阶段 | 持有者 | 下一步 | 现行正本 | 更新 |
 |---|---|---|---|---|---|---|
-| a19-a20-image-pages-and-idle-save | 编辑器组返修（A-18 残留、A-21、A-24） | 待验 | Tester | Tester 验纯 21 文件构建;builder 并行在干净基线重建、重跑矩阵(包里曾混进 A-19,分开上) | 订单尾部「编辑器组返修 Result(builder 2026-11-07)」 | 2026-11-07 |
+| a19-a20-image-pages-and-idle-save | 编辑器组返修（A-18 残留、A-21、A-24） | 待验 | Tester | Tester 验纯 21 文件构建(builder 已在干净基线重跑:26 行 ①21 ②5 ③0、r04@57 坏 0,与混包一致;等 Tester 判语) | 订单尾部「编辑器组返修 Result(builder 2026-11-07)」 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-25（新笔记第一行用输入法打字，拼音写进笔记） | 排队 | Main_Designer | 排期派单 | 订单「## A-25 · 新笔记第一行用输入法打字,拼音被写进笔记(🅰,既有,2026-11-06 Tester 编辑器组核验中发现)」 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-19（图片页面） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-19 规格 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-20（闲置保存） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-20 规格 | 2026-11-07 |

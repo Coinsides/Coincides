@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | Tester 验纯 21 文件构建(`index-TKMm6sxh.js`):第十一节第 7 小节全表(H 必过)+ 闸阳性对照亲核 + 真笔记 E/F/J + 地址栏一臂意见;**并行** builder 从 `9bc45e69`+21 文件重建副本,重跑注入矩阵 26 行 + r04@57,回执补「包的构成更正」 | 2026-11-07 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | Tester 验纯 21 文件构建(`index-TKMm6sxh.js`):第十一节第 7 小节全表(H 必过)+ 闸阳性对照亲核 + 真笔记 E/F/J + 地址栏一臂意见;builder 已在纯 21 文件包上重跑完(断言成立;26 行 ①21 ②5 ③0、r04@57 坏 0、全量 2643/2643;回执「包的构成更正」已补) | 2026-11-07 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -59,7 +59,11 @@
 
 | 数字 | 命令 | 环境/版本 | 证据文件 |
 |---|---|---|---|
-| 客户端全量 2649/2649(含守恒闸 40 种子) | `vitest run --pool=forks --poolOptions.forks.maxForks=3` | 最终包源码,副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-3-final/client-full.raw` |
+| 纯 21 文件包:副本−基线 = 21 个文件(`21 files changed`),sha256 21/21 相符 | `git archive 9bc45e69` 两份;`git diff --no-index --stat` | 纯副本 / 原样基线 | `docs/audits/2026-11-05-a21-builder/builder/matrix-4-pure21/copy-minus-baseline.diffstat.txt` |
+| 纯包:全量 2643/2643,类型检查净 | 同下 | 纯 21 文件包(主 JS `index-TKMm6sxh.js`) | `builder/matrix-4-pure21/summary.txt`、`client-full.raw` |
+| 纯包:注入矩阵 26 行 ①21 ②5 ③0;r04@57 156 行坏 0;dist 跑前跑后一致 | `matrix25.mjs … 2 57 '^enter_'`;`matrix_r04.mjs pure57 …` | 纯 21 文件包,延迟 57 | `builder/matrix-4-pure21/enter-fix.json`、`r04-pure57.log`、`dist-pure21.sha256` |
+| (以下各行出自混包:编辑器组 + A-19,见尾部「包的构成更正」) | | | |
+| 客户端全量 2649/2649(含守恒闸 40 种子) | `vitest run --pool=forks --poolOptions.forks.maxForks=3` | 混包源码,副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-3-final/client-full.raw` |
 | 类型检查净;三个检查脚本 exit 0 | `tsc --noEmit -p .`;`npm run -s check:canvas-runtime-boundary / check:source-experience / check:owned-helper-contract`(根目录) | 同上 | `matrix-3-final/summary.txt`、`tsc.txt` |
 | 守恒闸 7 条脚本冻结版全红、修复版全绿 | `vitest run hooks/structureTypingConservation.test.tsx` | 冻结副本 / 修复副本 | `builder/gate/conservation-frozen-*.raw`、`gate/frozen-controls-and-gate-run.txt` |
 | 注入矩阵 26 行:①21 ②5 ③0 | `node matrix25.mjs <fix 代理> <out> 2 57 '^enter_'` + `classify.mjs` | 最终包,本地后端,往返 57ms | `matrix-3-final/enter-fix.json`、`summary.txt` |
@@ -589,3 +593,37 @@ Tester 核同源时发现:builder 的最终包 = `9bc45e69` + 编辑器组 21 �
 3. **builder**:从干净基线重建副本——`9bc45e69` 检出 + 只叠加回执清单的 21 个文件,构建前用 `git diff --stat` 之类证明副本与基线的差异恰为这 21 个(清单与 sha256 写进回执);在这个包上重跑注入矩阵 26 行 + r04@57,跑前跑后记 dist sha256;Tester 已验过的场景不必重跑。回执补一节「包的构成更正」:原包含 A-19、哪些数字出自原包、哪些出自纯 21 文件包。原包的数字保留不删,标明来源。
 4. **规矩(候 Henry 入 builder 角色卡)**:副本一律从 HEAD 建,只叠加本单文件;出数前先证「副本−基线=本单清单」,回执带这条断言。这次的根因是副本取自脏的共享树,不是任何人的故意。
 5. 两路并行:Tester 照验,builder 照跑;谁先完都写进单卡自己那块,看板该行持有者仍是 Tester。
+
+## 编辑器组返修 · 包的构成更正（builder 2026-11-07，答「编辑器组裁定:包里混进 A-19,分开上」）
+
+上文 Result 末尾「更正：最终包里有 A-19 的代码」由本节取代。
+
+- **原包混了 A-19**：
+  - 副本 `edfix` 拷自共享树**工作树**，带着 A-19 未提交的 8 个客户端文件：
+    - `hooks/useSourcePageViewController.ts` 及 `.test.tsx`
+    - `layers/NoteSourcePagesLayer.tsx` 及 `.test.tsx`
+    - `layers/SourceViewToggle.tsx`
+    - `sourcePageLayout.ts` 及 `.test.ts`
+    - `client/src/pages/Sources/sourceApi.ts`
+  - 这 8 个与共享树逐字节相同。我在文件清单里排除了它们，却没申报它们在包里。
+- **纯 21 文件包**：
+  - 新副本 = `git archive 9bc45e69` 加回执清单的 21 个文件，不再从工作树拷。
+  - 断言「副本减基线 = 本单清单」：对同一 commit 的另一份原样解包做 `git diff --no-index --stat`，结果 `21 files changed, 2460 insertions(+), 775 deletions(-)`；21 个 sha256 逐个相符。见 `docs/audits/2026-11-05-a21-builder/builder/matrix-4-pure21/copy-minus-baseline.diffstat.txt` 与 `builder/source-sha256-vs-9bc45e69.txt`。
+  - 主 JS 是 `index-TKMm6sxh.js`，与 Tester 自建的构建一致。
+- **哪些数字出自哪个包**：
+
+| 数字 | 出自 | 证据 |
+|---|---|---|
+| 客户端全量 2643/2643、类型检查净 | 纯 21 文件包 | `builder/matrix-4-pure21/summary.txt`、`client-full.raw` |
+| 注入矩阵 26 行：①21 ②5 ③0，逐臂与混包相同 | 纯 21 文件包 | `matrix-4-pure21/enter-fix.json` |
+| r04@57：156 行坏 0 | 纯 21 文件包 | `matrix-4-pure21/r04-pure57.log`、`pure57.rows.jsonl` |
+| dist 跑前跑后 sha256 一致 | 纯 21 文件包 | `matrix-4-pure21/dist-pure21.sha256`、`summary.txt` |
+| 客户端全量 2649/2649；注入矩阵 26 行 ①21 ②5 ③0；r04@57 坏 0；三版 clean 计时（修复版中位 1238 ms） | 混包（编辑器组 + A-19），保留 | `builder/matrix-3-final/` |
+| 地址栏一臂 10 轮、慢回包 6 轮、冻结版与修前版对照 | 混包或第一批修复包，保留 | `builder/matrix-1/`、`matrix-2-opt4/` |
+
+  - 全量少的 6 条是 A-19 的测试。
+  - 纯包 clean 臂落地 2 轮：1169 ms、1178 ms。三版计时没在纯包上重跑。
+- **对照条件**：
+  - 冻结副本 `edfrozen` 也带着同样 8 个 A-19 文件，逐字节相同。所以混包上修复版对冻结版是同条件。
+  - 修前版包构建于 2026-11-05，早于 A-19 改动（2026-11-06），不含 A-19。所以修前版那一列和混包修复版之间还多一个 A-19 的差异。
+- **包**：纯 21 文件包在私有 ops 目录 `packages/editor-rework-pure21/dist/`。原混包改名为 `packages/editor-rework-mixed-with-a19/`，不作验收对象。
