@@ -1,0 +1,352 @@
+{
+ "pre": {
+  "bundle": [
+   "index-BSPPExzM.js"
+  ],
+  "fonts": [
+   "KaTeX_AMS:unloaded",
+   "KaTeX_Caligraphic:unloaded",
+   "KaTeX_Fraktur:unloaded",
+   "KaTeX_Main:unloaded",
+   "KaTeX_Main:loaded",
+   "KaTeX_Math:unloaded",
+   "KaTeX_Math:loaded",
+   "KaTeX_SansSerif:unloaded",
+   "KaTeX_Script:unloaded",
+   "KaTeX_Size1:unloaded",
+   "KaTeX_Size2:unloaded",
+   "KaTeX_Size3:unloaded",
+   "KaTeX_Size4:unloaded",
+   "KaTeX_Typewriter:unloaded"
+  ],
+  "grid": {
+   "katex": 3,
+   "errors": [
+    "ParseError: KaTeX parse error: Can't use function '\\]' in math mode at position ",
+    "ParseError: KaTeX parse error: Can't use function '\\(' in math mode at position "
+   ],
+   "rawBackslash": [
+    "\\frac{C}{i}",
+    "\\(x\\) 和 \\(y\\) 之间的文字",
+    "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+    "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+    "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+    "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+    "\\(\\frac{C}{i}\\)"
+   ],
+   "text": "实测·F3b卡片组\nF3BI\nReview (9)\nAdd Card\nAll types\nDefinition\nTheorem\nFormula\nGeneral\nAll tags\nDefinition\nExam-relevant\nFormula\nImportant\nTheorem\nAny importance\n★★★★★\n★★★★\n★★★\n★★\n★\n公式\n9\nDEF\nC3 美元金额\n债券售价 \n100\n，每年付\n100，每年付5。\nDEF\nC2 旧格式定义\n旧格式 \n𝑥\n2\nx\n2\n 的定义\nFML\nC1 旧格式公式\n𝐶\n𝑖\ni\nC\n\t​\n\nGEN\nG1 两式夹文字\n\\(x\\) 和 \\(y\\) 之间的文字\nTHM\nT1 定理\n若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在\nDEF\nD2 定义含F3b样式\n期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\mathbf{b}\\)\nDEF\nD1 定义含行内公式\n永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。\nFML\nF2 新定界符陈列公式\n\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]\nFML\nF1 新定界符公式\n\\(\\frac{C}{i}\\)"
+  },
+  "opened": [
+   {
+    "title": "F1 新定界符公式",
+    "found": true,
+    "before": {
+     "katex": 18,
+     "errors": [
+      "ParseError: KaTeX parse error: Can't use function '\\(' in math mode at position "
+     ],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\(\\frac{C}{i}\\)"
+     ]
+    },
+    "after": {
+     "katex": 18,
+     "errors": [
+      "ParseError: KaTeX parse error: Can't use function '\\(' in math mode at position "
+     ],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\(\\frac{C}{i}\\)"
+     ],
+     "text": "FML\nF1 新定界符公式\nClick to flip\nFML\nF1 新定界符公式\n\\(\\frac{C}{i}\\)\nVARIABLES:\n0\n0\n=\nC\n1\n1\n=\n2\n2\n=\n是\n3\n3\n=\n每\n4\n4\n=\n期\n5\n5\n=\n现\n6\n6\n=\n金\n7\n7\n=\n流\n8\n8\n=\n，\n9\n9\n=\n\\\n10\n10\n=\n(\n11\n11\n=\ni\n12\n12\n=\n\\\n13\n13\n=\n)\n14\n14\n=\n15\n15\n=\n是\n16\n16\n=\n利\n17\n17\n=\n率\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "F2 新定界符陈列公式",
+    "found": true,
+    "before": {
+     "katex": 0,
+     "errors": [
+      "ParseError: KaTeX parse error: Can't use function '\\]' in math mode at position "
+     ],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]"
+     ]
+    },
+    "after": {
+     "katex": 0,
+     "errors": [
+      "ParseError: KaTeX parse error: Can't use function '\\]' in math mode at position "
+     ],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]"
+     ],
+     "text": "FML\nF2 新定界符陈列公式\nClick to flip\nFML\nF2 新定界符陈列公式\n\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "D1 定义含行内公式",
+    "found": true,
+    "before": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。"
+     ]
+    },
+    "after": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。"
+     ],
+     "text": "DEF\nD1 定义含行内公式\nClick to flip\nDEF\nD1 定义含行内公式\nDEFINITION:\n永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "D2 定义含F3b样式",
+    "found": true,
+    "before": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma"
+     ]
+    },
+    "after": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma"
+     ],
+     "text": "DEF\nD2 定义含F3b样式\nClick to flip\nDEF\nD2 定义含F3b样式\nDEFINITION:\n期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\mathbf{b}\\)\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "T1 定理",
+    "found": true,
+    "before": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在"
+     ]
+    },
+    "after": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在"
+     ],
+     "text": "THM\nT1 定理\nClick to flip\nTHM\nT1 定理\nSTATEMENT:\n若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "G1 两式夹文字",
+    "found": true,
+    "before": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\(x\\) 和 \\(y\\) 之间的文字"
+     ]
+    },
+    "after": {
+     "katex": 0,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\(x\\) 和 \\(y\\) 之间的文字"
+     ],
+     "text": "GEN\nG1 两式夹文字\nClick to flip\nGEN\nG1 两式夹文字\n\\(x\\) 和 \\(y\\) 之间的文字\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "C1 旧格式公式",
+    "found": true,
+    "before": {
+     "katex": 1,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\frac{C}{i}"
+     ]
+    },
+    "after": {
+     "katex": 1,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)",
+      "\\frac{C}{i}"
+     ],
+     "text": "FML\nC1 旧格式公式\nClick to flip\nFML\nC1 旧格式公式\n𝐶\n𝑖\ni\nC\n\t​\n\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "C2 旧格式定义",
+    "found": true,
+    "before": {
+     "katex": 1,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)"
+     ]
+    },
+    "after": {
+     "katex": 1,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)"
+     ],
+     "text": "DEF\nC2 旧格式定义\nClick to flip\nDEF\nC2 旧格式定义\nDEFINITION:\n旧格式 \n𝑥\n2\nx\n2\n 的定义\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   },
+   {
+    "title": "C3 美元金额",
+    "found": true,
+    "before": {
+     "katex": 1,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)"
+     ]
+    },
+    "after": {
+     "katex": 1,
+     "errors": [],
+     "raw": [
+      "\\frac{C}{i}",
+      "\\(x\\) 和 \\(y\\) 之间的文字",
+      "若 \\(a>0\\) 则 \\(\\sqrt{a}\\) 存在",
+      "期望 \\({\\mathbb{E}}_{x}\\left[f\\right]\\) 与 \\({\\mathbb{R}}^{n}\\)，向量 \\(\\mathbf{a}+\\ma",
+      "永续年金的现值是 \\(\\frac{C}{i}\\)，其中 \\(i>0\\)。",
+      "\\[PV=\\sum_{t=1}^{n}\\frac{C}{(1+i)^{t}}\\]",
+      "\\(\\frac{C}{i}\\)"
+     ],
+     "text": "DEF\nC3 美元金额\nClick to flip\nDEF\nC3 美元金额\nDEFINITION:\n债券售价 \n100\n，每年付\n100，每年付5。\nCreated:\n11/7/2026\nEdit\nDelete"
+    },
+    "closed": true
+   }
+  ]
+ }
+}
