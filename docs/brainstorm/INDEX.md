@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-11-05
+> **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 180 份文档。
+共 181 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -50,6 +50,7 @@
 | [V2.5Research/r9-r11-domain-package-migration-summary.md](V2.5Research/r9-r11-domain-package-migration-summary.md) | R9-R11 阶段总结 - 领域图谱、模板包、迁移治理与工程包 | `(缺状态头)` | — | — |
 | [V2.5Research/v2.5-research-outline.md](V2.5Research/v2.5-research-outline.md) | v2.5 Research Outline - Template / Package / View Infrastru… | `(缺状态头)` | — | — |
 | [_ARCHIVE-NOTE.md](_ARCHIVE-NOTE.md) | ⚠️ 研究层 —— 非权威 (Research Layer — Non-Authoritative) | `active` | 2026-06-27 | — |
+| [field-tests/README.md](field-tests/README.md) | field-tests（旧址，已搬家） | `frozen` | 2026-11-07 | — |
 | [field-tests/round-01/2026-11-01-r01-blind-report.md](field-tests/round-01/2026-11-01-r01-blind-report.md) | 实测 round-01 · 盲测报告 | `active` | 2026-11-01 | — |
 | [field-tests/round-01/README.md](field-tests/round-01/README.md) | 实测 round-01 · 目录 | `active` | 2026-11-01 | — |
 | [field-tests/round-02/2026-11-01-r02-report.md](field-tests/round-02/2026-11-01-r02-report.md) | 实测 round-02 · 报告 | `active` | 2026-11-01 | — |
