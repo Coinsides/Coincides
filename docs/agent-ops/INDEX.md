@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 455 份文档。
+共 464 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -101,6 +101,7 @@
 | [analysis/2026-09-23-knowledge-architecture-target-design.md](analysis/2026-09-23-knowledge-architecture-target-design.md) | 知识架构目标态设计稿 v2(候拍) | `draft` | — | — |
 | [analysis/2026-11-02-knowledge-establishment-plan.md](analysis/2026-11-02-knowledge-establishment-plan.md) | 知识建制更新 —— 原子 / 透镜 / 事由 / 痕迹 | `**已翻牌(Henry 2026-11-02 亲拍)** —— 翻牌点①认(教义已铸宪章增补节)②认(分期顺序照表)③锁 UX=图标点选,机理从便(必要用布尔,施工单定)④普查暂落项目页;**附加令**:日历入口随本更新暴露(侧栏,外观候后期统一动刀,「现在重要的是能不能服务学习」)` | — | — |
 | [analysis/2026-11-07-role-records-design.md](analysis/2026-11-07-role-records-design.md) | 三个角色的常设记录体系（设计稿） | `draft` | 2026-11-07 | — |
+| [analysis/2026-11-07-role-records-rule-changes-draft.md](analysis/2026-11-07-role-records-rule-changes-draft.md) | 角色记录体系：规矩文件修改稿 | `draft` | 2026-11-07 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -148,6 +149,7 @@
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
 | [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-07 | — |
+| [current-state/board.md](current-state/board.md) | 看板：岛上是什么、在办什么、等谁 | `active` | 2026-11-07 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
@@ -156,6 +158,7 @@
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
 | [design/item-genealogy-draft.md](design/item-genealogy-draft.md) | item 家谱学 + 睡眠学(实验草案 v0) | `draft` | 2026-09-14 | — |
+| [design/loose-ideas-ledger.md](design/loose-ideas-ledger.md) | 闲谈记事簿 | `active` | — | — |
 | [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
 | [design/visual-design-charter.md](design/visual-design-charter.md) | 视觉设计宪章(草案) | `active` | 2026-09-21 | — |
 | [field-notes/2026-09-16-specimen-001-empty-note-nodes.md](field-notes/2026-09-16-specimen-001-empty-note-nodes.md) | 标本 #001 · 空白笔记当图节点 | `active` | — | — |
@@ -467,3 +470,9 @@
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
 | [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-26 | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
+| [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `draft` | 2026-11-07 | — |
+| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `draft` | 2026-11-07 | — |
+| [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `draft` | 2026-11-07 | — |
+| [roles/builder.md](roles/builder.md) | 角色卡：builder（工程实施） | `draft` | 2026-11-07 | — |
+| [roles/main-designer.md](roles/main-designer.md) | 角色卡：Main_Designer（主设计） | `draft` | 2026-11-07 | — |
+| [roles/tester.md](roles/tester.md) | 角色卡：Tester（验收） | `draft` | 2026-11-07 | — |

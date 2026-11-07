@@ -3,6 +3,7 @@
 > **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 否。拍板前不作施工依据；拍板后按 DOCUMENTATION-SYSTEM 把定下的部分蒸馏进 current-state 和协议文件
 > **出处**: Henry 2026-11-07 亲派（台账 §293），由「个人学习讨论」会话起草；Main_Designer 转单。只读调研加写方案，现有文件一律未动
+> **拍板**: 第九节 6 问，Henry 2026-11-07 全按推荐拍定（经 Main_Designer 转达）；第 4 问追加「pre-commit 钩子开成真拦，只有 Main_Designer 提交」。另补初衷一段，见第〇节
 
 # 三个角色的常设记录体系（设计稿）
 
@@ -18,6 +19,17 @@
 **Henry 要做的**：只看第九节，回答 6 个问题，每题都写了推荐。其余各节是给三个会话施工用的。
 
 ---
+
+### Henry 的初衷（2026-11-07，经 Main_Designer 转达，是设计约束）
+
+Main_Designer 固定是主设计会话。**Tester 和工程实施（builder）是两个可以分出去的角色，下个月或下下个月可能交给 Codex 代理。** 不管执行者是平行的 Claude 会话还是 Codex，都希望这几个角色扮演好自己的角色，每个角色都维护一套**味道相同的记录**，**信息持平**，哪里出了问题都**可以追溯**。
+
+由此得出四条硬约束：
+
+1. **角色卡和记录格式不得假设执行者是 Claude Desktop 会话。** 只依赖两样东西：仓库文件和私有 ops 目录。
+2. **短讯只传指针，正本在文件**，这是硬约束。Codex 收不到会话间短讯，只读仓库文件，入口是 `AGENTS.md`。
+3. **信息持平**：三个角色从同一张看板读同一组事实，不各自维护一份自己的事实。
+4. **可追溯**：每一次状态变化（阶段翻动、判语、裁定、部署）都要指向一个证据路径。
 
 ## 一 · 现状诊断（只读盘点，2026-11-07）
 
@@ -190,7 +202,7 @@ builder 是临时会话，所以**不给它建全局常设日志**。它的记�
    - 占位写法 `<home>`、`<ops>` 放行。
    - **不并进** `check:changed-file-secrets`：那条只挂在重型的 `verify` 链上，并进去就离开了轻量的 `docs:check`。
 
-**怎么跑**：没有 CI，钩子也没启用，所以把 `docs:check` 直接写进收割用的那一条提交命令里（`node scripts/docs-index.mjs && node scripts/docs-inventory.mjs && npm run docs:check && git add … && git commit …`）：检查一红，提交就不会发生，不靠谁记得去跑。要不要启用 `.githooks/pre-commit`（`git config core.hooksPath .githooks`），由 Henry 决定。注意：现有钩子只警告、不阻断（任何失败都 exit 0），整体还有 60 秒超时，所以启用它也不等于有了门禁。
+**怎么跑**：没有 CI，钩子也没启用，所以把 `docs:check` 直接写进收割用的那一条提交命令里（`node scripts/docs-index.mjs && node scripts/docs-inventory.mjs && npm run docs:check && git add … && git commit …`）：检查一红，提交就不会发生，不靠谁记得去跑。pre-commit 钩子：Henry 已拍「开成真拦」，而且只有 Main_Designer 提交。注意：现有钩子只警告、不阻断（任何失败都 exit 0），整体还有 60 秒超时，所以光启用它不等于有了门禁，钩子本身也要改。具体改法见规矩修改稿 `analysis/2026-11-07-role-records-rule-changes-draft.md` 第六节。
 **阳性对照**：脚本上线那一单，必须附 6 个故意违规的样本，证明每一项都会报红。
 
 ---
