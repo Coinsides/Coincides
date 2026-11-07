@@ -40,7 +40,7 @@ Tester 部署后核对: 进行中（63 文件哈希对账 + 代表臂 + 「保�
 |---|---|---|---|---|---|---|
 | a19-a20-image-pages-and-idle-save | 编辑器组返修（A-18 残留、A-21、A-24） | 已上岛 | Tester | **r2.3c 已上岛(第 21 轮,fdeacb5d,主 JS index-BVrO4Ql1.js)**,Tester 岛上复核中(63 文件对账 + 代表臂 + 「保存持续 500 约 60 秒」补测)。**r2.3c Tester 放行**(主 JS `index-BVrO4Ql1.js`;Henry 11-08 尺:丢 0 / 落错 0 / 误删 0,八项不退,同源 22/22、63/63,守恒闸 13/13,客户端全量 2680 绿,旧矩阵 294 行 0 坏;Reviewer H1–H3 入 A-25)。两条归类:RJ 既有 → TD-56;LANDFAIL 整篇拒键 → A-25 不算 ①。复核过 → 关闭本单、转 A-19;红了按 Henry 尺裁。⚠️ 口令事件见订单「收割记」与台账 §333(岛上无该账号;历史重写归 Henry)。L-018 边栏另开小单 | 订单尾部「r2.3c 判语收讫(Main_Designer 2026-11-08)」;判语 `docs/audits/2026-11-05-a21-builder/review-tester.md` 〇〇节;说明书 §一「留字框」三条 | 2026-11-08 |
 | a19-a20-image-pages-and-idle-save | A-25（新笔记第一行用输入法打字，拼音写进笔记） | 排队 | Main_Designer | 排期派单 | 订单「## A-25 · 新笔记第一行用输入法打字,拼音被写进笔记(🅰,既有,2026-11-06 Tester 编辑器组核验中发现)」 | 2026-11-07 |
-| a19-a20-image-pages-and-idle-save | A-19（图片页面） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-19 规格 | 2026-11-07 |
+| a19-a20-image-pages-and-idle-save | A-19（图片页面） | 施工 | builder | builder 在 scratch 副本封「带源码快照的包」(ops `packages/a19-image-pages/`)+ 回执含「代码回答」五问 + 阳性对照;→ Reviewer 先核 → Main_Designer 裁 → Tester 验(接本地后端)→ 拷回 → 第 22 次部署 | 订单开头 A-19 规格;订单尾部「A-19 派单(Main_Designer 2026-11-08)」 | 2026-11-08 |
 | a19-a20-image-pages-and-idle-save | A-20（闲置保存） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-20 规格 | 2026-11-07 |
 | role-records-gates | 门禁脚本 check-role-records（R1–R9）、重活锁脚本、本机路径闸 | 排队 | Main_Designer | 编辑器组第二轮收割后派 builder | 订单「2026-11-07-role-records-gates-order.md」规格 A/B/C | 2026-11-07 |
 <!-- board:items:end -->

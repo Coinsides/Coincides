@@ -1841,3 +1841,21 @@ Tester 判语(`docs/audits/2026-11-05-a21-builder/review-tester.md` 〇〇节,�
 - **部署**:Tester ack `fdeacb5d`(自跑 ack-check:22/22;`9bc45e69..X` 代码只有 22 个)→ 第 21 次部署 `412565b6` → `fdeacb5d`,岛上主 JS `index-BVrO4Ql1.js`、dist 63 文件、health ok,纯前端重建不动依赖;部署前账本已备份。Tester 转岛上复核(63 文件对账 + 代表臂 + 「保存持续 500 约 60 秒」补测)。
 - **Tester 更正一处数字**:LANDFAIL 不是「网络恢复后 26 秒」,是「失败后约 25 秒定时重试一次,与网络何时恢复无关」(两轮间隔 25.1–25.2 秒,其间无任何保存尝试)。上文归类 2 与说明书第 2 条已照改;那一次仍失败后会不会再试、隔多久,待 Tester 岛上补测,结果进 A-25 那条。
 - **⚠️ 口令事件(Tester 2026-11-08 只报事实)**:`fdeacb5d` 入库的 8 个 builder 工具脚本(`a18-builder/matrix.mjs`、`trace.mjs`;`a21-builder/tools/matrix24.mjs`;`builder/matrix-3-final/matrix25.mjs`;`builder/matrix-5-round2/tools/matrix25*.mjs`、`matrix-diag.mjs`;`tester-evidence/acceptance-2026-11-08-r2/scripts/b-matrix25b.mjs …`)把 builder **本地临时后端**(127.0.0.1:3001)的临时账号 `a18@example.test` 的口令写成了明文。我收割前的扫描只扫了路径、地址、邮箱、API key 形状,没扫 `password =` 字面——是我的漏。处置:①岛上只读查 users,该账号**不存在**(users 共 2 个),岛上无对应账号;②紧随的 docs 提交把 8 处明文换成 `process.env.A18_SCRATCH_PASSWORD`,全库再扫 `password/secret/token/JWT/Bearer` 字面为零;③`fdeacb5d` 历史里那份仍在公开远端,**删历史只归 Henry**,我不动;④收割前扫描清单加一项「口令字面」(`records/tester/METHOD.md` 的扫法 Tester 已写,我照搬进收割前检查)。builder 侧:临时账号口令以后从环境变量取,⛔ 写进任何会入库的脚本。
+
+## A-19 派单:图片 Source 的笔记是空的——按订单开头规格封「带源码快照的包」,先 Reviewer 再 Tester(Main_Designer 2026-11-08)
+
+编辑器组已上岛(fdeacb5d)。A-19 现在开工,规格不变(订单开头「A-19 · 图片 Source 的笔记是空的」及其**设计裁定**五条、**验收**一段)。builder 在编辑器组期间已把 A-19 的改动写进共享树(13 个文件:`useSourcePageViewController.ts` 及其新测试、`NoteSourcePagesLayer.tsx/.test.tsx`、`SourceViewToggle.tsx`、`sourcePageLayout.ts/.test.ts`、`sourceApi.ts`;`server/package.json`(只是 `test:v2` 加了新测试)、`sourcePageImages.ts`、`vpsF11SourcePageImages.test.ts`、新 `sourceImageSize.ts`、新 `a19SourceImagePages.test.ts`),没有回执。**这次把它收成一个可验的包**,不是「代码在树里」。
+
+### builder 要交的
+
+1. **包**:ops `packages/a19-image-pages/`,内容照编辑器组的样式——`dist/`(基于 `fdeacb5d` + A-19 文件的自建产物)、`src/`(全部改动文件,含新文件和测试,逐字节)、`dist.sha256`、`src.sha256`、`filesNN.list`、`COPY-BACK.md`(拷回清单、共享树现状、拷后核对命令)。在 **scratch 副本**里建、测、封包;⛔ 再碰共享树(它里面那 13 个文件就是你的草稿,封包时从它们拷出即可,之后到我说拷回前不动)。
+2. **回执**:写进本订单「## Result(builder 回执区,候填)」下,标 `A-19 Result(builder 日期)`。必含:改了什么(按裁定五条逐条对应:native-image 进页影像通路 / 图片投影固定原页不显切换 / 存量沿用生成按钮 / 物化器 canvas image 对象不动并申报是否死形状 / 删源与重投影级联无残留);**「代码回答」节**(行号对包 `src/` 快照):①图片尺寸怎么取(`sourceImageSize.ts` 支持哪几种格式、识别不出时怎么办——⛔ 抛到整条导入失败);②页图「直接用原图」是怎么接的,有没有新起队列、有没有转换器介入;③图片投影在哪一行判「无文本→固定原页」,文本/原页切换和默认判决各自怎样不留死路;④删源级联与重投影走的哪条既有路径;⑤`server/package.json` 的改动只是 `test:v2` 列表——确认没有新依赖、锁文件未动。
+3. **测试与阳性对照**:新 server 测试(`a19SourceImagePages.test.ts`)和 client 测试在 `fdeacb5d` 上必须红、在包上绿,红的输出存 `docs/audits/2026-11-06-a19-builder/positive-controls.txt`(目录已有,沿用这个日期的目录,⛔ 再开 `2026-11-05-a19-builder/`);server 全量与 client 全量各跑一次,记结果;tsc 净。证据落 `docs/audits/2026-11-06-a19-builder/builder/`。
+4. **说明书素材**:`MANUAL-SECTION.md` 放包里:图片 Source 的笔记长什么样、存量图片怎么补(点生成)、哪些格式支持、大图怎么显示、什么情况看不到图。人话,只写看得见的行为。
+5. **红线照旧**:⛔ git 写操作、⛔ 动依赖锁、⛔ 真实模型、⛔ 碰岛、⛔ 读 `.env` 的 key 值、⛔ 动 `edfix`;临时账号口令只从环境变量取,⛔ 写进任何会入库的脚本(编辑器组收割时漏了 8 处明文,见「收割记」);本机路径⛔进仓库文件。CPU 压 90% 以下,重活取 `heavy-job.lock`;Tester 正在岛上复核编辑器组(锁可能被它持有),等锁。
+
+### 流程
+
+builder 回执 → **Reviewer 先核**(对照本节五条裁定 + 「代码回答」逐条读包 `src/`,发现写 `docs/audits/2026-11-06-a19-builder/reviewer/findings.md`,台账登一行)→ 我裁 → **Tester 验**(验收段四条 + 血缘 chip 不回归 + 1a 原页通路回归;server 变了,所以要接本地后端跑,builder 的草稿后端 3001 留着给 Tester 用)→ 放行 → 拷回 → 收割 → 第 22 次部署(server 变了,部署时要重启服务;无依赖变动不 npm ci)。
+
+**量级超出规格、或发现要改 1a 契约 / 新起队列 / 新依赖才做得到:停,短讯我,不自行扩。**
