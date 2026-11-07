@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 469 份文档。
+共 470 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -100,6 +100,7 @@
 | [analysis/2026-09-22-flip-day-briefing.md](analysis/2026-09-22-flip-day-briefing.md) | 翻牌日呈批案(九件) | `active` | — | — |
 | [analysis/2026-09-23-knowledge-architecture-target-design.md](analysis/2026-09-23-knowledge-architecture-target-design.md) | 知识架构目标态设计稿 v2(候拍) | `draft` | — | — |
 | [analysis/2026-11-02-knowledge-establishment-plan.md](analysis/2026-11-02-knowledge-establishment-plan.md) | 知识建制更新 —— 原子 / 透镜 / 事由 / 痕迹 | `**已翻牌(Henry 2026-11-02 亲拍)** —— 翻牌点①认(教义已铸宪章增补节)②认(分期顺序照表)③锁 UX=图标点选,机理从便(必要用布尔,施工单定)④普查暂落项目页;**附加令**:日历入口随本更新暴露(侧栏,外观候后期统一动刀,「现在重要的是能不能服务学习」)` | — | — |
+| [analysis/2026-11-07-ocr-dsh-proposal-review.md](analysis/2026-11-07-ocr-dsh-proposal-review.md) | DSH 出的 OCR 方案:评估 | `active` | 2026-11-07 | — |
 | [analysis/2026-11-07-ocr-requirements.md](analysis/2026-11-07-ocr-requirements.md) | OCR / 文档理解模型选型:我们的需求 | `active` | 2026-11-07 | — |
 | [analysis/2026-11-07-role-records-design.md](analysis/2026-11-07-role-records-design.md) | 三个角色的常设记录体系（设计稿） | `accepted（2026-11-07 Henry 拍第九节 6 问并通过规矩稿;施工按第六节进行）` | 2026-11-07 | — |
 | [analysis/2026-11-07-role-records-rule-changes-draft.md](analysis/2026-11-07-role-records-rule-changes-draft.md) | 角色记录体系：规矩文件修改稿 | `applied（2026-11-07 Henry 拍「都可以」,27 处已由 Main_Designer 原样写入;本文留作判例）` | 2026-11-07 | — |
