@@ -1,4 +1,5 @@
 import { useAnnotationStampLayout } from '../annotationStampLayout';
+import { structureTypingHoldsFocus } from '../structureTypingFocus';
 import { resolveScreenRect, type CoordinateContract } from '../placementContractService';
 import type { PageFrameModel, DocumentTypographyProfile } from '../types';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
@@ -405,17 +406,23 @@ export function BlockEditorLayer({
     const textareas = Array.from(
       blockContentRef.current?.querySelectorAll<HTMLTextAreaElement>('textarea') || [],
     );
-    const textarea = autoFocusReceipt
+    const receiptTarget = autoFocusReceipt
       ? textareas.find((candidate) => candidate.dataset.textUnitId === autoFocusReceipt.textUnitId)
-        || textareaRef.current
-      : textareaRef.current;
-    if (!textarea) return;
+      : undefined;
+    // The caret belongs to a unit that has not rendered yet: another unit at that
+    // offset would be a wrong place to type. This runs again on the next render.
+    // Wait only for a unit that is still coming: one this block no longer holds never renders.
+    const receiptUnitAhead = Boolean(autoFocusReceipt && textFlow?.units.some((unit) => unit.id === autoFocusReceipt.textUnitId
+      && unit.status !== 'deleted'));
+    if (autoFocusReceipt && !receiptTarget && receiptUnitAhead && textareas.some((candidate) => candidate.dataset.textUnitId)) return;
+    const textarea = receiptTarget || textareaRef.current;
+    if (!textarea || structureTypingHoldsFocus()) return;
     textarea.focus({ preventScroll: true });
     const start = Math.max(0, Math.min(textarea.value.length, autoFocusSelection?.start ?? textarea.value.length));
     const end = Math.max(start, Math.min(textarea.value.length, autoFocusSelection?.end ?? start));
     textarea.setSelectionRange(start, end);
     resizeTextareaToContent(textarea);
-  }, [autoFocus, autoFocusReceipt, autoFocusSelection, contentReadOnly]);
+  }, [autoFocus, autoFocusReceipt, autoFocusSelection, contentReadOnly, textFlow]);
 
   const focusNearestTextArea = (clientY: number) => {
     const textareas = Array.from(

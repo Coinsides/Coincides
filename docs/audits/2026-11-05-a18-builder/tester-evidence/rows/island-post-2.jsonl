@@ -1,0 +1,58 @@
+{"arm":"V","name":"pause600","round":0,"boxes":[{"v":"abc","y":437,"h":27,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":false},{"v":"abc\n","y":629,"h":54,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":true}],"dom":["abc","xy"],"server":["abc","xy"],"expected":["abc","xy"],"ok":true}
+{"arm":"V","name":"pause2200","round":0,"boxes":[{"v":"abc","y":437,"h":27,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":false},{"v":"abc\n","y":629,"h":54,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":true}],"dom":["abc","xy"],"server":["abc","xy"],"expected":["abc","xy"],"ok":true}
+{"arm":"V","name":"pause5000","round":0,"boxes":[{"v":"abc","y":437,"h":27,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":false},{"v":"abc\n","y":629,"h":54,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":true}],"dom":["abc","xy"],"server":["abc","xy"],"expected":["abc","xy"],"ok":true}
+{"arm":"D","name":"lines30-0","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines30-1","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines30-2","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines80-0","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines80-1","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines80-2","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines150-0","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines150-1","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines150-2","round":0,"dom":["a","aa\nbb\ncc\ndd\nee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"D","name":"lines300-0","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"D","name":"lines300-1","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"D","name":"lines300-2","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"T","name":"space","round":0,"domBefore":["abc"],"domAfterReload":["abc "],"server":["abc "],"plain":["abc "],"expected":["abc "],"alert":[],"ok":true}
+{"arm":"T","name":"enter","round":0,"domBefore":["abc\n"],"domAfterReload":["abc",""],"server":["a"],"plain":["a"],"expected":["abc",""],"alert":[],"ok":false}
+{"arm":"T","name":"spaceThenType","round":0,"domBefore":["abcde "],"domAfterReload":["abcde "],"server":["abcde "],"plain":["abcde "],"expected":["abc de"],"alert":[],"ok":false}
+{"arm":"T","name":"twoEnters","round":0,"domBefore":["abc","abc\n\n"],"domAfterReload":["abc","",""],"server":["abc","",""],"plain":["abc\n\n"],"expected":["abc","",""],"alert":[],"ok":true}
+{"arm":"P","name":"pasted last line \"# \"","round":0,"dom":["第一行内容","# 这是一条注释"],"server":["第一行内容","# 这是一条注释"],"chapters":[],"expected":["第一行内容","# 这是一条注释"],"ok":true}
+{"arm":"P","name":"pasted middle line \"# \"","round":0,"dom":["第一行","# 中间","第三行"],"server":["第一行","# 中间","第三行"],"chapters":[],"expected":["第一行","# 中间","第三行"],"ok":true}
+{"arm":"P","name":"first line typed \"# title\"","round":0,"dom":["# title"],"server":["# title"],"chapters":[],"expected":["[heading_1]title"],"ok":false}
+{"arm":"P","name":"first line \"# title\", Enter, body","round":0,"dom":["# title","body"],"server":["# title","body"],"chapters":[],"expected":["[heading_1]title","body"],"ok":false}
+{"arm":"P","name":"settled second line \"# head\"","round":0,"dom":["abc","head"],"server":["abc","[heading_1]head"],"chapters":["head"],"expected":["abc","[heading_1]head"],"ok":true}
+{"arm":"P","name":"fast second line \"# head\"","round":0,"dom":["abc","head"],"server":["abc","[heading_1]head"],"chapters":["head"],"expected":["abc","[heading_1]head"],"ok":true}
+{"arm":"P","name":"fast \"# head\" then body","round":0,"dom":["abc","head","body"],"server":["abc","[heading_1]head","body"],"chapters":["head"],"expected":["abc","[heading_1]head","body"],"ok":true}
+{"arm":"N","name":"human80-0","round":0,"dom":["aaa","abcdefijkl"],"server":["aaa","[heading_1]abcdefijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,ro,ro,BODY,BODY,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human80-1","round":0,"dom":["aaa","abcdefghkl"],"server":["aaa","[heading_1]abcdefghkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,ro,ro,ro,ro,BODY,BODY,rw,rw","ok":false}
+{"arm":"N","name":"human80-2","round":0,"dom":["aaa","abcdefghkl"],"server":["aaa","[heading_1]abcdefghkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,ro,ro,ro,BODY,BODY,BODY,rw,rw","ok":false}
+{"arm":"N","name":"human120-0","round":0,"dom":["aaa","abcdeghijkl"],"server":["aaa","[heading_1]abcdeghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,ro,BODY,rw,rw,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human120-1","round":0,"dom":["aaa","gabcdhijkle"],"server":["aaa","[heading_1]gabcdhijkle"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,ro,BODY,rw,rw,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human120-2","round":0,"dom":["aaa","abcdeghijkl"],"server":["aaa","[heading_1]abcdeghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,ro,BODY,rw,rw,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human160-0","round":0,"dom":["aaa","abcdefghijkl"],"server":["aaa","[heading_1]abcdefghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,ro,rw,rw,rw,rw,rw,rw,rw,rw","ok":true}
+{"arm":"N","name":"human160-1","round":0,"dom":["aaa","abcefghijkl"],"server":["aaa","[heading_1]abcefghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,BODY,rw,rw,rw,rw,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human160-2","round":0,"dom":["aaa","abcefghijkl"],"server":["aaa","[heading_1]abcefghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,BODY,rw,rw,rw,rw,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human220-0","round":0,"dom":["aaa","abdefghijkl"],"server":["aaa","[heading_1]abdefghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,BODY,rw,rw,rw,rw,rw,rw,rw,rw,rw","ok":false}
+{"arm":"N","name":"human220-1","round":0,"dom":["aaa","abcdefghijkl"],"server":["aaa","[heading_1]abcdefghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,BODY,rw,rw,rw,rw,rw,rw,rw,rw,rw","ok":true}
+{"arm":"N","name":"human220-2","round":0,"dom":["aaa","abcdefghijkl"],"server":["aaa","[heading_1]abcdefghijkl"],"expected":["aaa","[heading_1]abcdefghijkl"],"focusAtKeys":"ro,ro,ro,rw,rw,rw,rw,rw,rw,rw,rw,rw","ok":true}
+{"arm":"N","name":"ime300-0","round":0,"dom":["aaa","现值推导"],"server":["aaa","[heading_1]现值推导"],"expected":["aaa","[heading_1]现值公式推导"],"ok":false}
+{"arm":"N","name":"ime300-1","round":0,"dom":["aaa","现值公式推导"],"server":["aaa","[heading_1]现值公式推导"],"expected":["aaa","[heading_1]现值公式推导"],"ok":true}
+{"arm":"N","name":"ime300-2","round":0,"dom":["aaa","现值推导"],"server":["aaa","[heading_1]现值推导"],"expected":["aaa","[heading_1]现值公式推导"],"ok":false}
+{"arm":"N","name":"ime600-0","round":0,"dom":["aaa","公式推导"],"server":["aaa","[heading_1]公式推导"],"expected":["aaa","[heading_1]现值公式推导"],"ok":false}
+{"arm":"N","name":"ime600-1","round":0,"dom":["aaa","现值公式推导"],"server":["aaa","[heading_1]现值公式推导"],"expected":["aaa","[heading_1]现值公式推导"],"ok":true}
+{"arm":"N","name":"ime600-2","round":0,"dom":["aaa",""],"server":["aaa","[heading_1]"],"expected":["aaa","[heading_1]现值公式推导"],"ok":false}
+{"arm":"l","name":"keys-300","round":0,"focus":"ro","server":["aaa","[heading_1]head"],"expected":["aaa","[heading_1]head"],"ok":true}
+{"arm":"l","name":"keys-500","round":0,"focus":"ro","server":["aaa","[heading_1]hea"],"expected":["aaa","[heading_1]head"],"ok":false}
+{"arm":"l","name":"keys-600","round":0,"focus":"ro","server":["aaa","[heading_1]head"],"expected":["aaa","[heading_1]head"],"ok":true}
+{"arm":"l","name":"keys-700","round":0,"focus":"BODY","server":["aaa","[heading_1]ad"],"expected":["aaa","[heading_1]head"],"ok":false}
+{"arm":"l","name":"keys-800","round":0,"focus":"rw","server":["aaa","[heading_1]head"],"expected":["aaa","[heading_1]head"],"ok":true}
+{"arm":"l","name":"keys-900","round":0,"focus":"rw","server":["aaa","[heading_1]head"],"expected":["aaa","[heading_1]head"],"ok":true}
+{"arm":"l","name":"keys-1100","round":0,"focus":"rw","server":["aaa","[heading_1]head"],"expected":["aaa","[heading_1]head"],"ok":true}
+{"arm":"l","name":"insert-300","round":0,"focus":"ro","server":["aaa","[heading_1]标题"],"expected":["aaa","[heading_1]标题"],"ok":true}
+{"arm":"l","name":"insert-500","round":0,"focus":"BODY","server":["aaa","[heading_1]"],"expected":["aaa","[heading_1]标题"],"ok":false}
+{"arm":"l","name":"insert-600","round":0,"focus":"BODY","server":["aaa","[heading_1]"],"expected":["aaa","[heading_1]标题"],"ok":false}
+{"arm":"l","name":"insert-700","round":0,"focus":"rw","server":["aaa","[heading_1]标题"],"expected":["aaa","[heading_1]标题"],"ok":true}
+{"arm":"l","name":"insert-800","round":0,"focus":"rw","server":["aaa","[heading_1]标题"],"expected":["aaa","[heading_1]标题"],"ok":true}
+{"arm":"l","name":"insert-900","round":0,"focus":"rw","server":["aaa","[heading_1]标题"],"expected":["aaa","[heading_1]标题"],"ok":true}
+{"arm":"l","name":"insert-1100","round":0,"focus":"rw","server":["aaa","[heading_1]标题"],"expected":["aaa","[heading_1]标题"],"ok":true}

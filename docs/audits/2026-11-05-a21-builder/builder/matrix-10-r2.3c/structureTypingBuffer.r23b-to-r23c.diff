@@ -1,0 +1,13 @@
+--- r2.3b/client/src/pages/Notes/canvasEngine/structureTypingBuffer.ts
++++ r2.3c/client/src/pages/Notes/canvasEngine/structureTypingBuffer.ts
+@@ -14,8 +14,8 @@
+ const NOT_YET_IN_NOTE = 'Not in the note yet';
+ const TOO_MANY_KEPT = 'Many kept words waiting, not in the note';
+ // They go back by themselves when they can: copying them in meanwhile would put them in the note twice.
+-const NOT_YET_IN_NOTE_FULL = 'These words are not in the note yet. Left here, they go back on their own when they can. Discard deletes them.';
+-const TOO_MANY_KEPT_FULL = 'Many kept words are waiting for this note. They are not in it yet; left here, they go back on their own when they can. Discard deletes them.';
++const NOT_YET_IN_NOTE_FULL = 'These words are not in the note yet. They may go back on their own; if they do not, copy them or discard them. Discard deletes them.';
++const TOO_MANY_KEPT_FULL = 'Many kept words are waiting for this note. They are not in it yet and may go back on their own; if they do not, copy them or discard them. Discard deletes them.';
+ /** Kept entries per note before the notice asks for attention. Nothing is dropped past it. */
+ export const UNPLACED_WORDS_LIMIT = 20;
+ // Room the box keeps at its right end for its notice, when the notice cannot be measured.

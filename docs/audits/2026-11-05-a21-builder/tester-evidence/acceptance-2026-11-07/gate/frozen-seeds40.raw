@@ -1,0 +1,67 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m<tmp>/edacc/frozen-gate/client[39m
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+
+ [31m❯[39m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m7 skipped[39m[2m)[22m[33m 89120[2mms[22m[39m
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss 1: words handed to a second structure that fails before its first edit
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss 1b: the same, the second structure failing at once on a tracked write
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss 2: leaving through the app right after Enter in the window
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss H: the page goes away while the window holds words, and the note is opened again
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss the role-change save fails once, no Enter in the window
+   [2m[90m↓[39m[22m words typed around heading structures are conserved[2m > [22mknown loss commit-1: a sync-priority commit between a frame and the write it waits for
+[31m   [31m×[31m words typed around heading structures are conserved[2m > [22m40 seeded sequences of 16 events: every word in exactly one place, in its own unit[39m[33m 89118[2mms[22m[39m
+[31m     → seed 6 (5 words): <k0> DUPLICATED (note 2, kept false); <k1> DUPLICATED (note 2, kept false); <k2> DUPLICATED (note 2, kept false); <k3> DUPLICATED (note 2, kept false)
+  note: prior[<P0> | <P1>] work[<W0>] new-2[H:<W1><k0><k1><k0><k1>] new-3[H:<k2><k3><k4>] new-4[<k2><k3>] new-1[]
+  writes: (set CONSERVE_TRACE)
+  events: heading(<W1>) fault(transfer) type(<k0> in window) undo(skipped) type(<k1> in window) enter(in window) type(<k2> in window) heading(skipped) type(<k3> in window) unload unload wait(80) wait(300) heading(<k2><k3>) type(<k4> in window)
+seed 39 (4 words): <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0> | H:<W1><k0><k2>] new-1[]
+  writes: (set CONSERVE_TRACE)
+  events: type(<k0>) heading(<W1><k0>) undo+redo(skipped) type(<k1> in window) unload undo undo+redo(same) type(<k2>) heading(<W1><k0><k2>) type(<k3> in window) undo+redo(skipped) undo(skipped) fault(transfer) heading(skipped) heading(skipped): expected [ …(2) ] to deeply equal [][39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22mwords typed around heading structures are conserved[2m > [22m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[31m[1mAssertionError[22m: seed 6 (5 words): <k0> DUPLICATED (note 2, kept false); <k1> DUPLICATED (note 2, kept false); <k2> DUPLICATED (note 2, kept false); <k3> DUPLICATED (note 2, kept false)
+  note: prior[<P0> | <P1>] work[<W0>] new-2[H:<W1><k0><k1><k0><k1>] new-3[H:<k2><k3><k4>] new-4[<k2><k3>] new-1[]
+  writes: (set CONSERVE_TRACE)
+  events: heading(<W1>) fault(transfer) type(<k0> in window) undo(skipped) type(<k1> in window) enter(in window) type(<k2> in window) heading(skipped) type(<k3> in window) unload unload wait(80) wait(300) heading(<k2><k3>) type(<k4> in window)
+seed 39 (4 words): <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0> | H:<W1><k0><k2>] new-1[]
+  writes: (set CONSERVE_TRACE)
+  events: type(<k0>) heading(<W1><k0>) undo+redo(skipped) type(<k1> in window) unload undo undo+redo(same) type(<k2>) heading(<W1><k0><k2>) type(<k3> in window) undo+redo(skipped) undo(skipped) fault(transfer) heading(skipped) heading(skipped): expected [ …(2) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "seed 6 (5 words): <k0> DUPLICATED (note 2, kept false); <k1> DUPLICATED (note 2, kept false); <k2> DUPLICATED (note 2, kept false); <k3> DUPLICATED (note 2, kept false)[39m
+[31m+   note: prior[<P0> | <P1>] work[<W0>] new-2[H:<W1><k0><k1><k0><k1>] new-3[H:<k2><k3><k4>] new-4[<k2><k3>] new-1[][39m
+[31m+   writes: (set CONSERVE_TRACE)[39m
+[31m+   events: heading(<W1>) fault(transfer) type(<k0> in window) undo(skipped) type(<k1> in window) enter(in window) type(<k2> in window) heading(skipped) type(<k3> in window) unload unload wait(80) wait(300) heading(<k2><k3>) type(<k4> in window)",[39m
+[31m+   "seed 39 (4 words): <k1> LOST[39m
+[31m+   note: prior[<P0> | <P1>] work[<W0> | H:<W1><k0><k2>] new-1[][39m
+[31m+   writes: (set CONSERVE_TRACE)[39m
+[31m+   events: type(<k0>) heading(<W1><k0>) undo+redo(skipped) type(<k1> in window) unload undo undo+redo(same) type(<k2>) heading(<W1><k0><k2>) type(<k3> in window) undo+redo(skipped) undo(skipped) fault(transfer) heading(skipped) heading(skipped)",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:[2m609:43[22m[39m
+    [90m607| [39m    [90m// Not counted as losses, listed so they stay visible.[39m
+    [90m608| [39m    console.log(`UNSAVED AT UNLOAD (existing save path): ${unsavedSeed…
+    [90m609| [39m    [34mexpect[39m(failures[33m,[39m failures[33m.[39m[34mjoin[39m([32m'\n'[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m610| [39m  }[33m,[39m [34m600_000[39m)[33m;[39m
+    [90m611| [39m[33m}[39m);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m7 skipped[39m[90m (8)[39m
+[2m   Start at [22m 16:23:09
+[2m   Duration [22m 91.30s[2m (transform 517ms, setup 247ms, collect 806ms, tests 89.12s, environment 708ms, prepare 121ms)[22m
+

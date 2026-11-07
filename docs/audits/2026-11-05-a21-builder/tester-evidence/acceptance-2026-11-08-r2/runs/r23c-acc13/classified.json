@@ -1,0 +1,87 @@
+{
+ "by": {
+  "S-b1-nextLineSharesPrefix": {
+   "ok": 1
+  },
+  "S-b2-prevLineSharesSuffix": {
+   "ok": 1
+  },
+  "S-a1-moreTypedAtCaret": {
+   "ok": 1
+  },
+  "S-ctrl-shouldLand": {
+   "ok": 1
+  },
+  "N-a1-failedSaveThenMore": {
+   "ok": 3
+  },
+  "N-a1c-failedSaveNoMore": {
+   "ok": 1
+  },
+  "N-b2-headingAboveLineSameWord": {
+   "ok": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "S-b1-nextLineSharesPrefix",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-b2-prevLineSharesSuffix",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-a1-moreTypedAtCaret",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-ctrl-shouldLand",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "N-a1-failedSaveThenMore-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "N-a1-failedSaveThenMore-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "N-a1-failedSaveThenMore-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "N-a1c-failedSaveNoMore-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "N-b2-headingAboveLineSameWord-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "N-b2-headingAboveLineSameWord-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

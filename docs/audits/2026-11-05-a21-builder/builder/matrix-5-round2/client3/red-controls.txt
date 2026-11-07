@@ -1,0 +1,63 @@
+### A. Round-2 tests on controller + buffer before round 2 (= pure 21-file package source)
+   × words from the window applied to text that changed under it (item 4, condition c) > round 2 #3a: an empty unit that has since filled gives no anchor, so the words are kept, not appended 14ms
+   × words from the window applied to text that changed under it (item 4, condition c) > round 2 #3a: kept words from an empty unit that has since filled stay kept on reopening 1082ms
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #3, condition a by anchor: "od" typed after "body" is not taken for already in "body" 12ms
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #3, the anchored check: in place counts, a lookalike elsewhere does not 1ms
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #2: kept words reopened by a later mount are one box for one record, and closing it removes only that record 76ms
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #4: the notice sits on the box itself, over no line of the note, and says Discard deletes the words 14ms
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #3b (H-L): words landed from the window stay stored while the save that carries them has not been confirmed 1202ms
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #3b: once the save carrying the landed words is confirmed, their record is gone 1208ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected { text: 'other textkept', caret: 14 } to be null
+AssertionError: expected null to be truthy
+AssertionError: expected [ 'Intro', 'body' ] to deeply equal [ 'Intro', 'bodyod' ]
+AssertionError: expected 4 to be 2 // Object.is equality
+AssertionError: expected 0 to be greater than or equal to 300
+AssertionError: expected <textarea …(4)></textarea> to be null
+AssertionError: expected <textarea …(4)></textarea> to be null
+      Tests  8 failed | 37 skipped (45)
+
+### B. K1 real-adapter test on the controller before round 2, 5 runs
+server: ["warmup|H:kept"]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+server: ["warmup|H:kept"]
+    219| server: ${JSON.stringify(shape())}
+      Tests  1 failed (1)
+server: ["warmup|H:kept"]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+server: ["warmup|H:kept"]
+    219| server: ${JSON.stringify(shape())}
+      Tests  1 failed (1)
+server: ["warmup|H:kept"]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+server: ["warmup|H:kept"]
+    219| server: ${JSON.stringify(shape())}
+      Tests  1 failed (1)
+server: ["warmup|H:kept"]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+server: ["warmup|H:kept"]
+    219| server: ${JSON.stringify(shape())}
+      Tests  1 failed (1)
+server: ["warmup|H:kept"]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+server: ["warmup|H:kept"]
+    219| server: ${JSON.stringify(shape())}
+      Tests  1 failed (1)
+
+### C. 3b tests on the round-2 controller just before the 3b change
+   × heading structure commits always release the note and keep both draft halves equal > round 2 #3b (H-L): words landed from the window stay stored while the save that carries them has not been confirmed 378ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > round 2 #3b: once the save carrying the landed words is confirmed, their record is gone 216ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [] to have a length of 1 but got +0
+      Tests  1 failed | 1 passed | 43 skipped (45)
+
+### D. Boundary assertion positive control and the gate (final source)
+ ✓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (9 tests | 8 skipped) 2171ms
+   ✓ words typed around heading structures are conserved > boundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red  2169ms
+      Tests  1 passed | 8 skipped (9)
+
+### E. Round-2 tests on the final source
+ ✓ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx (45 tests | 37 skipped) 820ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > round 2 #3b (H-L): words landed from the window stay stored while the save that carries them has not been confirmed  343ms
+      Tests  8 passed | 37 skipped (45)
+      Tests  1 passed (1)

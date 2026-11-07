@@ -1,0 +1,48 @@
+== edfix controller+layer
+      Tests  70 passed (70)
+== edfix conservation
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (8 tests | 1 failed) 100618ms
+   ✓ words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit  1735ms
+   ✓ words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write  1677ms
+   ✓ words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window  1377ms
+   ✓ words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)  2417ms
+   ✓ words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again  2061ms
+   ✓ words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window  2664ms
+   ✓ words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for  1718ms
+   × words typed around heading structures are conserved > 40 seeded sequences of 16 events: every word in exactly one place, in its own unit 86967ms
+     → seed 1 (6 words): <k2> DUPLICATED (note 1, kept true); <k3> DUPLICATED (note 1, kept true); <k4> DUPLICATED (note 1, kept true)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:579:43
+      Tests  1 failed | 7 passed (8)
+== edfrozen H unit
+   × heading structure commits always release the note and keep both draft halves equal > H: a page going away stores what is in the window at once, with no cleanup or timer needed 81ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 36 skipped (37)
+== edfrozen conservation scripts
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (8 tests | 7 failed) 13616ms
+   × words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit 1733ms
+     → <k0> LOST; <k1> LOST
+   × words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write 1682ms
+     → <k0> LOST; <k1> LOST
+   × words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window 1394ms
+     → <k0> LOST; <k1> LOST
+   × words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3) 2422ms
+     → <k0> LOST
+   × words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again 2045ms
+     → <k0> LOST; <k1> LOST
+   × words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window 2608ms
+     → <k0> LOST
+   × words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for 1729ms
+     → note text <W1> appears 2 times
+   ✓ words typed around heading structures are conserved > 0 seeded sequences of 16 events: every word in exactly one place, in its own unit 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+      Tests  7 failed | 1 passed (8)
+
+[exited with code 0]

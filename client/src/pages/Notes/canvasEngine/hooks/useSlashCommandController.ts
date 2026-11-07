@@ -20,6 +20,7 @@ import {
   type NoteSlashCommand,
   type SlashTrigger,
 } from '../../noteSlashCommands';
+import { headingRequestForDraftText } from '../headingInputService';
 import { textFromContent, type FieldValueRecord } from '../blockContentService';
 import {
   editingTextInteraction,
@@ -173,6 +174,31 @@ export function useSlashCommandController({
   focusedTextOwnerRef.current = focusedTextOwner;
   blockTextDraftsRef.current = blockTextDrafts;
   draftHeadingHostRef.current = { blocks, blockTextFlowDrafts, draftOwnerReconciliation, onHeadingStructure, addToast };
+
+  // A `# ` typed before the block existed reaches the durable editor as plain text.
+  useLayoutEffect(() => {
+    if (!draftOwnerReconciliation || pendingDraftHeadingRef.current) return;
+    const read = () => {
+      const host = draftHeadingHostRef.current;
+      const block = host.blocks.find((candidate) => candidate.id === draftOwnerReconciliation.to.blockId);
+      const flow = block && (host.blockTextFlowDrafts[block.id] || getTextFlowContent(block.content_json));
+      return { host, block, flow };
+    };
+    const before = read().flow;
+    if (!before || !headingRequestForDraftText(before, { unitId: draftOwnerReconciliation.to.textUnitId, offset: draftOwnerReconciliation.selectionStart })) return;
+    const frame = requestAnimationFrame(() => {
+      const { host, block, flow } = read();
+      if (!textFocusReceiptsEqual(host.draftOwnerReconciliation?.to, draftOwnerReconciliation.to)) return;
+      if (!block || !flow || !host.onHeadingStructure) return;
+      const active = document.activeElement;
+      const live = active instanceof HTMLTextAreaElement && active.dataset.blockId === block.id && active.dataset.textUnitId;
+      const request = headingRequestForDraftText(flow, live
+        ? { unitId: active.dataset.textUnitId!, offset: active.selectionStart }
+        : { unitId: draftOwnerReconciliation.to.textUnitId, offset: draftOwnerReconciliation.selectionStart });
+      if (request) void host.onHeadingStructure(block, request);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [draftOwnerReconciliation]);
 
   useLayoutEffect(() => {
     const pending = pendingDraftHeadingRef.current;

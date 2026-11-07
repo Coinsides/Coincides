@@ -22,6 +22,8 @@ export interface HeadingTextFlowStructureRequest {
   nextTextFlow: TextBlockContentV1;
   headingUnitId: string;
   focus: { unitId: string; caret: number };
+  /** The caret in the heading unit's previous text, where undo puts it back. Absent means focus.caret. */
+  beforeCaret?: number;
   inputType: 'formatHeading' | 'insertHeading' | 'insertParagraphAfterHeading';
 }
 

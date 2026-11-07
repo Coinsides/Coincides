@@ -1,0 +1,10 @@
+after113 
+before113 Binary file r04-before113.log matches
+after0 
+before0 
+win-after {"total":26,"bad":0,"latency":57,"byArm":{"winBackspace":{"n":2,"bad":0},"winArrow":{"n":2,"bad":0},"winComposition":{"n":2,"bad":0},"ctlComposition":{"n":2,"bad":0},"winEcho":{"n":2,"bad":0},"inject_fail":{"n":2,"bad":0},"inject_hang":{"n":2,"bad":0},"inject_failThenLeaveBack":{"n":2,"bad":0},"inject_leaveBack":{"n":2,"bad":0},"inject_back":{"n":2,"bad":0},"inject_leaveThenRefreshBack":{"n":2,"bad":0},"inject_leaveInApp":{"n":2,"bad":0},"inject_leaveAddressBar":{"n":2,"bad":0}}}
+win-before {"total":4,"bad":2,"latency":57,"byArm":{"winBackspace":{"n":1,"bad":1},"winArrow":{"n":1,"bad":1},"winComposition":{"n":1,"bad":0},"winEcho":{"n":1,"bad":0}}}
+a24-after Node.js v22.22.1
+a24-before {"total":32,"bad":20,"latency":57,"byArm":{"midHash":{"n":2,"bad":2},"midHashTwoBody":{"n":2,"bad":2},"midHashThird":{"n":2,"bad":2},"midHashFirst":{"n":2,"bad":2},"a24letters@80":{"n":2,"bad":2},"a24first@80":{"n":2,"bad":1},"a24ime@80":{"n":2,"bad":0},"a24letters@120":{"n":2,"bad":2},"a24first@120":{"n":2,"bad":0},"a24ime@120":{"n":2,"bad":2},"a24letters@160":{"n":2,"bad":2},"a24first@160":{"n":2,"bad":0},"a24ime@160":{"n":2,"bad":0},"a24letters@220":{"n":2,"bad":2},"a24first@220":{"n":2,"bad"
+hash-after Node.js v22.22.1
+done

@@ -307,6 +307,21 @@ describe('BlockEditorLayer K-4 affiliation controls', () => {
     expect(subject.onTextChange.mock.calls[0]?.slice(0, 2)).toEqual(['Alpha\n', 6]);
   });
 
+  it('handoff-1: focuses the block when its focus receipt names a unit the block no longer holds', async () => {
+    renderSubject({ autoFocus: true,
+      autoFocusReceipt: { blockId: 'block-k4', textFlowId: 'textflow-block-k4', textUnitId: 'moved-away' } });
+    await waitFor(() => expect((document.activeElement as HTMLElement | null)?.dataset.textUnitId).toBe('tu-1'));
+  });
+
+  it('focuses the unit its focus receipt names when the block holds it', async () => {
+    const flow = createTextBlockContentV1('Alpha');
+    flow.units = [flow.units[0], { ...flow.units[0], id: 'tu-2', text: 'Beta', order_index: 1 }];
+    const second = 'tu-2';
+    renderSubject({ autoFocus: true, text: 'Alpha\nBeta', textFlowDraft: flow,
+      autoFocusReceipt: { blockId: 'block-k4', textFlowId: 'textflow-block-k4', textUnitId: second } });
+    await waitFor(() => expect((document.activeElement as HTMLElement | null)?.dataset.textUnitId).toBe(second));
+  });
+
   it('K-4.3 keeps Move Export AI Save Label and Trash controls wired', async () => {
     const subject = renderSubject();
     const toolbar = within(getBlockToolbar());

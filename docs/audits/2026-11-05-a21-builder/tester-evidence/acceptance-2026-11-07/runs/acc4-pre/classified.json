@@ -1,0 +1,124 @@
+{
+ "by": {
+  "RE-beta": {
+   "3": 1,
+   "ERR": 1
+  },
+  "RE-alpha": {
+   "3": 1
+  },
+  "RF-gamma": {
+   "3": 1,
+   "ERR": 1
+  },
+  "RJ-gamma": {
+   "3": 1,
+   "ERR": 1
+  },
+  "RJ-beta": {
+   "3": 1
+  },
+  "RI-beta": {
+   "3": 2
+  },
+  "RX-addr": {
+   "3": 3
+  },
+  "RX-held": {
+   "3": 1,
+   "ERR": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "RE-beta-0",
+   "cls": "3",
+   "ok": false,
+   "note": "words neither in the note nor kept"
+  },
+  {
+   "name": "RE-beta-1",
+   "cls": "ERR",
+   "ok": false,
+   "note": "Error: no editor showing beta two"
+  },
+  {
+   "name": "RE-alpha-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RF-gamma-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RF-gamma-1",
+   "cls": "ERR",
+   "ok": false,
+   "note": "Error: no editor showing gamma two"
+  },
+  {
+   "name": "RJ-gamma-0",
+   "cls": "ERR",
+   "ok": false,
+   "note": "Error: no editor showing gamma two"
+  },
+  {
+   "name": "RJ-gamma-1",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RJ-beta-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RI-beta-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RI-beta-1",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RX-addr-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RX-addr-1",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RX-addr-2",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RX-held-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RX-held-1",
+   "cls": "ERR",
+   "ok": false,
+   "note": "Error: no editor showing beta three"
+  }
+ ]
+}

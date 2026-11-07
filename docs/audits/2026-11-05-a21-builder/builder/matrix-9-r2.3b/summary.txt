@@ -1,0 +1,13 @@
+build exit 0
+tsc exit 0
+client [2m      Tests [22m [1m[32m2677 passed[39m[22m[90m (2677)[39m
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+check:canvas-runtime-boundary exit 0
+check:source-experience exit 0
+check:owned-helper-contract exit 0
+r04 SUMMARY {"label":"r23b-57","origin":"http://localhost:4162","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":0},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+enter-r23b.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0 land med 1224 max 1248 (2)","enter_create":"n2 ①2 ②0 ③0","enter_reorder":"n2 ①2 ②0 ③0 land med 496 max 533 (2)","enter_placement":"n2 ①2 ②0 ③0","enter_save2":"n2 ①2 ②0 ③0 land med 1578 max 1656 (2)","enter_save3":"n2 ①2 ②0 ③0 land med 704 max 719 (2)","enter_hangWatchdog":"n2 ①2 ②0 ③0","enter_leaveInApp350":"n2 ①2 ②0 ③0","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①1 ②1 ③0","enter_slowReplyAddressBar":"n2 ①0 ②2 ③0","enter_slowReplyUnload":"n2 ①0 ②2 ③0","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":8,"median":719,"max":1656}}
+k-r23b.json {"arms":{"k_roleStallOk":"n2 ①2 ②0 ③0","k_roleStallFail":"n2 ①0 ②0 ②′2 ③0","k_roleStall25Ok":"n2 ①0 ②0 ②′2 ③0","k_roleStallUnload":"n2 ①0 ②0 ②′2 ③0"},"landed":null}
+hl-r23b.json {"arms":{"h_HL":"n3 ①0 ②3 ③0"},"landed":null}
+dist unchanged during runs
+=== r23b done 2026-11-08 01:56:20 ===

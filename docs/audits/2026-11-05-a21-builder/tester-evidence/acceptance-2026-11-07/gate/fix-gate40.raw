@@ -1,0 +1,62 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m<tmp>/edacc/tree/client[39m
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 1: words handed to a second structure that fails before its first edit
+[22m[39mSCRIPT 1: words handed to a second structure that fails before its first edit: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] || writes: whenWritesIdle ; fault idleHang skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; FAULT idleHang ; onFailure
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 1b: the same, the second structure failing at once on a tracked write
+[22m[39mSCRIPT 1b: the same, the second structure failing at once on a tracked write: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] || writes: whenWritesIdle ; fault idleReject skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; FAULT idleReject ; onFailure
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 2: leaving through the app right after Enter in the window
+[22m[39mSCRIPT 2: leaving through the app right after Enter in the window: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0>] new-2[<k1>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; transfer tu-3 new-1[H:<W1><k0>] -> new-2[<k1>] ; focusBlock new-2
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+[22m[39mSCRIPT 3: a new heading elsewhere while kept words are on screen (buffer-3): fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600) || note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1><k0>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; FAULT create ; onFailure ; structure -> false ; save work [<W0>|<W1>] ; save work [<W0>|<W1><k0>] ; whenWritesIdle ; save prior [<P0>|H:<P1>] ; create new-1 [] ; transfer tu-2 prior[<P0>] -> new-1[H:<P1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<P1><k1>]
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss H: the page goes away while the window holds words, and the note is opened again
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/edacc\tree\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss H: the page goes away while the window holds words, and the note is opened again
+[22m[39mSCRIPT H: the page goes away while the window holds words, and the note is opened again: heading(<W1>) type(<k0> in window) type(<k1> in window) unload wait(600) || note: prior[<P0> | <P1>] work[<W0> | <W1><k0><k1>] || writes: whenWritesIdle ; onFailure ; structure -> false ; save work [<W0>|<W1><k0><k1>]
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss the role-change save fails once, no Enter in the window
+[22m[39mSCRIPT the role-change save fails once, no Enter in the window: fault(save) heading(<W1>) type(<k0> in window) wait(600) undo wait(600) || note: prior[<P0> | <P1>] work[<W0> | H:<W1><k0>] || writes: whenWritesIdle ; FAULT save ; save work REJECTED ; onFailure ; structure -> false ; save work [<W0>|H:<W1>] ; save work [<W0>|H:<W1><k0>] ; whenWritesIdle ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1><k0>] ; focusBlock new-1 ; transfer tu-2 new-1[] -> work[<W0>|H:<W1><k0>] ; trash new-1
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss commit-1: a sync-priority commit between a frame and the write it waits for
+[22m[39mSCRIPT commit-1: a sync-priority commit between a frame and the write it waits for: enter(<k0>) wait(30) clicks heading(<W1>) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k1>] new-2[<k0>] || writes: save work [<W0>|<W1>|<k0>] ; whenWritesIdle ; save work [<W0>|H:<W1>|<k0>] ; create new-1 [] ; transfer tu-2 work[<W0>|<k0>] -> new-1[H:<W1>] ; create new-2 [] ; transfer tu-3 work[<W0>] -> new-2[<k0>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k1>]
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/edacc\tree\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/edacc\tree\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/edacc\tree\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/edacc\tree\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 105169[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 1: words handed to a second structure that fails before its first edit [33m 1727[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 1b: the same, the second structure failing at once on a tracked write [33m 1692[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 2: leaving through the app right after Enter in the window [33m 1645[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3) [33m 2417[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss H: the page goes away while the window holds words, and the note is opened again [33m 2057[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss the role-change save fails once, no Enter in the window [33m 2667[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss commit-1: a sync-priority commit between a frame and the write it waits for [33m 1724[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22m40 seeded sequences of 16 events: every word in exactly one place, in its own unit [33m 91237[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 16:24:50
+[2m   Duration [22m 107.39s[2m (transform 506ms, setup 247ms, collect 795ms, tests 105.17s, environment 701ms, prepare 137ms)[22m
+

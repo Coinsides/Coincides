@@ -1,0 +1,48 @@
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","head"],"server":["abc","[heading_1]head"],"expected":["abc","[heading_1]head"],"ok":true}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","# head","bo"],"server":["abc","# head","bo"],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","ead"],"server":["abc","[heading_1]ead"],"expected":["abc","[heading_1]head"],"ok":false}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","#head","body "],"server":["abc","#head","body "],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","bb","cc","dd","ee"],"server":["aa","bb","cc","dd","ee"],"expected":["aa","bb","cc","dd","ee"],"ok":true}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","ead"],"server":["abc","[heading_1]ead"],"expected":["abc","[heading_1]head"],"ok":false}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","# head","bo"],"server":["abc","# head","bo"],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","head"],"server":["abc","[heading_1]head"],"expected":["abc","[heading_1]head"],"ok":true}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","# head","byo"],"server":["abc","# head","byo"],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","ead"],"server":["abc","[heading_1]ead"],"expected":["abc","[heading_1]head"],"ok":false}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","ead","bo"],"server":["abc","[heading_1]ead","bo"],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","head"],"server":["abc","[heading_1]head"],"expected":["abc","[heading_1]head"],"ok":true}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","ead","bo"],"server":["abc","[heading_1]ead","bo"],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","head"],"server":["abc","[heading_1]head"],"expected":["abc","[heading_1]head"],"ok":true}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","ead","bo"],"server":["abc","[heading_1]ead","bo"],"expected":["abc","[heading_1]head","body"],"ok":false}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}
+{"arm":"R","name":"fastHash","round":0,"dom":["abc","ead"],"server":["abc","[heading_1]ead"],"expected":["abc","[heading_1]head"],"ok":false}
+{"arm":"R","name":"fastHashBody","round":0,"dom":["abc","head","body"],"server":["abc","[heading_1]head","body"],"expected":["abc","[heading_1]head","body"],"ok":true}
+{"arm":"R","name":"lines300","round":0,"dom":["aa","","cc","dd","eebb"],"server":["aa","","cc","dd","eebb"],"expected":["aa","bb","cc","dd","ee"],"ok":false}
+{"arm":"R","name":"trailingEnter","round":0,"dom":["abc","abc\n"],"server":["abc",""],"expected":["abc",""],"ok":true,"boxes":["abc","abc\n"]}
+{"arm":"R","name":"spaceThenType","round":0,"dom":["abcde "],"server":["abcde "],"expected":["abc de"],"ok":false}
+{"arm":"R","name":"sentence","round":0,"dom":["helloworld again "],"server":["helloworld again "],"expected":["hello world again"],"ok":false}

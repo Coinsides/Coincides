@@ -1,0 +1,228 @@
+
+ RUN  v3.2.7 <tmp>/edfrozen/client
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit
+SCRIPT 1: words handed to a second structure that fails before its first edit: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>] || writes: whenWritesIdle ; fault idleHang skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleHang ; onFailure
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write
+SCRIPT 1b: the same, the second structure failing at once on a tracked write: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>] || writes: whenWritesIdle ; fault idleReject skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleReject ; onFailure
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window
+SCRIPT 2: leaving through the app right after Enter in the window: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+SCRIPT 3: a new heading elsewhere while kept words are on screen (buffer-3): fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600) || note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; FAULT create ; onFailure ; structure -> false ; save work [<W0>|<W1>] ; whenWritesIdle ; save prior [<P0>|H:<P1>] ; create new-1 [] ; transfer tu-2 prior[<P0>] -> new-1[H:<P1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<P1><k1>]
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again
+SCRIPT H: the page goes away while the window holds words, and the note is opened again: heading(<W1>) type(<k0> in window) type(<k1> in window) unload wait(600) || note: prior[<P0> | <P1>] work[<W0> | <W1>] || writes: whenWritesIdle ; onFailure ; structure -> false
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window
+SCRIPT the role-change save fails once, no Enter in the window: fault(save) heading(<W1>) type(<k0> in window) wait(600) undo wait(600) || note: prior[<P0> | <P1>] work[<W0> | <W1>] || writes: whenWritesIdle ; FAULT save ; save work REJECTED ; onFailure ; structure -> false ; whenWritesIdle ; onFailure ; save work [<W0>|<W1>]
+
+stdout | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for
+SCRIPT commit-1: a sync-priority commit between a frame and the write it waits for: enter(<k0>) wait(30) clicks heading(<W1>) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0> | H:<W1>] new-1[H:<W1><k1>] new-2[<k0>] || writes: save work [<W0>|<W1>|<k0>] ; whenWritesIdle ; save work [<W0>|H:<W1>|<k0>] ; create new-1 [] ; transfer tu-2 work[<W0>|<k0>] -> new-1[H:<W1>] ; create new-2 [] ; transfer tu-3 work[<W0>|H:<W1>] -> new-2[<k0>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k1>]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (8 tests | 7 failed) 13616ms
+   × words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit 1733ms
+     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+   × words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write 1682ms
+     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+   × words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window 1394ms
+     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return: expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+   × words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3) 2422ms
+     → <k0> LOST
+  note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1>]
+  events: fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600): expected [ '<k0> LOST' ] to deeply equal []
+   × words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again 2045ms
+     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0> | <W1>]
+  events: heading(<W1>) type(<k0> in window) type(<k1> in window) unload wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+   × words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window 2608ms
+     → <k0> LOST
+  note: prior[<P0> | <P1>] work[<W0> | <W1>]
+  events: fault(save) heading(<W1>) type(<k0> in window) wait(600) undo wait(600): expected [ '<k0> LOST' ] to deeply equal []
+   × words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for 1729ms
+     → note text <W1> appears 2 times
+  note: prior[<P0> | <P1>] work[<W0> | H:<W1>] new-1[H:<W1><k1>] new-2[<k0>]
+  events: enter(<k0>) wait(30) clicks heading(<W1>) type(<k1> in window) wait(600): expected [ 'note text <W1> appears 2 times' ] to deeply equal []
+   ✓ words typed around heading structures are conserved > 0 seeded sequences of 16 events: every word in exactly one place, in its own unit 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit
+AssertionError: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "<k0> LOST",
++   "<k1> LOST",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write
+AssertionError: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "<k0> LOST",
++   "<k1> LOST",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window
+AssertionError: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return: expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "<k0> LOST",
++   "<k1> LOST",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+AssertionError: <k0> LOST
+  note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1>]
+  events: fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600): expected [ '<k0> LOST' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "<k0> LOST",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again
+AssertionError: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0> | <W1>]
+  events: heading(<W1>) type(<k0> in window) type(<k1> in window) unload wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "<k0> LOST",
++   "<k1> LOST",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window
+AssertionError: <k0> LOST
+  note: prior[<P0> | <P1>] work[<W0> | <W1>]
+  events: fault(save) heading(<W1>) type(<k0> in window) wait(600) undo wait(600): expected [ '<k0> LOST' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "<k0> LOST",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for
+AssertionError: note text <W1> appears 2 times
+  note: prior[<P0> | <P1>] work[<W0> | H:<W1>] new-1[H:<W1><k1>] new-2[<k0>]
+  events: enter(<k0>) wait(30) clicks heading(<W1>) type(<k1> in window) wait(600): expected [ 'note text <W1> appears 2 times' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "note text <W1> appears 2 times",
++ ]
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:567:95
+    565|       console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    566|       expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    567|         .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+       |                                                                                               ^
+    568|     }, 60_000);
+    569|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 1 passed (8)
+   Start at  03:02:34
+   Duration  15.91s (transform 526ms, setup 254ms, collect 822ms, tests 13.62s, environment 747ms, prepare 132ms)
+

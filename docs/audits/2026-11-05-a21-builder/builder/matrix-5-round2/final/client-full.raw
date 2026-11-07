@@ -1,0 +1,756 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m<tmp>/ed21/client[39m
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 1: words handed to a second structure that fails before its first edit
+[22m[39mSCRIPT 1: words handed to a second structure that fails before its first edit: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] || writes: whenWritesIdle ; fault idleHang skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; FAULT idleHang ; onFailure
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 1b: the same, the second structure failing at once on a tracked write
+[22m[39mSCRIPT 1b: the same, the second structure failing at once on a tracked write: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] || writes: whenWritesIdle ; fault idleReject skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; FAULT idleReject ; onFailure
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 2: leaving through the app right after Enter in the window
+[22m[39mSCRIPT 2: leaving through the app right after Enter in the window: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx[2m > [22m[2mheading structure commits always release the note and keep both draft halves equal[2m > [22m[2mfailure injection: words left behind go into the note when it is opened again
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at TestComponent (D:\Coinsides\v2.x\Coincides\client\node_modules\@testing-library\react\dist\pure.js:307:5)
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+[22m[39mSCRIPT 3: a new heading elsewhere while kept words are on screen (buffer-3): fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600) || note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1><k0>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; FAULT create ; onFailure ; structure -> false ; save work [<W0>|<W1>] ; save work [<W0>|<W1><k0>] ; whenWritesIdle ; save prior [<P0>|H:<P1>] ; create new-1 [] ; transfer tu-2 prior[<P0>] -> new-1[H:<P1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<P1><k1>]
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss H: the page goes away while the window holds words, and the note is opened again
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/ed21\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx[2m > [22m[2mheading structure commits always release the note and keep both draft halves equal[2m > [22m[2mround 2 #3, condition a by anchor: "od" typed after "body" is not taken for already in "body"
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at TestComponent (D:\Coinsides\v2.x\Coincides\client\node_modules\@testing-library\react\dist\pure.js:307:5)
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss H: the page goes away while the window holds words, and the note is opened again
+[22m[39mSCRIPT H: the page goes away while the window holds words, and the note is opened again: heading(<W1>) type(<k0> in window) type(<k1> in window) unload wait(600) || note: prior[<P0> | <P1>] work[<W0> | <W1><k0><k1>] || writes: whenWritesIdle ; onFailure ; structure -> false ; save work [<W0>|<W1><k0><k1>]
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx [2m([22m[2m45 tests[22m[2m)[22m[33m 9829[2mms[22m[39m
+   [33m[2m✓[22m[39m A4 heading isolation through the live TextFlow and Note history[2m > [22misolates a multiline cross-block selection paste and restores both blocks with one undo and redo [33m 554[2mms[22m[39m
+   [33m[2m✓[22m[39m A4 heading isolation through the live TextFlow and Note history[2m > [22mpromotes a middle unit, preserves both body segments and inline anchors, and undoes/redoes the whole operation once [33m 577[2mms[22m[39m
+   [33m[2m✓[22m[39m A4 heading isolation through the live TextFlow and Note history[2m > [22misolates several pasted heading units into single-heading blocks while keeping intervening body order [33m 511[2mms[22m[39m
+   [33m[2m✓[22m[39m A4 heading isolation through the live TextFlow and Note history[2m > [22mretains both earlier history batches after a later heading operation [33m 835[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mcompletes, releases busy and replays queued keys even when animation frames never arrive [33m 452[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mkeeps the buffer until the target editor exists and is writable, so the next key has somewhere to go [33m 595[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mcounts everything typed in the window as one undo step, leaving the heading [33m 389[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mwaits for a composition to end, however late, before placing its text [33m 519[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mbody typed after Enter in a heading takes its own block rather than sharing the heading block [33m 415[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mfailure injection: words held by a failed save go into the note once it is released [33m 907[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mkept words keep retrying through refusals and land once the note is released [33m 373[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mround 2 #3b (H-L): words landed from the window stay stored while the save that carries them has not been confirmed [33m 314[2mms[22m[39m
+   [33m[2m✓[22m[39m heading structure commits always release the note and keep both draft halves equal[2m > [22mcondition b: leaving is released within the watchdog when writes never settle, and the words are kept [33m 373[2mms[22m[39m
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss the role-change save fails once, no Enter in the window
+[22m[39mSCRIPT the role-change save fails once, no Enter in the window: fault(save) heading(<W1>) type(<k0> in window) wait(600) undo wait(600) || note: prior[<P0> | <P1>] work[<W0> | H:<W1><k0>] || writes: whenWritesIdle ; FAULT save ; save work REJECTED ; onFailure ; structure -> false ; save work [<W0>|H:<W1>] ; save work [<W0>|H:<W1><k0>] ; whenWritesIdle ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1><k0>] ; focusBlock new-1 ; transfer tu-2 new-1[] -> work[<W0>|H:<W1><k0>] ; trash new-1
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mcover title regression and normal/Overview same-source ink: default
+[22m[39mT8_COVER {"preset":"default","ratios":[[{"text":"封面题名回归夹具","ratio":17.317048507866375,"threshold":3},{"text":"可读述名","ratio":17.317048507866375,"threshold":4.5}],[{"text":"封面题名回归夹具","ratio":17.317048507866375,"threshold":3},{"text":"可读述名","ratio":17.317048507866375,"threshold":4.5}]]}
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss commit-1: a sync-priority commit between a frame and the write it waits for
+[22m[39mSCRIPT commit-1: a sync-priority commit between a frame and the write it waits for: enter(<k0>) wait(30) clicks heading(<W1>) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k1>] new-2[<k0>] || writes: save work [<W0>|<W1>|<k0>] ; whenWritesIdle ; save work [<W0>|H:<W1>|<k0>] ; create new-1 [] ; transfer tu-2 work[<W0>|<k0>] -> new-1[H:<W1>] ; create new-2 [] ; transfer tu-3 work[<W0>] -> new-2[<k0>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k1>]
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mcover title regression and normal/Overview same-source ink: quiet-ink
+[22m[39mT8_COVER {"preset":"quiet-ink","ratios":[[{"text":"封面题名回归夹具","ratio":14.478196947770302,"threshold":3},{"text":"可读述名","ratio":14.478196947770302,"threshold":4.5}],[{"text":"封面题名回归夹具","ratio":14.478196947770302,"threshold":3},{"text":"可读述名","ratio":14.478196947770302,"threshold":4.5}]]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mcover title regression and normal/Overview same-source ink: warm-paper
+[22m[39mT8_COVER {"preset":"warm-paper","ratios":[[{"text":"封面题名回归夹具","ratio":13.190812036393435,"threshold":3},{"text":"可读述名","ratio":13.190812036393435,"threshold":4.5}],[{"text":"封面题名回归夹具","ratio":13.190812036393435,"threshold":3},{"text":"可读述名","ratio":13.190812036393435,"threshold":4.5}]]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mcover title regression and normal/Overview same-source ink: workbench
+[22m[39mT8_COVER {"preset":"workbench","ratios":[[{"text":"封面题名回归夹具","ratio":12.959531408643135,"threshold":3},{"text":"可读述名","ratio":12.959531408643135,"threshold":4.5}],[{"text":"封面题名回归夹具","ratio":12.959531408643135,"threshold":3},{"text":"可读述名","ratio":12.959531408643135,"threshold":4.5}]]}
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mboundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/ed21\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mcover title regression and normal/Overview same-source ink: silk
+[22m[39mT8_COVER {"preset":"silk","ratios":[[{"text":"封面题名回归夹具","ratio":12.726461160050224,"threshold":3},{"text":"可读述名","ratio":12.726461160050224,"threshold":4.5}],[{"text":"封面题名回归夹具","ratio":12.726461160050224,"threshold":3},{"text":"可读述名","ratio":12.726461160050224,"threshold":4.5}]]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mscans every current template and every populated binding slot: default
+[22m[39mT8_CONTRAST {"preset":"default","samples":50,"failures":[],"minimum":{"element":"relation-component.timeline:span._year_230b8d","text":"Relation sample","foreground":{"r":109.8,"g":150.10000000000002,"b":238.5,"a":1},"backgrounds":[{"r":16,"g":17,"b":20,"a":1}],"fontSize":15,"fontWeight":600,"threshold":4.5,"ratio":6.5358030730455585},"exemptions":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mscans every current template and every populated binding slot: quiet-ink
+[22m[39mT8_CONTRAST {"preset":"quiet-ink","samples":50,"failures":[],"minimum":{"element":"paper:span.","text":"header-left","foreground":{"r":171.2,"g":174.8,"b":182.35000000000002,"a":1},"backgrounds":[{"r":23,"g":24,"b":28,"a":1}],"fontSize":12,"fontWeight":400,"threshold":4.5,"ratio":8.05073384098091},"exemptions":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mscans every current template and every populated binding slot: warm-paper
+[22m[39mT8_CONTRAST {"preset":"warm-paper","samples":50,"failures":[],"minimum":{"element":"paper:span.","text":"header-left","foreground":{"r":100.2,"g":92.6,"b":81.4,"a":1},"backgrounds":[{"r":249,"g":245,"b":237,"a":1},{"r":247,"g":243,"b":234,"a":1},{"r":245,"g":240,"b":229,"a":1}],"fontSize":12,"fontWeight":400,"threshold":4.5,"ratio":5.745810043064673},"exemptions":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mscans every current template and every populated binding slot: workbench
+[22m[39mT8_CONTRAST {"preset":"workbench","samples":50,"failures":[],"minimum":{"element":"paper:span.","text":"header-left","foreground":{"r":159.6,"g":167.2,"b":178.1,"a":1},"backgrounds":[{"r":26,"g":30,"b":37,"a":1}],"fontSize":12,"fontWeight":400,"threshold":4.5,"ratio":6.902806211447132},"exemptions":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mscans every current template and every populated binding slot: silk
+[22m[39mT8_CONTRAST {"preset":"silk","samples":50,"failures":[],"minimum":{"element":"relation-component.timeline:span._year_230b8d","text":"Relation sample","foreground":{"r":77.5,"g":105.55,"b":92.25,"a":1},"backgrounds":[{"r":242,"g":234,"b":215,"a":1}],"fontSize":15,"fontWeight":600,"threshold":4.5,"ratio":4.981391408959494},"exemptions":[]}
+
+ [32m✓[39m src/pages/Notes/canvasEngine/pageHeaderReservation.test.ts [2m([22m[2m23 tests[22m[2m)[22m[33m 19982[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=+0 cover=false header=false has zero first/continuation overlap [33m 1180[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=+0 cover=false header=true has zero first/continuation overlap [33m 1251[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=+0 cover=true header=false has zero first/continuation overlap [33m 1041[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=+0 cover=true header=true has zero first/continuation overlap [33m 1011[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=72 cover=false header=false has zero first/continuation overlap [33m 1044[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=72 cover=false header=true has zero first/continuation overlap [33m 1014[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=72 cover=true header=false has zero first/continuation overlap [33m 1026[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'a4_portrait' top=72 cover=true header=true has zero first/continuation overlap [33m 1050[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=+0 cover=false header=false has zero first/continuation overlap [33m 1069[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=+0 cover=false header=true has zero first/continuation overlap [33m 1171[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=+0 cover=true header=false has zero first/continuation overlap [33m 1210[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=+0 cover=true header=true has zero first/continuation overlap [33m 1241[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=72 cover=false header=false has zero first/continuation overlap [33m 1289[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=72 cover=false header=true has zero first/continuation overlap [33m 1289[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=72 cover=true header=false has zero first/continuation overlap [33m 1199[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22m'letter_portrait' top=72 cover=true header=true has zero first/continuation overlap [33m 1246[2mms[22m[39m
+   [33m[2m✓[22m[39m page header reservation[2m > [22mreserves section-specific offsets and header folios even when handwritten headers are disabled [33m 1094[2mms[22m[39m
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mnormal editable citizens and the three existing slot ink choices: default
+[22m[39mT8_EDITABLE {"preset":"default","samples":55,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mnormal editable citizens and the three existing slot ink choices: quiet-ink
+[22m[39mT8_EDITABLE {"preset":"quiet-ink","samples":55,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mnormal editable citizens and the three existing slot ink choices: warm-paper
+[22m[39mT8_EDITABLE {"preset":"warm-paper","samples":55,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mnormal editable citizens and the three existing slot ink choices: workbench
+[22m[39mT8_EDITABLE {"preset":"workbench","samples":55,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mnormal editable citizens and the three existing slot ink choices: silk
+[22m[39mT8_EDITABLE {"preset":"silk","samples":55,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mpaginated writing roles and markers inherit no shell ink: default
+[22m[39mT8_ROLES {"preset":"default","roles":["paragraph","heading","quote","bullet_item","numbered_item","todo_item","toggle_item"],"samples":10,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mpaginated writing roles and markers inherit no shell ink: quiet-ink
+[22m[39mT8_ROLES {"preset":"quiet-ink","roles":["paragraph","heading","quote","bullet_item","numbered_item","todo_item","toggle_item"],"samples":10,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mpaginated writing roles and markers inherit no shell ink: warm-paper
+[22m[39mT8_ROLES {"preset":"warm-paper","roles":["paragraph","heading","quote","bullet_item","numbered_item","todo_item","toggle_item"],"samples":10,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mpaginated writing roles and markers inherit no shell ink: workbench
+[22m[39mT8_ROLES {"preset":"workbench","roles":["paragraph","heading","quote","bullet_item","numbered_item","todo_item","toggle_item"],"samples":10,"failures":[]}
+
+[90mstdout[2m | src/test/visualRelationsContrast.test.tsx[2m > [22m[2mpermanent visual relations: actual paper text/background contrast[2m > [22m[2mpaginated writing roles and markers inherit no shell ink: silk
+[22m[39mT8_ROLES {"preset":"silk","roles":["paragraph","heading","quote","bullet_item","numbered_item","todo_item","toggle_item"],"samples":10,"failures":[]}
+
+ [32m✓[39m src/test/visualRelationsContrast.test.tsx [2m([22m[2m23 tests[22m[2m)[22m[33m 12495[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mpreserves global KaTeX selectors while mapping the local CSS module owner [33m 355[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mscans every current template and every populated binding slot: default [33m 1216[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mscans every current template and every populated binding slot: quiet-ink [33m 1055[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mscans every current template and every populated binding slot: warm-paper [33m 1031[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mscans every current template and every populated binding slot: workbench [33m 1016[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mscans every current template and every populated binding slot: silk [33m 1032[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mnormal editable citizens and the three existing slot ink choices: default [33m 974[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mnormal editable citizens and the three existing slot ink choices: quiet-ink [33m 985[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mnormal editable citizens and the three existing slot ink choices: warm-paper [33m 958[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mnormal editable citizens and the three existing slot ink choices: workbench [33m 870[2mms[22m[39m
+   [33m[2m✓[22m[39m permanent visual relations: actual paper text/background contrast[2m > [22mnormal editable citizens and the three existing slot ink choices: silk [33m 828[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/ed21\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstdout[2m | src/pages/Boards/BoardPage.smoke.test.tsx[2m > [22m[2mV13.5 B3 board identity details[2m > [22m[2mreads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes
+[22m[39mV13_5_B3_CLIENT_IDENTITY {"title":"Renamed board","identity_item_id":"identity-identity","description":"A place to compare field observations.\nQuestions remain open.","rename_request":["/boards/identity",{"title":"Renamed board"}],"reopened":true}
+
+[90mstdout[2m | src/pages/Boards/BoardPage.smoke.test.tsx[2m > [22m[2mV13 S4 board polish smoke[2m > [22m[2mopens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker
+[22m[39mV13_S4_BOARD_POLISH_SMOKE {"boardName":"Exam revision","soulTitle":"Exam revision","navigator":"collapsed on entry, manual expansion retained, restored on exit","picker":"open, mount, close, reopen with search retained, Escape, focus returned","members":1}
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx [2m([22m[2m122 tests[22m[2m)[22m[33m 13018[2mms[22m[39m
+   [33m[2m✓[22m[39m useNoteCanvasDataAdapter draft create receipt seam[2m > [22mkeeps recovery after a held reconciliation read is superseded by newer hydration [33m 403[2mms[22m[39m
+[90mstdout[2m | src/pages/Boards/BoardPage.smoke.test.tsx[2m > [22m[2mV13 S2 board and paper smoke[2m > [22m[2mopens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper
+[22m[39mV13_S2_BOARD_PAPER_SMOKE {"boardZoom":1.2,"members":3,"edges":2,"freehand":1,"paper":{"stored":[{"id":"block-a","canvas_layout":{"x":0,"y":40,"width":760,"height":88,"surface":"formal_page","coordinate_space":"page_frame_local","frame_id":"frame-a","boundary_role":"inside","surface_authority":{"coordinateSpace":"page_frame_local","pageBoundary":{"left":0,"right":760,"frameId":"frame-a"}}}}],"resolved":{"block-a":{"x":0,"y":40,"width":760,"height":88,"surface":"formal_page","coordinate_space":"page_frame_local","frame_id":"frame-a","boundary_role":"inside","surface_authority":{"coordinateSpace":"page_frame_local","pageBoundary":{"left":0,"right":760,"frameId":"frame-a"}}}},"typography":{"fontSizePx":15.2,"lineHeightPx":25.1},"reading":[{"gear":"fit_width","baseScale":1.25,"displayScale":1.25,"stepFactor":1,"paperWidth":904,"paperHeight":1350,"layoutWidth":760},{"gear":"fit_page","baseScale":0.6666666666666666,"displayScale":0.6666666666666666,"stepFactor":1,"paperWidth":904,"paperHeight":1350,"layoutWidth":760},{"gear":"physical","baseScale":0.8779875966831581,"displayScale":0.8779875966831581,"stepFactor":1,"paperWidth":904,"paperHeight":1350,"layoutWidth":760}]}}
+
+ [32m✓[39m src/pages/Boards/BoardPage.smoke.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 10409[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 B3 board identity details[2m > [22mreads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes [33m 852[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 wave 1 wiring smoke[2m > [22mA1 renames in the board, rejects a blank name and reopens the saved title [33m 319[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 wave 1 wiring smoke[2m > [22mA2 moves every visual kind, resizes a scaled shape, respects Pin and reopens geometry [33m 1571[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 wave 1 wiring smoke[2m > [22mA3 saves and clears a label, persists three arrow states and renders arrowheads outside cards [33m 1285[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 wave 1 wiring smoke[2m > [22mA4 shows fresh counts from both menus, cancels safely, deletes and reuses the retained purpose [33m 441[2mms[22m[39m
+   [33m[2m✓[22m[39m V13 S4 board polish smoke[2m > [22mopens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker [33m 967[2mms[22m[39m
+   [33m[2m✓[22m[39m V13 S2 board and paper smoke[2m > [22mopens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper [33m 2386[2mms[22m[39m
+   [33m[2m✓[22m[39m V13 S2 board and paper smoke[2m > [22mdeletes drawn ink and resizes a hosted group through a zoomed viewport before reopening its paper [33m 1584[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/ed21\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/ed21\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/PaginationProjection.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 9007[2mms[22m[39m
+   [33m[2m✓[22m[39m A1 one plan across writing, print and Overview[2m > [22mprojects the complete long logical block into the same page slices in both read-only surfaces [33m 1171[2mms[22m[39m
+   [33m[2m✓[22m[39m A1 one plan across writing, print and Overview[2m > [22mframe runtime consumes the supplied plan object without repaginating the projected boxes [33m 910[2mms[22m[39m
+   [33m[2m✓[22m[39m A1 one plan across writing, print and Overview[2m > [22mkeeps hidden auto text and a manual box on their complete export pages after folding a chapter [33m 2818[2mms[22m[39m
+   [33m[2m✓[22m[39m A1 one plan across writing, print and Overview[2m > [22mkeeps ink on its original page when text starts later and creates continuation pages (print=false) [33m 2069[2mms[22m[39m
+   [33m[2m✓[22m[39m A1 one plan across writing, print and Overview[2m > [22mkeeps ink on its original page when text starts later and creates continuation pages (print=true) [33m 2037[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx[2m > [22m[2mview options writing-surface integration[2m > [22m[2mforwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx [2m([22m[2m46 tests[22m[2m)[22m[33m 7395[2mms[22m[39m
+   [33m[2m✓[22m[39m A2 foldable page gaps[2m > [22mmoves A1 text fragments only on screen and keeps print and Overview projections unchanged [33m 1251[2mms[22m[39m
+   [33m[2m✓[22m[39m T8 external paper-title band stays before body geometry[2m > [22mA4 keeps its allocated header band clear at multiple scales and suppresses it with a cover [33m 446[2mms[22m[39m
+   [33m[2m✓[22m[39m T8 external paper-title band stays before body geometry[2m > [22mLetter keeps its allocated header band clear at multiple scales and suppresses it with a cover [33m 349[2mms[22m[39m
+   [33m[2m✓[22m[39m page repairs: shared header reservation in writing and print[2m > [22mkeeps first and continuation body outside the header (cover=false, header=false) [33m 338[2mms[22m[39m
+   [33m[2m✓[22m[39m page repairs: shared header reservation in writing and print[2m > [22mkeeps first and continuation body outside the header (cover=false, header=true) [33m 387[2mms[22m[39m
+   [33m[2m✓[22m[39m page repairs: shared header reservation in writing and print[2m > [22mkeeps first and continuation body outside the header (cover=true, header=false) [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m page repairs: shared header reservation in writing and print[2m > [22mkeeps first and continuation body outside the header (cover=true, header=true) [33m 386[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx [2m([22m[2m36 tests[22m[2m)[22m[33m 6304[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteRuntimeDocumentLayer overview navigation[2m > [22mT6 toolbar preserves the body selection and creates all three targets through the text save door [33m 677[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteRuntimeDocumentLayer overview navigation[2m > [22mT6 slash preserves the body selection and creates all three targets through the text save door [33m 528[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteRuntimeDocumentLayer overview navigation[2m > [22mT6 slash-pointer preserves the body selection and creates all three targets through the text save door [33m 529[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteRuntimeDocumentLayer overview navigation[2m > [22mnavigation follows paper scrolling and jumps to a clicked page without closing or writing [33m 342[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteRuntimeDocumentLayer overview navigation[2m > [22mA2 navigation and Overview return to folded reading destinations without changing their page models [33m 331[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.staging.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 5041[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mkeeps Agent stickies and their edges in Staging until the human drags them onto the board [33m 526[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mplaces successive staged stickies at distinct default positions and z indices [33m 327[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mreverts the fixed Agent batch from the toolbar, reloads the board, and disables repeated clicks [33m 484[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mretries a failed batch with its original ID even if the latest batch lookup would change [33m 310[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mStages Claim once, leaves it off canvas and reads it back on reopening [33m 525[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mStages Source note once, leaves it off canvas and reads it back on reopening [33m 479[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mStages Study group once, leaves it off canvas and reads it back on reopening [33m 453[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mPlaces at the default grid with one geometry PATCH and retains that placement on reopening [33m 430[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22msends a modal selection to a source-labelled staging row and keeps dock controls live while canvas keys yield [33m 407[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mremoves through unmount and preserves the library source [33m 336[2mms[22m[39m
+   [33m[2m✓[22m[39m board staging dock[2m > [22mretains a staged row when Place or Remove fails [33m 324[2mms[22m[39m
+[90mstderr[2m | src/pages/Boards/BoardPage.unboxing.test.tsx[2m > [22m[2m13.4 unboxing through production board and note runtime[2m > [22m[2mregisters media blob reads through real modal and full-page note mounts without relaxing the strict ledger
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/components/Skin/SkinFloatCard.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 5367[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22mstays a single nonmodal tool across paper clicks and note changes; X and Escape close [33m 559[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22monly drags by header, clamps on release, folds by double click, and restores UI memory [33m 324[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22mhover debounces real paper style for all four presets, restores on leave, never saves until click [33m 408[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22mclears a pending hover when switching note or collapsing [33m 313[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22mlets native picker controls borrow focus, commits grouping, and returns paper focus after commit or cancel [33m 491[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22mretries binding an already created suite without creating a duplicate [33m 423[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22medits via the real shared picker, persists palette identity, shows deviations and restores individually/all [33m 500[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22msaves the complete resolved appearance, immediately shows and selects Custom, then renames/updates/deletes [33m 593[2mms[22m[39m
+   [33m[2m✓[22m[39m skin float card contract[2m > [22m暖纸保存切换删除后完整外观不变 [33m 599[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.unboxing.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 5204[2mms[22m[39m
+   [33m[2m✓[22m[39m 13.4 unboxing through production board and note runtime[2m > [22mregisters media blob reads through real modal and full-page note mounts without relaxing the strict ledger [33m 1544[2mms[22m[39m
+   [33m[2m✓[22m[39m 13.4 unboxing through production board and note runtime[2m > [22mcreates in place, inserts a reference, rereads current ItemSummary and survives board/modal/full-page reopening [33m 2191[2mms[22m[39m
+   [33m[2m✓[22m[39m 13.4 unboxing through production board and note runtime[2m > [22muses ordinary block trash without changing its source item or staging row [33m 632[2mms[22m[39m
+   [33m[2m✓[22m[39m 13.4 unboxing through production board and note runtime[2m > [22mleaves a staged content_group outside the item-only unboxing flow [33m 414[2mms[22m[39m
+   [33m[2m✓[22m[39m 13.4 unboxing through production board and note runtime[2m > [22mleaves a staged text_range outside the item-only unboxing flow [33m 421[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/RichBlocksPrint.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 2256[2mms[22m[39m
+   [33m[2m✓[22m[39m T5 rich blocks share paper, real print portal and export preview projections[2m > [22mrenders media edits, the T3 table and all component kinds across unchanged pages (cover=false, included=false) [33m 839[2mms[22m[39m
+   [33m[2m✓[22m[39m T5 rich blocks share paper, real print portal and export preview projections[2m > [22mrenders media edits, the T3 table and all component kinds across unchanged pages (cover=true, included=false) [33m 526[2mms[22m[39m
+   [33m[2m✓[22m[39m T5 rich blocks share paper, real print portal and export preview projections[2m > [22mrenders media edits, the T3 table and all component kinds across unchanged pages (cover=true, included=true) [33m 416[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.visualV1.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 4989[2mms[22m[39m
+   [33m[2m✓[22m[39m board visual v1 complete UI workflows[2m > [22mcreates, edits, colors, resizes between the two widths and lightly deletes a board-owned sticky [33m 1958[2mms[22m[39m
+   [33m[2m✓[22m[39m board visual v1 complete UI workflows[2m > [22mdraws an anchored member-to-sticky edge with preview, edits every style axis and inherits styles on the next line [33m 579[2mms[22m[39m
+   [33m[2m✓[22m[39m board visual v1 complete UI workflows[2m > [22medits bend and horizontal wrapping labels, leaves a true path gap and snaps the dragged label back to the midpoint [33m 630[2mms[22m[39m
+   [33m[2m✓[22m[39m board visual v1 complete UI workflows[2m > [22mkeeps a label position unchanged on an off-center click or sub-threshold move and still edits on double-click [33m 340[2mms[22m[39m
+   [33m[2m✓[22m[39m board visual v1 complete UI workflows[2m > [22mdrags a legacy label into the new geometry without losing its arrows and undo restores its original renderer [33m 328[2mms[22m[39m
+   [33m[2m✓[22m[39m board visual v1 complete UI workflows[2m > [22mhonors Alt no-snap, previews rebound anchors, explicitly unbinds and reroutes only when asked [33m 679[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.modal.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 3849[2mms[22m[39m
+   [33m[2m✓[22m[39m BoardPage note modal host[2m > [22mcloses the selection list when opening a note and keeps the same selected cards after closing it [33m 898[2mms[22m[39m
+   [33m[2m✓[22m[39m BoardPage note modal host[2m > [22mleaves nonempty board undo and redo stacks untouched while the note modal owns keyboard input [33m 1104[2mms[22m[39m
+   [33m[2m✓[22m[39m BoardPage note modal host[2m > [22mopens a note in place, refreshes its saved body after close and keeps Enter as navigation [33m 467[2mms[22m[39m
+   [33m[2m✓[22m[39m BoardPage note modal host[2m > [22myields all board keys, paste, controls and non-note gestures while keeping the note-switch target [33m 425[2mms[22m[39m
+   [33m[2m✓[22m[39m BoardPage note modal host[2m > [22mholds a single instance until the old note accepts closing and retains it when saving fails [33m 349[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.item.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 3694[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 item projection smoke[2m > [22mresizes an item projection at board zoom, retains its minimum size and rereads saved geometry [33m 864[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 item projection smoke[2m > [22mmounts through the item picker, shows current body and rereads it on reopening without copying membership content [33m 375[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 item projection smoke[2m > [22mretirement and missing identity keep the same projection as a visibly degraded card on the next GET [33m 428[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 item projection smoke[2m > [22mdisables standalone double-click with a title hint and opens the origin note for a linked item [33m 559[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 item resize command smoke[2m > [22mresizes at zoom 0.5 and projection scale 2 as one undoable command and refreshes its final geometry [33m 475[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 item resize command smoke[2m > [22mresizes at zoom 2 and projection scale 1.5 as one undoable command and refreshes its final geometry [33m 449[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 item resize command smoke[2m > [22mkeeps a pinned item fixed with no resize handle or enabled projection scale controls [33m 307[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.layers.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 3489[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S8 six board layer workflows[2m > [22m① adds two layers, moves overlapping cards, drags layer order and rereads the saved order [33m 1163[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S8 six board layer workflows[2m > [22m② hides objects and cross-layer edges from rendering and selection, preserves staging, then restores them [33m 696[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S8 six board layer workflows[2m > [22m④ assigns new pen, chalk and staging placement to the active custom layer and replays created visual layers [33m 755[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S8 six board layer workflows[2m > [22m⑥ keeps legacy all-NULL geometry, class order and edge-before-ink rendering in Base [33m 358[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.chalk.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 3422[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S9 chalk interaction smoke[2m > [22mdiscards a blank ghost without a write and deletes saved chalk cleared back to a ghost [33m 521[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S9 chalk interaction smoke[2m > [22mdrags, edits, pins, blocks pinned movement, unpins and deletes through the visual channel [33m 635[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S9 chalk interaction smoke[2m > [22mdoes not draft over other visuals or with Pan, Connect or Pen selected [33m 308[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.snapping.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 3295[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 C1 board drag alignment smoke[2m > [22mshows a screen-space guide at zoom 0.5, saves its exact position, undoes once and rereads geometry [33m 743[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 C1 board drag alignment smoke[2m > [22mshows a screen-space guide at zoom 1, saves its exact position, undoes once and rereads geometry [33m 404[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 C1 board drag alignment smoke[2m > [22mshows a screen-space guide at zoom 2, saves its exact position, undoes once and rereads geometry [33m 375[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 C1 board drag alignment smoke[2m > [22muses Shift only during an established drag, updates without pointer motion, and keeps Ctrl/Alt/Shift selection gestures [33m 321[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.5 C1 board drag alignment smoke[2m > [22msnaps a group by the grabbed object rather than the first scene member and moves every object by the same delta [33m 314[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.selection.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 3208[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 walk-through fix 4 selection workflows[2m > [22m① accumulates two Ctrl marquees, drags all four objects in one history step and moves the same selection to a layer [33m 885[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 walk-through fix 4 selection workflows[2m > [22m③ groups all card kinds, chalk, mount-ordered strokes and labeled connections, following Ctrl/Shift toggles immediately [33m 606[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 walk-through fix 4 selection workflows[2m > [22m④ emphasizes only the hovered stroke in either direction, scrolls its row into view and locates without changing selection [33m 526[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 walk-through fix 4 selection workflows[2m > [22m⑥ clears selection with Escape from a sidebar button and cancels an active marquee without restoring it on pointerup [33m 335[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/usePaperSize.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 2422[2mms[22m[39m
+   [33m[2m✓[22m[39m A5 paper size shared history and Layout gestures[2m > [22mreflows with target paper typography while preserving an explicit override (false) [33m 1190[2mms[22m[39m
+   [33m[2m✓[22m[39m A5 paper size shared history and Layout gestures[2m > [22mreflows with target paper typography while preserving an explicit override (true) [33m 1150[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.tools.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 2481[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S4 six board tool workflows[2m > [22m① draws three strokes, erases two in one gesture, undoes both and redoes the erasure [33m 905[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S4 six board tool workflows[2m > [22m③ deletes an independent labeled directed edge, restores its label/direction with a new ID, and redoes [33m 328[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S4 six board tool workflows[2m > [22m④ follows live visual IDs across delete/undo/redo/undo and a subsequent move and history replay [33m 344[2mms[22m[39m
+   [33m[2m✓[22m[39m V13.4 S4 six board tool workflows[2m > [22m⑥ shows actual N/K/M including an unselected cascade; undo restores only the drawing and leaves A/E unmounted [33m 335[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardViewportBookmarks.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 1749[2mms[22m[39m
+   [33m[2m✓[22m[39m B4v personal viewport bookmark rail[2m > [22mshows a readable 24-bookmark limit and can create after deleting one [33m 698[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/panels/ContentGroupPanel.test.tsx[2m > [22m[2mContentGroupPanel library Purpose alignment[2m > [22m[2mretires historical membership controls and keeps library soul receipts on new Relations
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/panels/ContentGroupPanel.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 2415[2mms[22m[39m
+   [33m[2m✓[22m[39m ContentGroupPanel library Purpose alignment[2m > [22mretires historical membership controls and keeps library soul receipts on new Relations [33m 679[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/boardTextRangeClipboard.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 2150[2mms[22m[39m
+   [33m[2m✓[22m[39m text range copy and board paste user loop[2m > [22mcopies a native selected passage, posts its anchor on board paste, and retains the mounted card after reopening [33m 485[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mWarning: flushSync was called from inside a lifecycle method. React cannot flush when React is already rendering. Consider moving this call to a scheduler task or micro task.
+    at Host (<tmp>/ed21\client\src\pages\Notes\canvasEngine\hooks\structureTypingConservation.test.tsx:221:19)
+
+ [32m✓[39m src/pages/DesignStudio/PaletteDrawer.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1587[2mms[22m[39m
+   [33m[2m✓[22m[39m design studio shared palette drawer[2m > [22mputs custom slash groups first, locks factory management, and supports collapse and name search [33m 326[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx[2m > [22m[2mNoteChromeLayer note trash smoke[2m > [22m[2mmoves the note through the real delete action, navigates to its Project, and restores through the existing Trash entry
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 2497[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteChromeLayer appearance[2m > [22mretains a single float card across selections and paper identity changes, then applies to the current paper [33m 401[2mms[22m[39m
+   [33m[2m✓[22m[39m NoteChromeLayer appearance[2m > [22mopens one persistent float card, preserves deviations across presets, edits colors, and keeps More independent [33m 535[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx[2m > [22m[2mB1a adapter paper skin write intent[2m > [22m[2mserializes binding settings through the existing save boundary and retains the latest note setting
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 104946[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 1: words handed to a second structure that fails before its first edit [33m 1742[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 1b: the same, the second structure failing at once on a tracked write [33m 1688[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 2: leaving through the app right after Enter in the window [33m 1388[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3) [33m 2419[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss H: the page goes away while the window holds words, and the note is opened again [33m 2072[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss the role-change save fails once, no Enter in the window [33m 2665[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mknown loss commit-1: a sync-priority commit between a frame and the write it waits for [33m 1736[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22mboundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red [33m 2056[2mms[22m[39m
+   [33m[2m✓[22m[39m words typed around heading structures are conserved[2m > [22m40 seeded sequences of 16 events: every word in exactly one place, in its own unit [33m 89177[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 2342[2mms[22m[39m
+   [33m[2m✓[22m[39m B1a adapter paper skin write intent[2m > [22mkeeps a pending suite-detach save bound to its original paper after navigation [33m 313[2mms[22m[39m
+   [33m[2m✓[22m[39m B1a adapter paper skin write intent[2m > [22mbinds a skin intent before waiting for palette deletion so navigation cannot apply it to the next note [33m 309[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.bookmarks.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 2274[2mms[22m[39m
+   [33m[2m✓[22m[39m B4v BoardPage camera wiring[2m > [22msaves the current page camera, smoothly jumps to exact x/y/zoom, and persists only viewport [33m 970[2mms[22m[39m
+   [33m[2m✓[22m[39m B4v BoardPage camera wiring[2m > [22mlets wheel panning interrupt the animation and saves the user-adjusted camera [33m 491[2mms[22m[39m
+   [33m[2m✓[22m[39m B4v BoardPage camera wiring[2m > [22mkeeps an old board bookmark list response out of the new board after route navigation [33m 540[2mms[22m[39m
+ [32m✓[39m src/components/ColorPicker/UnifiedColorPicker.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 2058[2mms[22m[39m
+   [33m[2m✓[22m[39m UnifiedColorPicker[2m > [22mopens all four sections in order and keeps grouped palette colors on the first screen [33m 357[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteNavigationPages.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1755[2mms[22m[39m
+   [33m[2m✓[22m[39m navigation pages[2m > [22mkeeps distant page content unmounted and lazily loads it when this pane scrolls [33m 425[2mms[22m[39m
+   [33m[2m✓[22m[39m navigation pages[2m > [22mfollows the current reading page in its own viewport without moving or focusing the document [33m 445[2mms[22m[39m
+   [33m[2m✓[22m[39m navigation pages[2m > [22mpreserves thumbnail browsing through rebuilt runtime projections and follows only a changed reading page [33m 477[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textFlowBlockNavigation.test.tsx [2m([22m[2m34 tests[22m[2m)[22m[33m 1945[2mms[22m[39m
+[90mstderr[2m | src/pages/GroupGallery/GroupGallery.test.tsx[2m > [22m[2mGroup Gallery destination navigation[2m > [22m[2mK-1a renders the fixed destinations and the project group count
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/headingStructureWatchdog.realAdapter.test.tsx[2m > [22m[2mround 2 red 1: a role save that hangs past the watchdog and then succeeds (real adapter)[2m > [22m[2mK1: the watchdog gives the screen back, and once the save succeeds the heading still takes its own block
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/GroupGallery/GroupGallery.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 1781[2mms[22m[39m
+   [33m[2m✓[22m[39m Group Gallery destination navigation[2m > [22mK-1a renders the fixed destinations and the project group count [33m 356[2mms[22m[39m
+ [32m✓[39m src/components/CourseModal/CourseModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1871[2mms[22m[39m
+   [33m[2m✓[22m[39m CourseModal project weight retirement[2m > [22msubmitting a project after deleting another token color retains its detached hex and cannot restore the reference [33m 860[2mms[22m[39m
+   [33m[2m✓[22m[39m CourseModal project weight retirement[2m > [22mpublishes the saved project so reopening an edit preserves its persisted skin [33m 405[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/headingStructureWatchdog.realAdapter.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 2049[2mms[22m[39m
+   [33m[2m✓[22m[39m round 2 red 1: a role save that hangs past the watchdog and then succeeds (real adapter)[2m > [22mK1: the watchdog gives the screen back, and once the save succeeds the heading still takes its own block [33m 2048[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx[2m > [22m[2mnote cover metadata behavior[2m > [22m[2mhydrates stored tags, trims additions and reflects successful deletion across remounts
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 2315[2mms[22m[39m
+   [33m[2m✓[22m[39m E4 Overview continuous page grid[2m > [22mmounts only nearby content among 240 page shells and unloads distant content after scrolling [33m 410[2mms[22m[39m
+   [33m[2m✓[22m[39m E4 Overview continuous page grid[2m > [22mopens at the current reading page row and highlights it independently of the selected frame [33m 752[2mms[22m[39m
+   [33m[2m✓[22m[39m E4 Overview continuous page grid[2m > [22mdiscards the scroll window when changing notes and renders the new note first page [33m 381[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx [2m([22m[2m23 tests[22m[2m)[22m[33m 1686[2mms[22m[39m
+   [33m[2m✓[22m[39m note cover metadata behavior[2m > [22mhydrates stored tags, trims additions and reflects successful deletion across remounts [33m 396[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/TextBlockProjection.unitHandle.test.tsx [2m([22m[2m33 tests[22m[2m)[22m[33m 1525[2mms[22m[39m
+[90mstderr[2m | src/pages/AgentMemories/AgentEpisodes.test.tsx[2m > [22m[2mC3 episode human view[2m > [22m[2mloads the Episodes tab on demand and groups summaries with complete anchor IDs and message ranges
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/ComponentBlockEditor.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 1666[2mms[22m[39m
+   [33m[2m✓[22m[39m component editor local transaction[2m > [22medits every timeline field, adds/deletes/reorders entries, and saves one independent payload [33m 333[2mms[22m[39m
+   [33m[2m✓[22m[39m component editor local transaction[2m > [22mretains one timeline entry and disables moves at either end and additions at the limit [33m 498[2mms[22m[39m
+ [32m✓[39m src/pages/AgentMemories/AgentEpisodes.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1568[2mms[22m[39m
+   [33m[2m✓[22m[39m C3 episode human view[2m > [22mloads the Episodes tab on demand and groups summaries with complete anchor IDs and message ranges [33m 310[2mms[22m[39m
+   [33m[2m✓[22m[39m C3 episode human view[2m > [22msearches the full loaded collection, including an older episode beyond the first page and its anchor ID [33m 407[2mms[22m[39m
+   [33m[2m✓[22m[39m C3 episode human view[2m > [22mkeeps all 52 episodes reachable across grouped pages and a conversation label on each page [33m 364[2mms[22m[39m
+ [32m✓[39m src/components/AgentPanel/AgentPanel.proposalInbox.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1686[2mms[22m[39m
+   [33m[2m✓[22m[39m AgentPanel proposal inbox through the existing human routes[2m > [22mloads pending count only when opened and renders all eight types with summaries, origins and UTC time [33m 525[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx[2m > [22m[2moriginal page view[2m > [22m[2mdraws only the pages near the viewport, in order
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+[90mstderr[2m | src/pages/AgentMemories/AgentMemories.test.tsx[2m > [22m[2mAgent memories page human controls[2m > [22m[2mmakes all 205 synthetic memories reachable while rendering at most 25 rows
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/AgentMemories/AgentMemories.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1289[2mms[22m[39m
+   [33m[2m✓[22m[39m Agent memories page human controls[2m > [22mmakes all 205 synthetic memories reachable while rendering at most 25 rows [33m 656[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx [2m([22m[2m31 tests[22m[2m)[22m[33m 1621[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/TextBlockProjection.input.test.tsx [2m([22m[2m68 tests[22m[2m)[22m[33m 1602[2mms[22m[39m
+[90mstderr[2m | src/pages/Boards/BoardPage.documentShell.test.tsx[2m > [22m[2mfocuses a placed member, flashes and remembers its viewport without writing board or paper truth
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteBindingPanel.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1351[2mms[22m[39m
+   [33m[2m✓[22m[39m A2 binding controls[2m > [22mT7 applies handbook binding immediately, retains cover settings, then accepts ordinary edits [33m 491[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.documentShell.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 1196[2mms[22m[39m
+   [33m[2m✓[22m[39m focuses a placed member, flashes and remembers its viewport without writing board or paper truth [33m 421[2mms[22m[39m
+   [33m[2m✓[22m[39m holds a board focus request while the title editor owns input and delivers after blur [33m 402[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps the current tab until an already submitted board edit has finished saving [33m 371[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useChapterPresentation.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 1513[2mms[22m[39m
+ [32m✓[39m src/pages/DesignStudio/SuiteDrawer.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1602[2mms[22m[39m
+   [33m[2m✓[22m[39m design studio suite inventory[2m > [22mrenders custom first and five factories with the exact shared token/material sample [33m 325[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx[2m > [22m[2mV13 S3 tray relocation[2m > [22m[2mgates all three tray navigation destinations only in modal host mode
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 1359[2mms[22m[39m
+[90mstdout[2m | src/pages/Sources/SourceReprojectionDialog.test.tsx
+[22m[39m🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1379[2mms[22m[39m
+   [33m[2m✓[22m[39m V13 S3 tray relocation[2m > [22mmoves a mixed selection, opens the real board route, returns through its CG and undoes back into the tray [33m 754[2mms[22m[39m
+ [32m✓[39m src/pages/Sources/SourceReprojectionDialog.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1132[2mms[22m[39m
+   [33m[2m✓[22m[39m Source reprojection confirmation[2m > [22mshows the entry only for Ready sources [33m 303[2mms[22m[39m
+[90mstderr[2m | src/pages/Settings/Settings.test.tsx[2m > [22m[2mSettings provider management integration[2m > [22m[2mpreserves the A1 memory section and other provider metadata while connecting model drafts to provider tests
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 1139[2mms[22m[39m
+ [32m✓[39m src/pages/Settings/Settings.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1158[2mms[22m[39m
+   [33m[2m✓[22m[39m Settings provider management integration[2m > [22mpreserves the A1 memory section and other provider metadata while connecting model drafts to provider tests [33m 548[2mms[22m[39m
+[90mstderr[2m | src/components/AgentPanel/AgentPanel.adoptionRefresh.test.tsx[2m > [22m[2madopting an Agent proposal refreshes the host list in place[2m > [22m[2mshows an adopted note on the project page without a reload
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstderr[2m | src/components/AgentPanel/AgentPanel.adoptionRefresh.test.tsx[2m > [22m[2madopting an Agent proposal refreshes the host list in place[2m > [22m[2mshows an adopted note on the project page without a reload
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/components/AgentPanel/AgentPanel.adoptionRefresh.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 957[2mms[22m[39m
+   [33m[2m✓[22m[39m adopting an Agent proposal refreshes the host list in place[2m > [22mshows an adopted note on the project page without a reload [33m 751[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/useBoard.history.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 1034[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paragraphFurniture.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1062[2mms[22m[39m
+   [33m[2m✓[22m[39m paragraph furniture appearance[2m > [22mkeeps every original character and coordinate while paginating 'quote' [33m 480[2mms[22m[39m
+[90mstderr[2m | src/components/Layout/DocumentTabs.test.tsx[2m > [22m[2mopens one tab per document, switches with blur save, and restores independent scroll and reading step
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/TableBlockEditor.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 870[2mms[22m[39m
+   [33m[2m✓[22m[39m table editor transaction[2m > [22medits caption and cells, adds and deletes both dimensions, then saves one independent payload [33m 342[2mms[22m[39m
+ [32m✓[39m src/components/Layout/DocumentTabs.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1026[2mms[22m[39m
+   [33m[2m✓[22m[39m opens one tab per document, switches with blur save, and restores independent scroll and reading step [33m 400[2mms[22m[39m
+   [33m[2m✓[22m[39m defers commands throughout text ownership and composition, keeps only the latest, then opens its tab [33m 402[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/useBoard.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 961[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/MediaImageEditor.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 691[2mms[22m[39m
+ [32m✓[39m src/test/visualRelationsGeometry.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1049[2mms[22m[39m
+   [33m[2m✓[22m[39m T8 permanent paper geometry relations[2m > [22mA4: every registered citizen against all six binding slots, with and without cover at multiple reading scales [33m 642[2mms[22m[39m
+   [33m[2m✓[22m[39m T8 permanent paper geometry relations[2m > [22mLetter: every registered citizen against all six binding slots, with and without cover at multiple reading scales [33m 384[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 946[2mms[22m[39m
+ [32m✓[39m src/components/AgentPanel/AgentPanel.contextHint.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 884[2mms[22m[39m
+   [33m[2m✓[22m[39m B2 visible, passive context on the real panel and message transport[2m > [22monly registers with the panel open, follows pages without stealing focus, and clears on departure [33m 453[2mms[22m[39m
+[90mstderr[2m | src/pages/Courses/noteCover/ProjectNoteCard.test.tsx[2m > [22m[2mProject Notes cover projection and actions[2m > [22m[2mkeeps the original content and issues no requests without a slot, even with media hints
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 993[2mms[22m[39m
+   [33m[2m✓[22m[39m fix1 real writing surface navigation (synthetic memory)[2m > [22mlands on actual Page media and item shells and leaves in both directions without editing [33m 576[2mms[22m[39m
+ [32m✓[39m src/pages/Courses/noteCover/ProjectNoteCard.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 804[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx[2m > [22m[2mC4 paper ink through the existing canvas command stack and persistence adapter[2m > [22m[2mmoves and deletes a reloaded stroke with symmetric placement undo/redo on the paper stack
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 884[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/BlockEditorLayer.test.tsx [2m([22m[2m23 tests[22m[2m)[22m[33m 809[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/PaginatedTextBlockProjection.test.tsx [2m([22m[2m27 tests[22m[2m)[22m[33m 684[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardNoteModal.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 809[2mms[22m[39m
+[90mstderr[2m | src/components/Layout/AppLayout.test.tsx[2m > [22m[2mAppLayout sidebar project shortcuts[2m > [22m[2mhas no favorites and no recent section before anything was opened
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+ [32m✓[39m src/components/Skin/SkinEditor.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 760[2mms[22m[39m
+   [33m[2m✓[22m[39m SkinEditor save failure recovery[2m > [22medits all five board components without discarding colors, then resets to preset defaults [33m 351[2mms[22m[39m
+ [32m✓[39m src/components/Layout/AppLayout.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 893[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx[2m > [22m[2museRuntimeNaturalWritingController Page draft authority[2m > [22m[2mkeeps reconciled missing block rollback on the durable TextFlow and annotation inverse
+[22m[39mSlash block rollback was not durably saved: {
+  blockId: [32m'block-1'[39m,
+  exitReason: [32m'missing_block'[39m,
+  reason: [32m'block_unavailable'[39m,
+  durableOutcome: [32m'not_attempted'[39m
+}
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 718[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardNewNoteDialog.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 707[2mms[22m[39m
+[90mstderr[2m | src/pages/DesignStudio/DesignStudio.test.tsx[2m > [22m[2mDesign studio shell[2m > [22m[2menters through the real App navigator and switches all five URL drawers
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+ [32m✓[39m src/pages/DesignStudio/DesignStudio.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 780[2mms[22m[39m
+   [33m[2m✓[22m[39m Design studio shell[2m > [22menters through the real App navigator and switches all five URL drawers [33m 672[2mms[22m[39m
+ [32m✓[39m src/pages/Settings/ProvidersSection.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 645[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx [2m([22m[2m21 tests[22m[2m)[22m[33m 706[2mms[22m[39m
+[90mstderr[2m | src/pages/Courses/ProjectPurposeSection.test.tsx[2m > [22m[2mpurpose card[2m > [22m[2masks for this Project and shows an empty section when there are no cards
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/pages/Courses/ProjectPurposeSection.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 622[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx[2m > [22m[2mruntime float card ownership[2m > [22m[2mretains its exact portal node during route loading and binds the next hydrated paper
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 573[2mms[22m[39m
+   [33m[2m✓[22m[39m runtime float card ownership[2m > [22mretains its exact portal node during route loading and binds the next hydrated paper [33m 571[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 625[2mms[22m[39m
+   [33m[2m✓[22m[39m K-reading-gears: presentation → clientWidth → resolved layout → runtime[2m > [22msettles repeated sidebar width changes in every gear without mutating block geometry [33m 378[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/MediaImageConsumption.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 527[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteCoverPageControls.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 459[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNotePageFlow.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 606[2mms[22m[39m
+ [32m✓[39m src/hooks/useSkinSuites.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 502[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/componentBlockIntegration.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 757[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/tableBlockIntegration.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 844[2mms[22m[39m
+   [33m[2m✓[22m[39m B1 table block integration[2m > [22mopens from the real block shell, cancels without saving, then saves through the table callback [33m 396[2mms[22m[39m
+ [32m✓[39m src/components/Skin/PaperSizeControls.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 556[2mms[22m[39m
+[90mstdout[2m | src/pages/Courses/CourseDetail.test.tsx
+[22m[39m🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/pages/Sources/ProjectSourcesPanel.test.tsx
+[22m[39m🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/pages/Sources/ProjectSourcesPanel.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 488[2mms[22m[39m
+ [32m✓[39m src/pages/Courses/CourseDetail.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 482[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteBinding.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 495[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx[2m > [22m[2mnote route save boundary[2m > [22m[2mkeeps navigator departure on the note until dismiss, focus restoration, blur and pending writes finish
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx[2m > [22m[2mnote route save boundary[2m > [22m[2mcan render isolated legacy MemoryRouter fixtures without changing production router requirements
+[22m[39m⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 517[2mms[22m[39m
+ [32m✓[39m src/pages/Courses/Courses.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 516[2mms[22m[39m
+[90mstderr[2m | src/pages/Decks/EmptyDeckFirstCard.test.tsx[2m > [22m[2mempty deck[2m > [22m[2mlets a person create the first section from the deck page
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Decks/EmptyDeckFirstCard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 558[2mms[22m[39m
+   [33m[2m✓[22m[39m empty deck[2m > [22mlets a person create the first section from the deck page [33m 364[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 453[2mms[22m[39m
+ [32m✓[39m src/components/AgentPanel/AgentPanel.turnReceipt.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 461[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textFlowDocumentHistory.integration.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 460[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 394[2mms[22m[39m
+[90mstderr[2m | src/pages/ToolReceipts/ToolReceipts.test.tsx[2m > [22m[2mToolReceipts human review and executed views[2m > [22m[2mK-7 keeps the proposed Apply, Dismiss, and Jump to scene controls
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/ToolReceipts/ToolReceipts.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 462[2mms[22m[39m
+   [33m[2m✓[22m[39m ToolReceipts human review and executed views[2m > [22mK-7 keeps the proposed Apply, Dismiss, and Jump to scene controls [33m 359[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardPage.contextHint.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 450[2mms[22m[39m
+   [33m[2m✓[22m[39m B2 production board route context[2m > [22mregisters the current board passively, preserves explicit priority and clears on leaving the route [33m 449[2mms[22m[39m
+ [32m✓[39m src/components/ReferenceTag/ReferenceTag.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 461[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.document.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 377[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/InlineLinkProvider.test.tsx[2m > [22m[2mT6 rendered inline navigation and degradation[2m > [22m[2mclicks 'heading' through the existing navigation host
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/InlineLinkProvider.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 407[2mms[22m[39m
+ [32m✓[39m test/fixtures/canvasAssetFixture.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 459[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/ComponentBlockProjection.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 386[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useSlashBlockRollbackController.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 394[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardList.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 386[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 310[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/NoteTraySidebar.test.tsx[2m > [22m[2mNote staging row reorder[2m > [22m[2mdrags each entry category through one complete order request: 2
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstderr[2m | src/pages/Notes/canvasEngine/NoteCanvasRuntime.sourceView.test.tsx[2m > [22m[2msource view while the route moves between projections[2m > [22m[2mwaits for the next note to hydrate, so its default lands in a tab that exists
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteTraySidebar.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 407[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/NoteCanvasRuntime.sourceView.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 319[2mms[22m[39m
+ [32m✓[39m src/hooks/usePaletteColors.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 415[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx[2m > [22m[2mStaging gesture and sidebar integration with isolated HTTP memory[2m > [22m[2mrestores drag collisions, flushes the draft before the placement, renders the moved row, and undoes to the pre-drag position
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 432[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 328[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/notePageFlowService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 313[2mms[22m[39m
+[90mstderr[2m | src/pages/Settings/AgentMemoriesSection.test.tsx[2m > [22m[2mSettings agent memories summary[2m > [22m[2mshows the total and three latest previews, then opens the full page
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx [2m([22m[2m41 tests[22m[2m)[22m[33m 324[2mms[22m[39m
+ [32m✓[39m src/pages/Settings/AgentMemoriesSection.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 341[2mms[22m[39m
+[90mstderr[2m | src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx[2m > [22m[2mGallery Purpose writer retirement[2m > [22m[2msaves the editor draft once and reopens the saved group without a default-purpose role
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 309[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 297[2mms[22m[39m
+[90mstderr[2m | src/pages/Boards/BoardNoteModal.rangeSession.test.tsx[2m > [22m[2mregisters a range minted in the open modal and keeps it Live after same-session prefix edits and save
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Boards/BoardNoteModal.rangeSession.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 324[2mms[22m[39m
+   [33m[2m✓[22m[39m registers a range minted in the open modal and keeps it Live after same-session prefix edits and save [33m 323[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/DraftBlockEditorLayer.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 305[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteNavigationController.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 224[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/TocPrint.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 302[2mms[22m[39m
+ [32m✓[39m src/deadCodeRetirement.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 489[2mms[22m[39m
+   [33m[2m✓[22m[39m dead-code retirement contracts[2m > [22mkeeps singular loadRelation absent from client and server code [33m 312[2mms[22m[39m
+ [32m✓[39m src/pages/Courses/noteCover/NoteCoverEditor.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 328[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 362[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 275[2mms[22m[39m
+[90mstderr[2m | src/pages/DailyBrief/DailyBrief.test.tsx[2m > [22m[2mHome Agent entry[2m > [22m[2mopens the existing panel state from the loaded Home and keeps it open on repeated clicks
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/DailyBrief/DailyBrief.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 281[2mms[22m[39m
+ [32m✓[39m src/components/AgentPanel/IntentPlanCard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 235[2mms[22m[39m
+ [32m✓[39m src/components/Skin/SkinControls.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 293[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/useBoardSkin.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 300[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/BlockSourceReferenceLayer.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 388[2mms[22m[39m
+   [33m[2m✓[22m[39m bounded first-fragment source references[2m > [22mretains every source action while sharing its fixed strip budget with pagination [33m 380[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paperTypographyRuler.test.tsx [2m([22m[2m27 tests[22m[2m)[22m[33m 436[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardRelocatedVisual.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 283[2mms[22m[39m
+ [32m✓[39m src/components/GoalModal/GoalModal.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 217[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageTextCoordinates.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 285[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/BoardDeleteDialog.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 267[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 284[2mms[22m[39m
+ [32m✓[39m scripts/specExtractor/specExtractor.test.mjs [2m([22m[2m1 test[22m[2m)[22m[32m 282[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/A3CoverProjection.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 276[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteNavigationPages.requests.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 226[2mms[22m[39m
+[90mstderr[2m | src/pages/GroupGallery/groupGalleryItemSummary.test.tsx[2m > [22m[2mGallery Item summary projection[2m > [22m[2mrenders Item body in the Gallery and reloads changed current text when reopened
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/GroupGallery/groupGalleryItemSummary.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 296[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 243[2mms[22m[39m
+[90mstderr[2m | src/stores/agentUiStream.test.tsx[2m > [22m[2mC4a actual sendMessage SSE reception[2m > [22m[2mconsumes chunked tool activity and UI commands, and keeps the server receipt on the completed answer
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/stores/agentUiStream.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 285[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteNavigationHeadings.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 241[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/NoteRefBlockProjection.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 282[2mms[22m[39m
+[90mstderr[2m | src/pages/DesignStudio/TemplateDrawer.test.tsx[2m > [22m[2mT7 factory template drawer[2m > [22m[2mrenders all three live thumbnails and no application controls or metadata writers
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/DesignStudio/TemplateDrawer.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 250[2mms[22m[39m
+ [32m✓[39m src/components/AgentPanel/NotePatchReview.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 215[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/TocBlockProjection.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 236[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blocks/TableBlockProjection.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 217[2mms[22m[39m
+ [32m✓[39m src/components/AgentPanel/proposalInboxModel.richBlocks.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 223[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx [2m([22m[2m23 tests[22m[2m)[22m[32m 208[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.move.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[32m 196[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.rangeRecovery.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 177[2mms[22m[39m
+ [32m✓[39m src/components/Layout/recentProjects.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 182[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[32m 198[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 177[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 164[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 140[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useDraftBlockController.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 125[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/NoteCoverUnderlay.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 125[2mms[22m[39m
+ [32m✓[39m src/components/KaTeX/KaTeXRenderer.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[32m 112[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/BindingProjection.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/typographyMeasurementService.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 109[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/boardVisualData.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/applyCoverPreset.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 107[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/layers/SourceConversionNotice.test.tsx[2m > [22m[2mSourceConversionNotice[2m > [22m[2mshows on a projection whose parser reported messages, without a count
+[22m[39mreact-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: [32m'NO_I18NEXT_INSTANCE'[39m }
+
+ [32m✓[39m src/pages/Notes/canvasEngine/layers/SourceConversionNotice.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 99[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useMediaImageHistory.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/documentPageFlowService.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 115[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 108[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.extraction.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteAgentHumanEditor.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 86[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useComponentBlockHistory.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 78[2mms[22m[39m
+ [32m✓[39m src/components/CardFlip/CardTemplateContent.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 84[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteAmbientAgentContextHint.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 111[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.pageReading.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+[90mstderr[2m | src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx[2m > [22m[2mS5 retired canvas doors[2m > [22m[2mopens legacy canvas route/state as Page without hydration or toggle callbacks
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/tableBlockService.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/purposeRetirement.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useTableBlockHistory.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/freehandService.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 64[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/boundaryAccount.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/inlineLifecycle.test.ts [2m([22m[2m56 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/usePageReadingViewportController.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/draftFastEnter.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useBlockTextFlowEditController.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/draftBlockPersistence.test.ts [2m([22m[2m37 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/graphemeExcerpts.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.affiliationVisibility.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/componentBlockService.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useCanvasSurfacePointerController.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useBlockSelectionController.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textFlowSelection.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useSurfaceModeController.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageReadingDomService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/styles/skinPresets.test.ts [2m([22m[2m31 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paperSizeReplay.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paperSizeService.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/coordinateContractSession.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/documentTextFlowSelection.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageFrameSlotService.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paperSizeEditService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/hooks/useLayoutInteractionController.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageReadingViewportService.test.ts [2m([22m[2m71 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/boardRepository.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/chapterProjectionService.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/pages/Courses/noteCover/geometry.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/noteCoverPageCollection.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/canvasObjectRepository.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageStackContentFlowService.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paperSkinStyles.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/noteNavigationSearch.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/boardTextRangeEditSession.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/genericPlacementContract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/inlineLinkService.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textFlowEditSession.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/mediaBlockPasteService.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/boardVisualTokens.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/trayService.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/headingRoleService.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/pages/Sources/sourceApi.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/services/itemSummaryReader.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageFrameWallService.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/placementAutoWidth.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/headingInputService.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/boardSkinStyles.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/mediaBlockLayout.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/paginationEditingService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/styles/skinComponentStyles.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/inFlightWriteRegistry.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/mediaImageEdit.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/components/ColorPicker/paletteUtils.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/pages/Boards/boardSnapping.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/headingInputService.draftText.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textUnitMoveService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageFramePresentationService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/pages/GroupGallery/groupGalleryUnattached.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/sourcePageLayout.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/pageCenteringContract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/graphemes.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 149[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/placementContractService.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/writingSurfaceClassName.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/surfaceAuthorityContract.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/slashCommandReducer.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/selectionReceiptProjection.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/draftBlockLifecycleReducer.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/textFocusReceipt.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/surfacePersistenceContract.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/blockAffiliationOutlineService.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/routeRequestGeneration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/pages/Notes/canvasEngine/meaningfulRenderableContent.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m257 passed[39m[22m[90m (257)[39m
+[2m      Tests [22m [1m[32m2653 passed[39m[22m[90m (2653)[39m
+[2m   Start at [22m 17:44:33
+[2m   Duration [22m 268.19s[2m (transform 11.06s, setup 66.09s, collect 72.41s, tests 348.09s, environment 213.33s, prepare 35.43s)[22m
+

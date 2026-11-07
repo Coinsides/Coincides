@@ -1,0 +1,10 @@
+{
+ "total": 8,
+ "bad": [
+  "LEGACY-Y1-0",
+  "LEGACY-Y1-1",
+  "STEAL2-reopenThenTypeElsewhere-0",
+  "STEAL2-reopenThenTypeElsewhere-1",
+  "STEAL2-reopenThenTypeElsewhere-2"
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "by": {
+  "X-addr": {
+   "2": 2,
+   "3": 1,
+   "1e": 7
+  }
+ },
+ "detail": [
+  {
+   "name": "X-addr-0",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  },
+  {
+   "name": "X-addr-1",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  },
+  {
+   "name": "X-addr-2",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  },
+  {
+   "name": "X-addr-3",
+   "cls": "2",
+   "ok": true,
+   "note": "kept: kept\nbody [\"[{\\\"id\\\":\\\"mw63jb70-1\\\",\\\"blockId\\\":\\\"df22e3b9-3549-4f45-b7e4-e44a0f note [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-addr-4",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  },
+  {
+   "name": "X-addr-5",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  },
+  {
+   "name": "X-addr-6",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  },
+  {
+   "name": "X-addr-7",
+   "cls": "3",
+   "ok": true,
+   "note": "misplaced or merged: [[\"warmup\",\"body\"],[],[\"[heading_1]kept\"],[]]"
+  },
+  {
+   "name": "X-addr-8",
+   "cls": "2",
+   "ok": true,
+   "note": "kept: kept\nbody [\"[{\\\"id\\\":\\\"mw63ml3b-1\\\",\\\"blockId\\\":\\\"d54da976-5e69-408a-a5cc-839806 note [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-addr-9",
+   "cls": "1e",
+   "ok": true,
+   "note": "1 empty block(s) left"
+  }
+ ]
+}

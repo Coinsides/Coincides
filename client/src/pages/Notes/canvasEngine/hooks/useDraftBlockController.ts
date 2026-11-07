@@ -6,6 +6,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import { flushSync } from 'react-dom';
 import type { TemplateOption } from '@/services/templateOptions';
 import {
   idleInteraction,
@@ -67,6 +68,13 @@ export function draftTextFlowFromText(text: string): TextBlockContentV1 {
 }
 
 // Maps a textarea caret onto the unit and offset that hold it after splitting.
+// Takes the untrimmed text: a line break with nothing after it is a real, empty
+// unit, and that is where the caret is.
+// The editor rebuilds a flow that disagrees with its text half, so the two are always this one text.
+function plainTextOfFlow(flow: TextBlockContentV1): string {
+  return projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: flow }).plain_text;
+}
+
 function draftCaretInFlow(flow: TextBlockContentV1, text: string, caret: number) {
   const before = text.slice(0, caret).split('\n');
   const unit = flow.units[Math.min(before.length - 1, flow.units.length - 1)];
@@ -192,6 +200,17 @@ export function useDraftBlockController({
   // their content is adopted into the authority before the save is issued.
   const replayingHandoffRef = useRef(false);
   const persistDraftRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const draftFlowMemoRef = useRef<{ text: string; flow: TextBlockContentV1 } | null>(null);
+
+  // Unit ids are minted per split, so every reader of one text must get one flow:
+  // the save, the authority and the caret all name the same units.
+  const draftFlowForText = useCallback((text: string): TextBlockContentV1 => {
+    const memo = draftFlowMemoRef.current;
+    if (memo?.text === text) return memo.flow;
+    const flow = draftTextFlowFromText(text);
+    draftFlowMemoRef.current = { text, flow };
+    return flow;
+  }, []);
 
   const syncDraftTextFlow = useCallback((nextText: string) => {
     const current = draftTextFlowRef.current;
@@ -442,9 +461,9 @@ export function useDraftBlockController({
       // Keystrokes reached the draft after its last save, while focus was moving.
       // Adopt them into the authority now, before the durable editor takes any
       // input, then save them; the authority is never written by two hands.
-      const text = draftTextRef.current.trimEnd();
-      setBlockTextDrafts((current) => ({ ...current, [pending.to.blockId]: text }));
-      setBlockTextFlowDrafts((current) => ({ ...current, [pending.to.blockId]: draftTextFlowFromText(text) }));
+      const flow = draftFlowForText(draftTextRef.current);
+      setBlockTextDrafts((current) => ({ ...current, [pending.to.blockId]: plainTextOfFlow(flow) }));
+      setBlockTextFlowDrafts((current) => ({ ...current, [pending.to.blockId]: flow }));
       replayingHandoffRef.current = true;
       const replay = persistDraftRef.current().finally(() => { replayingHandoffRef.current = false; });
       void replay.then(() => {
@@ -455,7 +474,7 @@ export function useDraftBlockController({
       return;
     }
     clearLocalDraft('persist_succeeded', { preserveReconciliation: true });
-  }, [clearLocalDraft, setBlockTextDrafts, setBlockTextFlowDrafts]);
+  }, [clearLocalDraft, draftFlowForText, setBlockTextDrafts, setBlockTextFlowDrafts]);
 
   const persistDraft = useCallback((
     initialText?: string,
@@ -498,7 +517,7 @@ export function useDraftBlockController({
       if (!persistedBlock) {
         const revisionCreated = draftRevisionRef.current;
         textFlow = options.textFlow
-          || (!explicitTemplate ? draftTextFlowFromText(requestedText) : null);
+          || (!explicitTemplate ? draftFlowForText(initialValue) : null);
         createAttemptedRef.current = true;
         const authoritativeLayout = sessionCanonicalizeDraftLayoutRef.current(
           options.layout || draftLayoutRef.current || defaultDraftLayout,
@@ -546,7 +565,7 @@ export function useDraftBlockController({
         const latestText = draftTextRef.current.trimEnd();
         if (!hasMeaningfulDraftContent(latestText)) break;
         const latestTextFlow = draftTextFlowRef.current
-          || (!explicitTemplate ? draftTextFlowFromText(latestText) : null);
+          || (!explicitTemplate ? draftFlowForText(draftTextRef.current) : null);
         // Publish into the draft authority unless the handoff already adopted it.
         const preserveDrafts = replayingHandoffRef.current;
         const saveOutcome = await saveBlock(
@@ -560,6 +579,9 @@ export function useDraftBlockController({
         savedRevision = revisionToSave;
         durableSavedRevisionRef.current = revisionToSave;
       }
+      // Out of any React commit this reaches here from, so the handoff below can flush.
+      // Only microtasks run before it: no key can land between the loop and the focus.
+      await Promise.resolve();
       if (!requestIsCurrent()) return;
       if (!hasMeaningfulDraftContent(draftTextRef.current)) {
         requestGenerationRef.current += 1;
@@ -593,9 +615,19 @@ export function useDraftBlockController({
         selectionEnd,
       };
       pendingReconciliationRef.current = reconciliation;
-      setDraftOwnerReconciliation(reconciliation);
-      setDraftPhase((current) => transitionDraftPhase(current, { type: 'persisted_reconciled' }));
-      setFocusBlockId(persistedBlock.id);
+      // The caret above is only true for this task. Render the durable editor and move
+      // focus inside it, or the next key lands in a textarea that is about to lose it.
+      flushSync(() => {
+        // The save published this already, at a priority flushSync does not reach.
+        // The editor must have the caret's unit in this very render.
+        if (persistedFlow) {
+          setBlockTextDrafts((current) => ({ ...current, [persistedBlock.id]: plainTextOfFlow(persistedFlow) }));
+          setBlockTextFlowDrafts((current) => ({ ...current, [persistedBlock.id]: persistedFlow }));
+        }
+        setDraftOwnerReconciliation(reconciliation);
+        setDraftPhase((current) => transitionDraftPhase(current, { type: 'persisted_reconciled' }));
+        setFocusBlockId(persistedBlock.id);
+      });
       if (!durableHistoryRecordedRef.current) {
         durableHistoryRecordedRef.current = true;
         onDraftPersisted?.(persistedBlock);
@@ -616,10 +648,13 @@ export function useDraftBlockController({
     defaultDraftLayout,
     defaultTextTemplate,
     discardDraftBlock,
+    draftFlowForText,
     note,
     onDraftPersisted,
     saveBlock,
     saveDraftBlockPlacement,
+    setBlockTextDrafts,
+    setBlockTextFlowDrafts,
     setFocusBlockId,
     setInteractionState,
   ]);

@@ -76,6 +76,58 @@ describe('draft first-paragraph fast Enter', () => {
     expect(durableUnits).toEqual(['First', 'Second']);
   });
 
+  it('keeps an Enter with nothing typed after it, and puts the caret on the new line', async () => {
+    const create = deferred<DraftBlockCreateResult | null>();
+    const saved: string[][] = [];
+    const flowFrom = (options?: { textFlow?: TextBlockContentV1 }) => options?.textFlow?.units.map((unit) => unit.text) ?? [];
+    const saveBlock = vi.fn<UseDraftBlockControllerOptions['saveBlock']>(async (_block, text, options): Promise<BlockSaveOutcome> => {
+      saved.push(flowFrom(options));
+      return { status: 'saved', recoveryReceipt: null, reconciliation: 'response',
+        block: { ...block(text), content_json: { body: text, [TEXT_FLOW_CONTENT_KEY]: options?.textFlow } } };
+    });
+    const textDrafts: Array<Record<string, string>> = [];
+    const setBlockTextDrafts = vi.fn((action) => {
+      textDrafts.push(typeof action === 'function' ? action({}) : action);
+    }) as unknown as UseDraftBlockControllerOptions['setBlockTextDrafts'];
+    const flowDrafts: Array<Record<string, TextBlockContentV1>> = [];
+    const setBlockTextFlowDrafts = vi.fn((action) => {
+      flowDrafts.push(typeof action === 'function' ? action({}) : action);
+    }) as unknown as UseDraftBlockControllerOptions['setBlockTextFlowDrafts'];
+    const subject = renderHook(() => useDraftBlockController({
+      createBlock: vi.fn(async () => create.promise), defaultDraftLayout: layout, defaultTextTemplate: template,
+      discardDraftBlock: vi.fn(async () => true), finalizeDraftBlock: vi.fn(async () => true), note,
+      onDraftFocusReceipt: vi.fn(), saveBlock, saveDraftBlockPlacement: vi.fn(async (value) => value),
+      setActiveBlockId: vi.fn(), setBlockTextDrafts, setBlockTextFlowDrafts,
+      setFocusBlockId: vi.fn(), setInteractionState: vi.fn(), setSelectedBlockId: vi.fn(),
+    }));
+    const textarea = document.createElement('textarea');
+    (subject.result.current.draftRef as { current: HTMLTextAreaElement | null }).current = textarea;
+
+    let persisting!: Promise<void>;
+    act(() => {
+      subject.result.current.activateDraft();
+      subject.result.current.setDraftText('First');
+      persisting = subject.result.current.persistDraft('First');
+    });
+    // Enter lands while the create is out, and the reader pauses.
+    textarea.value = 'First\n';
+    textarea.setSelectionRange(6, 6);
+    act(() => subject.result.current.setDraftText('First\n'));
+    await act(async () => {
+      create.resolve({ block: block('First'), clientCreateKey: 'key-1', placementPersisted: true, reused: false });
+      await persisting;
+    });
+
+    expect(saved).toEqual([['First', '']]);
+    // Both halves of the authority name one text, trailing line included.
+    expect(textDrafts[textDrafts.length - 1]?.['block-1']).toBe('First\n');
+    const reconciliation = subject.result.current.draftOwnerReconciliation!;
+    expect(reconciliation.to.textUnitId).toBe('tu-2');
+    expect(reconciliation.selectionStart).toBe(0);
+    // Published with the handoff, so the editor has that unit when it takes focus.
+    expect(flowDrafts[flowDrafts.length - 1]?.['block-1']?.units.map((unit) => unit.text)).toEqual(['First', '']);
+  });
+
   it('splits multi-line draft text into paragraph units like durable Enter', () => {
     expect(draftTextFlowFromText('One').units.map((unit) => unit.text)).toEqual(['One']);
     const flow = draftTextFlowFromText('One\nTwo\n\nFour');

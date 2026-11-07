@@ -1,0 +1,48 @@
+{
+ "by": {
+  "Z2-newBlockTyping-2000": {
+   "ok": 4
+  },
+  "Z2-newBlockTyping-0": {
+   "ok": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "Z2-newBlockTyping-2000-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z2-newBlockTyping-2000-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z2-newBlockTyping-2000-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z2-newBlockTyping-2000-3",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z2-newBlockTyping-0-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z2-newBlockTyping-0-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

@@ -59,6 +59,22 @@ export function applyHeadingInputAtLine(flow: TextBlockContentV1, unitId: string
   if (!heading) return null;
   const normalized = normalizeHeadingTextFlow(heading.flow,
     { unitId: headingUnitId, caret: caret - lineStart - prefix.length });
+  // The keystroke that completed the prefix is not in the previous text yet; a draft's text already is.
+  const previousText = original.text;
+  const beforeCaret = Math.max(0, Math.min(previousText.length, caret - Math.max(0, value.length - previousText.length)));
   return { previousTextFlow: flow, nextTextFlow: normalized.flow, headingUnitId,
-    focus: normalized.focus, inputType: 'insertHeading' };
+    focus: normalized.focus, beforeCaret, inputType: 'insertHeading' };
+}
+
+/** The draft textarea has no heading shortcut, so a `# ` typed there arrives as text. The first such line takes the same request the durable editor makes; the caret stays where the reader is. */
+export function headingRequestForDraftText(flow: TextBlockContentV1, caret: { unitId: string; offset: number }):
+HeadingTextFlowStructureRequest | null {
+  const live = flow.units.filter((candidate) => candidate.status !== 'deleted');
+  if (live.length < 2) return null;
+  const unit = live.find((candidate) => !headingLevelForRole(candidate.writing_role) && headingPrefix(candidate.text));
+  if (!unit) return null;
+  const onHeading = unit.id === caret.unitId;
+  const request = applyHeadingInputAtLine(flow, unit.id, unit.text, onHeading ? Math.max(caret.offset, headingPrefix(unit.text)!.length) : unit.text.length);
+  if (!request || onHeading) return request;
+  return { ...request, focus: { unitId: caret.unitId, caret: caret.offset } };
 }

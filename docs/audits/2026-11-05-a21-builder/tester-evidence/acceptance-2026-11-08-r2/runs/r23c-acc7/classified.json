@@ -1,0 +1,48 @@
+{
+ "by": {
+  "Y2b-od": {
+   "ok": 3
+  },
+  "Y2c-xq": {
+   "ok": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "Y2b-od-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2b-od-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2b-od-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2c-xq-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2c-xq-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2c-xq-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

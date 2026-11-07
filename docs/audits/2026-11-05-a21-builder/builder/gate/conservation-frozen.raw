@@ -1,0 +1,168 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m<tmp>/edfix/client[39m
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 1: words handed to a second structure that fails before its first edit
+[22m[39mSCRIPT 1: words handed to a second structure that fails before its first edit: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>] || writes: whenWritesIdle ; fault idleHang skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleHang ; onFailure
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 1b: the same, the second structure failing at once on a tracked write
+[22m[39mSCRIPT 1b: the same, the second structure failing at once on a tracked write: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>] || writes: whenWritesIdle ; fault idleReject skipped ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleReject ; onFailure
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 2: leaving through the app right after Enter in the window
+[22m[39mSCRIPT 2: leaving through the app right after Enter in the window: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle
+
+[90mstdout[2m | src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22m[2mwords typed around heading structures are conserved[2m > [22m[2mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+[22m[39mSCRIPT 3: a new heading elsewhere while kept words are on screen (buffer-3): fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600) || note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1>] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; FAULT create ; onFailure ; structure -> false ; save work [<W0>|<W1>] ; whenWritesIdle ; save prior [<P0>|H:<P1>] ; create new-1 [] ; transfer tu-2 prior[<P0>] -> new-1[H:<P1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<P1><k1>]
+
+ [31m❯[39m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 90068[2mms[22m[39m
+[31m   [31m×[31m words typed around heading structures are conserved[2m > [22mknown loss 1: words handed to a second structure that fails before its first edit[39m[33m 1754[2mms[22m[39m
+[31m     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal [][39m
+[31m   [31m×[31m words typed around heading structures are conserved[2m > [22mknown loss 1b: the same, the second structure failing at once on a tracked write[39m[33m 1682[2mms[22m[39m
+[31m     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal [][39m
+[31m   [31m×[31m words typed around heading structures are conserved[2m > [22mknown loss 2: leaving through the app right after Enter in the window[39m[33m 1397[2mms[22m[39m
+[31m     → <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return: expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal [][39m
+[31m   [31m×[31m words typed around heading structures are conserved[2m > [22mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3)[39m[33m 2420[2mms[22m[39m
+[31m     → <k0> LOST
+  note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1>]
+  events: fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600): expected [ '<k0> LOST' ] to deeply equal [][39m
+[31m   [31m×[31m words typed around heading structures are conserved[2m > [22m40 seeded sequences of 16 events: every word in exactly one place, in its own unit[39m[33m 82813[2mms[22m[39m
+[31m     → seed 16 (5 words): <k2> LOST; <k3> LOST; <k4> LOST
+  note: prior[<P0> | <P1>] work[<W0> | <W1>] new-1[H:<k0><k1>]
+  writes: save work [<W0>|<W1>|<k0>] ; whenWritesIdle ; save work [<W0>|<W1>|<k0><k1>] ; save work [<W0>|<W1>|H:<k0><k1>] ; create new-1 [] ; transfer tu-3 work[<W0>|<W1>] -> new-1[H:<k0><k1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleReject
+  events: fault(create) enter(<k0>) type(<k1>) heading(<k0><k1>) wait(20) type(<k2> in window) fault(idleReject) enter(in window) type(<k3> in window) type(<k4> in window) leave(in app) return type(refused) undo+redo(same) undo leave(in app) return: expected [ Array(1) ] to deeply equal [][39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22mwords typed around heading structures are conserved[2m > [22mknown loss 1: words handed to a second structure that fails before its first edit
+[31m[1mAssertionError[22m: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleHang@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "<k0> LOST",[39m
+[31m+   "<k1> LOST",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:[2m503:95[22m[39m
+    [90m501| [39m      console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    [90m502| [39m      expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    [90m503| [39m        .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+    [90m   | [39m                                                                                              [31m^[39m
+    [90m504| [39m    }[33m,[39m [34m60_000[39m)[33m;[39m
+    [90m505| [39m  }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22mwords typed around heading structures are conserved[2m > [22mknown loss 1b: the same, the second structure failing at once on a tracked write
+[31m[1mAssertionError[22m: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: fault(idleReject@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600): expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "<k0> LOST",[39m
+[31m+   "<k1> LOST",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:[2m503:95[22m[39m
+    [90m501| [39m      console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    [90m502| [39m      expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    [90m503| [39m        .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+    [90m   | [39m                                                                                              [31m^[39m
+    [90m504| [39m    }[33m,[39m [34m60_000[39m)[33m;[39m
+    [90m505| [39m  }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22mwords typed around heading structures are conserved[2m > [22mknown loss 2: leaving through the app right after Enter in the window
+[31m[1mAssertionError[22m: <k0> LOST; <k1> LOST
+  note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1>]
+  events: heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) leave(in app) return: expected [ '<k0> LOST', '<k1> LOST' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "<k0> LOST",[39m
+[31m+   "<k1> LOST",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:[2m503:95[22m[39m
+    [90m501| [39m      console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    [90m502| [39m      expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    [90m503| [39m        .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+    [90m   | [39m                                                                                              [31m^[39m
+    [90m504| [39m    }[33m,[39m [34m60_000[39m)[33m;[39m
+    [90m505| [39m  }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22mwords typed around heading structures are conserved[2m > [22mknown loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+[31m[1mAssertionError[22m: <k0> LOST
+  note: prior[<P0>] new-1[H:<P1><k1>] work[<W0> | <W1>]
+  events: fault(create) heading(<W1>) type(<k0> in window) wait(400) undo heading(<P1>) type(<k1> in window) wait(600): expected [ '<k0> LOST' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "<k0> LOST",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:[2m503:95[22m[39m
+    [90m501| [39m      console.log(`SCRIPT ${name}: ${result.steps.map((step) => step.d…
+    [90m502| [39m      expect(result.problems, `${result.problems.join('; ')}\n  note: …
+    [90m503| [39m        .map((step) => step.detail ? `${step.kind}(${step.detail})` : …
+    [90m   | [39m                                                                                              [31m^[39m
+    [90m504| [39m    }[33m,[39m [34m60_000[39m)[33m;[39m
+    [90m505| [39m  }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx[2m > [22mwords typed around heading structures are conserved[2m > [22m40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+[31m[1mAssertionError[22m: seed 16 (5 words): <k2> LOST; <k3> LOST; <k4> LOST
+  note: prior[<P0> | <P1>] work[<W0> | <W1>] new-1[H:<k0><k1>]
+  writes: save work [<W0>|<W1>|<k0>] ; whenWritesIdle ; save work [<W0>|<W1>|<k0><k1>] ; save work [<W0>|<W1>|H:<k0><k1>] ; create new-1 [] ; transfer tu-3 work[<W0>|<W1>] -> new-1[H:<k0><k1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleReject
+  events: fault(create) enter(<k0>) type(<k1>) heading(<k0><k1>) wait(20) type(<k2> in window) fault(idleReject) enter(in window) type(<k3> in window) type(<k4> in window) leave(in app) return type(refused) undo+redo(same) undo leave(in app) return: expected [ Array(1) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "seed 16 (5 words): <k2> LOST; <k3> LOST; <k4> LOST[39m
+[31m+   note: prior[<P0> | <P1>] work[<W0> | <W1>] new-1[H:<k0><k1>][39m
+[31m+   writes: save work [<W0>|<W1>|<k0>] ; whenWritesIdle ; save work [<W0>|<W1>|<k0><k1>] ; save work [<W0>|<W1>|H:<k0><k1>] ; create new-1 [] ; transfer tu-3 work[<W0>|<W1>] -> new-1[H:<k0><k1>] ; focusBlock new-1 ; structure -> true ; whenWritesIdle ; FAULT idleReject[39m
+[31m+   events: fault(create) enter(<k0>) type(<k1>) heading(<k0><k1>) wait(20) type(<k2> in window) fault(idleReject) enter(in window) type(<k3> in window) type(<k4> in window) leave(in app) return type(refused) undo+redo(same) undo leave(in app) return",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx:[2m515:43[22m[39m
+    [90m513| [39m      }
+    [90m514| [39m    }
+    [90m515| [39m    [34mexpect[39m(failures[33m,[39m failures[33m.[39m[34mjoin[39m([32m'\n'[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m516| [39m  }[33m,[39m [34m600_000[39m)[33m;[39m
+    [90m517| [39m[33m}[39m);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[90m (5)[39m
+[2m   Start at [22m 02:21:26
+[2m   Duration [22m 92.53s[2m (transform 558ms, setup 281ms, collect 888ms, tests 90.07s, environment 814ms, prepare 157ms)[22m
+

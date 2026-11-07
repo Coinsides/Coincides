@@ -1,0 +1,78 @@
+{
+ "by": {
+  "S-shape": {
+   "ok": 8
+  },
+  "Z-coveredLine": {
+   "bad": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "S-shape-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-3",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-4",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-5",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-6",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "S-shape-7",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z-coveredLine-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z-coveredLine-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Z-coveredLine-2",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

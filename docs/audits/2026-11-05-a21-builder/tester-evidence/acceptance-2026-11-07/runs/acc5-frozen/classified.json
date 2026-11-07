@@ -1,0 +1,108 @@
+{
+ "by": {
+  "Y0-unloadEarly-1500": {
+   "bad": 2
+  },
+  "Y0-unloadEarly-2500": {
+   "bad": 2
+  },
+  "Y0-unloadEarly-3500": {
+   "bad": 2
+  },
+  "Y1-reusedId": {
+   "ok": 3
+  },
+  "Y2-fragmentReopen": {
+   "bad": 3
+  },
+  "Y3-restoredBoxTwice": {
+   "ok": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "Y0-unloadEarly-1500-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-1500-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-2500-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-2500-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-3500-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y0-unloadEarly-3500-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y1-reusedId-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y1-reusedId-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y1-reusedId-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2-fragmentReopen-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2-fragmentReopen-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y2-fragmentReopen-2",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y3-restoredBoxTwice-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "Y3-restoredBoxTwice-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

@@ -1,0 +1,337 @@
+{
+ "by": {
+  "A1-natural-300": {
+   "3": 3,
+   "3u": 1
+  },
+  "A1-natural-1000": {
+   "3": 2,
+   "3u": 2
+  },
+  "A0-windowOnly": {
+   "3": 1,
+   "3u": 3
+  },
+  "A2-heldLeave-enter": {
+   "3u": 1
+  },
+  "A2-heldLeave-noEnter": {
+   "3": 1
+  },
+  "B-reorder500-enter": {
+   "3u": 2
+  },
+  "B-reorder500-noEnter": {
+   "1": 1
+  },
+  "C-save500-n2": {
+   "3": 2
+  },
+  "C-save500-n3": {
+   "1": 2
+  },
+  "D-stallSecond": {
+   "3u": 2
+  },
+  "E-caretStart": {
+   "3": 2
+  },
+  "F-sameId": {
+   "3": 1
+  },
+  "I-wrongBlock": {
+   "3": 1
+  },
+  "G-draftUndo": {
+   "ok": 2
+  },
+  "X-addr": {
+   "3": 5
+  },
+  "X-back": {
+   "3": 3
+  },
+  "X-slowAddr": {
+   "3": 3
+  },
+  "H-unloadU": {
+   "1": 2,
+   "3": 1
+  },
+  "H-unloadW": {
+   "1": 2,
+   "3": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "A1-natural-300-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A1-natural-300-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]abcd\",\"warmup\"]]"
+  },
+  {
+   "name": "A1-natural-300-2",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "A1-natural-300-3",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "A1-natural-1000-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A1-natural-1000-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]abcd\",\"bod\"]]"
+  },
+  {
+   "name": "A1-natural-1000-2",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A1-natural-1000-3",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]abcd\",\"bod\"]]"
+  },
+  {
+   "name": "A0-windowOnly-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A0-windowOnly-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A0-windowOnly-2",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A0-windowOnly-3",
+   "cls": "3",
+   "ok": true,
+   "note": "misplaced or merged: [[\"[heading_1]abcd\"],[\"bodywarmup\"]]"
+  },
+  {
+   "name": "A2-heldLeave-enter-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "A2-heldLeave-noEnter-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "B-reorder500-enter-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "B-reorder500-enter-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]abcd\",\"body\"]]"
+  },
+  {
+   "name": "B-reorder500-noEnter-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "C-save500-n2-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\",\"[heading_1]kep\"]]"
+  },
+  {
+   "name": "C-save500-n2-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\",\"[heading_1]kep\"]]"
+  },
+  {
+   "name": "C-save500-n3-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "C-save500-n3-1",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "D-stallSecond-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "D-stallSecond-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "E-caretStart-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]intro\"]]"
+  },
+  {
+   "name": "E-caretStart-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]intro\"]]"
+  },
+  {
+   "name": "F-sameId-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\",\"second\",\"third\"],[\"[heading_1]head\"],[\"[heading_1]body\"]]"
+  },
+  {
+   "name": "I-wrongBlock-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\",\"second\",\"third\",\"fourth\"],[\"[heading_1]head\"],[\"body\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "G-draftUndo-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "G-draftUndo-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "X-addr-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-addr-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]kept\",\"bo\"]]"
+  },
+  {
+   "name": "X-addr-2",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-addr-3",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]kept\",\"bo\"]]"
+  },
+  {
+   "name": "X-addr-4",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]kept\",\"bo\"]]"
+  },
+  {
+   "name": "X-back-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-back-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]kept\",\"bo\"]]"
+  },
+  {
+   "name": "X-back-2",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]kept\",\"warmup\"]]"
+  },
+  {
+   "name": "X-slowAddr-0",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]kept\",\"warmup\"]]"
+  },
+  {
+   "name": "X-slowAddr-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]kept\",\"warmup\"]]"
+  },
+  {
+   "name": "X-slowAddr-2",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"[heading_1]kept\",\"warmup\"]]"
+  },
+  {
+   "name": "H-unloadU-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadU-1",
+   "cls": "3",
+   "ok": true,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "H-unloadU-2",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadW-0",
+   "cls": "3",
+   "ok": true,
+   "note": "misplaced or merged: [[\"[heading_1]headwarmup\"]]"
+  },
+  {
+   "name": "H-unloadW-1",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "H-unloadW-2",
+   "cls": "1",
+   "ok": true
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+All arms: scratch copy, test files unchanged. Shared tree not swapped.
+
+ARM A: save loop trims the trailing line break again
+ FAIL  src/pages/Notes/canvasEngine/hooks/draftFastEnter.test.tsx > draft first-paragraph fast Enter > keeps an Enter with nothing typed after it, and puts the 
+AssertionError: expected [ [ 'First' ] ] to deeply equal [ [ 'First', '' ] ]
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+
+ARM B: the handoff does not publish the flow
+ FAIL  src/pages/Notes/canvasEngine/hooks/draftFastEnter.test.tsx > draft first-paragraph fast Enter > keeps an Enter with nothing typed after it, and puts the 
+AssertionError: expected undefined to deeply equal [ 'First', '' ]
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)

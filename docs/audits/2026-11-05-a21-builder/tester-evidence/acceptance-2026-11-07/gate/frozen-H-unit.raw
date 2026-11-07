@@ -1,0 +1,63 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m<tmp>/edacc/frozen-gate/client[39m
+
+ [31m❯[39m src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.fixcopy.test.tsx [2m([22m[2m37 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m36 skipped[39m[2m)[22m[32m 69[2mms[22m[39m
+   [2m[90m↓[39m[22m words from the window applied to text that changed under it (item 4, condition c)[2m > [22mwords typed at the start of the line stay at its start
+   [2m[90m↓[39m[22m words from the window applied to text that changed under it (item 4, condition c)[2m > [22mwords typed after the text stay after it, ahead of what was added behind
+   [2m[90m↓[39m[22m words from the window applied to text that changed under it (item 4, condition c)[2m > [22munchanged text takes the window as it is
+   [2m[90m↓[39m[22m words from the window applied to text that changed under it (item 4, condition c)[2m > [22ma place that cannot be found puts the words nowhere
+   [2m[90m↓[39m[22m A4 heading isolation through the live TextFlow and Note history[2m > [22misolates a multiline cross-block selection paste and restores both blocks with one undo and redo
+   [2m[90m↓[39m[22m A4 heading isolation through the live TextFlow and Note history[2m > [22mpromotes a middle unit, preserves both body segments and inline anchors, and undoes/redoes the whole operation once
+   [2m[90m↓[39m[22m A4 heading isolation through the live TextFlow and Note history[2m > [22misolates several pasted heading units into single-heading blocks while keeping intervening body order
+   [2m[90m↓[39m[22m A4 heading isolation through the live TextFlow and Note history[2m > [22mretains both earlier history batches after a later heading operation
+   [2m[90m↓[39m[22m A4 heading isolation through the live TextFlow and Note history[2m > [22mreplays text and Enter typed while Enter after a heading is still committing
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mpublishes the text half with the flow when "# " converts an empty block, so the editor and chapter tree agree
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mnever saves a moved unit back when a frame fires before React commits the transfer
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22ma commit wait does not hang when the note unmounts mid-structure
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mcompletes, releases busy and replays queued keys even when animation frames never arrive
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mreleases busy on a failed structure step and replays queued keys into the block that holds the caret
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mreleases busy and stops capturing keys when the split itself cannot be saved
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mshows what is typed in the window on the unit, and hands off with the caret where it was left
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mkeeps the buffer until the target editor exists and is writable, so the next key has somewhere to go
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mdoes not pull focus back from another field someone clicked into during the window
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22man editor taking focus during the window does not take the keys
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mcounts everything typed in the window as one undo step, leaving the heading
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mwaits for a composition to end, however late, before placing its text
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mbody typed after Enter in a heading takes its own block rather than sharing the heading block
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mfailure injection: the words survive leaving the note mid-window and stay on screen
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mfailure injection: words left behind go into the note when it is opened again
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mopening one note leaves the words waiting for another note alone
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22manother account signing in neither sees left-behind words nor gets them written into its note
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mfailure injection: closing the notice is the only thing that discards left-behind words
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mopening a note with nothing waiting writes nothing
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mfailure injection: nothing typed leaves nothing behind when the note is left mid-window
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mfailure injection: words held by a failed save go into the note once it is released
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mkept words keep retrying through refusals and land once the note is released
+[31m   [31m×[31m heading structure commits always release the note and keep both draft halves equal[2m > [22mH: a page going away stores what is in the window at once, with no cleanup or timer needed[39m[32m 67[2mms[22m[39m
+[31m     → Cannot read properties of null (reading 'map')[39m
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mcondition a: words that landed before the page went away are not written twice
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mcondition b: leaving is released within the watchdog when writes never settle, and the words are kept
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mpast the limit the notice asks for attention, and no kept words are dropped
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22mleaving waits for typed words to be placed
+   [2m[90m↓[39m[22m heading structure commits always release the note and keep both draft halves equal[2m > [22ma structure whose writes never settle is abandoned by the watchdog: busy released, failure shown, keys kept
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.fixcopy.test.tsx[2m > [22mheading structure commits always release the note and keep both draft halves equal[2m > [22mH: a page going away stores what is in the window at once, with no cleanup or timer needed
+[31m[1mTypeError[22m: Cannot read properties of null (reading 'map')[39m
+[36m [2m❯[22m src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.fixcopy.test.tsx:[2m738:36[22m[39m
+    [90m736| [39m    window[33m.[39m[34mdispatchEvent[39m([35mnew[39m [33mEvent[39m([32m'pagehide'[39m))[33m;[39m
+    [90m737| [39m    // Read in the same task: an unloading page runs nothing after thi…
+    [90m738| [39m    expect(readUnplacedWords('note').map((words) => [words.blockId, wo…
+    [90m   | [39m                                   [31m^[39m
+    [90m739| [39m    editor[33m.[39m[34munmount[39m()[33m;[39m
+    [90m740| [39m    document.querySelectorAll<HTMLButtonElement>('[data-structure-typi…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m36 skipped[39m[90m (37)[39m
+[2m   Start at [22m 16:24:44
+[2m   Duration [22m 2.30s[2m (transform 546ms, setup 256ms, collect 831ms, tests 69ms, environment 716ms, prepare 132ms)[22m
+

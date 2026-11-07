@@ -1,0 +1,38 @@
+
+ RUN  v3.2.7 <tmp>/edacc/tree/client
+
+stderr | src/pages/Notes/canvasEngine/hooks/headingStructureWatchdog.realAdapter.r23ccopy.test.tsx > round 2 red 1: a role save that hangs past the watchdog and then succeeds (real adapter) > K1: the watchdog gives the screen back, and once the save succeeds the heading still takes its own block
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ src/pages/Notes/canvasEngine/hooks/headingStructureWatchdog.realAdapter.r23ccopy.test.tsx (1 test | 1 failed) 12405ms
+   × round 2 red 1: a role save that hangs past the watchdog and then succeeds (real adapter) > K1: the watchdog gives the screen back, and once the save succeeds the heading still takes its own block 12404ms
+     → expected [ 'warmup|H:kept' ] to deeply equal [ 'warmup', 'H:kept' ]
+server: ["warmup|H:kept"]
+requests: PUT /note-blocks/block-1/text-save, PUT /note-blocks/block-1/text-save
+toasts: []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/headingStructureWatchdog.realAdapter.r23ccopy.test.tsx > round 2 red 1: a role save that hangs past the watchdog and then succeeds (real adapter) > K1: the watchdog gives the screen back, and once the save succeeds the heading still takes its own block
+Error: expected [ 'warmup|H:kept' ] to deeply equal [ 'warmup', 'H:kept' ]
+server: ["warmup|H:kept"]
+requests: PUT /note-blocks/block-1/text-save, PUT /note-blocks/block-1/text-save
+toasts: []
+ ❯ onTimeout src/pages/Notes/canvasEngine/hooks/headingStructureWatchdog.realAdapter.r23ccopy.test.tsx:218:29
+    216|     release();
+    217|     await waitFor(() => expect(shape()).toEqual(['warmup', 'H:kept']),…
+    218|       onTimeout: (error) => new Error(`${error.message}
+       |                             ^
+    219| server: ${JSON.stringify(shape())}
+    220| requests: ${requests.join(', ')}
+ ❯ Timeout.handleTimeout <repo>/client/node_modules/@testing-library/dom/dist/wait-for.js:156:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  04:56:05
+   Duration  15.05s (transform 872ms, setup 251ms, collect 1.23s, tests 12.41s, environment 712ms, prepare 128ms)
+

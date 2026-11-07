@@ -1,0 +1,49 @@
+### A. r2.2 tests on the r2.1 controller and buffer (before)
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #1: a kept entry whose words cannot land asks again without touching anything: no undo boundary, no save 415ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #2 (S-b1): kept words count as already in the note only when the whole typed text closes on a line edge 9ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #2 (S-b2): kept words count as already in the note only when the whole typed text closes on a line edge 9ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #2 (S-a1): kept words count as already in the note only when the whole typed text closes on a line edge 1052ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #2 (control): kept words count as already in the note only when the whole typed text closes on a line edge 84ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #3: a structure given up while it waited for a batch that never settles does not make the next one wait too 1085ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #5 (Y1): kept words from an empty unit do not land in a new empty unit that reused its id 325ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #6 (i): kept words whose unit a structure moves to a new block go with it, in storage and on screen 172ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #6 (ii): when its unit is nowhere on screen, a kept box leaves every line uncovered and stays reachable 185ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 1 to be +0 // Object.is equality
+AssertionError: expected [ 'warmup', 'Title', 'Body text' ] to deeply equal [ 'warmup', 'Title', 'Body', …(1) ]
+AssertionError: expected [ 'See the Note', 'Intro' ] to deeply equal [ 'See the Note', 'Note', 'Intro' ]
+AssertionError: expected null to be truthy
+AssertionError: expected 357 to be less than 250
+AssertionError: expected [] to deeply equal [ 'y1' ]
+AssertionError: expected 'source' to be 'new-1' // Object.is equality
+AssertionError: box over the editor of below: expected true to be false // Object.is equality
+      Tests  8 failed | 1 passed | 46 skipped (55)
+
+### B. Gate path arms (409 x2, GEO-long-0 x2) on the r2.1 code: recorded colour, not red-first (green = the path does not lose words in the gate)
+PATH 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away: fault(conflict@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) unload wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] new-2[] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; fault conflict skipped ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; FAULT conflict ; transfer tu-3 CONFLICT (409) ; onFailure
+PATH 409: the first structure unit-transfer conflicts, then the page goes away: fault(conflict) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) unload wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-2[H:<W1><k0>] new-3[<k1>] new-1[] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; FAULT conflict ; transfer tu-2 CONFLICT (409) ; onFailure ; structure -> false ; save work [<W0>|H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; transfer tu-2 work[<W0>|<k1>] -> new-2[H:<W1><k0>] ; create new-3 [] ; transfer tu-3 work[<W0>] -> new-3[<k1>] ; onFailure ; focusBlock new-3
+PATH GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again: holdSaves(1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) fault(conflict) unload wait(800) unload wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] new-2[] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 HELD (never reaches the server) ; whenWritesIdle ; onFailure ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; FAULT conflict ; transfer tu-3 CONFLICT (409) ; onFailure
+PATH GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes: holdSaves(1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) fault(conflict) unload wait(800) unload wait(600) || note: prior[<P0> | <P1>] work[<W0> | <W1><k0> | <k1>] || writes: whenWritesIdle ; onFailure ; structure -> false ; save work [<W0>|<W1><k0>|<k1>]
+ ✓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (13 tests | 9 skipped) 12467ms
+   ✓ words typed around heading structures are conserved > path 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away  2704ms
+   ✓ words typed around heading structures are conserved > path 409: the first structure unit-transfer conflicts, then the page goes away  2675ms
+   ✓ words typed around heading structures are conserved > path GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again  3848ms
+   ✓ words typed around heading structures are conserved > path GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes  3238ms
+      Tests  4 passed | 9 skipped (13)
+
+### C. Same on the r2.2 code (after)
+ ✓ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx (55 tests | 46 skipped) 2337ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #1: a kept entry whose words cannot land asks again without touching anything: no undo boundary, no save  429ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #3: a structure given up while it waited for a batch that never settles does not make the next one wait too  847ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #5 (Y1): kept words from an empty unit do not land in a new empty unit that reused its id  323ms
+      Tests  9 passed | 46 skipped (55)
+PATH 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away: fault(conflict@1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) unload wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] new-2[] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; fault conflict skipped ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; FAULT conflict ; transfer tu-3 CONFLICT (409) ; onFailure
+PATH 409: the first structure unit-transfer conflicts, then the page goes away: fault(conflict) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) unload wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-2[H:<W1><k0>] new-3[<k1>] new-1[] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; FAULT conflict ; transfer tu-2 CONFLICT (409) ; onFailure ; structure -> false ; save work [<W0>|H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; transfer tu-2 work[<W0>|<k1>] -> new-2[H:<W1><k0>] ; create new-3 [] ; transfer tu-3 work[<W0>] -> new-3[<k1>] ; onFailure ; focusBlock new-3
+PATH GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again: holdSaves(1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) wait(600) fault(conflict) unload wait(800) unload wait(600) || note: prior[<P0> | <P1>] work[<W0>] new-1[H:<W1><k0> | <k1>] new-2[] || writes: whenWritesIdle ; save work [<W0>|H:<W1>] ; create new-1 [] ; transfer tu-2 work[<W0>] -> new-1[H:<W1>] ; focusBlock new-1 ; structure -> true ; save new-1 HELD (never reaches the server) ; whenWritesIdle ; onFailure ; save new-1 [H:<W1><k0>|<k1>] ; whenWritesIdle ; create new-2 [] ; FAULT conflict ; transfer tu-3 CONFLICT (409) ; onFailure
+PATH GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes: holdSaves(1) heading(<W1>) type(<k0> in window) enter(in window) type(<k1> in window) fault(conflict) unload wait(800) unload wait(600) || note: prior[<P0> | <P1>] work[<W0> | <W1><k0> | <k1>] || writes: whenWritesIdle ; onFailure ; structure -> false ; save work [<W0>|<W1><k0>|<k1>]
+ ✓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (13 tests | 9 skipped) 12506ms
+   ✓ words typed around heading structures are conserved > path 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away  2714ms
+   ✓ words typed around heading structures are conserved > path 409: the first structure unit-transfer conflicts, then the page goes away  2690ms
+   ✓ words typed around heading structures are conserved > path GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again  3860ms
+   ✓ words typed around heading structures are conserved > path GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes  3240ms
+      Tests  4 passed | 9 skipped (13)

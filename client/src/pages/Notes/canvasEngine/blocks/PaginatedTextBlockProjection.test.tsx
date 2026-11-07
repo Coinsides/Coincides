@@ -57,6 +57,21 @@ function subject(initialText = '甲乙丙丁戊己庚辛', overrides: Partial<Pa
   return { ...view, onFlow, onBoundary, onKeyDown, flow: () => current, reset: (value: TextBlockContentV1) => act(() => setExternal!(value)),
     nodes: () => [...view.container.querySelectorAll('textarea')], text: () => current.units.map((unit) => unit.text).join('\n') };
 }
+describe('commit-2: a heading window takes focus without an extra save', () => {
+  it('seals the edit and sends no save when focus passes into the window', () => {
+    const onSave = vi.fn().mockResolvedValue({ status: 'saved' });
+    const view = subject('甲乙', { onSave });
+    const window = document.createElement('textarea');
+    window.dataset.structureTypingBuffer = 'true';
+    document.body.appendChild(window);
+    fireEvent.blur(view.nodes()[0], { relatedTarget: window });
+    expect(view.onBoundary.mock.calls.map(([reason]) => reason)).toContain('blur');
+    expect(onSave).not.toHaveBeenCalled();
+    fireEvent.blur(view.nodes()[0], { relatedTarget: document.body });
+    expect(onSave).toHaveBeenCalledTimes(1);
+    window.remove();
+  });
+});
 function focus(node: HTMLTextAreaElement, start: number, end = start) { act(() => { node.focus(); node.setSelectionRange(start, end); }); fireEvent.select(node); }
 
 describe('A4 paginated heading input requests', () => {

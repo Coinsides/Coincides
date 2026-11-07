@@ -1,0 +1,46 @@
+
+ RUN  v3.2.7 <tmp>/edacc/tree-r23c/client
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.mutNoBoundary.test.tsx (13 tests | 1 failed | 12 skipped) 2165ms
+   ↓ words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit
+   ↓ words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write
+   ↓ words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window
+   ↓ words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+   ↓ words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again
+   ↓ words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window
+   ↓ words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for
+   ↓ words typed around heading structures are conserved > path 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away
+   ↓ words typed around heading structures are conserved > path 409: the first structure unit-transfer conflicts, then the page goes away
+   ↓ words typed around heading structures are conserved > path GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again
+   ↓ words typed around heading structures are conserved > path GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes
+   × words typed around heading structures are conserved > boundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red 2163ms
+     → expected false to be true // Object.is equality
+   ↓ words typed around heading structures are conserved > 0 seeded sequences of 16 events: every word in exactly one place, in its own unit
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.mutNoBoundary.test.tsx > words typed around heading structures are conserved > boundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.mutNoBoundary.test.tsx:642:121
+    640|     const result = await runSequence(0, 5, ['heading', 'type', 'type',…
+    641|     expect(result.steps.some((step) => step.detail?.endsWith('in windo…
+    642|     expect(result.problems.some((problem) => problem.includes('typed i…
+       |                                                                                                                         ^
+    643|   }, 60_000);
+    644| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 skipped (13)
+   Start at  04:55:30
+   Duration  4.39s (transform 541ms, setup 256ms, collect 829ms, tests 2.17s, environment 699ms, prepare 137ms)
+

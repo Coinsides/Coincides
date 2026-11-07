@@ -1,0 +1,924 @@
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import type { TemplateOption } from '@/services/templateOptions';
+import { createBoardTextRangeEditSession } from '../boardTextRangeEditSession';
+import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1, TextUnitWritingRole } from '../runtimeDataTypes';
+import { createTextBlockContentV1, getTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import type { HeadingTextFlowStructureRequest } from '../headingRoleService';
+import { splitTextUnitForEnter } from '../textUnitEditorService';
+import { useAuthStore } from '@/stores/authStore';
+import { forgetUnplacedWords, readUnplacedWords, rememberUnplacedWords, UNPLACED_WORDS_LIMIT } from '../structureTypingBuffer';
+import { mergeTypedText, useHeadingStructureController } from './useHeadingStructureController';
+import { usePlacementHistory } from './usePlacementHistory';
+import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
+import { useDocumentTextFlowSelection } from './useDocumentTextFlowSelection';
+import type { DocumentFlowEdit, DocumentFlowSelection } from '../documentTextFlowSelection';
+
+const template: TemplateOption = { template_id: 'text.paragraph', template_key: 'text.paragraph', template_version: '1.0.0',
+  label: 'Text', description: 'Text', system_type: 'text', learning_role: 'note', legacy_block_type: 'paragraph',
+  default_content: {}, origin: 'test', status: 'active', isRuntime: false };
+const layout = { x: 0, y: 0, width: 400, height: 64, frame_id: 'page',
+  coordinate_space: 'page_frame_local' as const, surface: 'formal_page' as const, width_mode: 'auto' as const };
+const textOf = (flow: TextBlockContentV1) => flow.units.map((unit) => unit.text).join('\n');
+type HistoryOptions = Parameters<typeof useTextFlowHistory>[0];
+
+function textFlow(rows: Array<[string, string, TextUnitWritingRole?]>): TextBlockContentV1 {
+  const flow = createTextBlockContentV1('');
+  flow.units = rows.map(([id, text, role], index) => ({ ...flow.units[0], id, text,
+    writing_role: role ?? 'paragraph', order_index: index }));
+  return flow;
+}
+
+function block(id: string, flow: TextBlockContentV1, order: number): NoteBlock {
+  return { id, block_type: 'paragraph', title: null, content_json: { [TEXT_FLOW_CONTENT_KEY]: flow },
+    plain_text: textOf(flow), metadata: {}, order_index: order, source_references: [], placement_id: `p-${id}`,
+    display_overrides_json: {}, canvas_layout: layout, text_save_revision: 0 };
+}
+
+/** Fake only the existing persistence boundary. Splitting, unit movement,
+ * snapshots, batching, history and the heading controller are all real hooks.
+ */
+type ControllerInput = Parameters<typeof useHeadingStructureController>[0];
+
+function renderStructure(original: TextBlockContentV1, ending = textFlow([['end', 'End']]),
+  extra: Partial<Pick<ControllerInput, 'whenWritesIdle' | 'watchdogMs' | 'editorWaitMs' | 'placeRetryMs'>> = {},
+  page: { noteId?: string; more?: TextBlockContentV1[]; blocks?: NoteBlock[] } = {}) {
+  const noteId = page.noteId ?? 'note';
+  const originalBlocks = page.blocks ? structuredClone(page.blocks)
+    : [block('source', structuredClone(original), 0), block('ending', structuredClone(ending), 1),
+      ...(page.more ?? []).map((flow, index) => block(`more-${index + 1}`, structuredClone(flow), index + 2))];
+  const board = createBoardTextRangeEditSession(noteId, async (_note, updates) => updates);
+  board.hydrate([]);
+  const data = { blocks: structuredClone(originalBlocks), annotations: [] as AnnotationTruthV1[],
+    flowDrafts: {} as Record<string, TextBlockContentV1>, textDrafts: {} as Record<string, string> };
+  let update = () => {};
+  let createdCount = 0;
+  const documentOperations: DocumentFlowEdit[][] = [];
+  let documentPending: Promise<boolean> | null = null;
+  const create = vi.fn<NonNullable<HistoryOptions['createDraftBlock']>>(async (_template, _text, options) => {
+    const id = `new-${++createdCount}`;
+    const created = { ...block(id, getTextFlowContent(options?.contentJson ?? {})!, data.blocks.length),
+      content_json: options!.contentJson!, canvas_layout: options?.layout ? { ...options.layout } : undefined };
+    data.blocks = [...data.blocks, created]; update();
+    return { block: created, clientCreateKey: options!.clientCreateKey!, placementPersisted: true, reused: false };
+  });
+  const savePlacement = vi.fn<NonNullable<HistoryOptions['saveDraftBlockPlacement']>>(async (target) => target);
+  const discard = vi.fn<NonNullable<HistoryOptions['discardDraftBlock']>>(async () => true);
+  const trash = vi.fn<NonNullable<HistoryOptions['trashBlock']>>(async (id) => {
+    data.blocks = data.blocks.filter((entry) => entry.id !== id);
+    delete data.flowDrafts[id]; delete data.textDrafts[id]; update(); return true;
+  });
+  const restore = vi.fn<NonNullable<HistoryOptions['restoreBlock']>>(async (target) => {
+    data.blocks = [...data.blocks, target]; update(); return target;
+  });
+  const transfer = vi.fn<NonNullable<HistoryOptions['transferTextUnit']>>(async (input) => {
+    const sourceBlock = { ...input.sourceBlock, content_json: { [TEXT_FLOW_CONTENT_KEY]: input.sourceTextFlow },
+      plain_text: textOf(input.sourceTextFlow), ...input.sourcePayload, text_save_revision: input.sourceBaseRevision + 1 };
+    const targetBlock = { ...input.targetBlock, content_json: { [TEXT_FLOW_CONTENT_KEY]: input.targetTextFlow },
+      plain_text: textOf(input.targetTextFlow), ...input.targetPayload, text_save_revision: input.targetBaseRevision + 1 };
+    data.blocks = data.blocks.map((entry) => entry.id === sourceBlock.id ? sourceBlock : entry.id === targetBlock.id ? targetBlock : entry);
+    data.flowDrafts = { ...data.flowDrafts, [sourceBlock.id]: input.sourceTextFlow, [targetBlock.id]: input.targetTextFlow };
+    data.textDrafts = { ...data.textDrafts, [sourceBlock.id]: sourceBlock.plain_text ?? '', [targetBlock.id]: targetBlock.plain_text ?? '' };
+    update(); return { sourceBlock, targetBlock };
+  });
+  const save = vi.fn<HistoryOptions['saveBlock']>(async (target, text, options) => {
+    const flow = options?.textFlow ?? getTextFlowContent(target.content_json)!;
+    const saved = { ...target,
+      content_json: options?.contentSnapshot?.contentJson ?? { ...target.content_json, [TEXT_FLOW_CONTENT_KEY]: flow },
+      plain_text: options?.contentSnapshot?.plainText ?? text,
+      text_save_revision: (options?.baseRevision ?? target.text_save_revision ?? 0) + 1 };
+    data.blocks = data.blocks.map((entry) => entry.id === target.id ? saved : entry);
+    update(); return { status: 'saved', block: saved, recoveryReceipt: null, reconciliation: 'response' };
+  });
+  const reorder = vi.fn(async (ids: readonly string[]) => {
+    if (ids.length !== data.blocks.length || ids.some((id) => !data.blocks.some((entry) => entry.id === id))) return false;
+    data.blocks = ids.map((id, order_index) => ({ ...data.blocks.find((entry) => entry.id === id)!, order_index }));
+    update(); return true;
+  });
+  const focus = vi.fn();
+  const failure = vi.fn();
+  const subject = renderHook(() => {
+    const [, force] = useState(0); update = () => force((value) => value + 1);
+    const host = useRef<TextFlowHistoryHost | null>(null);
+    const editing = useTextFlowHistory({ noteId, generation: 1, blocks: data.blocks,
+      annotationTruths: data.annotations, readAnnotationTruths: () => data.annotations,
+      setAnnotationTruthsSnapshot: (annotations) => { data.annotations = annotations; update(); },
+      blockTextFlowDrafts: data.flowDrafts,
+      setBlockTextFlowDrafts: (value) => { data.flowDrafts = typeof value === 'function' ? value(data.flowDrafts) : value; update(); },
+      setBlockTextDrafts: (value) => { data.textDrafts = typeof value === 'function' ? value(data.textDrafts) : value; update(); },
+      captureBoardTextRanges: board.snapshot, restoreBoardTextRanges: board.restore, rebaseBoardTextRanges: board.rebase,
+      saveBlock: save, saveAnnotationTruthsOutcome: async () => true, history: host,
+      createDraftBlock: create, saveDraftBlockPlacement: savePlacement, discardDraftBlock: discard,
+      trashBlock: trash, restoreBlock: restore, transferTextUnit: transfer,
+    });
+    const history = usePlacementHistory({ noteId, generation: 1, beforeHistoryBoundary: () => editing.boundary(),
+      applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null });
+    host.current = history;
+    const heading = useHeadingStructureController({ noteId, blocks: data.blocks,
+      layouts: Object.fromEntries(data.blocks.map((entry) => [entry.id, layout])), readOnly: false,
+      template, textHistory: editing, reorderBlocks: reorder, onFocusBlock: focus, onFailure: failure, editorWaitMs: 0,
+      setBlockTextDrafts: (value) => { data.textDrafts = typeof value === 'function' ? value(data.textDrafts) : value; update(); },
+      ...extra });
+    const selection = useDocumentTextFlowSelection({ noteId, visibleBlocks: data.blocks,
+      applyDocumentEdit: (changes) => {
+        documentOperations.push(structuredClone(changes));
+        documentPending = heading.onDocumentEdit(changes);
+        return documentPending;
+      } });
+    useLayoutEffect(() => {
+      for (const entry of data.blocks) {
+        const flow = data.flowDrafts[entry.id] ?? getTextFlowContent(entry.content_json)!;
+        selection.register(entry.id, { flow, editable: true, focus: vi.fn(),
+          anchor: () => ({ unitId: flow.units[0].id, offset: 0 }) });
+      }
+    });
+    return { editing, history, heading, selection };
+  });
+  const settle = async (operation: () => Promise<boolean>) => {
+    let done: boolean | undefined;
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = operation();
+      void pending.then((value) => { done = value; });
+    });
+    // RAF receipts deliberately let React publish each confirmed transfer before
+    // the next step. waitFor allows those renders, as in the live editor.
+    await waitFor(() => expect(done).toBeDefined());
+    return pending;
+  };
+  const run = (request: HeadingTextFlowStructureRequest, sourceId = 'source') => settle(() =>
+    subject.result.current.heading.onHeadingStructure(data.blocks.find((entry) => entry.id === sourceId)!, request));
+  const undo = () => settle(() => subject.result.current.history.undoRuntimeHistory());
+  const redo = () => settle(() => subject.result.current.history.redoRuntimeHistory());
+  const replaceDocument = async (range: DocumentFlowSelection, text: string) => {
+    act(() => { expect(subject.result.current.selection.select(range.anchor, range.focus)).toBe(true); });
+    return settle(() => {
+      expect(subject.result.current.selection.replace(text, 'insertFromPaste')).toBe(true);
+      if (!documentPending) throw new Error('Document selection did not reach the heading host');
+      return documentPending;
+    });
+  };
+  const flows = () => data.blocks.map((entry) => getTextFlowContent(entry.content_json)!);
+  return { ...subject, data, originalBlocks, create, transfer, save, reorder, trash, restore, failure, focus,
+    run, undo, redo, flows, replaceDocument, documentOperations };
+}
+
+const typingBuffer = () => document.querySelector<HTMLTextAreaElement>('textarea[data-structure-typing-buffer]');
+const typingNotice = () => document.querySelector<HTMLElement>('[data-structure-typing-notice]');
+// Returns false when the window took the text, as a browser would for a default-prevented key.
+function noteEditor() {
+  const area = document.createElement('textarea');
+  area.dataset.runtimeTextflowEditor = 'true';
+  document.body.appendChild(area);
+  const typeText = (data: string) => {
+    const buffer = typingBuffer();
+    if (!buffer || typingNotice()) return area.dispatchEvent(new InputEvent('beforeinput',
+      { inputType: 'insertText', data, bubbles: true, cancelable: true }));
+    buffer.setRangeText(data, buffer.selectionStart, buffer.selectionEnd, 'end');
+    buffer.dispatchEvent(new Event('input', { bubbles: true }));
+    return false;
+  };
+  return { area, typeText };
+}
+
+describe('words from the window applied to text that changed under it (item 4, condition c)', () => {
+  it('words typed at the start of the line stay at its start', () => {
+    expect(mergeTypedText('#Intro', 'Intro', 'Big Intro', 4)).toEqual({ text: '#Big Intro', caret: 5 });
+  });
+  it('words typed after the text stay after it, ahead of what was added behind', () => {
+    expect(mergeTypedText('Intro more', 'Intro', 'Intro!', 6)).toEqual({ text: 'Intro! more', caret: 6 });
+  });
+  it('unchanged text takes the window as it is', () => {
+    expect(mergeTypedText('Intro', 'Intro', 'Intro!', 6)).toEqual({ text: 'Intro!', caret: 6 });
+  });
+  it('a place that cannot be found puts the words nowhere', () => {
+    expect(mergeTypedText('zzz', 'abc def', 'abc X def', 6)).toBeNull();
+  });
+});
+
+describe('A4 heading isolation through the live TextFlow and Note history', () => {
+  it('isolates a multiline cross-block selection paste and restores both blocks with one undo and redo', async () => {
+    const original = textFlow([['title', 'Title', 'heading_2']]);
+    original.inline_structures = [{ id: 'title-inline', parent_text_unit_id: 'title', semantic_kind: 'inline_code',
+      anchor_text: 'Ti', anchor_range: { start: 0, end: 2 }, field_values: {}, metadata: {}, status: 'active' }];
+    const ending = textFlow([['end', 'Body tail']]);
+    ending.inline_structures = [{ id: 'tail-inline', parent_text_unit_id: 'end', semantic_kind: 'inline_code',
+      anchor_text: 'tail', anchor_range: { start: 5, end: 9 }, field_values: {}, metadata: {}, status: 'active' }];
+    const editor = renderStructure(original, ending);
+    expect(await editor.replaceDocument({ anchor: { blockId: 'source', unitId: 'title', offset: 2 },
+      focus: { blockId: 'ending', unitId: 'end', offset: 4 } }, 'A\nB')).toBe(true);
+    expect(editor.documentOperations).toHaveLength(1);
+    expect(editor.documentOperations[0].map((edit) => edit.block.id)).toEqual(['source', 'ending']);
+    // Prove the real document selector initially produced the hard-line heading
+    // which the heading host must normalize before its existing save actions.
+    expect(editor.documentOperations[0][0].nextTextFlow.units[0]).toMatchObject({ text: 'TiA\nB', writing_role: 'heading_2' });
+    expect(editor.flows().map((flow) => flow.units.map((unit) => [unit.text, unit.writing_role]))).toEqual([
+      [['TiA', 'heading_2']], [['B', 'paragraph']], [[' tail', 'paragraph']],
+    ]);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'new-1', 'ending']);
+    expect(editor.flows()[0].inline_structures).toEqual(original.inline_structures);
+    expect(editor.flows()[2].inline_structures[0]).toMatchObject({ id: 'tail-inline', anchor_range: { start: 1, end: 5 } });
+    expect(editor.failure).not.toHaveBeenCalled();
+    expect(editor.create).toHaveBeenCalledTimes(1);
+    const after = structuredClone(editor.flows());
+    expect(await editor.undo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'ending']);
+    expect(editor.flows()).toEqual([original, ending]);
+    expect(await editor.undo()).toBe(false);
+    expect(await editor.redo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'new-1', 'ending']);
+    expect(editor.flows()).toEqual(after);
+    expect(editor.create).toHaveBeenCalledTimes(1);
+    expect(await editor.redo()).toBe(false);
+  });
+  it('promotes a middle unit, preserves both body segments and inline anchors, and undoes/redoes the whole operation once', async () => {
+    const original = textFlow([['before', 'Before'], ['middle', 'Heading'], ['after-one', 'After one'], ['after-two', 'After two']]);
+    original.inline_structures = [
+      { id: 'heading-inline', parent_text_unit_id: 'middle', semantic_kind: 'inline_formula', anchor_range: { start: 0, end: 4 },
+        anchor_text: 'Head', field_values: { latex: 'x+1' }, metadata: { keep: true }, status: 'active' },
+      { id: 'body-inline', parent_text_unit_id: 'after-two', semantic_kind: 'inline_link', anchor_range: { start: 0, end: 5 },
+        anchor_text: 'After', field_values: { url: 'https://example.test' }, metadata: {}, status: 'active' },
+    ];
+    const editor = renderStructure(original);
+    const next = structuredClone(original); next.units[1].writing_role = 'heading_2';
+    expect(await editor.run({ previousTextFlow: original, nextTextFlow: next, headingUnitId: 'middle',
+      focus: { unitId: 'middle', caret: 2 }, inputType: 'formatHeading' })).toBe(true);
+    expect(editor.failure).not.toHaveBeenCalled();
+    expect(editor.flows().map((flow) => flow.units.map((unit) => unit.text))).toEqual([
+      ['Before'], ['Heading'], ['After one', 'After two'], ['End'],
+    ]);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'new-1', 'new-2', 'ending']);
+    expect(editor.data.blocks.every((entry) => entry.block_type === 'paragraph')).toBe(true);
+    expect(editor.flows()[1].units[0].writing_role).toBe('heading_2');
+    expect(editor.flows()[1].inline_structures).toEqual([original.inline_structures[0]]);
+    expect(editor.flows()[2].inline_structures).toEqual([original.inline_structures[1]]);
+    expect(editor.create).toHaveBeenCalledTimes(2);
+    expect(editor.reorder).toHaveBeenCalledTimes(1);
+    expect(editor.focus).toHaveBeenLastCalledWith('new-1');
+    expect(await editor.undo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'ending']);
+    expect(editor.flows()[0]).toEqual(original);
+    expect(await editor.undo()).toBe(false);
+    const redone = await editor.redo();
+    expect(redone, JSON.stringify({ order: editor.data.blocks.map((entry) => entry.id),
+      reorders: editor.reorder.mock.calls, restored: editor.restore.mock.calls.map(([entry]) => entry.id) })).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'new-1', 'new-2', 'ending']);
+    expect(editor.flows().map((flow) => flow.units.map((unit) => unit.text))).toEqual([
+      ['Before'], ['Heading'], ['After one', 'After two'], ['End'],
+    ]);
+    expect(editor.flows()[1].inline_structures).toEqual([original.inline_structures[0]]);
+    expect(editor.flows()[2].inline_structures).toEqual([original.inline_structures[1]]);
+    expect(editor.create).toHaveBeenCalledTimes(2);
+    expect(await editor.redo()).toBe(false);
+  });
+
+  it('isolates several pasted heading units into single-heading blocks while keeping intervening body order', async () => {
+    const original = textFlow([['original', 'Original']]);
+    const next = textFlow([['first', 'First', 'heading_1'], ['body-a', 'Body A'], ['second', 'Second', 'heading_2'],
+      ['body-b', 'Body B'], ['third', 'Third', 'heading_3'], ['body-c', 'Body C']]);
+    const editor = renderStructure(original);
+    expect(await editor.run({ previousTextFlow: original, nextTextFlow: next, headingUnitId: 'first',
+      focus: { unitId: 'body-c', caret: 6 }, inputType: 'insertHeading' })).toBe(true);
+    expect(editor.failure).not.toHaveBeenCalled();
+    expect(editor.flows().map((flow) => flow.units.map((unit) => [unit.text, unit.writing_role]))).toEqual([
+      [['First', 'heading_1']], [['Body A', 'paragraph']], [['Second', 'heading_2']],
+      [['Body B', 'paragraph']], [['Third', 'heading_3']], [['Body C', 'paragraph']], [['End', 'paragraph']],
+    ]);
+    expect(editor.reorder).toHaveBeenCalledTimes(1);
+    expect(await editor.undo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'ending']);
+    expect(editor.flows()[0]).toEqual(original);
+    expect(await editor.redo()).toBe(true);
+    expect(editor.flows().map(textOf)).toEqual(['First', 'Body A', 'Second', 'Body B', 'Third', 'Body C', 'End']);
+  });
+
+  it('retains both earlier history batches after a later heading operation', async () => {
+    const original = textFlow([['before', 'Before'], ['first', 'First title'], ['later', 'Later title'], ['tail', 'Tail']]);
+    const editor = renderStructure(original);
+    const first = structuredClone(original); first.units[1].writing_role = 'heading_1';
+    expect(await editor.run({ previousTextFlow: original, nextTextFlow: first, headingUnitId: 'first',
+      focus: { unitId: 'first', caret: 0 }, inputType: 'formatHeading' })).toBe(true);
+    const firstOrder = editor.data.blocks.map((entry) => entry.id);
+    const firstFlows = structuredClone(editor.flows());
+    const laterBlock = editor.data.blocks.find((entry) => getTextFlowContent(entry.content_json)!.units.some((unit) => unit.id === 'later'))!;
+    const previous = getTextFlowContent(laterBlock.content_json)!;
+    const second = structuredClone(previous); second.units.find((unit) => unit.id === 'later')!.writing_role = 'heading_2';
+    expect(await editor.run({ previousTextFlow: previous, nextTextFlow: second, headingUnitId: 'later',
+      focus: { unitId: 'later', caret: 0 }, inputType: 'formatHeading' }, laterBlock.id)).toBe(true);
+    const finalOrder = editor.data.blocks.map((entry) => entry.id);
+    expect(editor.flows().map(textOf)).toEqual(['Before', 'First title', 'Later title', 'Tail', 'End']);
+    expect(await editor.undo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(firstOrder);
+    expect(editor.flows()).toEqual(firstFlows);
+    expect(await editor.undo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(['source', 'ending']);
+    expect(editor.flows()[0]).toEqual(original);
+    expect(await editor.redo()).toBe(true);
+    expect(await editor.redo()).toBe(true);
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(finalOrder);
+    expect(editor.flows().map(textOf)).toEqual(['Before', 'First title', 'Later title', 'Tail', 'End']);
+  });
+
+  it('replays text and Enter typed while Enter after a heading is still committing', async () => {
+    const original = textFlow([['title', 'Ports', 'heading_1']]);
+    const next = splitTextUnitForEnter(original, 'title', 5, 5);
+    const paragraph = next.units[1];
+    const editor = renderStructure(original);
+    const { area, typeText } = noteEditor();
+
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks.find((entry) => entry.id === 'source')!, {
+        previousTextFlow: original, nextTextFlow: next, headingUnitId: 'title',
+        focus: { unitId: paragraph.id, caret: 0 }, inputType: 'insertParagraphAfterHeading' });
+    });
+    expect(typeText('Body')).toBe(false);
+    expect(typeText('\n')).toBe(false);
+    expect(typeText('Next')).toBe(false);
+    await waitFor(async () => expect(await pending).toBe(true));
+
+    await waitFor(() => {
+      const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'));
+      expect(created).toBeTruthy();
+      expect(editor.data.flowDrafts[created!.id]?.units.map((unit) => unit.text)).toEqual(['Body', 'Next']);
+      expect(editor.data.textDrafts[created!.id]).toBe('Body\nNext');
+    });
+    // Typing after the commit is ordinary input again.
+    expect(typeText('later')).toBe(true);
+    area.remove();
+  });
+});
+
+// F9 / A-17: three invariants of the structure commit.
+describe('heading structure commits always release the note and keep both draft halves equal', () => {
+  // "# Sec" typed into a standalone empty block: one heading unit, no new block.
+  const emptyBlockHeading = () => {
+    const original = textFlow([['empty', '']]);
+    const next = textFlow([['empty', 'Sec', 'heading_1']]);
+    return { original, request: { previousTextFlow: original, nextTextFlow: next, headingUnitId: 'empty',
+      focus: { unitId: 'empty', caret: 3 }, inputType: 'insertHeading' } as HeadingTextFlowStructureRequest };
+  };
+
+  it('publishes the text half with the flow when "# " converts an empty block, so the editor and chapter tree agree', async () => {
+    const { original, request } = emptyBlockHeading();
+    const editor = renderStructure(original);
+    expect(await editor.run(request)).toBe(true);
+    const flow = editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!;
+    expect(flow.units.map((unit) => [unit.writing_role, unit.text])).toEqual([['heading_1', 'Sec']]);
+    // The chapter tree is built from the flow; the editor renders the text half.
+    expect(editor.data.textDrafts.source).toBe('Sec');
+    expect(editor.result.current.heading.isBusy()).toBe(false);
+  });
+
+  it('never saves a moved unit back when a frame fires before React commits the transfer', async () => {
+    const original = textFlow([['before', 'aaa'], ['middle', 'bbb'], ['after', 'ccc']]);
+    const editor = renderStructure(original);
+    const next = structuredClone(original); next.units[1].writing_role = 'heading_1';
+    const frames = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => { callback(0); return 0; });
+    try {
+      expect(await editor.run({ previousTextFlow: original, nextTextFlow: next, headingUnitId: 'middle',
+        focus: { unitId: 'middle', caret: 0 }, inputType: 'insertHeading' })).toBe(true);
+    } finally {
+      frames.mockRestore();
+    }
+    expect(editor.transfer.mock.calls.map(([input]) => input.sourceTextFlow.units.map((unit) => unit.text))).toEqual([
+      ['aaa', 'ccc'], ['aaa'],
+    ]);
+    expect(editor.flows().map((flow) => flow.units.map((unit) => unit.text))).toEqual([['aaa'], ['bbb'], ['ccc'], ['End']]);
+  });
+
+  it('a commit wait does not hang when the note unmounts mid-structure', async () => {
+    const original = textFlow([['before', 'aaa'], ['middle', 'bbb'], ['after', 'ccc']]);
+    const editor = renderStructure(original);
+    const next = structuredClone(original); next.units[1].writing_role = 'heading_1';
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], { previousTextFlow: original,
+        nextTextFlow: next, headingUnitId: 'middle', focus: { unitId: 'middle', caret: 0 }, inputType: 'insertHeading' });
+    });
+    editor.unmount();
+    await expect(pending).resolves.toBeTypeOf('boolean');
+  });
+
+  it('completes, releases busy and replays queued keys even when animation frames never arrive', async () => {
+    const { original, request } = emptyBlockHeading();
+    const editor = renderStructure(original);
+    const { area, typeText } = noteEditor();
+    const frames = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 0);
+    try {
+      let pending!: Promise<boolean>;
+      act(() => { pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], request); });
+      expect(editor.result.current.heading.isBusy()).toBe(true);
+      expect(typeText(' more')).toBe(false);
+      expect(await pending).toBe(true);
+      await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+      await waitFor(() => expect(editor.data.textDrafts.source).toBe('Sec more'));
+      expect(editor.data.flowDrafts.source.units.map((unit) => unit.text)).toEqual(['Sec more']);
+      expect(typeText('later')).toBe(true);
+    } finally {
+      frames.mockRestore();
+      area.remove();
+    }
+  });
+
+  const splitHeading = (editor: ReturnType<typeof renderStructure>) => {
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], {
+        previousTextFlow: editor.flows()[0], nextTextFlow: textFlow([['body', 'Intro'], ['title', 'Sec', 'heading_1']]),
+        headingUnitId: 'title', focus: { unitId: 'title', caret: 3 }, inputType: 'insertHeading' });
+    });
+    return pending;
+  };
+  const halvesAgree = (editor: ReturnType<typeof renderStructure>) => {
+    for (const entry of editor.data.blocks) {
+      const live = editor.data.flowDrafts[entry.id] ?? getTextFlowContent(entry.content_json)!;
+      const shown = editor.data.textDrafts[entry.id];
+      if (shown !== undefined) expect(shown).toBe(textOf({ ...live, units: live.units.filter((unit) => unit.status !== 'deleted') }));
+    }
+  };
+
+  it('releases busy on a failed structure step and replays queued keys into the block that holds the caret', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    // The split is saved, but placing it in order fails.
+    editor.reorder.mockResolvedValueOnce(false);
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    expect(typeText('!')).toBe(false);
+    expect(await pending).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    await waitFor(() => expect(editor.data.textDrafts[created.id]).toBe('Sec!'));
+    halvesAgree(editor);
+    expect(typeText('later')).toBe(true);
+    area.remove();
+  });
+
+  it('releases busy and stops capturing keys when the split itself cannot be saved', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    editor.create.mockImplementationOnce(async () => { throw new Error('synthetic create failure'); });
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    expect(typeText('!')).toBe(false);
+    expect(await pending).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    halvesAgree(editor);
+    // A failed save holds the note until Retry or Undo. The words stay on screen and
+    // say they are not in the note, and typing elsewhere is ordinary input again.
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    expect(typingBuffer()!.value).toBe('Sec!');
+    expect(typeText('later')).toBe(true);
+    typingNotice()!.querySelector('button')!.click();
+    expect(typingBuffer()).toBeNull();
+    area.remove();
+  });
+
+  it('shows what is typed in the window on the unit, and hands off with the caret where it was left', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    const buffer = typingBuffer()!;
+    expect(document.activeElement).toBe(buffer);
+    expect(buffer.value).toBe('Sec');
+    typeText('Xabc');
+    expect(buffer.value).toBe('SecXabc');
+    // Backspace and an arrow key, as the browser applies them natively.
+    buffer.setRangeText('', 6, 7, 'end');
+    buffer.setSelectionRange(4, 4);
+    typeText('-');
+    expect(await pending).toBe(true);
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    await waitFor(() => expect(editor.data.textDrafts[created.id]).toBe('SecX-ab'));
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    area.remove();
+  });
+
+  it('keeps the buffer until the target editor exists and is writable, so the next key has somewhere to go', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined, { editorWaitMs: 5000 });
+    const pending = splitHeading(editor);
+    expect(await pending).toBe(true);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const buffer = typingBuffer()!;
+    // No editor yet: the key made now must not be lost.
+    expect(buffer).toBeTruthy();
+    const target = document.createElement('textarea');
+    target.dataset.runtimeTextflowEditor = 'true';
+    target.dataset.blockId = created.id;
+    target.dataset.textUnitId = 'title';
+    target.getBoundingClientRect = () => ({ width: 100 }) as DOMRect;
+    target.readOnly = true;
+    document.body.appendChild(target);
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    expect(typingBuffer()).toBe(buffer);
+    target.readOnly = false;
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    expect(document.activeElement).toBe(target);
+    target.remove();
+  });
+
+  it('does not pull focus back from another field someone clicked into during the window', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const other = document.createElement('input');
+    document.body.appendChild(other);
+    const pending = splitHeading(editor);
+    other.focus();
+    expect(await pending).toBe(true);
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    expect(document.activeElement).toBe(other);
+    other.remove();
+  });
+
+  it('an editor taking focus during the window does not take the keys', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area } = noteEditor();
+    const pending = splitHeading(editor);
+    const buffer = typingBuffer()!;
+    area.focus();
+    expect(document.activeElement).toBe(buffer);
+    expect(await pending).toBe(true);
+    area.remove();
+  });
+
+  it('counts everything typed in the window as one undo step, leaving the heading', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    typeText('a'); typeText('b'); typeText('c');
+    expect(await pending).toBe(true);
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    await waitFor(() => expect(editor.data.textDrafts[created.id]).toBe('Secabc'));
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    // Ordinary typing afterwards is its own step, not folded into the window's.
+    const live = editor.data.flowDrafts[created.id];
+    const typed = { ...live, units: live.units.map((unit) => ({ ...unit, text: 'Secabcd' })) };
+    await act(async () => { await editor.result.current.editing.applyEdit(editor.data.blocks.find((entry) => entry.id === created.id)!, typed,
+      { previousTextFlow: live, metadata: { unitId: live.units[0].id, inputType: 'insertText', kind: 'typing', isComposing: false,
+        beforeSelection: { unitId: live.units[0].id, start: 6, end: 6 }, afterSelection: { unitId: live.units[0].id, start: 7, end: 7 } } }); });
+    expect(await editor.undo()).toBe(true);
+    expect(editor.data.flowDrafts[created.id].units[0].text).toBe('Secabc');
+    expect(await editor.undo()).toBe(true);
+    await waitFor(() => expect(editor.data.textDrafts[created.id]).toBe('Sec'));
+    expect(editor.data.flowDrafts[created.id].units[0].writing_role).toBe('heading_1');
+    area.remove();
+  });
+
+  it('waits for a composition to end, however late, before placing its text', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area } = noteEditor();
+    const pending = splitHeading(editor);
+    const buffer = typingBuffer()!;
+    buffer.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    expect(await pending).toBe(true);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(typingBuffer()).toBe(buffer);
+    buffer.value = 'Sec现值';
+    buffer.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '现值' }));
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    await waitFor(() => expect(editor.data.textDrafts[created.id]).toBe('Sec现值'));
+    expect(typingBuffer()).toBeNull();
+    area.remove();
+  });
+
+  it('body typed after Enter in a heading takes its own block rather than sharing the heading block', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    typeText('\nBody');
+    expect(await pending).toBe(true);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    await waitFor(() => expect(editor.flows().map((flow) => flow.units.map((unit) => unit.text)))
+      .toEqual([['Intro'], ['Sec'], ['Body'], ['End']]));
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    area.remove();
+  });
+
+  it('failure injection: the words survive leaving the note mid-window and stay on screen', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('kept');
+    editor.unmount();
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    expect(typingBuffer()!.value).toBe('Seckept');
+    typingNotice()!.querySelector('button')!.click();
+    expect(typingBuffer()).toBeNull();
+    area.remove();
+  });
+
+  it('failure injection: words left behind go into the note when it is opened again', async () => {
+    const original = textFlow([['body', 'Intro'], ['title', 'Sec']]);
+    const editor = renderStructure(original);
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('kept');
+    editor.unmount();
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    expect(readUnplacedWords('note').map((words) => words.text)).toEqual(['Seckept']);
+    const back = renderStructure(original);
+    await waitFor(() => expect(typingNotice()).toBeNull());
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    expect(back.data.flowDrafts.source?.units.map((unit) => unit.text).join('|')).toContain('kept');
+    expect(readUnplacedWords('note')).toEqual([]);
+    back.unmount();
+    area.remove();
+  });
+
+  it('opening one note leaves the words waiting for another note alone', async () => {
+    rememberUnplacedWords('other-note', { id: 'theirs', blockId: 'b', unitId: 'u', initialText: '', text: 'theirs' });
+    const editor = renderStructure(textFlow([['body', 'Intro']]));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    expect(readUnplacedWords('other-note').map((words) => words.text)).toEqual(['theirs']);
+    forgetUnplacedWords('other-note', 'theirs');
+    editor.unmount();
+  });
+
+  it('another account signing in neither sees left-behind words nor gets them written into its note', async () => {
+    const original = textFlow([['body', 'Intro'], ['title', 'Sec']]);
+    const owner = { id: 'owner' } as NonNullable<ReturnType<typeof useAuthStore.getState>['user']>;
+    useAuthStore.setState({ user: owner });
+    try {
+      const editor = renderStructure(original);
+      const { area, typeText } = noteEditor();
+      void splitHeading(editor);
+      typeText('secret');
+      editor.unmount();
+      await waitFor(() => expect(typingNotice()).toBeTruthy());
+      useAuthStore.setState({ user: { ...owner, id: 'someone-else' } });
+      expect(typingNotice()).toBeNull();
+      expect(typingBuffer()).toBeNull();
+      expect(readUnplacedWords('note')).toEqual([]);
+      const theirs = renderStructure(original);
+      await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+      expect(typingBuffer()).toBeNull();
+      expect(theirs.data.flowDrafts.source).toBeUndefined();
+      expect(theirs.save).not.toHaveBeenCalled();
+      theirs.unmount();
+      // Still there for its owner.
+      useAuthStore.setState({ user: owner });
+      const ownerWords = readUnplacedWords('note');
+      expect(ownerWords.map((words) => words.text)).toEqual(['Secsecret']);
+      forgetUnplacedWords('note', ownerWords[0].id);
+      area.remove();
+    } finally {
+      useAuthStore.setState({ user: null });
+    }
+  });
+
+  it('failure injection: closing the notice is the only thing that discards left-behind words', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('kept');
+    editor.unmount();
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    typingNotice()!.querySelector('button')!.click();
+    expect(readUnplacedWords('note')).toEqual([]);
+    area.remove();
+  });
+
+  it('opening a note with nothing waiting writes nothing', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro']]));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    expect(typingBuffer()).toBeNull();
+    expect(editor.save).not.toHaveBeenCalled();
+    editor.unmount();
+  });
+
+  it('failure injection: nothing typed leaves nothing behind when the note is left mid-window', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    void splitHeading(editor);
+    editor.unmount();
+    await waitFor(() => expect(typingBuffer()).toBeNull());
+    expect(typingNotice()).toBeNull();
+  });
+
+  it('failure injection: words held by a failed save go into the note once it is released', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    editor.create.mockImplementationOnce(async () => { throw new Error('synthetic create failure'); });
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    typeText('!');
+    expect(await pending).toBe(false);
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    expect(await editor.undo()).toBe(true);
+    await waitFor(() => expect(typingBuffer()).toBeNull(), { timeout: 3000 });
+    const flow = editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!;
+    expect(flow.units.map((unit) => unit.text).join('|')).toContain('!');
+    area.remove();
+  });
+
+  it('kept words keep retrying through refusals and land once the note is released', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined, { placeRetryMs: 40 });
+    editor.create.mockImplementationOnce(async () => { throw new Error('synthetic create failure'); });
+    const { area, typeText } = noteEditor();
+    const pending = splitHeading(editor);
+    typeText('!');
+    expect(await pending).toBe(false);
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    // Several retries are refused while the failed save holds the note.
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 200)); });
+    expect(typingNotice()).toBeTruthy();
+    expect(await editor.undo()).toBe(true);
+    await waitFor(() => expect(typingBuffer()).toBeNull(), { timeout: 3000 });
+    const flow = editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!;
+    expect(flow.units.map((unit) => unit.text).join('|')).toContain('!');
+    expect(readUnplacedWords('note')).toEqual([]);
+    area.remove();
+  });
+
+  it('H: a page going away stores what is in the window at once, with no cleanup or timer needed', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined, { editorWaitMs: 60_000 });
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('kept');
+    window.dispatchEvent(new Event('pagehide'));
+    // Read in the same task: an unloading page runs nothing after this.
+    expect(readUnplacedWords('note').map((words) => [words.blockId, words.unitId, words.text])).toEqual([['source', 'title', 'Seckept']]);
+    editor.unmount();
+    document.querySelectorAll<HTMLButtonElement>('[data-structure-typing-notice] button').forEach((button) => button.click());
+    localStorage.clear();
+    area.remove();
+  });
+
+  it('condition a: words that landed before the page went away are not written twice', async () => {
+    rememberUnplacedWords('note', { id: 'landed', blockId: 'source', unitId: 'title', initialText: 'Sec', text: 'Seckept' });
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', 'Seckept']]));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 150)); });
+    expect(typingBuffer()).toBeNull();
+    expect(editor.save).not.toHaveBeenCalled();
+    expect(readUnplacedWords('note')).toEqual([]);
+    editor.unmount();
+  });
+
+  it('condition b: leaving is released within the watchdog when writes never settle, and the words are kept', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined,
+      { whenWritesIdle: () => new Promise<void>(() => {}), watchdogMs: 300 });
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('kept');
+    const started = Date.now();
+    let released = false;
+    void editor.result.current.heading.whenTypingSettled().then(() => { released = true; });
+    await waitFor(() => expect(released).toBe(true), { timeout: 2000 });
+    expect(Date.now() - started).toBeLessThan(1500);
+    // In the note or kept on screen and stored: never nowhere.
+    await waitFor(() => {
+      const inNote = Object.values(editor.data.textDrafts).some((text) => text.includes('kept'));
+      const kept = readUnplacedWords('note').some((words) => words.text.includes('kept'));
+      expect(inNote || kept).toBe(true);
+    });
+    editor.unmount();
+    document.querySelectorAll<HTMLButtonElement>('[data-structure-typing-notice] button').forEach((button) => button.click());
+    localStorage.clear();
+    area.remove();
+  });
+
+  it('past the limit the notice asks for attention, and no kept words are dropped', async () => {
+    for (let index = 0; index < UNPLACED_WORDS_LIMIT; index += 1) {
+      rememberUnplacedWords('note', { id: `old-${index}`, blockId: 'gone', unitId: 'gone', initialText: '', text: `old ${index}` });
+    }
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    editor.create.mockImplementationOnce(async () => { throw new Error('synthetic create failure'); });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    const pending = splitHeading(editor);
+    const window = document.activeElement as HTMLTextAreaElement;
+    expect(window.dataset.structureTypingBuffer).toBe('true');
+    window.setRangeText('!', window.value.length, window.value.length, 'end');
+    window.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(await pending).toBe(false);
+    await waitFor(() => expect(readUnplacedWords('note')).toHaveLength(UNPLACED_WORDS_LIMIT + 1));
+    const notices = [...document.querySelectorAll<HTMLElement>('[data-structure-typing-notice]')];
+    expect(notices).toHaveLength(UNPLACED_WORDS_LIMIT + 1);
+    expect(notices.some((notice) => notice.textContent?.includes('Many kept words'))).toBe(true);
+    editor.unmount();
+    notices.forEach((notice) => notice.querySelector('button')!.click());
+    expect(readUnplacedWords('note')).toEqual([]);
+  });
+
+  it('leaving waits for typed words to be placed', async () => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('x');
+    let settled = false;
+    void editor.result.current.heading.whenTypingSettled().then(() => { settled = true; });
+    expect(settled).toBe(false);
+    await waitFor(() => expect(settled).toBe(true));
+    const created = editor.data.blocks.find((entry) => entry.id.startsWith('new-'))!;
+    expect(editor.data.textDrafts[created.id]).toBe('Secx');
+    area.remove();
+  });
+
+  it('a structure whose writes never settle is abandoned by the watchdog: busy released, failure shown, keys kept', async () => {
+    const { original, request } = emptyBlockHeading();
+    const editor = renderStructure(original, undefined, { whenWritesIdle: () => new Promise<void>(() => {}), watchdogMs: 200 });
+    const { area, typeText } = noteEditor();
+    act(() => { void editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], request); });
+    expect(editor.result.current.heading.isBusy()).toBe(true);
+    expect(typeText('kept')).toBe(false);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.data.textDrafts.source).toBe('kept'));
+    expect(editor.data.flowDrafts.source.units.map((unit) => unit.text)).toEqual(['kept']);
+    expect(typeText('later')).toBe(true);
+    area.remove();
+  });
+
+  // Option 4: the transfer reaches the server, and its reply arrives only after the note was left.
+  const holdTransferReply = (editor: ReturnType<typeof renderStructure>, reply: 'arrives' | 'fails' | 'never') => {
+    const real = editor.transfer.getMockImplementation()!;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    editor.transfer.mockImplementationOnce(async (input) => {
+      const result = await real(input);
+      await gate;
+      if (reply === 'never') return new Promise<never>(() => {});
+      return reply === 'fails' ? null as never : result;
+    });
+    return release;
+  };
+  // Three blocks hold a unit called 'title' once the heading has its own block: identity, not the id, must decide.
+  const crowded = { more: [textFlow([['m', 'M'], ['title', 'Y']])] };
+  const crowdedEnding = textFlow([['end', 'End'], ['title', 'Other']]);
+  const leaveDuringTransfer = async (reply: 'arrives' | 'fails' | 'never', noteId = 'note') => {
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', 'Sec']]), crowdedEnding, {}, { ...crowded, noteId });
+    const release = holdTransferReply(editor, reply);
+    const { area, typeText } = noteEditor();
+    void splitHeading(editor);
+    typeText('kept');
+    await waitFor(() => expect(editor.transfer).toHaveBeenCalledTimes(1));
+    editor.unmount();
+    await waitFor(() => expect(typingNotice()).toBeTruthy());
+    return { editor, release, area };
+  };
+  const unitTexts = (blocks: NoteBlock[]) => blocks.map((entry) => [entry.id,
+    getTextFlowContent(entry.content_json)!.units.map((unit) => `${unit.id}:${unit.text}`).join('|')]);
+  const closeNotices = () => document.querySelectorAll<HTMLButtonElement>('[data-structure-typing-notice] button')
+    .forEach((button) => button.click());
+
+  it('option 4: a transfer confirmed after leaving moves the stored words to the new block, and they land there once', async () => {
+    const { editor, release, area } = await leaveDuringTransfer('arrives');
+    expect(readUnplacedWords('note').map((words) => [words.blockId, words.unitId])).toEqual([['source', 'title']]);
+    release();
+    await waitFor(() => expect(readUnplacedWords('note').map((words) => [words.blockId, words.unitId, words.text]))
+      .toEqual([['new-1', 'title', 'Seckept']]));
+    // A key typed into the kept words afterwards stores them where they now belong, not on the old block.
+    const box = typingBuffer()!;
+    box.value += '!';
+    box.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(readUnplacedWords('note').map((words) => [words.blockId, words.text])).toEqual([['new-1', 'Seckept!']]);
+    const back = renderStructure(textFlow([]), undefined, {}, { blocks: editor.data.blocks });
+    await waitFor(() => expect(typingNotice()).toBeNull());
+    await waitFor(() => expect(readUnplacedWords('note')).toEqual([]));
+    const live = back.data.blocks.map((entry) => [entry.id,
+      (back.data.flowDrafts[entry.id] ?? getTextFlowContent(entry.content_json)!).units.map((unit) => `${unit.id}:${unit.text}`).join('|')]);
+    expect(live).toEqual([['source', 'body:Intro'], ['ending', 'end:End|title:Other'], ['more-1', 'm:M|title:Y'], ['new-1', 'title:Seckept!']]);
+    back.unmount();
+    area.remove();
+  });
+
+  it.each(['fails', 'never'] as const)('option 4: when the transfer reply %s, the words stay kept on the old block and are not written', async (reply) => {
+    const { editor, release, area } = await leaveDuringTransfer(reply);
+    release();
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 100)); });
+    expect(readUnplacedWords('note').map((words) => [words.blockId, words.unitId])).toEqual([['source', 'title']]);
+    const before = unitTexts(editor.data.blocks);
+    const back = renderStructure(textFlow([]), undefined, {}, { blocks: editor.data.blocks });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 200)); });
+    expect(typingNotice()).toBeTruthy();
+    expect(back.save).not.toHaveBeenCalled();
+    expect(unitTexts(back.data.blocks)).toEqual(before);
+    expect(readUnplacedWords('note').map((words) => words.text)).toEqual(['Seckept']);
+    back.unmount();
+    closeNotices();
+    localStorage.clear();
+    area.remove();
+  });
+
+  it('option 4: a reply for note A arriving while note B is open changes nothing of B', async () => {
+    const { release, area } = await leaveDuringTransfer('arrives', 'note-a');
+    const other = renderStructure(textFlow([['body', 'B1'], ['title', 'B2']]), crowdedEnding, {}, { ...crowded, noteId: 'note-b' });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    const blocksBefore = structuredClone(other.data.blocks);
+    release();
+    await waitFor(() => expect(readUnplacedWords('note-a').map((words) => words.blockId)).toEqual(['new-1']));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 100)); });
+    expect(other.data.blocks).toEqual(blocksBefore);
+    expect(other.data.flowDrafts).toEqual({});
+    expect(other.save).not.toHaveBeenCalled();
+    expect(other.transfer).not.toHaveBeenCalled();
+    expect(other.create).not.toHaveBeenCalled();
+    expect(typingBuffer()?.dataset.structureTypingBuffer).toBe('true');
+    expect(readUnplacedWords('note-b')).toEqual([]);
+    other.unmount();
+    closeNotices();
+    localStorage.clear();
+    area.remove();
+  });
+});

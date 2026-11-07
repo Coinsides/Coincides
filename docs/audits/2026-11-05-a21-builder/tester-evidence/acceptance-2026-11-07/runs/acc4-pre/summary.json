@@ -1,0 +1,20 @@
+{
+ "total": 15,
+ "bad": [
+  "RE-beta-0",
+  "RE-beta-1",
+  "RE-alpha-0",
+  "RF-gamma-0",
+  "RF-gamma-1",
+  "RJ-gamma-0",
+  "RJ-gamma-1",
+  "RJ-beta-0",
+  "RI-beta-0",
+  "RI-beta-1",
+  "RX-addr-0",
+  "RX-addr-1",
+  "RX-addr-2",
+  "RX-held-0",
+  "RX-held-1"
+ ]
+}

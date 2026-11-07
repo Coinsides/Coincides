@@ -1,0 +1,22 @@
+after113 
+before113 
+after0 
+before0 Binary file r04-before0.log matches
+win-after {"total":26,"bad":0,"latency":57,"byArm":{"winBackspace":{"n":2,"bad":0},"winArrow":{"n":2,"bad":0},"winComposition":{"n":2,"bad":0},"ctlComposition":{"n":2,"bad":0},"winEcho":{"n":2,"bad":0},"inject_fail":{"n":2,"bad":0},"inject_hang":{"n":2,"bad":0},"inject_failThenLeaveBack":{"n":2,"bad":0},"inject_leaveBack":{"n":2,"bad":0},"inject_back":{"n":2,"bad":0},"inject_leaveThenRefreshBack":{"n":2,"bad":0},"inject_leaveInApp":{"n":2,"bad":0},"inject_leaveAddressBar":{"n":2,"bad":0}}}
+win-before {"total":4,"bad":2,"latency":57,"byArm":{"winBackspace":{"n":1,"bad":1},"winArrow":{"n":1,"bad":1},"winComposition":{"n":1,"bad":0},"winEcho":{"n":1,"bad":0}}}
+a24-after Node.js v22.22.1
+a24-before {"total":32,"bad":19,"latency":57,"byArm":{"midHash":{"n":2,"bad":2},"midHashTwoBody":{"n":2,"bad":1},"midHashThird":{"n":2,"bad":2},"midHashFirst":{"n":2,"bad":2},"a24letters@80":{"n":2,"bad":2},"a24first@80":{"n":2,"bad":0},"a24ime@80":{"n":2,"bad":0},"a24letters@120":{"n":2,"bad":2},"a24first@120":{"n":2,"bad":0},"a24ime@120":{"n":2,"bad":2},"a24letters@160":{"n":2,"bad":2},"a24first@160":{"n":2,"bad":0},"a24ime@160":{"n":2,"bad":0},"a24letters@220":{"n":2,"bad":2},"a24first@220":{"n":2,"bad"
+hash-after Node.js v22.22.1
+done
+after113 SUMMARY {"label":"after113","origin":"http://localhost:4130","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":0},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+after0 SUMMARY {"label":"after0","origin":"http://localhost:4131","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":0},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+a24-after {"total":32,"bad":8,"latency":57,"byArm":{"midHash":{"n":2,"bad":0},"midHashTwoBody":{"n":2,"bad":0},"midHashThird":{"n":2,"bad":0},"midHashFirst":{"n":2,"bad":0},"a24letters@80":{"n":2,"bad":0},"a24first@80":{"n":2,"bad":2},"a24ime@80":{"n":2,"bad":0},"a24letters@120":{"n":2,"bad":0},"a24first@120":{"n":2,"bad":2},"a24ime@120":{"n":2,"bad":0},"a24letters@160":{"n":2,"bad":0},"a24first@160":{"n":2,"bad":2},"a24ime@160":{"n":2,"bad":0},"a24letters@220":{"n":2,"bad":0},"a24first@220":{"n":2,"bad":
+hash-after {"total":21,"bad":0,"latency":57,"byArm":{"hash@150":{"n":3,"bad":0},"hash@300":{"n":3,"bad":0},"hash@800":{"n":3,"bad":0},"hashEnter@150":{"n":3,"bad":0},"hashEnter@300":{"n":3,"bad":0},"fine@440":{"n":3,"bad":0},"fine@455":{"n":3,"bad":0}}}
+done2
+=== FINAL BUILD: only the lines below count ===
+FINAL after113 SUMMARY {"label":"after113","origin":"http://localhost:4130","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":0},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+FINAL after0 SUMMARY {"label":"after0","origin":"http://localhost:4131","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":1},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+FINAL win-after {"total":26,"bad":0,"latency":57,"byArm":{"winBackspace":{"n":2,"bad":0},"winArrow":{"n":2,"bad":0},"winComposition":{"n":2,"bad":0},"ctlComposition":{"n":2,"bad":0},"winEcho":{"n":2,"bad":0},"inject_fail":{"n":2,"bad":0},"inject_hang":{"n":2,"bad":0},"inject_failThenLeaveBack":{"n":2,"bad":0},"inject_leaveBack":{"n":2,"bad":0},"inject_back":{"n":2,"bad":0},"inject_leaveThenRefreshBack":{"n":2,"bad":0},"inject_leaveInApp":{"n":2,"bad":0},"inject_leaveAddressBar":{"n":2,"bad":0}}}
+FINAL a24-after {"total":32,"bad":0,"latency":57,"byArm":{"midHash":{"n":2,"bad":0},"midHashTwoBody":{"n":2,"bad":0},"midHashThird":{"n":2,"bad":0},"midHashFirst":{"n":2,"bad":0},"a24letters@80":{"n":2,"bad":0},"a24first@80":{"n":2,"bad":0},"a24ime@80":{"n":2,"bad":0},"a24letters@120":{"n":2,"bad":0},"a24first@120":{"n":2,"bad":0},"a24ime@120":{"n":2,"bad":0},"a24letters@160":{"n":2,"bad":0},"a24first@160":{"n":2,"bad":0},"a24ime@160":{"n":2,"bad":0},"a24letters@220":{"n":2,"bad":0},"a24first@220":{"n":2,"bad":0},"a24ime@220":{"n":2,"bad":0}}}
+FINAL hash-after {"total":21,"bad":0,"latency":57,"byArm":{"hash@150":{"n":3,"bad":0},"hash@300":{"n":3,"bad":0},"hash@800":{"n":3,"bad":0},"hashEnter@150":{"n":3,"bad":0},"hashEnter@300":{"n":3,"bad":0},"fine@440":{"n":3,"bad":0},"fine@455":{"n":3,"bad":0}}}
+=== done3 ===

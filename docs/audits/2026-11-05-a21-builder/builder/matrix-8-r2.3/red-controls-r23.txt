@@ -1,0 +1,32 @@
+### A. Role narrowing on the r2 / r2.1 controller (r2.2 buffer): Y1 (a) and variant (b) red, recovery guard (c) green
+   × heading structure commits always release the note and keep both draft halves equal > r2.2 #5 (Y1): kept words from an empty unit do not land in a new empty unit that reused its id 433ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3 (b): kept heading words still naming the old block do not land in a new empty paragraph that reused the id 1031ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.3 (c): words kept when a heading block could not be made go back into that empty heading on reopening 213ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [] to deeply equal [ 'y1' ]
+AssertionError: expected null to be truthy
+      Tests  2 failed | 1 passed | 58 skipped (61)
+
+### B. Same on the r2.2 controller: (a) (b) green, recovery guard (c) RED
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #5 (Y1): kept words from an empty unit do not land in a new empty unit that reused its id  421ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.3 (b): kept heading words still naming the old block do not land in a new empty paragraph that reused the id 169ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3 (c): words kept when a heading block could not be made go back into that empty heading on reopening 3181ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ { id: 'mw6i46po-1', …(4) } ] to deeply equal []
+      Tests  1 failed | 2 passed | 58 skipped (61)
+
+### C. Box tests on the r2.2 controller and box: (a) (c) (d) red, (b) green (r2.2 also folds when neither margin fits)
+   × heading structure commits always release the note and keep both draft halves equal > r2.3 kept boxes beside the text (items 7-10) > (a) on a 35px unit, two lines of kept words stay 35px tall (scrolling inside) and cover nothing below 350ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.3 kept boxes beside the text (items 7-10) > (b) with no unit and no margin wide enough either side, the box folds to a strip that covers no line 230ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3 kept boxes beside the text (items 7-10) > (c) two kept boxes with no unit never overlap, and each Discard removes only its own words 233ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3 kept boxes beside the text (items 7-10) > (d) with no unit and room on the left only, the box docks wholly left of the text column 231ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 70 to be less than or equal to 35
+AssertionError: expected true to be false // Object.is equality
+AssertionError: expected 600 to be less than or equal to 400
+      Tests  3 failed | 1 passed | 57 skipped (61)
+
+### D. All of the above on r2.3
+ ✓ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx (61 tests | 54 skipped) 1783ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #5 (Y1): kept words from an empty unit do not land in a new empty unit that reused its id  417ms
+      Tests  7 passed | 54 skipped (61)

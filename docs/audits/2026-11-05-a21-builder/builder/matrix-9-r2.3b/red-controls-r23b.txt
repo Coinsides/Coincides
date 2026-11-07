@@ -1,0 +1,22 @@
+### A. r2.3b positive controls on r2.3 (controller + box, before)
+   × heading structure commits always release the note and keep both draft halves equal > r2.3b F1: a record with no role does not take one from the empty unit that now has its id 1133ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3b F2: kept while their unit was not there, words take no role from a paragraph that later reuses the id 334ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3b ②: kept words landing on their own only go back in: no structure, no window, focus and caret left alone 386ms
+   × heading structure commits always release the note and keep both draft halves equal > r2.3b ③④: the box has no transition to trail behind its unit, and its notice says the words go back on their own 25ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected null to be truthy
+AssertionError: expected [ 'warmup', 'kept!' ] to deeply equal [ 'warmup', '' ]
+AssertionError: expected [ [ 'Intro', 'paragraph' ], …(1) ] to deeply equal [ [ 'Intro', 'paragraph' ], …(2) ]
+AssertionError: expected '' to be 'none' // Object.is equality
+      Tests  4 failed | 61 skipped (65)
+
+### B. Same on r2.3b (after), with every round-2 / r2.2 / r2.3 test
+ ✓ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx (65 tests | 37 skipped) 5557ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > round 2 #3b (H-L): words landed from the window stay stored while the save that carries them has not been confirmed  327ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #1: a kept entry whose words cannot land asks again without touching anything: no undo boundary, no save  358ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #3: a structure given up while it waited for a batch that never settles does not make the next one wait too  755ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #5 (Y1): kept words from an empty unit do not land in a new empty unit that reused its id  335ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.2 #6 (i): kept words whose unit a structure moves to a new block go with it, in storage and on screen  330ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.3b F2: kept while their unit was not there, words take no role from a paragraph that later reuses the id  323ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > r2.3b ②: kept words landing on their own only go back in: no structure, no window, focus and caret left alone  402ms
+      Tests  28 passed | 37 skipped (65)

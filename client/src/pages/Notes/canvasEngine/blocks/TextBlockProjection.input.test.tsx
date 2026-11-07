@@ -453,6 +453,19 @@ describe('B4 TextFlow input boundaries with synthetic content', () => {
     fireEvent.compositionEnd(editor.textarea, { data: '字' });
   });
 
+  it('commit-2: focus passing into a heading window seals the edit and sends no save of its own', () => {
+    const editor = renderEditor('alpha');
+    const window = document.createElement('textarea');
+    window.dataset.structureTypingBuffer = 'true';
+    document.body.appendChild(window);
+    fireEvent.blur(editor.textarea, { relatedTarget: window });
+    expect(editor.onBoundary.mock.calls.map(([reason]) => reason)).toEqual(['blur']);
+    expect(editor.onSave).not.toHaveBeenCalled();
+    fireEvent.blur(editor.textarea, { relatedTarget: document.body });
+    expect(editor.onSave).toHaveBeenCalledTimes(1);
+    window.remove();
+  });
+
   it('smoke 3: composition remains open through updates and blur, then seals the complete input once', () => {
     const editor = renderEditor('');
     fireEvent.compositionStart(editor.textarea);

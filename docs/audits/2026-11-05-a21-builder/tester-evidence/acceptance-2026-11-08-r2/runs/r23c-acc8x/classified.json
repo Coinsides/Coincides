@@ -1,0 +1,112 @@
+{
+ "by": {
+  "X-addr": {
+   "2": 1,
+   "3u": 9
+  },
+  "X-back": {
+   "3u": 3
+  },
+  "X-slowAddr": {
+   "2": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "X-addr-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-2",
+   "cls": "2",
+   "ok": true,
+   "note": "kept: kept\nbody [\"[{\\\"id\\\":\\\"mw6rvio5-1\\\",\\\"blockId\\\":\\\"57adaafc-7eb8-4cfe-b308-89d07c note [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-addr-3",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-4",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-5",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-6",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-7",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-8",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-addr-9",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-back-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"],[]]"
+  },
+  {
+   "name": "X-back-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"],[]]"
+  },
+  {
+   "name": "X-back-2",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]kept\",\"body\"]]"
+  },
+  {
+   "name": "X-slowAddr-0",
+   "cls": "2",
+   "ok": true,
+   "note": "kept: kept\nbody [\"[{\\\"id\\\":\\\"mw6s26lr-1\\\",\\\"blockId\\\":\\\"ecf11950-0fda-4730-9e5d-4bd7a6 note [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-slowAddr-1",
+   "cls": "2",
+   "ok": true,
+   "note": "kept: kept\nbody [\"[{\\\"id\\\":\\\"mw6s2thl-1\\\",\\\"blockId\\\":\\\"4585ab90-6a76-4835-89db-5d8fec note [[\"warmup\"],[\"[heading_1]\"]]"
+  },
+  {
+   "name": "X-slowAddr-2",
+   "cls": "2",
+   "ok": true,
+   "note": "kept: kept\nbody [\"[{\\\"id\\\":\\\"mw6s3fau-1\\\",\\\"blockId\\\":\\\"2b072ab8-9e04-44f4-b8a8-b7c415 note [[\"warmup\"],[\"[heading_1]\"]]"
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "by": {
+  "K1-roleSaveStall-noEnter": {
+   "3": 1,
+   "3u": 1
+  },
+  "K2-roleSaveStall-enter": {
+   "3u": 2
+  },
+  "K3-reorderStall-enter": {
+   "3": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "K1-roleSaveStall-noEnter-0",
+   "cls": "3",
+   "ok": true,
+   "note": "misplaced or merged: [[\"[heading_1]keptwarmup\"]]"
+  },
+  {
+   "name": "K1-roleSaveStall-noEnter-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\",\"[heading_1]kept\"]]"
+  },
+  {
+   "name": "K2-roleSaveStall-enter-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\",\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "K2-roleSaveStall-enter-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\",\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "K3-reorderStall-enter-0",
+   "cls": "3",
+   "ok": true,
+   "note": "misplaced or merged: [[\"[heading_1]two\"],[\"bodywarmup\"]]"
+  },
+  {
+   "name": "K3-reorderStall-enter-1",
+   "cls": "3",
+   "ok": false,
+   "note": "lost: [[\"warmup\"],[\"[heading_1]two\",\"bo\"]]"
+  }
+ ]
+}

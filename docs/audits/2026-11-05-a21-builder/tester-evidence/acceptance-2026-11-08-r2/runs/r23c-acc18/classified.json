@@ -1,0 +1,192 @@
+{
+ "by": {
+  "LEGACY-Y1": {
+   "ok": 2
+  },
+  "STEAL-landWhileTypingElsewhere": {
+   "ok": 3
+  },
+  "LANDFAIL-box": {
+   "ok": 2
+  },
+  "LANDFAIL-control": {
+   "ok": 1
+  },
+  "STEAL2-reopenThenTypeElsewhere": {
+   "ok": 3
+  },
+  "LANDFAIL2-box": {
+   "ok": 2
+  },
+  "LANDFAIL2-control": {
+   "ok": 1
+  },
+  "BOXTYPE-typeInBox": {
+   "bad": 3
+  },
+  "BOXTYPE-ctrl": {
+   "ok": 1
+  },
+  "BOXTYPE2-landWhileTypingInBox": {
+   "ok": 3
+  },
+  "BOXTYPE3-typeInKeptBox": {
+   "ok": 3
+  },
+  "COPYPASTE": {
+   "ok": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "LEGACY-Y1-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LEGACY-Y1-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL-landWhileTypingElsewhere-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL-landWhileTypingElsewhere-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL-landWhileTypingElsewhere-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL-box-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL-box-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL-control-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL2-box-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL2-box-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL2-control-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE-typeInBox-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE-typeInBox-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE-typeInBox-2",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE-ctrl-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE2-landWhileTypingInBox-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE2-landWhileTypingInBox-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE2-landWhileTypingInBox-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE3-typeInKeptBox-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE3-typeInKeptBox-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "BOXTYPE3-typeInKeptBox-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "COPYPASTE-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

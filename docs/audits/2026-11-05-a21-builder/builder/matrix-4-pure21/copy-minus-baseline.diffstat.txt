@@ -1,0 +1,22 @@
+ .../blocks/PaginatedTextBlockProjection.test.tsx   |   15 +
+ .../blocks/PaginatedTextBlockProjection.tsx        |    7 +-
+ .../blocks/TextBlockProjection.input.test.tsx      |   13 +
+ .../canvasEngine/blocks/TextBlockProjection.tsx    |   12 +-
+ .../headingInputService.draftText.test.ts          |   28 +
+ .../Notes/canvasEngine/headingInputService.test.ts |    7 +
+ .../Notes/canvasEngine/headingInputService.ts      |   18 +-
+ .../pages/Notes/canvasEngine/headingRoleService.ts |    2 +
+ .../canvasEngine/hooks/draftFastEnter.test.tsx     |   52 +
+ .../hooks/structureTypingConservation.test.tsx     |  611 ++++++++++
+ .../canvasEngine/hooks/useDraftBlockController.ts  |   53 +-
+ .../hooks/useHeadingStructureController.test.tsx   | 1261 +++++++++++++-------
+ .../hooks/useHeadingStructureController.ts         |  860 ++++++++-----
+ .../hooks/useNoteCanvasRuntimeController.ts        |    3 +-
+ .../useRuntimeNaturalWritingController.test.tsx    |    3 +-
+ .../hooks/useSlashCommandController.ts             |   26 +
+ .../Notes/canvasEngine/hooks/useTextFlowHistory.ts |    8 +-
+ .../canvasEngine/layers/BlockEditorLayer.test.tsx  |   15 +
+ .../Notes/canvasEngine/layers/BlockEditorLayer.tsx |   17 +-
+ .../Notes/canvasEngine/structureTypingBuffer.ts    |  214 ++++
+ .../Notes/canvasEngine/structureTypingFocus.ts     |   10 +
+ 21 files changed, 2460 insertions(+), 775 deletions(-)

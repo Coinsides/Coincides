@@ -1,0 +1,120 @@
+{
+ "by": {
+  "KU-heldUnload-1.5s": {
+   "2h": 2
+  },
+  "KU-heldUnload-11s": {
+   "2h": 2
+  },
+  "KRO-readOnlyWhileHeld": {
+   "ok": 2
+  },
+  "EDGE-a-failAfterTransfer": {
+   "3u": 2
+  },
+  "EDGE-b-failAtOnce": {
+   "3u": 2
+  },
+  "HL2-afterFirstStructure": {
+   "1": 3
+  },
+  "HL3-allFast": {
+   "3u": 3
+  }
+ },
+ "detail": [
+  {
+   "name": "KU-heldUnload-1.5s-0",
+   "cls": "2h",
+   "ok": true,
+   "note": "kept, literal # left in the note: kept two\nbody [\"[{\\\"id\\\":\\\"mw6rhswt-1\\\",\\\"blo note [[\"warmup\",\"#\"]]"
+  },
+  {
+   "name": "KU-heldUnload-1.5s-1",
+   "cls": "2h",
+   "ok": true,
+   "note": "kept, literal # left in the note: kept two\nbody [\"[{\\\"id\\\":\\\"mw6rie87-1\\\",\\\"blo note [[\"warmup\",\"#\"]]"
+  },
+  {
+   "name": "KU-heldUnload-11s-0",
+   "cls": "2h",
+   "ok": true,
+   "note": "kept, literal # left in the note: kept two\nbody [\"[{\\\"id\\\":\\\"mw6riz3n-1\\\",\\\"blo note [[\"warmup\",\"#\"]]"
+  },
+  {
+   "name": "KU-heldUnload-11s-1",
+   "cls": "2h",
+   "ok": true,
+   "note": "kept, literal # left in the note: kept two\nbody [\"[{\\\"id\\\":\\\"mw6rjun2-1\\\",\\\"blo note [[\"warmup\",\"#\"]]"
+  },
+  {
+   "name": "KRO-readOnlyWhileHeld-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "KRO-readOnlyWhileHeld-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "EDGE-a-failAfterTransfer-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "EDGE-a-failAfterTransfer-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "EDGE-b-failAtOnce-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "EDGE-b-failAtOnce-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "HL2-afterFirstStructure-0",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "HL2-afterFirstStructure-1",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "HL2-afterFirstStructure-2",
+   "cls": "1",
+   "ok": true
+  },
+  {
+   "name": "HL3-allFast-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "HL3-allFast-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  },
+  {
+   "name": "HL3-allFast-2",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]head\",\"body\"]]"
+  }
+ ]
+}

@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-11-05(1a-乙收割,新增 TD-45 至 TD-48)
+> **日期 (Updated)**: 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -66,3 +66,4 @@
 | TD-53 | **Group Gallery 按笔记逐篇发请求**:账号有 2030 篇笔记时一打开发约 2100 个请求,Chrome 报 `ERR_INSUFFICIENT_RESOURCES`,页面显示「Gallery could not load」;同一标签页接着开 Source Library 连自己的 JS 都加载失败。随笔记数线性变坏(几百篇会慢,上千篇打不开),也会让 A-22 的修法在大账号上一起失效。修前修后一样,与 V2 无关。Tester 判 🅱 偏重。2026-11-07 岛上只读核过:Henry 账号 3 篇笔记,眼下碰不到 | 2026-11-07 Tester V2 复走 review-tester.md | Henry 笔记到百篇量级之前,或 Tester 大账号要验 Gallery 时 | 未清 |
 | TD-54 | **A-22 修法的小尾巴**:「Not in any note」里的组不计入左栏和顶部计数(列出 1 个时仍显示 0);说明文字写「属于一篇已重建的笔记」,但经 API 不带笔记建的组也列在这里(真人走界面碰不到,只影响 API 或 Agent 建的组) | 2026-11-07 Tester V2 复走 review-tester.md | 按使用摩擦触发 | 未清 |
 | TD-55 | **守恒闸与控制器测试的假适配器缺「离开即丢回包」的闸**:真适配器 `useNoteCanvasDataAdapter.ts` 的 `transferTextUnit` 在回包到达时自己核 `current()`(节点、路由、代际、水合纪元),笔记已切走就返回 null;测试里的假适配器没有这道闸,所以「回包确认后跟到新块」在单元层全绿、浏览器里一行不生效(编辑器组返修做法 4 因此撤回)。修法:假适配器补同样的离开闸,并以「转移已发、回包未到时改地址离开」为阳性对照(必须红)。出处:订单 `2026-11-05-a19-a20-image-pages-and-idle-save-order.md` 收尾裁定、`docs/audits/2026-11-05-a21-builder/builder/opt4-withdrawn/ROOT-CAUSE.md` | 2026-11-07 builder 返修回报 | 编辑器后续单(与离开守卫扩地址栏同批) | 未清 |
+| TD-56 | **空行上 `/` 选 Text 再打字,整块并成一个带换行的单元,打的字落到块首**(真笔记 RJ 臂:`zzgamma one` + 换行 + `gamma two`)。按结果是「落错位置」,但线上同版就有,r2 与 r2.3c 逐字相同,不是编辑器组返修引入的;Tester 判不挡该包、Main_Designer 2026-11-08 确认 | 2026-11-08 Tester r2.3c 判语「请 Main_Designer 确认」第 1 条,`docs/audits/2026-11-05-a21-builder/review-tester.md` 〇〇节;裁定在订单 `2026-11-05-a19-a20-image-pages-and-idle-save-order.md` 尾部「r2.3c 判语收讫」节 | A-25 设计单(落错位置家族,与「结构非原子残留」同单) | 未清 |

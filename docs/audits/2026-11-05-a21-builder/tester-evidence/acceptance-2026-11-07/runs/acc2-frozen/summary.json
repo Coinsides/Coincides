@@ -1,0 +1,23 @@
+{
+ "total": 46,
+ "bad": [
+  "A1-natural-300-0",
+  "A1-natural-300-1",
+  "A1-natural-300-2",
+  "A1-natural-300-3",
+  "A2-heldLeave-enter-0",
+  "B-reorder500-enter-0",
+  "B-reorder500-enter-1",
+  "C-save500-n3-0",
+  "C-save500-n3-1",
+  "E-caretStart-0",
+  "E-caretStart-1",
+  "F-sameId-0",
+  "I-wrongBlock-0",
+  "G-draftUndo-0",
+  "G-draftUndo-1",
+  "X-back-0",
+  "X-back-1",
+  "X-back-2"
+ ]
+}

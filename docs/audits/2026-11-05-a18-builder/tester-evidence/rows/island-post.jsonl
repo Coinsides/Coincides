@@ -1,0 +1,62 @@
+{"arm":"K","name":"k120-0","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k120-1","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k120-2","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k120-3","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k120-4","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k220-0","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k220-1","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k220-2","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k220-3","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k220-4","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k260-0","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k260-1","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k260-2","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k260-3","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k260-4","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k300-0","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k300-1","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k300-2","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k300-3","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k300-4","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k340-0","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k340-1","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k340-2","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k340-3","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k340-4","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k400-0","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k400-1","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k400-2","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k400-3","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"K","name":"k400-4","round":0,"dom":["abcdef","xy"],"server":["abcdef","xy"],"ro":0,"ok":true}
+{"arm":"W","name":"ime200a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime200b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime250a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime250b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime280a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime280b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime300a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime300b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime320a","round":0,"dom":["第一段甲乙丙\n第二行"],"server":["第一段甲乙丙","第二行"],"ok":false}
+{"arm":"W","name":"ime320b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime350a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime350b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime400a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime400b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime500a","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"ime500b","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"chars250","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"chars300","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"W","name":"chars350","round":0,"dom":["第一段甲乙丙","第二行"],"server":["第一段甲乙丙","第二行"],"ok":true}
+{"arm":"H","name":"one 300","round":0,"dom":["第一段","标题甲"],"server":["第一段","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"one 800","round":0,"dom":["第一段","标题甲"],"server":["第一段","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"one 3000","round":0,"dom":["第一段","标题甲"],"server":["第一段","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"one 8000","round":0,"dom":["第一段",""],"server":["第一段","[heading_1]"],"chapters":["Untitled"],"ok":false}
+{"arm":"H","name":"two 300","round":0,"dom":["第一段","第二段","标题甲"],"server":["第一段","第二段","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"two 3000","round":0,"dom":["第一段","第二段","标题甲"],"server":["第一段","第二段","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"wait3000 300","round":0,"dom":["第一段","标题甲"],"server":["第一段","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"caretA","round":0,"dom":["第一段甲乙丙","标题甲"],"server":["第一段甲乙丙","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"caretB","round":0,"dom":["第一段甲乙丙","标题甲"],"server":["第一段甲乙丙","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"caretC","round":0,"dom":["第一段甲乙丙","标题甲"],"server":["第一段甲乙丙","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"caretD","round":0,"dom":["第一段甲乙丙","标题甲"],"server":["第一段甲乙丙","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"caretE","round":0,"dom":["第一段甲乙丙","标题甲"],"server":["第一段甲乙丙","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}
+{"arm":"H","name":"caretF","round":0,"dom":["第一段甲乙丙","标题甲"],"server":["第一段甲乙丙","[heading_1]标题甲"],"chapters":["标题甲"],"ok":true}

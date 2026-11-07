@@ -1,0 +1,6 @@
+tsc exit 0
+client [2m      Tests [22m [1m[32m2653 passed[39m[22m[90m (2653)[39m
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+K1 real-adapter test repeated: 20/20 passed
+source restored after controls
+=== client3 done 2026-11-07 20:19:04 ===

@@ -1,0 +1,30 @@
+// X. The address-bar leave the builder reports as a regression against the frozen build: Enter in the window, 'body',
+// then the address changes to another note at once (a hash change: no unload, not through the in-app leave guard).
+// Variants: addr = hash set to the other note; back = browser Back to the note we came from; slowAddr = the
+// unit-transfer reply held 4 s at the response stage, so the leave falls between "transfer sent" and "reply in".
+// Read three times: away (6 s after leaving), back in-app (hash), and after a full reopen.
+const xRounds = Number(process.env.XROUNDS || 5);
+for (const [variant, reps] of [['addr', xRounds], ['back', 3], ['slowAddr', 3]]) for (let i = 0; i < reps; i += 1) {
+  const name = `X-${variant}-${i}`;
+  if (!want(name)) continue;
+  await scenario(name, async () => {
+    const id = await newNote(`R x ${variant} ${i}`);
+    await arriveAndWarm(id);
+    await watch(); await traceOn(); mark();
+    if (variant === 'slowAddr') respRule = ({ u }) => (/unit-transfer/.test(u) ? { delay: 4000 } : null);
+    await typeHash(); await typeText('kept'); await enter(); await sleep(40); await typeText('body', 50);
+    if (variant === 'back') await b.ev('history.back();1'); else await goHash(other);
+    await sleep(6000);
+    const away = await win(); const hashAway = await b.ev('location.hash'); const tr = await traceGet().catch(() => null);
+    respRule = () => null;
+    await goHash(id); await sleep(5000);
+    const back = await win(); const blocksBack = await blocksOf(id); await shot(`${name}-back`);
+    await open(id); await sleep(4000);
+    const reopened = await win(); const blocksAfter = await blocksOf(id); await shot(`${name}-reopened`);
+    lastStoredHere = await storedFor(id);
+    const text = flat(blocksAfter);
+    const inNote = text.includes('kept') && text.includes('body');
+    const kept = ['kept', 'body'].every((w) => text.includes(w) || (reopened.buf || '').includes(w) || JSON.stringify(lastStoredHere).includes(w));
+    row(name, id, { variant, leftNote: !hashAway.includes(id), away, tr, back, blocksBack, reopened, blocksAfter, inNote, kept }, inNote || kept);
+  });
+}

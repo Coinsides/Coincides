@@ -1,0 +1,9 @@
+### r2.1 layout test on the r2 buffer (before)
+   × heading structure commits always release the note and keep both draft halves equal > r2.1 #4: the kept box follows its unit when the layout moves after it was placed, and covers no line 1149ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 300 to be 396 // Object.is equality
+      Tests  1 failed | 45 skipped (46)
+
+### same test on the r2.1 buffer (after)
+ ✓ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx (46 tests | 45 skipped) 181ms
+      Tests  1 passed | 45 skipped (46)

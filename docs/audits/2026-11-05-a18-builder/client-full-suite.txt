@@ -1,0 +1,1073 @@
+ARM: final A-18 code, full client suite
+ Test Files  1 failed | 251 passed (252)
+      Tests  1 failed | 2591 passed (2592)
+--- every red entry verbatim
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Boards/BoardPage.selection.test.tsx > V13.4 walk-through fix 4 selection workflows > ① accumulates two Ctrl marquees, drags all four objects in one history step and moves the same selection to a layer
+TestingLibraryElementError: Unable to find an accessible element with the role "toolbar" and name "Selected projection controls"
+
+Here are the accessible roles:
+
+  region:
+
+  Name "Board workspace":
+  <section
+    aria-label="Board workspace"
+    class="_workspace_94a861"
+    data-board-skin-preset="default"
+    style="--sk-desk: #0f0f10; --sk-paper: #101114; --sk-ink: #f5f5f5; --sk-ink-muted: #b7b8bd; --sk-accent: #2563eb; --sk-annotation: #facc15; --sk-hairline: #2c2d31; --sk-danger: #ef4444; --sk-wall: #777a8270; --sk-board-desk: #0b0b0c; --sk-card: #151516; --sk-edge: #b7b8bd; --sk-chalk: #f5f5f5; --board-overlay: color-mix(in srgb, var(--sk-card) 96%, var(--sk-ink)); --board-desk: var(--bg-deepest); --board-card: var(--bg-surface); --board-edge: var(--text-secondary); --board-chalk: var(--text-primary); --board-ink: var(--board-chalk); --board-desk-muted: var(--text-secondary); --board-chalk-fill: var(--bg-elevated); --board-sticky-fill: #2f2817; --board-sticky-stroke: #d8a429; --board-shape-fill: color-mix(in srgb, var(--accent-primary) 14%, transparent); --board-button-ink: #fff; --board-grid: transparent; --board-title-weight: 600; --board-backdrop: rgb(0 0 0 / 55%); --board-note-backdrop: rgb(0 0 0 / 28%); --sk-header-rule: initial; --sk-headrule-display: block; --sk-headrule-left: initial; --sk-headrule-right: initial; --sk-headrule-width: auto; --sk-headrule-style: solid; --sk-headrule-color: var(--sk-hairline); --sk-title-font: initial; --sk-paper-title-size: 34px; --sk-paper-title-weight: 650; --sk-paper-title-spacing: normal; --sk-label-font: initial; --sk-menu-row-height: 30px; --sk-menu-gap: 3px; --sk-more-padding: 10px; --sk-board-menu-height: 36px; --sk-board-menu-padding: 7px 10px; --sk-handle-radius: var(--radius-sm); --sk-board-handle-radius: 4px; --sk-small-handle-radius: 2px; --sk-handle-mark-width: 2px; --sk-handle-mark-bottom: 0; --sk-handle-mark-height: auto; --sk-handle-mark-left: 3px;"
+  />
+
+  Name "Board identity":
+  <section
+    aria-label="Board identity"
+    class="_boardIdentity_94a861"
+  />
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  <header
+    class="_boardHeader_94a861"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Boards":
+  <button
+    class="_button_94a861"
+  />
+
+  Name "Rename board":
+  <button
+    aria-label="Rename board"
+    class="_button_94a861"
+  />
+
+  Name "New note":
+  <button
+    class="_button_94a861"
+  />
+
+  Name "Add notes and items":
+  <button
+    aria-controls="board-note-picker"
+    aria-expanded="false"
+    class="_primaryButton_94a861"
+  />
+
+  Name "Staging (0)":
+  <button
+    aria-controls="board-staging"
+    aria-expanded="false"
+    class="_button_94a861 _stagingToggle_94a861"
+    data-board-staging-control="true"
+  />
+
+  Name "Layers":
+  <button
+    aria-controls="board-layers"
+    aria-expanded="false"
+    class="_button_94a861"
+  />
+
+  Name "正文":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="正文"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "正文颜色入池":
+  <button
+    aria-label="正文颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "弱字":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="弱字"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "弱字颜色入池":
+  <button
+    aria-label="弱字颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "强调":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="强调"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "强调颜色入池":
+  <button
+    aria-label="强调颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "批注":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="批注"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "批注颜色入池":
+  <button
+    aria-label="批注颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "分隔线":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="分隔线"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "分隔线颜色入池":
+  <button
+    aria-label="分隔线颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "危险操作":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="危险操作"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "危险操作颜色入池":
+  <button
+    aria-label="危险操作颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "板台面":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="板台面"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "板台面颜色入池":
+  <button
+    aria-label="板台面颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "板卡面":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="板卡面"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "板卡面颜色入池":
+  <button
+    aria-label="板卡面颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "连线":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="连线"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "连线颜色入池":
+  <button
+    aria-label="连线颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "粉笔":
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="粉笔"
+    class="_trigger_3788e5"
+    type="button"
+  />
+
+  Name "粉笔颜色入池":
+  <button
+    aria-label="粉笔颜色入池"
+    class="_quickAdd_3788e5"
+    title="把当前颜色入池"
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "重置":
+  <button
+    disabled=""
+    type="button"
+  />
+
+  Name "Delete board":
+  <button
+    class="_button_94a861"
+  />
+
+  Name "Select":
+  <button
+    aria-pressed="true"
+    class="_button_94a861"
+  />
+
+  Name "Pan":
+  <button
+    aria-pressed="false"
+    class="_button_94a861"
+  />
+
+  Name "Connect":
+  <button
+    aria-pressed="false"
+    class="_button_94a861"
+  />
+
+  Name "Pen":
+  <button
+    aria-pressed="false"
+    class="_button_94a861"
+  />
+
+  Name "Eraser":
+  <button
+    aria-pressed="false"
+    class="_button_94a861"
+  />
+
+  Name "Add sticky":
+  <button
+    class="_button_94a861"
+  />
+
+  Name "Undo board action":
+  <button
+    aria-label="Undo board action"
+    class="_button_94a861"
+    disabled=""
+  />
+
+  Name "Redo board action":
+  <button
+    aria-label="Redo board action"
+    class="_button_94a861"
+    disabled=""
+  />
+
+  Name "撤销 Agent 本批":
+  <button
+    class="_button_94a861"
+    title="撤销此板最近一次 Agent 会话的全部板写入（含该会话涉及的其他板）"
+  />
+
+  Name "Zoom board out":
+  <button
+    aria-label="Zoom board out"
+    class="_button_94a861"
+  />
+
+  Name "Reset board zoom":
+  <button
+    aria-label="Reset board zoom"
+    class="_button_94a861"
+  />
+
+  Name "Zoom board in":
+  <button
+    aria-label="Zoom board in"
+    class="_button_94a861"
+  />
+
+  Name "Select drawing":
+  <path
+    aria-label="Select drawing"
+    class="_lineHit_94a861"
+    d="M 0 0 L 100 20"
+    data-eraser-id="visual-4"
+    role="button"
+    tabindex="0"
+  />
+
+  Name "Select chalk":
+  <div
+    aria-label="Select chalk"
+    class="_chalk_94a861  "
+    data-selection-key="visual:visual-2"
+    data-testid="board-visual-visual-2"
+    data-visual-kind="sticky"
+    role="button"
+    style="left: 90px; top: 240px; width: 100px; height: 20px; transform: scale(1); z-index: 0;"
+    tabindex="0"
+    title="Double-click to edit chalk"
+  />
+
+  Name "Reference details":
+  <button
+    aria-disabled="false"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="Reference details"
+    class="_tag_5db3ea"
+    data-reference-color="unavailable"
+    data-reference-health="lost"
+    style="--reference-color: var(--text-secondary); --reference-ink: var(--paper-annotation-slate-accent, #94a3b8); --reference-fill: var(--paper-annotation-slate-background, rgba(100, 116, 139, 0.24));"
+    type="button"
+  />
+
+  Name "Connect from n anchor":
+  <button
+    aria-label="Connect from n anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="n"
+    title="Connect from n anchor"
+    type="button"
+  />
+
+  Name "Connect from e anchor":
+  <button
+    aria-label="Connect from e anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="e"
+    title="Connect from e anchor"
+    type="button"
+  />
+
+  Name "Connect from s anchor":
+  <button
+    aria-label="Connect from s anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="s"
+    title="Connect from s anchor"
+    type="button"
+  />
+
+  Name "Connect from w anchor":
+  <button
+    aria-label="Connect from w anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="w"
+    title="Connect from w anchor"
+    type="button"
+  />
+
+  Name "Resize Upper card":
+  <button
+    aria-label="Resize Upper card"
+    class="_resizeHandle_94a861 _memberResizeHandle_94a861"
+    title="Resize card"
+    type="button"
+  />
+
+  Name "Reference details":
+  <button
+    aria-disabled="false"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="Reference details"
+    class="_tag_5db3ea"
+    data-reference-color="unavailable"
+    data-reference-health="lost"
+    style="--reference-color: var(--text-secondary); --reference-ink: var(--paper-annotation-slate-accent, #94a3b8); --reference-fill: var(--paper-annotation-slate-background, rgba(100, 116, 139, 0.24));"
+    type="button"
+  />
+
+  Name "Connect from n anchor":
+  <button
+    aria-label="Connect from n anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="n"
+    title="Connect from n anchor"
+    type="button"
+  />
+
+  Name "Connect from e anchor":
+  <button
+    aria-label="Connect from e anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="e"
+    title="Connect from e anchor"
+    type="button"
+  />
+
+  Name "Connect from s anchor":
+  <button
+    aria-label="Connect from s anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="s"
+    title="Connect from s anchor"
+    type="button"
+  />
+
+  Name "Connect from w anchor":
+  <button
+    aria-label="Connect from w anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="w"
+    title="Connect from w anchor"
+    type="button"
+  />
+
+  Name "Resize Lower card":
+  <button
+    aria-label="Resize Lower card"
+    class="_resizeHandle_94a861 _memberResizeHandle_94a861"
+    title="Resize card"
+    type="button"
+  />
+
+  Name "Reference details":
+  <button
+    aria-disabled="false"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="Reference details"
+    class="_tag_5db3ea"
+    data-reference-color="unavailable"
+    data-reference-health="lost"
+    style="--reference-color: var(--text-secondary); --reference-ink: var(--paper-annotation-slate-accent, #94a3b8); --reference-fill: var(--paper-annotation-slate-background, rgba(100, 116, 139, 0.24));"
+    type="button"
+  />
+
+  Name "Connect from n anchor":
+  <button
+    aria-label="Connect from n anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="n"
+    title="Connect from n anchor"
+    type="button"
+  />
+
+  Name "Connect from e anchor":
+  <button
+    aria-label="Connect from e anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="e"
+    title="Connect from e anchor"
+    type="button"
+  />
+
+  Name "Connect from s anchor":
+  <button
+    aria-label="Connect from s anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="s"
+    title="Connect from s anchor"
+    type="button"
+  />
+
+  Name "Connect from w anchor":
+  <button
+    aria-label="Connect from w anchor"
+    class="_cardAnchor_94a861"
+    data-anchor="w"
+    title="Connect from w anchor"
+    type="button"
+  />
+
+  Name "Resize Between the two areas":
+  <button
+    aria-label="Resize Between the two areas"
+    class="_resizeHandle_94a861 _memberResizeHandle_94a861"
+    title="Resize card"
+    type="button"
+  />
+
+  Name "Save current viewport":
+  <button
+    aria-label="Save current viewport"
+    class="_save_61f1fc"
+    disabled=""
+    title="Save current viewport"
+    type="button"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Board tools workshop":
+  <h1
+    title="Board tools workshop"
+  />
+
+  Name "Board identity":
+  <h2 />
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  <span
+    class="_saveStatus_94a861"
+    role="status"
+  />
+
+  --------------------------------------------------
+  group:
+
+  Name "":
+  <details
+    class="_boardMenu_94a861"
+  />
+
+  Name "":
+  <details
+    class="_boardAppearance_94a861"
+  />
+
+  Name "":
+  <details
+    class="_advanced_8862a9"
+  />
+
+  Name "":
+  <details
+    class="_advanced_8862a9"
+  />
+
+  --------------------------------------------------
+  combobox:
+
+  Name "板面预设":
+  <select
+    aria-label="板面预设"
+    id=":r0:"
+  />
+
+  Name "标题字":
+  <select
+    id=":r0:-titleFont"
+  />
+
+  Name "标签与刻度字":
+  <select
+    id=":r0:-labelFont"
+  />
+
+  Name "菜单密度":
+  <select
+    id=":r0:-menuDensity"
+  />
+
+  Name "把手样式":
+  <select
+    id=":r0:-handleStyle"
+  />
+
+  Name "表头分隔线":
+  <select
+    id=":r0:-headerRule"
+  />
+
+  Name "表头线长短":
+  <select
+    id=":r0:-headerRuleLength"
+  />
+
+  Name "表头线样式":
+  <select
+    id=":r0:-headerRuleStyle"
+  />
+
+  --------------------------------------------------
+  option:
+
+  Name "继承项目 / 全局":
+  <option
+    value=""
+  />
+
+  Name "默认":
+  <option
+    value="default"
+  />
+
+  Name "静墨":
+  <option
+    value="quiet-ink"
+  />
+
+  Name "暖纸":
+  <option
+    value="warm-paper"
+  />
+
+  Name "工作台":
+  <option
+    value="workbench"
+  />
+
+  Name "绢本":
+  <option
+    value="silk"
+  />
+
+  Name "无衬线":
+  <option
+    value="sans"
+  />
+
+  Name "衬线":
+  <option
+    value="serif"
+  />
+
+  Name "系统":
+  <option
+    value="system"
+  />
+
+  Name "等宽":
+  <option
+    value="mono"
+  />
+
+  Name "舒适":
+  <option
+    value="comfortable"
+  />
+
+  Name "紧凑":
+  <option
+    value="compact"
+  />
+
+  Name "胶囊":
+  <option
+    value="capsule"
+  />
+
+  Name "铆钉":
+  <option
+    value="rivet"
+  />
+
+  Name "显示":
+  <option
+    value="visible"
+  />
+
+  Name "隐藏":
+  <option
+    value="hidden"
+  />
+
+  Name "通栏":
+  <option
+    value="full"
+  />
+
+  Name "正文宽":
+  <option
+    value="content"
+  />
+
+  Name "短线":
+  <option
+    value="short"
+  />
+
+  Name "实线":
+  <option
+    value="solid"
+  />
+
+  Name "虚线":
+  <option
+    value="dashed"
+  />
+
+  Name "点线":
+  <option
+    value="dotted"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p />
+
+  Name "":
+  <p />
+
+  Name "":
+  <p
+    class="_referenceBody_94a861"
+  />
+
+  Name "":
+  <p
+    class="_referenceBody_94a861"
+  />
+
+  Name "":
+  <p
+    class="_referenceBody_94a861"
+  />
+
+  --------------------------------------------------
+  toolbar:
+
+  Name "Board tools":
+  <div
+    aria-label="Board tools"
+    class="_toolbar_94a861"
+    role="toolbar"
+  />
+
+  --------------------------------------------------
+  article:
+
+  Name "Upper card":
+  <article
+    aria-disabled="true"
+    aria-label="Upper card"
+    class="_member_94a861 _referenceMember_94a861  "
+    data-selection-key="member:member-1"
+    data-testid="board-member-member-1"
+    style="left: 80px; top: 80px; width: 160px; height: 100px; transform: scale(1); z-index: 0;"
+    tabindex="0"
+    title="This item has no origin note. Double-click is unavailable."
+  />
+
+  Name "Lower card":
+  <article
+    aria-disabled="true"
+    aria-label="Lower card"
+    class="_member_94a861 _referenceMember_94a861  "
+    data-selection-key="member:member-3"
+    data-testid="board-member-member-3"
+    style="left: 650px; top: 470px; width: 160px; height: 100px; transform: scale(1); z-index: 0;"
+    tabindex="0"
+    title="This item has no origin note. Double-click is unavailable."
+  />
+
+  Name "Between the two areas":
+  <article
+    aria-disabled="true"
+    aria-label="Between the two areas"
+    class="_member_94a861 _referenceMember_94a861  "
+    data-selection-key="member:member-5"
+    data-testid="board-member-member-5"
+    style="left: 380px; top: 330px; width: 160px; height: 100px; transform: scale(1); z-index: 0;"
+    tabindex="0"
+    title="This item has no origin note. Double-click is unavailable."
+  />
+
+  --------------------------------------------------
+  complementary:
+
+  Name "Viewport bookmarks":
+  <aside
+    aria-busy="true"
+    aria-label="Viewport bookmarks"
+    class="_rail_61f1fc"
+    data-board-viewport-bookmarks="true"
+  />
+
+  --------------------------------------------------
+  list:
+
+  Name "":
+  <ol
+    class="_list_61f1fc"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      aria-label="Board workspace"
+      class="_workspace_94a861"
+      data-board-skin-preset="default"
+      style="--sk-desk: #0f0f10; --sk-paper: #101114; --sk-ink: #f5f5f5; --sk-ink-muted: #b7b8bd; --sk-accent: #2563eb; --sk-annotation: #facc15; --sk-hairline: #2c2d31; --sk-danger: #ef4444; --sk-wall: #777a8270; --sk-board-desk: #0b0b0c; --sk-card: #151516; --sk-edge: #b7b8bd; --sk-chalk: #f5f5f5; --board-overlay: color-mix(in srgb, var(--sk-card) 96%, var(--sk-ink)); --board-desk: var(--bg-deepest); --board-card: var(--bg-surface); --board-edge: var(--text-secondary); --board-chalk: var(--text-primary); --board-ink: var(--board-chalk); --board-desk-muted: var(--text-secondary); --board-chalk-fill: var(--bg-elevated); --board-sticky-fill: #2f2817; --board-sticky-stroke: #d8a429; --board-shape-fill: color-mix(in srgb, var(--accent-primary) 14%, transparent); --board-button-ink: #fff; --board-grid: transparent; --board-title-weight: 600; --board-backdrop: rgb(0 0 0 / 55%); --board-note-backdrop: rgb(0 0 0 / 28%); --sk-header-rule: initial; --sk-headrule-display: block; --sk-headrule-left: initial; --sk-headrule-right: initial; --sk-headrule-width: auto; --sk-headrule-style: solid; --sk-headrule-color: var(--sk-hairline); --sk-title-font: initial; --sk-paper-title-size: 34px; --sk-paper-title-weight: 650; --sk-paper-title-spacing: normal; --sk-label-font: initial; --sk-menu-row-height: 30px; --sk-menu-gap: 3px; --sk-more-padding: 10px; --sk-board-menu-height: 36px; --sk-board-menu-padding: 7px 10px; --sk-handle-radius: var(--radius-sm); --sk-board-handle-radius: 4px; --sk-small-handle-radius: 2px; --sk-handle-mark-width: 2px; --sk-handle-mark-bottom: 0; --sk-handle-mark-height: auto; --sk-handle-mark-left: 3px;"
+    >
+      <header
+        class="_boardHeader_94a861"
+      >
+        <button
+          class="_button_94a861"
+        >
+          <svg
+            class="lucide lucide-arrow-left"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m12 19-7-7 7-7"
+            />
+            <path
+              d="M19 12H5"
+            />
+          </svg>
+          Boards
+        </button>
+        <h1
+          title="Board tools workshop"
+        >
+          Board tools workshop
+        </h1>
+        <button
+          aria-label="Rename board"
+          class="_button_94a861"
+        >
+          <svg
+            class="lucide lucide-pencil"
+            fill="none"
+            height="15"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="15"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+            />
+            <path
+              d="m15 5 4 4"
+            />
+          </svg>
+        </button>
+        <span
+          class="_saveStatus_94a861"
+          role="status"
+        >
+          Saved
+        </span>
+        <button
+          class="_button_94a861"
+        >
+          <svg
+            class="lucide lucide-plus"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          New note
+        </button>
+        <button
+          aria-controls="board-note-picker"
+          aria-expanded="false"
+          class="_primaryButton_94a861"
+        >
+          <svg
+            class="lucide lucide-plus"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          Add notes and items
+        </button>
+        <button
+          aria-controls="board-staging"
+          aria-expanded="false"
+          class="_button_94a861 _stagingToggle_94a861"
+          data-board-staging-control="true"
+        >
+          <svg
+            class="lucide lucide-inbox"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            str...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ selected src/pages/Boards/BoardPage.selection.test.tsx:42:29
+     40| function selected(count: number) {
+     41|   if (!count) expect(screen.queryByRole('toolbar', { name: 'Selected p…
+     42|   else expect(within(screen.getByRole('toolbar', { name: 'Selected pro…
+       |                             ^
+     43| }
+     44| async function selectionList() {
+ ❯ src/pages/Boards/BoardPage.selection.test.tsx:111:51
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 251 passed (252)

@@ -1,0 +1,66 @@
+{
+ "by": {
+  "LEGACY-Y1": {
+   "bad": 2
+  },
+  "STEAL2-reopenThenTypeElsewhere": {
+   "bad": 3
+  },
+  "LANDFAIL2-box": {
+   "ok": 2
+  },
+  "LANDFAIL2-control": {
+   "ok": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "LEGACY-Y1-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LEGACY-Y1-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-0",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-1",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "STEAL2-reopenThenTypeElsewhere-2",
+   "cls": "bad",
+   "ok": false,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL2-box-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL2-box-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL2-control-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

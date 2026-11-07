@@ -1,0 +1,9 @@
+build exit 0
+tsc exit 0
+client [2m      Tests [22m [1m[32m2654 passed[39m[22m[90m (2654)[39m
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+check:canvas-runtime-boundary exit 0
+check:source-experience exit 0
+check:owned-helper-contract exit 0
+buffer restored after controls
+=== r21 done 2026-11-07 21:21:23 ===

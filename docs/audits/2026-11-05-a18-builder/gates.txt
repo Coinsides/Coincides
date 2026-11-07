@@ -1,0 +1,8 @@
+--- tsc client
+exit 0
+--- check:canvas-runtime-boundary
+Canvas runtime boundary check passed (175 checks).
+exit 0
+--- check:changed-file-secrets
+Changed-file secret scan passed: 30 changed file(s) scanned.
+exit 0

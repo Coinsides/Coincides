@@ -1,0 +1,51 @@
+{
+ "by": {
+  "LL-long": {
+   "ok": 2
+  },
+  "LL-short": {
+   "ok": 2
+  },
+  "LL-4s": {
+   "ok": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "LL-long-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LL-long-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LL-short-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LL-short-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LL-4s-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LL-4s-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

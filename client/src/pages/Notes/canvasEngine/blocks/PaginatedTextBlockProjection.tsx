@@ -1,4 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ClipboardEvent, type CSSProperties, type KeyboardEvent } from 'react';
+import { isStructureTypingWindow, structureTypingHoldsFocus } from '../structureTypingFocus';
 import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import { nextGraphemeOffset, previousGraphemeOffset, snapGraphemeOffset } from '../../../../../../shared/graphemes';
 import type { TextBlockProjectionProps } from './TextBlockProjection';
@@ -89,6 +90,7 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
     if (!slice || !node) return false;
     const unit = latestFlow.current.units.find((candidate) => candidate.id === point.unitId);
     const offset = snapGraphemeOffset(unit?.text ?? slice.unit.text, point.offset);
+    if (structureTypingHoldsFocus()) return;
     traversing.current = true;
     caretLine.current = null;
     nativeLineTarget.current = null;
@@ -153,7 +155,7 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
     if (props.onHeadingStructure) {
       clearRange();
       latestFlow.current = request.nextTextFlow;
-      pendingFocus.current = { unitId: request.focus.unitId, offset: request.focus.caret };
+      // The structure commit owns the caret from here; see useHeadingStructureController.
       void props.onHeadingStructure(request);
     } else emit(request.nextTextFlow, { unitId: request.focus.unitId, offset: request.focus.caret }, node);
   };
@@ -522,7 +524,8 @@ export function PaginatedTextBlockProjection(props: PaginatedTextBlockProjection
                 focused.current = event.relatedTarget instanceof HTMLTextAreaElement && event.relatedTarget.dataset.blockId === blockId;
                 if (composition.current) { deferredBlur.current = true; return; }
                 if (!traversing.current && !documentSelection?.traversing.current) { focused.current = false; clearRange(); documentSelection?.clear(); }
-                props.onTextEditBoundary?.('blur', readSelection(slice, event.currentTarget)); void props.onSave(true, undefined, latestFlow.current);
+                props.onTextEditBoundary?.('blur', readSelection(slice, event.currentTarget));
+                if (!isStructureTypingWindow(event.relatedTarget)) void props.onSave(true, undefined, latestFlow.current);
               }}
               onCompositionStart={readOnly ? undefined : (event) => {
                 clearRange(); documentSelection?.clear(); column.current = null;

@@ -1,0 +1,2 @@
+BAD {"arm":"K","name":"k400-1","round":0,"dom":["cdef","xyab"],"server":["cdef","xyab"],"ro":0,"ok":false}
+SUMMARY {"label":"before0","origin":"http://localhost:4133","by":{"N":{"n":18,"bad":9},"R":{"n":48,"bad":18},"V":{"n":3,"bad":1},"D":{"n":12,"bad":1},"L":{"n":32,"bad":6},"K":{"n":30,"bad":3},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}

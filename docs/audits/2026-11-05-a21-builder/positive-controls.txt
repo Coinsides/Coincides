@@ -1,0 +1,64 @@
+# A-21/A-24 positive controls, final code. Each mutation applied to a scratch copy, never the shared tree.
+# [APPLIED] is printed only when the target text was found and replaced.
+
+== unmodified
+      Tests  48 passed (48)
+
+== frame-only rendered (A-21) [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > never saves a moved unit back when a frame fires before React commits the trans
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== buffer closed after the focus (focus falls to BODY) [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > keeps the buffer until the target editor exists and is writable, so the next ke
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== no refusal check before placing [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > releases busy and stops capturing keys when the split itself cannot be saved 11
+   × heading structure commits always release the note and keep both draft halves equal > failure injection: words held by a failed save go into the note once it is rele
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 46 passed (48)
+
+== no wait for a writable editor [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > keeps the buffer until the target editor exists and is writable, so the next ke
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== leaving drops the words [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > failure injection: the words survive leaving the note mid-window and stay on sc
+   × heading structure commits always release the note and keep both draft halves equal > failure injection: words left behind go into the note when it is opened again 1
+   × heading structure commits always release the note and keep both draft halves equal > another account signing in neither sees left-behind words nor gets them written
+   × heading structure commits always release the note and keep both draft halves equal > failure injection: closing the notice is the only thing that discards left-behi
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 44 passed (48)
+
+== window input merges with later typing (no seal) [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > counts everything typed in the window as one undo step, leaving the heading 323
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== composition placed mid-way [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > waits for a composition to end, however late, before placing its text 475ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== text half trimmed again (R4,R5,R6) [APPLIED]
+   × draft first-paragraph fast Enter > keeps an Enter with nothing typed after it, and puts the caret on the new line 23ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== words stored without the account [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > another account signing in neither sees left-behind words nor gets them written
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== notice stays after the account changes [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > another account signing in neither sees left-behind words nor gets them written
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)
+
+== editors keep focus guard off [APPLIED]
+   × heading structure commits always release the note and keep both draft halves equal > an editor taking focus during the window does not take the keys 20ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 47 passed (48)

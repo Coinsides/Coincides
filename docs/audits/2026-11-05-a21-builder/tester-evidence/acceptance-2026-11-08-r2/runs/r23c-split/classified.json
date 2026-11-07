@@ -1,0 +1,30 @@
+{
+ "by": {
+  "SPLIT-body": {
+   "ok": 2
+  },
+  "SPLIT-head": {
+   "ok": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "SPLIT-body-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "SPLIT-body-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "SPLIT-head-2",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

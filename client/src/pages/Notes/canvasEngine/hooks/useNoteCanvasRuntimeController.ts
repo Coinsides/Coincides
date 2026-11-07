@@ -845,13 +845,14 @@ export function useNoteCanvasRuntimeController() {
   }, [dismissSlashSession, closeOverlay, setSourceJumpTarget]);
 
   const flushPendingSaves = useCallback(async () => {
+    await headingStructure.whenTypingSettled();
     await saveHeaderMetadata();
     await textHistory.flush();
     // Draft creation can schedule another adapter write after its first receipt.
     // Await that existing workflow before waiting for the adapter's write registry.
     await whenDraftIdle();
     await whenIdle();
-  }, [saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
+  }, [headingStructure.whenTypingSettled, saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
 
   return {
     paper,

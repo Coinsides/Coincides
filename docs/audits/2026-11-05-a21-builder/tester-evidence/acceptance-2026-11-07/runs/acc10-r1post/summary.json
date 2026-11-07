@@ -1,0 +1,10 @@
+{
+ "total": 12,
+ "bad": [
+  "HL-saveNotSentThenClose-0",
+  "HL-saveNotSentThenClose-1",
+  "HL-saveNotSentThenClose-2",
+  "TWO-discardOne-0",
+  "TWO-discardOne-1"
+ ]
+}

@@ -1,0 +1,31 @@
+build exit 0
+tsc exit 0
+client [2m Tests [22m [1m[32m2653 passed[39m[22m[90m (2653)[39m
+[22m[39mUNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+check:canvas-runtime-boundary exit 0
+check:source-experience exit 0
+check:owned-helper-contract exit 0
+r04 SUMMARY {"label":"r2final57","origin":"http://localhost:4155","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":0},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+dist unchanged during runs
+enter-r2.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0 land med 1234 max 1245 (2)","enter_create":"n2 ①2 ②0 ③0","enter_reorder":"n2 ①2 ②0 ③0 land med 532 max 579 (2)","enter_placement":"n2 ①2 ②0 ③0","enter_save2":"n2 ①2 ②0 ③0 land med 1672 max 1707 (2)","enter_save3":"n2 ①2 ②0 ③0 land med 674 max 750 (2)","enter_hangWatchdog":"n2 ①2 ②0 ③0","enter_leaveInApp350":"n2 ①2 ②0 ③0","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①2 ②0 ③0","enter_slowReplyAddressBar":"n2 ①0 ②2 ③0","enter_slowReplyUnload":"n2 ①0 ②2 ③0","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":8,"median":750,"max":1707}}
+enter-frozen.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0 land med 1343 max 1364 (2)","enter_create":"n2 ①2 ②0 ③0","enter_reorder":"n2 ①0 ②0 ③2","enter_placement":"n2 ①2 ②0 ③0","enter_save2":"n2 ①2 ②0 ③0 land med 1560 max 1589 (2)","enter_save3":"n2 ①0 ②0 ③2","enter_hangWatchdog":"n2 ①2 ②0 ③0","enter_leaveInApp350":"n2 ①0 ②0 ③2","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①2 ②0 ③0","enter_slowReplyAddressBar":"n2 ①2 ②0 ③0","enter_slowReplyUnload":"n2 ①0 ②0 ③2","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":4,"median":1364,"max":1589}}
+enter-before.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0","enter_create":"n2 ①0 ②0 ③2","enter_reorder":"n2 ①1 ②0 ③1","enter_placement":"n2 ①0 ②0 ③2","enter_save2":"n2 ①1 ②0 ③1 land med 1476 max 1476 (1)","enter_save3":"n2 ①2 ②0 ③0","enter_hangWatchdog":"n2 ①0 ②0 ③2","enter_leaveInApp350":"n2 ①0 ②0 ③2","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①0 ②0 ③2","enter_slowReplyAddressBar":"n2 ①0 ②0 ③2","enter_slowReplyUnload":"n2 ①0 ②0 ③2","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":1,"median":1476,"max":1476}}
+k-r2.json {"arms":{"k_roleStallOk":"n2 ①2 ②0 ③0","k_roleStallFail":"n2 ①0 ②0 ②′2 ③0","k_roleStall25Ok":"n2 ①0 ②0 ②′2 ③0","k_roleStallUnload":"n2 ①2 ②0 ③0"},"landed":null}
+node:fs:440
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '<tmp>/ed21-evidence\r2final\k-frozen.json'
+    at Object.readFileSync (node:fs:440:20)
+    at file:///<scratch>/a18/classify.mjs:5:30
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '<tmp>/ed21-evidence\\r2final\\k-frozen.json'
+}
+
+Node.js v22.22.1
+=== r2final done 2026-11-07 18:49:06 ===

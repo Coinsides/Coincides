@@ -151,12 +151,12 @@
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-07 | — |
-| [current-state/board.md](current-state/board.md) | 看板：岛上是什么、在办什么、等谁 | `active` | 2026-11-07 | — |
+| [current-state/app-operating-manual.md](current-state/app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-08 | — |
+| [current-state/board.md](current-state/board.md) | 看板：岛上是什么、在办什么、等谁 | `active` | 2026-11-08 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-05(1a-乙收割,新增 TD-45 至 TD-48) | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
@@ -480,8 +480,8 @@
 | [records/reviewer/findings.md](records/reviewer/findings.md) | Reviewer 发现台账 | `active` | 2026-11-08 | — |
 | [records/tester/METHOD.md](records/tester/METHOD.md) | Tester 方法与坑 | `active` | 2026-11-07 | — |
 | [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `active` | 2026-11-07 | — |
-| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-07 | — |
-| [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `active` | 2026-11-07 | — |
+| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-08 | — |
+| [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `active` | 2026-11-08 | — |
 | [roles/builder.md](roles/builder.md) | 角色卡：builder（工程实施） | `active` | 2026-11-07 | — |
 | [roles/main-designer.md](roles/main-designer.md) | 角色卡：Main_Designer（主设计） | `active` | 2026-11-07 | — |
 | [roles/reviewer.md](roles/reviewer.md) | 角色卡：Reviewer（复核审查） | `active` | 2026-11-08 | — |

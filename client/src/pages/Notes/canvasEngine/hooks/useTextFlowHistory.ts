@@ -634,8 +634,12 @@ export function useTextFlowHistory(options: Options) {
       });
     },
   });
+  const canApplyEdit = useCallback(() => scope.current() && !scope.isReplaying() && !scope.templateFailures.size
+    && !scope.documentFailures.size && !latest.current.history.current?.isReplaying?.(), [scope]);
+  /** A failed save holds the note for Retry or Undo; unlike a replay in progress, this does not pass by itself. */
+  const isEditHeld = useCallback(() => !scope.current() || scope.templateFailures.size > 0 || scope.documentFailures.size > 0, [scope]);
   const applyEdit: ApplyBlockTextFlowEdit = useCallback(async (block, flow, editOptions) => {
-    if (!scope.current() || scope.isReplaying() || scope.templateFailures.size || scope.documentFailures.size || latest.current.history.current?.isReplaying?.()) return;
+    if (!canApplyEdit()) return;
     const fullBlock = latest.current.blocks.find((candidate) => candidate.id === block.id);
     const previousTextFlow = editOptions?.previousTextFlow
       ?? (!latest.current.blockTextFlowDrafts[block.id] && !getTextFlowContent(block.content_json ?? {}) && fullBlock
@@ -938,7 +942,7 @@ export function useTextFlowHistory(options: Options) {
       throw new Error('Text changes could not be saved. Retry saving or undo before leaving the note.');
     }
   }, [boundary, options.history, scope]);
-  return { applyEdit, applyDocumentEdit, extractUnit, moveUnit, applyTemplateToBlock, boundary, saveBlock, flush,
+  return { applyEdit, canApplyEdit, isEditHeld, applyDocumentEdit, extractUnit, moveUnit, applyTemplateToBlock, boundary, saveBlock, flush,
     runStructureBatch: async (operation: Parameters<typeof scope.runBatch>[0]) => { await flush(); return scope.runBatch(operation); },
     readLiveBlock: (id: string) => latest.current.blocks.find((block) => block.id === id),
     readLiveFlow: (id: string) => latest.current.blockTextFlowDrafts[id]

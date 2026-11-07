@@ -1,0 +1,10 @@
+ARM: red files run alone
+=== src/pages/Boards/BoardPage.selection.test.tsx
+   ✓ V13.4 walk-through fix 4 selection workflows > ④ emphasizes only the hovered stroke in either direction, scrolls its row into view and locates without changing selection  486ms
+   ✓ V13.4 walk-through fix 4 selection workflows > ⑥ clears selection with Escape from a sidebar button and cancels an active marquee without restoring it on pointerup  322ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  18:27:14
+   Duration  8.59s (transform 2.75s, setup 256ms, collect 4.21s, tests 2.82s, environment 755ms, prepare 189ms)
+

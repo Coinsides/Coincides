@@ -1,0 +1,8 @@
+{
+ "total": 11,
+ "bad": [
+  "Z-coveredLine-0",
+  "Z-coveredLine-1",
+  "Z-coveredLine-2"
+ ]
+}

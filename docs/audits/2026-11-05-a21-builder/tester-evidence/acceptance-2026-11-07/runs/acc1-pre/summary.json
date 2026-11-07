@@ -1,0 +1,28 @@
+{
+ "total": 46,
+ "bad": [
+  "A1-natural-300-1",
+  "A1-natural-300-2",
+  "A1-natural-300-3",
+  "A1-natural-1000-1",
+  "A1-natural-1000-3",
+  "A2-heldLeave-noEnter-0",
+  "C-save500-n2-0",
+  "C-save500-n2-1",
+  "E-caretStart-0",
+  "E-caretStart-1",
+  "F-sameId-0",
+  "I-wrongBlock-0",
+  "X-addr-0",
+  "X-addr-1",
+  "X-addr-2",
+  "X-addr-3",
+  "X-addr-4",
+  "X-back-0",
+  "X-back-1",
+  "X-back-2",
+  "X-slowAddr-0",
+  "X-slowAddr-1",
+  "X-slowAddr-2"
+ ]
+}

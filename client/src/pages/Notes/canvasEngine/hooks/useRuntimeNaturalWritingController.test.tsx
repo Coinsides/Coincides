@@ -481,7 +481,8 @@ describe('useRuntimeNaturalWritingController Page draft authority', () => {
       expect.objectContaining({
         silent: true,
         textFlow: expect.objectContaining({
-          units: [expect.objectContaining({ text: 'draft' })],
+          // The space the reader typed before the Slash stays: a caret after it must have somewhere to be.
+          units: [expect.objectContaining({ text: 'draft ' })],
         }),
       }),
     );

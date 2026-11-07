@@ -1,0 +1,8 @@
+build exit 0
+tsc exit 0
+client [2m Tests [22m [1m[32m2643 passed[39m[22m[90m (2643)[39m
+enter-fix {"total":26,"bad":5,"latency":57,"byArm":{"enter_clean":{"n":2,"bad":0},"enter_create":{"n":2,"bad":0},"enter_reorder":{"n":2,"bad":0},"enter_placement":{"n":2,"bad":0},"enter_save2":{"n":2,"bad":0},"enter_save3":{"n":2,"bad":0},"enter_hangWatchdog":{"n":2,"bad":0},"enter_leaveInApp350":{"n":2,"bad":0},"enter_leaveInApp1000":{"n":2,"bad":0},"enter_leaveAddressBar":{"n":2,"bad":1},"enter_slowReplyAddressBar":{"n":2,"bad":2},"enter_slowReplyUnload":{"n":2,"bad":2},"enter_unload":{"n":2,"bad":0}}}
+pure57 SUMMARY {"label":"pure57","origin":"http://localhost:4140","by":{"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"K":{"n":30,"bad":0},"H":{"n":13,"bad":0}},"errors":0,"firstErrors":[]}
+dist unchanged during reruns
+enter-fix.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0 land med 1169 max 1178 (2)","enter_create":"n2 ①2 ②0 ③0","enter_reorder":"n2 ①2 ②0 ③0 land med 541 max 558 (2)","enter_placement":"n2 ①2 ②0 ③0","enter_save2":"n2 ①2 ②0 ③0 land med 1664 max 1728 (2)","enter_save3":"n2 ①2 ②0 ③0 land med 719 max 737 (2)","enter_hangWatchdog":"n2 ①2 ②0 ③0","enter_leaveInApp350":"n2 ①2 ②0 ③0","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①1 ②1 ③0","enter_slowReplyAddressBar":"n2 ①0 ②2 ③0","enter_slowReplyUnload":"n2 ①0 ②2 ③0","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":8,"median":737,"max":1728}}
+=== pure21 done 2026-11-07 14:54:08 ===

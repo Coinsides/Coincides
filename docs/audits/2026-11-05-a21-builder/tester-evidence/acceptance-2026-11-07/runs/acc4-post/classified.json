@@ -1,0 +1,122 @@
+{
+ "by": {
+  "RE-beta": {
+   "3u": 2
+  },
+  "RE-alpha": {
+   "3u": 1
+  },
+  "RF-gamma": {
+   "1": 2
+  },
+  "RJ-gamma": {
+   "3": 2
+  },
+  "RJ-beta": {
+   "3": 1
+  },
+  "RI-beta": {
+   "2": 2
+  },
+  "RX-addr": {
+   "1": 1,
+   "2": 2
+  },
+  "RX-held": {
+   "1": 1,
+   "3": 1
+  }
+ },
+ "detail": [
+  {
+   "name": "RE-beta-0",
+   "cls": "3u",
+   "ok": false,
+   "note": "words in the note but not in the expected place"
+  },
+  {
+   "name": "RE-beta-1",
+   "cls": "3u",
+   "ok": false,
+   "note": "words in the note but not in the expected place"
+  },
+  {
+   "name": "RE-alpha-0",
+   "cls": "3u",
+   "ok": false,
+   "note": "words in the note but not in the expected place"
+  },
+  {
+   "name": "RF-gamma-0",
+   "cls": "1",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RF-gamma-1",
+   "cls": "1",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RJ-gamma-0",
+   "cls": "3",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RJ-gamma-1",
+   "cls": "3",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RJ-beta-0",
+   "cls": "3",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RI-beta-0",
+   "cls": "2",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RI-beta-1",
+   "cls": "2",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RX-addr-0",
+   "cls": "2",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RX-addr-1",
+   "cls": "1",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RX-addr-2",
+   "cls": "2",
+   "ok": true,
+   "note": ""
+  },
+  {
+   "name": "RX-held-0",
+   "cls": "3",
+   "ok": false,
+   "note": ""
+  },
+  {
+   "name": "RX-held-1",
+   "cls": "1",
+   "ok": true,
+   "note": ""
+  }
+ ]
+}

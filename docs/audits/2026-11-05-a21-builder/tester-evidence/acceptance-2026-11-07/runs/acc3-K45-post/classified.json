@@ -1,0 +1,36 @@
+{
+ "by": {
+  "K4-roleSaveStallThenDrop-enter": {
+   "3u": 2
+  },
+  "K5-reorderStallThenDrop-enter": {
+   "3u": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "K4-roleSaveStallThenDrop-enter-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\",\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "K4-roleSaveStallThenDrop-enter-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\",\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "K5-reorderStallThenDrop-enter-0",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]two\",\"body\"]]"
+  },
+  {
+   "name": "K5-reorderStallThenDrop-enter-1",
+   "cls": "3u",
+   "ok": true,
+   "note": "words and order right, structure [[\"warmup\"],[\"[heading_1]two\",\"body\"]]"
+  }
+ ]
+}

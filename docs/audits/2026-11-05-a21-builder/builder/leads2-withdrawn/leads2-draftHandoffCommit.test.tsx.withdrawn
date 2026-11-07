@@ -1,0 +1,78 @@
+// leads-2: on the create-only path (no save loop) the created block reaches the host through
+// a default-priority update after an await, as the app's data adapter publishes it. The handoff
+// to the durable editor commits at sync priority; it must not commit without that block, or the
+// keys pressed in that moment have no durable editor to go to.
+import { render } from '@testing-library/react';
+import { useLayoutEffect, useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import type { TemplateOption } from '@/services/templateOptions';
+import type { BlockBoxLayout } from '../runtimeLayout';
+import type { Note, NoteBlock } from '../runtimeDataTypes';
+import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { useDraftBlockController } from './useDraftBlockController';
+import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
+
+// React's own scheduler, as in the app: an act scope would hold the very commits this is about.
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = false;
+
+const layout: BlockBoxLayout = { x: 0, y: 0, width: 760, height: 72 };
+const template: TemplateOption = {
+  template_id: 'text', template_key: 'text', template_version: '1.0.0', label: 'Text', description: 'Text block',
+  system_type: 'text', learning_role: 'note', legacy_block_type: 'text', default_content: {}, origin: 'test',
+  status: 'active', isRuntime: false,
+};
+const note: Note = { id: 'note-1', course_id: 'project-1', title: 'Handoff', description: null, status: 'active', metadata: {} };
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function block(text: string): NoteBlock {
+  return {
+    id: 'block-1', placement_id: 'placement-1', display_overrides_json: {}, canvas_layout: null, block_type: 'text',
+    title: null, content_json: { body: text, [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1(text, 'paragraph') },
+    plain_text: text, metadata: {}, order_index: 0, source_references: [],
+  };
+}
+
+describe('draft handoff on the create-only path (leads-2)', () => {
+  it('commits the handoff only together with the created block', async () => {
+    const handoffs: boolean[] = [];
+    let controller: ReturnType<typeof useDraftBlockController> | null = null;
+    function Host() {
+      const [blocks, setBlocks] = useState<NoteBlock[]>([]);
+      const [, setFocus] = useState<string | null>(null);
+      const draft = useDraftBlockController({
+        createBlock: vi.fn(async (_template, text: string, options: { clientCreateKey: string }) => {
+          await sleep(5);
+          const created = block(text);
+          // The adapter publishes the block from the response, at default priority.
+          setBlocks((current) => [...current, created]);
+          return { block: created, clientCreateKey: options.clientCreateKey, placementPersisted: true, reused: false };
+        }),
+        defaultDraftLayout: layout, defaultTextTemplate: template,
+        discardDraftBlock: vi.fn(async () => true), finalizeDraftBlock: vi.fn(async () => true), note,
+        onDraftFocusReceipt: vi.fn(),
+        saveBlock: vi.fn(async (target: NoteBlock, text: string): Promise<BlockSaveOutcome> =>
+          ({ status: 'saved', block: { ...target, plain_text: text }, recoveryReceipt: null, reconciliation: 'response' })),
+        saveDraftBlockPlacement: vi.fn(async (value) => value),
+        setActiveBlockId: vi.fn(), setBlockTextDrafts: vi.fn(), setBlockTextFlowDrafts: vi.fn(),
+        setFocusBlockId: setFocus, setInteractionState: vi.fn(), setSelectedBlockId: vi.fn(),
+      } as never);
+      controller = draft;
+      const reconciled = Boolean(draft.draftOwnerReconciliation);
+      useLayoutEffect(() => {
+        // The commit that hands the caret over: the durable editor renders from these blocks.
+        if (reconciled && handoffs.length === 0) handoffs.push(blocks.some((entry) => entry.id === 'block-1'));
+      });
+      return null;
+    }
+    const view = render(<Host />);
+    await sleep(0);
+    controller!.activateDraft();
+    await sleep(20);
+    controller!.setDraftText('First');
+    await sleep(20);
+    await controller!.persistDraft('First');
+    await sleep(50);
+    expect(handoffs).toEqual([true]);
+    view.unmount();
+  });
+});

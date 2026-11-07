@@ -1,0 +1,168 @@
+┌─────────┬──────────────────────────────────────────────────────────────────────────────────────────────────┬──────────┐
+│ (index) │ check                                                                                            │ status   │
+├─────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┼──────────┤
+│ 0       │ 'NoteDetail shell imports runtime'                                                               │ 'passed' │
+│ 1       │ 'NoteDetail has no old runtime symbols'                                                          │ 'passed' │
+│ 2       │ 'NoteCanvasRuntime is a host layer'                                                              │ 'passed' │
+│ 3       │ 'NoteCanvasRuntime does not own implementation layers'                                           │ 'passed' │
+│ 4       │ 'Runtime root composes first-level controllers'                                                  │ 'passed' │
+│ 5       │ 'Runtime root does not import lower-level controllers directly'                                  │ 'passed' │
+│ 6       │ 'Runtime model exposes viewport and historical placement contracts'                              │ 'passed' │
+│ 7       │ 'Runtime model exposes PageStack continuity context'                                             │ 'passed' │
+│ 8       │ 'Runtime model exposes cross-page Block fragment projections'                                    │ 'passed' │
+│ 9       │ 'Runtime model exposes PageSlice snapshot and reference contracts'                               │ 'passed' │
+│ 10      │ 'Engine model builds viewport world and runtime model seed'                                      │ 'passed' │
+│ 11      │ 'Engine model keeps independent PageFrame numbering stack-neutral'                               │ 'passed' │
+│ 12      │ 'Engine model derives PageFrame extension from PageStack context'                                │ 'passed' │
+│ 13      │ 'Engine model derives cross-page Block fragments once for runtime consumers'                     │ 'passed' │
+│ 14      │ 'Engine model does not use PageFrameCollection total as page-number total'                       │ 'passed' │
+│ 15      │ 'Engine model threads document typography into PageFrame extensions'                             │ 'passed' │
+│ 16      │ 'Engine model does not couple document typography to viewport zoom'                              │ 'passed' │
+│ 17      │ 'Canvas AI tree service owns AI-readable layout snapshot derivation'                             │ 'passed' │
+│ 18      │ 'Canvas AI tree exposes PageStack continuity context'                                            │ 'passed' │
+│ 19      │ 'Canvas AI tree exposes cross-page Block fragment metadata'                                      │ 'passed' │
+│ 20      │ 'Canvas AI tree exposes PageFrame document typography for AI-readable layout'                    │ 'passed' │
+│ 21      │ 'Viewport service owns runtime viewport and world seed'                                          │ 'passed' │
+│ 22      │ 'Viewport transform controller retains Page viewport state and measured size'                    │ 'passed' │
+│ 23      │ 'Viewport transform controller has no retired pan zoom or reset callbacks'                       │ 'passed' │
+│ 24      │ 'Runtime kernel owns scene index hit test selection and command delta seed'                      │ 'passed' │
+│ 25      │ 'Canvas command service owns create move resize style delete dispatcher seed'                    │ 'passed' │
+│ 26      │ 'Block projection service owns TextFlow-backed CanvasObject projection seed'                     │ 'passed' │
+│ 27      │ 'Shape projection service owns pure shape block-backed shape and visual connector seeds'         │ 'passed' │
+│ 28      │ 'Visual connector service owns endpoint resolution and persistence payload boundary'             │ 'passed' │
+│ 29      │ 'Image object service owns asset-backed CanvasObject projection boundary'                        │ 'passed' │
+│ 30      │ 'Canvas asset repository owns image upload boundary'                                             │ 'passed' │
+│ 31      │ 'Table object service owns structured CanvasObject projection boundary'                          │ 'passed' │
+│ 32      │ 'PageFrame service owns formal frame sizing boundary'                                            │ 'passed' │
+│ 33      │ 'PageFrame collection service owns multi-frame management boundary'                              │ 'passed' │
+│ 34      │ 'PageFrame collection persists explicit PageStack coverage metadata'                             │ 'passed' │
+│ 35      │ 'Course detail New Note seeds explicit PageStack entity persistence'                             │ 'passed' │
+│ 36      │ 'New paper preset delegates geometry and stack ownership to the existing seed'                   │ 'passed' │
+│ 37      │ 'PageStack service owns continuous PageFrame relation boundary'                                  │ 'passed' │
+│ 38      │ 'PageStack content flow service owns default writing continuation boundary'                      │ 'passed' │
+│ 39      │ 'PageStack Block fragment service owns cross-page fragment projection boundary'                  │ 'passed' │
+│ 40      │ 'PageSlice service owns whole-page snapshot and reference boundary'                              │ 'passed' │
+│ 41      │ 'Layout affiliation service owns sparse PageFrame move cohort'                                   │ 'passed' │
+│ 42      │ 'Runtime presentation controller can create a PageFrame from an empty collection'                │ 'passed' │
+│ 43      │ 'Runtime presentation controller retains live PageFrame collection actions'                      │ 'passed' │
+│ 44      │ 'Runtime presentation controller has no retired Canvas frame drag handlers'                      │ 'passed' │
+│ 45      │ 'PageFrame affiliation service owns geometry-derived no-ownership boundary'                      │ 'passed' │
+│ 46      │ 'Geometry service owns PageFrame crossing export policy interpretation'                          │ 'passed' │
+│ 47      │ 'PageFrame guide service owns ruler margin guide and snap wall boundary'                         │ 'passed' │
+│ 48      │ 'Typography profile service owns note-level typography truth'                                    │ 'passed' │
+│ 49      │ 'PageFrame print scale service owns page size and typography compatibility exports'              │ 'passed' │
+│ 50      │ 'PageFrame print scale service does not inline document typography truth'                        │ 'passed' │
+│ 51      │ 'Typography measurement service owns pure estimate helpers'                                      │ 'passed' │
+│ 52      │ 'Typography measurement service does not use DOM layout reads'                                   │ 'passed' │
+│ 53      │ 'PageFrame slot service owns header footer and generated page number boundary'                   │ 'passed' │
+│ 54      │ 'PageFrame template service owns template background and style boundary'                         │ 'passed' │
+│ 55      │ 'Export preview service owns PageFrame-aware preview model'                                      │ 'passed' │
+│ 56      │ 'Runtime types do not define hard PageFrame ownership for blocks'                                │ 'passed' │
+│ 57      │ 'Note canvas layout model focuses Page Mode on primary PageFrame'                                │ 'passed' │
+│ 58      │ 'Note canvas layout model derives the Page world from runtime content'                           │ 'passed' │
+│ 59      │ 'Runtime types have no retired workspace reserve generator'                                      │ 'passed' │
+│ 60      │ 'Layout assembly has no retired workspace reserve input'                                         │ 'passed' │
+│ 61      │ 'Note canvas layout model feeds runtime PageFrame context into Export Preview'                   │ 'passed' │
+│ 62      │ 'Placement service owns layout seed write and runtime placement records'                         │ 'passed' │
+│ 63      │ 'Placement service routes move snapping through PageFrame guide service'                         │ 'passed' │
+│ 64      │ 'Measurement service owns measured height and reflow boundary'                                   │ 'passed' │
+│ 65      │ 'Page policy owns visibility and blank draft placement'                                          │ 'passed' │
+│ 66      │ 'Page draft placement retains snap and content-width bounds'                                     │ 'passed' │
+│ 67      │ 'History service owns runtime undo redo keyboard intent contract'                                │ 'passed' │
+│ 68      │ 'Command surface service exposes PageFrame and blank Canvas menus'                               │ 'passed' │
+│ 69      │ 'Object inspector service centralizes ordinary CanvasObject safe actions'                        │ 'passed' │
+│ 70      │ 'Note canvas adapter uses entity GroupFolder repository'                                         │ 'passed' │
+│ 71      │ 'Note canvas adapter persists Canvas entities through repository cutover'                        │ 'passed' │
+│ 72      │ 'Note canvas adapter no longer writes PageFrame or block layout legacy seeds'                    │ 'passed' │
+│ 73      │ 'Note canvas adapter persists document typography metadata'                                      │ 'passed' │
+│ 74      │ 'Note canvas adapter does not write GroupFolder metadata'                                        │ 'passed' │
+│ 75      │ 'TextFlow service does not own document typography profile'                                      │ 'passed' │
+│ 76      │ 'Group Gallery uses entity GroupFolder repository'                                               │ 'passed' │
+│ 77      │ 'Group Gallery moves groups through placement route'                                             │ 'passed' │
+│ 78      │ 'Group Gallery does not write GroupFolder metadata'                                              │ 'passed' │
+│ 79      │ 'GroupFolder repository strips legacy metadata after successful import'                          │ 'passed' │
+│ 80      │ 'ContentGroup repository saves entity groups with hydrated members'                              │ 'passed' │
+│ 81      │ 'ContentGroup repository does not write note metadata for members'                               │ 'passed' │
+│ 82      │ 'ContentGroup member contract supports PageSlice snapshots'                                      │ 'passed' │
+│ 83      │ 'ContentGroup service creates PageSlice snapshot members'                                        │ 'passed' │
+│ 84      │ 'Server ContentGroup service preserves page_slice member kind'                                   │ 'passed' │
+│ 85      │ 'ContentGroup repository does not know Petal/Fragment DB fields'                                 │ 'passed' │
+│ 86      │ 'ContentGroup service does not know Petal/Fragment DB fields'                                    │ 'passed' │
+│ 87      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx' │ 'passed' │
+│ 88      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx'          │ 'passed' │
+│ 89      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx'  │ 'passed' │
+│ 90      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx'         │ 'passed' │
+│ 91      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx'     │ 'passed' │
+│ 92      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/SlashMenuLayer.tsx'           │ 'passed' │
+│ 93      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx'       │ 'passed' │
+│ 94      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/canvasAiTreeService.ts'              │ 'passed' │
+│ 95      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/canvasCommandService.ts'             │ 'passed' │
+│ 96      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/blockProjectionService.ts'           │ 'passed' │
+│ 97      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/shapeProjectionService.ts'           │ 'passed' │
+│ 98      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/imageObjectService.ts'               │ 'passed' │
+│ 99      │ 'Required runtime file exists: src/pages/Notes/canvasEngine/tableObjectService.ts'               │ 'passed' │
+│ 100     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/objectInspectorService.ts'           │ 'passed' │
+│ 101     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/canvasAssetRepository.ts'            │ 'passed' │
+│ 102     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/visualConnectorService.ts'           │ 'passed' │
+│ 103     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/canvasRuntimeKernelService.ts'       │ 'passed' │
+│ 104     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageFrameAffiliationService.ts'      │ 'passed' │
+│ 105     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageFrameCollectionService.ts'       │ 'passed' │
+│ 106     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageStackCollectionService.ts'       │ 'passed' │
+│ 107     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageStackContentFlowService.ts'      │ 'passed' │
+│ 108     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageStackBlockFragmentService.ts'    │ 'passed' │
+│ 109     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageSliceService.ts'                 │ 'passed' │
+│ 110     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageFrameGuideService.ts'            │ 'passed' │
+│ 111     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageFrameSlotService.ts'             │ 'passed' │
+│ 112     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/pageFrameTemplateService.ts'         │ 'passed' │
+│ 113     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx'      │ 'passed' │
+│ 114     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/blocks/FormulaBlockProjection.tsx'   │ 'passed' │
+│ 115     │ 'Required runtime file exists: src/pages/Notes/canvasEngine/blocks/CodeBlockProjection.tsx'      │ 'passed' │
+│ 116     │ 'Writing surface exposes runtime smoke attributes'                                               │ 'passed' │
+│ 117     │ 'Writing surface renders PageFrame ruler and margin guide markers'                               │ 'passed' │
+│ 118     │ 'Writing surface exposes PageFrame print scale and document typography markers'                  │ 'passed' │
+│ 119     │ 'Writing surface exposes Page template background and style markers'                             │ 'passed' │
+│ 120     │ 'Writing surface renders PageFrame slot markers'                                                 │ 'passed' │
+│ 121     │ 'Shared reading, thumbnail and print renderer exposes PageFrame slot markers'                    │ 'passed' │
+│ 122     │ 'Writing surface has no retired Canvas frame collection'                                         │ 'passed' │
+│ 123     │ 'Writing surface has no retired Canvas frame context menus'                                      │ 'passed' │
+│ 124     │ 'Writing surface has no retired generic shape layer or handlers'                                 │ 'passed' │
+│ 125     │ 'Writing surface has no retired connector layer or commands'                                     │ 'passed' │
+│ 126     │ 'Writing surface has no retired generic image layer or commands'                                 │ 'passed' │
+│ 127     │ 'Writing surface has no retired table layer or mutations'                                        │ 'passed' │
+│ 128     │ 'Writing surface has no retired table editor context menu'                                       │ 'passed' │
+│ 129     │ 'Writing surface has no retired generic Object Inspector injection'                              │ 'passed' │
+│ 130     │ 'Writing surface retains Page wall editing and ink persistence'                                  │ 'passed' │
+│ 131     │ 'Writing surface has no retired Canvas PageStack controls'                                       │ 'passed' │
+│ 132     │ 'Writing surface passes cross-page Block fragments to Block shells'                              │ 'passed' │
+│ 133     │ 'Writing surface exposes the active Page reading controls'                                       │ 'passed' │
+│ 134     │ 'Writing surface renders selection typography toolbar from TextFlow selection draft'             │ 'passed' │
+│ 135     │ 'Layer props pass document typography into writing surface'                                      │ 'passed' │
+│ 136     │ 'Layer props pass generic CanvasObject persistence into writing surface'                         │ 'passed' │
+│ 137     │ 'Selection typography toolbar edits note-level typography profile'                               │ 'passed' │
+│ 138     │ 'Selection typography toolbar does not create rich text span truth'                              │ 'passed' │
+│ 139     │ 'Block editor shell exposes cross-page fragment markers'                                         │ 'passed' │
+│ 140     │ 'Text annotation stamps register with the shared painted-range layout'                           │ 'passed' │
+│ 141     │ 'Both parent and child annotation stamps participate in shared avoidance'                        │ 'passed' │
+│ 142     │ 'Whole-block annotation stamps share the surface coordinator'                                    │ 'passed' │
+│ 143     │ 'Stamp layout measures painted ranges, body text, peers and both page surfaces'                  │ 'passed' │
+│ 144     │ 'Stamp placement receives page bounds and independent text and peer obstacles'                   │ 'passed' │
+│ 145     │ 'Stamp geometry stays outside persisted annotation and DOM truth'                                │ 'passed' │
+│ 146     │ 'Text annotation stamps do not restore fixed first-line or alternating offsets'                  │ 'passed' │
+│ 147     │ 'Unmeasured annotation stamps remain hidden until an unobscured side is placed'                  │ 'passed' │
+│ 148     │ 'Note detail styles apply document typography variables to writing text areas'                   │ 'passed' │
+│ 149     │ 'Note detail styles render selection typography mini toolbar'                                    │ 'passed' │
+│ 150     │ 'Note detail styles apply Page template background variables'                                    │ 'passed' │
+│ 151     │ 'Note detail styles render PageFrame slots as quiet page chrome'                                 │ 'passed' │
+│ 152     │ 'Note detail styles render cross-page Block fragment markers'                                    │ 'passed' │
+│ 153     │ 'Note detail styles render PageFrame-aware Export Preview groups'                                │ 'passed' │
+│ 154     │ 'Note detail styles retain the active PageFrame panel controls'                                  │ 'passed' │
+│ 155     │ 'Note detail styles exclude retired basic shape CanvasObjects'                                   │ 'passed' │
+│ 156     │ 'Note detail styles exclude retired asset-backed image CanvasObjects'                            │ 'passed' │
+│ 157     │ 'Note detail styles exclude retired structured table CanvasObjects'                              │ 'passed' │
+│ 158     │ 'Note detail styles exclude retired Object Inspector panel'                                      │ 'passed' │
+│ 159     │ 'Export Preview layer renders PageFrame groups and workspace warnings'                           │ 'passed' │
+│ 160     │ 'Export preview exposes PageStack grouping metadata'                                             │ 'passed' │
+│ 161     │ 'Chrome More panel exposes document typography controls'                                         │ 'passed' │
+│ 162     │ 'Chrome Layout panel exposes PageStack navigator controls'                                       │ 'passed' │
+└─────────┴──────────────────────────────────────────────────────────────────────────────────────────────────┴──────────┘
+Canvas runtime boundary check passed (175 checks).

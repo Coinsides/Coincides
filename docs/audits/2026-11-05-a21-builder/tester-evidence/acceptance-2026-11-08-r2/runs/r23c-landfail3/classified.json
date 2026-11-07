@@ -1,0 +1,21 @@
+{
+ "by": {
+  "LANDFAIL3-seen": {
+   "ok": 2
+  }
+ },
+ "detail": [
+  {
+   "name": "LANDFAIL3-seen-0",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  },
+  {
+   "name": "LANDFAIL3-seen-1",
+   "cls": "ok",
+   "ok": true,
+   "note": "criterion of the scenario itself"
+  }
+ ]
+}

@@ -23,6 +23,13 @@ describe('A4 logical heading line boundaries', () => {
     expect(request.focus).toEqual({ unitId: request.nextTextFlow.units[1].id, caret: 4 });
     expect(normalizeHeadingTextFlow(request.nextTextFlow, request.focus).flow).toBe(request.nextTextFlow);
   });
+  it('item 5: undo puts the caret back where it was before the space completed the prefix', () => {
+    const request = applyHeadingInputAtLine(createTextBlockContentV1('#Title'), 'tu-1', '# Title', 2)!;
+    expect(request.focus).toEqual({ unitId: 'tu-1', caret: 0 });
+    expect(request.beforeCaret).toBe(1);
+    const below = applyHeadingInputAtLine(createTextBlockContentV1('Body\n#'), 'tu-1', 'Body\n# ', 7)!;
+    expect(below.beforeCaret).toBe(6);
+  });
   it('keeps ordinary typing in a standalone heading on its ordinary edit path', () => {
     expect(headingStructureRequestForEdit(createTextBlockContentV1('A', 'heading_1'), createTextBlockContentV1('AB', 'heading_1'),
       { unitId: 'tu-1', caret: 2 })).toBeNull();

@@ -1,0 +1,2 @@
+old-harness.json {"arms":{"enter_slowReplyUnload":"n2 ①0 ②2 ③0"},"landed":null}
+new-harness.json {"arms":{"enter_slowReplyUnload":"n2 ①0 ②0 ③2"},"landed":null}

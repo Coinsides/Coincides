@@ -1,0 +1,21 @@
+=== start 2026-11-07 12:04:11 ===
+build exit 0
+enter-fix {"total":26,"bad":6,"latency":57,"byArm":{"enter_clean":{"n":2,"bad":0},"enter_create":{"n":2,"bad":0},"enter_reorder":{"n":2,"bad":0},"enter_placement":{"n":2,"bad":0},"enter_save2":{"n":2,"bad":0},"enter_save3":{"n":2,"bad":0},"enter_hangWatchdog":{"n":2,"bad":0},"enter_leaveInApp350":{"n":2,"bad":0},"enter_leaveInApp1000":{"n":2,"bad":0},"enter_leaveAddressBar":{"n":2,"bad":2},"enter_slowReplyAddressBar":{"n":2,"bad":2},"enter_slowReplyUnload":{"n":2,"bad":2},"enter_unload":{"n":2,"bad":0}}}
+enter-frozen {"total":26,"bad":8,"latency":57,"byArm":{"enter_clean":{"n":2,"bad":0},"enter_create":{"n":2,"bad":0},"enter_reorder":{"n":2,"bad":2},"enter_placement":{"n":2,"bad":0},"enter_save2":{"n":2,"bad":0},"enter_save3":{"n":2,"bad":2},"enter_hangWatchdog":{"n":2,"bad":0},"enter_leaveInApp350":{"n":2,"bad":2},"enter_leaveInApp1000":{"n":2,"bad":0},"enter_leaveAddressBar":{"n":2,"bad":0},"enter_slowReplyAddressBar":{"n":2,"bad":0},"enter_slowReplyUnload":{"n":2,"bad":2},"enter_unload":{"n":2,"bad":0}}}
+enter-before {"total":26,"bad":14,"latency":57,"byArm":{"enter_clean":{"n":2,"bad":0},"enter_create":{"n":2,"bad":2},"enter_reorder":{"n":2,"bad":0},"enter_placement":{"n":2,"bad":2},"enter_save2":{"n":2,"bad":0},"enter_save3":{"n":2,"bad":0},"enter_hangWatchdog":{"n":2,"bad":2},"enter_leaveInApp350":{"n":2,"bad":2},"enter_leaveInApp1000":{"n":2,"bad":0},"enter_leaveAddressBar":{"n":2,"bad":2},"enter_slowReplyAddressBar":{"n":2,"bad":2},"enter_slowReplyUnload":{"n":2,"bad":2},"enter_unload":{"n":2,"bad":0}}}
+addr-fix {"total":10,"bad":3,"latency":57,"byArm":{"enter_leaveAddressBar":{"n":10,"bad":3}}}
+slow-fix {"total":8,"bad":8,"latency":57,"byArm":{"enter_slowReplyAddressBar":{"n":4,"bad":4},"enter_slowReplyUnload":{"n":4,"bad":4}}}
+slow-frozen {"total":8,"bad":4,"latency":57,"byArm":{"enter_slowReplyAddressBar":{"n":4,"bad":0},"enter_slowReplyUnload":{"n":4,"bad":4}}}
+tsc exit 0
+client [2m Tests [22m [1m[32m2654 passed[39m[22m[90m (2654)[39m
+check:canvas-runtime-boundary exit 0
+check:source-experience exit 0
+check:owned-helper-contract exit 1
+fix57 
+enter-before.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0","enter_create":"n2 ①0 ②0 ③2","enter_reorder":"n2 ①2 ②0 ③0","enter_placement":"n2 ①0 ②0 ③2","enter_save2":"n2 ①1 ②0 ③1 land med 1481 max 1505 (2)","enter_save3":"n2 ①2 ②0 ③0","enter_hangWatchdog":"n2 ①0 ②0 ③2","enter_leaveInApp350":"n2 ①0 ②0 ③2","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①0 ②0 ③2","enter_slowReplyAddressBar":"n2 ①0 ②0 ③2","enter_slowReplyUnload":"n2 ①0 ②0 ③2","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":2,"median":1481,"max":1505}}
+enter-frozen.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0 land med 1304 max 1369 (2)","enter_create":"n2 ①2 ②0 ③0","enter_reorder":"n2 ①0 ②0 ③2","enter_placement":"n2 ①2 ②0 ③0","enter_save2":"n2 ①2 ②0 ③0 land med 1459 max 1675 (2)","enter_save3":"n2 ①0 ②0 ③2","enter_hangWatchdog":"n2 ①2 ②0 ③0","enter_leaveInApp350":"n2 ①0 ②0 ③2","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①2 ②0 ③0","enter_slowReplyAddressBar":"n2 ①2 ②0 ③0","enter_slowReplyUnload":"n2 ①0 ②0 ③2","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":4,"median":1369,"max":1675}}
+enter-fix.json {"arms":{"enter_clean":"n2 ①2 ②0 ③0 land med 1096 max 1246 (2)","enter_create":"n2 ①2 ②0 ③0","enter_reorder":"n2 ①2 ②0 ③0 land med 582 max 639 (2)","enter_placement":"n2 ①2 ②0 ③0","enter_save2":"n2 ①2 ②0 ③0 land med 1633 max 2033 (2)","enter_save3":"n2 ①2 ②0 ③0 land med 697 max 733 (2)","enter_hangWatchdog":"n2 ①2 ②0 ③0","enter_leaveInApp350":"n2 ①2 ②0 ③0","enter_leaveInApp1000":"n2 ①2 ②0 ③0","enter_leaveAddressBar":"n2 ①0 ②2 ③0","enter_slowReplyAddressBar":"n2 ①0 ②2 ③0","enter_slowReplyUnload":"n2 ①0 ②2 ③0","enter_unload":"n2 ①2 ②0 ③0"},"landed":{"n":8,"median":733,"max":2033}}
+addr-fix.json {"arms":{"enter_leaveAddressBar":"n10 ①7 ②3 ③0"},"landed":null}
+slow-fix.json {"arms":{"enter_slowReplyAddressBar":"n4 ①0 ②4 ③0","enter_slowReplyUnload":"n4 ①0 ②4 ③0"},"landed":null}
+slow-frozen.json {"arms":{"enter_slowReplyAddressBar":"n4 ①4 ②0 ③0","enter_slowReplyUnload":"n4 ①0 ②0 ③4"},"landed":null}
+=== done 2026-11-07 13:08:22 ===

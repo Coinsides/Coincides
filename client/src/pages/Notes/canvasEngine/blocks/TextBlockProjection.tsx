@@ -3,6 +3,7 @@ import {
   ChevronRight,
   Move,
 } from 'lucide-react';
+import { isStructureTypingWindow, structureTypingHoldsFocus } from '../structureTypingFocus';
 import { flushSync } from 'react-dom';
 import {
   useEffect,
@@ -625,7 +626,7 @@ export function TextBlockProjection({
 
   const focusTextUnit = (unitId: string, caret: number) => {
     const node = unitRefs.current[unitId];
-    if (!node) return;
+    if (!node || structureTypingHoldsFocus()) return;
     const nextCaret = snapGraphemeOffset(node.value, caret);
     node.focus({ preventScroll: true });
     node.selectionStart = nextCaret;
@@ -848,7 +849,7 @@ export function TextBlockProjection({
       ? headingStructureRequestForEdit(previousTextFlow, nextFlow, { unitId, caret }) : null;
     if (headingRequest) {
       latestFlowRef.current = headingRequest.nextTextFlow;
-      pendingFocusRef.current = headingRequest.focus;
+      // The structure commit owns the caret from here; see useHeadingStructureController.
       void onHeadingStructure?.(headingRequest);
       return;
     }
@@ -884,7 +885,7 @@ export function TextBlockProjection({
     if (onHeadingStructure) {
       clearFlowSelection();
       latestFlowRef.current = request.nextTextFlow;
-      pendingFocusRef.current = request.focus;
+      // The structure commit owns the caret from here; see useHeadingStructureController.
       void onHeadingStructure(request);
     } else {
       emitFlowChange(request.nextTextFlow, request.focus.unitId, request.focus.caret, textarea);
@@ -975,8 +976,9 @@ export function TextBlockProjection({
     } });
   };
 
-  const saveAfterBlur = (selection: TextFlowEditSelection) => {
+  const saveAfterBlur = (selection: TextFlowEditSelection, to: EventTarget | null = null) => {
     onTextEditBoundary?.('blur', selection);
+    if (isStructureTypingWindow(to)) return;
     void onSave(true, undefined, latestFlowRef.current || editableFlow);
   };
 
@@ -1868,7 +1870,7 @@ export function TextBlockProjection({
                       deferredBlurRef.current = true;
                       return;
                     }
-                    saveAfterBlur(readSelection(unit.id, event.currentTarget));
+                    saveAfterBlur(readSelection(unit.id, event.currentTarget), event.relatedTarget);
                   }}
                   onKeyDown={readOnly ? undefined : (event) => handleUnitKeyDown(unit, event)}
                   onPaste={readOnly ? undefined : (event) => handleUnitPaste(unit, event)}
