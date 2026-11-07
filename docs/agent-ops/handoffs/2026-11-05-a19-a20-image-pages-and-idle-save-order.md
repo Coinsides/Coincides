@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 返修 | builder | 做法 4 已撤;最终包重建→类型/全量/检查脚本→三版 clean 计时→最终包上注入矩阵 26 行 + r04@57(跑前跑后记 dist 哈希)→回执→交 Tester | 2026-11-07 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | 验最终包:第十一节第 7 小节全表(H 必过)+ 守恒闸阳性对照亲核 + 真笔记 E/F/J + 地址栏一臂挡不挡放行;回执「编辑器组返修 Result(builder 2026-11-07)」 | 2026-11-07 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -48,9 +48,9 @@
 
 ### 改动清单(builder,待 builder 填)
 
-- 基线 commit:
-- 改了哪些文件:
-- 冻结清单外的文件:
+- 基线 commit:`9bc45e69`(与现分支头 `c74d4b86` 之间只有 docs 提交,代码相同)。改动只在 scratch 副本里,共享树一字未动,拷回候 Main_Designer 令。
+- 改了哪些文件(相对共享树工作树,15 个,sha256 在回执里):`blocks/PaginatedTextBlockProjection.tsx` 及 `.test.tsx`、`blocks/TextBlockProjection.tsx` 及 `.input.test.tsx`、`headingInputService.ts` 及 `.test.ts`、`.draftText.test.ts`、`headingRoleService.ts`、`hooks/structureTypingConservation.test.tsx`(新)、`hooks/useHeadingStructureController.ts` 及 `.test.tsx`、`layers/BlockEditorLayer.tsx` 及 `.test.tsx`、`structureTypingBuffer.ts`、`structureTypingFocus.ts`(都在 `client/src/pages/Notes/canvasEngine/` 下)
+- 冻结清单外的文件:`headingRoleService.ts`(加 `beforeCaret?`)、`BlockEditorLayer.test.tsx`、`headingInputService.test.ts`、`TextBlockProjection.input.test.tsx`、`PaginatedTextBlockProjection.test.tsx`、`structureTypingConservation.test.tsx`(新)。`useTextFlowHistory.ts`、`useDraftBlockController.ts` 与共享树相同(做法 4、leads-2 都已撤)。
 
 ### 自报数字(builder,待 builder 填)
 
@@ -58,10 +58,21 @@
 
 | 数字 | 命令 | 环境/版本 | 证据文件 |
 |---|---|---|---|
+| 客户端全量 2649/2649(含守恒闸 40 种子) | `vitest run --pool=forks --poolOptions.forks.maxForks=3` | 最终包源码,副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-3-final/client-full.raw` |
+| 类型检查净;三个检查脚本 exit 0 | `tsc --noEmit -p .`;`npm run -s check:canvas-runtime-boundary / check:source-experience / check:owned-helper-contract`(根目录) | 同上 | `matrix-3-final/summary.txt`、`tsc.txt` |
+| 守恒闸 7 条脚本冻结版全红、修复版全绿 | `vitest run hooks/structureTypingConservation.test.tsx` | 冻结副本 / 修复副本 | `builder/gate/conservation-frozen-*.raw`、`gate/frozen-controls-and-gate-run.txt` |
+| 注入矩阵 26 行:①21 ②5 ③0 | `node matrix25.mjs <fix 代理> <out> 2 57 '^enter_'` + `classify.mjs` | 最终包,本地后端,往返 57ms | `matrix-3-final/enter-fix.json`、`summary.txt` |
+| 同批对照:冻结版 ①18 ③8;修前版 ①11 ③15 | 同上,冻结/修前代理 | 冻结包 / A-18 前包,延迟 57 | `matrix-2-opt4/enter-frozen.json`、`enter-before.json` |
+| r04@57:156 行坏 0 | `node matrix_r04.mjs final57 … N,R,V,D,L,K,H 1` | 最终包,延迟 57 | `matrix-3-final/r04-final57.log`、`final57.rows.jsonl` |
+| 地址栏离开(自然时序)修复版 7/10 自动落、其余第②类;冻结版 10/10 | `matrix25.mjs … '^enter_leaveAddressBar$'` | 第一批修复包 / 冻结包 | `matrix-1/addr-fix.json`、`addr-frozen.json`、`enter-*.json` |
+| 慢回包地址栏离开:修复版 0/6 自动落(全②);冻结版 6/6 | `matrix25.mjs … '^enter_slowReply'` | 代理 slowreply 回包迟 3s | `matrix-2-opt4/slow-*.json`、`matrix-3-final/enter-fix.json` |
+| 回车到字落地:修复版中位 1238 ms 最大 1304;冻结版 1370 / 1419;修前版没测到 | `matrix25.mjs … 6 57 '^enter_clean$'` | 三版同批 | `matrix-3-final/timing-*.json` |
+| dist 跑前跑后 sha256 一致 | `sha256sum` | 最终包 | `matrix-3-final/dist-edfix.sha256`、`summary.txt` |
 
 ### 待办(builder,待 builder 填)
 
--
+- 已交 Tester,等判语。拷回共享树候 Main_Designer 令。
+- 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
 
@@ -430,3 +441,126 @@ builder 回报:这一臂修后 1/2 坏、冻结版 0/2 坏、修前 2/2 坏;它�
   2. 否则:在最终包上重跑注入矩阵 26 行与 r04 延迟 57 一档(其余旧矩阵留给 Tester 在最终包上验)。正在用做法 4 包跑的 r04@57 不算数——做法 4 的回调在 `current()` 为真时也会提前触发一次 `followUnit`,不是对最终包的测量。
 - **证据**:副本 `evidence/opt4-withdrawn/`(四条测试、slowReply 注入、适配器根因)整体存入 `docs/audits/2026-11-05-a21-builder/builder/opt4-withdrawn/`,后续单要用;路径一律仓库内相对路径。
 - **顺序不变**:回执(三类拆分、三版「回车到字落地」时长并列、文件清单带 sha256 以 9bc45e69 为基)→ 最终静态包交 Tester → 看板该行改「待验 · Tester」。Tester 验收范围=第十一节第 7 小节全表(H 必过)+ 守恒闸阳性对照亲核 + 真笔记形状的 E/F/J + 对地址栏一臂「挡不挡放行」的意见。
+
+## 编辑器组返修 Result(builder 2026-11-07)
+
+**执行状态**:返修完工，未提交，共享树一字未动。改动全在 builder 的 scratch 副本里，拷回候令。
+- 没碰岛、没碰 Henry 的文件、没调真实模型、没加新依赖。
+- 证据在 `docs/audits/2026-11-05-a21-builder/builder/`，先读 `README.md`：哪个目录算数写在里面。
+
+**一句话**：
+- 必修 8 条在副本里都有单元级或闸级的冻结红、修复绿。
+- 最终包注入矩阵 26 行，第③类（丢失、重复、落错块）为零；r04@57 共 156 行，坏 0。
+- 「回车后立刻改地址离开」相对冻结版是退步，做法 4 已撤，按做法 3 写，见下文退步与净改进并排。
+
+### 两句更正（改写上次回执）
+- **A-18「草稿交接已原子」**：在只建块、没有保存循环的路径上不成立（leads-2）。本轮 leads-2 已撤，转入 A-25，冻结红测试随单移交，所以这句现在依旧不成立。
+- **A-21「写回已堵住」**：上次交付时没完全关死。同步优先级的点击能在一帧和它等的提交之间提前放行等待（commit-1），被转走的单元仍可能写回。
+  - 本轮改为按计数等提交：一个等待只被包含它自己那次更新的提交放行。
+  - 守恒闸 commit-1 脚本：冻结版红（`<W1>` 出现 2 次），修复版绿。
+
+### 文件清单
+- 基线 `9bc45e69`；现分支头 `c74d4b86`，两者之间只有 docs 提交。
+- 21 个文件的 sha256 在 `docs/audits/2026-11-05-a21-builder/builder/source-sha256-vs-9bc45e69.txt`，都在 `client/src/pages/Notes/canvasEngine/` 下。
+- **本轮新改，15 个，只在副本**：
+  - `blocks/PaginatedTextBlockProjection.tsx` 及 `.test.tsx`
+  - `blocks/TextBlockProjection.tsx` 及 `.input.test.tsx`
+  - `headingInputService.ts` 及 `.test.ts`、`.draftText.test.ts`
+  - `headingRoleService.ts`
+  - `hooks/structureTypingConservation.test.tsx`（新）
+  - `hooks/useHeadingStructureController.ts` 及 `.test.tsx`
+  - `layers/BlockEditorLayer.tsx` 及 `.test.tsx`
+  - `structureTypingBuffer.ts`、`structureTypingFocus.ts`
+- **冻结清单外，单列**：
+  - `headingRoleService.ts`：只加可选 `beforeCaret`。
+  - 测试：`BlockEditorLayer.test.tsx`、`headingInputService.test.ts`、`TextBlockProjection.input.test.tsx`、`PaginatedTextBlockProjection.test.tsx`，外加新文件 `structureTypingConservation.test.tsx`。
+- **共享树已有，6 个，本轮没动**：`hooks/draftFastEnter.test.tsx`、`useDraftBlockController.ts`、`useNoteCanvasRuntimeController.ts`、`useRuntimeNaturalWritingController.test.tsx`、`useSlashCommandController.ts`、`useTextFlowHistory.ts`。
+  - 做法 4 碰过 `useTextFlowHistory.ts`，已恢复为共享树原样，diff 为空。
+  - leads-2 碰过 `useDraftBlockController.ts`，已恢复。
+
+### 必修逐条
+| 条目 | 做法 | 冻结版红 / 修复版绿 |
+|---|---|---|
+| 第 1 条：第二个结构失败，字全丢 | 先落后拆：窗口里的字（含回车）先作普通编辑写进笔记，再发第二个结构 | 闸脚本 1、1b：冻结版两词 LOST，修复版绿 |
+| 第 2 条：窗口内回车后在应用内离开 | 离开等待以看门狗为上限；到点存 localStorage 再放行（条件 b） | 闸脚本 2：冻结版 LOST，修复版绿；注入矩阵 leaveInApp350 冻结版 2/2 第③类，修复版 2/2 第①类 |
+| buffer-2：留字写进别的段落 | 按块加单元一起定位；找不到就留，⛔全页搜 | 控制器测试，冻结版红 |
+| buffer-4：行首的字被挪到行尾 | 窗口文字并回变动后的单元，按 beforeCaret 定位；条件 c：对不上只「追加加提示」或留住 | 「words from the window applied to text that changed under it」四条 |
+| buffer-3：新开标题抹掉留住的字 | 留字是按笔记存的列表，上限 20 条，超了换提示；只有用户关掉才删 | 闸脚本 3：冻结版 LOST，修复版绿 |
+| handoff-1：`/` 选 Text 后光标不回来 | 焦点回执指向的单元不在块里时，聚焦到块 | `BlockEditorLayer.test.tsx` 两条 |
+| commit-1 | 见上「两句更正」 | 闸脚本 commit-1 |
+| H：页面卸载同步存档 | `pagehide` 同步把窗口的字写进留字存档；重开按条件 a 处理 | 冻结版 H 单元测试红（`gate/frozen-controls-and-gate-run.txt`）；闸脚本 H 冻结版 LOST，修复版绿；矩阵 enter_unload 修复版 2/2 第①类 |
+
+**搭车**：
+- commit-2：结构窗口接焦点时只封口、不另存。冻结版两条新测试都红（多调一次 onSave），见 `matrix-1/c2-frozen.log`。
+- leads-3 / 第 5 条：只加 `beforeCaret`，撤销后光标回到原位。
+- buffer-5：随 buffer-2 一起修。
+- leads-2：撤，理由是它的修法让 6 条既有草稿测试超时。失败测试在 `leads2-withdrawn/`。
+
+### 守恒闸（验收 2）
+- 事件集加了「页面卸载」（先模拟 beforeunload，再 pagehide）和「改角色保存 500（未按回车）」，记号带目标块。
+- 冻结版：7 条脚本全红，第 1 条、第 2 条、buffer-3 各红至少一次。见 `gate/conservation-frozen-*.raw` 和 `gate/frozen-controls-and-gate-run.txt`。
+- 修复版：7 条脚本加 40 种子，全绿。以 `matrix-3-final/client-full.raw` 为准。
+- **放宽一处，按中途裁定第 1 条**：卸载那一刻只在本地、从没进过窗口或留字框的普通编辑，单列为「UNSAVED AT UNLOAD」打印，不算 LOST。这是 A-20 的债。
+- **保真缺口（事实）**：闸和控制器测试的假适配器没有真适配器 `transferTextUnit` 的离开闸（`current()`），所以做法 4 在单元级全绿、在浏览器里不生效。
+
+### 最终包与同源证明
+- 第一批验收的 dist 已在做法 4 重建时清掉，所以走重跑。
+- 最终包由撤回后的源码重建，跑前跑后各记一次 dist sha256，期间没变（`matrix-3-final/dist-edfix.sha256`）。
+- 最终包上：类型检查净、客户端全量 2649/2649、三个检查脚本全过、注入矩阵 26 行、r04@57。
+- 做法 4 包上那次 r04@57 已停，不算数。
+
+### 三类拆分（①落库正确 / ②没自动落但留住可取用 / ③丢失、重复、落错块）
+注入矩阵每臂 2 轮，延迟 57。修复版取最终包（`matrix-3-final/`），冻结版和修前版取 `matrix-2-opt4/`（与做法 4 无关的两个对照包）。
+
+| 臂 | 修复版 | 冻结版 | 修前版（A-18 前） |
+|---|---|---|---|
+| clean | ①2 | ①2 | ①2 |
+| create 失败 | ①2 | ①2 | ③2 |
+| reorder 失败 | ①2 | ③2 | ①2 |
+| placement 失败 | ①2 | ①2 | ③2 |
+| 第 2 次保存失败 | ①2 | ①2 | ①1 ③1 |
+| 第 3 次保存失败 | ①2 | ③2 | ①2 |
+| 卡死过看门狗 | ①2 | ①2 | ③2 |
+| 应用内离开 350ms | ①2 | ③2 | ③2 |
+| 应用内离开 1s | ①2 | ①2 | ①2 |
+| 地址栏离开（自然时序） | ①1 ②1 | ①2 | ③2 |
+| 慢回包后地址栏离开 | ②2 | ①2 | ③2 |
+| 慢回包后整页卸载 | ②2 | ③2 | ③2 |
+| 整页卸载（H 机理） | ①2 | ①2 | ①2 |
+| **合计 26 行** | **①21 ②5 ③0** | **①18 ③8** | **①11 ③15** |
+
+**「改地址离开」：退步与净改进并排**
+- **退步（相对冻结版）**：
+  - 自然时序下自动落 7/10：`matrix-1/addr-fix.json` 8 轮加 `matrix-1/enter-fix.json` 2 轮；最终包上又 2 轮，①1 ②1。冻结版 10/10。
+  - 慢回包时 0/6 自动落：`matrix-2-opt4/` 4 轮加最终包 2 轮。冻结版 6/6。
+  - 坏的全是第②类：字在屏上、有提示、存了档，第③类为零。
+  - 成因：本轮按「块加单元定位，⛔全页搜」删掉了冻结版那次全页回找。
+- **净改进（相对冻结版）**：慢回包后整页卸载，冻结版第③类（字没了，没存档），修复版第②类（留住）。
+- **相对线上版（修前）**：这一臂由第③类（丢失）变第②类。
+- **后续单第一项**（订单所列两案）：离开守卫扩到地址栏导航；或在适配器层按笔记编号放行已确认的回包。根因和原件在 `opt4-withdrawn/ROOT-CAUSE.md`。
+
+### 回车到字落地时长（三版同批，clean 臂各 6 轮，延迟 57，见 `matrix-3-final/timing-*.json`）
+| 版本 | 中位数 | 最大 | 落库 |
+|---|---|---|---|
+| 修复版（最终包） | 1238 ms | 1304 ms | ①6 |
+| 冻结版 | 1370 ms | 1419 ms | ①6 |
+| 修前版 | 没测到 | 没测到 | ①5 ③1 |
+
+- 修复版不比冻结版长。
+- 修前版计时探针没触发，原因没查明。它那 1 条第③类是 `body` 落成 `bod`，属修前版自身的既有问题。
+
+### 其他旧矩阵
+- 同源只证到注入矩阵和 r04@57。第一批里修复版的 r04@0、win/inject、a24/midHash、hash/fine 只作参考，按裁定留给 Tester 在最终包上验。
+- 第一批的数：r04@0 坏 0/156；win/inject 坏 0/28；a24/midHash 坏 0/32；hash/fine 坏 0/21。见 `matrix-1/summary.txt`。
+
+### 没修到、没验到
+1. 「改地址离开」退步，见上。
+2. `["cdef","xyab"]` 没查，按既有残留继续跟踪。
+3. 卸载那一刻还没发出的普通编辑（闸的放宽），归 A-20。
+4. 整页卸载落在转移已发、回包未到之间，`pagehide` 存下的仍是旧块。慢回包整页卸载一臂已计入上表：修复版第②类。
+5. 修前版的计时没测到。
+6. Tester 第十一节第 7 小节场景表、守恒闸阳性对照亲核、真笔记形状的 E/F/J，都归 Tester，我没跑。
+
+### 交 Tester
+- 最终静态包放在私有 ops 目录 `packages/editor-rework-final/dist/`，`dist.sha256` 与 `matrix-3-final/dist-edfix.sha256` 逐行一致。
+- 源码以上面 21 个文件的 sha256 为准。副本位置写在 builder 私有状态卡里。
