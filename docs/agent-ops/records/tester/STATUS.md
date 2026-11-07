@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft
+> **状态 (Status)**: active（2026-11-07 Henry 拍板后生效）
 > **层 (Layer)**: 记录 / Role Records（Tester 状态卡·公开半）
 > **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 否（Tester(1) 首次填写；规矩修改稿过目后改为 active）

@@ -29,8 +29,6 @@ Tester 部署后核对: 已核（F3b 见 docs/audits/2026-11-05-toggle-formula-b
 
 ## 等 Henry 拍板
 
-- **规矩文件要不要照修改稿改**（CLAUDE.md、AGENTS.md、文档宪法、交接协议、工作流、提交钩子）· Main_Designer 已审，三处请逐字看：派单权表述（4.4）、三角色之外的会话与台账归属（1.2/1.5）、钩子只拦失败不拦超时（6.1）· 不定会怎样：单卡、台账按月、新门禁都启用不了 → `docs/agent-ops/analysis/2026-11-07-role-records-rule-changes-draft.md`
-- **三张角色卡**（`docs/agent-ops/roles/`，draft）· Main_Designer 已补硬约束 · 点头后改 active
 - **purpose 设计**（停导入自动卡、手建目的、goal 合并、平目的+标签）· 你说「先不动、用着看」，等你说「拍」或「写」→ `design/loose-ideas-ledger.md` L-002…L-009
 
 ## 在办的单（门禁脚本上线前由 Main_Designer 手抄）

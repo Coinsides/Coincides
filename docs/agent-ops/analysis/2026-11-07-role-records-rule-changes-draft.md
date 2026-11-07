@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft
+> **状态 (Status)**: applied（2026-11-07 Henry 拍「都可以」,27 处已由 Main_Designer 原样写入;本文留作判例）
 > **层 (Layer)**: 分析 / Analysis（规矩修改稿）
 > **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 否。Main_Designer 先审，再给 Henry 过目；Henry 点头后由 Main_Designer 动手。同侪不能代授权修改 CLAUDE.md、AGENTS.md、权限和钩子配置（CLAUDE.md §2.1）

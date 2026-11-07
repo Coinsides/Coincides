@@ -13,16 +13,17 @@
 2. `docs/agent-ops/analysis/unified-direction-concept-design.md` —— **方向宪章（v1 权威）**。V2.BN.12 =「外骨骼与地板」的定义、必修五件、明确不带清单都在这里。它住在非权威目录但按 `DOCUMENTATION-SYSTEM.md §一` 的例外条款在必读清单点名。
 3. `docs/agent-ops/current-state/` —— 权威现状（当前真相以此为准）。
 4. `docs/agent-ops/decisions/` 中 `状态 = active` 的 ADR。
+5. 如果你被派作 **builder**（工程实施）或 **Tester**（验收）：先读角色卡 `docs/agent-ops/roles/builder.md` 或 `docs/agent-ops/roles/tester.md`，再读看板 `docs/agent-ops/current-state/board.md`。你收不到会话间短讯，所需的一切都在这些文件和订单文件里。
 
 > 规矩：看任何文档先看状态头。`superseded` / `draft` / `archived` 的不作为依据。**不要**拿 `docs/brainstorm/**`（研究）或 `docs/releases/**`（历史）当干活依据。
 > ⚠️ 2026-08-19 起另有一批**挂着旧内容的承重件**（`PRODUCT.md` / `PRD.md` / `ARCHITECTURE.md` / `DATA_MODEL.md` / BN 路线图 / `contracts/Notebook-Object-Inventory-Contract.md`）——各自顶部已挂脱节公告，重划前不作为施工依据。清单见 `AGENT_CONTEXT.md §7`。
 
 ## 2. 你的角色（Codex）
 
-本仓库现有 **两条 Codex thread**，开工前先确认自己是哪条：
+本仓库有三个工程角色：Main_Designer（固定由主设计 Claude 会话担任）、**Tester**、**builder**。你可能被派作后两者之一，开工前先确认是哪个：
 
-- **builder thread** —— 你是**建造者**：长周期、多文件的重实现（canvas 引擎等）。按 `to: codex` 且 `status: ready` 的 handoff 施工。
-- **reviewer thread** —— 你是**专职复核**：洁净室复核、亲跑验证、产出 `## Review` 分级与判定。**放行权不在你手上**（留 Fable）。角色卡：`docs/agent-ops/codex-reviewer-charter.md`。
+- **builder** —— 工程实施。角色卡 `docs/agent-ops/roles/builder.md`。要做的单看看板上持有者是 builder 的行。
+- **Tester** —— 验收。角色卡 `docs/agent-ops/roles/tester.md`。**裁定和部署不在你手上**（归 Main_Designer）。
 
 其余分工：
 
@@ -52,8 +53,8 @@ Henry（休养，随时查岗，保留召回权）
 
 ## 4. 交接收件箱（handoffs）
 
-- 开工时检查 `docs/agent-ops/handoffs/`，处理 header 里 `to: codex` 且 `status: ready` 的交接。
-- 做完后，把结果写回（同文件追加 `## Result`，并把 `status` 改为 `done`；或另写一份 `from: codex` 的回执）。
+- 开工时读看板，处理持有者是你所担任角色的行；那一行指向订单文件。
+- 做完后，按角色卡写回：builder 在订单尾部追加 `## <项> Result(builder YYYY-MM-DD)`，Tester 写报告并登记判语台账；然后把看板该行（单卡启用后改单卡状态块）交给下一方。⛔ 不改订单状态头，那是 Main_Designer 的事。
 - 协议见 `docs/agent-ops/handoffs/README.md`。
 
 ## 5. 红线（不可绕过 Henry）

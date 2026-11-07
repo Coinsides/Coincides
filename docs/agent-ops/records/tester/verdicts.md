@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft
+> **状态 (Status)**: active（2026-11-07 Henry 拍板后生效）
 > **层 (Layer)**: 记录 / Role Records（Tester 判语台账）
 > **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 否（回填初稿，Tester 核对后改为 active；判语的正本在各报告里，这里只放指针）

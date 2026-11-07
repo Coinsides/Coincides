@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft
+> **状态 (Status)**: accepted（2026-11-07 Henry 拍第九节 6 问并通过规矩稿;施工按第六节进行）
 > **层 (Layer)**: 分析 / Analysis（设计稿，候 Henry 拍）
 > **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 否。拍板前不作施工依据；拍板后按 DOCUMENTATION-SYSTEM 把定下的部分蒸馏进 current-state 和协议文件

@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State（Claude 行动日志）
-> **日期 (Updated)**: 2026-06-27
+> **日期 (Updated)**: 2026-11-07
 > **权威 (Authoritative)**: 否（过程记录，非单一事实源；权威现状见 `../current-state/`）
 
 # claude-log —— Claude 行动日志（Henry 的监督轨迹）
@@ -21,7 +21,7 @@ Codex 纯写代码，他的工作有**天然轨迹**：git commit、`docs/releas
 
 ## 格式
 
-一天一个文件：`YYYY-MM-DD.md`，**最新在最上**。每条：
+**按月一个文件**：`YYYY-MM.md`（2026-11-07 起；之前按天或按会话的旧文件原地冻结，不改写），条目**追加在末尾**，§ 编号**跨文件连续**（2026-09-09.md 止于 §297，2026-11.md 从 §298 起）。只有 Main_Designer 写这本台账；Tester 和 builder 按各自角色卡（`docs/agent-ops/roles/`）记录。每条：
 
 ```
 ## <序号> — <一句话标题>

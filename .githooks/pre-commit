@@ -12,7 +12,7 @@ soft_gate_failed() { #
 } #
 #
 docs_check_failed() { #
-  printf '⚠️ Coincides 文档软闸警告：npm run docs:check 未通过（exit %s）；本钩子只警告、不阻断，本次提交仍会继续。\n' "$1" >&2; #
+  printf '⛔ Coincides 文档闸：npm run docs:check 未通过（exit %s），本次提交已被拦下。修好后再提交；⛔ 未经 Henry 逐次同意不得用 --no-verify 绕过。\n' "$1" >&2; #
   printf '%s\n' '请运行 npm run docs:check 查看详情；索引修复：node scripts/docs-index.mjs' >&2; #
   printf '%s\n' '射程边界 1：docs:check 检查工作树，不检查暂存快照。若旧版生成件已 git add、工作树随后重新生成，软闸可能说绿，但提交的仍是旧版；它看不见 index 与工作树的差异。' >&2; #
   printf '%s\n' '射程边界 2：软闸只覆盖 docs:check 的两项（docs-index / docs-inventory），不覆盖“新文件忘了 git add”；这正是 d799d50 事故的形状。' >&2; #
@@ -35,7 +35,7 @@ case "$check_status" in #
   0) exit 0 ;; #
   124|137) soft_gate_failed 'docs:check 超时' ;; #
   125|126|127) soft_gate_failed "无法运行 docs:check，exit $check_status" ;; #
-  *) docs_check_failed "$check_status" ;; #
+  *) docs_check_failed "$check_status"; trap - 0 1 2 3 15; exit 1 ;; #
 esac #
 #
 exit 0; #

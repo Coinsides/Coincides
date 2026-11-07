@@ -1,7 +1,7 @@
-> **状态 (Status)**: draft
+> **状态 (Status)**: active（2026-11-07 Henry 拍「都可以,就这么办」）
 > **层 (Layer)**: 协议 / Ops Protocol（角色卡）
 > **日期 (Updated)**: 2026-11-07
-> **权威 (Authoritative)**: 否（草稿，候 Henry 过目）
+> **权威 (Authoritative)**: 是（角色义务）
 
 # 角色卡：builder（工程实施）
 

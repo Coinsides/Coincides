@@ -3,13 +3,15 @@
 > **日期 (Updated)**: 2026-06-27
 > **权威 (Authoritative)**: 是
 
-# handoffs —— Henry × Claude × Codex 三方交接区
+# handoffs —— 订单区(Main_Designer × Tester × builder)
+
+> **2026-11-07 起的角色名映射**:下文判例沿用旧称,读时按此对应 —— 总部 / Fable / Project review 会话 / 调度方(Opus) → **Main_Designer**;Codex builder / 施工方 → **builder**;Codex reviewer / 复核方 → **Tester**。角色卡见 `docs/agent-ops/roles/`。判例原文不改。
 
 ## ⭐⭐ 通信协议(2026-08-30 Henry 常设令,经总部转达;⛔ 传递给一切下级)
 
 ### 1. 一切问题走总部,⛔ 不找 Henry
 
-**任何问题、请示、翻牌、卡点 —— 一律 `SendMessage` 找总部(Project review 会话)。**
+**任何问题、请示、翻牌、卡点 —— 一律找 Main_Designer。** 写在订单尾部 `## 提问(<角色> YYYY-MM-DD)`,并把看板该行的持有者改成 Main_Designer;收得到会话短讯的,再补一行指针。Codex 代理收不到短讯,所以文件这一步不能省。
 ⚠️ **总部的会话名会变**(2026-08-29 是 `coincides-5d`,08-30 起是 `coincides-23`)⇒ **用 `ListAgents` 认当前那个 interactive 会话,⛔ 不记死名字。**
 
 **需要 Henry 本人的只有四类**,而且**这四类也先报总部,由总部汇总找他**:
@@ -135,32 +137,39 @@
 
 ## 文件格式
 
-一份交接 = 一个 md。文件名：`YYYY-MM-DD-<slug>.md`。顶部一行 header：
+一份订单 = 一个 md,只放一项(旧的多项单按项在单卡里分行)。文件名:`YYYY-MM-DD-<单号>-order.md`;**单号** = 文件名去掉日期和 `-order.md`,审计目录、判语台账、看板都用它。顶部状态头:
 
 ```
-> from: <claude|codex|henry> | to: <claude|codex|henry> | status: <draft|ready|done|closed> | re: <slug> | date: <YYYY-MM-DD>
+> **状态 (Status)**: active | archived
+> **层 (Layer)**: 交接 / Handoff(订单)
+> **日期 (Updated)**: YYYY-MM-DD
+> **权威 (Authoritative)**: 规格与单卡里的现行裁定是施工依据
+> **from**: Main_Designer | **to**: builder;核验 Tester
 ```
+
+状态头之后、规格之前是 `## 单卡(现行,覆盖写)`,格式见 `analysis/2026-11-07-role-records-design.md` 3.2。尾部每个新追加的 `##` 标题都以 `(<角色> YYYY-MM-DD)` 结尾,日期写写作日。
 
 正文 = spec / 结果 / 问题本身。**写成 spec（文件、契约、验收标准、约束），不是聊天语气** —— spec 没有口音，任何 agent 读起来一样。
 
 ## 状态流转
 
-- `draft` —— 作者写好；若是「要建的活」，需 Henry 审过才能往下。
-- `ready` —— **Henry 已批准**；目标 agent 可以执行。（这是唯一的人工闸：Henry 把 `draft` 翻成 `ready`。）
-- `done` —— 目标 agent 做完，在同文件追加 `## Result`，或另写一份回执交接。
-- `closed` —— 已确认收口，可留档。
+- **阶段写在单卡里**,只用:`排队 | 施工 | 待验 | 返修 | 待裁 | 待收割 | 待部署 | 已上岛 | 已核 | 关闭`。状态头的 `状态` 只用 active / archived(关闭时改 archived)。
+- **派单(排队 → 施工)由 Main_Designer 决定并执行**,依 Henry 2026-08-19 的代理授权和工作流,不需要 Henry 逐张批。⛔ builder 和 Tester 没有派单权。
+- **Henry 保留的四类事**(体感走查、迁移触发、推翻他的裁定、权限文件改动):订单涉及其中任何一类,必须 Henry 本人点头,并在单卡状态块写明出处。
+- **谁交出,谁改阶段**:builder 交货改成「待验 · Tester」;Tester 下判语改成「待裁 · Main_Designer」;其余阶段由 Main_Designer 改。
 
 ## 流程
 
-1. Claude 写 spec → `from: claude / to: codex / status: draft`。
-2. Henry 读、改、把 `status` 翻成 `ready`。
-3. Codex 开工时（由根 `AGENTS.md` 指引）扫到 `ready` 的活，执行，写回 `status: done` + `## Result`。
-4. Claude 读回执，审 diff，给结论。
+1. Main_Designer 写订单(规格 + 单卡),阶段「排队」,在看板排期;派单时改成「施工 · builder」。
+2. builder 在副本里施工,交付时在订单尾部追加 `## <项> Result(builder 日期)`,证据放 `docs/audits/<日期>-<单号>/builder/`,阶段改成「待验 · Tester」。
+3. Tester 冻结快照、复核,报告放 `docs/audits/<日期>-<单号>/tester/review.md`,判语写在最前面并登记 `records/tester/verdicts.md`,阶段改成「待裁 · Main_Designer」。
+4. Main_Designer 裁定:返修(回到第 2 步)或放行;放行后收割、提交、部署,并在看板更新岛上版本。
+5. Tester 部署后去岛上复走,在 `verdicts.md` 那一行填「部署核对」;Main_Designer 把阶段改成「关闭」。
 
 ## 约定
 
-- **不删原文**：交接是 append-only；状态只在 header 里改。
-- 一份交接只干一件事（一个 `re:`）。
+- **不删原文**:规格和尾部是 append-only;只有状态头和顶部单卡可以覆盖写。
+- 一份订单只放一项(新单起);旧的多项单按项在单卡里分行。
 - 遇到与 spec 假设不符的情况**不要猜** —— 在 `## Result` 里记下、标 `needs: claude/henry`。
 - `done` / `closed` 的交接可移到 `archive/` 子目录，或留原地。
 
@@ -174,6 +183,7 @@
 ## 翻牌来源标注(2026-08-21 增,调度下沉后)
 
 `ready` 的翻牌方有两种,**工单文首必须注明是哪一种**:①**Henry 本人**批准;②**调度方(Opus)按 Henry 亲授的下沉工作流**翻牌(注明设计裁定出处,如「Fable 裁定 §x」),并明写「不代表 Henry 逐张批过」。理由:两张牌的授权强度不同,将来回看必须分得出来(Henry 保留全量推翻权,逐张可翻)。
+> **2026-11-07 起**:派单权的现行规定见上文「状态流转」;本节作为判例保留。新单的出处写在单卡状态块:「Main_Designer 派单」或「Henry 本人点头(出处)」。
 
 #### 附注:调度方给工单加设计级内容,先写还是先问?(2026-08-23)
 > ✅ **Henry 已追认**（2026-08-26，本会话直接作答「2～4我都觉得你说的就OK了」，含全批四条待追认；记录：claude-log/2026-08-26.md 条目 6）。本条自即日起为可执行依据。

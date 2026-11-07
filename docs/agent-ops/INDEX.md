@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 464 份文档。
+共 465 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -100,8 +100,8 @@
 | [analysis/2026-09-22-flip-day-briefing.md](analysis/2026-09-22-flip-day-briefing.md) | 翻牌日呈批案(九件) | `active` | — | — |
 | [analysis/2026-09-23-knowledge-architecture-target-design.md](analysis/2026-09-23-knowledge-architecture-target-design.md) | 知识架构目标态设计稿 v2(候拍) | `draft` | — | — |
 | [analysis/2026-11-02-knowledge-establishment-plan.md](analysis/2026-11-02-knowledge-establishment-plan.md) | 知识建制更新 —— 原子 / 透镜 / 事由 / 痕迹 | `**已翻牌(Henry 2026-11-02 亲拍)** —— 翻牌点①认(教义已铸宪章增补节)②认(分期顺序照表)③锁 UX=图标点选,机理从便(必要用布尔,施工单定)④普查暂落项目页;**附加令**:日历入口随本更新暴露(侧栏,外观候后期统一动刀,「现在重要的是能不能服务学习」)` | — | — |
-| [analysis/2026-11-07-role-records-design.md](analysis/2026-11-07-role-records-design.md) | 三个角色的常设记录体系（设计稿） | `draft` | 2026-11-07 | — |
-| [analysis/2026-11-07-role-records-rule-changes-draft.md](analysis/2026-11-07-role-records-rule-changes-draft.md) | 角色记录体系：规矩文件修改稿 | `draft` | 2026-11-07 | — |
+| [analysis/2026-11-07-role-records-design.md](analysis/2026-11-07-role-records-design.md) | 三个角色的常设记录体系（设计稿） | `accepted（2026-11-07 Henry 拍第九节 6 问并通过规矩稿;施工按第六节进行）` | 2026-11-07 | — |
+| [analysis/2026-11-07-role-records-rule-changes-draft.md](analysis/2026-11-07-role-records-rule-changes-draft.md) | 角色记录体系：规矩文件修改稿 | `applied（2026-11-07 Henry 拍「都可以」,27 处已由 Main_Designer 原样写入;本文留作判例）` | 2026-11-07 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -143,8 +143,9 @@
 | [claude-log/2026-09-04.md](claude-log/2026-09-04.md) | Claude 工作日志 · 2026-09-04 | `(缺状态头)` | — | — |
 | [claude-log/2026-09-07.md](claude-log/2026-09-07.md) | Claude Log · 2026-09-07(Fable 会话) | `(缺状态头)` | — | — |
 | [claude-log/2026-09-08.md](claude-log/2026-09-08.md) | Claude Log · 2026-09-08(Fable 会话) | `(缺状态头)` | — | — |
-| [claude-log/2026-09-09.md](claude-log/2026-09-09.md) | Claude Log · 2026-09-09(Fable 会话) | `(缺状态头)` | — | — |
-| [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
+| [claude-log/2026-09-09.md](claude-log/2026-09-09.md) | Claude Log · 2026-09-09(Fable 会话) | `archived` | 2026-11-07 | — |
+| [claude-log/2026-11.md](claude-log/2026-11.md) | Main_Designer 台账 · 2026-11 | `active` | 2026-11-07 | — |
+| [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-11-07 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
@@ -446,7 +447,7 @@
 | [handoffs/2026-11-05-a18-first-block-text-loss-order.md](handoffs/2026-11-05-a18-first-block-text-loss-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md](handoffs/2026-11-05-a19-a20-image-pages-and-idle-save-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md](handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md) | (无标题) | `(缺状态头)` | — | — |
-| [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
+| [handoffs/README.md](handoffs/README.md) | handoffs —— 订单区(Main_Designer × Tester × builder) | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
@@ -470,9 +471,9 @@
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
 | [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-26 | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
-| [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `draft` | 2026-11-07 | — |
-| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `draft` | 2026-11-07 | — |
-| [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `draft` | 2026-11-07 | — |
-| [roles/builder.md](roles/builder.md) | 角色卡：builder（工程实施） | `draft` | 2026-11-07 | — |
-| [roles/main-designer.md](roles/main-designer.md) | 角色卡：Main_Designer（主设计） | `draft` | 2026-11-07 | — |
-| [roles/tester.md](roles/tester.md) | 角色卡：Tester（验收） | `draft` | 2026-11-07 | — |
+| [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `active` | 2026-11-07 | — |
+| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-07 | — |
+| [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `active` | 2026-11-07 | — |
+| [roles/builder.md](roles/builder.md) | 角色卡：builder（工程实施） | `active` | 2026-11-07 | — |
+| [roles/main-designer.md](roles/main-designer.md) | 角色卡：Main_Designer（主设计） | `active` | 2026-11-07 | — |
+| [roles/tester.md](roles/tester.md) | 角色卡：Tester（验收） | `active` | 2026-11-07 | — |

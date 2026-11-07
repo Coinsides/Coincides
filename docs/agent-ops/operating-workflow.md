@@ -14,18 +14,18 @@
 | 层 | 文件 | 作者 | 内容 |
 |---|---|---|---|
 | **Plan** | `handoffs/plans/<version>.md` | Fable | 目标 / DoD(契约门+旅程分数)/ 触及面申报 / 编号步骤(各带 RED 靶)/ 边界 / 步骤状态表 |
-| **Order** | `handoffs/<date>-<version>-<step>.md` | Opus(从 plan 拆)| 施工单;修正轮追加同文件 |
-| **Receipt** | 同工单文件 `## Result/## Review/## Review-2`;`claude-log/` | builder / reviewer / Opus / Fable | 现行不变 |
+| **Order** | `handoffs/<date>-<单号>-order.md` | Main_Designer | 施工单:规格 + 顶部单卡(覆盖写);裁定和 Result 追加在尾部 |
+| **Receipt** | 订单尾部 Result;`docs/audits/<日期>-<单号>/{builder,tester}/`;`records/tester/verdicts.md`;`claude-log/` | builder / Tester / Main_Designer | 见各角色卡 |
 
 **消息纪律**:跨会话消息只用于 ①方向变更 ②一行指针(「X 已落盘」)③升级告警。**报告不进消息**。
 *理由:文件是权威通道(CLAUDE.md);消息里重述文件=同一事写两遍、两个会话各吃一遍上下文(08-20 实测)。*
 
-## 2. 指挥链(Henry → Fable → Opus → Codex)
+## 2. 指挥链(Henry → Main_Designer → Tester / builder;2026-11-07 起)
 
-- **Fable**:设计稿与 plan、拍板(设计介入)、抽样抽检、终检与铸版、大版本复盘。**不写产品代码,不逐单调度。**
-- **Opus(Fable 负责)**:从 plan 拆单、启动与监视 codex builder/reviewer、按步骤汇总复核、维护 tech-debt 与生成件;**只在三种情况升级 Fable**:设计级 finding(裁定卡 §2)、止损触发(§3)、plan 步骤收口。每日一份摘要。
-- **Codex builder**:按 plan 步骤自驱多工单(V11 模式),按步骤 checkpoint;**Codex reviewer**:按步骤攒批、增量协议(角色卡 5-7)。
-- **Claude 会话不下场施工**(Henry 08-21)。
+- **Main_Designer**(固定由主设计会话担任):设计、裁定、派单、收割提交、部署、对 Henry 汇报;维护看板、台账、tech-debt 与生成件。**不做验收,不写产品代码。** 角色卡 `roles/main-designer.md`。
+- **Tester**(Claude 会话或 Codex 代理):对抗式复核、冻结快照、下判语、部署后复走、回归。角色卡 `roles/tester.md`;复核纪律承接原 reviewer 角色卡 5-1 到 5-10。
+- **builder**(Claude 会话或 Codex 代理):在副本里施工,交 Result 和证据。角色卡 `roles/builder.md`。
+- 三者共读看板 `current-state/board.md`;一切指令和交接落在文件里,会话短讯只是指针。
 *理由:昨日 Fable 兼任调度员,34 场 codex 会话逐单重读全仓;策略上下文被代码细节挤占。调度下沉后 Fable 上下文回到设计层。*
 
 ## 3. 版本纪律
@@ -46,4 +46,4 @@
 
 ## 5. 即时生效
 
-12.2 起按本流程:Fable 出 plan → Opus 拆单与调度 → Fable 抽检/拍板/铸版。
+2026-11-07 起按 §2 的三角色链执行。注意:§3 的版本纪律(注解标签、铸版)自 `v2.bn.12.1.1` 之后没有执行过,要不要恢复由 Henry 定;§3.5 的 token 经济学排序沿用旧角色名,只作历史参考。
