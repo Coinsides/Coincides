@@ -1782,3 +1782,15 @@ Tester 推断:第二次落地拿第一次落地**之前**的文本流算合并�
 - **机理**(builder 按代码坐实,与 Tester 推断一致):重开恢复循环在一个 effect 里对每条记录同步 `openEntry → retainWords → placeTyped`;`placeTyped` 读→合→`flushSync(applyEdit)` 之间无 await,**但 effect 内 `flushSync` 不提交**,history `latest.current` 仍是落地前的流,下一条读到旧流、以旧 `previousTextFlow` 整块写回。r2.3 时第一条起结构置 busy,第二条轮询等到新流,所以没撞。修:`landKept` 每笔记一条队列,一条一个任务、在 effect 之外,上一条 flushSync 提交后下一条才读。G1:`placeTyped` 对留住字在 `activeElement` 为框时本拍不落、不翻倍,盖住组字回调。G2 守卫测试。G4 文案。F3 撤回保留。拷回计划更新为 r2.3c。**合格。**
 - **转 Tester**(包 `editor-rework-r2.3c/`,主 JS `index-BVrO4Ql1.js`):控制器臂全跑(矩阵、K、H-L 0/N、Y1 ×6、acc13、acc18 两形状、TWO2 ×6 撞覆盖写、BOXTYPE 三形状丢 0、LANDFAIL2、EDGE、NA);GEO / acc14 / BAN / 先 Dismiss **自己 diff 核过框文件只差两字符串后沿用**,否则重跑。判语按 Henry 11-08 尺。
 - **转 Reviewer**(并行):落地三入口是否都进 `landKept` 队列;读流与 apply 之间无残留 await;队列中一条 keep 不卡后面;G1 盖住 `C:456` 组字路;队列任务在 effect 之外是否有卸载 / 换笔记时的清理。
+
+## Reviewer r2.3c 复核的裁定:六重点落实、无 ③;H1–H3 不丢字,入 A-25(Main_Designer 2026-11-08)
+
+Reviewer 报告「r2.3c 复核」节:三入口进 `landKept` 且任务在 effect 外;读→合→apply 无 await(`apply` 在首个 await 前同步 `setBlockTextFlowDrafts`,effect 外 flushSync 即提交,`readLiveFlow` 读的正是它);builder 两次读流行号 `C3b:464 / :540-541` + 恢复循环 `:612-617` 对上;keep 不卡后面;G1 盖组字回调、判的是框 textarea;换笔记不落错笔记。
+
+| # | 发现(🅱,皆不丢字) | 裁定 |
+|---|---|---|
+| H1 | 队列任务同步抛异常 → `landingScheduled` 永真 → 本次挂载后台落地全停(`C:204-206`);字留框与存档(②) | **A-25**:try/finally 加固,一行;本轮不动控制器 |
+| H2(疑似) | 入队后换笔记 → `C:482` 对 `!live` 直接 return、重试链断;回来恢复循环又跳过它(已在 kept 集)→ 要整页重载才落;r2.3c 引入的间隙(②) | **A-25**:改走 retryTimer;Tester 若在地址栏 / 换笔记臂见到「回来后框不自动落」记 ②、注 H2,不算退步 |
+| H3 | G2 守卫按读码可守,但缺「删 `C:241` 即红」的对照;前提是撤销真把角色改回 paragraph | 下次动控制器时补对照;不单开 |
+
+**r2.3c 的放行只看 Tester 的数。**
