@@ -14,7 +14,7 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 编辑器组返修(A-18 残留、A-21、A-24) | 返修 | builder | **r2.3**(控制器 + 框):①留住字「空等于空」自动落加角色一致条件;②框:停靠位过自检 / 多框不重叠 Discard 命中谁删谁 / 锚上框高 ≤ 单元行(Tester r2.2 GEO 两红:停靠伸进栏盖字、两框重叠删错,③)。r2.2 回执合格(`index-sNlfO3uB.js`,m7)。r2.3 上行为臂 + GEO 全跑,无沿用。裁定见尾部「r2.2 框侧两条红」节 | 2026-11-07 |
+| 编辑器组返修(A-18 残留、A-21、A-24) | 待验 | Tester | r2.3 已交(builder 2026-11-08):控制器角色收窄 + 框第 7–9 条;包 = ops `packages/editor-rework-r2.3/`(主 JS `index-CUqxwHSs.js`);回执在尾部「编辑器组 r2.3 Result」;行为臂与 GEO 全在 r2.3 上复测 | 2026-11-08 |
 | A-25 | 排队 | Main_Designer | 编辑器组收割后派单(排在 A-19 之前) | 2026-11-07 |
 | A-19 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
 | A-20 | 排队 | Main_Designer | 编辑器组之后 | 2026-11-07 |
@@ -70,6 +70,7 @@
 - 包:ops `packages/editor-rework-r2/`(`dist/` 主 JS `index-BlJnjQci.js` + `src/` + 两份哈希);纯 21 文件包的源码快照在 `packages/editor-rework-pure21/src/`。
 - **r2.1**(留字框跟随版面):对 r2 只改 `structureTypingBuffer.ts` 和 `hooks/useHeadingStructureController.test.tsx`,其余 20 个逐字节同(控制器不变);sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/source-sha256-r21.txt`;包 ops `packages/editor-rework-r2.1/`(主 JS `index-Ck4z0VFS.js`)。
 - **r2.2**:对 r2.1 改控制器、框和两个测试文件,其余 18 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/source-sha256-r22.txt`;包 ops `packages/editor-rework-r2.2/`(主 JS `index-sNlfO3uB.js`)。
+- **r2.3**:对 r2.2 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/source-sha256-r23.txt`;包 ops `packages/editor-rework-r2.3/`(主 JS `index-CUqxwHSs.js`)。
 
 ### 自报数字(builder)
 
@@ -90,10 +91,12 @@
 | r2.1:「定位后改版面」几何测试在 r2 框代码上红(300≠396)、r2.1 上绿 | `vitest run … -t "r2.1"`,换入 r2 的 `structureTypingBuffer.ts`(副本内,trap 复原) | 副本 | `matrix-6-r2.1/red-controls.txt` |
 | r2.2:构建 exit 0;类型检查净;客户端全量 2667/2667;三个检查脚本 exit 0;r04@57 156 行坏 0;8 条阳性对照 r2.1 上红、r2.2 上绿 | 同上 | r2.2 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/summary.txt`、`red-controls-full.txt` |
 | r2.2 浏览器:注入矩阵 ①14 ②12 ③0;K ①2 / ②′2 / ②2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.2 包,延迟 57 | `matrix-7-r2.2/enter-r22.json`、`k-r22.json`、`hl-r22.json` |
+| r2.3:构建 exit 0;类型检查净;客户端全量 2673/2673;三个检查脚本 exit 0;r04@57 156 行坏 0;阳性对照见 red-controls A–D 段 | 同上 | r2.3 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/summary.txt`、`red-controls-r23.txt` |
+| r2.3 浏览器:注入矩阵 ①20 ②6 ③0;K ①2 / ②′2 / ①2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3 包,延迟 57 | `matrix-8-r2.3/enter-r23.json`、`k-r23.json`、`hl-r23.json` |
 
 ### 待办(builder)
 
-- 已交 Tester(r2.2 包),等判语;回执文首 ⚠️ 候 Main_Designer 裁。拷回共享树候 Main_Designer 令。
+- 已交 Tester(r2.3 包),等判语。拷回共享树候 Main_Designer 令。
 - 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
 
 ### 验收条件(Tester,待 Tester 填)
@@ -1380,3 +1383,91 @@ Tester 在真浏览器坐实核读指出的 3b(其 H-L 臂):`warmup` 回车 → 
 **沿用规则更新**:r2.3 控制器 + 框都变 → 行为臂与 GEO 全在 r2.3 上跑;r2.2 的 GEO 过的几项(BAN、先 Dismiss、GEO-enter、GEO-long)作「r2.2 早期」记。
 
 **给 Henry 的一句**:留字框第四次在几何上出事(盖上一行 → 不跟版面 → 搬走单元后压行 → 停靠伸进栏/两框叠)。每一次修法都对,每一次都有下一个没想到的形状。我仍不建议停下重想——它的职责很窄(把没落下的字留在屏上、不盖字、能显式丢弃),这三条写成**不变量 + 自检 + 可变 rect 测试**后应该收口;r2.3 若再出几何红,我会停下来把框整体重做成「边栏清单」而不是浮层。
+
+## 编辑器组 r2.3 Result(builder 2026-11-08)
+
+答「r2.2 回执收讫 + ⚠️ 裁定」(角色收窄)和「r2.2 框侧两条红」(第 7–11 条)。证据 `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/`(下称 m8)。
+
+### 包与同源
+
+- 源码 = `9bc45e69` + 22 个文件,副本−基线仍是这 22 个。逐文件 sha256 对 r2.2(`m8/source-sha256-r23.txt`):
+  - `r2.3改`:
+    - `hooks/useHeadingStructureController.ts`(`a10ac50e9b49…`)
+    - `structureTypingBuffer.ts`(`b29e2ecf9ae5…`)
+    - `hooks/useHeadingStructureController.test.tsx`(`d595189e4dac…`)
+  - 其余 19 个与 r2.2 逐字节同,含守恒闸。
+- 包:ops `packages/editor-rework-r2.3/`。`dist/` 主 JS `index-CUqxwHSs.js`,63 个文件;`src/` 22 个文件;两份哈希与 m8 一致。r2.2 及更早的包都没动,`edfix` 没动。
+- 控制器和框都变了,行为臂和 GEO 都没有沿用。
+
+### 全量、检查、阳性对照
+
+| 数 | 证据 |
+|---|---|
+| 构建 exit 0;类型检查净;客户端全量 2673/2673;守恒闸 40 种子绿 | `m8/summary.txt`、`client-full.raw` |
+| 三个检查脚本 exit 0;r04@57 156 行坏 0;dist 跑前跑后一致 | `m8/check-*.txt`、`r04-r23-57.log`、`summary.txt` |
+| 阳性对照(下节逐条) | `m8/red-controls-r23.txt` A–D 段 |
+
+### 角色收窄(控制器)
+
+- 留住时,存档记下单元当时的 `writing_role`。三处写存档都带:留住、pagehide、3b 落地档。记录跟着单元搬块时,角色随记录不变。
+  - 类型 `UnplacedWords` 在框文件里;角色作为存档 JSON 里多出的字段写入,控制器里用扩展类型读写,类型声明没动。
+- 留住的字「空等于空」自动落,三者同时成立才放行:按 (blockId, unitId) 当前确有其单元;单元文本为空;单元 `writing_role` 与记录角色相同。旧记录没有角色字段 → keep。活窗口照旧。
+- 测试(`m8/red-controls-r23.txt`):
+  - (a) Y1 原测试:r2 / r2.1 红,r2.2 绿,r2.3 绿(A、B、D 段)。
+  - (b) Y1 变体(存档仍指旧块、原块回车新建同号空段落、记录角色是 `heading_1`)→ keep:r2 / r2.1 红,r2.2、r2.3 绿。
+  - (c) 回归守卫(建块失败后留住,服务端是空标题单元,重开)→ 自动落:**r2 绿、r2.2 红、r2.3 绿**(A、B、D 段)。这条证明收窄把失去的恢复拿回来了。
+
+### 框(第 7–9 条)
+
+只对留住的框;活窗口照旧压在自己单元上。
+
+- **锚上**:框高不超过所在单元编辑器的高度,字在框内滚动,不会因为比单元高就盖到下一行、再触发停靠。
+- **自检**:每次放置后检查框和提示条,不得与自己单元以外的任何编辑器、任何别的框、任何别的提示条相交。
+- **停靠**:框改为 border-box,宽度就是实际宽度。r2.2 的框是 content-box,padding 把它撑宽,伸进了文本栏,Tester 量到 right 784、栏从 711 起。
+  - 停靠位整框在文本栏外,先右后左,一侧至少要 200px 才停。
+  - 提示条在框内顶部一行,最大宽度不超过框。
+  - 撞上别的框或提示条,就移到它下方(间隔 6px)。
+  - 停在原处且仍合格就不动。
+- **折叠**:两侧都放不下,框收起,只剩提示条,带 `Show words` / `Hide words` 按钮,按钮顺序是 Discard 在前。
+  - 折叠条也过同一自检:先窗口右缘、再左缘,从上往下找第一个不盖任何东西的位置,多条折叠条依次往下排。
+- **命中谁删谁**:框与框、提示条与提示条不再重叠;每个提示条的 Discard 只关自己那条记录。z 序:框 2147483000,提示条 2147483001。
+- 测试(jsdom,版面按浏览器行为模拟:content-box 的框宽含 padding,框高取 height 样式,内容每行 35px):
+  - (a) 35px 单元,留字两行 → 框高 ≤35,不与 `below` 相交。
+  - (b) 无锚,两侧边距各 50px → 折,折叠条不与任何编辑器相交;`Show words` 一点字就出来,Discard 仍在。
+  - (c) 两条无锚记录 → 两框、两提示条都不相交;点 `one` 的 Discard 后存档只剩 `two`。
+  - (d) 无锚、只有左侧放得下 → 停靠后 right ≤ 栏 left,提示条在框内。
+  - r2.2 上 (a)(c)(d) 红,(b) 绿(C 段)。**(b) 与裁定预期不同**:两侧都不够 320px 时,r2.2 本来就折。Tester 的 noEnter 红,机理是左侧放得下、content-box padding 把框撑进栏,这正是 (d) 在 r2.2 上红的原因(`expected 600 to be less than or equal to 400`)。
+- 原 `round 2 #4` 几何测试改为框锚在真单元上(原来那条用的是无锚记录,r2.3 下它本应停靠),断言不变。
+
+### 浏览器(r2.3 包;注入层写明)
+
+| 臂 | 注入层 | r2.3 | r2.2 |
+|---|---|---|---|
+| 注入矩阵 26 行 | 代理层(浏览器已发出) | **①20 ②6 ③0** | ①14 ②12 ③0 |
+| 其中 create / placement / hangWatchdog | 同上 | **① 2 / ① 2 / ① 2** | ② 2 / ② 2 / ② 2 |
+| 其中地址栏三臂:改地址离开、慢回包改地址、慢回包卸载 | 同上 | ② 2 / ② 2 / ② 2 | 同 |
+| K:卡 12 秒后成功 / 失败 / 卡住 + 卸载 / 卡 25 秒后成功 | 代理层扣改角色那次 text-save | ① 2 / ②′ 2 / **① 2** / ②′ 2 | ① 2 / ②′ 2 / ② 2 / ②′ 2 |
+| H-L(`h_HL`,不是 Tester 的 H-L 时序) | 浏览器请求阶段(CDP Fetch) | ② 3 | ② 3 |
+| r04@57(冒烟) | 无注入 | 156 行坏 0 | 同 |
+
+- `h_HL` 仍是 ②:本臂扣住的是第一次带 `body` 的保存,库里那个单元是 `#`(非空),字无锚,留住。Tester 的 H-L 时序(结构走完、字作普通编辑落地)由 Tester 复测,按裁定那条应回 ①。
+- **GEO**:Tester r2.3 复测(其判据已加:框与框不叠、锚上框高 ≤ 行高、停靠过自检否则折、窄窗口 1100 / 950 变体)。我这边的单元证据:上面 (a)–(d) 四条,外加 `r2.1 #4`(定位后移版面)和 `r2.2 #6 (i)(ii)`(记录跟单元走、无锚不压行),都在 r2.3 全量里绿。
+
+### 残余风险
+
+- **id 复用误落**:同块里单元号被复用 + 同一角色 + 新单元为空,三者同时成立,留住的字才会落进那个新单元。记入 A-25「单元 id 可复用」(与 clientCreateKey 同题)。
+- **极窄窗口**(手机宽):两侧都放不下就折;折叠条也找不到不盖任何东西的位置时,放在窗口右上角(可能压到别的东西)。不作放行条件。
+- **字太多**:停靠框最高 160px,字在框内滚动;折叠条只显示提示与按钮,字一点即出,展开时是用户主动操作,不过自检。不作放行条件。
+- **覆盖缺口**(Tester 2026-11-08 知会):浏览器里 1100、950、760、610 四种宽度,左侧边距总放得下,「折成提示条」这条路径浏览器臂没触达,只有 jsdom 测试 (b) 覆盖。
+- 第 6 条只认本次挂载里结构自己做的搬动(同 r2.2)。
+
+### 待 Tester
+
+- 包:ops `packages/editor-rework-r2.3/`,`dist/` + `src/` + 两份哈希。复测范围按 Tester 定:GEO 全套(含窄窗口变体),行为臂全在 r2.3 上跑。
+- 拷回共享树候 Main_Designer 令。
+
+## 编辑器组 r2.3 回执收讫:角色收窄拿回三条恢复的 ①;框四条不变量先红后绿;转 Tester 复测(Main_Designer 2026-11-08)
+
+- **核对**(只读 m8):改 3 文件(控制器、框、控制器测试),19 同 r2.2 含闸;2673/2673、tsc 净、三检查、r04@57 156/0、dist 不变。角色收窄:Y1 与变体 r2/r2.1 红、r2.2/r2.3 绿;**回归守卫 r2 绿 / r2.2 红 / r2.3 绿**——收窄把失去的恢复拿回来了;浏览器 create / placement / hangWatchdog / K 卸载回 ① 2,矩阵 ①20 ②6 ③0。框:(a) 高度上限、(c) 不重叠 + 命中谁删谁、(d) 停靠整框在栏外三条 r2.2 红 r2.3 绿;(b) 折叠 r2.2 本就绿——**Tester noEnter 红的真因是 content-box 的 padding 把左停靠的框撑进栏**((d) 在 r2.2 上以 `600 > 400` 红复现),r2.3 改 border-box。回执把这处与裁定预期的差写明了,好。残余(id 复用三重巧合、极窄窗口右上角、160px 内滚动)写清,入 A-25。**合格。**
+- **转 Tester**:GEO 全套(BAN / 先 Dismiss / GEO-enter / GEO-noEnter / GEO-long / TWO、TWO2 / 窄窗口 1100、950)+ 行为臂(K 四臂、H-L 0/N 且应回 ①、注入矿阵、地址栏三臂、冒烟、acc12/13/14、Y1 ×6、EDGE、NA、守恒闸三步、旧矩阵)。**建议先跑挡放行的臂**(真丢字类 + GEO 两红的复测),其余随后;范围 Tester 定。
+- **放行尺候 Henry**:我已向 Henry 提议——r2.3 之后真丢字 = 0 即上岛,留字框的几何毛病不再挡、写进说明书,留住状态改边栏另开小单。Henry 未答前,放行条件仍按汇总那条(③ 为 0,含几何 ③)。
