@@ -1161,3 +1161,19 @@ Tester 在真浏览器坐实核读指出的 3b(其 H-L 臂):`warmup` 回车 → 
 - **测试**:Y1 三步的 jsdom 版——留住后结构把单元搬走、原块回车新建同号空单元、打 `next`;断言新单元只含 `next`、存档仍在、框仍在;r2.1 代码上红(`nextkept`)。Tester 的 Y1 脚本作浏览器臂。
 
 **r2.2 现有清单**:1 重试拍零副作用 + 有界;2 跨行界锚单元边界;3 `lastBatch`(候核读);4 「并成一单元」异常(候 Tester acc12c);**5 Y1 空锚捷径**。包等 3、4 有结论再封。
+
+## 编辑器组 r2.2 · 两条读码所得的核读:重试拍坐实(修法=先算合入再封界);`lastBatch` 坐实但后果被高估,十行内并入(Main_Designer 2026-11-07)
+
+来源:三路只读阅读(两读者 + 一怀疑者),对象 ops `editor-rework-r2.1/src/` 快照(控制器与 r2 逐字节同),行号对它。
+
+**A · 重试拍每拍封界(Tester acc14 实测 13 次保存 / 14 步撤销)——坐实。**
+- 两个 800ms 循环共用 `PLACE_RETRY_MS`(`:46`):(a)留住条目的 `retryTimer`(`:180-186`,`:207`/`:450` 起、`:184` 自续,**无计数无期限**;`waitingSince` 每拍重置(`:183/:406`),`overdue`(`:434`)永不累积);(b)3b 的 `confirm` 落地后等 flush(`:500-509`),`attempt < 30` 的上限只属于它。
+- 每拍 `placeTyped` 在算合入**之前**就调 `history.boundary()`(`:460` 先于 `:461 mergeTypedText`);卡住形状下 `:407-458` 的门全过,`mergeTypedText('#','', 'kept')` 回 null(`:80-84`)→ `keep()` → 再排 800ms。`boundary()` 无参时 `scope.session.seal()`(`useTextFlowHistory.ts:654-660`),session 按笔记一份(`:537-582/:610`),`onSeal` 把当前打字组推成独立撤销条目并排一次 persist → `saveBlock`(`:575-580 → :220`)。所以用户在笔记任何地方打字,每拍一个撤销步 + 一次保存。空闲拍是否发保存取决于 `textFlowEditSession.ts`(不在 22 文件内),Tester 实测空闲 10 秒 0 次,按实测记。
+- **r2.2 第 1 条的修法定为**:把 `:460-463` 的顺序倒过来——先 `mergeTypedText`,对不上 `keep(); return`,对得上才 `history.boundary()`。`mergeTypedText` 只读 live 流与框(`:417-419/:461`),`boundary()` 不改这两者,落地结果不变;落地前那一次封界(`:460 → :491`)照旧在 `applyEdit`(`:480`)之前。800ms 的节律与无上限可留(`:447` 注明是有意的),改完一拍卡住只读不写;退避/「单元文本变了才再试」是另一个决定,builder 可做可不做,回执写明。测试规格见核读(卡住记录 + 另一块开着打字组不封;40ms 重试拍;200ms 内 save mock 调用数不变;再手动 `boundary()` 一次 → +1;r2.1 上红)。
+
+**B · `lastBatch` 换笔记不重置 / 被放弃等待者让后续结构反复等——机理坐实,后果被高估。**
+- `lastBatch` 一个 `useRef` 槽(`:141`),`:301` 读、`:303` 在 `previous.session === session` 时等、**`:368` 才赋值**(在 `runStructureBatch :306` 之后);noteId 的 effect(`:219-222`)不重置它。「按笔记作用域」在「只等同笔记 batch」的意义上成立(`:303` 同笔记门),我原要求两种写法任一即可,**回执不算错**。
+- 卡链:run N 的 batch 不落定 → N+1 在 `:303` 等、被自己的看门狗放弃(`:284-291`)、永不到 `:368` → 槽仍指 N 的 promise → N+2、N+3 各再等满 10 秒。**但**:四个文件里每条失败路径都让它落定(`:368 batch.catch`;history `:940-943/:585/:603/:230-232/:370-371/:459-460/:518/:526-527`);只有适配器/宿主的写永不 resolve(无超时)或长时间卡顿才进得去——Tester 的 25 秒臂就是一种:卡顿期间每次新结构白等 10 秒。无丢字;每次 10 秒 busy、键进窗口、然后落地或留住。
+- **并入 r2.2 为第 3 条(十行内,照规矩)**:在 `:258` 旁加 `waitingFor`;`:303` 改为记下等的是谁、等完清掉;看门狗回调(`:284-291`)在 `activeRun.current = null` 后加:若本 run 仍在等且 `lastBatch.current === waitingFor`,把槽换成 `{ settled: Promise.resolve() }`。效果:下一个结构直接到 `runStructureBatch`,flush 落定后在 `useTextFlowHistory.ts:585` 被立即拒(`batchEntries` 非空)→ 立刻 onFailure,而不是再等 10 秒;flush 自身卡住则与今天同,不更差。测试规格见核读(watchdogMs 300;第一个 batch 的 reorder 永不 resolve;第二次结构被自己看门狗放弃 ≥300ms;第三次 <250ms 即失败——r2.1 上红、修后绿)。根子(写无超时)在适配器,不在本单。
+
+**r2.2 定稿清单**:1 重试拍先算合入再封界(必修);2 跨行界锚单元边界(必修);3 `lastBatch` 被放弃等待者归位(并入);5 Y1 空锚捷径禁用(必修);4 「并成一单元」0/6 不挡。**可封包**。
