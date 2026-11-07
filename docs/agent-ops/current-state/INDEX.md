@@ -14,9 +14,9 @@
 |------|------|------|------|--------|
 | [README.md](README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
 | [agent-constitution.md](agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
-| [app-operating-manual.md](app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-07 | — |
-| [board.md](board.md) | 看板：岛上是什么、在办什么、等谁 | `active` | 2026-11-07 | — |
+| [app-operating-manual.md](app-operating-manual.md) | Coincides 应用操作说明书 v2 | `active` | 2026-11-08 | — |
+| [board.md](board.md) | 看板：岛上是什么、在办什么、等谁 | `active` | 2026-11-08 | — |
 | [deferred-tests.md](deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [glossary.md](glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [page-frame-and-layout-contract.md](page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-11-05(1a-乙收割,新增 TD-45 至 TD-48) | — |
+| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56) | — |

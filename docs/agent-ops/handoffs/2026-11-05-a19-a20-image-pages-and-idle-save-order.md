@@ -1815,9 +1815,9 @@ Tester 判语(`docs/audits/2026-11-05-a21-builder/review-tester.md` 〇〇节,�
 
 ### 归类 2:LANDFAIL2 / LANDFAIL3(落地保存一律 500 时整篇拒收按键)——不算 ①,归 A-25 既有那条;说明书加一行
 
-- 事实(Tester):带留字记录重开、text-save 全回 500,别的行打 83 键 0 上屏;对照(无记录)83 键全上屏。屏上有恢复横幅(Apply / Dismiss)和每键一条提示;没有 Retry;文案说「Heading changes」。网络恢复后约 26 秒落地保存成功,字进库(②′),记录清掉;重开两次无重复无框,打字恢复。r2.3 上同样。
-- ① 的定义是「字在服务端、存档、框**任何地方都没有**」。这里被拒的键**从未被应用接收**——每一下都有可见提示,没有「上了屏又消失」的字;留住的记录本身在恢复后落地入库。**不是 ①。**
-- 它是 r2.2 节(1339 行)已入 A-25 的那条「409 后状态卡死、⛔ 无提示只读」的同一机理:保存失败保持期(`unresolvedTransfer` / 失败保持)拒打字、等 Retry/Undo,只是这次从落地路径进入。**A-25 该条扩三点**:(a) 保持期整篇拒键,而不是只拒出事的那一块;(b) 无常驻 Retry 控件(26 秒被动等);(c) 提示文案「Heading changes could not be completed. Undo to restore the previous text.」对普通打字不成立,改为说「保存没成功、字还留着、重试或撤销」。
+- 事实(Tester):带留字记录重开、text-save 全回 500,别的行打 83 键 0 上屏;对照(无记录)83 键全上屏。屏上有恢复横幅(Apply / Dismiss)和每键一条提示;没有 Retry;文案说「Heading changes」。落地保存在重开后 1.3–1.4 秒失败,第 26.3–26.6 秒再试一次成功(两轮间隔 25.1–25.2 秒;其间网络早已恢复,应用没有因恢复而重试——即「失败后约 25 秒定时重试一次」,Tester 2026-11-08 更正),字进库(②′),记录清掉;重开两次无重复无框,打字恢复。r2.3 上同样。
+- ① 的定义是「字在服务端、存档、框**任何地方都没有**」。这里被拒的键**从未被应用接收**——每一下都有可见提示,没有「上了屏又消失」的字;留住的记录本身在重试成功后落地入库。**不是 ①。**
+- 它是 r2.2 节(1339 行)已入 A-25 的那条「409 后状态卡死、⛔ 无提示只读」的同一机理:保存失败保持期(`unresolvedTransfer` / 失败保持)拒打字、等 Retry/Undo,只是这次从落地路径进入。**A-25 该条扩三点**:(a) 保持期整篇拒键,而不是只拒出事的那一块;(b) 无常驻 Retry 控件(只有失败后约 25 秒的一次定时重试,被动等;那次仍失败后的行为待 Tester 岛上补测);(c) 提示文案「Heading changes could not be completed. Undo to restore the previous text.」对普通打字不成立,改为说「保存没成功、字还留着、重试或撤销」。
 - 说明书「已知」加一行:保存失败时整篇可能暂时不接受输入,屏上有提示;网络恢复后字自动落回。
 
 ### 观察的处置
@@ -1838,3 +1838,6 @@ Tester 判语(`docs/audits/2026-11-05-a21-builder/review-tester.md` 〇〇节,�
 
 - builder 拷回:22 OK;canvasEngine 其余 7 条(A-19 的)拷前后一致;tsc 净(在 `client/` 目录跑 `npx tsc --noEmit -p .`,仓库根没装 typescript)。我自核 22 OK;`9bc45e69..HEAD` 代码零改动,本次提交的代码恰为 22 文件。
 - 审计目录 `2026-11-05-a21-builder/`(617 文件)与 `2026-11-05-a18-builder/`(27 文件)入库;本机路径与会话目录已换成 `<home>` / `<tmp>` / `<ops>` / `<session>`,重扫为零。`*.log`(89 个)按仓库 `.gitignore` 不入库,与既往审计一致;正本在 builder / Tester 本机与私有 ops 目录,回执里指向 `.log` 的证据以同目录的 `.txt` / `.json` 汇总为准。
+- **部署**:Tester ack `fdeacb5d`(自跑 ack-check:22/22;`9bc45e69..X` 代码只有 22 个)→ 第 21 次部署 `412565b6` → `fdeacb5d`,岛上主 JS `index-BVrO4Ql1.js`、dist 63 文件、health ok,纯前端重建不动依赖;部署前账本已备份。Tester 转岛上复核(63 文件对账 + 代表臂 + 「保存持续 500 约 60 秒」补测)。
+- **Tester 更正一处数字**:LANDFAIL 不是「网络恢复后 26 秒」,是「失败后约 25 秒定时重试一次,与网络何时恢复无关」(两轮间隔 25.1–25.2 秒,其间无任何保存尝试)。上文归类 2 与说明书第 2 条已照改;那一次仍失败后会不会再试、隔多久,待 Tester 岛上补测,结果进 A-25 那条。
+- **⚠️ 口令事件(Tester 2026-11-08 只报事实)**:`fdeacb5d` 入库的 8 个 builder 工具脚本(`a18-builder/matrix.mjs`、`trace.mjs`;`a21-builder/tools/matrix24.mjs`;`builder/matrix-3-final/matrix25.mjs`;`builder/matrix-5-round2/tools/matrix25*.mjs`、`matrix-diag.mjs`;`tester-evidence/acceptance-2026-11-08-r2/scripts/b-matrix25b.mjs …`)把 builder **本地临时后端**(127.0.0.1:3001)的临时账号 `a18@example.test` 的口令写成了明文。我收割前的扫描只扫了路径、地址、邮箱、API key 形状,没扫 `password =` 字面——是我的漏。处置:①岛上只读查 users,该账号**不存在**(users 共 2 个),岛上无对应账号;②紧随的 docs 提交把 8 处明文换成 `process.env.A18_SCRATCH_PASSWORD`,全库再扫 `password/secret/token/JWT/Bearer` 字面为零;③`fdeacb5d` 历史里那份仍在公开远端,**删历史只归 Henry**,我不动;④收割前扫描清单加一项「口令字面」(`records/tester/METHOD.md` 的扫法 Tester 已写,我照搬进收割前检查)。builder 侧:临时账号口令以后从环境变量取,⛔ 写进任何会入库的脚本。

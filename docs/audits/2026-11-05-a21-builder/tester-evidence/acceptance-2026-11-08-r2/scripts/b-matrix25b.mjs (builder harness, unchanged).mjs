@@ -8,7 +8,7 @@ const [CLIENT, OUT, ROUNDS = '1', LATENCY = '0', FILTER = '', PORT = '3001'] = p
 const API = `http://127.0.0.1:${PORT}/api`;
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const email = '<email>';
-const password = 'a18-scratch-pass';
+const password = process.env.A18_SCRATCH_PASSWORD; // 本地临时后端的临时账号口令;明文已于 2026-11-08 从仓库移除,运行前自行设置
 const json = { 'Content-Type': 'application/json' };
 let res = await fetch(`${API}/auth/register`, { method: 'POST', headers: json, body: JSON.stringify({ email, password, name: 'A18' }) });
 if (!res.ok) res = await fetch(`${API}/auth/login`, { method: 'POST', headers: json, body: JSON.stringify({ email, password }) });

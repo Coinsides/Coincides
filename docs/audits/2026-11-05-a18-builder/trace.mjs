@@ -6,7 +6,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const [CLIENT, GAP = '300', AFTER = '300', TRIES = '4'] = process.argv.slice(2);
 const API = 'http://127.0.0.1:3001/api';
 const json = { 'Content-Type': 'application/json' };
-const login = await (await fetch(`${API}/auth/login`, { method: 'POST', headers: json, body: JSON.stringify({ email: 'a18@example.test', password: 'a18-scratch-pass' }) })).json();
+const login = await (await fetch(`${API}/auth/login`, { method: 'POST', headers: json, body: JSON.stringify({ email: 'a18@example.test', password: process.env.A18_SCRATCH_PASSWORD }) })).json();
 const auth = { Authorization: `Bearer ${login.token}`, ...json };
 const course = (await (await fetch(`${API}/courses`, { headers: auth })).json()).find((c) => c.name === 'A18');
 const debugPort = 9800 + Math.floor(Math.random() * 100);
