@@ -13,13 +13,14 @@
 
 | 项 | 阶段 | 持有者 | 下一步 | 更新 |
 |---|---|---|---|---|
-| 角色记录门禁与锁脚本 | 排队 | Main_Designer | 审定本稿、完成「前置」两件后派单 | 2026-11-07 |
+| 角色记录门禁与锁脚本(+ 规格 C 本机路径闸) | 排队 | Main_Designer | 编辑器组第二轮收割后派 builder;派单前完成「前置」两件 | 2026-11-07 |
 
 **现行有效的裁定**(一条一行;被推翻的直接删,历史在尾部)
 
 - 门禁照规格 A 施工,挂进 docs:check,所以 pre-commit 真拦会连带拦它 ← 「规格 A · 门禁脚本 check-role-records」
 - 锁照规格 B 施工;推荐的用法是「取、跑、放」一条命令 ← 「规格 B · 锁脚本 heavy-lock」
 - 派单前 Main_Designer 先做两件文档活 ← 「前置(Main_Designer 派单前做)」
+- 本机路径模式进 `check:changed-file-secrets`,带夹具与自测,放行 `<home>`/`<tmp>`/`<session>` 占位;不扩到盘符路径与 IP ← 「规格 C · 本机路径进 `check:changed-file-secrets`(2026-11-07 追加)」
 
 **已读到**:「交付」
 
@@ -139,12 +140,30 @@ Henry 2026-11-07 拍板了角色记录体系,依据是 `docs/agent-ops/analysis/
   5. 持有者 pid 已不在时,`status` 标出孤儿锁
   6. 日志行数和动作一一对应
 
+## 规格 C · 本机路径进 `check:changed-file-secrets`(2026-11-07 追加;第二次独立重发现即建闸)
+
+**起因**:2026-11-07 Tester 与 Main_Designer 先后在公开仓已入库文件里发现本机路径(Windows 用户名、`AppData\Local\Temp` 下的临时目录、会话目录),共 82 个文件、约 400 处,已向前清掉(`51115479`)。这是同一类泄漏第二次被人手发现(F3 一次、这次一次),按「第二次重发现即机械化」,进现有的变更文件扫描。
+
+**位置**:`scripts/changedFileSecretScan.mjs` 的 `patterns` 数组追加三条,其余逻辑不动:
+
+| 名 | 模式(意图;写法由 builder 定,须有夹具) | 必须放行 |
+|---|---|---|
+| `windows user home path` | 盘符 + `Users` + 用户名,分隔符为任意深度的反斜杠或斜杠(JSON 里的 `\\` 也要中);以及 `/c/Users/<名>` | `<home>` 占位;`Users` 后面紧跟 `<` 的占位写法 |
+| `windows temp path` | `AppData` + `Local` + `Temp`,同样的分隔符规则,不要求前面有用户名 | `<tmp>` 占位;文档里把中间写成省略号的说明(如「AppData…Temp」) |
+| `agent session directory` | `claude` + 16 位十六进制 + UUID 的目录段,两种分隔符 | `<session>` 占位 |
+
+- 扫描对象不变(工作区改动 + 暂存 + 未跟踪),所以老文件不会被重扫;历史已向前清。
+- **夹具**:`scripts/fixtures/changed-file-secrets/` 下,每条模式一份坏样本(含 JSON 四重反斜杠形态一份)、一份全部用占位的好样本;加 `--self-test`(或同等机制)让坏样本红在自己那条、好样本绿。现有七条模式各补一份坏样本顺带把老闸也盖住。
+- **当前仓库**:加完后在当前树上跑 `npm run check:changed-file-secrets` 必须退出 0——若红,红的那处要么是真漏网(清掉),要么是说明文字(改写),回执里逐条列。
+- 本规格不扩到 `D:\…` 这类盘符路径(仓库自身路径到处都是,信息量低);不扩到 IP(另有人工 grep,岛的地址从未进仓)。
+
 ## 允许面
 
 - `scripts/check-role-records.mjs`
 - `scripts/heavy-lock.mjs`
-- `scripts/fixtures/role-records/**`
-- `package.json`:只改 scripts 字段(新增两个脚本、docs:check 末尾追加一段)
+- `scripts/changedFileSecretScan.mjs`(只加模式与自测,规格 C)
+- `scripts/fixtures/role-records/**`、`scripts/fixtures/changed-file-secrets/**`
+- `package.json`:只改 scripts 字段(新增两个脚本、docs:check 末尾追加一段;规格 C 若需要自测入口再加一个)
 - `docs/audits/2026-11-07-role-records-gates/**`:证据放在其下的 `builder/`
 - 不许触碰:`package-lock.json` 和任何依赖、看板 board.md(归 Main_Designer)、其余文档和规矩文件、产品代码
 

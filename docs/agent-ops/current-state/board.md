@@ -42,7 +42,7 @@ Tester 部署后核对: 已核（F3b 见 docs/audits/2026-11-05-toggle-formula-b
 | a19-a20-image-pages-and-idle-save | A-25（新笔记第一行用输入法打字，拼音写进笔记） | 排队 | Main_Designer | 排期派单 | 订单「## A-25 · 新笔记第一行用输入法打字,拼音被写进笔记(🅰,既有,2026-11-06 Tester 编辑器组核验中发现)」 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-19（图片页面） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-19 规格 | 2026-11-07 |
 | a19-a20-image-pages-and-idle-save | A-20（闲置保存） | 排队 | Main_Designer | 编辑器组之后 | 订单开头 A-20 规格 | 2026-11-07 |
-| role-records-gates | 门禁脚本 check-role-records（R1–R9）与重活锁脚本 | 排队 | Main_Designer | 编辑器组之后派 builder | 订单「2026-11-07-role-records-gates-order.md」规格 A/B | 2026-11-07 |
+| role-records-gates | 门禁脚本 check-role-records（R1–R9）、重活锁脚本、本机路径闸 | 排队 | Main_Designer | 编辑器组第二轮收割后派 builder | 订单「2026-11-07-role-records-gates-order.md」规格 A/B/C | 2026-11-07 |
 <!-- board:items:end -->
 
 ### 未建卡的事项（手写）
