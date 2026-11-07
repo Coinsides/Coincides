@@ -60,50 +60,32 @@
 
 ### 改动清单(builder)
 
-- 基线 commit:`9bc45e69`。改动只在 scratch 副本 `ed21` 里;共享树一字未动;`edfix`(第一轮被测源码)未动。拷回候 Main_Designer 令。
-- 第二轮源码 = 基线 + 22 个文件(都在 `client/src/pages/Notes/canvasEngine/` 下),sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-5-round2/final/source-sha256-r2.txt`。17 个与第一轮相同;本轮改 4 个、新增 1 个:
-  - `hooks/useHeadingStructureController.ts`:K1 的 `lastBatch`(按笔记)、留字框记录 id、`typedTextIsPlaced`、3a 锚点、3b 落地即写档 flush 落定才删
-  - `structureTypingBuffer.ts`:提示条进框内、Discard
-  - `hooks/useHeadingStructureController.test.tsx`
-  - `hooks/structureTypingConservation.test.tsx`:边界断言 + 阳性对照
-  - 新增 `hooks/headingStructureWatchdog.realAdapter.test.tsx`:真适配器 K1
-- 包:ops `packages/editor-rework-r2/`(`dist/` 主 JS `index-BlJnjQci.js` + `src/` + 两份哈希);纯 21 文件包的源码快照在 `packages/editor-rework-pure21/src/`。
-- **r2.1**(留字框跟随版面):对 r2 只改 `structureTypingBuffer.ts` 和 `hooks/useHeadingStructureController.test.tsx`,其余 20 个逐字节同(控制器不变);sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/source-sha256-r21.txt`;包 ops `packages/editor-rework-r2.1/`(主 JS `index-Ck4z0VFS.js`)。
-- **r2.2**:对 r2.1 改控制器、框和两个测试文件,其余 18 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/source-sha256-r22.txt`;包 ops `packages/editor-rework-r2.2/`(主 JS `index-sNlfO3uB.js`)。
-- **r2.3**:对 r2.2 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/source-sha256-r23.txt`;包 ops `packages/editor-rework-r2.3/`(主 JS `index-CUqxwHSs.js`)。
-- **r2.3b**:对 r2.3 改控制器、框和控制器测试,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/source-sha256-r23b.txt`;包 ops `packages/editor-rework-r2.3b/`(主 JS `index-bobNSNGx.js`)。
-- **r2.3c**:对 r2.3b 改控制器和控制器测试,框文件只改两个提示字符串,其余 19 个逐字节同;sha256 在 `docs/audits/2026-11-05-a21-builder/builder/matrix-10-r2.3c/source-sha256-r23c.txt`;包 ops `packages/editor-rework-r2.3c/`(主 JS `index-BVrO4Ql1.js`)。
+> 编辑器组已收割上岛(fdeacb5d),它的清单和数字在尾部各 Result 节与 `docs/audits/2026-11-05-a21-builder/builder/`。本块现在只记 A-19。
+
+- A-19 基线 commit:`fdeacb5d`。在 scratch 副本里建、测、封包;共享树那 13 个草稿文件封包后未再动;`edfix` 未动。拷回候 Main_Designer 令,以包为准。
+- 源码 = 基线 + 15 个文件(清单 ops `packages/a19-image-pages/files15.list`,哈希 `src.sha256`):
+  - server:`services/sourcePageImages.ts`(image 进页影像通路、原格式存页图、登记 `text_view`)、新 `services/sourceImageSize.ts`(png/jpeg/webp 头部读尺寸,含 EXIF 方向)、`package.json`(只 `test:v2` 加新测试)
+  - server 测试:新 `a19SourceImagePages.test.ts`;`vpsF11SourcePageImages.test.ts`、`fidelity1a2DocxPages.test.ts`、`v2SourceLifecycleClosure.test.ts` 只改预期
+  - client:`hooks/useSourcePageViewController.ts`(`pagesOnly`)、`layers/SourceViewToggle.tsx`、`layers/NoteSourcePagesLayer.tsx`、`sourcePageLayout.ts`(小图不放大)、`Sources/sourceApi.ts`(`text_view?`)
+  - client 测试:新 `hooks/useSourcePageViewController.test.tsx`;`layers/NoteSourcePagesLayer.test.tsx`、`sourcePageLayout.test.ts`
+- 包:ops `packages/a19-image-pages/`(`dist/client/` 主 JS `index-Gswd3cHv.js`、`dist/server/`、`src/`、两份哈希、`COPY-BACK.md`、`MANUAL-SECTION.md`)。
 
 ### 自报数字(builder)
 
-> 一个数字一行,出处写全。m5 = `docs/audits/2026-11-05-a21-builder/builder/matrix-5-round2/`,哪些算数见其 `README.md`。
+> 一个数字一行,出处写全。a19 = `docs/audits/2026-11-06-a19-builder/`。
 
 | 数字 | 命令 | 环境/版本 | 证据文件 |
 |---|---|---|---|
-| 副本−基线 = 22 个文件,sha256 与 ops 包 `src/` 22/22 一致 | `diff -rq`(排除 node_modules、构建产物、检查脚本临时输出);`sha256sum` | 第二轮副本 / 原样基线 | `m5/final/source-sha256-r2.txt`、`files22.list` |
-| 类型检查净;客户端全量 2653/2653;守恒闸 40 种子绿,边界断言在跑 | `tsc --noEmit -p .`;`vitest run --pool=forks --poolOptions.forks.maxForks=3` | 最终文件集 | `m5/client3/summary.txt`、`client-full.raw` |
-| 三个检查脚本 exit 0;r04@57 156 行坏 0;dist 跑前跑后一致 | `npm run -s check:…`(根目录);`matrix_r04.mjs r2final57 …` | 第二轮包,延迟 57 | `m5/final/summary.txt`、`r04-r2final57.log` |
-| 阳性对照:本轮 8 条测试在第二轮前的源码上全红;3b 在 3b 改动前红;K1 真适配器修前 5/5 红、修后 20/20 绿 | `vitest run … -t "round 2"`,换入修前源码(副本内,trap 复原) | 副本 | `m5/client3/red-controls.txt`、`k1-repeat/` |
-| K 臂(卡 12 秒后成功):第二轮 ①2,冻结版 ①2,纯包 ②′2 | `matrix25.mjs … '^k_'`,代理层 `stall` | 三版,延迟 57 | `m5/final/k-r2.json`、`m5/per-note/k-frozen.json`、`m5/k1-early/k-pure.json` |
-| 注入矩阵 26 行(修正 harness):第二轮 ①20 ②6 ③0;纯包 ①20 ②6 ③0;冻结版 ①18 ③8;修前 ①11 ③15 | `matrix25b.mjs … 2 57 '^enter_'` + `classifyb.mjs` | 四版同批 | `m5/per-note/enter-*.json`、`summary.txt` |
-| H-L(浏览器请求阶段扣住):第二轮 ②3,冻结版 ③3,纯包 ③3 | `matrix25b.mjs … 3 57 '^h_HL$'` | 三版 | `m5/per-note/hl-*.json` |
-| 度量器自测:真丢一行加别的笔记的同字存档,旧 harness ②2(误判)、新 harness ③2 | `SEED_OTHER=1 matrix25(b).mjs … '^enter_slowReplyUnload$'` | 冻结版 | `m5/harness-control/summary.txt` |
-| 第一轮旧数(纯包 ②5、「慢回包卸载 冻结③→修复②」)按修正 harness 重出,结论不变,但原数作废 | 同上 | 纯包 / 冻结版 | `m5/per-note/enter-pure.json`、`enter-frozen.json` |
-| r2.1:构建 exit 0;类型检查净;客户端全量 2654/2654;三个检查脚本 exit 0 | 同上 | r2.1 副本 | `docs/audits/2026-11-05-a21-builder/builder/matrix-6-r2.1/summary.txt` |
-| r2.1:「定位后改版面」几何测试在 r2 框代码上红(300≠396)、r2.1 上绿 | `vitest run … -t "r2.1"`,换入 r2 的 `structureTypingBuffer.ts`(副本内,trap 复原) | 副本 | `matrix-6-r2.1/red-controls.txt` |
-| r2.2:构建 exit 0;类型检查净;客户端全量 2667/2667;三个检查脚本 exit 0;r04@57 156 行坏 0;8 条阳性对照 r2.1 上红、r2.2 上绿 | 同上 | r2.2 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-7-r2.2/summary.txt`、`red-controls-full.txt` |
-| r2.2 浏览器:注入矩阵 ①14 ②12 ③0;K ①2 / ②′2 / ②2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.2 包,延迟 57 | `matrix-7-r2.2/enter-r22.json`、`k-r22.json`、`hl-r22.json` |
-| r2.3:构建 exit 0;类型检查净;客户端全量 2673/2673;三个检查脚本 exit 0;r04@57 156 行坏 0;阳性对照见 red-controls A–D 段 | 同上 | r2.3 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-8-r2.3/summary.txt`、`red-controls-r23.txt` |
-| r2.3 浏览器:注入矩阵 ①20 ②6 ③0;K ①2 / ②′2 / ①2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3 包,延迟 57 | `matrix-8-r2.3/enter-r23.json`、`k-r23.json`、`hl-r23.json` |
-| r2.3b:构建 exit 0;类型检查净;客户端全量 2677/2677;三个检查脚本 exit 0;r04@57 156 行坏 0;4 条阳性对照 r2.3 上红、r2.3b 上绿 | 同上 | r2.3b 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-9-r2.3b/summary.txt`、`red-controls-r23b.txt` |
-| r2.3b 浏览器:注入矩阵 ①21 ②5 ③0;K ①2 / ②′2 / ②′2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3b 包,延迟 57 | `matrix-9-r2.3b/enter-r23b.json`、`k-r23b.json`、`hl-r23b.json` |
-| r2.3c:构建 exit 0;类型检查净;客户端全量 2680/2680;三个检查脚本 exit 0;r04@57 156 行坏 0;TWO2 在 r2.3b 上 3/3 红、r2.3c 上 3/3 绿 | 同上 | r2.3c 副本 / 包 | `docs/audits/2026-11-05-a21-builder/builder/matrix-10-r2.3c/summary.txt`、`red-controls-r23c.txt` |
-| r2.3c 浏览器:注入矩阵 ①22 ②4 ③0;K ①2 / ②′2 / ②′2 / ②′2;H-L ②3 | `matrix25b.mjs` + `classifyb.mjs` | r2.3c 包,延迟 57 | `matrix-10-r2.3c/enter-r23c.json`、`k-r23c.json`、`hl-r23c.json` |
+| 包 `src/` 15/15 与副本逐字节同;`dist.sha256` 1852 行自检通过 | `sha256sum -c` | A-19 包 | ops `packages/a19-image-pages/` |
+| client tsc 净;server tsc 净(先 `tsc -b` 建 shared);vite build、server build exit 0 | `npx tsc --noEmit -p .`;`npx vite build`;`npm run build` | A-19 副本 | `a19/builder/summary.txt`、`tsc-*.txt`、`build-*.txt` |
+| client 全量 2686/2686,exit 0 | `vitest run --pool=forks --poolOptions.forks.maxForks=3` | A-19 副本 | `a19/builder/client-full-work.txt` |
+| server test:v2 985 条 977 过 8 红;fdeacb5d 同 8 条红(scratch 环境所致) | `run-server-test-suite.mjs --test-concurrency=3 …` | A-19 副本 / fdeacb5d 副本 | `a19/builder/server-full.txt`、`server-full-base.txt` |
+| 阳性对照:A-19 测试在 fdeacb5d 上红(A1 server 6、client 6;A2 server 11);B 段 11 臂改坏 11/11 红 | 见 `a19run.py` 说明行 | fdeacb5d 副本 / A-19 副本 | `a19/positive-controls.txt` |
 
 ### 待办(builder)
 
-- 已交 Tester / Reviewer(r2.3c 包),等判语。拷回共享树候 Main_Designer 令;拷回清单用 r2.3c 包的 `COPY-BACK.md`。
-- 收工时停 scratch 后端和代理、清副本(先拆 node_modules junction),见私有状态卡。
+- A-19 回执已落尾部「Result(builder 回执区,候填)」下「A-19 Result(builder 2026-11-08)」;待 Reviewer 核、Main_Designer 裁、Tester 验。
+- 3001 草稿后端(只绑回环)留给 Tester 交叉核对,核完即停;收工清 `a19pkg` 副本(先拆 node_modules junction)。
 
 ### 验收条件(Tester,待 Tester 填)
 
@@ -140,6 +122,167 @@
 ---
 
 ## Result(builder 回执区,候填)
+
+### A-19 Result(builder 2026-11-08)
+
+答「A-19 派单」及其后三次裁定(两处先报、第一趟、补跑)。证据 `docs/audits/2026-11-06-a19-builder/`(阳性对照 `positive-controls.txt`;其余在 `builder/`,下称 b/)。行号一律对 ops `packages/a19-image-pages/src/` 快照;没进包的文件(未改动)对 `fdeacb5d`。
+
+#### 包与同源
+
+- 包:ops `packages/a19-image-pages/`。
+  - `src/`:15 个文件,逐字节;`src.sha256` 路径为仓库相对路径。
+  - `dist/client/`:主 JS `index-Gswd3cHv.js`,63 个文件。
+  - `dist/server/`:`npm run build` 产物。
+  - `dist.sha256` 共 1852 行,路径相对 `dist/`。
+  - 另有 `files15.list`、`COPY-BACK.md`(未执行)、`MANUAL-SECTION.md`。
+- 源码 = `fdeacb5d` + 15 个文件,在 scratch 副本里建、测、封包。共享树那 13 个草稿文件没动;别的单的改动没碰;`edfix` 没动。
+- 包与共享树草稿的差别(拷回以包为准):
+  - `vpsF11SourcePageImages.test.ts`:草稿把整篇行尾改了。包里按 `fdeacb5d` 原字节只改两处(+7/−1)。
+  - `useSourcePageViewController.ts`:按第一趟裁定删了 `setMode` 里那行守卫。
+  - 新增两个文件,只改预期:`fidelity1a2DocxPages.test.ts:261`,`v2SourceLifecycleClosure.test.ts:305、407`。见下文「旧测试预期」。
+- 依赖与锁:`server/package.json` 只改 `test:v2` 列表,加入 `src/__tests__/a19SourceImagePages.test.ts`;没有新依赖,`package-lock.json` 没动。
+
+#### 按裁定五条
+
+1. **native-image 进页影像通路**:
+   - `IMAGE_PARSER = 'native-image'`(`sourcePageImages.ts:24`)。
+   - `pageImagesSupported` 认它(`:122-124`)。
+   - `openRenderer` 对它直接返回 `openImagePageRenderer`(`:319-321`)。
+   - 登记 1 页,尺寸 = 图片真实宽高(`:128-139`)。
+   - 页图就是原图字节,按原格式存:扩展名和 mime 跟着走(`:221-225`),`ON CONFLICT` 时同步更新 storage_key、filename、mime_type(`:246-249`)。
+   - 没有转换器,没有新队列,见代码回答②。
+2. **图片投影固定原页、不显切换**:
+   - 服务端登记带 `text_view: false`(`:526`)。
+   - 客户端由此判 `pagesOnly`(`useSourcePageViewController.ts:79`):原页强制为当前视图(`:183`),切换不渲染(`SourceViewToggle.tsx:9`),默认判决对它直接收口(`:130`)。
+   - 小图不放大(`sourcePageLayout.ts:31`),页框宽跟着走(`NoteSourcePagesLayer.tsx:148`)。
+3. **存量沿用生成按钮**:
+   - 旧图片 Source:登记 `supported: true`、`status: 'none'`,所以 `pagesOnly` 成立,笔记停在原页。
+   - 原页层显示「这份资料还没有原页影像」和「生成原页影像」。
+   - 点生成走既有的 `requestSourcePageImages`(`sourcePageImages.ts:559`),只补缺的,不重投影,不全量扫。
+   - 测试 `a19SourceImagePages.test.ts:191`。
+4. **物化器 canvas image 对象不动**:没动。申报见下节。
+5. **删源、重投影级联**:走既有路径,本单没加新路径。见代码回答④;测试 `a19SourceImagePages.test.ts:210`。
+
+#### 物化器 canvas image 对象:申报(按补跑裁定 2)
+
+现在每张图片 Source 有三份字节:
+
+| 份 | 存在哪 | 谁写 | 谁读 |
+|---|---|---|---|
+| 原件 blob | `SOURCE_BLOB_DIR`,`source_files.storage_key` | 导入 | 物化器(复制出投影副本);页影像渲染器(`openImagePageRenderer`,`sourcePageImages.ts:128-139`) |
+| 投影副本 | `CANVAS_ASSET_DIR/<user>/source-materializations/<mid><ext>`,资产 id `source-materialization-asset:<mid>`(`sourceProjectionMaterializer.ts:117-124`,fdeacb5d) | 物化器 | 只被 canvas image 对象引用(`:679`、`:716`)。客户端把它读进 `imageObjects`,只用在两处:AI 树(`canvasAiTreeService.ts:170`)、空笔记判断(`writingEntryVisibility.ts:28`)。**没有任何层画它** |
+| 原页图 | 同目录 `<mid>-page-1<ext>`,资产 id `source-page-image:<mid>:1`(`sourcePageImages.ts:225`) | 页影像通路(本单) | 原页层 `<img>`(`NoteSourcePagesLayer.tsx:19`) |
+
+- **是否死形状**:
+  - 画面上是死的:没有层画 canvas image 对象,A-19 也不靠它出图。
+  - 数据上还活着:AI 树和空笔记判断仍读它,所以不是「无人读」。
+  - 建议入 tech-debt:「图片投影的 canvas image 对象与投影副本:画面无人画,AI 树、空笔记判断仍读;与原页图重复存一份字节」。
+- **合并成一份引用是否要动 1a 契约**:要动。原页资产有自己的 id 命名(`source-page-image:<mid>:<n>`)、随投影迁移的规则(`adoptSourcePageImages`)和删除时的释放路径(`sourcePageImageAssetIds`)。让原页指向投影副本,就要改 `source_pages.image_asset_id` 的约定和引用计数的释放顺序。本单不做。
+- **代价**:每张图多存一份原图大小的字节。删源时三份都清(见代码回答④)。
+
+#### 代码回答
+
+**① 图片尺寸怎么取,读不出时怎么办**
+- 读取器在 `sourceImageSize.ts`,只读文件头:
+  - png:IHDR(`:13-16`)。
+  - jpeg:逐段找 SOF,包括渐进式,排除 C4/C8/CC(`:40-64`)。EXIF 方向 5–8 时宽高对调,按浏览器显示的方向算(`:19-38`)。
+  - webp:VP8X、VP8L、VP8 三种(`:66-81`)。
+  - 宽或高为 0,或格式不认识,返回 null,绝不猜(`:84-87`)。
+- 读不出时属于 **(b)**:
+  - `openImagePageRenderer` 的 render 抛错(`sourcePageImages.ts:134`)。
+  - `renderMissingPages` 的逐页 catch 记进 failed_pages(`:383`),登记 `failed`(`:392`)。
+  - materialization 仍是 `materialized`,笔记在,**不是整条导入失败**。
+  - 界面显示「原页无法生成」和「重试」;「重试」走生成入口(`NoteSourcePagesLayer.tsx:101-103`)。
+  - 测试 `a19SourceImagePages.test.ts:171`。
+  - (c) 已按裁定记为可选改进,不做。
+- **缺口**:上传入口(`sourceFileIntake.ts:110-135`,fdeacb5d)接受 png、jpeg、webp,和读取器支持的三种一致。下面两种情况浏览器可能能显示,读取器却读不出或读得不对,列为缺口,不修:
+  - jpeg 在 SOF 里把高度写成 0、另用 DNL 段给出真实高度。这种很少见;读取器判 null,那一页失败。
+  - webp 带 EXIF 方向。读取器不看 webp 里的 EXIF;浏览器是否按它转正未核实,所以竖拍的 webp 比例可能对调。
+
+**② 页图「直接用原图」怎么接的**
+- `openRenderer` 第一个分支(`sourcePageImages.ts:319-321`):image 不走 `options.openPageRenderer`(PDF 渲染器),也不走 docx 转换器。
+- `openImagePageRenderer`(`:128-139`)读原文件、取尺寸,把原字节当页图返回。
+- `storeRenderedPage` 按 `rendered.image` 定扩展名和 mime(`:221-223`),原样落盘。
+- 测试断言页图与原件逐字节相同、渲染器打开次数为 0(`a19SourceImagePages.test.ts:134` 起)。
+- **没有新队列**:仍是唯一的那个 `queueTail`(`:414`、`:449`),和 PDF、docx 一起排,一次一份。
+
+**③ 哪一行判「无文本→固定原页」,两处怎样不留死路**
+- 判定:`const pagesOnly = Boolean(register?.supported) && register?.text_view === false;`(`useSourcePageViewController.ts:79`)。
+- **文本/原页切换**:
+  - `pagesOnly` 时 `active` 恒为真(`:183`),`textAvailable` 为假(`:184`),`SourceViewToggle` 返回 null(`SourceViewToggle.tsx:9`)。
+  - 第一趟裁定删掉的是 `setMode` 里那行守卫:不管谁调 `setMode('text')`,`active` 都不变。
+  - 守这个不变量的测试:`useSourcePageViewController.test.tsx:23-29`(调 `setMode('text')` 后仍在原页);`NoteSourcePagesLayer.test.tsx:75`(切换不渲染)。
+  - B 段「去掉 pagesOnly 对 active 的强制」一臂红 3 条。
+- **默认判决**:`pagesOnly` 时直接收口,不等页、不读 scrollTop(`:130`)。
+- **不留死路**:
+  - 还没有页影像时,原页层显示生成入口(`useSourcePageViewController.test.tsx:40`、`NoteSourcePagesLayer.test.tsx:75`)。
+  - 生成失败时显示「重试」。
+  - 登记加载失败时,`register` 为 null,`pagesOnly` 为假,走原有的报错和重试路径。
+- **旧页缺省(补跑裁定 1)**:
+  - `text_view` 不是表列,也不是 JSON 字段,不落库,**没有迁移**。服务端每次组装登记时,由 `parser_key` 算出(`sourcePageImages.ts:526`)。岛上已有的 PDF、docx 部署后立刻得到 `true`。
+  - 客户端只认 `=== false`(`useSourcePageViewController.ts:79`)。字段缺失(比如旧服务端)当「有文本视图」(`sourceApi.ts:56` 注释)。
+  - 测试 `useSourcePageViewController.test.tsx:47`:`register({})` 不带字段,切换在,能切到文本。
+  - 服务端 PDF 返回 `true` 由 `vpsF11SourcePageImages.test.ts:248` 守。
+
+**④ 删源级联与重投影走的哪条既有路径**
+- **删源**:`deleteSourceWithCompensation`(`sourceLifecycle.ts`,fdeacb5d):
+  - 先用 `releaseNoteCanvasAssets(projection_note_id)`(`:164`)按 origin_note_id 释放该笔记的全部资产。投影副本和原页图都是这条笔记的,一起释放。
+  - 再用 `sourcePageImageAssetIds`(`:173`)兜住原页登记里的资产。
+  - 物理文件在事务提交后才删。连 blob 共三份,测试 `v2SourceLifecycleClosure.test.ts:407` 预期从 2 改为 3。
+  - 原页图删后无残留:`a19SourceImagePages.test.ts:210`。
+- **重投影**:`rematerializeSource`(`sourceReprojection.ts:135`)用 `adoptSourcePageImages` 把原页图挪到新笔记;`:139` 只补缺的。测试同上一条:新笔记 1 页、文件 1 个。
+- **项目删除(移到 Home)**:两份资产都随笔记走,`v2SourceLifecycleClosure.test.ts:305` 预期从 1 改为 2。
+- 这几条都是 1a 既有路径;本单只让 image 进入同一套登记。
+
+**⑤ `server/package.json`**
+- 只改 `test:v2` 一行,在 `normalizeCardContentDelimiters` 之后加入 `src/__tests__/a19SourceImagePages.test.ts`。
+- 没有新依赖,`dependencies`、`devDependencies` 没变,锁文件没动。
+
+#### 旧测试预期(补跑裁定已收)
+
+- `fidelity1a2DocxPages.test.ts:261`、`vpsF11SourcePageImages.test.ts:494`:整对象比较登记,加上 `text_view: true`。
+- `v2SourceLifecycleClosure.test.ts:305`(1→2)、`:407`(2→3):原因见上节「三份字节」。
+
+#### 测试、检查、阳性对照(第三趟,`b/summary.txt`)
+
+| 项 | 结果 | 证据 |
+|---|---|---|
+| client tsc | 净 | `b/tsc-client.txt` |
+| server tsc(先 `tsc -b` 建 shared) | 净 | `b/tsc-server.txt` |
+| client vite build | exit 0 | `b/build-client.txt` |
+| server build | exit 0 | `b/build-server.txt` |
+| client 全量(3 forks) | 2686/2686,exit 0,unhandled 0 | `b/client-full-work.txt` |
+| client 全量 fdeacb5d 对照 | 2680/2680,**exit 1**,2 个 unhandled,`structureTypingBuffer.ts:292` 定时器在拆环境后仍跑(TD-58,挂 A-25);包上第二、三趟都没出现,间歇性 | `b/client-full-base.txt` |
+| server test:v2(并发 3) | 985 条,977 过,8 红 | `b/server-full.txt` |
+| server test:v2 fdeacb5d 对照 | 973 条,965 过,8 红,**与包上 8 条同名**:MinerU 四条、T-1 manifest copy、live specimen、两个整文件(`v2CanvasPersistenceCutover`、`v2DocumentParserPdf`);scratch 环境所致,按裁定不修 | `b/server-full-base.txt` |
+| 阳性对照 A1:包里 4 个 server 测试文件、3 个 client 测试文件放在 fdeacb5d 上 | server 46 条红 6(`a19SourceImagePages` 整文件加载不了,因为尺寸读取器不在;另 5 条是 `text_view` 和资产计数的新预期);client 41 条红 6 | `positive-controls.txt` |
+| 阳性对照 A2:再放进尺寸读取器(fdeacb5d 里没有任何代码调它) | server 53 条红 11,全是行为上的红 | 同上 |
+| B0:包原样 | server 53/53;client 41/41 | 同上 |
+| B 段 11 臂逐臂改坏 | **11/11 红**,各红在对应的测试上 | 同上 |
+
+- 第一、二趟的记录:`b/summary-runs-1-2.txt`、`b/*-run1.txt`、`b/*-run2.txt`。
+- 第一趟 server 大面积红,原因是副本里缺 `docs/generated`,不是代码问题。
+
+#### 3001 草稿后端(给 Tester)
+
+- 只绑 `127.0.0.1`:启动预加载把 `0.0.0.0` 改成回环,源码不动。
+- 跑的是共享树的 server 源码,= `fdeacb5d` + A-19 的 server 改动:`sourcePageImages.ts`、`sourceImageSize.ts` 与包里逐字节相同,`fdeacb5d` 之后 server 没有提交。
+- 数据库是原来的 scratch 库。
+- Tester 核完通知我,我就停掉。
+
+#### 已知、未修
+
+- 图片 Source 存三份字节(见申报)。
+- 尺寸读取器的两个缺口(见代码回答①)。
+- 读不出尺寸的图「重试」多半仍失败:文件本身坏了,说明书照实写了。
+- client 全量间歇性 unhandled(TD-58,不属本单)。
+
+#### 待 Reviewer / Tester
+
+- Reviewer:对照派单五条裁定和本节「代码回答」读包 `src/`。
+- Tester:验收段四条、血缘 chip 不回归、1a 原页通路回归;接本地后端 3001。
+- 同源构建按包 `src/` 做,`sha256sum -c src.sha256` 15 行。
+- 说明书素材:包里 `MANUAL-SECTION.md`。
 
 ## A-21 · 持久编辑器中间段落打 `# ` 重复标题(🅰,2026-11-05 补入,builder A-18 中发现)
 
@@ -1906,3 +2049,12 @@ builder 回执 → **Reviewer 先核**(对照本节五条裁定 + 「代码回�
   1. **`text_view` 是页登记的新字段 = 1a 页登记形状的加法**。派单说「要改 1a 契约就停下来问」,这条没问就加了;加法我接受,但回执「代码回答」必须答:字段写在哪(表列还是 JSON)、有没有迁移、**岛上已登记的旧页(PDF/docx)没有这个字段时客户端当什么**——缺省必须是「有文本视图」,否则第 22 次部署后岛上所有旧 Source 丢文本视图,这是 🅰 回归。Reviewer 清单第一条就是它;Tester 加一臂:**修前导入的 PDF/docx,修后打开,文本视图、默认判决、切换都在**(不是修后重新导入)。
   2. **每张图两份字节**:原页图是复制原件进页图存储,不是引用既有资产。「直接用原图」的本意是不经转换器,复制一份字节不违背,但多一份存储;Henry 量级可忽略,先接受。回执「物化器 canvas image 对象」那条一并申报:三份各在哪、谁读哪份、物化器那份是否已成死形状;合并为引用是否要动 1a 契约——申报即可,不改。记 TD 候回执。
 - **Tester 已备 `text_view` 臂**:修前(`fdeacb5d`)后端上导入 18 张好图 + 4 个坏/异格式文件 + 12 页 PDF + 12 页 docx,页登记字段只有 `page_number / asset_id / image_width / image_height / pdf_width / pdf_height`(**无 `text_view`**,正是旧形状);数据目录整份冻结成快照。修后服务端开这份快照、不重新导入,逐项对比修前基线(PDF 默认原页、文本视图 32 块、12 血缘标、跳 3/7/11 页对、离开回来仍文本、刷新回原页;docx 默认原页、文本 160 块、0 血缘标;18 张图登记 none、无图、无生成按钮)。「修后重新导入」另算一臂。
+
+## A-19 回执收讫:五条裁定逐条有行号;`text_view` 不落库、由 parser_key 现算、客户端只认 `=== false`;三份字节申报 → TD-59;转 Reviewer 与 Tester 并行(Main_Designer 2026-11-08)
+
+- **包**:ops `packages/a19-image-pages/`,`src/` 15 文件我自核 `sha256sum -c` 15 OK;`dist/client` 63 文件、主 JS `index-Gswd3cHv.js`;`server/package.json` 只改 `test:v2` 列表、锁未动。回执「A-19 Result(builder 2026-11-08)」逐条对裁定与「代码回答」五问给了行号。
+- **我点名的两件,回执答到位**:①`text_view` 不是表列也不是 JSON 字段、无迁移,服务端每次组装登记时由 `parser_key` 算(`sourcePageImages.ts:526`),岛上旧 PDF/docx 部署后立刻得 `true`;客户端只认 `=== false`(`useSourcePageViewController.ts:79`),字段缺失当有文本视图,`useSourcePageViewController.test.tsx:47` 守。**这是 Reviewer 第一核、Tester 冻结旧库那臂第一验。** ②三份字节表清楚:原件 blob / 物化器投影副本(画面无人画,AI 树与空笔记判断仍读)/ 原页图;合并为引用要动 `source_pages.image_asset_id` 约定与释放顺序 → 本单不做,登 **TD-59**。
+- **读取器两个缺口(申报,不修)**:jpeg SOF 高度为 0、靠 DNL 段给高度 → 读 null、该页失败;webp 内 EXIF 方向不读 → 竖拍 webp 比例可能对调。记进说明书「已知」与 TD-59 同行;Tester 若手头能造 webp+EXIF 就加一臂,造不出记未覆盖。
+- **阳性对照**:A1 整文件加载不了算「红」太便宜,builder 自己补了 A2(放进读取器但无人调用 → 11 条行为红),对;B 段 11/11 红。
+- **流程改为并行**:Reviewer 读包 `src/` 对裁定;Tester 同时起同源构建与臂(修前/修后两套后端已备)。Reviewer 若出 🅰 发现要改包,Tester 已跑的臂按文件级同源沿用。**放行只看 Tester 的数 + Reviewer 无未处置的确认项。**
+- **Reviewer 点名清单**(写进其发现报告开头):①`text_view` 缺省链(服务端 `:526` 对所有非 image parser 是否都给 `true`,含 md/txt/html 等每一种 parser_key;客户端 `:79`;`sourceApi.ts:56`);②尺寸读取器:png/jpeg/webp 各分支边界、渐进式 JPEG SOF2(0xC2)是否认、EXIF 5–8 对调是否按浏览器显示方向、宽高 0 → null;③读不出尺寸 → `renderMissingPages` 逐页 catch(`:383/:392`)后 materialization 仍 materialized、无整条导入失败的别路;④页图 = 原字节(`:128-139`、`:221-225`)、`ON CONFLICT` 更新 storage_key/filename/mime 时旧文件是否释放;⑤删源与重投影:`releaseNoteCanvasAssets` + `sourcePageImageAssetIds` 是否覆盖原页图的全部引用,`adoptSourcePageImages` 挪页后旧笔记是否残留;⑥删掉的 `setMode` 守卫与 `:183/:184` 的强制、依赖数组改动有无别的调用方受影响;⑦物化器对象未动的核实;⑧15 文件之外有没有该改没改的调用方(例如别处读 `register.text_view` 或假设每 Source 一份资产的计数)。
