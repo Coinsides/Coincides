@@ -1010,3 +1010,28 @@ Tester 在真浏览器坐实核读指出的 3b(其 H-L 臂):`warmup` 回车 → 
 6. **放行条件不变**(汇总那条 + H-L 0/N),第 4 条的验收路线加「Dismiss 后、滚动后框仍在单元上」。
 
 **给 Henry 的一句**:又多一次补修——是我在第二轮验收路线里没写「版面变了框要跟着走」,builder 的测试也只量了一瞬。框是新部件,每多一轮都在替它找没人想到的失败法;到岛上之前找到比之后找到便宜。
+
+## 编辑器组 r2.1 · 框定位的机理核读:修法首选改为「留住后继续跟随」,⛔ 把框搬进 React 的 DOM(Main_Designer 2026-11-07)
+
+来源:三路只读阅读(两名读者 + 一名怀疑者逐行复核),对象 = ops `packages/editor-rework-r2/src/` 冻结快照(行号对它),横幅部分对共享树。未跑任何测试。
+
+**机理(坐实)**:
+- 框是 `document.body` 下一个 `position: fixed` 的 textarea(`structureTypingBuffer.ts:107-111/:138`),`follow()` 把锚点编辑器的 `getBoundingClientRect()` 原样抄进 left/top/width/minHeight(`:117-121`),视口坐标,没有 scroll 偏移。
+- 窗口活着时有一个 50ms 的 `setInterval(place)` 跟随(`:12/:128-132/:159`);**`retain()` 第一件事就是 `stopHolding()`,把它 clearInterval(`:188-190 → :173-178`)**。此后 top/left 再没写过。重开恢复路径里 `openEntry → retainWords` 在同一个 effect 里同步连做(`useHeadingStructureController.ts:547-550`),interval 建了就清,**框只定位一次**。
+- 提示条同样 fixed、在 `retain()` 时按框的 rect 放一次(`:197-198/:214-215`),不再动。
+- 快照里没有任何 ResizeObserver / MutationObserver / scroll / resize 监听与框相关;`StructureTypingBuffer` 接口(`:23-36`)也没暴露重放位的方法,控制器的 800ms 重试循环(`:180-186`)帮不上。
+- **回执「框顶 = 该单元顶,不低于上一行的底」没有代码对应物**——不存在对上一行的夹限;「框顶 = 单元顶」只在写入那一刻成立。
+- 第二轮 #4 几何测试(`useHeadingStructureController.test.tsx:811-843`)只给框 mock 了一个常量 rect、blockId `'gone'`(没有单元编辑器,框走 25%/20% 回落位)、断言提示条在框内;对框自己的 top/left、单元、上一行、定位后的版面变化一概没断言——所以看不见这条。
+- 横幅 `BlockEditRecoveryQueue`(共享树 `layers/BlockEditRecoveryQueue.tsx:158-163`)挂在 `.documentShell` 顶、写字面之上(`NoteRuntimeDocumentLayer.tsx:279-290`),`position: relative` 在流(`NoteDetail.module.css:905-917`),出现/消失都推动正文。同类在流元素还有 templateWarning(独立 promise,可能晚到)。字体加载后整页重排(`useNotePageFlow.ts:27-32`)、滚动、改尺寸同效。
+- 框是普通 textarea,没 readOnly、没 pointer-events 限制(`:107-112`);点上去就聚焦,打的字经 `retainWords` 的 input 监听写进留字记录(`:195-200`)——落错位置、可取回、Discard 即删。
+
+**修法修正**(取代上节第 1 条的「首选锚 DOM」):
+1. **首选:留住后继续跟随。** 把 `stopHolding()` 拆成 `releaseFocus()`(held=false、摘 focusin/focusout)和 `stopFollowing()`(clearInterval);`retain()` 只调前者,`close()` 两者都调。`place()` 每拍 `follow(anchor)` 后**重新加回** paddingRight 的提示条预留(`follow` 每拍从锚点抄 paddingRight,`:9-11/:116`,会抹掉 `:216` 加的预留——不补回,#4 的 `:831` 断言第一拍后就破)并按框的新 rect 重放提示条。锚点找不到(单元卸载/只读)时保持原位(与现在同,记残留)。CPU:每拍一次 getBoundingClientStyle/Rect;框多时(上限 20)按「rect 没变就不写」门控,`document.hidden` 时暂停。这一条天然覆盖横幅、Dismiss、滚动、改尺寸、字体重排——它量几何,不靶事件。不动控制器、不动存储、不改字何时落地。
+2. **⛔ 把框 re-parent 进单元所在块的容器(我上节写的「锚 DOM」)**:块容器是 React 持有的 DOM,块重渲染换子树、分页重切(`PaginatedTextBlockProjection.tsx:511-517` 一个单元可有多个切片容器)、块移动/删除、跨页裁切(`BlockEditorLayer.tsx:314-315`)都会**悄悄把框连同它的 input 监听一起拿掉**,而同一挂载内没有任何恢复路径(恢复 effect 每笔记只跑一次,`:526-527`)——字在存档里但屏上不见,直到下次挂载。框故意活在 body 下正是为了熬过结构 run 造成的编辑器重挂(`structureTypingBuffer.ts:1-5` 文件自述)。builder 若坚持这条,先答这几处。
+3. 次选(事件驱动:scroll/resize 监听 + ResizeObserver + 重试拍调 place):ResizeObserver 对纯位移不触发,横幅挂上可能要等 800ms 重试拍才跟上,期间点击仍落在框上;比 1 多代码路径、少覆盖。不推荐。
+
+**测试规格**(给 #4 加 #4b):放一个真的单元编辑器 textarea(`dataset.blockId='source'`、`textUnitId='body'`、`runtimeTextflowEditor='true'`,让 `editorFor` 找得到);rect mock 改**可变**:单元 {top:300,bottom:330,…}、上一行 {top:270,bottom:300}、框的 rect 由它自己的 inline style 推出(不是常量);记一条合不上的留字(如 initialText 'x' 对 live 'Intro')让它留住;等提示条出现后断言框 top=300、提示条在框内;**然后移版面**:单元与上一行各 +80;真计时器下 `waitFor(框 top → 380)`;再断言框 top ≥ 上一行 bottom(不盖行)、提示条 top∈[380,410) 且 left 在框内、paddingRight 仍 ≥ 预留(抹除检查)、`readUnplacedWords` 不变、save mock 未调(位移不改落地与存储)。修前红(top 停在 300)。
+
+**给 Tester 的一个判别**:重开后看框的 inline `style.left`——是 `25%` 就是「没找到编辑器、走回落位」,是 px 值就是「锚上了、随后被推走」。两者修法同一条都盖,但回执里要分开记。
+
+**其余不变**:定性(第 4 条未过、③)、范围收紧(只动 `structureTypingBuffer.ts`)、哈希沿用规则、锁的交接、Tester 复测范围建议。
