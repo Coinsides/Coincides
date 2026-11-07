@@ -12,7 +12,7 @@
 | `STATUS.md` | 接班的 Tester：「我正做到哪？」 | Tester，覆盖写 | 每轮开始和结束、每次下判语之后 | 接班的 Tester、Main_Designer |
 | `verdicts.md` | Main_Designer、Henry：「哪单放行了、带什么尾巴、部署后核没核？」 | Tester，行不删，只改状态列 | 每次下判语；每次部署后核对 | Main_Designer（收割和部署前）、Henry |
 | `rounds/round-NN/` | Main_Designer：「这一轮整体走下来怎么样？」 | Tester | 不针对某一单的整轮岛上实测（从 round-05 起放这里） | Main_Designer（判级、派单） |
-| `METHOD.md`（待建） | 接班的 Tester、builder：「这类测试怎么做、有哪些坑？」 | Tester，追加加修订，已脱敏 | 踩到新坑时 | 新会话接班时读 |
+| `METHOD.md`（2026-11-07 首版） | 接班的 Tester、builder：「这类测试怎么做、有哪些坑？」 | Tester，追加加修订，已脱敏 | 踩到新坑时 | 新会话接班时读 |
 
 **不放在这里的东西**
 
