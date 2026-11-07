@@ -1875,3 +1875,10 @@ builder 回执 → **Reviewer 先核**(对照本节五条裁定 + 「代码回�
 - 报告第十五节;`records/tester/verdicts.md` 该行「部署核对」已改为已核;证据 `tester-evidence/postdeploy-21/`(已扫)。
 - **编辑器组返修(A-18 残留、A-21、A-24)至此关闭。** 余项都已有去处:A-25(结构非原子残留、LANDFAIL 无自动重试、KRO、H1–H3、Y1 id 复用、文案)、L-018(边栏)、TD-55、TD-56。
 
+
+### A-19 第一趟 · 两处补跑、一条全量尾巴、一臂没红的裁定(Main_Designer 2026-11-08)
+
+- **清理**:编辑器组副本(ed21、ed21base、edfrozen、ed21-evidence)已清,junction 先拆、共享 node_modules 完好;代理 4140–4148 停。`edfix` 未碰(铁令);`edacc` 是 Tester 的验收副本,未碰。3001 草稿后端留着,builder 核过:跑的是 `fdeacb5d` 的 server + A-19 两个 server 文件(与包逐字节同,启动后无 server/src 提交),Tester 可直接接。
+- **第一趟**:client tsc 净、vite 构建 exit 0;阳性对照 A 段在 `fdeacb5d` 上红,B 段 11 臂 10 红、各红对应条。server build / tsc / test:v2 因副本缺 `docs/generated/tool-face-manifest.json` 与未建 `shared/dist` 而失败——副本没建全,与 A-19 无关,补齐后在锁下补跑;server 若仍有红再在 `fdeacb5d` 上对照。
+- **client 全量 2686/2686 过但 exit 1**:2 个 unhandled error 来自 `structureTypingBuffer.ts:292` 跟随定时器里的 `document.hidden`——`useHeadingStructureController.test.tsx` 环境拆掉后定时器还在跑。这是编辑器组(已上岛的 `fdeacb5d`)的定时器生命周期尾巴:浏览器里 `document` 一直在,不丢字、不影响线上;但「卸载后定时器仍跑」与 Reviewer F5/F6 记的泄漏同根。**裁:A-19 不修;builder 在包与 `fdeacb5d` 两副本各跑一次全量,基线上同样出现则记 TD(全量偶红族,与 TD-45 同列)并把「卸载时清跟随定时器 + `document` 守卫」挂到 A-25(下次动控制器一并补,与 H3 同批);基线上不出现则回报,我再看。**
+- **B 段没红的一臂**:删掉 `setMode` 里 `if (next === 'text' && pagesOnly) return;` 测试照样全绿。builder 解释:图片 Source 的 active 由 `pagesOnly` 强制为真、切换按钮已隐藏,这行只拦住往标签页记忆里写一个用不上的 `'text'`,看得见的行为没有测试守它。**裁:删这行**——改坏测不出的守卫就是没人知道它守不守得住的守卫,留着只会在下次有人改 `pagesOnly` 逻辑时制造假安全;真正的不变量是「pagesOnly 的笔记:无论 `setMode` 被谁调成 `'text'`,active 仍是原页、切换不渲染」——回执里指出守这条不变量的测试在哪一行(没有就补一条,这才是 B 段该红的那臂)。删行后重新封包、重算 `src.sha256`,阳性对照 B 段此臂改为「去掉 pagesOnly 强制」须红。
