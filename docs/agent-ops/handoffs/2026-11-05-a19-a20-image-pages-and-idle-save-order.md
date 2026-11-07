@@ -1896,3 +1896,12 @@ builder 回执 → **Reviewer 先核**(对照本节五条裁定 + 「代码回�
 - 23 张自造图片在 Chrome 逐张核过;截断 png 在 Chrome 里按 800×600「加载成功」而画面近空白,预期从「解码失败」改为观察项。图片探针只读页面 DOM 对构建产物跑;血缘标探针真点「View original」看落页。
 - **修前基线(`fdeacb5d` 本地后端)**:4 张好图(png、jpeg EXIF6、webp、6000×4500 png)都生成了笔记、屏上 0 张图——A-19 复现,探针阴性对照成立。乱码 png 与 avif:上传成功但停在 `received` 不出投影(修前既有;修后按 (b) 该页应失败并说明,Tester 对比);空文件 400「Source file is empty」;截断 png、png 改名 .jpg:有笔记无图。PDF 默认原页、12 个血缘标、跳 3/7/11 页全对;docx 默认原页、文本视图 0 血缘标(docx 文本不带页码),按「修后与修前一致」判。
 - **环境事实**(只记指针,细节在私有 ops 档案):本机临时后端默认绑 `0.0.0.0`,Tester 已把自己的改绑回环;服务端监听地址可配置记 **TD-57**;系统设置归 Henry,已报。
+
+### A-19 补跑 · 三条包上红是旧测试预期没跟上;两件事要进回执与 Reviewer 清单(Main_Designer 2026-11-08)
+
+- **server test:v2**:包 967 条 11 红,`fdeacb5d` 973 条 8 红;共有的 8 红是 scratch 环境(MinerU 族、manifest copy、live specimen、v2CanvasPersistenceCutover、v2DocumentParserPdf),不修。只在包上红的 3 条,builder 改预期(两测试文件按 `fdeacb5d` 原字节只改那几行,包从 13 文件增至 **15**):①`fidelity1a2DocxPages.test.ts:261` 页登记多了 `text_view: true`;②③`v2SourceLifecycleClosure.test.ts:303/:405` 移到 Home 的 canvas_assets 1→2、删源 cleanupCalls 2→3——**图片 Source 现在每张图两份**(物化器投影副本 + 新原页图),连 blob 删源清三个文件。
+- **client 全量**:包 2686/2686 exit 0;`fdeacb5d` 2680/2680 exit 1、2 个 unhandled(`structureTypingBuffer.ts:292`)。基线也出现、间歇 → **TD-58**,修法挂 A-25(与 H3 同批)。
+- **裁定 1 已执行**:删 `setMode` 死守卫,守不变量的测试在 `useSourcePageViewController.test.tsx:23-29`(pagesOnly 时 `setMode('text')` 后 active 仍真)与 `NoteSourcePagesLayer.test.tsx:75`(切换不渲染);B 段该臂改「去掉 pagesOnly 对 active 的强制」,第三趟看红。
+- **两件事(我现在点名,免得回执后返工)**:
+  1. **`text_view` 是页登记的新字段 = 1a 页登记形状的加法**。派单说「要改 1a 契约就停下来问」,这条没问就加了;加法我接受,但回执「代码回答」必须答:字段写在哪(表列还是 JSON)、有没有迁移、**岛上已登记的旧页(PDF/docx)没有这个字段时客户端当什么**——缺省必须是「有文本视图」,否则第 22 次部署后岛上所有旧 Source 丢文本视图,这是 🅰 回归。Reviewer 清单第一条就是它;Tester 加一臂:**修前导入的 PDF/docx,修后打开,文本视图、默认判决、切换都在**(不是修后重新导入)。
+  2. **每张图两份字节**:原页图是复制原件进页图存储,不是引用既有资产。「直接用原图」的本意是不经转换器,复制一份字节不违背,但多一份存储;Henry 量级可忽略,先接受。回执「物化器 canvas image 对象」那条一并申报:三份各在哪、谁读哪份、物化器那份是否已成死形状;合并为引用是否要动 1a 契约——申报即可,不改。记 TD 候回执。

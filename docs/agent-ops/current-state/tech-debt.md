@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56、TD-57)
+> **日期 (Updated)**: 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56 至 TD-58)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -68,3 +68,4 @@
 | TD-55 | **守恒闸与控制器测试的假适配器缺「离开即丢回包」的闸**:真适配器 `useNoteCanvasDataAdapter.ts` 的 `transferTextUnit` 在回包到达时自己核 `current()`(节点、路由、代际、水合纪元),笔记已切走就返回 null;测试里的假适配器没有这道闸,所以「回包确认后跟到新块」在单元层全绿、浏览器里一行不生效(编辑器组返修做法 4 因此撤回)。修法:假适配器补同样的离开闸,并以「转移已发、回包未到时改地址离开」为阳性对照(必须红)。出处:订单 `2026-11-05-a19-a20-image-pages-and-idle-save-order.md` 收尾裁定、`docs/audits/2026-11-05-a21-builder/builder/opt4-withdrawn/ROOT-CAUSE.md` | 2026-11-07 builder 返修回报 | 编辑器后续单(与离开守卫扩地址栏同批) | 未清 |
 | TD-56 | **空行上 `/` 选 Text 再打字,整块并成一个带换行的单元,打的字落到块首**(真笔记 RJ 臂:`zzgamma one` + 换行 + `gamma two`)。按结果是「落错位置」,但线上同版就有,r2 与 r2.3c 逐字相同,不是编辑器组返修引入的;Tester 判不挡该包、Main_Designer 2026-11-08 确认 | 2026-11-08 Tester r2.3c 判语「请 Main_Designer 确认」第 1 条,`docs/audits/2026-11-05-a21-builder/review-tester.md` 〇〇节;裁定在订单 `2026-11-05-a19-a20-image-pages-and-idle-save-order.md` 尾部「r2.3c 判语收讫」节 | A-25 设计单(落错位置家族,与「结构非原子残留」同单) | 未清 |
 | TD-57 | **服务端监听地址写死 `0.0.0.0`**(`server/src/index.ts:206`),无环境变量可改。本地起的临时后端(验收、草稿、代理)因此默认对所在网络可达,只能靠启动预加载或系统防火墙兜底。修法:`HOST` 环境变量,缺省保持现值不改线上行为;岛上 env 显式写明 | 2026-11-08 Tester(1) A-19 准备中发现,只报不动(系统防火墙设置归 Henry) | 按使用摩擦触发;可随下一次 server 小单顺带 | 未清 |
+| TD-58 | **留字框跟随定时器在测试环境拆掉后仍跑**:`structureTypingBuffer.ts:292` 每 50ms 读 `document.hidden`,`useHeadingStructureController.test.tsx` 拆环境后 jsdom 无 `document`,client 全量偶发 2 个 unhandled error、exit 1(2686/2686 全过)。基线 `fdeacb5d` 与 A-19 包上都间歇出现。浏览器里 `document` 一直在,不丢字、不影响线上;但「卸载后定时器仍跑」与 Reviewer F5/F6 的泄漏同根 | 2026-11-08 builder A-19 第一、二趟全量;Main_Designer 裁 A-19 不修 | A-25(卸载时清跟随定时器 + `document` 守卫,与 H3 同批) | 未清 |
