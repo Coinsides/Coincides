@@ -32,6 +32,8 @@ export interface SourcePageViewController {
   /** False until this Source is known to have an original page view. */
   available: boolean;
   active: boolean;
+  /** False when the Source is only its pages: there is no text to switch to. */
+  textAvailable: boolean;
   register: SourcePageRegister | null;
   loadFailed: boolean;
   jump: { page: number; nonce: number } | null;
@@ -73,6 +75,8 @@ export function useSourcePageViewController({ noteId, enabled }: {
   }, []);
   const register = read.noteId === noteId ? read.register : null;
   const loadFailed = read.noteId === noteId && read.failed;
+  // An image has nothing to read as text: its note is the page, whatever the tab remembered.
+  const pagesOnly = Boolean(register?.supported) && register?.text_view === false;
 
   useLayoutEffect(() => {
     setScoped((current) => current.noteId === noteId ? current : { noteId, mode: rememberedView(noteId).mode });
@@ -123,7 +127,7 @@ export function useSourcePageViewController({ noteId, enabled }: {
   const defaultSettledFor = useRef<string | undefined>();
   useEffect(() => {
     if (!enabled || !noteId || !register || defaultSettledFor.current === noteId) return;
-    if (storedView(noteId) || !register.supported) {
+    if (storedView(noteId) || !register.supported || pagesOnly) {
       defaultSettledFor.current = noteId;
       return;
     }
@@ -141,7 +145,7 @@ export function useSourcePageViewController({ noteId, enabled }: {
     keepTextScroll();
     setScoped({ noteId, mode: 'pages' });
     remember({ mode: 'pages' });
-  }, [enabled, noteId, register, remember, keepTextScroll]);
+  }, [enabled, noteId, register, pagesOnly, remember, keepTextScroll]);
 
   const setMode = useCallback((next: SourceViewMode) => {
     if (next === 'pages') keepTextScroll();
@@ -176,7 +180,8 @@ export function useSourcePageViewController({ noteId, enabled }: {
     // reader gets the error and a retry instead of a control that never appears.
     available: enabled && (register ? register.supported : loadFailed),
     // A remembered original-page tab stays there while its register reloads.
-    active: enabled && mode === 'pages' && (register === null || register.supported),
+    active: enabled && (pagesOnly || (mode === 'pages' && (register === null || register.supported))),
+    textAvailable: !pagesOnly,
     register,
     loadFailed,
     jump,

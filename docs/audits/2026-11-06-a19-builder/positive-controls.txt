@@ -1,0 +1,124 @@
+# A-19 positive controls (builder 2026-11-08). Scratch copies only, never the shared tree.
+# Part A: the A-19 tests on fdeacb5d. Part B: one mutation at a time on the package source.
+# Server target = the four server test files the package touches; client target = the three client test files.
+
+== A1 server: the four server test files the package touches, on fdeacb5d (no A-19 source at all)
+exit 1 {'tests': '46', 'pass': '40', 'fail': '6'}
+  red: src\\__tests__\\a19SourceImagePages.test.ts
+  red: without a converter a docx behaves as before, and an older docx cannot start one
+  red: Project deletion dynamically protects user work and moves the full SourceProjection graph to Home
+  red: physical Source and image asset cleanup runs only after the Source DB transaction commits
+  red: a PDF register says it has a text view
+  red: other formats get no register, and the replacement preview has no page side effects
+
+== A1 client: the three A-19 client test files on fdeacb5d
+exit 1 ['      Tests  6 failed | 35 passed (41)']
+  red: × original page layout > fits a large picture to the page width and never enlarges a small one 12ms
+  red: × a Source that is only its pages > stays on the page with no text to switch to, even when asked for the text 92ms
+  red: × a Source that is only its pages > is on the page even when its tab remembered the text view 78ms
+  red: × a Source that is only its pages > is on the page while it has no page image yet, so the generate entry is reachable 77ms
+  red: × a Source that is only its pages > a Source with text keeps its switch, and an older server without the field counts as having text 78ms
+  red: × original page view > an image Source shows its page with no text switch, and still offers generate when it has no page yet 21ms
+  red: FAIL  src/pages/Notes/canvasEngine/sourcePageLayout.test.ts > original page layout > fits a large picture to the page width and never enlarges a small one
+  red: FAIL  src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > an image Source shows its page with no text switch, and still off
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > stays on the page with no text to switch to, e
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > is on the page even when its tab remembered th
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > is on the page while it has no page image yet,
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > a Source with text keeps its switch, and an ol
+
+== A2 server: same, plus sourceImageSize.ts on its own (nothing in fdeacb5d calls it)
+exit 1 {'tests': '53', 'pass': '42', 'fail': '11'}
+  red: a png Source is one original page: the file itself, at its real size, with no text view
+  red: a jpeg Source is one original page: the file itself, at its real size, with no text view
+  red: a webp Source is one original page: the file itself, at its real size, with no text view
+  red: an image whose size cannot be read fails its page and says so, and the note stays published
+  red: an image published before page images existed gets its page from the generate entry, without a rebuild
+  red: rebuilding an image keeps its page and moves it to the new note; deleting the Source leaves no page behind
+  red: without a converter a docx behaves as before, and an older docx cannot start one
+  red: Project deletion dynamically protects user work and moves the full SourceProjection graph to Home
+  red: physical Source and image asset cleanup runs only after the Source DB transaction commits
+  red: a PDF register says it has a text view
+  red: other formats get no register, and the replacement preview has no page side effects
+
+== B0 package, unmodified: server
+exit 0 {'tests': '53', 'pass': '53', 'fail': '0'}
+== B0 package, unmodified: client
+exit 0 ['      Tests  41 passed (41)']
+
+== B images are not given a page [APPLIED]
+exit 1 {'tests': '53', 'pass': '45', 'fail': '8'}
+  red: a png Source is one original page: the file itself, at its real size, with no text view
+  red: a jpeg Source is one original page: the file itself, at its real size, with no text view
+  red: a webp Source is one original page: the file itself, at its real size, with no text view
+  red: an image whose size cannot be read fails its page and says so, and the note stays published
+  red: an image published before page images existed gets its page from the generate entry, without a rebuild
+  red: rebuilding an image keeps its page and moves it to the new note; deleting the Source leaves no page behind
+  red: Project deletion dynamically protects user work and moves the full SourceProjection graph to Home
+  red: physical Source and image asset cleanup runs only after the Source DB transaction commits
+
+== B an image goes through the PDF renderer [APPLIED]
+exit 1 {'tests': '53', 'pass': '45', 'fail': '8'}
+  red: a png Source is one original page: the file itself, at its real size, with no text view
+  red: a jpeg Source is one original page: the file itself, at its real size, with no text view
+  red: a webp Source is one original page: the file itself, at its real size, with no text view
+  red: an image whose size cannot be read fails its page and says so, and the note stays published
+  red: an image published before page images existed gets its page from the generate entry, without a rebuild
+  red: rebuilding an image keeps its page and moves it to the new note; deleting the Source leaves no page behind
+  red: Project deletion dynamically protects user work and moves the full SourceProjection graph to Home
+  red: physical Source and image asset cleanup runs only after the Source DB transaction commits
+
+== B page image always stored as png [APPLIED]
+exit 1 {'tests': '53', 'pass': '51', 'fail': '2'}
+  red: a jpeg Source is one original page: the file itself, at its real size, with no text view
+  red: a webp Source is one original page: the file itself, at its real size, with no text view
+
+== B an image register claims a text view [APPLIED]
+exit 1 {'tests': '53', 'pass': '49', 'fail': '4'}
+  red: a png Source is one original page: the file itself, at its real size, with no text view
+  red: a jpeg Source is one original page: the file itself, at its real size, with no text view
+  red: a webp Source is one original page: the file itself, at its real size, with no text view
+  red: an image published before page images existed gets its page from the generate entry, without a rebuild
+
+== B EXIF rotation ignored [APPLIED]
+exit 1 {'tests': '53', 'pass': '52', 'fail': '1'}
+  red: a photo stored on its side is measured the way it is shown
+
+== B unreadable size gets a guessed A4 shape instead of failing the page [APPLIED]
+exit 1 {'tests': '53', 'pass': '52', 'fail': '1'}
+  red: an image whose size cannot be read fails its page and says so, and the note stays published
+
+== B size reader guesses for unreadable bytes [APPLIED]
+exit 1 {'tests': '53', 'pass': '51', 'fail': '2'}
+  red: bytes that are not a readable image give no size, never a guessed one
+  red: an image whose size cannot be read fails its page and says so, and the note stays published
+
+== B controller ignores pages-only [APPLIED]
+exit 1 ['      Tests  3 failed | 38 passed (41)']
+  red: × a Source that is only its pages > stays on the page with no text to switch to, even when asked for the text 107ms
+  red: × a Source that is only its pages > is on the page even when its tab remembered the text view 78ms
+  red: × a Source that is only its pages > is on the page while it has no page image yet, so the generate entry is reachable 73ms
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > stays on the page with no text to switch to, e
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > is on the page even when its tab remembered th
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > is on the page while it has no page image yet,
+
+== B pages-only no longer forces the page view [APPLIED]
+exit 1 ['      Tests  3 failed | 38 passed (41)']
+  red: × a Source that is only its pages > stays on the page with no text to switch to, even when asked for the text 111ms
+  red: × a Source that is only its pages > is on the page even when its tab remembered the text view 78ms
+  red: × a Source that is only its pages > is on the page while it has no page image yet, so the generate entry is reachable 77ms
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > stays on the page with no text to switch to, e
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > is on the page even when its tab remembered th
+  red: FAIL  src/pages/Notes/canvasEngine/hooks/useSourcePageViewController.test.tsx > a Source that is only its pages > is on the page while it has no page image yet,
+
+== B switch shown for a pages-only Source [APPLIED]
+exit 1 ['      Tests  1 failed | 40 passed (41)']
+  red: × original page view > an image Source shows its page with no text switch, and still offers generate when it has no page yet 22ms
+  red: FAIL  src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > an image Source shows its page with no text switch, and still off
+
+== B small picture enlarged to page width [APPLIED]
+exit 1 ['      Tests  2 failed | 39 passed (41)']
+  red: × original page layout > fits a large picture to the page width and never enlarges a small one 12ms
+  red: × original page view > an image Source shows its page with no text switch, and still offers generate when it has no page yet 18ms
+  red: FAIL  src/pages/Notes/canvasEngine/sourcePageLayout.test.ts > original page layout > fits a large picture to the page width and never enlarges a small one
+  red: FAIL  src/pages/Notes/canvasEngine/layers/NoteSourcePagesLayer.test.tsx > original page view > an image Source shows its page with no text switch, and still off
+

@@ -1,0 +1,123 @@
+== n1 arm a start 23:55:56
+== n1 arm a exit 0 00:06:37
+n1-1-a {"arm":"a","rep":1,"scenario":"S2","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (35s)
+n1-2-a {"arm":"a","rep":2,"scenario":"S2","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (36s)
+n1-3-a {"arm":"a","rep":1,"scenario":"S2","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (35s)
+n1-4-a {"arm":"a","rep":2,"scenario":"S2","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (37s)
+n1-5-a {"arm":"a","rep":1,"scenario":"S2","scroll":"script","nav":"hash"} -> HELD text top=800 (before 800) (35s)
+n1-6-a {"arm":"a","rep":2,"scenario":"S2","scroll":"script","nav":"hash"} -> HELD text top=800 (before 800) (34s)
+n1-7-a {"arm":"a","rep":1,"scenario":"S7","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (43s)
+n1-8-a {"arm":"a","rep":2,"scenario":"S7","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (42s)
+n1-9-a {"arm":"a","rep":1,"scenario":"S7","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (42s)
+n1-10-a {"arm":"a","rep":2,"scenario":"S7","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (42s)
+n1-11-a {"arm":"a","rep":1,"scenario":"S2","scroll":"wheel","nav":"tab","returnAt":"complete"} -> HELD text top=800 (before 800) (36s)
+n1-12-a {"arm":"a","rep":2,"scenario":"S2","scroll":"wheel","nav":"tab","returnAt":"complete"} -> HELD text top=800 (before 800) (36s)
+n1-13-a {"arm":"a","rep":1,"scenario":"S1","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (33s)
+n1-14-a {"arm":"a","rep":2,"scenario":"S1","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (33s)
+n1-15-a {"arm":"a","rep":1,"scenario":"S2","scroll":"none","nav":"tab"} -> PULLED pages top=26 (before 0) textAfterClick=0 (35s)
+n1-16-a {"arm":"a","rep":2,"scenario":"S2","scroll":"none","nav":"tab"} -> PULLED pages top=26 (before 0) textAfterClick=0 (35s)
+n1-17-a {"arm":"a","rep":1,"scenario":"S2","scroll":"wheel","nav":"stay"} -> HELD text top=800 mode=text (24s)
+n1-18-a {"arm":"a","rep":2,"scenario":"S2","scroll":"wheel","nav":"stay"} -> HELD text top=800 mode=text (24s)
+== n1 arm b start 00:06:37
+== n1 arm b exit 0 00:17:09
+n1-1-b {"arm":"b","rep":1,"scenario":"S2","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (35s)
+n1-2-b {"arm":"b","rep":2,"scenario":"S2","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (35s)
+n1-3-b {"arm":"b","rep":1,"scenario":"S2","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (35s)
+n1-4-b {"arm":"b","rep":2,"scenario":"S2","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (34s)
+n1-5-b {"arm":"b","rep":1,"scenario":"S2","scroll":"script","nav":"hash"} -> HELD text top=800 (before 800) (33s)
+n1-6-b {"arm":"b","rep":2,"scenario":"S2","scroll":"script","nav":"hash"} -> HELD text top=800 (before 800) (33s)
+n1-7-b {"arm":"b","rep":1,"scenario":"S7","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (42s)
+n1-8-b {"arm":"b","rep":2,"scenario":"S7","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (42s)
+n1-9-b {"arm":"b","rep":1,"scenario":"S7","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (42s)
+n1-10-b {"arm":"b","rep":2,"scenario":"S7","scroll":"wheel","nav":"hash"} -> HELD text top=800 (before 800) (42s)
+n1-11-b {"arm":"b","rep":1,"scenario":"S2","scroll":"wheel","nav":"tab","returnAt":"complete"} -> HELD text top=800 (before 800) (36s)
+n1-12-b {"arm":"b","rep":2,"scenario":"S2","scroll":"wheel","nav":"tab","returnAt":"complete"} -> HELD text top=800 (before 800) (36s)
+n1-13-b {"arm":"b","rep":1,"scenario":"S1","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (33s)
+n1-14-b {"arm":"b","rep":2,"scenario":"S1","scroll":"wheel","nav":"tab"} -> HELD text top=800 (before 800) (33s)
+n1-15-b {"arm":"b","rep":1,"scenario":"S2","scroll":"none","nav":"tab"} -> PULLED pages top=26 (before 0) textAfterClick=0 (35s)
+n1-16-b {"arm":"b","rep":2,"scenario":"S2","scroll":"none","nav":"tab"} -> PULLED pages top=26 (before 0) textAfterClick=0 (36s)
+n1-17-b {"arm":"b","rep":1,"scenario":"S2","scroll":"wheel","nav":"stay"} -> HELD text top=800 mode=text (24s)
+n1-18-b {"arm":"b","rep":2,"scenario":"S2","scroll":"wheel","nav":"stay"} -> HELD text top=800 mode=text (24s)
+== pagestabs arm a start 00:17:09
+== pagestabs arm a exit 0 00:20:22
+pagestabs-1-a {"arm":"a","rep":1,"nav":"tab"} -> pagesKept=true textFramesAcross6=6 perSwitch=1,1,1,1,1,1 (50s)
+pagestabs-2-a {"arm":"a","rep":2,"nav":"tab"} -> pagesKept=true textFramesAcross6=6 perSwitch=1,1,1,1,1,1 (48s)
+pagestabs-3-a {"arm":"a","rep":1,"nav":"hash"} -> pagesKept=true textFramesAcross6=5 perSwitch=1,1,1,1,0,1 (48s)
+pagestabs-4-a {"arm":"a","rep":2,"nav":"hash"} -> pagesKept=true textFramesAcross6=6 perSwitch=1,1,1,1,1,1 (47s)
+== pagestabs arm b start 00:20:22
+== pagestabs arm b exit 0 00:23:33
+pagestabs-1-b {"arm":"b","rep":1,"nav":"tab"} -> pagesKept=true textFramesAcross6=6 perSwitch=1,1,1,1,1,1 (48s)
+pagestabs-2-b {"arm":"b","rep":2,"nav":"tab"} -> pagesKept=true textFramesAcross6=6 perSwitch=1,1,1,1,1,1 (49s)
+pagestabs-3-b {"arm":"b","rep":1,"nav":"hash"} -> pagesKept=true textFramesAcross6=5 perSwitch=1,1,1,0,1,1 (48s)
+pagestabs-4-b {"arm":"b","rep":2,"nav":"hash"} -> pagesKept=true textFramesAcross6=4 perSwitch=1,1,1,0,0,1 (47s)
+== pagesback arm a start 00:23:34
+== pagesback arm a exit 0 00:26:55
+pagesback-1-a {"arm":"a","rep":1,"cast":false} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=63 medShellToImg=196 medClickToImg=3433 (50s)
+pagesback-2-a {"arm":"a","rep":2,"cast":false} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=66 medShellToImg=190 medClickToImg=3467 (50s)
+pagesback-3-a {"arm":"a","rep":1,"cast":true} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=66 medShellToImg=175 medClickToImg=3444 (50s)
+pagesback-4-a {"arm":"a","rep":2,"cast":true} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=72 medShellToImg=205 medClickToImg=3501 (50s)
+== pagesback arm b start 00:26:55
+== pagesback arm b exit 0 00:30:18
+pagesback-1-b {"arm":"b","rep":1,"cast":false} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=61 medShellToImg=159 medClickToImg=3501 (51s)
+pagesback-2-b {"arm":"b","rep":2,"cast":false} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=67 medShellToImg=211 medClickToImg=3449 (50s)
+pagesback-3-b {"arm":"b","rep":1,"cast":true} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=70 medShellToImg=188 medClickToImg=3486 (50s)
+pagesback-4-b {"arm":"b","rep":2,"cast":true} -> kept=true oldText=1,1,1,1 chrome=2,2,2,2 medShellToPlaced=67 medShellToImg=178 medClickToImg=3476 (50s)
+== textpos arm a start 00:30:18
+== textpos arm a exit 0 00:33:58
+textpos-1-a {"arm":"a","rep":1,"other":"pdf","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (40s)
+textpos-2-a {"arm":"a","rep":2,"other":"pdf","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (39s)
+textpos-3-a {"arm":"a","rep":1,"other":"md","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (34s)
+textpos-4-a {"arm":"a","rep":2,"other":"md","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (35s)
+textpos-5-a {"arm":"a","rep":1,"other":"pdf-leak","nav":"tab"} -> before=800 control=800 otherNoteTextTop=0 pressed=Text h=10447 (36s)
+textpos-6-a {"arm":"a","rep":2,"other":"pdf-leak","nav":"tab"} -> before=800 control=800 otherNoteTextTop=0 pressed=Text h=10447 (36s)
+== textpos arm b start 00:33:58
+== textpos arm b exit 0 00:37:38
+textpos-1-b {"arm":"b","rep":1,"other":"pdf","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (40s)
+textpos-2-b {"arm":"b","rep":2,"other":"pdf","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (39s)
+textpos-3-b {"arm":"b","rep":1,"other":"md","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (35s)
+textpos-4-b {"arm":"b","rep":2,"other":"md","nav":"tab"} -> before=800 control=800 afterTabTrip=35 pressed=Text (35s)
+textpos-5-b {"arm":"b","rep":1,"other":"pdf-leak","nav":"tab"} -> before=800 control=800 otherNoteTextTop=0 pressed=Text h=10447 (36s)
+textpos-6-b {"arm":"b","rep":2,"other":"pdf-leak","nav":"tab"} -> before=800 control=800 otherNoteTextTop=0 pressed=Text h=10447 (36s)
+== entries arm a start 00:37:38
+== entries arm a exit 0 00:39:02
+entries-1-a {"arm":"a","rep":1} -> h_hash=true h_agent=true proj_pdf=true proj_docx=true (41s)
+entries-2-a {"arm":"a","rep":2} -> h_hash=true h_agent=true proj_pdf=true proj_docx=true (41s)
+== entries arm b start 00:39:02
+== entries arm b exit 0 00:40:25
+entries-1-b {"arm":"b","rep":1} -> h_hash=true h_agent=true proj_pdf=true proj_docx=true (42s)
+entries-2-b {"arm":"b","rep":2} -> h_hash=true h_agent=true proj_pdf=true proj_docx=true (41s)
+== focus arm a start 00:40:25
+== focus arm a exit 0 00:42:56
+focus-1-a {"arm":"a","rep":1} -> text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=tru
+focus-2-a {"arm":"a","rep":2} -> text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=tru
+== focus arm b start 00:42:56
+== focus arm b exit 0 00:45:27
+focus-1-b {"arm":"b","rep":1} -> text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=tru
+focus-2-b {"arm":"b","rep":2} -> text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=true/hl=1 | text/Text/top=8247/in=tru
+== notice arm a start 00:45:27
+== notice arm a exit 0 00:49:31
+notice-1-a {"arm":"a","rep":1,"nav":"tab"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=fa
+notice-2-a {"arm":"a","rep":2,"nav":"tab"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=fa
+notice-3-a {"arm":"a","rep":1,"nav":"hash"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=f
+notice-4-a {"arm":"a","rep":2,"nav":"hash"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=f
+== notice arm b start 00:49:31
+== notice arm b exit 0 00:53:35
+notice-1-b {"arm":"b","rep":1,"nav":"tab"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=fa
+notice-2-b {"arm":"b","rep":2,"nav":"tab"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=fa
+notice-3-b {"arm":"b","rep":1,"nav":"hash"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=f
+notice-4-b {"arm":"b","rep":2,"nav":"hash"} -> pages=false text=false back=false firstOpenFrames=0 leave(C/M/H)=0/0/0 failedShown=false badge=false detailNote=f
+== td1 arm a start 00:53:35
+== td1 arm a exit 0 00:55:47
+td1-1-a {"arm":"a","rep":1,"via":"hash"} -> HELD pages p4 memory=pages/4 (33s)
+td1-2-a {"arm":"a","rep":2,"via":"hash"} -> HELD pages p4 memory=pages/4 (33s)
+td1-3-a {"arm":"a","rep":1,"via":"agent"} -> HELD pages p4 memory=pages/4 (33s)
+td1-4-a {"arm":"a","rep":2,"via":"agent"} -> HELD pages p4 memory=pages/4 (33s)
+== td1 arm b start 00:55:48
+== td1 arm b exit 0 00:58:00
+td1-1-b {"arm":"b","rep":1,"via":"hash"} -> HELD pages p4 memory=pages/4 (33s)
+td1-2-b {"arm":"b","rep":2,"via":"hash"} -> HELD pages p4 memory=pages/4 (33s)
+td1-3-b {"arm":"b","rep":1,"via":"agent"} -> HELD pages p4 memory=pages/4 (33s)
+td1-4-b {"arm":"b","rep":2,"via":"agent"} -> HELD pages p4 memory=pages/4 (33s)
+1a regression done 00:58:00
+
+[exited with code 0]

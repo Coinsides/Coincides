@@ -1,0 +1,7 @@
+# xcheck-3001.mjs: builder's draft backend 3001 vs my post backend 3592 (fdeacb5d + package src), same three files, 2026-11-08
+3001  png-land-800x600.png       {"parser":"native-image","mat":"materialized","supported":true,"text_view":false,"status":"complete","failed":[],"dims":[800,600],"bytesOriginal":true}
+3001  jpeg-exif6-1600x900.jpg    {"parser":"native-image","mat":"materialized","supported":true,"text_view":false,"status":"complete","failed":[],"dims":[900,1600],"bytesOriginal":true}
+3001  unread-png-zero-width.png  {"parser":"native-image","mat":"materialized","supported":true,"text_view":false,"status":"failed","failed":[1],"dims":null,"bytesOriginal":null}
+3592  png-land-800x600.png       {"parser":"native-image","mat":"materialized","supported":true,"text_view":false,"status":"complete","failed":[],"dims":[800,600],"bytesOriginal":true}
+3592  jpeg-exif6-1600x900.jpg    {"parser":"native-image","mat":"materialized","supported":true,"text_view":false,"status":"complete","failed":[],"dims":[900,1600],"bytesOriginal":true}
+3592  unread-png-zero-width.png  {"parser":"native-image","mat":"materialized","supported":true,"text_view":false,"status":"failed","failed":[1],"dims":null,"bytesOriginal":null}

@@ -300,8 +300,9 @@ test('Project deletion dynamically protects user work and moves the full SourceP
     assert.equal((db.prepare('SELECT course_id FROM note_blocks WHERE id = ?').get(work.blockId) as any).course_id, homeId);
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_objects WHERE note_id = ? AND course_id = ?')
       .get(source.projectionNoteId, homeId) as any).count > 0, true);
+    // The projection's image copy and the Source's one original page both move with the note.
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_assets WHERE origin_note_id = ? AND course_id = ?')
-      .get(source.projectionNoteId, homeId) as any).count, 1);
+      .get(source.projectionNoteId, homeId) as any).count, 2);
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM source_project_placements WHERE source_record_id = ? AND course_id = ?')
       .get(source.sourceId, homeId) as any).count, 1);
     assert.ok(db.prepare('SELECT id FROM source_records WHERE id = ?').get(source.sourceId));
@@ -402,6 +403,7 @@ test('physical Source and image asset cleanup runs only after the Source DB tran
         unlinkSync(path);
       },
     });
-    assert.equal(cleanupCalls, 2);
+    // The blob, the projection's image copy and the original page image.
+    assert.equal(cleanupCalls, 3);
   });
 });

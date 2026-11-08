@@ -52,6 +52,8 @@ export interface SourcePage {
 export interface SourcePageRegister {
   source_id: string;
   supported: boolean;
+  /** False for a Source that has no text to read, such as an image. Absent on an older server means true. */
+  text_view?: boolean;
   status: 'none' | 'pending' | 'partial' | 'complete' | 'failed';
   expected: number;
   completed: number;

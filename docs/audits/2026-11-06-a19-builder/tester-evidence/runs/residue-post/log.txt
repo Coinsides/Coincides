@@ -1,0 +1,22 @@
+F0 files 144
+A {"note":"c4f50111-f315-49cd-be2e-96521ec84d50","reg":"complete","asset":"source-page-image:861c7be4-2db9-4484-bba7-a5122cbe422d:1"}
+B {"note":"7699e08a-5868-427c-b55a-51c63bf1a387","reg":"complete","asset":"source-page-image:97e89f59-a9b1-4da4-8380-400d84d08b61:1"}
+import added 6 ["blobs/33d2f37b-d54f-43ad-b509-5b2f49e433fc/21a85312-f6db-498c-8862-f192a87cdf90.jpg","blobs/33d2f37b-d54f-43ad-b509-5b2f49e433fc/c71e8387-b91e-40e6-9edf-1686cac7f950.webp","assets/33d2f37b-d54f-43ad-b509-5b2f49e433fc/source-materializations/861c7be4-2db9-4484-bba7-a5122cbe422d-page-1.jpg","assets/33d2f37b-d54f-43ad-b509-5b2f49e433fc/source-materializations/861c7be4-2db9-4484-bba7-a5122cbe422d.jpg","assets/33d2f37b-d54f-43ad-b509-5b2f49e433fc/source-materializations/97e89f59-a9b1-4da4-8380-400d84d08b61-page-1.webp","assets/33d2f37b-d54f-43ad-b509-5b2f49e433fc/source-materializations/97e89f59-a9b1-4da4-8380-400d84d08b61.webp"]
+import removed 0
+A blob {"status":200,"sha":"9863a369548cfde7587bcd76ee68c75127328136ba7ca91c41b3f3b57e981d09"} orig 9863a369548c
+B blob {"status":200,"sha":"586f5ea206ce47da32bc870126104eee4bbbfffb17a63277323a5cdc5fe8788f"} orig 586f5ea206ce
+rows after import {"source_records":2,"source_files":2,"source_materializations":2,"source_pages":2,"canvas_assets":12,"notes":2}
+rebuild preview {"user_work":{"note_tag_count":0,"annotation_count":0,"content_group_count":0,"purpose_count":0,"display_override_count":0,"external_block_placement_count":0,"has_user_work":false}}
+rebuild result {"projection_note_id":"6763d820-eb3d-41d5-94e5-2d9218caa2f6","operation_batch_id":"1d2034b3-a02f-4e98-9d77-a2c9897a3789","block_count":0,"canvas_object_count":2,"receipt_id":"1c3bae7f-318e-42e7-9dd9-f58516fb7cc2","user_work":{"note_tag_count":0,"annotation_count":0,"content_group_count":0,"purpose_c
+A after rebuild {"newNote":"6763d820-eb3d-41d5-94e5-2d9218caa2f6","reg":{"status":"complete","n":1,"text_view":false},"asset2":"source-page-image:861c7be4-2db9-4484-bba7-a5122cbe422d:1"}
+A old asset blob {"status":200,"sha":"9863a369548cfde7587bcd76ee68c75127328136ba7ca91c41b3f3b57e981d09"} A new asset blob {"status":200,"sha":"9863a369548cfde7587bcd76ee68c75127328136ba7ca91c41b3f3b57e981d09"}
+A old note GET 404
+rebuild added [] removed []
+DELETE B 200
+delete B removed ["blobs/33d2f37b-d54f-43ad-b509-5b2f49e433fc/c71e8387-b91e-40e6-9edf-1686cac7f950.webp","assets/33d2f37b-d54f-43ad-b509-5b2f49e433fc/source-materializations/97e89f59-a9b1-4da4-8380-400d84d08b61-page-1.webp","assets/33d2f37b-d54f-43ad-b509-5b2f49e433fc/source-materializations/97e89f59-a9b1-4da4-8380-400d84d08b61.webp"] added []
+B blob after delete {"status":404,"sha":null}
+rows B after delete {"source_records":0,"source_files":0,"source_materializations":0,"source_pages":0,"canvas_assets":0,"notes":0}
+DELETE A 200
+F4 vs F0 added [] removed []
+A blobs after delete {"status":404,"sha":null} {"status":404,"sha":null}
+rows A after delete {"source_records":0,"source_files":0,"source_materializations":0,"source_pages":0,"canvas_assets":0,"notes":0}

@@ -1,0 +1,35 @@
+tsc client (work): exit 0, 0 lines, 29s
+tsc server (work): exit 2, 88 lines, 18s
+vite build client (work): exit 0, 14s
+npm run build server (work): exit 1, 3s
+controls written: positive-controls.txt
+pretest:v2 (work): exit 1
+server test:v2 (work, concurrency 3): exit 1 {'tests': '14', 'pass': '14', 'fail': '0'} 223s; failing: ['without a converter a docx behaves as before, and an older docx cannot start one', 'src\\\\__tests__\\\\v14AgentKnowledgeProjection.test.ts', 'src\\\\__tests__\\\\v14AgentRouteLifecycle.test.ts', 'src\\\\__tests__\\\\v14AgentVerbTransfer.test.ts', 'src\\\\__tests__\\\\v14AgentWriteDoor.test.ts', 'original live specimen replays byte-for-byte with prior successful save receipts and zero flags', 'src\\\\__tests__\\\\v14ClaimReceipt.test.ts', 'src\\\\__tests__\\\\v14ContextHint.test.ts', 'src\\\\__tests__\\\\v14DeleteCeremony.test.ts', 'src\\\\__tests__\\\\v14LoopRobustness.test.ts', 'src\\\\__tests__\\\\v14MemoryQuickwins.test.ts', 'src\\\\__tests__\\\\v14ProposalUnification.test.ts', 'src\\\\__tests__\\\\v14ReadTools.test.ts', 'src\\\\__tests__\\\\v14TurnIdentity.test.ts', 'T-1 both dev gates enabled returns a normal-login-shaped JWT response', 'T-2 production startup does not mount the dev quick-login path', 'T-3 the explicit opt-in defaults off and leaves the path unmounted', 'src\\\\__tests__\\\\v2MaterialLibrary.test.ts', 'src\\\\__tests__\\\\v2SourceContainerIntake.test.ts', 'Project deletion dynamically protects user work and moves the full SourceProjection graph to Home']
+client vitest full (work, 3 forks): exit 1 ['      Tests  2686 passed (2686)'] 289s; failing: []
+--- rerun 2026-11-08 07:10 after adding docs/generated from fdeacb5d to both copies
+npm run build server (work; tsc -b builds shared then server): exit 0
+tsc server --noEmit (work, after shared built): exit 0, 0 lines
+pretest:v2 (work): exit 0
+server test:v2 (work, concurrency 3): exit 1, # tests 967 # pass 956 # fail 11 # tests 49 # pass 49 # fail 0 # tests 2 # pass 2 # fail 0  262s
+not ok 93 - without a converter a docx behaves as before, and an older docx cannot start one
+not ok 400 - original live specimen replays byte-for-byte with prior successful save receipts and zero flags
+not ok 61 - src\\__tests__\\v2CanvasPersistenceCutover.test.ts
+not ok 64 - src\\__tests__\\v2DocumentParserPdf.test.ts
+not ok 856 - Project deletion dynamically protects user work and moves the full SourceProjection graph to Home
+not ok 860 - physical Source and image asset cleanup runs only after the Source DB transaction commits
+not ok 873 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+not ok 874 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+not ok 875 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+not ok 886 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+not ok 905 - T-1 manifest copy recreates a missing dist target byte-for-byte
+server test:v2 on fdeacb5d (base, same file list minus the new file): exit 1, # tests 973 # pass 965 # fail 8 # tests 49 # pass 49 # fail 0 # tests 2 # pass 2 # fail 0 
+not ok 392 - original live specimen replays byte-for-byte with prior successful save receipts and zero flags
+not ok 60 - src\\__tests__\\v2CanvasPersistenceCutover.test.ts
+not ok 63 - src\\__tests__\\v2DocumentParserPdf.test.ts
+not ok 879 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+not ok 880 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+not ok 881 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+not ok 892 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+not ok 911 - T-1 manifest copy recreates a missing dist target byte-for-byte
+client vitest full (work, 3 forks): exit 0,  unhandled: 0 331s
+client vitest full (base, 3 forks): exit 1,  unhandled: 2 298s

@@ -258,7 +258,7 @@ test('without a converter a docx behaves as before, and an older docx cannot sta
   assert.equal(docxPdfConverterConfigured(), false);
   const docx = await f.uploadDocx();
   assert.deepEqual(getSourcePages(f.db, f.userId, docx.sourceId), {
-    source_id: docx.sourceId, supported: false, status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [],
+    source_id: docx.sourceId, supported: false, text_view: true, status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [],
   });
   assert.equal(f.runs().length, 0);
   assert.throws(() => requestSourcePageImages(f.db, f.userId, docx.sourceId, f.options), (error: any) => {

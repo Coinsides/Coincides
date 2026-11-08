@@ -1,0 +1,392 @@
+[
+ {
+  "name": "png-land-800x600.png",
+  "mime": "image/png",
+  "bytes": 38212,
+  "sha256": "041d4be4bc7b3b1f1ea3055464faff7e6126f9e9d1d14574ee79701dffe9a306",
+  "pixel": [
+   800,
+   600
+  ],
+  "display": [
+   800,
+   600
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "png-tall-1200x4000.png",
+  "mime": "image/png",
+  "bytes": 192910,
+  "sha256": "05ad25aa0372090e1b784fd075f00050d08557b5abe2692304bd051943bf9a68",
+  "pixel": [
+   1200,
+   4000
+  ],
+  "display": [
+   1200,
+   4000
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "png-pano-5000x800.png",
+  "mime": "image/png",
+  "bytes": 144170,
+  "sha256": "90c75e7f3a5bb4f679301fd994a9339e7d3626343a2ee360b3448ae46e2c26a7",
+  "pixel": [
+   5000,
+   800
+  ],
+  "display": [
+   5000,
+   800
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "png-ultrawide-16000x300.png",
+  "mime": "image/png",
+  "bytes": 111914,
+  "sha256": "0d5add1a1bed468a5679bcddeaaa6b5a0bdc8043cb818baea90625c53fbd3814",
+  "pixel": [
+   16000,
+   300
+  ],
+  "display": [
+   16000,
+   300
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "png-huge-6000x4500.png",
+  "mime": "image/png",
+  "bytes": 8727167,
+  "sha256": "e5cc0605e778dbc2c175a20e1edd8917c2551b1a92aca3b3a7cf626b911fc40e",
+  "pixel": [
+   6000,
+   4500
+  ],
+  "display": [
+   6000,
+   4500
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "png-tiny-16x16.png",
+  "mime": "image/png",
+  "bytes": 656,
+  "sha256": "cfd52d3bebc303dea9203d8b3344b7b6075ffe30d456ce6bacc3f3aaec089b5b",
+  "pixel": [
+   16,
+   16
+  ],
+  "display": [
+   16,
+   16
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "png-alpha-600x600.png",
+  "mime": "image/png",
+  "bytes": 32403,
+  "sha256": "8a9886d0eb120109f80dea464b7bef0f5b8c2f2f07fd3e3b38f44dd019d874f8",
+  "pixel": [
+   600,
+   600
+  ],
+  "display": [
+   600,
+   600
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "jpeg-1600x900.jpg",
+  "mime": "image/jpeg",
+  "bytes": 87521,
+  "sha256": "9863a369548cfde7587bcd76ee68c75127328136ba7ca91c41b3f3b57e981d09",
+  "pixel": [
+   1600,
+   900
+  ],
+  "display": [
+   1600,
+   900
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "jpeg-exif3-1600x900.jpg",
+  "mime": "image/jpeg",
+  "bytes": 94691,
+  "sha256": "ecf79bf785ab1d769a6f798f16a0ae1513a050ea71a78fda0cac403d8a0dac3b",
+  "pixel": [
+   1600,
+   900
+  ],
+  "display": [
+   1600,
+   900
+  ],
+  "expect": "visible",
+  "exif": 3
+ },
+ {
+  "name": "jpeg-exif6-1600x900.jpg",
+  "mime": "image/jpeg",
+  "bytes": 95938,
+  "sha256": "c6d6699f220836e355f079e01b0412c7e06121f821898167f71e43c1ad3fd615",
+  "pixel": [
+   1600,
+   900
+  ],
+  "display": [
+   900,
+   1600
+  ],
+  "expect": "visible",
+  "exif": 6
+ },
+ {
+  "name": "jpeg-exif8-1600x900.jpg",
+  "mime": "image/jpeg",
+  "bytes": 95882,
+  "sha256": "c2a81ad588d2d8fe0232dab19236c44428da3f13d8afd8df9f37aed1382f3a70",
+  "pixel": [
+   1600,
+   900
+  ],
+  "display": [
+   900,
+   1600
+  ],
+  "expect": "visible",
+  "exif": 8
+ },
+ {
+  "name": "jpeg-huge-7000x5000.jpg",
+  "mime": "image/jpeg",
+  "bytes": 8933834,
+  "sha256": "c38be7b32c25e792cf5cfc23a743db856d5f34140f460e01e590b46d1ea03c28",
+  "pixel": [
+   7000,
+   5000
+  ],
+  "display": [
+   7000,
+   5000
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "webp-vp8x-icc-vp8-1000x700.webp",
+  "mime": "image/webp",
+  "bytes": 23196,
+  "sha256": "741a38d7f30068fc3ea9b7964df4260499b4455a6227ced05360af480d2fdc8e",
+  "pixel": [
+   1000,
+   700
+  ],
+  "display": [
+   1000,
+   700
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "webp-vp8x-icc-vp8l-1000x700.webp",
+  "mime": "image/webp",
+  "bytes": 32776,
+  "sha256": "97284698a9dbe9eb19ac979fdfbcd233debaf85b45cb2198c01c4cffba4dadc0",
+  "pixel": [
+   1000,
+   700
+  ],
+  "display": [
+   1000,
+   700
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "webp-vp8x-alpha-1000x700.webp",
+  "mime": "image/webp",
+  "bytes": 29256,
+  "sha256": "706f56e24fef9fd9f9fe6fbfa9a7dda2c0221150b96cf7a6eaeb24d4af5837a9",
+  "pixel": [
+   1000,
+   700
+  ],
+  "display": [
+   1000,
+   700
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "webp-simple-vp8-1000x700.webp",
+  "mime": "image/webp",
+  "bytes": 22714,
+  "sha256": "e21d3f124aaaf932d6440f0cf8294eb40318c42e18c617ad05de6ed16050b40d",
+  "pixel": [
+   1000,
+   700
+  ],
+  "display": [
+   1000,
+   700
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "webp-simple-vp8l-1000x700.webp",
+  "mime": "image/webp",
+  "bytes": 32294,
+  "sha256": "586f5ea206ce47da32bc870126104eee4bbbfffb17a63277323a5cdc5fe8788f",
+  "pixel": [
+   1000,
+   700
+  ],
+  "display": [
+   1000,
+   700
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "webp-simple-vp8-odd-999x701.webp",
+  "mime": "image/webp",
+  "bytes": 22832,
+  "sha256": "888d01a2034c1da8307e510dd4964f1b9a69c860a70b0ed14d3ea039af663bc2",
+  "pixel": [
+   999,
+   701
+  ],
+  "display": [
+   999,
+   701
+  ],
+  "expect": "visible"
+ },
+ {
+  "name": "bad-garbage.png",
+  "mime": "image/png",
+  "bytes": 4096,
+  "sha256": "026fde64aaef6121747166aab8a385e210483978c64c124cfc0f335417027a96",
+  "expect": "page-fails-note-stands"
+ },
+ {
+  "name": "bad-truncated-800x600.png",
+  "mime": "image/png",
+  "bytes": 200,
+  "sha256": "670d6f6fa047a82d09137e4f65921ad9c1ac82d8819ee245e2c0e1b3c0c6253f",
+  "pixel": [
+   800,
+   600
+  ],
+  "expect": "size-readable-renders-blank",
+  "display": [
+   800,
+   600
+  ]
+ },
+ {
+  "name": "bad-pngbytes-named.jpg",
+  "mime": "image/jpeg",
+  "bytes": 38212,
+  "sha256": "041d4be4bc7b3b1f1ea3055464faff7e6126f9e9d1d14574ee79701dffe9a306",
+  "pixel": [
+   800,
+   600
+  ],
+  "expect": "mismatch-observe"
+ },
+ {
+  "name": "bad-empty.png",
+  "mime": "image/png",
+  "bytes": 0,
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "expect": "observe"
+ },
+ {
+  "name": "other-avif-800x600.avif",
+  "mime": "image/avif",
+  "bytes": 2725,
+  "sha256": "db0ca6fb57ef9314b6e5074b285419c029a9fe11fe2db99b462147dfe6cc16b2",
+  "pixel": [
+   800,
+   600
+  ],
+  "expect": "not-accepted-observe"
+ },
+ {
+  "name": "bad-pngbytes-distinct-810x600.jpg",
+  "mime": "image/jpeg",
+  "bytes": 33012,
+  "sha256": "42c4ae0e0e3134d39892bbb921032fe1e07373c23daca16e59435029b71d868d",
+  "pixel": [
+   810,
+   600
+  ],
+  "expect": "mismatch-observe"
+ },
+ {
+  "name": "webp-exif6-1600x900.webp",
+  "mime": "image/webp",
+  "bytes": 21326,
+  "sha256": "40d04ec5a43011ace02dd9c698a71176e045030219dd29010f90efcb7a691819",
+  "pixel": [
+   1600,
+   900
+  ],
+  "display": [
+   1600,
+   900
+  ],
+  "expect": "visible",
+  "exif": 6,
+  "note": "declared gap; Chrome ignores EXIF orientation inside webp (checked 2026-11-08), so shown as stored"
+ },
+ {
+  "name": "webp-exif6-prefixed-1600x900.webp",
+  "mime": "image/webp",
+  "bytes": 21332,
+  "sha256": "e4c6ab3d98b18674b24b377672a42922b9d30fe0a0ee48d1195605ae6bdfa41a",
+  "pixel": [
+   1600,
+   900
+  ],
+  "display": [
+   1600,
+   900
+  ],
+  "expect": "visible",
+  "exif": 6,
+  "note": "declared gap, Exif prefix; Chrome ignores EXIF orientation inside webp (checked 2026-11-08), so shown as stored"
+ },
+ {
+  "name": "unread-png-zero-width.png",
+  "mime": "image/png",
+  "bytes": 7220,
+  "sha256": "d2b444be123c989f4df5465173707ea1cdbff2ea369dc08a2dc75c8421def635",
+  "expect": "page-fails-note-stands"
+ },
+ {
+  "name": "unread-jpeg-no-sof.jpg",
+  "mime": "image/jpeg",
+  "bytes": 43,
+  "sha256": "545e933963adbb7387bd8bdb719af28af3f5cdd334dc9e675921c6912fed5a50",
+  "expect": "page-fails-note-stands"
+ },
+ {
+  "name": "unread-webp-unknown.webp",
+  "mime": "image/webp",
+  "bytes": 38,
+  "sha256": "ad5dc1acac3b399ec8318cd00d57a7e1fb9e2780487a58fe9896676475ed594f",
+  "expect": "page-fails-note-stands"
+ }
+]

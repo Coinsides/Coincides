@@ -1,0 +1,7 @@
+# noconv-probe.mjs: backends with no docx converter configured (pre 3596 = fdeacb5d, post 3597 = fdeacb5d + package), 2026-11-08
+noconv-pre   docx   reg {"s":"none","sup":false} generate 409 {"error":"This server cannot convert documents to original pages","details":{"code":"sourc | view {"toggles":[],"pagesActive":false,"imgs":0,"blocks":60,"lines":[]}
+noconv-pre   pdf    reg {"s":"complete","sup":true} generate 200 | view {"toggles":["TextPages"],"pagesActive":true,"imgs":2,"blocks":5,"lines":[]}
+noconv-pre   image  reg {"s":"none","sup":false} generate 409 {"error":"This Source has no original page images","details":{"code":"source_pages_unsuppo | view {"toggles":[],"pagesActive":false,"imgs":0,"blocks":0,"lines":[]}
+noconv-post  docx   reg {"s":"none","sup":false,"tv":true} generate 409 {"error":"This server cannot convert documents to original pages","details":{"code":"sourc | view {"toggles":[],"pagesActive":false,"imgs":0,"blocks":60,"lines":[]}
+noconv-post  pdf    reg {"s":"complete","sup":true,"tv":true} generate 200 | view {"toggles":["TextPages"],"pagesActive":true,"imgs":2,"blocks":5,"lines":[]}
+noconv-post  image  reg {"s":"complete","sup":true,"tv":false} generate 200 | view {"toggles":[],"pagesActive":true,"imgs":1,"blocks":0,"lines":[]}

@@ -8,6 +8,8 @@ const A4_RATIO = 842 / 595;
 export interface SourcePageSlot {
   pageNumber: number;
   top: number;
+  /** Never wider than the image's own pixels: a small picture is not blown up to page width. */
+  width: number;
   height: number;
   page: SourcePage | null;
   failed: boolean;
@@ -26,8 +28,9 @@ export function sourcePageLayout(register: SourcePageRegister | null, availableW
   for (let pageNumber = 1; pageNumber <= (register?.expected ?? 0); pageNumber += 1) {
     const page = byNumber.get(pageNumber) ?? null;
     if (page) ratio = page.image_height / page.image_width;
-    const height = pageWidth * ratio;
-    slots.push({ pageNumber, top, height, page, failed: !page && (stopped || failed.has(pageNumber)) });
+    const width = page ? Math.min(pageWidth, page.image_width) : pageWidth;
+    const height = width * ratio;
+    slots.push({ pageNumber, top, width, height, page, failed: !page && (stopped || failed.has(pageNumber)) });
     top += height + SOURCE_PAGE_GAP;
   }
   return { pageWidth, slots, height: Math.max(0, top - SOURCE_PAGE_GAP) };

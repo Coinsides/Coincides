@@ -29,7 +29,7 @@ const complete = (count: number) => register({
 
 function view(input: Partial<SourcePageViewController> = {}): SourcePageViewController {
   return {
-    noteId: 'note', available: true, active: true, register: complete(3), loadFailed: false, jump: null,
+    noteId: 'note', available: true, active: true, textAvailable: true, register: complete(3), loadFailed: false, jump: null,
     generating: false, generateFailed: false, initialPage: () => 1, setMode: vi.fn(), jumpToPage: vi.fn(), clearJump: vi.fn(),
     rememberPage: vi.fn(), takeTextScroll: () => null, generate: vi.fn(), reload: vi.fn(), ...input,
   };
@@ -67,6 +67,22 @@ describe('original page view', () => {
     })} />);
     expect(failed.container.querySelector('[data-source-page-number="2"]')?.textContent).toContain('sourcePages.pageFailed');
     expect(failed.container.querySelector('[data-source-pages-generate]')).not.toBeNull();
+  });
+
+  it('an image Source shows its page with no text switch, and still offers generate when it has no page yet', () => {
+    const image = register({ text_view: false, expected: 1, completed: 1, pages: [{ ...page(1), image_width: 300, image_height: 200 }] });
+    const shown = render(<NoteSourcePagesLayer view={view({ register: image, textAvailable: false })} />);
+    expect(shown.container.querySelector('[data-source-view-toggle]')).toBeNull();
+    const article = shown.container.querySelector<HTMLElement>('[data-source-page-number="1"]')!;
+    // A small picture keeps its own pixels instead of filling the page width.
+    expect(article.style.width).toBe('300px');
+    expect(article.style.height).toBe('200px');
+    shown.unmount();
+    const generate = vi.fn();
+    const old = render(<NoteSourcePagesLayer view={view({ register: register({ text_view: false, status: 'none' }), textAvailable: false, generate })} />);
+    expect(old.container.querySelector('[data-source-view-toggle]')).toBeNull();
+    old.container.querySelector<HTMLButtonElement>('[data-source-pages-generate]')!.click();
+    expect(generate).toHaveBeenCalledTimes(1);
   });
 
   it('offers the generate entry to a PDF without images', () => {

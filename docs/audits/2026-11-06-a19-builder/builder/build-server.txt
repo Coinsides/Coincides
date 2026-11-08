@@ -1,0 +1,94 @@
+
+> @coincides/server@1.8.0 build
+> npm run check:tool-face-manifest && tsc -b && npm run copy:tool-face-manifest
+
+
+> @coincides/server@1.8.0 check:tool-face-manifest
+> node --import tsx ../scripts/generate-tool-face-manifest.ts --check
+
+tool-face manifest 未过期：37 条条目，其中 14 条 public。
+
+> @coincides/server@1.8.0 copy:tool-face-manifest
+> node ../scripts/copy-tool-face-manifest.mjs
+
+Copied tool-face manifest bytes to <scratch>\work\server\dist\tool-face-manifest.json
+Recursive reference detected at #/items/properties/display_overrides_json/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/display_overrides_json/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/content_json/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/content_json/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/body_json/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/body_json/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/anchors/items/properties/range_json/anyOf/0/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/anchors/items/properties/range_json/anyOf/0/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/anchors/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/anchors/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/body_json/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/body_json/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/anchors/items/properties/range_json/anyOf/0/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/anchors/items/properties/range_json/anyOf/0/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/anchors/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/anchors/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/placements/items/anyOf/0/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/placements/items/anyOf/0/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/placements/items/anyOf/1/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/placements/items/anyOf/1/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/0/properties/content_range/anyOf/0/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/0/properties/content_range/anyOf/0/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/0/properties/source_ref/anyOf/0/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/0/properties/source_ref/anyOf/0/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/0/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/0/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/1/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/members/items/anyOf/1/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/identity/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/identity/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/view_state/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/view_state/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/scope/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/scope/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/anchor/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/anchor/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/snapshot/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/snapshot/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/page/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/0/properties/page/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/scope/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/scope/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/snapshot/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/snapshot/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/page/properties/metadata/anyOf/0/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/page/properties/metadata/anyOf/0/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/pages/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/anyOf/1/properties/pages/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/anchor/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/anchor/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/snapshot/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/snapshot/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/page/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/page/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/created/items/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/created/items/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/updated/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/updated/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/links/items/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/links/items/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/board/properties/viewport/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/board/properties/viewport/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/annotations/items/properties/ranges/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/annotations/items/properties/ranges/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+Recursive reference detected at #/properties/annotations/items/properties/metadata/additionalProperties/anyOf/4/items! Defaulting to any
+Recursive reference detected at #/properties/annotations/items/properties/metadata/additionalProperties/anyOf/5/additionalProperties! Defaulting to any
+
+exit 0

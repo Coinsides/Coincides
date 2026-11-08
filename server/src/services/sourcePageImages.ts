@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { docxPdfConverterConfigured, ensureDocxPdf } from './sourceDocxPdf.js';
 import { resolveSourceStorageKey } from './sourceFileIntake.js';
+import { readSourceImageInfo, type SourceImageInfo } from './sourceImageSize.js';
 import { MINERU_PARSER_KEY } from './sourceMineruParser.js';
 import {
   canvasAssetRoot,
@@ -19,6 +20,8 @@ import {
 const PAGE_IMAGE_WIDTH = 1240;
 const PAGE_IMAGE_PARSERS = new Set(['native-pdf', MINERU_PARSER_KEY]);
 const DOCX_PARSER = 'native-docx';
+// An image is its own single page: the original bytes are the page image.
+const IMAGE_PARSER = 'native-image';
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export type SourcePageImageStatus = 'none' | 'pending' | 'partial' | 'complete' | 'failed';
@@ -33,9 +36,12 @@ interface PageImageProgress {
 }
 
 export interface RenderedSourcePage {
+  /** The page image bytes: a PNG unless `image` says otherwise. */
   png: Buffer;
   pdf_width: number;
   pdf_height: number;
+  /** Set when the bytes are an original image rather than a rendered PNG. */
+  image?: SourceImageInfo;
 }
 
 export interface SourcePageRenderer {
@@ -114,7 +120,22 @@ export async function openPdfPageRenderer(filePath: string): Promise<SourcePageR
 
 // A docx has pages only where this host can convert it.
 function pageImagesSupported(parserKey: string): boolean {
-  return PAGE_IMAGE_PARSERS.has(parserKey) || (parserKey === DOCX_PARSER && docxPdfConverterConfigured());
+  return PAGE_IMAGE_PARSERS.has(parserKey) || parserKey === IMAGE_PARSER
+    || (parserKey === DOCX_PARSER && docxPdfConverterConfigured());
+}
+
+// No converter and no renderer: one page, the file itself, at the size a browser draws it.
+export async function openImagePageRenderer(filePath: string): Promise<SourcePageRenderer> {
+  return {
+    total: 1,
+    async render() {
+      const data = await readFile(filePath);
+      const image = readSourceImageInfo(data);
+      if (!image) throw new Error('Image size could not be read');
+      return { png: data, pdf_width: image.width, pdf_height: image.height, image };
+    },
+    close: async () => undefined,
+  };
 }
 
 function pngSize(png: Buffer): { width: number; height: number } {
@@ -197,9 +218,11 @@ function storeRenderedPage(
   rendered: RenderedSourcePage,
   options: SourcePageImageOptions,
 ): void {
-  const { width, height } = pngSize(rendered.png);
+  const { width, height } = rendered.image ?? pngSize(rendered.png);
+  const extension = rendered.image?.extension ?? '.png';
+  const mimeType = rendered.image?.mime_type ?? 'image/png';
   const assetId = `source-page-image:${target.materialization_id}:${pageNumber}`;
-  const storageKey = `${userId}/${SOURCE_ASSET_FOLDER}/${target.materialization_id}-page-${pageNumber}.png`;
+  const storageKey = `${userId}/${SOURCE_ASSET_FOLDER}/${target.materialization_id}-page-${pageNumber}${extension}`;
   const finalPath = resolveCanvasAssetPath(canvasAssetRoot(options.canvasAssetRootDir), storageKey);
   const tempPath = `${finalPath}.tmp-${uuidv4()}`;
   const now = timestamp(options);
@@ -219,10 +242,13 @@ function storeRenderedPage(
         id, user_id, course_id, origin_note_id, kind, storage_kind, storage_key,
         filename, mime_type, byte_size, width, height, sha256, metadata,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'image', 'local_file', ?, ?, 'image/png', ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, 'image', 'local_file', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         course_id = excluded.course_id,
         origin_note_id = excluded.origin_note_id,
+        storage_key = excluded.storage_key,
+        filename = excluded.filename,
+        mime_type = excluded.mime_type,
         byte_size = excluded.byte_size,
         width = excluded.width,
         height = excluded.height,
@@ -234,7 +260,8 @@ function storeRenderedPage(
       target.course_id,
       target.projection_note_id,
       storageKey,
-      `page-${pageNumber}.png`,
+      `page-${pageNumber}${extension}`,
+      mimeType,
       rendered.png.length,
       width,
       height,
@@ -289,6 +316,9 @@ async function openRenderer(
   target: PageImageTarget,
   options: SourcePageImageOptions,
 ): Promise<SourcePageRenderer | null> {
+  if (target.parser_key === IMAGE_PARSER) {
+    return openImagePageRenderer(resolveSourceStorageKey(target.storage_key, options.sourceRootDir));
+  }
   const open = options.openPageRenderer || openPdfPageRenderer;
   if (target.parser_key !== DOCX_PARSER) {
     return open(resolveSourceStorageKey(target.storage_key, options.sourceRootDir));
@@ -492,6 +522,8 @@ export function getSourcePages(db: Database.Database, userId: string, sourceReco
   const identity = {
     source_id: sourceRecordId,
     supported: pageImagesSupported(materialization.parser_key) && Boolean(materialization.projection_note_id),
+    // An image has no text to read: its reader stays on the page.
+    text_view: materialization.parser_key !== IMAGE_PARSER,
   };
   const progress = readProgress(db, userId, sourceRecordId);
   // Project deletion can remove the projection and its images but keep the Source.

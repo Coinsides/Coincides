@@ -18,6 +18,15 @@ describe('original page layout', () => {
     expect(layout.height).toBeCloseTo(layout.slots[1].top + 400);
   });
 
+  it('fits a large picture to the page width and never enlarges a small one', () => {
+    const large = sourcePageLayout(register({ expected: 1, pages: [page(1, 6000, 4000)] }), 800).slots[0];
+    expect([large.width, large.height]).toEqual([800, 800 * (4000 / 6000)]);
+    const small = sourcePageLayout(register({ expected: 1, pages: [page(1, 300, 200)] }), 800).slots[0];
+    expect([small.width, small.height]).toEqual([300, 200]);
+    const tall = sourcePageLayout(register({ expected: 1, pages: [page(1, 400, 4000)] }), 800).slots[0];
+    expect([tall.width, tall.height]).toEqual([400, 4000]);
+  });
+
   it('reserves a slot for every expected page and marks what is missing or failed', () => {
     const { slots } = sourcePageLayout(register({ status: 'failed', expected: 3, failed_pages: [2], pages: [page(1, 1000, 500)] }), 800);
     expect(slots.map((slot) => [slot.pageNumber, Boolean(slot.page), slot.failed])).toEqual([

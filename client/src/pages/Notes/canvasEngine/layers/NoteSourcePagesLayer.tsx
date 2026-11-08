@@ -145,7 +145,7 @@ export function NoteSourcePagesLayer({ view }: { view: SourcePageViewController 
         '--source-page-gap': `${SOURCE_PAGE_GAP}px` } as CSSProperties}>
         {layout.slots.map((slot) => {
           const visible = size.width > 0 && overviewPageIsVisible(slot.top + SOURCE_PAGE_PADDING, slot.height, scrollTop, size.height);
-          return <article key={slot.pageNumber} className="noteSourcePage" style={{ height: slot.height }}
+          return <article key={slot.pageNumber} className="noteSourcePage" style={{ width: slot.width, height: slot.height }}
             data-source-page-number={slot.pageNumber} data-source-page-ready={slot.page ? 'true' : 'false'}
             data-agent-ui-highlight={highlight === slot.pageNumber ? 'true' : undefined}
             aria-label={t('sourcePages.pageLabel', { page: slot.pageNumber })}>

@@ -245,6 +245,12 @@ test('both page routes return the same list, in order, only to the owner', async
   });
 });
 
+test('a PDF register says it has a text view', async () => {
+  await withSource(THREE_PAGES, {}, async ({ db, userId, sourceId }) => {
+    assert.equal(getSourcePages(db, userId, sourceId).text_view, true);
+  });
+});
+
 test('deleting the Source clears page rows, asset rows and files', async () => {
   await withSource(THREE_PAGES, {}, async ({ db, userId, sourceId, materializationId, sourceRootDir, canvasAssetRootDir }) => {
     assert.deepEqual(counts(db, materializationId), { pages: 3, assets: 3 });
@@ -485,7 +491,7 @@ test('other formats get no register, and the replacement preview has no page sid
     assert.equal(renderer.opens(), 0);
     assert.equal(progressOf(db, sourceId), undefined);
     assert.deepEqual(getSourcePages(db, userId, sourceId), {
-      source_id: sourceId, supported: false, status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [],
+      source_id: sourceId, supported: false, text_view: true, status: 'none', expected: 0, completed: 0, failed_pages: [], pages: [],
     });
     assert.throws(() => requestSourcePageImages(db, userId, sourceId), /no original page images/);
     assert.deepEqual(counts(db, materializationId), { pages: 0, assets: 0 });

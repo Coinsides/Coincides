@@ -1,0 +1,8 @@
+tsc client (work): exit 0, 0 lines, 31s
+tsc server (work): exit 0, 0 lines, 19s
+vite build client (work): exit 0, 14s
+npm run build server (work): exit 0, 31s
+controls written: positive-controls.txt
+pretest:v2 (work): exit 0
+server test:v2 (work, concurrency 3): exit 1 {'tests': '2', 'pass': '2', 'fail': '0'} 246s; failing: ['original live specimen replays byte-for-byte with prior successful save receipts and zero flags', 'src\\\\__tests__\\\\v2CanvasPersistenceCutover.test.ts', 'src\\\\__tests__\\\\v2DocumentParserPdf.test.ts', 'K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning', 'K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text', 'K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity', 'V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable', 'T-1 manifest copy recreates a missing dist target byte-for-byte']
+client vitest full (work, 3 forks): exit 0 ['      Tests  2686 passed (2686)'] 303s; failing: []
