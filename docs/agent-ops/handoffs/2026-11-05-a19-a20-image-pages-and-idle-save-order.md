@@ -2445,3 +2445,14 @@ r2 的「代码回答」在 ⑦ 之后加 ⑧ K3 修法与测试、⑨ 来源标
 5. 阳性对照:LATEBACK 请求型 / 响应型 r1 红 r2 绿(「 second」在服务器或留字框;屏上有状态;等待期间按键不进编辑器或进了也落地);still 变体行为写明。LATE / LATEREQ 行补「 second」去向。
 
 回执「代码回答」加 ⑫:只读与状态条在哪几行;重发前再核在哪几行;与 PUSH 路共用的函数。
+
+### A-20 r2 · Tester r1 坐实表与三处细化(Main_Designer 2026-11-08 记)
+
+- **INAPP(应用内链接 + 慢保存)是老病**:修前 `04f6f822` Home 链接 2/2、另一笔记 tab 2/2 都丢「 second」(用户留在 A 约 3.3 秒、字进编辑器、然后跳走);r1 同。→ 说明书写法:应用内链接路的老病,r1 把同一缺陷扩到了 hash 路(LATEBACK),r2 一处修两路;修前红即阳性对照。
+- **K 臂 r1 全红**(22 行 16 红):K1 401hash / 401blur / close 6/6 红,服务器终态 `note alpha beta alpha`;K2 hash / paste 4/4 红(撤销后 `note`,回来服务器 `note gamma`)——**旁观**:两臂里离开本身被拒(网络已恢复仍弹「Changes could not be saved…」用户留在 A),是整页重开把 gamma 带回的;K5 2/2 红——同一次挂载停顿即出横幅,打「 more」后点 Apply,活字 `note delta more` 被盖成 `note delta`,**「 more」丢(①)**;K3 2/2 红——401 期间两把钥匙都落在 anonymous 下:`coincides:draft-recovery:v2:anonymous` **和 `coincides:unplaced-words:anonymous:<note id>`**,登录重开无横幅无可 Dismiss,服务器永远没有 `kthree words`;K6 push 2/2 对,replace 2/2 红(历史 `[A, X, A, B]`,后退回 A 而非 X)。
+- **K1-paste / K1IME 没红是臂没打中,不是路没病**:paste 那臂扣住的 PUT 500 后 2 秒又发了一次 `note alpha beta` 200,回执确认后撤了;IME 那臂第二个组合的 compositionend 保存在 401 设定前就 200 了。变体 `paste500`(回来前所有 text-save 500)、`K1IME-before`(第二组合前设 401)在跑。
+
+**r2 细化(不扩范围,只把已裁的三条说准)**:
+1. **K3 的认领要盖两把钥匙**:恢复回执 `draft-recovery:v2:anonymous` **与留字框 `unplaced-words:anonymous:<note id>`**,否则同一刻的保险带记录仍是孤儿。
+2. **K2 的旁观并入**:撤销后网络已恢复时离开必须能走(flush 不该再拿被撤掉的那条去重试);r2 的「终点 = live」应顺带解决,回执写明。
+3. **K5 坐实为 ①**(Apply 盖活字丢「 more」):同挂载回执不出 Apply 这条从「最小修」升为**必修**,阳性对照用 Tester 原臂。
