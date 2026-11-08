@@ -159,3 +159,7 @@ Reviewer r2 复核报了 M1(确认 ①,打列表时中间行丢)与 M2(疑似 �
 ### 决定 4 结论:CHAIN 不进 A-25——普查 7 个渲染期调用方无重试(Main_Designer 2026-11-08)
 
 普查 `docs/audits/2026-11-08-a25-builder/caller-census.md`:12 个 `previousTextFlow` 调用方,同步读的只有编辑器打字路(`TextBlockProjection.tsx:849` `latestFlowRef`);留字落地、Agent 补丁采纳、斜杠 ×3、批量改角色、行内链接 7 个渲染期读且无重试。按本单决定 4 的规则:**不改 history,CHAIN(K2 守恒臂)留作已知红、不当闸,记 TD-65**(含修法顺序:先让调用方能重试,再「不符即拒」)。A-25 验收 ③ 里「CHAIN 阳性对照」改为:臂存在、在冻结版与 A-25 包上都红、标 known-red,不计入放行。
+
+### Tester LANDOTHER 实测与查报推断不符:拒键可能只在持失败的那块(Main_Designer 2026-11-08 转 builder)
+
+Tester(`a20m` LANDOTHER,修前 `04f6f822` 与 A-20 r2):LANDFAIL 开着时,在**另一个普通块**打字 2/2 上屏落地;在**另一个标题块的正文行** 1/1;在**另一个标题块的标题行** 2/2;零「Heading changes could not be completed」。查报 Q2 ① 的推断「整篇任何一处 `failures` → 任何需要结构路径的块都被 `flush` 拒」**不复现**;实测只量到持失败的那块拒键(A-25 LANDFAIL (a),A 的 warmup 行)。**builder 对码**:为什么另一个标题块的键没走到 `runStructureBatch` → `flush`(结构路径的触发条件比「块里有标题且不止一行」更窄?还是 `flush` 只看本块?),把结论写进回执;若范围真是「持失败的那块」,决定 2 的第一刀(跨块隔离)不必做,②b 只剩「本块自己失败时甲 / 乙」,回归面随之缩小。Tester 不下结论,只报数。
