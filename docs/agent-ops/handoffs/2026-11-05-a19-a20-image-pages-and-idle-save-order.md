@@ -2579,3 +2579,33 @@ Tester 新探针:LATEBACK 8/8、INAPP 8/8 绿;TWICE-hash500 在我前一节改�
 **说明书**:builder 已加的一句(「did not reach the server」段下:也会在后退后出现一次;多半由后续保存自己补上;重开见横幅按 Apply)收。再补一句,按实情:「切换笔记 / 改地址时若那次保存一时失败,可能先看到一两条『没存上』,随后多半自动补上并照常离开;离开后字在笔记里就对了」。
 
 **封包**。15 文件 `src/`、`index-DGn86c1V.js`、COPY-BACK、MANUAL-SECTION;报哈希 + sha256 + 文件数。封后派 Reviewer ∥ Tester。
+
+### A-20 r2 包收讫:`a20-idle-save-r2`(`index-DGn86c1V.js`,src 15 / dist 63,两清单 `sha256sum -c` 我核 15/15、63/63 OK);派 Reviewer ∥ Tester(Main_Designer 2026-11-08)
+
+**回执** `docs/audits/2026-11-08-a20-builder/builder-r2/RECEIPT.md`(代码回答 ⑦–⑫ 行号对包 `src/`;证据 `kit/` 各轮分析、`runs/`、`positive-controls-r2.txt`、`client-full-r2.txt`;扫描 ⛔ 0)。COPY-BACK 对共享树 HEAD `036bb4f1` 核过:14 文件 = `04f6f822`、1 新文件;server 未动。**r2 取代 r1,r1 ⛔ 回拷。**
+
+**两处偏离,都收**(此前已裁过):起点取「已交出」`handedFlows`(交出即有回执,不重叠);K5 过滤放控制器 `useNoteCanvasRuntimeController.ts:606`,适配器保持 3 行(`useNoteCanvasDataAdapter.ts:2148`)。
+
+**四条残余的处置**:
+1. 「排队中的纯文本组所在单元,离开前在劈点之前被劈分,被劈单元这段排队文字不保留」——(B) 窄补的已知代价,窗口极窄(在途 + 排队 + 回车 + 不可扣住的离开或崩溃,队列未排空)。**说明书措辞随之改**:我在「排队中的劈分组」节写的「原行保持原样」超承诺,收割时改为「原行保持上次已存的样子,框里多一条后半」。
+2. **守恒闸 K2 臂已删**(它在 `04f6f822` 上同样丢 `<k1>`,是修前就有的重试链覆盖,A-25 CHAIN)。收,不为此重封;条件:**A-25 builder 把这条臂加回**作 CHAIN 阳性对照(冻结版 `04f6f822` 与 r2 上红、②a 修后绿),A-25 单「验收 ③ / CHAIN」已指定 jsdom 闸臂为控制,这就是那条。
+3. 一次失败两条提示 → A-25 (e)(已写 Q2 ⑥)。
+4. 适配器 2xx 后 `route_receipt_stale` → TD-62 → A-25 Q2 ⑥。
+
+**派 Reviewer**(只核写入路径,出发现不裁;读包 `src/` 与对 `04f6f822` 的 diff;⛔ 改码、⛔ git 写;报告 `docs/audits/2026-11-08-a20-builder/reviewer-r2/findings.md`,登记 `records/reviewer/findings.md`;若起工作流 `model:'opus'`、≤4 代理、取一个锁位):
+- 保险带只在 `peek()` 非空时记(`useTextFlowHistory.ts:785` 起点、`:787` 相等不记、`:752` 终点);`unsent` / `unsentSplits` 两表(`:163` `:167`)与两次交接(`:670-672` 封口入;`:285-290` `saveBlock` 前移出并记 `handedFlows`);**一组任一时刻只在一张账**——特别核 `leaveUnsent`(`:171`,`:317` 恢复扫除调用)有没有漏的路(重试只确认第一组的旧账是否真不再被任何「留住」逻辑读;`unconfirmed` 确已删尽)。
+- 劈分记录:只记新单元(`:779`,`source:'split'`、`initialText:''`),被劈单元不记(`:771`),`settleKept` 对 `split-` 不重锚(`:813`)→ `mergeTypedText` 返回 null → **永不自动落地**;找反例(新 id 被复用 + 为空的 Y1 形状)。
+- 回执:失败且带回执入 `visitReceipts`(`:307`);K3 两把匿名钥匙的认领(`draftBlockPersistence.ts:103/:126/:136/:526`、`structureTypingBuffer.ts:92/:110`);K5 同次访问的回执不出 Apply(`isVisitReceipt` `:1206`,过滤 `:606`);K6 replace 仍 `location.replace`(`useNoteRouteSaveBoundary.tsx:61/:66`)。
+- 离开:LATEBACK 复查 ≤2 轮(`:93`)、仍有未存 `keepOpenEdit`(`:99`);第二步扣住(`:189-199`);traverse 走 `keepAndLeave`(`:173`,`:205` 分流),放行后不报被扣 flush 的拒绝;`whenLeaveSettled` 的「回执自打开以来新写 / 重写」判定(`useNoteCanvasRuntimeController.ts:870-881`,打开时 `recoveryKey@queuedAt` 快照)——核边界:账号打开时未知的分支、同一 `queuedAt` 重写、两个笔记串台。
+- 适配器 diff 恰 3 行(`:2148` 附近);⛔ 动过 `useHeadingStructureController.ts`、`transferTextUnit`、server(diff 应为零)。
+- 闸:`structureTypingConservation.test.tsx` 回执计入「被持有」(`:100/:123/:136/:495`),来源三分 window / edit / split 与 window-only 读取(`:255`),阳性对照 `dropWindowRecords`(`:439/:672`)真能把闸打红。
+- 只出发现,按 🅰 / 🅱 标,附行号;不出判语。
+
+**派 Tester**(每包必做:同源 + 本单验收臂 + 相关修前阳性对照 + ≤10 冒烟 + 判语;阶段末再全量):
+- 同源:两清单 `sha256sum -c`;`src/` 与 dist 的对应按你的方法。
+- r2 链:FLYK 严格形(服务器 kone = 0、框里有 kone、kzero = 1);SPLIT 四变体(原单元不动 = 修前;框里可多一条后半 🅱);RETRY del / more;K1 五变体含 K1IME-held(无重复、不自动落地、横幅 Apply = 最新快照);K2(不自动落回);STALE = 修前;LATEBACK / INAPP(留状态条截图)/ GONEFAIL-back(新规则)/ TWICE 四变体含 hash500(存一次、到 C、无 Apply)/ BACKOK;emptyHash;OFFKILL 作已知;提示按 `watchN` 计数;UNDOSEQ / UNDOPAUSE / IME 对你自己的 pre-c2 基线。
+- 阳性对照:r1 在 SPLIT / RETRY-del / GONEFAIL-back 上红;修前在 K1 / K2 上红。
+- **列「比修前差的臂」**,一条也写;判语在报告最前面,登 `records/tester/verdicts.md`;交证据前 `pre-harvest-scan --paths`;截图裁侧栏;取锁位、≤40%。
+- 你的 9 张裁好的截图 + LATEBACK 等待截图随本次证据一并交。
+
+放行后:COPY-BACK → 收割(`docs/audits/2026-11-08-a20-builder/` 一并)→ 说明书节 → 告 Tester 版本 → 第 23 次部署(纯前端 `build:client`)→ 轻量岛检。builder 转 A-25 查报(底换 r2 包)。
