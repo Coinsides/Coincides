@@ -2432,3 +2432,16 @@ Reviewer 全报告 `docs/audits/2026-11-08-a20-builder/reviewer/findings.md`:点
 | K6 | 离开单测用假句柄、B-81 单测只走 popstate;可拦的导航重开会把 replace 变成 push | **replace → push 进 r2**(重开用与原导航相同的类型,否则后退键会撞两次同一篇);测试:navigate 路的单测能写就写,写不了就在回执写明「navigate 路由 Tester 浏览器臂 10/10 覆盖、单测只覆盖 popstate」,不算挡 |
 
 r2 的「代码回答」在 ⑦ 之后加 ⑧ K3 修法与测试、⑨ 来源标记与闸的新断言、⑩ 同挂载回执不出 Apply 的判定行、⑪ 导航类型保留的行。Tester 加臂:K3(账户载入前触发 401 → 载入后横幅列得到、Dismiss 删得掉)、K5(断网时停顿 → 不出 Apply 横幅、活字不被盖)、K6(可拦导航后按后退一次回到前一篇,不是同一篇)。
+
+### A-20 r2 再加一条 ①:LATEBACK——拦截导航等慢保存期间继续打的字被延迟跳转静默带走(Tester,r1 4/4)(Main_Designer 2026-11-08)
+
+**事实**(Tester 臂 `LATEBACK`,r1):在 A 打「first words」不回车 → 脚本改 hash 去 X,离开时的 text-save 扣 3 秒(请求或响应)→ 点回 A 行尾打「 second」。r1:navigate 被拦(`useNoteRouteSaveBoundary.tsx:156` preventDefault → `flushForLeave`),这 3 秒用户留在 A、屏上没有任何「正在离开」的提示,打的字进了 A 的编辑器;保存回来 `:157-159` 置 `scope.released = true` 再 `location.hash = X`,应用跳走;「 second」不在服务器、不在留字框、不在存储、无横幅无 toast,重开 A 只有 `[warmup, first words]`。请求型 2/2、响应型 2/2 全丢;still 变体(不打字只是 1 秒内点回 A)约 3.3 秒后仍被拉去 X 4/4。修前:改 hash 不发保存丢「first words」,但回来后打的「 second」能存——r1 是换了一种丢法。r1 的 LATE / LATEREQ 行里「 second」也从未到服务器,当时没看出。Tester 正核应用内链接 + 慢保存(原 `flushForLeave` 路)是否既有同病。
+
+**裁定(r2 必修,①)**:
+1. **等待离开期间编辑器只读 + 可见状态**:从拦截到重发跳转之间,A 的编辑器 readOnly,屏上有一条说真话的状态(英文,如「Saving before leaving…」),⛔ 无提示只读;这段时长 = 一次保存往返。
+2. **重发跳转前再核一次**:`:157-159` 置 `released` 之前检查 `peek()` / 未确认集合,非空就不置 `released`、再跑一次 `flushForLeave`(有界,最多两轮),仍非空则走留字框保险带再跳;⛔ 带着未落的字跳。这是兜底,主路是第 1 条。
+3. **still 变体**:用户在等待期间点回 A 并有输入意图(第 1 条只读后不会有输入;若点击 / 聚焦算意图由 builder 按现有 `flushForLeave` 的 PUSH 路行为对齐),保持与应用内链接同一行为——两条路一处修,⛔ 两套。
+4. **应用内链接路若既有同病**(Tester 核中):同一处修,一并算 r2;写明修前红。
+5. 阳性对照:LATEBACK 请求型 / 响应型 r1 红 r2 绿(「 second」在服务器或留字框;屏上有状态;等待期间按键不进编辑器或进了也落地);still 变体行为写明。LATE / LATEREQ 行补「 second」去向。
+
+回执「代码回答」加 ⑫:只读与状态条在哪几行;重发前再核在哪几行;与 PUSH 路共用的函数。
