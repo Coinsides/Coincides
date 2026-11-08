@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 475 份文档。
+共 476 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -451,6 +451,7 @@
 | [handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md](handoffs/2026-11-05-view-toggle-and-docx-text-formula-order.md) | (无标题) | `(缺状态头)` | — | — |
 | [handoffs/2026-11-07-role-records-gates-order.md](handoffs/2026-11-07-role-records-gates-order.md) | (无标题) | `active` | 2026-11-07 | — |
 | [handoffs/2026-11-08-a25-ime-and-save-failure-order.md](handoffs/2026-11-08-a25-ime-and-save-failure-order.md) | A-25 · 输入法拼音写进笔记 + 保存失败后的死路(阶段一「写字不丢」第二单) | `active` | 2026-11-08 | — |
+| [handoffs/2026-11-09-a20b-safety-belt-coverage-order.md](handoffs/2026-11-09-a20b-safety-belt-coverage-order.md) | A-20b · 保险带覆盖缺口(Reviewer r3e Q2 / Q3 / Q4 / Q5;阶段一「写字不丢」A-2… | `active` | 2026-11-09 | — |
 | [handoffs/ORDER-TEMPLATE.md](handoffs/ORDER-TEMPLATE.md) | 订单模板（复制下面整段，另存为 `YYYY-MM-DD-<单号>-order.md`；本模板文件名故意不以 -orde… | `active` | 2026-11-07 | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— 订单区(Main_Designer × Tester × builder) | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
