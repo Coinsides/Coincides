@@ -17,7 +17,7 @@
 | 编辑器组返修(A-18 残留、A-21、A-24) | 已核 · 关闭 | Main_Designer | r2.3c 第 21 轮上岛(`fdeacb5d`)、Tester 岛上已核;余项 → A-25、L-018、TD-55、TD-56 | 2026-11-08 |
 | A-25 | 排队 | Main_Designer | A-20 之后派;已扩成设计单(输入法组合交接 + LANDFAIL 无自动重试 / 整篇拒键 + Reviewer H1–H3 + TD-58 定时器 + Y1 id 重用 + 结构非原子残留 + KRO),见尾部各节「→ A-25」 | 2026-11-08 |
 | A-19 | 已核 · 关闭 | Main_Designer | 第 22 轮上岛(`04f6f822`,主 JS `index-Gswd3cHv.js`)、Tester 岛上 63/63 + 代表臂全过;余项 → TD-59 / TD-60 / TD-61 / L-021 | 2026-11-08 |
-| A-20(**🅰**,11-08 升) | 待验 | Reviewer ∥ Tester | 包 `a20-idle-save`(14 文件,`index-BkYnVk7W.js`)已封;Reviewer 核包 src/,Tester 跑全部臂 + builder 没跑的回归;判语 → 裁 → 拷回 → 第 23 轮 | 2026-11-08 |
+| A-20(**🅰**,11-08 升) | 返修 r2 | builder | Reviewer K1(保险带跨中间态落地重复)/ K2(撤销后离开被撤字落回)皆 ②,挡放行;修法:保险带起点 = 最后一次已确认落库内容、终点 = 离开时 live;包 `a20-idle-save-r2`;Tester 在 r1 上坐实作阳性对照 | 2026-11-08 |
 
 **现行有效的裁定**(一条一行;被推翻的直接删,历史在尾部)
 
@@ -37,6 +37,7 @@
 - A-25:组合中不挪焦点、不换主,等 compositionend 后再交接;动工时带上 leads-1、handoff-0 两条约束,并接收 leads-2 和随单移交的冻结红测试 ← 「A-25 · 新笔记第一行用输入法打字,拼音被写进笔记(🅰,既有,2026-11-06 Tester 编辑器组核验中发现)」、「A-25 追加约束(来自 Tester 对 leads-1、handoff-0 的处置)」
 - A-19:走原页通道,一图一页,不改写 media 块 ← 「A-19 · 图片 Source 的笔记是空的(🅰,功能失效,不丢数据)」
 - A-20·🅰 半边**开修**:hash 路 (i) 监听 popstate/hashchange 同步跑 flushForLeave(实测 PUT 先于路由提交 10/10)+ (ii) 清理时未封口 pending 写留字框(只读 peek);401 路恢复回执 sessionStorage → localStorage 加用户作用域,⛔ 转写成留字框条目;回包晚到无假横幅须有测试;B-81 以 emptyHash 阳性对照收口;⛔ 服务端 / 记账层 / 适配器 / F9;分包 a20-leave-safety 或同包由 builder 按量级定 ← 「A-20 🅰 半边裁定(Main_Designer 2026-11-08)」
+- A-20·r2:保险带记录起点 = 单元最后一次已确认落库内容、终点 = 离开时 live,相等不记;⛔ 改 `useHeadingStructureController.ts` 落地逻辑;守恒闸加停顿 > IDLE_SAVE_MS 种子 ← 「A-20 返修 r2(Main_Designer 2026-11-08)」
 - A-20·(B) 开修:会话只读 `peek()`,中途落库 = 不进撤销栈的 transaction 走同一队列;失败不进 failures、停发至下次封口成功;封口同体不重发;定时器随 scope 清;输入法按现状(compositionend 即封口,预裁那句撤);结构提交中跳过后 `peek()` 非空才重设一次 2 秒;撤销形状逐字节同今天须测试钉住;1 秒节流只在 scratch 量 ← 「A-20 查报收讫(Main_Designer 2026-11-08)」
 - A-20·空闲保存半边:**Henry 选 (B) 只落库不封口(11-08)**;Q1 收口为 (B) 的可行性与深浅(记账层内哪些行、修订号跟进、撤销后追平、与适配器闸有无牵连);收不住记账层以内就停下来报,⛔ 自行退 (A)/(C);验收用 Henry 原话(随时关都能保存;撤销与今天一样细)← 「A-20 空闲保存半边:Henry 选 (B)(Main_Designer 2026-11-08)」
 - A-20·预裁:阈值 2 秒常量;草稿期无定时器;结构提交中跳过、IME 组合后补 seal 不轮询;hash 离开前 seal 且 persist 真发出(只传不记,带旧笔记 id;要改适配器记账层就停);B-81 不许留、须有冻结版红;pagehide 留档扩到普通未存编辑并取消守恒闸放宽(冻结版该臂红);⛔ 第二写者 / 逐键写 / 新 localStorage 结构 / 动服务端 / 动 F9 / 动 A-25 范围 ← 「A-20 派单(Main_Designer 2026-11-08)」
@@ -200,6 +201,7 @@
   - `draftBlockPersistence.test.ts` 加 4 条(跨标签页、按账户、旧回执、删除)。
   - `hooks/useNoteCanvasDataAdapter.test.tsx` 加 1 条(回包晚到删回执)。
   - 守恒闸去掉豁免。
+- **14 个文件里两个不显眼的(Main_Designer 问到):** `NoteCanvasRuntime.tsx` 是运行时句柄的接口与实现,加了两个可选方法 `whenLeaveSettled` / `keepOpenEdit`(`:19-22`、`:29`、`:40-41`),路由守卫离开时要调用它们;`useTrayController.test.tsx` 只改测试夹具:`useTextFlowHistory` 现在导入留字框模块,经由它会导入 authStore,authStore 创建时调用 `getToken`,原来的 api mock 没有这个导出,所以补上 `getToken` / `setToken`(`:13`,上一行是说明注释),断言一条没改。
 - 改动的旧测试:回执存储改了位置,13 处 `sessionStorage` 断言改读新键;`useTrayController.test.tsx` 的 api mock 补了 `getToken`。新导入链会经过 authStore,authStore 创建时就要读令牌,所以必须补。
 - 阳性对照(`04f6f822` 上,`positive-controls.txt`):
   - 红:peek 3/3、空闲保存 5/5、离开 7/8、回执存储 2/4、回包晚到 1/1;守恒闸红,种子 18 和 31 报 `<k1> LOST`。
@@ -2402,3 +2404,18 @@ Tester 重测(修前,每格 2 次),撤回自己先前两种说法(「401 整页�
 - **builder**:**不等 A-20 放行,现在开 A-25 第一段「查」**(scratch 底 = 本包 + `04f6f822`);A-20 若出红,返修优先。
 
 **流程**:判语 → 裁 → 拷回(`COPY-BACK.md`,`sha256sum -c` 14 OK)→ 收割(含 `docs/audits/2026-11-08-a20-builder/`)→ 报 Tester 版本 → 第 23 轮(纯前端:`build:client`,不重启服务,无依赖变动)→ 岛上轻对账(哈希 + 3–5 代表臂)。
+
+## A-20 返修 r2:Reviewer K1(保险带跨中间态 → 落地重复)、K2(撤销后离开 → 被撤的字落回)皆 ②,挡放行;根因同一处——保险带记录的起点要用最后一次已确认落库的内容(Main_Designer 2026-11-08)
+
+**Reviewer 先报**(行号对包 `src/`;H = `hooks/useTextFlowHistory.ts`;落地逻辑 `useHeadingStructureController.ts`@`04f6f822` 包内未改):
+- **K1(疑似 ②,重复)**:空闲落库只 peek 不封口,组的 before 不动(H:640-660);`keepOpenEdit` 按单元取最早 before、最新 after(H:664-692);回来时 `typedTextIsPlaced` 不成立,走 `mergeTypedText` 插入式合并(HSC:74-96),「已在服务器的中间段」不算命中。例:单元「Note:」→ 打「 alpha」停 2.6s(服务器 = 「Note: alpha」)→ 再打「 beta」→ 最后一次 PUT 没到 → 回来自动落成「**Note: alpha beta alpha**」并保存。自然路径:token 过期(先前停顿已落库,之后回车 PUT 401 → 跳登录 → keepAndLeave);关标签页 / 地址栏离开时最后 PUT 排在在途保存后面没发出;中文输入法逐组合封口同形。守恒闸停顿 ≤300ms、收尾 1s,碰不到 `IDLE_SAVE_MS`,闸测不到。
+- **K2(读码确认,②)**:`unconfirmed` 只靠 `confirmTyping` 收缩(H:260 要求 `!historyRestore && side=after`;另一处 H:621);撤销成功只删 `failures`(H:265-266)。提示条原话叫人「Retry saving or undo」(C:395),照做后离开 → `keepOpenEdit` 收进被撤掉的那条(H:677)→ 回来 live==initial → 整段替换(HSC:73)→ 自动落地并保存。
+
+**裁定**:
+1. **两条都是 Henry 尺第 ② 条(字落错位置 / 重复),挡放行。** 不等 Reviewer 全报告、不等 Tester 坐实就开修——根因在 builder「多做」的保险带上,是本包新引入的,修法明确;Tester 的复现同时跑,作 r2 的阳性对照(r1 上红)。
+2. **根因同一处,一起修**:保险带记录的 **起点 = 该单元最后一次已确认落库的内容**((B) 已有 `committedBases` / 封口去重用的「最后一次中途落库内容」,就用它),**终点 = 离开那一刻屏上实际内容(live)**;两者相等则不记;撤销把 live 退回去,终点自然跟着退——K2 随之消失,不另开一套「撤销收缩 unconfirmed」的账。若 builder 发现「已确认」的那份在某些路上拿不到(例如中途落库的回包还在途),**那一刻的起点退回组 before 但要标记「可能含已落库中间段」,落地时用 `typedTextIsPlaced` 的子串匹配先剔除服务器已有的前缀**——这条是兜底,主路是起点用已确认内容。⛔ 改 `useHeadingStructureController.ts` 的落地逻辑(它 `04f6f822` 未改,别把 A-20 的病修进 r2.3c 的地盘)。
+3. **阳性对照(r1 上红、r2 上绿)**:(a) Reviewer K1 原例(停 2.6s → 续打 → 最后一次 text-save 扣在请求阶段或回 401 → 离开 → 回来:无重复、服务器最终 = 「Note: alpha beta」);(b) K2 原例(保存失败 → Ctrl+Z → 离开 → 回来:被撤的字不落回、留字框无该记录);(c) 中文输入法逐组合 + 停顿 + 离开同形一臂;(d) 守恒闸加一条停顿 > `IDLE_SAVE_MS` 的种子,让闸以后看得见这一段。
+4. **包 `a20-idle-save-r2`**:只改保险带相关行;`src.sha256` 全新;回执补「代码回答」⑦:起点 / 终点各取自哪一行、相等不记在哪一行、兜底路在哪。Tester 重跑受影响臂(离开 × 回法、LATE / LATEREQ、关页进留字框、401 恢复、撤销三序列、中文输入法)+ 新四臂;未受影响臂(写放大、硬杀、emptyHash、草稿期后)沿用 r1 数、文件级同源。Reviewer 重读保险带 diff + 「代码回答」⑦。
+5. **优先级**:builder 放下 A-25 查,先修 r2;A-25 查在 r2 封包后续。
+
+**Tester**:现在就在 r1 包上跑 3(a)(b)(c),把红坐实发我;r2 到了重跑。
