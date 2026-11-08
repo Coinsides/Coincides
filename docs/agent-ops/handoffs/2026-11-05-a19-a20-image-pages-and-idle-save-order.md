@@ -2654,3 +2654,18 @@ Reviewer 报告 `docs/audits/2026-11-08-a20-builder/reviewer-r2/findings.md`(只
 **Tester r2 报告落**:`docs/audits/2026-11-08-a20-builder/tester-r2/review-tester.md`(判语最前;比修前差:BACKIN-undo 复活 2/2、人未走的假「did not reach … kept on this device」3/3);`records/tester/verdicts.md` 末行;证据同目录(含裁好的 LATEBACK 等待截图);9 张 A-19 裁图留原目录随本次收割。**LIST(M1)**:修前 close / back / addr 全丢 x、y 6/6(横幅只给 `warmup k0`);r2 close / back 丢 x 4/4(坐实 M1)、y 在框;r2 addr 被扣住、放行后 k0 x y 全在服务器 2/2 → 不比修前差。**r3 的 LIST 预期(更正 Tester 的「x 在服务器一次」)**:close / back = 页面死前队列没排空,x、y 各作 `split-` 记录进**框**(手动放回,⛔ 自动落地),服务器 `warmup k0`(k0 有回执),**零丢零重复**;addr / hash(可扣住)= 扣住 flush,k0 x y 全在服务器各一份。**LANDOTHER(A-25 基线)**:LANDFAIL 期间在另一个普通块、另一个标题块的正文行、另一个标题块的标题行打字,修前与 r2 皆 100% 上屏落地、零「Heading changes could not be completed」——查报「整篇任何失败 → 任何需要结构路径的块都拒」的推断**不复现**,实测只有持失败的那块拒键;转 A-25 builder 对码(见 A-25 单)。
 
 **r2 链跑完(Tester):153 行 0 红**(含 1 行 OFFKILL 参照)——这是 **r3 必须全保的「已修好」参照**;r2 判语不变(挡,M2)。下半:OFFLINE-N / OFFALL 4/4(一次失败一条提示;OFFALL +1「could not be reconciled」)、FLYK 8/8 严格形、INAPP 8/8(等待状态可见,裁图在 `screens/`)、a20d 20/20(HASHFAIL 留 A;SWITCH 零假提示;GONEFAIL hash / paste 由重试存上;GONEFAIL-back 新规则;ACCT401;CLOSEFLY / OFFCLOSE 一次、残横幅已知)、a20b 24/24(LEAVE ×9 在服务器;401 提示真话;EMPTYHASH / LATE / LATEREQ)、IDLE / WAMP / PAUSES / UNDO / PAGEHIDE 8/8、PAUSEEXIT×5 8/8、UNDOSEQ / UNDOPAUSE / IME 6/6 = 她的 pre-c2 基线、DRAFT / PUTDUP 4/4、HARDKILL 2/2、OFFKILL 丢(已知,A-25 ②a)。报告 §三 全表,证据 `tester-r2/`。r3 验收 = 同源 → 这条链 + `a20m` + 9 对回归(修前 vs r3)。
+
+### A-20 r3 · 封包前自跑抓到 M2 变体;(甲) 作废只留 (乙) + 「回到本篇不算离开」;UNDOPAUSE 间歇红归修前对照(Main_Designer 2026-11-08)
+
+builder 在 r3 封包前自跑 a20m 时读字段(BACKIN-fail 行的判定器**永远打 ok**,看着绿、其实没判)发现 r3 规则未达:人留在 A 时弹 2 条「did not reach the server」,第二次离开不扣(`released` 卡住)。根因:路由拦截器扣下后退后,**用自己的一次 traverse 把人送回 A**;此刻 `flushForLeave` 还在途,这个 navigate 事件落进 r2 的 TWICE 分支当「扣不住的一步」→ 又跑一次 `keepAndLeave`(`released = true`、`kept = true` 重置)→ LEFT_UNSAVED 弹出、下次离开不扣。
+
+**builder 的修法与偏差,裁**:
+- `useNoteRouteSaveBoundary` `beforeHashChange`:目的地是本篇自己(`/notes/<noteId>`)→ 直接返回,**踏回本篇永远不算离开**。**准**。回执补三句:(1)匹配谓词是什么(只比 pathname?忽略 search / hash?);(2)`navigationType === 'reload'` 的目的地也是本篇——是排除了,还是靠 `beforeunload` 先交所以不要紧,哪条臂证明(r2 链里的关页 / 刷新臂仍绿即可);(3)同篇改 hash(`/notes/A#x → #y`)此前走哪条路、现在是否被这条早退改变。
+- **(甲) 作废**:`destination.getState()?.idx` 在真浏览器里是空的——`getState` 是 Navigation API 的 state,路由的 `idx` 在 `history.state`。单测过了只因 mock 把 idx 放在那儿。**准删**;只留 (乙):先扣住,拦截器效果若把人留下就撤回。**记一条判断点**:我开 r3 时把 (甲) 写成「更直接」,是没核真浏览器的状态归属;mock 把状态放在真机不放的位置 = 假绿,这类单测以后要配一次真浏览器读数(builder 这次正是这样抓到的)。
+- 单测 BACKIN (A) 改为「扣住的离开在保存时,路由自己踏回本篇的 traverse 不是第二次离开」,修前代码红 → 阳性对照成立。**准**。
+
+**UNDOPAUSE 间歇红**(第二次撤销整块删掉、跳过回到 `warmup` 那一步):builder 用 r2 包 src 重建(字节与封包 `index-DGn86c1V.js` 完全一致)同环境交错跑,r2 2/40、r3 7/51、去掉 M3/M5 的 scratch 变体 X 2/14。**裁:不挡 r3,但进 Tester 的回归对**——builder 只比了 r2 vs r3,**修前(`04f6f822`)没有数**;「不比修前差」的基线是修前。Tester 在 9 对回归里加 **UNDOPAUSE ×20 修前 vs ×20 r3,同环境交错**;修前也出同签名 → 记 TD(独立于 TD-63 的「形状随环境不同」,这是数据面:整块删)归阶段二;修前 0/20 而 r3 ≥ 3/20 → 停下报我,不自动放行。builder 回执两问:整块删掉后 **redo 能不能回来**;服务器上那块的字当时是什么(是撤销链的一步还是真丢)。前者决定 🅰 / 🅱。
+
+**a20m BACKIN-fail 判定器**:永远 ok 是探针缺陷,Tester 修(按 r3 规则断言:LEFT_UNSAVED 0 条、第二次离开被扣、无冻结记录),配阳性对照(r2 上红)。
+
+其余:r2 链其它 0 红;a20m LIST close / back / addr、BACKIN-undo 均达 r3 规则(x / y 进框作 split 记录、k0 服务器一次;addr 三个都在服务器;undo 什么都不回来、重开无残留横幅)。在跑:tsc + client 全量 + 重建包 + 整套 kit(约 90 分钟);绿即封包报哈希、两 sha256、文件数。服务器未改、r3 服务器全量已跑过,不重跑。
