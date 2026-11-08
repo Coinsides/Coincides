@@ -17,7 +17,7 @@
 | 编辑器组返修(A-18 残留、A-21、A-24) | 已核 · 关闭 | Main_Designer | r2.3c 第 21 轮上岛(`fdeacb5d`)、Tester 岛上已核;余项 → A-25、L-018、TD-55、TD-56 | 2026-11-08 |
 | A-25 | 排队 | Main_Designer | A-20 之后派;已扩成设计单(输入法组合交接 + LANDFAIL 无自动重试 / 整篇拒键 + Reviewer H1–H3 + TD-58 定时器 + Y1 id 重用 + 结构非原子残留 + KRO),见尾部各节「→ A-25」 | 2026-11-08 |
 | A-19 | 已核 · 关闭 | Main_Designer | 第 22 轮上岛(`04f6f822`,主 JS `index-Gswd3cHv.js`)、Tester 岛上 63/63 + 代表臂全过;余项 → TD-59 / TD-60 / TD-61 / L-021 | 2026-11-08 |
-| A-20(**🅰**,11-08 升) | 施工 | builder | 查报收讫:(B) 收得住(`useTextFlowHistory.ts` + `textFlowEditSession.ts`,不碰撤销栈 / 适配器)→ 两半同包 `a20-idle-save` 开修;🅰 半边测试单列;交包 → Reviewer ∥ Tester | 2026-11-08 |
+| A-20(**🅰**,11-08 升) | 待验 | Reviewer ∥ Tester | 包 `a20-idle-save`(14 文件,`index-BkYnVk7W.js`)已封;Reviewer 核包 src/,Tester 跑全部臂 + builder 没跑的回归;判语 → 裁 → 拷回 → 第 23 轮 | 2026-11-08 |
 
 **现行有效的裁定**(一条一行;被推翻的直接删,历史在尾部)
 
@@ -126,6 +126,106 @@
 ---
 
 ## Result(builder 回执区,候填)
+
+### A-20 Result(builder 2026-11-08)
+
+> 包:ops `packages/a20-idle-save/`。主 JS `index-BkYnVk7W.js`。`src/` 共 14 个文件,清单 `files14.list`,另有 `src.sha256`、`dist.sha256`(63 行)、`COPY-BACK.md`、`MANUAL-SECTION.md`。基线 `04f6f822`。server 未改,包里没有 dist/server;依赖与锁文件都没动。
+> 证据:`docs/audits/2026-11-08-a20-builder/`。查报在 `survey.md` 与 `survey/`;本趟的数据在 `builder/`,先看 `summary.txt`;阳性对照在 `positive-controls.txt`。`pre-harvest-scan` 结果 ⛔ 0。
+> 包在 scratch 副本里建、测、封,没碰共享树,没碰 `edfix` / `edacc`。共享树 HEAD 是 `f28c7914`:14 个文件里 13 个与 `04f6f822` 相同,另 1 个是新文件。
+
+#### 按裁定逐条
+
+- **(B) 空闲保存:中途落库,不封口。** 停手 2 秒(常量 `IDLE_SAVE_MS`)后,把还没封口的那组写进同一条写入队列,经同一个 `persist` 落库;不进撤销栈,撤销分组规则一字没改。
+  - 失败时不记入 `failures`,并停止后续中途落库,直到下一次封口保存成功;所以断网时「Failed to save block」只弹一次。
+  - 封口时,如果正文和上一次中途落库的内容相同,就不再重发。
+  - 草稿期不起定时器:草稿走另一条路,不经 `onEditApplied`。
+  - 结构提交中跳过,只在 `peek()` 非空时重设一次 2 秒定时器;组合输入中 `peek()` 返回 null。输入法保持现状(compositionend 时封口并落库)。
+- **🅰 改 hash / 粘贴链接换笔记,用 navigate 事件。**
+  - 可拦的(脚本改 hash):拦下,走和应用内链接同一个 `flushForLeave`,保存成功后再打开同一地址;保存失败就留在原笔记,弹原来的「Please retry」。
+  - 不可拦的(地址栏粘贴),以及去 /login 的:先把没确认落库的字写进留字框,再失焦。
+  - 浏览器没有 navigate 事件时,用 popstate 兜底,处理同上;兜底这条路有单元测试和浏览器臂。
+- **🅰 留字框保险带。** 换笔记、卸载、pagehide 时,把「已封口但还没确认落库」和「还开着」的字按单元各记一条(从最早的 before 到最新的 after),和留字框是同一入口、同一种记录,幂等。确认落库后撤掉这条;如果同一单元里结构窗口已经留了一模一样的字,就不再重复记。
+- **🅰 401 回执改存 localStorage。** 按账户分开存,条目 schema 不变;Apply / Dismiss / baseRevision 校验照旧;旧版留在 sessionStorage 里的回执照样读,遇到同一块时替换掉。
+  - 我自己补了一处:笔记可能在账户还没载入时就渲染,控制器订阅账户 id,载入后重渲一次,回执才列得出来。路由只等令牌、不等账户,不加这一行,新标签页会查不到回执。
+- **适配器改 3 行(准改范围内)。** 回包晚于换笔记到达时,只要 2xx 且正文与发出的一致,就删掉本次回执,别的不动。
+- **B-81。** 没人通知的换笔记(两篇空笔记之间也一样)不再弹假的「could not be saved」。保存真失败、人又已经离开时,改弹真话 `LEFT_UNSAVED`。
+- **守恒闸。** 删掉了卸载豁免;冻结版上这一臂红,包上全绿。
+- **:940 诊断构建坐实。** 2 样本 × 3 臂,6/6 都在 `textHistory.flush` 报「Text composition is still active」被拒。
+
+#### 代码回答(行号对包 `src/`,目录 `client/src/pages/Notes/canvasEngine/`)
+
+1. **空闲封口挂在哪,四个条件各在哪一行守住。**
+   - 挂点:每次记录输入后调 `scope.scheduleIdleSave()`,在 `hooks/useTextFlowHistory.ts:765`;定时器在 `:631-638`,到点执行 `idleSave` `:640-660`。
+   - 唯一写入路径:队列里重新 `peek()`(`:655`),然后 `persist(…, 'after', false, undefined, true)`(`:658`)。
+   - 草稿期:块不在 `blocks` 里就直接返回,在 `:646` 附近;草稿输入本来就不经 `onEditApplied`。
+   - 结构提交中:`canSaveWhileTyping` 判 false 就重设定时器,`:650`;判定条件在 `hooks/useNoteCanvasRuntimeController.ts:396`。
+   - 组合输入中:`peek()` 返回 null,`textFlowEditSession.ts:149`。
+   - 失败不重试:`:211`,`:273`。
+   - 不重复写:`:619-627`。
+2. **hash 离开:修前修后各走哪几行,persist 从哪发,记不记历史。**
+   - 修前:`useNoteRouteSaveBoundary.tsx` 的 `useBlocker` 不拦没有步长的 POP;`useTextFlowHistory.ts` 的 `:189`、`:540`(冻结版行号)被 `current()` 挡回;`:940` 抛出。详见查报 Q2。
+   - 修后:`hooks/useNoteRouteSaveBoundary.tsx:148-161`(navigate:可拦的走 `:156` preventDefault → `flushForLeave` → `:159` 重开地址;不可拦或去登录的走 `:155` → `keepAndLeave` `:138-146`),`:162-166` 是 popstate 兜底,`:164` 由路由自己产生的那一步交给 blocker。
+   - persist 照旧由失焦封口发出(`onSeal` → 队列 → `persist`),在旧 scope 还当前时就发出;适配器会先写回执。没新增 history 记账。
+3. **B-81 提示从哪来,怎么修的。** 来源:`useNoteRouteSaveBoundary.tsx:117` 清理时对旧句柄调 `flushPendingSaves`,在 `:940` 被拒。修法:离开路径一开始就设 `scope.released = true`(`:139`、`:158`),清理时跳过。如果离开后保存真失败,弹真话 `:145`,文案在 `:15`。
+4. **pagehide 留档怎么扩,宽限在哪删,新断言在哪。**
+   - 写:`hooks/useTextFlowHistory.ts:664-692`,`keepOpenEdit`,不重复记的判断在 `:686`。
+   - 撤:`:694-705`,`confirmTyping`,由 `:260`、`:621` 调用;未确认列表 `:151`,封口时入列 `:615`。
+   - 触发:`:735`(scope 结束)、`:738`(pagehide);离开时另由 `useNoteRouteSaveBoundary.tsx:140` 调用。
+   - 恢复:走留字框原有入口,`useHeadingStructureController.ts` 未改。
+   - 宽限删在 `hooks/structureTypingConservation.test.tsx:546`(原来是 `continue` 豁免,现在是注释);放宽的边界断言 `:544` 保留。
+5. **写放大(真 Chrome + 代理计数)。**
+
+   | 情形 | 修前 | 修后 |
+   |---|---|---|
+   | 连打 60 秒约 410 键 | 0 写 | 0 写 |
+   | 「打 5 秒 + 停 3 秒」× 4 | 0 写,服务器无字 | 4 写 |
+   | 输入法 13 个组合 | 13 | 13(不变) |
+   | 草稿期 20 秒 | 服务器只收到前 9 个字 | 服务器有全文 |
+
+   约 1 秒节流的数没有在包里做,只是估算:上界约 60 PUT/分钟。包里没有任何测量开关。
+6. **撤销分段实测(冻结版和包逐步比对,都相同)。**
+   - `aaa`↵`bbb`↵`ccc` 连按 Ctrl+Z 四次:`aaa|bbb|` → `aaa|bbb` → `aaa|` → `aaa`。
+   - `aaa` 停 3 秒再打 `bbb`:一次 Ctrl+Z 两段一起撤掉。
+   - 输入法:一个组合撤一次。
+   - 包上「`aaa` 停 2.6 秒(已中途落库)再打 `bbb`」:一次 Ctrl+Z 撤回整行,服务器跟着变回 `warmup`。
+7. **适配器那 3 行,为什么不算动记账。** `hooks/useNoteCanvasDataAdapter.ts:2146-2148`:两行注释加一行代码,只在 2xx 且 `blockMatchesIssuedSave` 为真时调 `forgetBlockEditRecoveryReceipt`。不碰 blocks / drafts / outstanding 这些账,不碰 `reconciliationReadIsCurrent` 和 `transferTextUnit`。回包和发出的内容一致,就证明这次编辑已经落库,回执已无用;不删的话,回到原笔记会出一个假横幅。
+8. **401 回执改存 localStorage。** `draftBlockPersistence.ts:86-111`:键是 `coincides:draft-recovery:v2:<账户>`,按顺序读旧 session 键、再读本账户的 local 键;`:89` 用 `getState?.()`,测试里 mock 掉 authStore 也不会抛错。列出 `:444`、记下 `:489`、删除 `:560`。账户载入后重渲,在 `hooks/useNoteCanvasRuntimeController.ts:46`。
+
+#### 测试与阳性对照
+
+- 新测试:
+  - `textFlowEditSession.test.ts` 加 3 条(peek)。
+  - `hooks/useTextFlowHistory.test.tsx` 加 5 条:中途落库;一次 Ctrl+Z 撤回整段;不重复写;失败只一次;结构提交中等待;留字框保险带。
+  - `hooks/useNoteRouteSaveBoundary.leave.test.tsx` 新文件 8 条:可拦的、失败留下、不可拦先留后失焦、401、离开后失败说真话、popstate 兜底、B-81、路由自己那一步交给 blocker。
+  - `draftBlockPersistence.test.ts` 加 4 条(跨标签页、按账户、旧回执、删除)。
+  - `hooks/useNoteCanvasDataAdapter.test.tsx` 加 1 条(回包晚到删回执)。
+  - 守恒闸去掉豁免。
+- 改动的旧测试:回执存储改了位置,13 处 `sessionStorage` 断言改读新键;`useTrayController.test.tsx` 的 api mock 补了 `getToken`。新导入链会经过 authStore,authStore 创建时就要读令牌,所以必须补。
+- 阳性对照(`04f6f822` 上,`positive-controls.txt`):
+  - 红:peek 3/3、空闲保存 5/5、离开 7/8、回执存储 2/4、回包晚到 1/1;守恒闸红,种子 18 和 31 报 `<k1> LOST`。
+  - 在冻结版上绿的 3 条都是保护既有行为的守卫:路由自己那一步交给 blocker、旧回执照读、删除不限位置。
+- 全量(包的源码):client tsc 0;vitest 259 个文件 / 2707 条全过,exit 0。server 未改,`test:v2` 只有与 A-19 基线同样的 8 条环境红。中间一轮 client 有 3 个 TD-58 计时器的 unhandled error(`structureTypingBuffer.ts:292`,早已记在 A-25 名下),最终这轮没有出现。
+- 浏览器(最终 work 构建,每臂 10 样本;构建期间 dist 未变,哈希见 `builder/dist-browser-runs.sha256`):
+
+  | 臂 | 修后(有 navigate) | 修后(兜底:`--disable-blink-features=NavigationApi`) | 冻结版 |
+  |---|---|---|---|
+  | hashSwitch | 服务器有字 10/10 | 10/10 | 0/10(查报)、兜底 0/3 |
+  | pasteLink | 10/10 | 10/10 | 0/10、0/3 |
+  | lateReply(回包扣 3 秒) | 10/10,无假横幅 | 10/10 | 0/3 |
+  | loginHash / login401Enter | 留字框里有字 10/10 | — | 丢 |
+  | emptyHash | 假提示 0/10 | 0/10 | 3/3 |
+  | clickLeave(对照) | 10/10 | — | 10/10 |
+
+  另有:硬杀 Chrome(CDP `Browser.close`,停 2.6 秒后)服务器有字;包构建冒烟 3/3 全过。
+
+#### 没修 / 没验
+
+- **约 1 秒节流:** 只有估算,没有实测(Main_Designer 准许只量不改,包里不放开关)。
+- **401 臂:** 字由留字框自动落回,随后中途落库保存;横幅在这条路上不再出现,因为留字框落地保存时替换掉了同一块的回执。新标签页上回执能列出来(账户载入后重渲),我没有在浏览器里单独测新标签页这一臂,交给 Tester。
+- **两个恢复入口(横幅、留字框)仍然并存:** 按裁定留给 A-25。
+- **非 Chrome 浏览器:** 用 Chrome 关掉 Navigation API 来模拟兜底路,没在真 Firefox / Safari 上跑。
+- **A-18 矩阵和 r2.3c 代表臂:** 本趟没有重跑全矩阵。撤销分段与离开相关的几臂已经修前修后比对过;编辑器组的 H 场景、三个固定项、r2.3c 代表臂,请 Tester 用修前修后两个构建各跑一遍(包里 `useHeadingStructureController.ts` 没动)。
+- **真实输入法:** 输入法臂用 CDP `imeSetComposition` 模拟,没用真实输入法。
 
 ### A-19 Result(builder 2026-11-08)
 
@@ -2285,3 +2385,20 @@ Tester 重测(修前,每格 2 次),撤回自己先前两种说法(「401 整页�
 3. 「warmup 第三次撤销退成 w」(Tester 修前观察)是既有形状,修后须相同,不算本单。
 
 **Tester 修前基线(齐,等包;修后逐臂对照)**:停 2.6 秒后离开——整页离开 2/2、关标签页 1/1 字在服务器(离开时 1 PUT);改 hash 换笔记 2/2 不在(0 PUT);401 失焦 2/2 不在(PUT 回 401;同标签页横幅 Apply 可回);硬杀 1/1 不在(0 PUT)。撤销:`aaa`↵`bbb`↵`ccc` 连撤四步 `[warmup,aaa,bbb,ccc] → [..,bbb,""] → [..,bbb] → [..,aaa,""] → [warmup,aaa]`;`aaa` 停 3 秒 `bbb` 连撤三步 `[warmup,aaabbb] → [warmup,""] → [warmup] → [w]`。新笔记草稿期慢打 20 秒不回车:服务器始终只有首字母,0 PUT(builder 节奏下是前 9 字,结论同)。断网三段打字各停 2.6 秒:0 条「Failed to save block」(修前本就不存);恢复后仍不存。4 段停顿 0 PUT。中文输入法 3 组合每组合 1 PUT、每次撤销 1 PUT。证据在 Tester scratch `a20/runs`,判语时归档。
+
+## A-20 回执收讫:包 `a20-idle-save`(14 文件,主 JS `index-BkYnVk7W.js`);两处多做准;Reviewer ∥ Tester 并行;builder 不等放行先开 A-25 的「查」(Main_Designer 2026-11-08)
+
+**回执**:「A-20 Result(builder 2026-11-08)」(本文件 `:130`),证据 `docs/audits/2026-11-08-a20-builder/`(先看 `builder/summary.txt`),扫描 ⛔ 0。全量 client tsc 0、vitest 259 文件 / 2707 全过;server 未改。阳性对照(`04f6f822`):新测试除 3 条守卫外全红;守恒闸去豁免后冻结版红(种子 18、31 丢字)、包上绿。浏览器每臂 10 样本、navigate 与兜底(关 Navigation API)两种都跑:hashSwitch / pasteLink / lateReply 服务器有字 10/10 无假横幅;loginHash / login401Enter 留字框有字 10/10;emptyHash 假提示 0;冻结版 0/3 有字、假提示 3/3。撤销:回车四步、停顿不切、输入法修前修后逐步相同;中途落库后一次 Ctrl+Z 仍整行撤回、服务器跟着变回。硬杀前停 2.6 秒服务器有字。写放大:连打 60 秒 0 写、4 停顿 4 写、输入法不变。`:940` 坐实 6/6。
+
+**比裁定多做的两处 · 裁**:
+1. **留字框保险带也记「已封口但未确认落库」的字**(按单元合成一条,确认后撤;同单元结构窗口已留同字则不重复,H-L 测试守)——**准**。这正是 H-L 那条裁定「承载落地字的保存被确认前存档记录不删」的同一原则推到普通编辑;Reviewer 点名读合成 / 撤销 / 去重三处;Tester 臂:封口后请求被扣住时关页 → 留字框有、到服务器后框自删(说明书「Closing the page」那句)。
+2. **控制器订阅账户 id**(`useNoteCanvasRuntimeController.ts:46`,一行;路由只等令牌不等账户,否则按账户存的回执在新标签页列不出来)——**准**;不在适配器;Reviewer 核它不改渲染顺序与别的订阅。
+
+**说明书素材**(`MANUAL-SECTION.md`)我核过:句子都对应到了臂;「Chrome 以外走兜底路,行为同」保留但 Tester 判语写明只测 Chrome;「Failed to save block」只弹一次 + 下次回车 / 点开再试 = (B)(a) 的真话。收割时照译进 §一。
+
+**派**:
+- **Reviewer**(并行):八条点名 + 第九条「适配器 3 行回执清理」+ 两处多做;另核 `files14.list` 里 `NoteCanvasRuntime.tsx`、`useTrayController.test.tsx` 为何在清单内(回执未提)。发现写 `docs/audits/2026-11-08-a20-builder/reviewer/findings.md`,台账登一行。
+- **Tester**(并行):备好的全部臂(两路离开 × 三种回法、LATE / LATEREQ、emptyHash、硬杀、(B) 撤销三序列、草稿期后、断网一次提示、写请求计数、中文输入法、401 新标签页恢复、另一账号不可见、关页进留字框且到服务器后框自删);builder 没跑的交给 Tester:A-18 矩阵三固定项、编辑器组 H 场景、r2.3c 代表臂修前修后各一遍。只测 Chrome,注明。判语前列「比修前差的臂」。
+- **builder**:**不等 A-20 放行,现在开 A-25 第一段「查」**(scratch 底 = 本包 + `04f6f822`);A-20 若出红,返修优先。
+
+**流程**:判语 → 裁 → 拷回(`COPY-BACK.md`,`sha256sum -c` 14 OK)→ 收割(含 `docs/audits/2026-11-08-a20-builder/`)→ 报 Tester 版本 → 第 23 轮(纯前端:`build:client`,不重启服务,无依赖变动)→ 岛上轻对账(哈希 + 3–5 代表臂)。
