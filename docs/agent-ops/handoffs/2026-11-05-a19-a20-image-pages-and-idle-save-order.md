@@ -2531,3 +2531,22 @@ r2 的「代码回答」在 ⑦ 之后加 ⑧ K3 修法与测试、⑨ 来源标
 
 - **更正我的前提**:Tester r1 四行 FLYK 里 `kone` 重开 8 秒后仍在留字框、服务器 `[warmup, kzero]`——r1 没有自动落地。r2「框里等人、手动放回」与 r1 实测一致;r2 通过规则取严格形:服务器 kone = 0、框里有 kone、kzero = 1。
 - **r2 不加「放回」按钮**:留字框今天没有放回控件(说明书:多半自己回去;没回去就复制或 Discard),加按钮是新 UI,属 L-018 边栏单(阶段二),r2 范围已封口。所以这类记录的「手动放回」= 人复制粘贴再 Discard。**说明书已知补两句**:「新行的字在框里:新起一行粘贴,再 Discard」;「回车在一行中间后关页:原行已完整,框里那条后半直接 Discard,⛔ 再粘回去(会重复)」。Tester 臂:记录框内容与按钮;若无放回控件,「放回不重复」不作判据,改为说明书条目。
+
+### A-20 r2 · 封包前红行:三处修法收;TWICE-hash500 探针预期按 r2 改;UNDOPAUSE 等基线对照再裁(Main_Designer 2026-11-08)
+
+builder 封包前自跑 Tester r2 探针(scratch 构建 `index-ClZUj0ex.js`,**未封包**):K1 / K2 / K3 / K5 / K6、FLYK、SPLIT、LEAVE、B81、BACK、IDLE、PAUSEEXIT×5、HARDKILL、OFFLINE、OFFKILL(参照)、STALE、RETRY-more 绿;红行三类,修在 scratch 副本,重跑中。
+
+**三处修法,收**:
+
+1. **LATEBACK×4 / INAPP×4(探针量具问题,非产品病)**:离开确实被扣住(hash 停在 A 约 3 s、键入不显示),红的是探针——「Saving before leaving…」状态条 `position:fixed`,探针 `vis()` 用 `offsetParent !== null` 判可见,fixed 元素永远 null。builder 把 fixed 挪到外层包裹、`role=status` 元素本身是普通盒。收,但说清两点:这是为探针量具改的产品 DOM,无行为变化;**量具本身要修**——Tester 把 `vis()` 改成 `checkVisibility()` 或 `getBoundingClientRect` 非零,否则下次任何 fixed 提示都量不到。LATEBACK 的「可见状态」Tester 留一张截图作旁证(探针这一次是瞎的)。
+2. **RETRY-del(真病,r2 自己的账本)**:排在失败保存后面的已封口组在依赖环进了 `failures`,没走到第二交接点,留在 `unsent`;重试存整屏、恢复扫描清 `failures` 却不清 `unsent`;人删掉已存的 `beta` 后离开,过时的 `beta` 组被记录并自动落回。修:恢复扫描同时从 `unsent` / `unsentSplits` 移除(一个 helper `leaveUnsent`)。单测修前红修后绿。收——这正是「三本账任一时刻只有一个家」的漏项。
+3. **TWICE-hash / paste、BACKOK×2、GONEFAIL-back(2xx 之后假弹「Please retry」/「did not reach the server」)**:
+   - (a) TWICE:扣住期间第二次动作没被看见(pending 时 `leaving()` 返 null),它不经扣住就走了,第一次 flush 丢了笔记、SAVE_FAILURE 触发。修:可扣住的第二步也扣住,离开只走一次、去最新目的地;不可扣住的(后退、地址栏、登录)走 `keepAndLeave`,放行后被扣 flush 自己的拒绝不再上报;应用内链接 blocker 同一交接。两条 leave 测试修前红修后绿。收——与 LATEBACK「重查 peek 再发、限两轮」同一条规则。
+   - (b) BACKOK / GONEFAIL-back:`whenLeaveSettled` 拒绝,因为适配器把迟到的 2xx 报成失败(`route_receipt_stale`),虽然它已把回执忘掉。修:`whenLeaveSettled` 只在「本笔记的恢复回执自打开以来新写或重写」(打开时快照 `recoveryKey@queuedAt`)才保持拒绝;打开时账号未知则偏向弹。落在 `useNoteCanvasRuntimeController.ts`(15 文件内),适配器仍只有批准的 3 行。收,并记我的读法:这把提示的依据从「这一个请求的结果」换成「有没有没到服务器的字(回执在不在)」——对提示的语义反而更准(提示该说的正是字没到)。但适配器把「2xx 已存、只是没法贴回已卸载的画布」报成失败,**这条错报本身不修在 r2**,记 TD;A-25 ②a(持久 Retry 控件)直接吃适配器结果,builder 的 A-25 查报加一问:`route_receipt_stale` 在 2xx 后应报什么,否则 ②a 的控件会在同一处假亮。「账号未知偏向弹」:Tester 若在刚登录即离开的臂上看到假弹,记 已知,不算红。
+
+**两行待裁**:
+
+- **TWICE-hash500**:被扣住的保存吃 500。修后人留在 A、弹重试提示(HASHFAIL 规则)、重开时回执横幅给 Apply。探针要「字在服务器、无 Apply」——500 下字不可能在服务器,r2 又没有自动重试(那是 A-25 ②a)。**探针预期错,按 r2 改**:留在 A + 一条 HASHFAIL 提示 + 重开横幅 Apply = 最新快照。Tester 改这一行预期;原预期留作 A-25 ②a 的前瞻臂(自动重试落地后无 Apply)。
+- **UNDOPAUSE**:第三次撤销删掉了 warmup 块(`[]`)而不是退到 `['w']`。builder 在 r1 与基线 `04f6f822` 上重跑中。**规则**:基线相同 → 不是 r2 引入,记 已知 / TD,不挡封包;基线不同 → 撤销形状变了,这是本单硬闸(Henry:撤销和今天一样),红,修了再封。
+
+**封包条件不变**:重跑全绿(上两行按本节处置)→ 封包 `a20-idle-save-r2` → 报新哈希。范围到此;再有新发现开 r3。
