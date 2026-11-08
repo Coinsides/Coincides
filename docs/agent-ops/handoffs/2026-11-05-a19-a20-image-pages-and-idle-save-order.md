@@ -2560,3 +2560,22 @@ builder 重跑(scratch 构建 `index-DGn86c1V.js`,未封包):LATEBACK 8/8、INAP
 **GONEFAIL-back——builder 的规则对,Tester 独立到同一条,采**。Tester 自述:分析器 `!r.goneMsg` 写于 r1 / 修前所有行 goneMsg 皆 false 之时,与 README 闸「0 条假提示」相悖;r1 的假提示其实是 stayMsg「Changes could not be saved. Please retry before leaving the note.」。新规则下 r1 两行仍红(stayMsg 被抓)= 阳性对照成立。这臂按设计让离开时的保存吃 500:应用弹一次「Your last edit did not reach the server. It is kept on this device…」,字稍后(既有重试链,PUT 200 约 9.4 s)落地一次,count 1、无框、无重复、探针自己的 ok = true。分析器把任何「did not reach」都判红,那条规则写于这臂还在假弹「Please retry」的时候;**现在保存确实失败了,提示是真话**。我裁的是「traverse 不假弹」和「一次失败最多一条提示」,不是「失败也不许说」。r2 规则:**GONEFAIL-back 绿 = 字落地 1 份 + 恰好一条「did not reach」(按出现次数计)+ 零条「could not be saved / 请重试」(stayMsg——后退后人已不在页上,无处重试)**;BACKOK(网络好)仍 = 零条。这一对正好是阳性对照:提示跟着真假走。要「失败也不提示」得让应用预知稍后会成功,那是 A-25 ②a(持久控件 + 退避重试)的事,不塞 r2。MANUAL-SECTION 加一句,按代码实际行为写:后退 / 离开时那次保存失败会提示一次,字留在本机,多半由后续保存自己补上;重开若见横幅再 Apply。
 
 **准封包**:Tester 新探针三行绿后封 `a20-idle-save-r2`,报哈希 + sha256。封后我派 Reviewer ∥ Tester。
+
+### A-20 r2 · TWICE-hash500 再裁:两轮重查实际是一次重试,一次性 500 被吸收 → 存一次、离开到最新目的地,采;我上两节「留在 A + Apply」的预期撤;两条过时提示归 A-25 ②a (e);封包(Main_Designer 2026-11-08)
+
+Tester 新探针:LATEBACK 8/8、INAPP 8/8 绿;TWICE-hash500 在我前一节改过的规则下红,但 builder 录下的实情是**字存了,不是丢了**:
+
+- 1496 PUT `[hold] warmup|twice words`,扣住后被答 500 → 3382「Failed to save block」;
+- 3458 PUT 同内容 → 3591 **200**。这是 `flushForLeave` 的重查轮(LATEBACK 裁定:`hasUnsavedEdit` 仍真 → 最多再 2 轮 flush),它走的是失败组的 Retry 路,把 500 的那组重发并存上;
+- 3528「Text changes could not be saved. Retry saving or undo before leaving the note.」(history `onSaveFailure`,来自那次 500);
+- 然后被扣的离开走到 C(最新目的地)。服务器:字 1 份、精确;重开无 Apply,因为无字可恢复。
+
+**裁:采「存一次、离开到最新目的地」为 TWICE-hash500 的 r2 绿。**理由:Henry 的验收是「网络好时随时关它都能保存」;一次性 500 被下一轮吸收后字在、人也去了想去的地方,这**严格好于**我写的「留在 A + 提示 + 重开 Apply」——那是保存不可能时的兜底(持久失败的 GONEFAIL-hash / paste 仍走它,绿),不是目标。我前两节关于这一行的预期撤,**原探针的 `a25Forward`(字在服务器、无 Apply)就是正确预期**,只是成因不是自动重试而是重查轮。不选 builder 列的另一路(「某轮 flush 拒绝即停轮、留在 A」):那是拿一次已存的编辑去换一次人工重试,方向反了,且是 r3。
+
+**两条提示(一次失败弹两条、第二条被随后的成功 + 离开证伪)**:基线同款(GONEFAIL-hash / paste 同一对,绿),不是 r2 引入;归 A-25 ②a (e)「一次失败一条、控件在屏时零条」,已写进 A-25 单 Q2 ⑥(与 TD-62 同条)。r2 不碰。
+
+**Tester 分析器**:TWICE-hash500 绿 = 字在服务器恰 1 份精确 + 落到最新目的地(C)+ 重开无 Apply(无可恢复);提示只记 `watchN` 计数(goneN / stayN),r2 不作闸,A-25 (e) 接。这一行就是「重查轮吸收一次性 500」的机械化钉子——每包都跑,不另写单测。
+
+**说明书**:builder 已加的一句(「did not reach the server」段下:也会在后退后出现一次;多半由后续保存自己补上;重开见横幅按 Apply)收。再补一句,按实情:「切换笔记 / 改地址时若那次保存一时失败,可能先看到一两条『没存上』,随后多半自动补上并照常离开;离开后字在笔记里就对了」。
+
+**封包**。15 文件 `src/`、`index-DGn86c1V.js`、COPY-BACK、MANUAL-SECTION;报哈希 + sha256 + 文件数。封后派 Reviewer ∥ Tester。
