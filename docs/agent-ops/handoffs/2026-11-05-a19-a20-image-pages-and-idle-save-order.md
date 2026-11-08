@@ -17,7 +17,7 @@
 | 编辑器组返修(A-18 残留、A-21、A-24) | 已核 · 关闭 | Main_Designer | r2.3c 第 21 轮上岛(`fdeacb5d`)、Tester 岛上已核;余项 → A-25、L-018、TD-55、TD-56 | 2026-11-08 |
 | A-25 | 排队 | Main_Designer | A-20 之后派;已扩成设计单(输入法组合交接 + LANDFAIL 无自动重试 / 整篇拒键 + Reviewer H1–H3 + TD-58 定时器 + Y1 id 重用 + 结构非原子残留 + KRO),见尾部各节「→ A-25」 | 2026-11-08 |
 | A-19 | 已核 · 关闭 | Main_Designer | 第 22 轮上岛(`04f6f822`,主 JS `index-Gswd3cHv.js`)、Tester 岛上 63/63 + 代表臂全过;余项 → TD-59 / TD-60 / TD-61 / L-021 | 2026-11-08 |
-| A-20(**🅰**,11-08 升) | 查中 | builder | Tester 旁证坐实改 hash 换笔记 / 401 两路丢字(各 2/2,样本在补)→ 升 🅰。第二段拆两半:🅰 半边(两路不丢字)查报 Q2/Q3 机理一到就裁就修;空闲保存半边候 Henry 选撤销路 (A)/(B)/(C) | 2026-11-08 |
+| A-20(**🅰**,11-08 升) | 🅰 半边施工中;Q1 查中 | builder | 🅰 半边已裁开修(守卫接住无步长导航 + 留字框保险带;401 回执挪 localStorage);空闲保存半边 Q1 三条撤销路实测候 Henry 选 | 2026-11-08 |
 
 **现行有效的裁定**(一条一行;被推翻的直接删,历史在尾部)
 
@@ -36,7 +36,7 @@
 - 编辑器组·H-L(字刚落地未落库时关页,三版 3/3 丢):第③类,挡第二轮放行,本轮修——承载落地字的保存被确认前存档记录不删(或 pagehide 重新写档);⛔ 以 A-20 债豁免;注入一律写明注入层、至少一臂发出前拦 ← 「编辑器组第二轮裁定:H-L 坐实,第③类,挡第二轮放行,本轮修(Main_Designer 2026-11-07)」
 - A-25:组合中不挪焦点、不换主,等 compositionend 后再交接;动工时带上 leads-1、handoff-0 两条约束,并接收 leads-2 和随单移交的冻结红测试 ← 「A-25 · 新笔记第一行用输入法打字,拼音被写进笔记(🅰,既有,2026-11-06 Tester 编辑器组核验中发现)」、「A-25 追加约束(来自 Tester 对 leads-1、handoff-0 的处置)」
 - A-19:走原页通道,一图一页,不改写 media 块 ← 「A-19 · 图片 Source 的笔记是空的(🅰,功能失效,不丢数据)」
-- A-20·🅰 半边(改 hash 换笔记 + 401 不丢字)不等撤销路选定;修法边界:卸载前 seal 且 persist 真发出(只传不记),发不出就同步写留字框存档;401 ⛔ 丢弃请求体,先写留字框再跳登录,提示改真话 ← 「A-20 升 🅰(Main_Designer 2026-11-08)」
+- A-20·🅰 半边**开修**:hash 路 (i) 监听 popstate/hashchange 同步跑 flushForLeave(实测 PUT 先于路由提交 10/10)+ (ii) 清理时未封口 pending 写留字框(只读 peek);401 路恢复回执 sessionStorage → localStorage 加用户作用域,⛔ 转写成留字框条目;回包晚到无假横幅须有测试;B-81 以 emptyHash 阳性对照收口;⛔ 服务端 / 记账层 / 适配器 / F9;分包 a20-leave-safety 或同包由 builder 按量级定 ← 「A-20 🅰 半边裁定(Main_Designer 2026-11-08)」
 - A-20·预裁:阈值 2 秒常量;~~接受撤销分组在空闲处切开~~ → **Henry 不接受分段(11-08 直接作答),Q1⑤ 摆 (A) 分段 / (B) 只落库不封口 / (C) 与下一段合并 三条路由 Henry 选,第二段候选定**;草稿期无定时器;结构提交中跳过、IME 组合后补 seal 不轮询;hash 离开前 seal 且 persist 真发出(只传不记,带旧笔记 id;要改适配器记账层就停);B-81 不许留、须有冻结版红;pagehide 留档扩到普通未存编辑并取消守恒闸放宽(冻结版该臂红);⛔ 第二写者 / 逐键写 / 新 localStorage 结构 / 动服务端 / 动 F9 / 动 A-25 范围 ← 「A-20 派单(Main_Designer 2026-11-08)」
 - A-20:空闲保存只走现有的唯一写入路径;动工时把 pagehide 同步留档扩到普通未存编辑,并取消守恒闸的那处放宽;B-81 并入同查 ← 「A-20 · 打字只在回车或失焦时落库(🅱 偏重,修)」、「编辑器组返修中途裁定(Main_Designer 2026-11-07,答 builder 中途进度)」、「记录不修」
 
@@ -2199,3 +2199,28 @@ A-19 已上岛(`04f6f822`,第 22 轮)。A-20 现在开工,规格不变(订单开
 - **401 路**:已有恢复队列与 Apply 流程,问题只是队列不落盘。修法 = **把这条恢复队列写进留字框存档**(同一 localStorage 存档、按笔记 id + 块锚点、幂等;重开后恢复横幅照旧出、Apply 照旧落回),⛔ 另起新存储结构;提示文案改真话。Q2 的 401 半段请 builder 定位恢复队列所在(文件、行号)与它为什么只在内存。
 - **改 hash 路**:零请求、零恢复入口,是两路里真正的空洞;修法边界不变(卸载前 seal 且 persist 真发出;发不出就同步写留字框存档,重开可见、Apply 可落回)。查报重点:为什么离开时 seal/persist 一个都没发生,而 401 路上同一笔字能进恢复队列——两条路在哪一行分叉。
 - **Tester 修后臂**:401 分「同标签页回去」「刷新后回去」两种,后者才看得出保险带接没接上;改 hash 后「整页重开」「应用内回去」两种都要字在(服务器或留字框 Apply 可落回)。
+
+## A-20 🅰 半边裁定:两路在路由守卫分叉;hash 路做 (i) 守卫接住无步长导航 + (ii) 留字框保险带;401 路把恢复回执从 sessionStorage 挪到 localStorage,⛔ 改成留字框条目;开修(Main_Designer 2026-11-08)
+
+**builder 机理(行号对 `04f6f822`;每条标了实测 / 读码)**,我采信的事实:
+- 应用内换笔记 4 臂(`hashSwitch` / `pasteLink` 同文档只换 `#` / `loginHash` / `login401Enter`)修前 0/10 服务器有字,前三臂 0 请求,第四臂一次 PUT 回 401;对照 `clickLeave`(点应用内链接)10/10 正常。4 条丢字臂 10/10 打出路由库告警「You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router」,对照臂 0/10——**守卫没被问到**(`useNoteRouteSaveBoundary.tsx:81-83` 的 `useBlocker` 只拦路由自己产生的 PUSH;无步长的 POP 直接放行,`:85-101` 与 `flushForLeave` `:51-79` 都不跑:不失焦、不 seal、不 `flushPendingSaves`)。
+- 换笔记时 `NoteDetailPage` 原地重渲不重挂(`App.tsx:111` 路由无 key),`useTextFlowHistory` 的 scope 按 noteId 重建,渲染中 `:611` 已换 `active.current`,旧 scope `current()` 立刻 false;旧会话未封口的 `pending`(`textFlowEditSession.ts:90`)没人 seal,就算 seal,`onSeal` `:540` 与 `persist` `:189` 也被 `current()` 挡回。闸在**渲染那一步**就关了,卸载顺序无关。
+- 失焦 + 401 那路能有恢复回执,是因为适配器 `saveBlock` 发请求前先写回执(`useNoteCanvasDataAdapter.ts:1995-2022`);hash 路没 seal 就轮不到。**分叉点 = 守卫没被问到**。
+- 401:回车 seal → persist → `await api.saveBlock`(`:220`),回执先写 `:2022`,PUT 回 401;`api.ts:57-61` `setToken(null)` + `hash='#/login'`(同样无步长),页卸载,`persist` 在 `:227` 碰 `!current()` 返 false,`:234` 的 finally 也被挡——不记 failures、不调 onSaveFailure,编辑器里的重试状态没了。**回执在 sessionStorage**(`draftBlockPersistence.ts:73-78`,键 `coincides:draft-recovery:v2`,写入 `:456-487`,全仓无处清)。builder 实测 401 后同标签页整页重开横幅 3/3 出现;旧 mountNonce 的回执只弹 info 不回填(`:727-737`),要点横幅 Apply(`:2269`)。新标签页 / 关标签页 / 崩溃时 sessionStorage 随之没了。
+- B-81 提示:文案 `useNoteRouteSaveBoundary.tsx:12`,弹出 `:114`;noteId 一变,`:103-117` 的 layout 清理在微任务里见旧 scope 既未释放也无 pending,对保留的 runtime 句柄调 `flushPendingSaves`,reject 后弹;reject 来源**推断**在 `useTextFlowHistory.ts:940`(`boundary()` 返 false 抛出),未插桩。3 样本 × 3 臂(含两篇空笔记之间改 hash)每个都弹(第一轮 50 样本按文字轮询没抓到是因为一闪即没,MutationObserver 才抓到)。**与 Q2 同一处边界,Tester 判「同一处」成立**;原记法「假提示」在空笔记间成立,有未回车字时碰巧是真的但人已回不去。
+- 对照:留字框里的字换笔记不丢——`useHeadingStructureController.ts:268-271` 按 noteId 清理时 `leaveBuffer` → `retainWords`;普通编辑没有这一步。
+- **与 Tester 表的两处差别**:①Tester「地址栏打开另一篇链接 0/2」用的是不同地址 = 整页导航;真实使用里本应用链接都是 `/#/notes/<id>`,在一篇里粘贴另一篇的链接只差 `#` 后面,Chrome 按同文档导航,= builder 的 `pasteLink`,10/10 丢。**「地址栏粘贴链接换笔记」在真实使用里丢**。②Tester「401 整页重开 12/12 丢」与 builder「同标签页重开横幅 3/3」不一致——请 Tester 核重开方式(同标签页 reload 还是新 target / 新 profile)及是否看了横幅。
+
+**裁定(🅰 半边,现在开修;与空闲保存半边解耦)**:
+
+1. **hash 路 · 两条都做**:
+   - **(i) 守卫接住无步长导航**:监听 `popstate` / `hashchange`,在 React 提交新笔记之前**同步**跑 `flushForLeave`(失焦 → seal → persist),让 PUT 在旧 scope 仍是当前时**发出**(适配器照旧先写回执)。不碰 history 记账层、不碰适配器。**必须实测**「监听先于路由提交」:4 臂各 10 样本,观察到 PUT 离开浏览器且服务器有字 10/10;另核**回包晚到**(回包在换笔记之后到达)时回执怎么清——不清会出假横幅,Apply 可能把旧字盖新字,这是 ②,须有测试守。
+   - **(ii) 保险带**:按 noteId 清理那一刻,把旧会话未封口的那一组同步写进留字框存档(`rememberUnplacedWords`,`structureTypingBuffer.ts:106`),给会话加**只读 peek**,不碰记账层。(i) 跑过则 pending 为空、(ii) 自然无事可写;(i) 没跑到才兜底。幂等、一记录一框。
+   - 401 跳登录走同一个口子,(i) 也会经过 flushForLeave,但令牌已清、persist 再拿一次 401(无害噪声);救字靠第 2 条。
+2. **401 路 · 把恢复回执存储从 sessionStorage 挪到 localStorage**,键 schema 不变、**加用户作用域**(同浏览器多账号不得互见),Apply / Dismiss / baseRevision 校验照旧;⛔ 转写成留字框条目——回执带 baseRevision + textFlow、恢复入口是横幅原位回填,比留字框条目(blockId/unitId/initialText/text,手工放回)更准,改形状是倒退。**我撤回上一节「写进留字框同一 localStorage 存档」对 401 路的那句**:回执存储是既有结构,挪位置不是「另起存储」。「全仓无处清」要核:Apply / Dismiss 之后、以及保存成功之后回执是否删除;不删 → 假横幅,补。
+3. **两个恢复入口(横幅 Apply 与留字框)并存**是既有状态,本单不合一;记入 **A-25 设计单范围**(「恢复面合一」),⛔ 本单动。
+4. **B-81 提示**:(i) 到位后无步长换笔记也走 flushForLeave、`scope.released=true`,清理那步不再 reject,提示不该再弹。测试:冻结版 `emptyHash`(两篇空笔记间改 hash)提示出现 → 包上不出现(阳性对照);有字且 persist 真失败(断网离开)时提示改真话,写明字在本地可恢复(英文,照界面语言;文案进 `MANUAL-SECTION.md` 我核)。**reject 来源的 15 分钟诊断构建:做**,把 `:940` 从推断变事实,回归测试才知道断言什么。
+5. **⛔**:动服务端;动 history 记账层;动适配器 `transferTextUnit`;动 F9;新存储结构;逐键写;A-25 范围(组合交接、LANDFAIL 重试、结构事务、恢复面合一)。
+6. **交付**:🅰 半边可先封包 `a20-leave-safety`(与空闲保存半边分包,Henry 选撤销路前后不互相等),或等 Q1 裁定后同包——**builder 按量级定,告我**。阳性对照(`04f6f822` 上红):hashSwitch / pasteLink / loginHash / login401Enter 四臂丢字、emptyHash 提示出现、401 后新标签页重开无横幅;包上全绿。A-18 矩阵三固定项 + r2.3c 代表臂不退步。
+
+**Tester**:①核「401 整页重开 12/12」的重开方式与横幅;②地址栏臂改成**同文档**(同 URL 只换 `#`),这才是真实使用;③修后臂按两种回法分开(同标签页 / 新标签页),hash 路加「回包晚到无假横幅」一臂;④emptyHash 无提示。
