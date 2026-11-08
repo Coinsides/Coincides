@@ -2669,3 +2669,18 @@ builder 在 r3 封包前自跑 a20m 时读字段(BACKIN-fail 行的判定器**�
 **a20m BACKIN-fail 判定器**:永远 ok 是探针缺陷,Tester 修(按 r3 规则断言:LEFT_UNSAVED 0 条、第二次离开被扣、无冻结记录),配阳性对照(r2 上红)。
 
 其余:r2 链其它 0 红;a20m LIST close / back / addr、BACKIN-undo 均达 r3 规则(x / y 进框作 split 记录、k0 服务器一次;addr 三个都在服务器;undo 什么都不回来、重开无残留横幅)。在跑:tsc + client 全量 + 重建包 + 整套 kit(约 90 分钟);绿即封包报哈希、两 sha256、文件数。服务器未改、r3 服务器全量已跑过,不重跑。
+
+**Tester 回(探针 + 第 10 对就位)**:a20m BACKIN-fail 改真断言(人留 A + LEFT_UNSAVED 0 条直数到重开 + 停留时冻结记录 0 + 第二次 hash 离开被扣;「被扣」= 扣住 1.5 s 内 ≥1 s 仍在 A、放行后 3 s 内到达,放行点远在约 3.3 s 的放弃时限内);阳性对照 r2 红 2/2(LEFT_UNSAVED 1、冻结记录 1、0.27 s 就到另一篇零请求),修前红 2/2 只红在「不扣」(修前本就不扣 hash 离开,预期)。**新增 BACKIN-ctl** 作「被扣」检测器自身的对照(不后退不失败,只扣保存后 hash 离开):r2 被扣 2/2、修前不扣 2/2 —— 检测器两个方向都见过真值。**回归第 10 对** `run-undopause-pair.sh`:10 轮交错 [修前 ×2, r3 ×2] 同浏览器同 CDP 口,签名 = steps[2] ≠ ['warmup'](builder 确认红行原样),计数脚本按裁线自动出结论(修前 ≥1 → 记数开 TD;修前 0/20 且 r3 ≥3/20 → STOP 报主设计),已用合成红行验过;PUT 次数只看红绿差不看绝对数(Tester 环境第三步多一个写入)。
+
+### A-20 r3 · 裁 REFUSED = 被扣住的一种;S3(失败先于后退的假 LEFT_UNSAVED)转 builder 封包前核;S2 变异对照准派(Main_Designer 2026-11-08)
+
+Tester 对新判定器自起复核(3 名 Opus 读者分存储 / 提示 / 被扣三镜头 + 每条 1 名反驳者,8 代理约 130 万 token,`model:'opus'`,取放 `.lock.2`;读 r2 包 src + builder 未封 r3 dist 只读):5 条立住、0 条被驳、7 条低可能性。要裁的两条与我的裁:
+
+**一、REFUSED 算「仍被扣住」,算绿**——条件齐全才算。BACKIN-fail 之后那组 500 仍在 `failures`,今天没有自动重试(A-25 ②a 才有),第二次 hash 离开被 r3 拦下(preventDefault = latch 没卡)后 `flush` 见 `failures` 即抛、0 请求、人留 A、弹一条「Changes could not be saved. Please retry before leaving the note.」——这正是 HASHFAIL 已裁的「留 A + 一条提示」路,r3 的「仍被扣住」就是指它。**绿的条件**:navigate 事件被 preventDefault;人仍在 A(地址栏 hash 未变 / A 宿主节点仍连着);恰好 **+1 条**「Please retry before leaving」(不是每键一条、不是两条);LEFT_UNSAVED 0;冻结记录 0(按 S2 的 1 / 3 / 6 s 三采样);0 请求可接受。HELD-PROCEED 只在**没有失败**(ctl)或**失败已清**时才是预期。Tester 五类读数(STUCK / HELD-PROCEED / INSTANT-PROCEED / REFUSED / HUNG)照用:r3 BACKIN-fail 第二次离开的预期形 = REFUSED;r2 = STUCK;修前 = 不扣(INSTANT 到另一篇,重开给横幅 + Apply)。**若便宜加一臂 BACKIN-fail-recover**:REFUSED 之后让服务器放行、再打一个字触发重存 → hash 离开 → 预期 HELD-PROCEED 或 INSTANT-PROCEED、字在服务器、LEFT_UNSAVED 0——证明被拒之后人出得去、latch 继续工作。
+- **随之进手册「已知」**:服务器持续失败时,应用内后退与地址栏 hash 跳转都会把人留在本篇并提示重试(修前只拦后退不拦 hash);关页仍可走,字进恢复框。A-25 ②a 的常驻指示(重试 / 复制 / 丢弃)补出口。
+
+**二、S3 转 builder 封包前必核**(读的是未封 dist `index-BKcpbxZB.js`,builder 对现源确认):r3 的 LEFT_UNSAVED 守卫 `.catch(() => { o.kept && addToast(LEFT_UNSAVED) })`,`kept` 只在拦截器 blocked 的 effect 里清。**失败先于后退**(人看到「Failed to save block」再按后退——最自然的顺序)时,`whenLeaveSettled` 因回执快照已变,在 navigate 之后的微任务里立刻 reject;此刻拦截器 effect 还没跑、`kept` 仍真 → 弹假 LEFT_UNSAVED,而人其实被留下。builder 的 a20m BACKIN-fail 只走「后退时扣住、1.5 s 后才 500」一种顺序,盖不到。**裁**:LEFT_UNSAVED 的判定要**等导航结果明确**再做——门不是「reject 那一刻 kept 是否仍真」,而是「离开真发生了没有」(位置已换 / A 已卸载 / 非本篇目的地的 navigatesuccess),机制 builder 选、回执写明。**确认是真缺陷就在 r3 修**(它就是挡 r2 的 ② 同形:人没走却被告知「已离开、字留在本机」),修完重跑;不是真缺陷则回执写明为什么微任务晚于 effect。Tester 的三个顺序变体 **BACKIN-fail-sealed**(先 500 并封口再后退)/ **-idlefirst**(先等空闲保存 500 再后退)/ **-fast**(后退后立刻 500)同时进 builder 封包前自跑与 Tester 验收臂,都按同一 r3 规则判。
+
+**三、S2 变异对照准派**:r3 的 M3(交接 2 几毫秒内删记录)掩盖了 (乙) 的撤回——BACKIN-fail 从没真考到 (乙)。Tester 加 **BACKIN-refail**(同块另一单元先有失败,本组交接不了,只有 (乙) 能删记录;1 / 3 / 6 s 三采样记录都须 0)。**builder 在封包后、Reviewer 小核期间**从封好的 r3 src 出一个 scratch 变异 dist:只删 (乙) 撤回那一行、保留 M3;预期 BACKIN-fail 仍绿(证明它只考到 M3)、BACKIN-refail 红。变异 dist 是测试夹具,交 Tester 路径,⛔ 进仓 ⛔ 进包;占一个锁位,不与 kit 重跑并行。
+
+其余 Tester 自修的测量项(S5 preventDefault 读数 + BACKIN-ctlfail / ctlclean 对照;读存储失败判不可测;提示取两次快照并集;注入失败未发生 = 搭建错误不参判;stayed 加宿主节点仍连着;LEFT_UNSAVED 正则对封包 src 常量核)不涉裁定,照做;改完先在 r2 与修前把五类对照跑一遍再报。
