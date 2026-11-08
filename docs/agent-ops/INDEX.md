@@ -156,7 +156,7 @@
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-09(A-20 r3d heldhead 根因新增 TD-68;TD-66 据真机对照降级;Reviewer r3 N4 新增 TD-66、A-25 ②a 丢弃裁 (C) 新增 TD-67、TD-64 附两边;A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60) | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-09(r3d P2 单元 id 复用新增 TD-70;A-25 ②a 范围定、冲突项 Replay 整块替换新增 TD-69;A-20 r3d heldhead 根因新增 TD-68;TD-66 据真机对照降级;Reviewer r3 N4 新增 TD-66、A-25 ②a 丢弃裁 (C) 新增 TD-67、TD-64 附两边;A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
@@ -478,7 +478,7 @@
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-11-08(§6 流程精简八条,Henry 当日批) | — |
 | [records/reviewer/README.md](records/reviewer/README.md) | Reviewer 的记录（records/reviewer/） | `active` | 2026-11-08 | — |
 | [records/reviewer/STATUS.md](records/reviewer/STATUS.md) | Reviewer 状态 | `active` | 2026-11-09 | — |
-| [records/reviewer/findings.md](records/reviewer/findings.md) | Reviewer 发现台账 | `active` | 2026-11-08 | — |
+| [records/reviewer/findings.md](records/reviewer/findings.md) | Reviewer 发现台账 | `active` | 2026-11-09 | — |
 | [records/tester/METHOD.md](records/tester/METHOD.md) | Tester 方法与坑 | `active` | 2026-11-08 | — |
 | [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `active` | 2026-11-07 | — |
 | [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-09 | — |
