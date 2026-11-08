@@ -111,3 +111,47 @@
 **封版硬规矩**:D6 若 A-25 没全绿,**只上绿的部分**(A-20 已上;A-25 分项可上则上,不可分则整单留阶段二),⛔ 为赶日程上半成品——Henry 在大陆期间无法修 🅰。
 
 ## Result(builder 回执区,候填)
+
+## 第一段查报收讫 · 裁定(Main_Designer 2026-11-08)
+
+查报 `docs/audits/2026-11-08-a25-builder/survey.md`(底 `04f6f822` + r2 包,事实 / 建议分开,样本数写明;扫描 ⛔ 0)。要点与裁定:
+
+### ① 输入法:选 (a),只动草稿框
+
+事实收:草稿框 `DraftBlockEditorLayer.tsx:79-82` 的 `onChange` → `useRuntimeNaturalWritingController.ts:445` 在组合中的值(`d`)上就 `persistDraft` → `useDraftBlockController.ts:620-629` 交接(`flushSync`、`setFocusBlockId`)→ `NoteWritingSurfaceLayer.tsx:1998` `autoFocus` 组合中抢焦点;整条路没有任何 `compositionstart/end` 检查。**裁 (a)**:草稿框加 `onCompositionStart/End`,组合中 `onChange` 只更新文字不建块,`compositionend` 用框里的最终值(已是汉字)调一次 `handleDraftChange`;持久编辑器不动。守:组合中按 Enter / Esc / 斜杠的现有行为不变(写进 Tester IME 臂)。(b)(c) 否(浏览器无「接管组合」接口,(c) 是靠时序猜测补救)。
+
+**决定 1 · leads-2 不并入,留阶段二**(维持 11-08 的切法)。它是交接原子性(`flushSync` 提交时新块还不在 host 的 blocks 里),(a) 不覆盖也不依赖;冻结红测试现成,不会丢。阶段一只装「Henry 日用会撞到的」,leads-2 没有使用症状。
+
+### ② 保存失败:拒键范围坐实,四条建议都采,其中两条加条件
+
+事实收:**不是只读**(六个 `contentReadOnly` 来源全 false)。键死在结构路径:块里有标题且不止一行 → `TextBlockProjection.tsx:848-853` 交 `onHeadingStructure` → `useHeadingStructureController.ts:301/:371` → `useTextFlowHistory.ts:1207` 先 `await flush()`,而 `flush`(`:1190-1194`)只要**整篇**有任何 `failures` 就抛 → `:445-447` catch → 每键一条「Heading changes could not be completed…」。所以范围 = 「整篇任何一处失败时,任何需要结构路径的块」;普通块走 `applyEdit`、`canApplyEdit` 不看 `failures`,收得到键。**Tester 加两臂**:LANDFAIL 期间在另一个**普通块**打字(预期今天就能打)、在另一个**带标题的块**打字(预期今天拒,修后不拒)。
+
+**决定 2 · 准 A-25 收窄 history 的 `flush` 语义**,条件三条:
+- 收窄的只是「别处的 `failures` 挡本块结构」这一刀:`runStructureBatch` 前仍要 **await 本次触及的块的在途保存**(结构的 `after` 要从最新流算,这个等不能省),只去掉「整篇任何失败即抛」。
+- 本块自己有失败时,两条路 builder 按代码实情选一条,回执写明:**(甲)** 编辑按普通打字 `applyEdit` 上屏、排在失败后面,结构在那块恢复后**真的补上**——要有测试证明恢复后结构到位(⛔「以后再说」);**(乙)** 本块仍拒,但只点亮常驻指示,⛔ 逐键 toast。甲优先;甲做不干净就乙。
+- Q4 回归面先过:r2.3c 代表臂、守恒闸 6 种子 + PATH 臂。
+
+**②a 自动重试 + 常驻指示 + 收声(建议 2–4),采**:
+- 退避定时器挂 `useTextFlowHistory` scope,与 (B) 的 `idleTimer` 同层;2 s 起翻倍、上限 30 s;`online` 事件立刻排一次;经 `host.enqueueRuntimeHistoryOperation` 走 `saveBlock` 打字失败分支同一段(`:1162-1173`),不另开写者。**加一条**:4xx 里的 401 / 403 ⛔ 自动重试(不是暂时性失败,路由守卫会送去登录;重试只打 5xx / 网络错)。中途落库在有 `failures` 时仍停发。
+- 常驻指示放在块上(控件条不常驻):「未保存 · 重试 / 复制 / 丢弃」;重试 = 立即排一次;复制 = 该块当前文字;丢弃 = 撤回到服务器版本走现有 Undo / 恢复路径,⛔ 新造写。指示在屏期间零 toast;成功即消失。`recoveryBlockIds` 扩到含 `failures`。
+- 收声:适配器 `:2228` 对 `silent` 保存不弹;history `onSaveFailure` 改点亮指示不弹。一次失败 = 0 toast + 1 指示;先败后成零残留。这就是 (e)。不经 history 的保存(表单字段等)不变。Tester 的 (e) 修前基线:提示在到达目的地后留屏约 3 s(已记 Q2 ⑥)。
+
+**决定 3 · 准改适配器 `route_receipt_stale`**(`useNoteCanvasDataAdapter.ts:2146-2185`):2xx 且正文与发出一致时返回 `durableState: 'matches_requested'`、`recoveryReceipt: null`,写入登记 `:2259-2263` 据此判成功;A-20 r2 控制器里的回执兜底**保留**作双保险。改动限这一段;TD-62 承接 = A-25 本条。Tester 重跑 A-20 的 BACKOK / GONEFAIL / TWICE / CLOSEFLY。
+
+**决定 4 · CHAIN:history 核对 `previousTextFlow`,不符即拒,⛔ 静默覆盖;先做调用方普查,普查结果决定进不进**:
+- 真病收:history 的 apply 入口接受调用方给的 `previousTextFlow` 而不与自己最新的流(开着的组 / 已封口 after / handed)核对;读渲染期状态的调用方(如留字落地 `readLiveFlow` `:1209-1210` 读 `blockTextFlowDrafts`)可能用旧流盖掉已重试成功的字。编辑器自己读 `latestFlowRef`(`TextBlockProjection.tsx:869`)同步,不会撞。
+- **先普查**:列出所有传 `previousTextFlow` 的调用方,各标「同步读(永不旧)」或「渲染期读(可能旧)」,后者各自有无重试(落地的 `confirm` 循环最多 30 次,算有)。**若所有渲染期调用方都能重试 → 进 A-25 作必修 ⑤:不符即拒**(返回可重试的结果,⛔ 重放 / rebase——那是阶段二),K2 / CHAIN 臂作闸(冻结版与 r2 红、修后绿);**若有任何渲染期调用方拒了就没人再试 → 不改 history,CHAIN 臂作已知红留着(不当闸),记 TD 归阶段二**。普查先交我看(半页),再动手。
+
+### ③ H1 / H2:按查报修,两条冻结红测试都写
+
+H1 `:203-206` 定时器体包 `try { … } finally { if (landingQueue.current.length) next(); else landingScheduled.current = false; }`;H2 `:482` 加 `else if (kept.current.has(entry)) retryTimer(entry)`。测试按查报写(H1:首次 `forgetUnplacedWords` 抛;H2:入队与执行间切 noteId 再切回,假定时器)。
+
+### ④ 回归面:查报 Q4 的清单照单,由 builder 封包前自跑一次,Tester 每包必做只跑本单臂 + 相关修前阳性对照,全量留阶段末
+
+### 施工顺序(与 A-20 r3 的关系)
+
+Reviewer r2 复核报了 M1(确认 ①,打列表时中间行丢)与 M2(疑似 ②,应用内后退 + 保存失败 → 人被留下而记录冻结 → 撤销后复活)等六条,**A-20 开 r3**(范围与原则见 A-20 单「Reviewer 发现收讫;开 r3」节),r3 与 ②a / ②b 同改 `useTextFlowHistory.ts`。顺序:
+1. **现在:builder 先做 r3**(可能是第 23 轮的船,优先于一切);决定 4 的调用方普查在同一文件里顺手做(只读,交我半页)。
+2. r3 封包 → Reviewer 小核 ∥ Tester 定向臂 → 部署。期间 builder 在 A-25 scratch(rebase 到 r3 包)开 **①(a)**(草稿框层)与 **③**(HSC),都不碰 r3 的文件。
+3. 然后 ②a / ②b / 决定 3 / 决定 4(若进)。
+4. r2 发不发由 Tester 的 BACKIN-undo 臂决定(见 A-20 单):复现 ② → r2 不发、r3 作第 23 轮;不复现 → r2 先发。

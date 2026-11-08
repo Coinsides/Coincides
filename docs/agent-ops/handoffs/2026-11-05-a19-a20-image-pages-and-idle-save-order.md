@@ -2609,3 +2609,33 @@ Tester 新探针:LATEBACK 8/8、INAPP 8/8 绿;TWICE-hash500 在我前一节改�
 - 你的 9 张裁好的截图 + LATEBACK 等待截图随本次证据一并交。
 
 放行后:COPY-BACK → 收割(`docs/audits/2026-11-08-a20-builder/` 一并)→ 说明书节 → 告 Tester 版本 → 第 23 次部署(纯前端 `build:client`)→ 轻量岛检。builder 转 A-25 查报(底换 r2 包)。
+
+### A-20 r2 · Reviewer 发现收讫(M1–M6);开 **r3**;r2 发不发看 Tester 两条 M2 臂(Main_Designer 2026-11-08)
+
+Reviewer 报告 `docs/audits/2026-11-08-a20-builder/reviewer-r2/findings.md`(只读码,无子代理无锁;九条点名逐条核:三本账成立、`unconfirmed` 删尽、劈分记录找不到自动落地反例、适配器恰 3 行、HSC / `transferTextUnit` / server 零 diff;`whenLeaveSettled` 快照三边核过无串台)。六条发现与处置:
+
+| # | 性质 | 一句话 | 处置 |
+|---|---|---|---|
+| **M1** | 确认 ① | 连打两个回车、队列未排空时离开,中间那行(`x`)不在任何账里:`keepOpenEdit` H:771 因 U2 被 S2 劈而删 `ends[U2]`;U2 是排队 S1 新长出的、服务器没有的单元,「不记原单元」的理由(整段替换删服务器字)对它不成立。同一行还会丢「S1 排队时点回原行接着打」的开着的组。触发 = 平常打列表 + 关页 / 后退 / 地址栏 / 401。修前同丢 | **r3 必修**。我接受残余 #1 时的「窗口极窄」前提错了,记判断点 |
+| **M2** | 疑似 ② | 应用内后退(路由推的条目,带 `idx`)+ 保存失败:Navigation API `traverse` 先走 `keepAndLeave`(记 K、`released = true`、失焦封口发保存),随后 popstate 到路由,拦截器 R:115-137 拦下、`flush` 抛、`blocker.reset()` → **人留在 A**;K 却当「已离开」冻结;此后撤销 → `settleKept` 把 K 重锚成 `{initial: 撤后文字, text: 被撤文字}` → 下次打开自动落回(K2 同形)。附带:弹 LEFT_UNSAVED「已离开」而人没走;`released` 卡真,本次访问余下所有离开都不扣住、卸载兜底 flush 也跳过。探针 back 臂用脚本 hash 条目(无 `idx`),拦截器拦不住,没盖这条路 | **r3 必修**;**Tester 现在就加两臂在 r2 与修前上跑**(见下)。r2 若复现 ② → **r2 不发**,r3 作第 23 轮;不复现 → r2 照发,r3 第 24 轮 |
+| **M3** | 疑似 🅱 | `keepAndLeave` 与 LATEBACK R:99 都「先记后交」,同一组同时在记录与回执里;迟到 2xx 被适配器忘掉、`settleKept` 因 `!current()` 不跑,记录留下而字已在服务器;重开通常 `typedTextIsPlaced` 认出并删,但第二设备改回那行时会把别处删的字带回(STALE-back) | **r3 收**,规则:交接 2 发生即删该组的保险带记录(回执成为唯一的家);页面在记与交之间死掉则记录存活 → 框。关页路本就干净(`beforeunload` 先交) |
+| **M4** | 疑似 🅱 | `pagehide` 记账不看 `event.persisted`;页面从 bfcache 回来继续打字、空闲保存成功后 `settleKept` 重锚成 `{initial: 新字, text: 旧字}` → 下次打开整段替换成旧字,**后打的字被删**。窄(需 pagehide 时有未存字且无在途请求,如离线) | **r3 收**:`pageshow` 且 `persisted` → 删 pagehide 写下的冻结记录(会话还活着就没有冻结记录) |
+| **M5** | 确认 🅱 | 「交出即有回执」三例外:适配器在写回执前就拒(A:1910 `mutation_not_allowed`、A:1922 `route_receipt_unavailable`、A:1987 `board_range_sync_failed`),这类组只在 `failures`,离开不记不提示。1922 走不到,1987 少见 | r3 **若便宜就收**(拒绝无回执 → 组退回 `unsent`),否则记 TD;闸模拟补这三种拒绝 |
+| **M6** | 确认 🅱 | K3 三边:匿名条目 JSON 损坏挡整表且随后被单条覆盖;认领回执不保证一块一条(与 A-25 ②a 陈旧回执去重同题);匿名条目由下一个读到的账号认领 | **TD-64**;②归 A-25 ②a |
+
+另:K5 的 H:1183 直接 `saveBlock` 路失败未标本次访问 → A-25 ②a 顺手(控件取代本次访问的横幅)。
+
+**r3 的设计原则(一句话给 builder)**:**冻结的记录只属于已经不在的会话**。会话还活着(路由拦截器把人留下、bfcache 回来),就不该有冻结记录——`keepAndLeave` 的记录与 `released` 是**临时的**,导航没有真发生就撤回(删 K、`released = false`,留下的失败走 HASHFAIL 的「留在 A + 一条提示」,⛔ LEFT_UNSAVED)。两种实现 builder 选:(甲)traverse 时查 `event.destination.getState()` 有没有路由的 `idx`,有 = 路由会拦 = **可拦住就扣住**(走 `flushForLeave`,与 TWICE (a) 同原则),无 `idx` 才 `keepAndLeave`;(乙)`keepAndLeave` 照做但下一拍核对路由是否真换了,没换就撤回。甲更直接,乙更兜底;可以都做。回执写明选哪条、为什么。
+
+**r3 范围**:M1(被劈单元的字——排队的与开着的——都记:服务器没有的新单元 `split-` 记录起点空终点现文字、永不自动落地;服务器已有的原单元 `edit-` 记录起点 = **劈分后**的文本、终点 live,服务器仍是劈前内容时自然不匹配 → 框,S1 真发出去了才匹配落地)+ M2 + M3 + M4(+ M5 若便宜)。⛔ 别的。决定 4 的调用方普查(A-25 单)顺手在同文件里做,只读。**单测 + 闸种子**:LIST(`k0 ↵ x ↵ y`,保存被扣,卸载)、CLICKBACK(S1 排队,点回原行打字,卸载)、BACKIN-fail / BACKIN-undo、HANDOVER-one-home(交接 2 后记录消失)、BFCACHE(pageshow persisted 后无冻结记录)。包 `a20-idle-save-r3`,src 快照 + 两 sha256 + COPY-BACK + MANUAL-SECTION(只改「已知」里被 r3 推翻的句子)。
+
+**Tester 立刻加臂(修前 `04f6f822` 与 r2 各跑)**,结果决定 r2 发不发:
+- **BACKIN-fail**:从列表 / 应用内链接点进笔记 A(路由条目,不用脚本 hash),打字,扣住保存答 500,按后退。记:人停在哪、弹了哪条、框里 / 存储里有无记录。
+- **BACKIN-undo**:接上一步若人留在 A,撤销那组字 → 正常离开 → 重开 A,看服务器与屏上文字(被撤的字回来 = ② 复现)。
+- **LIST**:保存被扣住时打 `k0 ↵ x ↵ y`,分别关页 / 后退 / 地址栏离开;重开后 `x` 在哪(预期修前与 r2 都丢 → 不比修前差;r3 绿)。
+- **STALE-back**(🅱,记就行):STALE 的后退变体。
+- A-25 用:**LANDFAIL 期间在另一个普通块打字** / **在另一个带标题的块打字**(查报推断:前者今天能打、后者今天拒)。
+
+**r2 判语标准不变**(不比修前差 + 本单臂 + 阳性对照),**加一条**:BACKIN-undo 在 r2 上若复现 ②,判语写「挡放行,原因 M2」;不复现写「放行,M2 未复现,r3 仍修」。
+
+**Reviewer**:r3 包封了再核一遍 diff(小),点名:M1–M4 各自的修法对不对行、`released` 不再卡住、冻结记录在会话存活时为零、交接 2 删记录没有删到不该删的。
