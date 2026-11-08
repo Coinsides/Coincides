@@ -2098,3 +2098,17 @@ Tester 赶在封包前报的两件(都在现包、真实输入):
 - **Tester 其余进度(现包)**:同源 63/63、1789/1789;`text_view` 旧库臂全过(修后开冻结旧库,PDF/docx 逐项一致,登记旧 PDF/docx 为 true、旧图片 false;另加「修后前端配修前后端」臂,缺字段当有成立);旧图片 18/18 生成按钮在、点后出图、比例对(EXIF 6/8 竖图)、字节等原件、不撑破、逐张只补缺;webp EXIF 方向 Chrome 不理会(登记与显示一致,其他浏览器未核);jpeg DNL 高度造不出记未覆盖;「png 改名 .jpg」原样本与另一 png 字节相同被内容去重,另造字节不同版本补测。接下来:新库图片全臂、坏文件、删源与 Rebuild、血缘标、1a 回归、3001 交叉核对。
 
 **我的教训**:一小时内对同一条裁定翻了两次(不显示切换 → 恢复切换 → 不显示切换)。第二次翻时我只读了说明书一句「批注在文本视图」,没核「文本视图能不能写」「图片笔记有没有可选的东西」——Tester 一个 20 分钟的探针就把这两点坐实了。**可达性类裁定先问 Tester 探一下那个面到底能做什么,再改。** 记台账 §337。
+
+## A-19 判语收讫:放行;一条发现判不挡 → TD-61;说明书按实测六处改;拷回 15/15;收割;第 22 次部署(Main_Designer 2026-11-08)
+
+**Tester 判语**:放行(`docs/audits/2026-11-06-a19-builder/review-tester.md` 〇;台账 `records/tester/verdicts.md`)。同源:`fdeacb5d` + 包 src 15 文件,自建客户端 63/63(`index-Gswd3cHv.js`)、服务端 1789/1789,逐字节同包;`package-lock.json` 哈希同基线。验收四条全成立(21 张好图首屏 1 秒内可见、比例误差 <1.5%、EXIF 6/8 竖图、超栏宽缩到 904 不裁、小图原尺寸、页图字节 = 原件;旧图片 18/18 生成按钮、不重复;删源三份文件全清、Rebuild 旧笔记 404 磁盘不增减;血缘标 PDF 12 个跳页全对、docx 0 个、修前修后同);1a-乙 8 组修前修后各 2 轮逐条一致,另补三臂(docx 转换失败 / 未配转换器 / 同标签页文本记忆)。我点名五项:① `text_view` 旧库三组合全过;② 旧图片 18/18;③ 三种读不出尺寸的文件都是导入成功、笔记在、第 1 页「This page could not be generated.」+「Try again」;④ webp EXIF 在 Chrome 无可见后果、jpeg DNL 本机造不出未覆盖;⑤ avif / 乱码 png 与修前完全相同(停 received、不出笔记、无提示)。〇.5 坐实 J1 前提:图片笔记与 PDF 原页都不能写 / 批注 / 建组,PDF 文本视图作阳性对照能批注能建组;冻结库与修前库图片投影上的批注 / 组 / 目的都是 0。
+
+**Tester 请裁的一条 · 裁定:判不挡本单,记 TD-61,说明书照实写**。原页登记 `GET /api/sources/by-projection-note/:id/pages` 失败(500 / 断网,取样 4、10、20 秒)时图片笔记始终空白——无图、无提示、无重试、放行后 4 秒不自动恢复,刷新才好;PDF 修前修后同样静默退回文本、无提示。回执「走原有的报错和重试路径」没错,错在原有路径本身不出任何提示,落到没有文本的图片笔记上就是一页空白。按 Henry 放行闸:不是 ①(字不丢)、②(不错位)、③(不删记录);只在请求失败时出现、刷新即恢复、修前图片笔记本来就是空白。不开 builder 新一趟(A-19 已翻过两次,再加一趟就是第三次范围变动)。处置:TD-61(修法=登记失败态进控制器、原页层出「加载失败 / 重试」,pagesOnly 尤其不能空白),承接=下一个动 Source 阅读视图的单,L-021 立单时一并;说明书「图片 Source 的笔记 · 已知」②。
+
+**说明书**:`app-operating-manual.md` §二新增两条「图片 Source 的笔记」「图片 Source 的笔记 · 已知」(六项:L-021 无解释面 / TD-61 加载失败空白 / 文件头坏的停 received / 超宽全景十几像素高 / J4 开场闪一帧 / TD-59 三份字节),「格式现状」图片一句改掉「正文是空的」,「原页视图的边界」补「文本视图本身是锁的」。builder 的 `MANUAL-SECTION.md` 素材按 Tester 〇.4 六处改过:界面文字是英文(按钮「Generate original page images」、失败「This page could not be generated.」「Try again」);「加载失败显示失败和重试」不成立 → 已知②;「坏文件显示无法生成」只对能被认作图片的成立 → 已知③;竖拍转正只对 jpeg;加超宽全景已知;「正在准备原页…」没测到不写。
+
+**拷回**:builder 照 `COPY-BACK.md` 原样执行,`sha256sum -c src.sha256` 15/15 OK;拷前拷后 `git status`(范围 client/src server/src server/package.json)只多两行、都在 15 个之内(`fidelity1a2DocxPages.test.ts`、`v2SourceLifecycleClosure.test.ts` 从基线改成包的预期);client `tsc --noEmit` / server `tsc -b` / server `tsc --noEmit` 三处 exit 0;`shared/`、两个 dist 无已跟踪变动。
+
+**收割前扫描(兑现 §333 承诺)**:新脚本 `scripts/pre-harvest-scan.mjs`(零依赖;默认扫已暂存,`--changed` / `--tracked` / `--paths`;⛔ = 本机用户名路径、`AppData\Local\Temp`、Claude 会话目录、有地址语境的公网 IPv4、邮箱、口令 / API key / 令牌 / JWT / Bearer / 私钥字面;⚠️ = 盘符路径、无语境四段数、AppData 其他、测试文件里的口令;ℹ️ = `0.0.0.0` 出现处;含 NUL 与二进制扩展名的文件列出请人工确认;`--max-mb` 调单文件上限)。校准:全树已跟踪文件 4326 个从首版 690 处 ⛔ 调到 **0**(去掉的全是版本号 / 章节号当 IP、npm `包@版本` 当邮箱、设计令牌 `token:` 当口令、Markdown 反引号吞句、注释里的占位符描述这几类误报);阳性对照一个临时文件 13 处全亮、7 条该放过的全过(含事故原形 `const password = '…'`)。顺手扫出**两处旧泄漏**并在 HEAD 洗掉:`claude-log/2026-08-20.md:622` 一行 git 作者邮箱、`claude-log/2026-08-21.md:273` 会话目录槽名(历史里仍在,与 11-08 口令事件同一类,归 Henry 定)。本次收割集(15 代码文件 + `docs/audits/2026-11-06-a19-builder/` 85 个文件含 3 份 5.7MB 全量日志 + docs)`--max-mb 8` 扫:**⛔ 0**。脚本本身没进钩子(钩子归 Henry 定),候 Henry 过目。
+
+**流程**:收割(代码 + 证据 → 脚本 + 两处洗 → docs)→ 报 Tester 版本等 ack → 第 22 次部署(server 变了要重启服务;锁未动不 `npm ci`)→ Tester 岛上哈希对账 + 代表臂 → builder 清 `<tmp>/a19pkg`。

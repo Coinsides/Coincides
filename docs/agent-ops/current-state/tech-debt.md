@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-11-08(编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
+> **日期 (Updated)**: 2026-11-08(A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -71,3 +71,4 @@
 | TD-58 | **留字框跟随定时器在测试环境拆掉后仍跑**:`structureTypingBuffer.ts:292` 每 50ms 读 `document.hidden`,`useHeadingStructureController.test.tsx` 拆环境后 jsdom 无 `document`,client 全量偶发 2 个 unhandled error、exit 1(2686/2686 全过)。基线 `fdeacb5d` 与 A-19 包上都间歇出现。浏览器里 `document` 一直在,不丢字、不影响线上;但「卸载后定时器仍跑」与 Reviewer F5/F6 的泄漏同根 | 2026-11-08 builder A-19 第一、二趟全量;Main_Designer 裁 A-19 不修 | A-25(卸载时清跟随定时器 + `document` 守卫,与 H3 同批) | 未清 |
 | TD-59 | **图片 Source 存三份字节,物化器 canvas image 对象画面上已死**:原件 blob(`source_files.storage_key`)、物化器投影副本(`source-materialization-asset:<mid>`,无任何层画它,只有 AI 树 `canvasAiTreeService.ts:170` 与空笔记判断 `writingEntryVisibility.ts:28` 读)、A-19 原页图(`source-page-image:<mid>:1`,原页层画)。合并为引用要改 `source_pages.image_asset_id` 约定、`adoptSourcePageImages` 迁移规则与 `sourcePageImageAssetIds` 释放顺序(1a 契约)。另:尺寸读取器两缺口——jpeg SOF 高度 0 靠 DNL 段者读 null 该页失败;webp 内 EXIF 方向不读;PNG eXIf 方向同样不读(Reviewer J3) | 2026-11-08 builder A-19 回执「物化器 canvas image 对象:申报」与「代码回答①」 | 1a 契约下一次打开时合并;物化器副本是否退役随 AI 树去向定 | 未清 |
 | TD-60 | **图片尺寸读取器四分支无测试**(`sourceImageSize.ts`:SOF2 渐进式 JPEG、webp VP8L、webp VP8 有损、小端 EXIF;读码皆对,测试只造 SOF0 / VP8X / 大端)。builder 若已写好四条,存 ops `packages/a19-image-pages/extras/j2-reader-tests.patch` | 2026-11-08 Reviewer A-19 J2;A-19b 撤销后未入包 | 下次动 server 的单随手入 | 未清 |
+| TD-61 | **原页登记加载失败时没有提示、不重试**:`GET /api/sources/by-projection-note/:id/pages` 失败(断网、500)时,PDF/docx 笔记静默退回文本视图、无提示、无切换(既有);图片笔记没有文本可退,就成了一页空白——无图、无提示、无重试按钮,网络恢复后 4 秒仍不自动好,只有刷新页面才恢复。A-19 回执写「走原有的报错和重试路径」,但原有路径本身不出任何提示。修法:登记请求失败态进 `useSourcePageViewController`,原页层显示「原页加载失败 / 重试」,图片笔记(pagesOnly)尤其不能空白 | 2026-11-08 Tester(1) A-19 验收 〇.3(判不挡放行:不丢数据、刷新即恢复、修前图片笔记一直是空白);说明书 §二「图片 Source 的笔记 · 已知」② | 下一个动 Source 阅读视图的单随手入(L-021 立单时一并) | 未清 |
