@@ -2717,3 +2717,27 @@ Tester 对新判定器自起复核(3 名 Opus 读者分存储 / 提示 / 被扣�
 4. **9 对回归 修前 vs r3 + 第 10 对 UNDOPAUSE ×20 / ×20 交错**;第 10 对按已裁线自动出结论(修前 ≥1 → 记数,我开 TD;修前 0 且 r3 ≥3 → STOP 报我)。
 5. 判语标准:不比修前差 + 本单臂 + 阳性对照;**列出每一条比修前差的臂**(包括已裁为设计选择的「服务器持续失败时 hash 跳转也被留下」——那条标「已裁,进手册已知」而不是红)。
 Tester 判语到 → 我 copy-back → 收割 → 手册 → 告 Tester 版本号 → 第 23 轮部署。
+
+**Tester 补记**:锁规则进 METHOD §七(划掉「单浏览器走查不算重活」,改「每次探针跑都占一位」+ 持有者进程保位 + 链脚本自包 withslot;随收割进仓)。自报第二次在运行中用 `sed -i` 改链脚本(第 2 行注释),即刻按原字节写回(4116 字节同),第 1 步仍在跑;第 2 步开始时查日志有无误读再报;METHOD 记「第二次 → 机械化」:脚本笔记只进 README / notes,运行中要变的走环境变量或暂停文件。LANDOTHER 不在链第 13 步(`ONLY=BACKIN,LIST`),链完后占位单跑 `ONLY=LANDOTHER REPS=2` 修前 → r3 同环境背靠背;参考:修前与 r2 上普通块 / 标题块键都收得到(2/2、1/1、2/2,0 条标题提示)。
+
+### A-20 r3 · Reviewer 小核报 N1–N5;N1(疑似 ③ 重复:合行 / 跨行删除的组离开后重开,被合掉的行落两次)**挡 r3**;开 **r3d**(N1 + N2 + N3);N4 记 TD;N5 收(Main_Designer 2026-11-08)
+
+Reviewer 报告 `docs/audits/2026-11-08-a20-builder/reviewer-r3/findings.md`(只读码无子代理无锁;八条点名全读:行号与裁定成立;`released` 不变量按字面成立、反例只有 N2;会话存活时记录为零——除 N2 外「`beforeunload` 后页面没卸载」「拦下时 runtime 为空」两路都未找到应用内可达触发;交接 2 不多删;M1 重放成立、例外 N1;修 b 谓词七条路列表;四条单测臂断的是行为、一处缺口 = N4;范围成立,HSC 不在包里)。五条发现与裁:
+
+| # | 性质 | 一句话 | 裁 |
+|---|---|---|---|
+| **N1** | 疑似 ③,建议 🅰 | 服务器 `['ab','cd']`,有保存在途 → 在 `cd` 行首退格合成 `abcd`(`mergeTextUnitWithPrevious` `textUnitEditorService.ts:192` 把 U2 **移除**,不标 deleted)→ 打 Z → 地址栏 / 401 离开(可扣住的离开先 `flushForLeave` 排空不触发;关页只在合行单独封口排队时触发)→ 重开。合行组 id 列表变了:`plainTyping`(H:184-187)假、`isSplit`(H:180-183)假 → H:685-686 两张账都不收、未交接、**不在任何账里**;`keepOpenEdit` 只遍历 `after` 里活着的单元(H:775-776),U2 删除不留痕,U1 记 edit `{initial 'ab'(H:800), text 'abcdZ'}`;重开 HSC:73 live == 起点 → 整段替换 → **`['abcdZ','cd']`,`cd` 自动落两次**。跨行选中删除同族(`ab|cd` 选 `b…c` 删 → `['ad','cd']`)。修前无记录 = 丢 Z 与合行、不重复;r2 同形(自 r1 起),Reviewer 自报 r2 复核「三本账成立」写得过宽 | **挡 r3,r3d 必修**。理由:它把**错的内容自动落进已存正文**(多一行),不是「字没存上」;与 M1 同原则——**单元集合有结构性变化的组,记录永不自动落地,进框**;M1 修了「单元变多」这半边,这是「单元变少」那半边,r3 不该只修半边。修前只丢 Z;r3d 的框里有 `abcdZ`,比修前好 |
+| **N2** | 疑似 ②,建议 🅱 | 修 b 谓词 R:213/217 与 `leaving()` R:186-187 都把目的地 hash 去 `#` 截 `?` 后与 `/notes/${noteId}` 字面比,路由拦截器比的是解析后 pathname(R:120-122);对不上的三形:二级锚点 `#/notes/A#x`(路由不拦、人没走、记录冻结、`released` 卡真;可扣住的脚本 hash 到此地址则 `goHeld` R:70 置 `released` 后不卸载 → 卡真)、尾斜杠 `#/notes/A/`(地址栏不可扣一步 → 同形;**若笔记本身用此地址打开,拦截器扣下后退后路由 traverse 回 `#/notes/A/` 不中 R:217 → 落进 TWICE = builder 封包前抓到的 M2 变体再现**)、百分号编码(noteId 按 uuid 类假设不相关)。可达性:`client/src` 九处 `navigate`、四处 `<Link>`、`ReferenceTag` / `NotePatchReview` 的 href 都是规范形,无笔记内锚点链接;只有人手改地址或外部粘贴链接触发 | **r3d 顺手修**(同一文件、便宜):两处谓词改成与路由同一套——解析目的地为 pathname(去尾斜杠、去二级锚点、解码)再比;单测 `#/notes/A/`、`#/notes/A#x`、`#/notes/A?q` 三形都命中。「窄要有臂」:Tester 加 ADDR-noncanon 臂(用 `#/notes/A/` 打开笔记 → 扣住保存 → 后退;r3 应红、r3d 绿) |
+| **N3** | 确认 🅱 | 脚本 hash 离开被扣住期间按后退 → TWICE traverse 不可扣 → `keepAndLeave`(R:230)清 `heldTo` → 路由拦下、撤回、`released = false`(R:131-136)→ R:138 拿到同一个 `scope.pending` → 保存失败时 R:249 与 R:145 两个失败回调都见 `!released` → **SAVE_FAILURE 弹 2 条**。人留下、记录零、`released` 不卡;r2 此路 0 条 retry + 1 条假 LEFT_UNSAVED。Tester 的 BACKIN 变体都从「没扣住」起,盖不到 | **r3d 顺手修**(同文件、两行):同一个 `pending` 被收回后只许一个失败回调弹;单测红 → 绿。Tester 加 BACKIN-heldback 臂(hash 离开扣住中按后退、保存失败 → 恰 +1 条「Please retry」) |
+| **N4** | 疑似 🅱 | CLICKBACK 在被切行**末尾**接着打字:edit 记录 `{alpha → alphaZ}`,服务器仍劈前 `alpha beta!`;HSC:86 用前缀 `alpha` 作锚点、HSC:95 重复检查放行 → 落成 `alphaZ beta!`(线性文字对),但劈分记录 ` beta!` 仍留框里,**手动放回就重复**。行首 / 行中打字两侧锚点找不到 → 框,符合裁定。单测 T:932-954 只断了劈分已到服务器那侧 | **不进 r3d**(修在 HSC 的落地器,HSC 不在包里,改锚点规则波及别的路);记 **TD-66**(阶段二:框对服务器文字去重 / 带劈分记录的组禁锚点落地);手册「已知」加一句:劈分行末尾接着打字后离开,重开后框里可能多一条已在正文里的后半,别重复放回(与现有「原行保持上次已存的样子,框里多一条后半」合写)。Tester 记 CLICKBACK-end 形状即可 |
+| **N5** | 观察 | 「路由拦下 → 存储为零」由 L 测试(`withdrawKeptEdit` 是 mock,L:49,只证调用)与 T:1000-1016(直接调 `withdrawKeptEdit()` 证真删)拼起来,转接行 C:893 无单测;真机证据靠 S2 变异 dist 上的 BACKIN-refail | 收。r3d 若便宜加一条穿过 C:893 的测试;不便宜就靠 S2 结果(Tester 在跑) |
+
+另两条 Reviewer 读出的边(不改码,记进 TD-64 一行):`beforeunload` 两轮后仍有未存 → R:104 `keepOpenEdit` 而 `kept` 未置真、无 pageshow → 若页面随后没卸载(下载响应 / 外部协议 / 另一个弹确认的 beforeunload)记录留在活会话里——应用内未找到触发;拦下时 `runtimeRef.current` 为空则 `kept` 清了记录没删——未找到路。
+
+**r3d 范围**(⛔ 别的):N1(通用:组的 `before` 里有、`after` 里没有的单元 ⇒ 本组全部记录标非落地,与 `split` 同待遇——起点空、永不自动落地、重开进框;合行 / 跨行删 / 整行删同一条,⛔ 只修合行)+ N2(谓词与路由同解析)+ N3(一个 pending 一个失败回调)。单测各一条,**在 r3 上红**(阳性对照);守恒闸种子 MERGE、SELDEL;其余 r3 内容不动。包 `a20-idle-save-r3d`,src 快照 + 两 sha256 + COPY-BACK + MANUAL-SECTION(「已知」加 N4 一句)。**builder 暂停 A-25 ②**(它也动 history),在 **A-20 scratch(r3 包为底,⛔ 混 A-25 文件)**做 r3d;A-25 的 ①③ 留在 A-25 scratch 不动,r3d 封后 A-25 底换到 r3d。先读 H:685-686 / H:772-785 / `textUnitEditorService.ts:192` 确认 N1 的路,半页;**附带答**:保存已失败(非在途)时合行还能在本地发生吗(A-25 查报说结构路遇 `failures` 即抛拒键)——决定 401 变体存不存在。
+
+**Tester**:r3 链照跑完(它是 r3d 全保的参照);之后 LANDOTHER;再加 **MERGE 臂**(保存扣住时在第二行行首退格合行、打 Z、分别 addr / close / back 离开 → 重开记服务器与屏上;预期修前丢 Z,r2 / r3 `cd` 两次,r3d 进框)、**SELDEL**(跨两行选中删除后打 Z 再离开,同判)、**ADDR-noncanon**、**BACKIN-heldback**、**CLICKBACK-end**(只记形状),修前 / r3 各 REPS=2;r3d 到后 = 同源 → r3 链全保 + a20m 全部 + 新臂 → 9 对 + 第 10 对。
+
+**Reviewer**:r3d 封后只核 N1–N3 的 diff 行与三条红测试(小);r3 的其余结论沿用。
+
+**判断点**:我开 r3 时把 M1 写成「被劈单元的字都记」,只想了单元变多没想单元变少,对称性没查;Reviewer 自报 r2 漏了同一条——两个人在同一处盲,因为点名清单写的是「三本账成立」而不是「所有改变单元集合的编辑都有账」。下次点名要点**不变量**,不点结论。

@@ -19,4 +19,4 @@
 | [deferred-tests.md](deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [glossary.md](glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [page-frame-and-layout-contract.md](page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-11-08(A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60) | — |
+| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-11-08(Reviewer r3 N4 新增 TD-66、A-25 ②a 丢弃裁 (C) 新增 TD-67、TD-64 附两边;A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60) | — |
