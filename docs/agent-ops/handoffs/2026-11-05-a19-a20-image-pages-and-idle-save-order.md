@@ -2261,3 +2261,13 @@ A-19 已上岛(`04f6f822`,第 22 轮)。A-20 现在开工,规格不变(订单开
 - 🅰 半边与 (B) 同改 `useTextFlowHistory.ts`,**一个包 `a20-idle-save`**,🅰 半边的测试与阳性对照单列,准。`:940` 诊断构建随修一起做,准。
 
 **验收(Tester 臂,Henry 原话)**:「写到任何一个字,网络好的情况下随时关它,都能保存」——停 2 秒后硬杀 Chrome / 关标签页 / 整页离开 / 换笔记 / 过期跳登录,服务器有字;「撤销还很细、和今天一样」——Ctrl+Z 分段修前修后逐臂相同;新笔记草稿期后的持久编辑器也 2 秒落库;断网期间停顿只弹一次提示、恢复后下一次封口追平;连打期间无逐键写、停顿次数 = PUT 次数(± 封口去重)。
+
+### A-20 🅰 · Tester 与 builder 事实核平(Main_Designer 2026-11-08 记)
+
+Tester 重测(修前,每格 2 次),撤回自己先前两种说法(「401 整页重开 12/12 丢」是漏看横幅与 sessionStorage,作废;「只在内存、刷新即丢」也作废):
+- **401**:同标签页整页重开 / 应用内 hash 回去 → 横幅「A block edit is waiting for recovery」在,sessionStorage 有 `coincides:draft-recovery:v2`,字不自动回填,点 Apply 进服务器,2/2 不丢(与 builder 3/3 一致);**新标签页**(CDP `Target.createTarget`,同 profile)→ 无横幅、sessionStorage 空,2/2 丢。离开时 2/2 弹「Changes could not be saved…」。
+- **地址栏改成同文档**(只换当前 href 的 `#`):同标签页 / 新标签页 / 应用内三种回法各 2/2 丢,无横幅、sessionStorage 空,离开都弹提示(与 builder 10/10 一致)。先前 0/2 那臂因 `open()` 带了 `?r=` 成了整页导航,不是真实用法,作废。脚本改 hash 同。
+- 修后臂备好:每条路分同标签页 / 新标签页 / 应用内三种回法,回来读横幅、Apply、sessionStorage、服务器;「回包晚到」一臂(A 打字 → hash 去 B,A 的 text-save 请求阶段扣 3 秒,1 秒后回 A 再打「 second」并失焦;看服务器文字、横幅、Apply 旧盖新);emptyHash 修前 2/2 弹,修后要 0。
+- Tester 教训入 METHOD:说「丢」之前查完所有恢复入口(服务器、留字框、本地存储、会话存储、恢复横幅、Apply);回法写明同标签页 / 新标签页 / 应用内。
+
+**结论**:两边事实一致,裁定不变。401 路修法 = 回执挪 localStorage(新标签页也能恢复);hash 路 = 守卫接住 + 留字框保险带。
