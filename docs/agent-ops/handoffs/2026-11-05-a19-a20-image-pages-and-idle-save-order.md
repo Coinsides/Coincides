@@ -2550,3 +2550,13 @@ builder 封包前自跑 Tester r2 探针(scratch 构建 `index-ClZUj0ex.js`,**�
 - **UNDOPAUSE**:第三次撤销删掉了 warmup 块(`[]`)而不是退到 `['w']`。builder 在 r1 与基线 `04f6f822` 上重跑中。**规则**:基线相同 → 不是 r2 引入,记 已知 / TD,不挡封包;基线不同 → 撤销形状变了,这是本单硬闸(Henry:撤销和今天一样),红,修了再封。
 
 **封包条件不变**:重跑全绿(上两行按本节处置)→ 封包 `a20-idle-save-r2` → 报新哈希。范围到此;再有新发现开 r3。
+
+### A-20 r2 · 重跑全绿;UNDOPAUSE 基线一致不是 r2 的(TD-63);GONEFAIL-back 探针规则改——真失败的一条「没到服务器」提示不算红;准封包(Main_Designer 2026-11-08)
+
+builder 重跑(scratch 构建 `index-DGn86c1V.js`,未封包):LATEBACK 8/8、INAPP 8/8、a20j 全部(SPLIT×4、RETRY-del、RETRY-more、STALE×2、TWICE-hash / back / paste / hash500、BACKOK×2)、GONEFAIL-hash / paste、UNDOSEQ、IME 绿;客户端全量 2727/2727 exit 0;tsc 0。Tester 改过的 LATEBACK / INAPP / TWICE-hash500 探针在跑。
+
+**UNDOPAUSE——过闸,记债**。四步在 builder 环境的基线 `04f6f822`、r1、r2 上两遍完全一致:`[["warmup","aaabbb"],["warmup",""],["warmup"],[]]`;Tester 环境的基线(pre-c2)与 r1 都终于 `['w']`。**形状随环境不同,但每个环境里基线 = 包**。本单撤销的闸是「与今天逐字节相同」,相同即过;分析器手写的 `['w']` 是 Tester 环境的形状,不是普适预期。Tester 已改:分析器收 `BASE=<基线跑目录>`,UNDOSEQ / UNDOPAUSE / IME 一律判「= 同环境基线」,合成 `[]` 对她的 `['w']` 基线红(阳性对照);封包后她在自己的 pre-c2 上再对一遍。记 **TD-63**(第三次撤销删整块、且形状随环境变),Henry 日用期看顺不顺手。
+
+**GONEFAIL-back——builder 的规则对,Tester 独立到同一条,采**。Tester 自述:分析器 `!r.goneMsg` 写于 r1 / 修前所有行 goneMsg 皆 false 之时,与 README 闸「0 条假提示」相悖;r1 的假提示其实是 stayMsg「Changes could not be saved. Please retry before leaving the note.」。新规则下 r1 两行仍红(stayMsg 被抓)= 阳性对照成立。这臂按设计让离开时的保存吃 500:应用弹一次「Your last edit did not reach the server. It is kept on this device…」,字稍后(既有重试链,PUT 200 约 9.4 s)落地一次,count 1、无框、无重复、探针自己的 ok = true。分析器把任何「did not reach」都判红,那条规则写于这臂还在假弹「Please retry」的时候;**现在保存确实失败了,提示是真话**。我裁的是「traverse 不假弹」和「一次失败最多一条提示」,不是「失败也不许说」。r2 规则:**GONEFAIL-back 绿 = 字落地 1 份 + 恰好一条「did not reach」(按出现次数计)+ 零条「could not be saved / 请重试」(stayMsg——后退后人已不在页上,无处重试)**;BACKOK(网络好)仍 = 零条。这一对正好是阳性对照:提示跟着真假走。要「失败也不提示」得让应用预知稍后会成功,那是 A-25 ②a(持久控件 + 退避重试)的事,不塞 r2。MANUAL-SECTION 加一句,按代码实际行为写:后退 / 离开时那次保存失败会提示一次,字留在本机,多半由后续保存自己补上;重开若见横幅再 Apply。
+
+**准封包**:Tester 新探针三行绿后封 `a20-idle-save-r2`,报哈希 + sha256。封后我派 Reviewer ∥ Tester。

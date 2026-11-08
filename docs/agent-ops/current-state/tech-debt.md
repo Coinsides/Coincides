@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-11-08(A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
+> **日期 (Updated)**: 2026-11-08(A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -72,3 +72,5 @@
 | TD-59 | **图片 Source 存三份字节,物化器 canvas image 对象画面上已死**:原件 blob(`source_files.storage_key`)、物化器投影副本(`source-materialization-asset:<mid>`,无任何层画它,只有 AI 树 `canvasAiTreeService.ts:170` 与空笔记判断 `writingEntryVisibility.ts:28` 读)、A-19 原页图(`source-page-image:<mid>:1`,原页层画)。合并为引用要改 `source_pages.image_asset_id` 约定、`adoptSourcePageImages` 迁移规则与 `sourcePageImageAssetIds` 释放顺序(1a 契约)。另:尺寸读取器两缺口——jpeg SOF 高度 0 靠 DNL 段者读 null 该页失败;webp 内 EXIF 方向不读;PNG eXIf 方向同样不读(Reviewer J3) | 2026-11-08 builder A-19 回执「物化器 canvas image 对象:申报」与「代码回答①」 | 1a 契约下一次打开时合并;物化器副本是否退役随 AI 树去向定 | 未清 |
 | TD-60 | **图片尺寸读取器四分支无测试**(`sourceImageSize.ts`:SOF2 渐进式 JPEG、webp VP8L、webp VP8 有损、小端 EXIF;读码皆对,测试只造 SOF0 / VP8X / 大端)。builder 若已写好四条,存 ops `packages/a19-image-pages/extras/j2-reader-tests.patch` | 2026-11-08 Reviewer A-19 J2;A-19b 撤销后未入包 | 下次动 server 的单随手入 | 未清 |
 | TD-61 | **原页登记加载失败时没有提示、不重试**:`GET /api/sources/by-projection-note/:id/pages` 失败(断网、500)时,PDF/docx 笔记静默退回文本视图、无提示、无切换(既有);图片笔记没有文本可退,就成了一页空白——无图、无提示、无重试按钮,网络恢复后 4 秒仍不自动好,只有刷新页面才恢复。A-19 回执写「走原有的报错和重试路径」,但原有路径本身不出任何提示。修法:登记请求失败态进 `useSourcePageViewController`,原页层显示「原页加载失败 / 重试」,图片笔记(pagesOnly)尤其不能空白 | 2026-11-08 Tester(1) A-19 验收 〇.3(判不挡放行:不丢数据、刷新即恢复、修前图片笔记一直是空白);说明书 §二「图片 Source 的笔记 · 已知」② | 下一个动 Source 阅读视图的单随手入(L-021 立单时一并) | 未清 |
+| TD-62 | **适配器把迟到的 2xx 报成失败**:路由已换(人已离开笔记)后保存返回 2xx,适配器按批准的 3 行删回执,却仍向调用方报 `route_receipt_stale` 失败——字已在服务器,只是没法贴回已卸载的画布。r2 在 `useNoteCanvasRuntimeController.ts` 侧绕开(离开提示只看「本笔记有无自打开以来新写的回执」),错报本身未修。A-25 ②a 的持久 Retry 控件直接吃适配器结果,不修会在同一处假亮 | 2026-11-08 builder A-20 r2 封包前(BACKOK / GONEFAIL-back 假弹的根);订单文件「封包前红行」第 3(b) 条 | **A-25 查报加一问**(`route_receipt_stale` 在 2xx 后应报什么),②a 施工时一并清 | 未清 |
+| TD-63 | **停顿后连续撤销的终态随环境不同,且一种环境里会把整块删掉**(UNDOPAUSE 探针:warmup 块 + `aaa` 停 `bbb`,三次 Ctrl+Z:builder 环境基线 `04f6f822` / r1 / r2 两遍皆 `aaabbb` 全退 → 空块退 → warmup 块整个消失 `[]`;Tester 环境基线 pre-c2 / r1 皆终于 `['w']`)。**每个环境里基线 = 包,不是 A-20 引入**,按「与今天逐字节相同」的闸算过;分析器手写的 `['w']` 是单一环境的形状,已改为「= 同环境基线」。为何同四步在两台机上终态不同(时序?warmup 块的落库先后?)未查;是否顺手是 🅱 问题 | 2026-11-08 builder + Tester A-20 r2 封包前 UNDOPAUSE 行;订单文件「重跑全绿」节 | Henry 日用期观察;有摩擦再立单(立单时先查环境差异的根) | 未清 |
