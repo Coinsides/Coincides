@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-11-08(Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
+> **日期 (Updated)**: 2026-11-08(A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60)
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -75,3 +75,4 @@
 | TD-62 | **适配器把迟到的 2xx 报成失败**:路由已换(人已离开笔记)后保存返回 2xx,适配器按批准的 3 行删回执,却仍向调用方报 `route_receipt_stale` 失败——字已在服务器,只是没法贴回已卸载的画布。r2 在 `useNoteCanvasRuntimeController.ts` 侧绕开(离开提示只看「本笔记有无自打开以来新写的回执」),错报本身未修。A-25 ②a 的持久 Retry 控件直接吃适配器结果,不修会在同一处假亮 | 2026-11-08 builder A-20 r2 封包前(BACKOK / GONEFAIL-back 假弹的根);订单文件「封包前红行」第 3(b) 条 | **A-25 查报加一问**(`route_receipt_stale` 在 2xx 后应报什么),②a 施工时一并清 | 未清 |
 | TD-63 | **停顿后连续撤销的终态随环境不同,且一种环境里会把整块删掉**(UNDOPAUSE 探针:warmup 块 + `aaa` 停 `bbb`,三次 Ctrl+Z:builder 环境基线 `04f6f822` / r1 / r2 两遍皆 `aaabbb` 全退 → 空块退 → warmup 块整个消失 `[]`;Tester 环境基线 pre-c2 / r1 皆终于 `['w']`)。**每个环境里基线 = 包,不是 A-20 引入**,按「与今天逐字节相同」的闸算过;分析器手写的 `['w']` 是单一环境的形状,已改为「= 同环境基线」。为何同四步在两台机上终态不同(时序?warmup 块的落库先后?)未查;是否顺手是 🅱 问题 | 2026-11-08 builder + Tester A-20 r2 封包前 UNDOPAUSE 行;订单文件「重跑全绿」节 | Henry 日用期观察;有摩擦再立单(立单时先查环境差异的根) | 未清 |
 | TD-64 | **K3 匿名钥匙认领的三边**(Reviewer A-20 r2 M6):①匿名条目 JSON 损坏时 `readUnplacedWords` 对该笔记永远返回 `[]`,随后 `rememberUnplacedWords` 用单条覆盖账号下已有记录(`structureTypingBuffer.ts:97/:109-119/:130-134`);②认领回执只按 `recoveryKey` 去重,账号未载入时同块新旧回执认领后两条(`draftBlockPersistence.ts:103-117`);③匿名条目由下一个读到它的账号认领,不核对写入者(`:136`、`structureTypingBuffer.ts:93`)。另 TD-62 的三例外(适配器写回执前就拒:A:1910 / A:1922 / A:1987 → 组只在 `failures`,离开不记不提示)若 r3 不收也归这里 | 2026-11-08 Reviewer `reviewer-r2/findings.md` M5 / M6 | ① 下次动 `structureTypingBuffer.ts` 的单随手(逐条 try);② A-25 ②a 陈旧回执去重一并;③ 记录归属,日用期观察 | 未清 |
+| TD-65 | **history 接受调用方的 `previousTextFlow` 不与自己最新的流核对**(CHAIN 真病;jsdom 守恒闸 K2 种子坐实:重试成功的 `[k0 k1]` 被用旧流劈分的保存盖掉)。普查 `docs/audits/2026-11-08-a25-builder/caller-census.md`:12 个调用方里只有编辑器打字路同步读 `latestFlowRef`;留字落地(`:566` 经 `readLiveFlow`)、Agent 补丁、斜杠 ×3、改角色、行内链接等 7 个渲染期读且**无重试**。真浏览器人的节奏下探针 6 行打不中(调用与上一键隔了至少一次渲染);最可能撞的是 4 留字落地(`setTimeout` 触发)。修法(阶段二):先给 4 加「拒了就 `keep` + `retryTimer`」、给 7/8/11 返回失败可重来,再让 history 不符即拒;⛔ 在调用方能重试之前就「拒」(静默覆盖会变成静默丢弃)。闸里 K2/CHAIN 臂留作**已知红**,不当闸 | 2026-11-08 A-25 查报 Q2 CHAIN + 决定 4 普查 | 阶段二立单(与 L-0xx 留字落地读流的改法一并) | 未清 |

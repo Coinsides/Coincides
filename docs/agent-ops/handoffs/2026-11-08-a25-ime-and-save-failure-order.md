@@ -155,3 +155,7 @@ Reviewer r2 复核报了 M1(确认 ①,打列表时中间行丢)与 M2(疑似 �
 2. r3 封包 → Reviewer 小核 ∥ Tester 定向臂 → 部署。期间 builder 在 A-25 scratch(rebase 到 r3 包)开 **①(a)**(草稿框层)与 **③**(HSC),都不碰 r3 的文件。
 3. 然后 ②a / ②b / 决定 3 / 决定 4(若进)。
 4. r2 发不发由 Tester 的 BACKIN-undo 臂决定(见 A-20 单):复现 ② → r2 不发、r3 作第 23 轮;不复现 → r2 先发。
+
+### 决定 4 结论:CHAIN 不进 A-25——普查 7 个渲染期调用方无重试(Main_Designer 2026-11-08)
+
+普查 `docs/audits/2026-11-08-a25-builder/caller-census.md`:12 个 `previousTextFlow` 调用方,同步读的只有编辑器打字路(`TextBlockProjection.tsx:849` `latestFlowRef`);留字落地、Agent 补丁采纳、斜杠 ×3、批量改角色、行内链接 7 个渲染期读且无重试。按本单决定 4 的规则:**不改 history,CHAIN(K2 守恒臂)留作已知红、不当闸,记 TD-65**(含修法顺序:先让调用方能重试,再「不符即拒」)。A-25 验收 ③ 里「CHAIN 阳性对照」改为:臂存在、在冻结版与 A-25 包上都红、标 known-red,不计入放行。
