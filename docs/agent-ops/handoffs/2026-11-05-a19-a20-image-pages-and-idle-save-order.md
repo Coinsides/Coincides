@@ -2271,3 +2271,17 @@ Tester 重测(修前,每格 2 次),撤回自己先前两种说法(「401 整页�
 - Tester 教训入 METHOD:说「丢」之前查完所有恢复入口(服务器、留字框、本地存储、会话存储、恢复横幅、Apply);回法写明同标签页 / 新标签页 / 应用内。
 
 **结论**:两边事实一致,裁定不变。401 路修法 = 回执挪 localStorage(新标签页也能恢复);hash 路 = 守卫接住 + 留字框保险带。
+
+### A-20 施工中裁定:导航拦截改用 Navigation API(popstate 抢不到路由前面);适配器 3 行回执清理准改;Tester 修前基线齐(Main_Designer 2026-11-08)
+
+**builder 先报(照报、不越界)**:
+- `:940` 诊断构建坐实:hashSwitch / login401Enter / emptyHash 2 样本 × 3 臂,6/6 reject 在 `textHistory.flush`,文案「Text composition is still active」(`useTextFlowHistory.ts:940`)。
+- 原设想「popstate 抢在路由前面」**实测不成立**(路由监听总在前,capture 亦然;保存排在重渲之后,被 `enqueueRuntimeHistoryOperation` 的 isCurrentScope 丢掉,诊断日志证实)。改用浏览器 **navigate 事件(Navigation API)**,在地址改变、路由听见之前触发:脚本改 hash(可拦)→ `preventDefault` → 与应用内链接同一个 `flushForLeave` → 成功后再打开同一地址,失败留在原笔记弹原提示(与点链接行为一致);地址栏粘贴(不可拦)与去 `/login`(令牌已清)→ 先把未封口的字写进留字框(`peek`)再失焦;无 navigate 事件的浏览器 popstate 兜底同法。地址栏粘贴中间版 3/3 服务器有字;脚本臂 10 样本重测中。不碰记账层、不碰 `transferTextUnit`。
+- **请裁**:地址栏粘贴存进去了,但回到原笔记横幅「A block edit is waiting for recovery」照出——回包到时路由已换,`useNoteCanvasDataAdapter.ts:2144-2151` → `reconcileIssuedSave` 在路由非当前时直接 `read_failed`(`reconciliationReadIsCurrent` 约 `:2080`),回执不删。Apply 不会旧盖新(旧 baseRevision → 409 走冲突提示),是假横幅。修法约 3 行:2xx 成功分支里,回包正文与发出内容一致(`blockMatchesIssuedSave`)时不论路由是否当前都删本次回执;只删回执,不动 blocks / drafts 账。
+
+**裁定**:
+1. **Navigation API 做法准**。它不是记账层,也不是 `transferTextUnit`;条件:(a) 兜底路(popstate)也要有测试,别只测 Chrome 有 navigate 的路;(b) 不可拦的两路(地址栏粘贴、去 /login)写留字框那步要幂等,与 pagehide 留档同一入口;(c) `MANUAL-SECTION.md` 写一句「Chrome 以外的浏览器走兜底路,行为同」。
+2. **适配器 3 行准改**——理由:假横幅会训练用户点 Dismiss,把真正的恢复面(401 路)也废了;只在 2xx 且 `blockMatchesIssuedSave` 为真时删本次回执,⛔ 碰 blocks / drafts 账、⛔ 碰 `transferTextUnit`、⛔ 改 `reconciliationReadIsCurrent` 的语义。条件:冻结版「回包晚到横幅出现」红、包上不出现;**Reviewer 点名读这 3 行**(列入八条之外第九条);回执「代码回答」单列「适配器改了哪 3 行、为什么不算记账」。
+3. 「warmup 第三次撤销退成 w」(Tester 修前观察)是既有形状,修后须相同,不算本单。
+
+**Tester 修前基线(齐,等包;修后逐臂对照)**:停 2.6 秒后离开——整页离开 2/2、关标签页 1/1 字在服务器(离开时 1 PUT);改 hash 换笔记 2/2 不在(0 PUT);401 失焦 2/2 不在(PUT 回 401;同标签页横幅 Apply 可回);硬杀 1/1 不在(0 PUT)。撤销:`aaa`↵`bbb`↵`ccc` 连撤四步 `[warmup,aaa,bbb,ccc] → [..,bbb,""] → [..,bbb] → [..,aaa,""] → [warmup,aaa]`;`aaa` 停 3 秒 `bbb` 连撤三步 `[warmup,aaabbb] → [warmup,""] → [warmup] → [w]`。新笔记草稿期慢打 20 秒不回车:服务器始终只有首字母,0 PUT(builder 节奏下是前 9 字,结论同)。断网三段打字各停 2.6 秒:0 条「Failed to save block」(修前本就不存);恢复后仍不存。4 段停顿 0 PUT。中文输入法 3 组合每组合 1 PUT、每次撤销 1 PUT。证据在 Tester scratch `a20/runs`,判语时归档。
