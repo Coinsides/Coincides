@@ -2490,3 +2490,9 @@ r2 的「代码回答」在 ⑦ 之后加 ⑧ K3 修法与测试、⑨ 来源标
 6. **STALE** 跑出来再裁;它是留字框自带的形状(窗口留字同病),不是 A-20 新引入。
 
 **对 builder**:若已按 §354 的「起点 = 最后确认」在做,**只保留未封口记录那一半**,把「已封口未确认进保险带」整段拿掉;不要试图给保险带加劈分感知——那是在给错的表示法打补丁。回执「代码回答」⑦ 改答:未封口记录的起点 / 终点各取自哪一行;已封口字的回执路哪几行;闸如何计回执;`unconfirmed` 重试确认改在哪一行。r2 范围不再加任何东西。
+
+### A-20 r2 · STALE 坐实(r1 比修前差;r2 改法应回到修前)与断网提示计数(Main_Designer 2026-11-08 记)
+
+- **STALE**(`STALE-<back|edit>`,r1 / 修前各 1):在 `warmup` 行尾打「 tail words」,保存到服务器但回包迟、300ms 后关页(服务器 = `warmup tail words`);第二设备(隔离浏览器上下文、自己的登录与存储)改这一行(back = 删回 `warmup`;edit = 改成 `…edited elsewhere`);原浏览器重开。**r1 back:服务器自动变回 `warmup tail words`——第二设备删掉的字自己回来**,只有 info toast 无 Apply;修前:服务器保持 `warmup` + 带 Apply 的横幅,放不放回是用户选择。**r1 edit:行正确但多一个假的留字框**提供 `warmup tail words` + 横幅;修前只有横幅。差别全在保险带记录(r1 把已封口组塞进框并自动落地)。**r2 改法下关页失焦即封口,只走回执 → 目标 = 与修前相同**(横幅,用户选择);进 r2 臂。修前那条陈旧回执横幅(Apply 可盖第二设备的改动)是老形状,已归 A-25 ②a「陈旧回执去重」。
+- SPLIT / RETRY 在 r1 重跑再红(各 2 行)。
+- **断网提示计数**(新计数器 `watchN` 记每次出现;旧 `watch()` 每种文字只记一次,A-25 kit 的 (e) 同一缺口已修并告 builder):三次停顿断网——OFFLINE-N(只 text-save 失败):「Failed to save block」**恰好 1 次** 2/2;OFFALL(所有请求含 GET 失败):「Failed to save block」1 + **「Block save result could not be reconciled」1**,2/2;修前 0 toast(本无保存)。网络恢复后一次点开全部存上 4/4。**说明书加一句**:完全断网时还会伴随一条「Block save result could not be reconciled」。
