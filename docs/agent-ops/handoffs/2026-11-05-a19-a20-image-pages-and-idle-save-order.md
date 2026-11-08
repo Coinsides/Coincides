@@ -2639,3 +2639,14 @@ Reviewer 报告 `docs/audits/2026-11-08-a20-builder/reviewer-r2/findings.md`(只
 **r2 判语标准不变**(不比修前差 + 本单臂 + 阳性对照),**加一条**:BACKIN-undo 在 r2 上若复现 ②,判语写「挡放行,原因 M2」;不复现写「放行,M2 未复现,r3 仍修」。
 
 **Reviewer**:r3 包封了再核一遍 diff(小),点名:M1–M4 各自的修法对不对行、`released` 不再卡住、冻结记录在会话存活时为零、交接 2 删记录没有删到不该删的。
+
+### A-20 r2 · Tester 判语:**挡放行,原因 M2**(BACKIN-undo r2 2/2 复活、修前 0/2);r3 作第 23 轮(Main_Designer 2026-11-08 收)
+
+**Tester 实测**(真路由条目:课程页满载 idx 0 → 列表点进笔记 A idx 1;打 `backin words`;首次 text-save 扣住后 500、后续 500;立即后退):
+- **r2 BACKIN-undo ×2**:人留在 A(拦截器扣住);提示「Failed to save block」×2、「Text changes could not be saved…」×2、**假的**「Your last edit did not reach the server. It is kept on this device…」(人没走);存储里有冻结记录 `{edit-…, initialText '', text 'backin words'}`;网络恢复、撤销 → 编辑器与服务器皆 `['warmup','']`;改 hash 离开:记录仍在;重开:服务器 `['warmup','backin words']`、count 1、无横幅无 Apply——**被撤的字自己回来了(K2 形)**。
+- **修前 ×2**:留在 A;提示含「Changes could not be saved. Please retry before leaving the note.」;撤销 → 离开 → 重开:`['warmup','']`,什么都不回来。
+- **BACKIN-fail**:r2 留在 A、同样的假 LEFT_UNSAVED、记录已写;**再用脚本 hash 离开(保存仍扣住):不扣、0.3 s 内到另一篇、零请求、无状态条 = `released` 卡死**(修前这步也不扣,因修前根本不扣 hash 离开;修前重开给横幅 + Apply);r2 重开:字落地(count 1,未撤销过)**外加**「A previous block edit is queued for recovery」——字已在而回执横幅还挂着(🅱,r3 顺手:保险带记录落地后同文的回执应忘掉,或至少不再说「queued」)。
+- **比修前差**:BACKIN-undo(复活)、人未离开时的假「did not reach / kept on this device」。
+- 跑目录 scratchpad `a20/runs/pre-m-backin`、`r2-m-backin`;探针 `a20m`(BACKIN-fail / undo、LIST-close / back / addr、LANDOTHER-plain / heading)进 kit 作 r3 封包前自跑臂。LIST / LANDOTHER 在跑。
+
+**裁**:r2 **不发**;r3 = 第 23 轮。Tester 两个默认都准:r2 链跑完(作 r3 的「r2 已修好的」参照,r3 必须全保);r2 的 9 对回归跳过,直接在 r3 上跑。**r3 的 BACKIN 预期**:BACKIN-fail = 人留在 A + 零条 LEFT_UNSAVED(失败提示对数是基线同款,A-25 (e))+ 存储里**零冻结记录**(或记录随 live 走、撤销即消)+ 之后改 hash 离开**仍被扣住**(`released` 不卡);BACKIN-undo = 重开 `['warmup','']`,什么都不回来;重开后无「queued for recovery」残横幅。
