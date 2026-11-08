@@ -24,6 +24,7 @@
 - ②保存失败:⛔ 无提示只读;失败保持必须可见可操作 ← 编辑器组第二轮裁定 §3「失败保持必须可见可操作(Retry/Undo),⛔ 无提示只读」
 - ②b LANDFAIL 闸(Tester 探针 `LANDFAIL-<500|net>-i` 修前 (a)(b)(c)(d) 红、(e) 绿):**放行闸 = (a) 另一块能打字 + (c) 网络恢复后留住的字在退避上限内自动落地、服务器有 + (d) 恰好一份 + (e) 不退步**;**(b) 弱形式**——须有常驻、可操作、说真话的入口,恢复横幅的 Apply 算(前提:网络恢复后点它真能落地),专用 Retry / 复制 / Discard 若能复用 ②a 的控件则用,由 Q2 定 ← Main_Designer 2026-11-08 答 Tester
 - (e) 提示闸重裁(Tester 以 `watchN` 逐次计数后,修前 ②a 「Failed to save block」×2 + 「Text changes could not be saved. Retry saving…」×2 在 0.2 秒内;②b 打 7 键出 7 条「Heading changes could not be completed. Undo…」):**②a (e) 从「不退步」改为「须改善」——一次失败事件各类提示合计 ≤1 条,且常驻控件在屏期间同一块不再弹提示(控件就是指示器)**;**②b (e) = 一次失败 ≤1 条、⛔ 逐键提示**(0 条/键);两者都要在修前红、包上绿 ← Main_Designer 2026-11-08 答 Tester
+- CHAIN(重试链 `[k0 k1]` → `[k0 | k2]` 冲掉 k1):builder 的 jsdom 守恒闸臂在冻结版红;Tester 按 builder 种子在真浏览器四形 + 种子形共 6 行修前全绿(写序 REJECTED → `kzero kone` → `kzero kone|` → `kzero kone|ktwo` → 撤销后 `kzero kone|`,那条没 k1 的写从未出现)→ **闸 = builder 的 jsdom 臂,浏览器臂 CHAIN 作冒烟**;A-25 查报 Q2 要写明 jsdom 与真浏览器在这条路上时序为何不同、哪个更接近真实用户 ← Main_Designer 2026-11-08
 - 红线:单写者不变;⛔ 服务端;⛔ F9;⛔ A-20 正在改的两文件之外再碰 history 记账层(A-20 收割前 A-25 的 scratch 从 A-20 包 + `04f6f822` 建,避免两单撞同一文件)
 
 ### 验收条件(Tester,探针先行)
