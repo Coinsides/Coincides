@@ -2684,3 +2684,36 @@ Tester 对新判定器自起复核(3 名 Opus 读者分存储 / 提示 / 被扣�
 **三、S2 变异对照准派**:r3 的 M3(交接 2 几毫秒内删记录)掩盖了 (乙) 的撤回——BACKIN-fail 从没真考到 (乙)。Tester 加 **BACKIN-refail**(同块另一单元先有失败,本组交接不了,只有 (乙) 能删记录;1 / 3 / 6 s 三采样记录都须 0)。**builder 在封包后、Reviewer 小核期间**从封好的 r3 src 出一个 scratch 变异 dist:只删 (乙) 撤回那一行、保留 M3;预期 BACKIN-fail 仍绿(证明它只考到 M3)、BACKIN-refail 红。变异 dist 是测试夹具,交 Tester 路径,⛔ 进仓 ⛔ 进包;占一个锁位,不与 kit 重跑并行。
 
 其余 Tester 自修的测量项(S5 preventDefault 读数 + BACKIN-ctlfail / ctlclean 对照;读存储失败判不可测;提示取两次快照并集;注入失败未发生 = 搭建错误不参判;stayed 加宿主节点仍连着;LEFT_UNSAVED 正则对封包 src 常量核)不涉裁定,照做;改完先在 r2 与修前把五类对照跑一遍再报。
+
+**S3 坐实,r3c 修**(builder):门 = 本 scope 卸载(笔记路由离开或 noteId 变)。`keepAndLeave` 的 `whenLeaveSettled` catch 在 `kept` 为真时:scope 已卸载 → 立刻弹(原「离开后保存失败」测试仍过);仍挂着 → 只置 `scope.leftUnsaved = true`;卸载清理若 `leftUnsaved && kept` 弹一次;拦截器 effect 收回被扣离开时清 `kept` 与 `leftUnsaved`。新单测两条(BACKIN-fail-sealed:拦截前 reject → 0 LEFT_UNSAVED、留下、提示重试;reject 后笔记真走 → LEFT_UNSAVED 恰一次、在离开时),S3 修前红(阳性对照成立);边界测试 19/19。client 全量 259 文件 / 2744 测试过;构建 `index-nLSUOG48.js`;a20m oracle ok。r3b 的 kit 中途停(s4e–s4j 皆 0 红)因 r3c 又改包,整链以 s5* 重跑(Tester 20:07 kit 副本:r2 链 + a20m 的 BACKIN fail / undo / ctl / recover / sealed / refail / idlefirst / fast / neterr + LIST,REPSRACE=5)→ 回执臂 → 绿即封。残留服务器 / 代理 / Chrome 按 PID 停,锁已放。**我追两问进回执**:(1)`leftUnsaved` 是否在每次 `keepAndLeave` 开头与 M4 `withdrawKept` 里都复位——否则一次被拒离开留下的陈旧真值,会让下一次在途离开在卸载时提前弹;(2)生产里有没有同 noteId 不离开却重挂 scope 的路(视图切换等)——有则门要看 noteId / 路由变化而非裸卸载(a20d SWITCH 臂零假提示作旁证)。
+
+**两问答(builder,入回执)**:(1)`leftUnsaved` 不在 `keepAndLeave` 开头复位、M4 `withdrawKept` 也不碰边界 scope,但陈旧真值按构造活不下来:`keepAndLeave` 先置 `released = true`;三个入口(`leaving()` 供 traverse / 不可取消与登录 / afterPop 路,TWICE 分支 `scope.pending && !scope.released`)都要 `!released`;`released` 回假只有一处 = 拦截器 effect 的 kept 分支(`useNoteRouteSaveBoundary.tsx:134`),同处清 `leftUnsaved`——所以任一被扣离开之后,要么 scope 卸载(弹一次),要么拦截器收回并清掉,中间起不了第二个 `keepAndLeave`;bfcache 的 pagehide / pageshow 只到 history hook,边界的 navigate 处理器在跨文档离开时于 `!navigate.hashChange` 返回,kept / leftUnsaved 不会被置。防御性复位一行要再建包 + 全 kit 重跑约 85 分钟。**裁:不加**,不变量写进回执;**Reviewer 小核加一条**:核三个入口都要 `!released`、`released = false` 唯一一处同时清 `leftUnsaved`。(2)重挂路核过 4 处:边界只在 `NoteDetail.tsx:21` 渲染一次,单路由 `notes/:noteId`(`App.tsx:111`)无 key;父级无条件渲染(`AppLayout.tsx:239` 的 `<Outlet />` 无 key);`ProtectedRoute`(`App.tsx:37-41`)只在 token 没了时拆子树且同一渲染 Navigate 到 /login = 真离开(toSignIn 路);scope 的 useMemo 依赖 `[noteId]`,卸载 layout effect 依赖稳定;生产里 `NoteRouteSaveBoundary` 从常量上下文取 DataRouter 版不翻转。结论:卸载 ⇔ 离开 `notes/:noteId` 路由、noteId 变、token 清(→ /login)、整页卸载。StrictMode(`main.tsx:8`)仅 dev,探挂时 `leftUnsaved` 仍假不弹。**收**。
+
+**Tester:BACKIN 判定按 REFUSED 裁定落地**(`a20m_judge.mjs` 一份,行 ok 与分析器共用;REFUSED 条件全数落地:被 prevent、18 采样在 A、宿主节点连着、恰 +1 条「Please retry」、0 LEFT_UNSAVED、1/3/6 s 记录全 0、0 请求可;读存储失败 / 观察器丢失 = 不可测 = 红;注入失败未发生 = 搭建错误不参判;`check-a20m-oracle.mjs` 反向对照:改一字文案读「作废」exit 1)。**对照跑**(r2 / 修前并跑,`.lock.2` 取放):r2 ctl = HELD-PROCEED 2/2、ctlfail = REFUSED 2/2、ctlclean = INSTANT-PROCEED 2/2(五类里四类在真机见过真值);r2 上 BACKIN-fail 全部变体红(原臂 / recover / fast ×5 / neterr ×5 / refail:LEFT_UNSAVED 1、记录 1、第二次 STUCK;sealed / idlefirst ×5:记录 0 但 LEFT_UNSAVED 1、STUCK);BACKIN-undo r2 仍复活。修前:全 STUCK、LEFT_UNSAVED 0、记录 0、undo 2/2 绿;idlefirst 修前无空闲保存不可构造 = N/A。**S3 旁证**:r2 上 sealed 后退后 7–8 ms 即弹 LEFT_UNSAVED、idlefirst 70–90 ms、fast / neterr 110–140 ms,人都留在 A。**r3 预期形**:BACKIN-fail 全变体留 A、0 LEFT_UNSAVED、0 记录、REFUSED;recover 第三次离开 HELD / INSTANT-PROCEED、`backin wordsz` 恰一份;三对照同 r2。链第 13 步约 31 行 BACKIN,+约 20 分钟。
+
+### A-20 r3 包收讫(`index-nLSUOG48.js`);派 Reviewer 小核 ∥ Tester 验收(Main_Designer 2026-11-08)
+
+**包核**:`<ops>/packages/a20-idle-save-r3/`,从 `src/`、`dist/` 内部 `sha256sum -c` 15/15、63/63 OK;两份清单文件自身哈希与 builder 报的一致(`386253c8…`、`4476a224…`);文件数 15 / 63;主 JS `dist/client/assets/index-nLSUOG48.js`。COPY-BACK 核过共享树 HEAD `1b9517cd`:15 个文件里 14 个 = `04f6f822`,1 个新测试文件;`client/src`、`server/src` 无未提交改动;只拷本包(r1、r2 都不回拷)。server 未动、无 dist/server、依赖锁未动。回执 `docs/audits/2026-11-08-a20-builder/builder-r3/RECEIPT.md`(扫描 ⛔ 0,未提交,随收割进仓)。
+
+**回执要点**:tsc 0;client 全量 2744/2744(259 文件,r2 为 2727);Tester kit 16 段 total red 0,a20m 全部 BACKIN 变体第二次离开 = REFUSED、LEFT_UNSAVED 0、kept 0、三对照符合;LIST 三变体 2/2。阳性对照 C1(r2 源 + r3 测试)13 红、C2(带 (甲) 的首版)BACKIN (A) + 两条 S3 红、C3(修 c 前)两条 S3 红。**守恒闸里 CLICKBACK / BACKIN-fail / BACKIN-undo / HANDOVER 四臂在 r2 上不红,只靠单元测试兜**——Reviewer 核这四条单测是真阳性。五问答全(修 b 谓词 = 目的地 hash 去 `#` 去 `?` 后与 `/notes/${noteId}` 比,不看 pathname / search,笔记内锚点不相等走后面分支;reload 走 `beforeunload` + `pagehide`,RELOADHELD ×3 r3 = r2 行行一致;同篇 hash 变化非扣留期本就返回 null、扣留期由 TWICE 扣住变为提前返回;UNDOREDO ×20 全绿、Ctrl+Y 逐步回来)。**一处不收**:回执「UNDOPAUSE 修前就有(基线同形)」一句没有修前红次的数据(builder 只跑过 r2 / r3 / X),以 Tester 第 10 对为准。MANUAL-SECTION 未改(删 (甲) 后「应用内后退 = 像点链接,失败就留下并提示重试」仍成立)。
+
+**S2 变异夹具**:builder 已交 Tester `index-CR5M1VGf.js`(只删 (乙) 撤回行 boundary :135,M3 保留;⛔ 进包 ⛔ 进仓;工作副本已还原、src.sha256 OK)。builder 转 A-25:scratch 底换到 r3 包,先 ①(a) + ③,再 ②;LANDOTHER 与代码的对照写进回执。
+
+**派 Reviewer**(只读码、无子代理、无锁;报告 `docs/audits/2026-11-08-a20-builder/reviewer-r3/findings.md`,登记 `records/reviewer/findings.md`;对象 = r3 包 `src/` 对 `04f6f822` 的 diff,行号对包):
+1. M1–M5、修 b、修 c 各在回执所指的行上,改法与裁定一致(M1 `:169`/`:684`/`:769`;M2 `boundary :131-136`、`:145-150`,`withdrawKept` `:820`;M3 `:297`;M4 `:881-884`;M5 `:305-309`;修 b `boundary :217`、`:235`;修 c `:202-206`、`:160`、`:133`)。
+2. **`released` 不变量**:三个 `keepAndLeave` 入口都要求 `!released`;`released = false` 唯一一处(`:134`)同时清 `leftUnsaved`(`:133`);找反例。
+3. **会话存活时冻结记录为零**:拦截器收回路 `withdrawKeptEdit` 真删到那条记录;bfcache `pageshow persisted` 路同;列出任何「人没走、记录却留下」的路。
+4. **交接 2 `settleKept(block.id, sent)`(`:297`)不多删**:只删正在交的那组的保险带记录,不碰同块其它组、不碰 `split` 记录、不碰别块。
+5. **M1 重放(`:769`)**:服务器没有的单元 → `split` 记录(空起点、永不自动落地);被切单元 → 以切后文字为起点的 `edit` 记录;同一单元既排队又开着时不重复记;排空后不残留。
+6. **修 b 谓词(`:217`)**:列出应用里**停在同一篇时 URL 会怎样变**的每一条路(路由自己的 traverse、同篇带 query、锚点、replace),各条是否命中提前返回;**凡没命中又在扣留期的,会不会走进 TWICE → `keepAndLeave` 而路由不拦 → 记录冻结 / `released` 卡住**(M2 同形)。
+7. 四条只靠单测兜的臂(CLICKBACK、BACKIN-fail (B)、BACKIN-undo、HANDOVER-one-home):读测试断言,确认它们断的是裁定里的行为,而不是实现细节的形状。
+8. 范围:diff 只在 15 个文件;适配器相对 `04f6f822` 仍恰 3 行(r2 原样);server 零 diff。
+只出发现不裁;每条标「确认 / 疑似」+ 触发顺序 + 行号。
+
+**派 Tester**(报告 `docs/audits/2026-11-08-a20-builder/tester-r3/review-tester.md`,判语最前 + `records/tester/verdicts.md` 末行;一个锁位 ≤40%):
+1. **同源**:从包 `src/` 重建,与 `dist/client/assets/index-nLSUOG48.js` 逐字节比;对不上停下报我。
+2. **r2 链 153 行全保** + **a20m 全部**(BACKIN fail / undo / ctl / ctlfail / ctlclean / recover / sealed / refail / idlefirst / fast / neterr、LIST close / back / addr、LANDOTHER plain / heading),按已裁预期形判(BACKIN-fail 全变体 = REFUSED + 0 LEFT_UNSAVED + 0 记录;recover 第三次 HELD / INSTANT-PROCEED、字恰一份;LIST close / back x、y 各进框、服务器 `warmup k0`;addr 三个都在服务器)。
+3. **S2 变异对照**:`index-CR5M1VGf.js` 上 BACKIN-fail 应仍绿、BACKIN-refail 应红;结果写进报告「探针自证」节。不红 = refail 没考到 (乙),如实写,不改判语标准。
+4. **9 对回归 修前 vs r3 + 第 10 对 UNDOPAUSE ×20 / ×20 交错**;第 10 对按已裁线自动出结论(修前 ≥1 → 记数,我开 TD;修前 0 且 r3 ≥3 → STOP 报我)。
+5. 判语标准:不比修前差 + 本单臂 + 阳性对照;**列出每一条比修前差的臂**(包括已裁为设计选择的「服务器持续失败时 hash 跳转也被留下」——那条标「已裁,进手册已知」而不是红)。
+Tester 判语到 → 我 copy-back → 收割 → 手册 → 告 Tester 版本号 → 第 23 轮部署。
