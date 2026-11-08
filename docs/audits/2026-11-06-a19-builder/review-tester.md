@@ -141,3 +141,23 @@ Main_Designer 点名的五项：
 - 只用临时账号；岛上什么都没碰。没改产品代码，没做 git 写操作。应用里的 Agent 一条没调，没用真实模型。
 - 搭环境时踩的坑都记进了 `records/tester/METHOD.md`：TaskStop 停不掉 exec 出去的 node、同端口双绑、传给 node 的路径格式、生成件 tool-face manifest、云机自带服务占着调试端口 9615。
 - 顺手停掉了我早先留下的两组常驻服务：第一轮编辑器验收的 r04a（其中 13121 绑在所有网卡上）、F3b 的 Vite。
+
+## 四、第 22 次部署后岛上复核（2026-11-08）
+
+**结论：岛上就是验过的那一版，代表臂全过。** 证据在 `tester-evidence/postdeploy-22/`。
+
+- **部署前 ack**（`04f6f822`）：包里 15 个文件 15/15 相符；`fdeacb5d` 之后代码区只多了根目录工具脚本 `scripts/pre-harvest-scan.mjs`，没有任何构建或启动配置引用它；三个锁文件和 `docs/generated/tool-face-manifest.json` 与基线相同。
+- **对账**：经隧道 GET 岛上 63 个客户端文件，63/63 与包的 `dist/client` 逐字节一致，主 JS `index-Gswd3cHv.js`。部署前同一脚本对第二十一轮是 61/63（只差主 JS 和 `index.html`），作对照。
+- **代表臂**：对岛上前端，只登录我的测试账号，没注册新账号。
+
+| 臂 | 结果 |
+|---|---|
+| 旧 PDF（A-19 前导入的 12 页样张） | 登记顶层 `text_view: true`；默认原页、有切换；文本视图 24 块、11 个血缘标，跳 3、7、11 页全落对；离开再回来仍是文本；刷新回原页 |
+| 旧 docx | 登记 `text_view: true`；默认原页、有切换；文本视图 103 块；离开再回来仍是文本；刷新回原页 |
+| 旧 png（岛上唯一一篇图片笔记，在我的测试账号里） | 生成前显示「Generate them to read it exactly as the original file lays it out.」和「Generate original page images」；点后出图 800×300，比例对，页图字节与该 Source 原件相同，无切换，不撑破 |
+| 新传 png、jpeg EXIF 6、webp 带透明、1200×4000 长图 | 首屏可见；比例对（EXIF 6 显示成 900×1600）；页图字节等于原件；超宽的缩到 904；无切换；不撑破 |
+| 新传宽度为 0 的 png | 笔记在，第 1 页失败，显示「Pages that could not be generated: 1」「This page could not be generated.」「Try again」 |
+| 收尾 | 新传的 5 份 Source 全部删除；页图地址和笔记都返回 404 |
+
+- 旧 PDF 是 12 页、11 个血缘标。岛上没有部署前的计数可比；round-04 当时验的也是跳 3、7、11 页，这次一样落对。
+- 那张旧 png 现在已经生成了原页，这是我测试账号里的数据。

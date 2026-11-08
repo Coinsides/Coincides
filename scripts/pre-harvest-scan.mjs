@@ -7,13 +7,14 @@
 //   ⛔ 公网 IP、邮箱
 //   ⛔ 口令 / 密钥 / 令牌字面量(含 JWT、Bearer、各家 API key 形)
 //   ⚠️ 盘符绝对路径、内网 IP、没有地址语境的公网四段数(多半是版本号)、
-//      AppData 非 Temp 路径、测试文件里的口令 / Bearer 字面量(人工过目)
+//      AppData 非 Temp 路径、测试文件里的口令 / Bearer 字面量、
+//      本机用户名 / 会话编号片段作为独立词出现(名单读自 <home>/.claude/ops/pre-harvest-local-names.txt,不进仓)(人工过目)
 //   ℹ️ 0.0.0.0 监听地址出现处(只列,不判)
 //
 // 为什么另写一条而不扩 changedFileSecretScan.mjs:那条是提交期的「密钥闸」,阈值
 // 24 字符、跳过含 NUL 的文件,射程是密钥;本条是收割期的「进公开仓」闸,射程是
 // 「任何不该出现在公开仓里的本机 / 个人信息」。2026-11-08 事故:8 个脚本里的
-// `const password = 'a18-scratch-pass'`(16 字符)被密钥闸放过、人工 grep 也漏了,
+// `const password = '<16 字符的临时口令>'` 被密钥闸放过、人工 grep 也漏了,
 // Tester 事后发现。规则在这里机械化(claude-log §333 承诺)。
 //
 // 用法(在仓库根运行;零依赖):
@@ -37,7 +38,8 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { resolve, sep } from 'node:path';
+import { resolve, join } from 'node:path';
+import { homedir } from 'node:os';
 
 const root = process.cwd();
 const maxMbArg = process.argv.indexOf('--max-mb');
@@ -76,6 +78,18 @@ function collectFiles() {
   }
   return gitLines(['diff', '--cached', '--name-only', '--diff-filter=ACMRTUXB']);
 }
+
+// 本机标识名单(私有):<home>/.claude/ops/pre-harvest-local-names.txt,一行一个,大小写敏感;
+// 放 Windows 用户名、会话编号片段这类「只在这台机器上有意义的词」。有这个文件就多一条 ⚠️ 规则:
+// 名字作为独立词出现(正则、字符串、路径段都算),人看一眼。名单不进公开仓;
+// 2026-11-08 Tester 在三份归档脚本的正则里抓到会话编号前缀和用户名,通用规则认不出,所以用名单。
+const LOCAL_NAMES_FILE = join(homedir(), '.claude', 'ops', 'pre-harvest-local-names.txt');
+const LOCAL_NAMES = existsSync(LOCAL_NAMES_FILE)
+  ? readFileSync(LOCAL_NAMES_FILE, 'utf8').split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
+  : [];
+const LOCAL_NAMES_RE = LOCAL_NAMES.length
+  ? new RegExp('(?<![A-Za-z0-9_])(?:' + LOCAL_NAMES.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\// ---------- 规则 ----------')).join('|') + ')(?![A-Za-z0-9_])', 'g')
+  : null;
 
 // ---------- 规则 ----------
 // 每条: { id, level: 'block'|'warn'|'info', re, mask, accept?(match, line, file) → true 表示放过 }
@@ -138,16 +152,19 @@ const RULES = [
   { id: 'password-literal', level: BLOCK, mask: 'secret',
     // password = 'xxx' / "password": "xxx" / passwd: 'xxx' / secret = "xxx" / token: 'xxx' / api_key = 'xxx'
     re: /\b(?:password|passwd|pwd|passphrase|secret|api[_-]?key|access[_-]?key|private[_-]?key)\b\s*[:=]\s*(["'])([^"'\r\n]{4,})\1/gi,
-    accept: (m, line, file) => SECRET_PLACEHOLDER.test(m[2]) || UI_LABEL.test(m[2]) || /^\s*(?:\/\/|#|\*)/.test(line) },
+    accept: (m) => SECRET_PLACEHOLDER.test(m[2]) || UI_LABEL.test(m[2]) },
   { id: 'password-literal-in-test', level: WARN, mask: 'secret',
     re: /\b(?:password|passwd|pwd|passphrase|secret|api[_-]?key|access[_-]?key|private[_-]?key)\b\s*[:=]\s*(["'])([^"'\r\n]{4,})\1/gi,
     accept: (m, line, file) => true },
   { id: 'token-literal', level: BLOCK, mask: 'secret',
     // token = '…':值要像令牌(≥20 字符、字母数字混杂、含数字),设计令牌 'color-ink-strong' 这类不算
     re: /\btokens?\b\s*[:=]\s*["'`]([A-Za-z0-9._\/+=-]{20,})["'`]/gi,
-    accept: (m, line) => SECRET_PLACEHOLDER.test(m[1]) || !/\d/.test(m[1]) || !/[A-Za-z]/.test(m[1]) || /^\s*(?:\/\/|#|\*)/.test(line) },
+    accept: (m) => SECRET_PLACEHOLDER.test(m[1]) || !/\d/.test(m[1]) || !/[A-Za-z]/.test(m[1]) },
   { id: 'listen-any-address', level: INFO, mask: 'none',
     re: /0\.0\.0\.0/g },
+  ...(LOCAL_NAMES_RE ? [{ id: 'local-name-bare', level: WARN, mask: 'none', re: LOCAL_NAMES_RE,
+    // 已被 windows-user-path 报过的路径段不重复
+    accept: (m, line) => /Users[\\/]+/.test(line.slice(Math.max(0, m.index - 12), m.index)) }] : []),
 ];
 
 // 测试文件里的口令字面量降为 ⚠️:把 block 规则在测试路径下让给 warn 规则。
@@ -158,7 +175,7 @@ function activeRules(file) {
     if (r.id === 'password-literal-in-test') return isTest;
     return true;
   }).map((r) => (r.id === 'password-literal-in-test'
-    ? { ...r, accept: (m, line) => SECRET_PLACEHOLDER.test(m[2]) || UI_LABEL.test(m[2]) || /^\s*(?:\/\/|#|\*)/.test(line) }
+    ? { ...r, accept: (m) => SECRET_PLACEHOLDER.test(m[2]) || UI_LABEL.test(m[2]) }
     : r));
 }
 
