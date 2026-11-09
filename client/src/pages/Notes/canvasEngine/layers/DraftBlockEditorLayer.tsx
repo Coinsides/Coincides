@@ -9,6 +9,9 @@ import type { BlockBoxLayout } from '../runtimeLayout';
 import type { TextFocusReceipt } from '../textFocusReceipt';
 import styles from '../../NoteDetail.module.css';
 
+// A-25 ①: composing is true while an input method is still composing (pinyin letters on screen, not yet the word).
+export interface DraftInput { composing?: boolean }
+
 interface DraftBlockEditorLayerProps {
   creating: boolean;
   focusReceipt: TextFocusReceipt;
@@ -18,7 +21,7 @@ interface DraftBlockEditorLayerProps {
   slashTargetActive: boolean;
   textareaRef: RefObject<HTMLTextAreaElement>;
   text: string;
-  onChange: (value: string, caret: number, textarea: HTMLTextAreaElement) => void;
+  onChange: (value: string, caret: number, textarea: HTMLTextAreaElement, input?: DraftInput) => void;
   onClearSlashTarget: () => void;
   onDiscard: () => void;
   onFocused: (receipt: TextFocusReceipt) => void;
@@ -47,6 +50,10 @@ export function DraftBlockEditorLayer({
   onResize,
 }: DraftBlockEditorLayerProps) {
   const focusedRef = useRef(false);
+  // A-25 ①: the draft becomes a block only on a committed value. While an input method composes, the box shows the
+  // letters but nothing is created: creating hands the writing over to the new block's editor and moves the focus,
+  // and Chrome then commits the letters themselves into the note. compositionend hands over the word.
+  const composingRef = useRef(false);
   const focusReceiptRef = useRef(focusReceipt);
   const onFocusReleasedRef = useRef(onFocusReleased);
   focusReceiptRef.current = focusReceipt;
@@ -76,9 +83,16 @@ export function DraftBlockEditorLayer({
           focusedRef.current = true;
           onFocused(focusReceipt);
         }}
-        onChange={(event) => {
+        onCompositionStart={() => { composingRef.current = true; }}
+        onCompositionEnd={(event) => {
+          composingRef.current = false;
           onResize(event.currentTarget);
           onChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
+        }}
+        onChange={(event) => {
+          onResize(event.currentTarget);
+          const composing = composingRef.current || (event.nativeEvent as InputEvent).isComposing === true;
+          onChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget, composing ? { composing } : undefined);
         }}
         onBlur={() => {
           focusedRef.current = false;

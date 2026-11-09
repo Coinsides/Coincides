@@ -1,0 +1,9 @@
+D1: a receipt that only took words out, onto a line that has gained some: nothing written, still a conflict item 153ms
+D2: words placed before an inline range move it with them 95ms
+D2: words placed after an inline range leave it where it was 77ms
+D3: a formula block whose fields are the same now: merged, its fields written as they are 89ms
+D3: a formula block whose fields changed since: nothing written, still a conflict item 117ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 2 passed | 135 skipped (140)
+exit 1
+restored ok

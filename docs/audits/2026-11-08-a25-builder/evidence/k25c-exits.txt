@@ -1,0 +1,4 @@
+vite build exit 0
+index-BngbSlvd.js
+a25 kit exit 0
+done 18:33:43

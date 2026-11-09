@@ -1,0 +1,9 @@
+BACKIN-fail-sealed         2/2
+    ok  sealed: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["w
+BACKIN-fail-refail         2/2
+    ok  refail: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["w
+BACKIN-fail-idlefirst      5/5
+    ok  idlefirst: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen 
+BACKIN-ctlfail             2/2
+    ok  ctlfail: REFUSED (want REFUSED; prevented true, on A 6/6, arrived false, sent 0, new toasts ["Changes could not be saved. "]); count 0
+total red 0

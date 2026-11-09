@@ -10,7 +10,7 @@ import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowServ
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
 import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 import { usePlacementHistory } from './usePlacementHistory';
-import { IDLE_SAVE_MS, useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
+import { IDLE_SAVE_MS, SAVE_RETRY_START_MS, useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
 import { readUnplacedWords } from '../structureTypingBuffer';
 import { splitTextUnitForEnter } from '../textUnitEditorService';
 import { mergeTypedText } from './useHeadingStructureController';
@@ -22,6 +22,8 @@ function renderHistoryEditor(initialText = 'original', options: {
   annotations?: AnnotationTruthV1[]; boardRanges?: BoardTextRangeV1[];
   saveFails?: () => boolean; canSaveWhileTyping?: () => boolean; receiptKey?: string; holdSave?: () => boolean;
   saveRefused?: () => boolean;
+  /** A-25 ②a: the HTTP status a failed save answered with (none: no answer, as offline). */
+  failStatus?: () => number | undefined;
 } = {}) {
   const initialFlow = options.flow ?? createTextBlockContentV1(initialText);
   const initialPlainText = options.flow ? plainTextFromTextFlow(options.flow) : initialText;
@@ -45,7 +47,8 @@ function renderHistoryEditor(initialText = 'original', options: {
     // A save that was sent and failed: the adapter wrote its recovery receipt before sending.
     if (options.saveFails?.()) return { status: 'rejected', block: null,
       recoveryReceipt: { recoveryKey: options.receiptKey ?? 'harness-receipt' } as never, reconciliation: 'not_attempted',
-      durableState: 'not_checked', reason: 'request_failed', staleEpoch: false };
+      durableState: 'not_checked', reason: 'request_failed', staleEpoch: false,
+      ...(options.failStatus ? { error: { response: { status: options.failStatus() } } } : {}) } as BlockSaveOutcome;
     return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
   });
   const onSaveFailure = vi.fn();
@@ -697,7 +700,9 @@ describe('A-20 idle save: written at a pause, undo unchanged', () => {
 
   it('a failed idle save is not retried at every pause and does not hold the note; the sealed save tries again', async () => {
     let failing = true;
-    const editor = renderHistoryEditor('original', { saveFails: () => failing });
+    // A-25 r2: a failed idle save is now asked again by the backoff (2 s); a 409 is never asked again by itself, so
+    // what this checks stays what it was: the pauses do not send it again.
+    const editor = renderHistoryEditor('original', { saveFails: () => failing, failStatus: () => 409 });
     editor.input('original a', 8);
     await pause(editor);
     expect(editor.saveBlock).toHaveBeenCalledTimes(1);
@@ -1052,6 +1057,75 @@ describe('A-20 r3d a group that removes units is kept, never placed by itself (N
 
 });
 
+// A-25 ②a: a failed typing save is asked again by itself (2 s, doubling, at most 30 s; at once when back online), the
+// block shows it while it is so, and nothing is asked again by itself after a 4xx.
+describe('A-25 ②a failed typing saves are asked again by themselves', () => {
+  const wait = async (ms: number) => { await act(async () => { await new Promise((resolve) => setTimeout(resolve, ms)); }); };
+  const failedBlocks = (editor: ReturnType<typeof renderHistoryEditor>) => editor.current().textHistory.failedTypingBlockIds;
+
+  it('500: marked, asked again after 2 s, then 4 s; the mark goes when it saves', async () => {
+    let fails = 3;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails-- > 0, failStatus: () => 500 });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    // The blur's own save and the projection's save at blur: both refused (one failure, one mark).
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    const n = editor.savedTexts.length;
+    fails = 1; // the first retry is refused too, the second goes through
+    expect(failedBlocks(editor)).toEqual(['synthetic-block']);
+    await wait(SAVE_RETRY_START_MS - 400);
+    expect(editor.savedTexts).toHaveLength(n);
+    await wait(700);
+    expect(editor.savedTexts).toHaveLength(n + 1);
+    expect(failedBlocks(editor)).toEqual(['synthetic-block']);
+    await wait(SAVE_RETRY_START_MS * 2 - 600);
+    expect(editor.savedTexts).toHaveLength(n + 1);
+    await wait(900);
+    await editor.idle();
+    expect(editor.savedTexts).toHaveLength(n + 2);
+    expect(new Set(editor.savedTexts)).toEqual(new Set(['original a']));
+    expect(failedBlocks(editor)).toEqual([]);
+    await wait(SAVE_RETRY_START_MS + 300);
+    expect(editor.savedTexts).toHaveLength(n + 2);
+  }, 15_000);
+
+  it('no answer (offline): asked again at once when the browser is back online', async () => {
+    let fails = true;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails, failStatus: () => undefined });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    const n = editor.savedTexts.length;
+    fails = false;
+    await act(async () => { window.dispatchEvent(new Event('online')); });
+    await wait(50);
+    await editor.idle();
+    expect(editor.savedTexts).toHaveLength(n + 1);
+    expect(failedBlocks(editor)).toEqual([]);
+  });
+
+  it.each([401, 403, 409, 422])('%s: not asked again by itself; Retry asks at once', async (status) => {
+    let fails = true;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails, failStatus: () => status });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    const n = editor.savedTexts.length;
+    expect(failedBlocks(editor)).toEqual(['synthetic-block']);
+    await wait(SAVE_RETRY_START_MS + 400);
+    expect(editor.savedTexts).toHaveLength(n);
+    fails = false;
+    await act(async () => { editor.current().textHistory.retryFailedSavesNow(); });
+    await wait(50);
+    await editor.idle();
+    expect(editor.savedTexts).toHaveLength(n + 1);
+    expect(failedBlocks(editor)).toEqual([]);
+  });
+});
+
 // A-20 r3e (Reviewer P2): a unit made by Enter after a join can get the id of the line the join removed (the next id is
 // the highest one present + 1). It is a new line all the same: its words are kept like a split's, never placed over the
 // server's text of the removed line.
@@ -1114,6 +1188,27 @@ describe('A-20b words of a structural group are kept at a departure (Q2, Q3)', (
   });
 
   // A-20b r2 (R3): '😀' and '😁' share their high surrogate; the start is 'abc', never 'abc' + half a character.
+  // Reviewer O4: the step back is for a high surrogate only. 'a😀b' -> 'a😀c' part after a whole '😀' (it ends on a
+  // low surrogate): the start is 'a😀'. Red if the step-back range reached the low surrogates (up to 0xdfff).
+  it('O4: "a😀|b" with "b" replaced by a paste of "c⏎Y": the record starts at "a😀", the emoji kept whole', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('a😀b', { holdSave: () => hold });
+    editor.inputAt(0, 'a😀b!', 5);
+    await act(async () => { fireEvent.blur(editor.textarea(0)); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus(0);
+    editor.textarea(0).setSelectionRange(3, 4);
+    paste(editor.textarea(0), 'c\nY');
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['a😀c', 'Y', '!']);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records).toEqual(expect.arrayContaining([expect.objectContaining({ initialText: 'a😀', text: 'a😀c' })]));
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
   it('R3: "abc|😀def" + paste "😁⏎Y": the record starts at "abc", not inside the emoji', async () => {
     localStorage.clear();
     let hold = true;
@@ -1153,4 +1248,317 @@ describe('A-20b words of a structural group are kept at a departure (Q2, Q3)', (
     editor.heldSaves.splice(0).forEach((release) => release());
     localStorage.clear();
   });
+});
+
+// A-25 r2 (i) (Main_Designer 2026-11-09): block X's idle save stops only while X itself has a failed save; another
+// block still saves at a pause; a failed idle save is asked again by the same backoff, its block marked meanwhile.
+describe('A-25 r2 (i) the idle save waits per block', () => {
+  const wait = async (ms: number) => { await act(async () => { await new Promise((resolve) => setTimeout(resolve, ms)); }); };
+  function renderTwoBlocks(options: { fails: (blockId: string) => boolean; failStatus?: (blockId: string) => number | undefined }) {
+    const makeBlock = (id: string, text: string, order: number): NoteBlock => ({
+      id, placement_id: `${id}-placement`, display_overrides_json: {}, block_type: 'paragraph', title: null,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1(text) }, plain_text: text, metadata: {},
+      order_index: order, source_references: [],
+    });
+    const blocks = [makeBlock('block-a', 'alpha', 0), makeBlock('block-b', 'beta', 1)];
+    const boardRanges = createBoardTextRangeEditSession('synthetic-note', async (_note, ranges) => ranges);
+    boardRanges.hydrate([]);
+    const sent: { blockId: string; text: string; saved: boolean }[] = [];
+    const saveBlock = vi.fn(async (block: NoteBlock, text: string): Promise<BlockSaveOutcome> => {
+      const fails = options.fails(block.id);
+      sent.push({ blockId: block.id, text, saved: !fails });
+      if (fails) return { status: 'rejected', block: null, recoveryReceipt: { recoveryKey: `receipt-${block.id}` } as never,
+        reconciliation: 'not_attempted', durableState: 'not_checked', reason: 'request_failed', staleEpoch: false,
+        ...(options.failStatus ? { error: { response: { status: options.failStatus(block.id) } } } : {}) } as BlockSaveOutcome;
+      return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
+    });
+    let current!: { textHistory: ReturnType<typeof useTextFlowHistory>; history: ReturnType<typeof usePlacementHistory> };
+    function Editor() {
+      const drafts = useBlockDraftAuthority();
+      const hostRef = useRef<TextFlowHistoryHost | null>(null);
+      const textHistory = useTextFlowHistory({
+        noteId: 'synthetic-note', generation: 1, blocks,
+        annotationTruths: [], readAnnotationTruths: () => [], setAnnotationTruthsSnapshot: () => {},
+        blockTextFlowDrafts: drafts.blockTextFlowDrafts, setBlockTextFlowDrafts: drafts.setBlockTextFlowDrafts,
+        setBlockTextDrafts: drafts.setBlockTextDrafts,
+        captureBoardTextRanges: boardRanges.snapshot, restoreBoardTextRanges: boardRanges.restore,
+        rebaseBoardTextRanges: boardRanges.rebase,
+        saveBlock, saveAnnotationTruthsOutcome: async () => true, history: hostRef, onSaveFailure: vi.fn(),
+      });
+      const history = usePlacementHistory({
+        noteId: 'synthetic-note', generation: 1, beforeHistoryBoundary: () => textHistory.boundary(),
+        applyLayoutDrafts: () => {}, persistLayoutSnapshot: async () => true,
+      });
+      hostRef.current = history;
+      current = { textHistory, history };
+      return <>{blocks.map((block) => {
+        const flow = drafts.blockTextFlowDrafts[block.id] ?? (block.content_json[TEXT_FLOW_CONTENT_KEY] as TextBlockContentV1);
+        return <TextBlockProjection key={block.id} blockId={block.id} text={plainTextFromTextFlow(flow)} textFlow={flow}
+          presentationKind="paragraph" readOnly={false} annotations={[]} selectedAnnotationIds={[]}
+          showLabelOverlay={false} textareaRef={null} onFocused={vi.fn()} onAnnotationSelect={vi.fn()}
+          onAnnotationContextMenu={vi.fn()} onTextUnitSelection={vi.fn()} onTextUnitContextMenu={vi.fn()}
+          onTextChange={(text) => drafts.setBlockTextDrafts((next) => ({ ...next, [block.id]: text }))}
+          onTextFlowChange={(next, metadata, previousTextFlow) => { void textHistory.applyEdit(block, next, { metadata, previousTextFlow }); }}
+          onTextEditBoundary={textHistory.boundary}
+          onSave={async (_silent, _fields, latestFlow) => {
+            const savedFlow = latestFlow ?? flow;
+            return textHistory.saveBlock(block, plainTextFromTextFlow(savedFlow), { silent: true, textFlow: savedFlow });
+          }} onKeyDown={vi.fn()} />;
+      })}</>;
+    }
+    const view = render(<Editor />);
+    const textarea = (index: number) => view.container.querySelectorAll('textarea')[index]!;
+    const type = (index: number, value: string) => {
+      const node = textarea(index);
+      act(() => node.focus());
+      const at = node.value.length;
+      node.setSelectionRange(at, at);
+      fireEvent(node, new InputEvent('beforeinput', { bubbles: true, inputType: 'insertText' }));
+      fireEvent.input(node, { target: { value, selectionStart: value.length, selectionEnd: value.length }, inputType: 'insertText' });
+    };
+    const idle = async () => { await act(async () => { await current.history.whenHistoryIdle(); }); };
+    const pause = async () => { await wait(IDLE_SAVE_MS + 150); await idle(); };
+    return { ...view, sent, saveBlock, textarea, type, idle, pause, marked: () => current.textHistory.failedTypingBlockIds };
+  }
+
+  // Red before r2: any failed save in the note (persist :336, idleSave :813 / :823 counted failures.size) stopped every
+  // block's idle save, so B's words stayed on screen and were never sent until B lost focus.
+  it('A\'s sealed save failed: B typed after it is written at a pause', async () => {
+    const editor = renderTwoBlocks({ fails: (blockId) => blockId === 'block-a', failStatus: () => 500 });
+    editor.type(0, 'alpha a');
+    fireEvent.blur(editor.textarea(0));
+    await waitFor(() => expect(editor.sent.some((save) => save.blockId === 'block-a')).toBe(true));
+    await editor.idle();
+    expect(editor.marked()).toEqual(['block-a']);
+    editor.type(1, 'beta b');
+    await editor.pause();
+    expect(editor.sent.filter((save) => save.blockId === 'block-b')).toEqual([{ blockId: 'block-b', text: 'beta b', saved: true }]);
+    expect(editor.marked()).toEqual(['block-a']);
+    editor.unmount();
+  }, 15_000);
+
+  // Red before r2: a failed idle save set one note-wide flag (idleSaveFailed) that stopped every block's idle save.
+  it('A\'s idle save failed: B typed after it is written at a pause', async () => {
+    const editor = renderTwoBlocks({ fails: (blockId) => blockId === 'block-a', failStatus: () => 409 });
+    editor.type(0, 'alpha a');
+    await editor.pause();
+    expect(editor.sent).toEqual([{ blockId: 'block-a', text: 'alpha a', saved: false }]);
+    editor.type(1, 'beta b');
+    await editor.pause();
+    expect(editor.sent.filter((save) => save.blockId === 'block-b')).toEqual([{ blockId: 'block-b', text: 'beta b', saved: true }]);
+    editor.unmount();
+  }, 15_000);
+
+  // Guard (the same on r1): A's own pauses still send nothing while A holds a failed save. A 409 is not asked again by
+  // itself, so only a pause could send here.
+  it('A\'s own pauses stay quiet while A has a failed save', async () => {
+    const editor = renderTwoBlocks({ fails: (blockId) => blockId === 'block-a', failStatus: () => 409 });
+    editor.type(0, 'alpha a');
+    await editor.pause();
+    expect(editor.sent).toHaveLength(1);
+    editor.type(0, 'alpha ab');
+    await editor.pause();
+    await editor.pause();
+    expect(editor.sent).toHaveLength(1);
+    editor.unmount();
+  }, 15_000);
+
+  // Red before r2: a failed idle save was never asked again by itself, and its block showed no mark: with the focus
+  // still in the block, the words waited for a blur that might not come.
+  it('a failed idle save is marked and asked again by the backoff with what the block shows', async () => {
+    let down = true;
+    const editor = renderTwoBlocks({ fails: () => down, failStatus: () => 500 });
+    editor.type(1, 'beta b');
+    await editor.pause();
+    expect(editor.sent).toEqual([{ blockId: 'block-b', text: 'beta b', saved: false }]);
+    expect(editor.marked()).toEqual(['block-b']);
+    editor.type(1, 'beta bc');
+    down = false;
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.sent[editor.sent.length - 1]).toEqual({ blockId: 'block-b', text: 'beta bc', saved: true });
+    expect(editor.marked()).toEqual([]);
+    editor.unmount();
+  }, 15_000);
+
+  // A-25 r3 (F3). Red on r2: one 409 anywhere set a note-wide refusal, and every block's automatic asking stopped.
+  it('X answered 409, Y answered 500: Y is still asked again by itself', async () => {
+    const down = new Set(['block-a', 'block-b']);
+    const editor = renderTwoBlocks({ fails: (blockId) => down.has(blockId), failStatus: (blockId) => blockId === 'block-a' ? 409 : 500 });
+    editor.type(0, 'alpha a');
+    await editor.pause();
+    expect(editor.sent).toEqual([{ blockId: 'block-a', text: 'alpha a', saved: false }]);
+    editor.type(1, 'beta b');
+    fireEvent.blur(editor.textarea(1));
+    await waitFor(() => expect(editor.sent.some((save) => save.blockId === 'block-b')).toBe(true));
+    await editor.idle();
+    down.delete('block-b');
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.sent.filter((save) => save.blockId === 'block-b').pop()).toEqual({ blockId: 'block-b', text: 'beta b', saved: true });
+    expect(editor.marked()).toEqual(['block-a']);
+    editor.unmount();
+  }, 20_000);
+});
+
+// A-25 r2 item 4 guard (Main_Designer 2026-11-09, (a)): one block never has two saves on their way at once. It holds
+// because every save goes through the one write lane (usePlacementHistory enqueueRuntimeHistoryOperation); the blur,
+// the backoff timer, the browser's online event and the Retry control all queue there. Green before and after r2.
+describe('A-25 r2 at most one save of a block on its way', () => {
+  const wait = async (ms: number) => { await act(async () => { await new Promise((resolve) => setTimeout(resolve, ms)); }); };
+  it('a held retry: blur, the backoff timer, online and Retry add none beside it', async () => {
+    let fails = true;
+    let hold = false;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails, failStatus: () => 500, holdSave: () => hold });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    expect(editor.current().textHistory.failedTypingBlockIds).toEqual(['synthetic-block']);
+    // The next ask is held on its way (no answer yet).
+    hold = true;
+    await wait(SAVE_RETRY_START_MS + 300);
+    expect(editor.heldSaves).toHaveLength(1);
+    const before = editor.saveBlock.mock.calls.length;
+    editor.focus();
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await act(async () => { window.dispatchEvent(new Event('online')); });
+    await act(async () => { editor.current().textHistory.retryFailedSavesNow(); });
+    await wait(SAVE_RETRY_START_MS * 2 + 300);
+    expect(editor.heldSaves).toHaveLength(1);
+    expect(editor.saveBlock.mock.calls.length).toBe(before);
+    // Its answer comes: the server has it, and nothing more is on its way after it.
+    hold = false;
+    fails = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    await editor.idle();
+    await wait(50);
+    await editor.idle();
+    expect(editor.heldSaves).toHaveLength(0);
+    expect(editor.current().textHistory.failedTypingBlockIds).toEqual([]);
+    editor.unmount();
+  }, 20_000);
+});
+
+// A-25 r3 (Reviewer r2 pre-seal read F2–F4; Main_Designer 2026-11-09). After any save ends, a block with words the
+// server does not have has a timer on its way, is in the backoff, or shows its mark.
+describe('A-25 r3 (F2, F4) a failing block\'s retry and the words typed around it', () => {
+  const wait = async (ms: number) => { await act(async () => { await new Promise((resolve) => setTimeout(resolve, ms)); }); };
+  const failedBlocks = (editor: ReturnType<typeof renderHistoryEditor>) => editor.current().textHistory.failedTypingBlockIds;
+
+  // F2. Red on r2: the idle save of the words typed while the retry was on its way was skipped (the block was paused)
+  // and nobody asked again after the retry went through: the mark went out with 'original ab' on screen only.
+  it('words typed while the retry is on its way are written after it goes through', async () => {
+    let fails = true;
+    let hold = false;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails, failStatus: () => 500, holdSave: () => hold });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    expect(failedBlocks(editor)).toEqual(['synthetic-block']);
+    fails = false;
+    hold = true;
+    await wait(SAVE_RETRY_START_MS + 300);
+    expect(editor.heldSaves).toHaveLength(1);
+    editor.input('original ab', 10);
+    await wait(IDLE_SAVE_MS + 300);
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    await editor.idle();
+    await wait(IDLE_SAVE_MS + 300);
+    await editor.idle();
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original ab');
+    expect(failedBlocks(editor)).toEqual([]);
+    editor.unmount();
+  }, 20_000);
+
+  // F4. Red on r2: the retry was sent while something else held the note (the idle save waits for it; the retry did not).
+  it('a retry due while something else holds the note waits, then goes', async () => {
+    let fails = true;
+    let free = true;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails, failStatus: () => 500, canSaveWhileTyping: () => free });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    const n = editor.savedTexts.length;
+    fails = false;
+    free = false;
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.savedTexts).toHaveLength(n);
+    expect(failedBlocks(editor)).toEqual(['synthetic-block']);
+    free = true;
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.savedTexts).toHaveLength(n + 1);
+    expect(failedBlocks(editor)).toEqual([]);
+    editor.unmount();
+  }, 20_000);
+
+  // F4. Red on r2: the retry was sent in the middle of a composition.
+  it('a retry due while the input method composes waits for its end', async () => {
+    let fails = true;
+    const editor = renderHistoryEditor('original', { saveFails: () => fails, failStatus: () => 500 });
+    editor.input('original a', 8);
+    fireEvent.blur(editor.textarea());
+    await waitFor(() => expect(editor.savedTexts.length).toBeGreaterThan(0));
+    await editor.idle();
+    const n = editor.savedTexts.length;
+    fails = false;
+    editor.focus();
+    fireEvent.compositionStart(editor.textarea());
+    editor.input('original ax', 10, 10, 'insertCompositionText', true);
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.savedTexts).toHaveLength(n);
+    fireEvent.compositionEnd(editor.textarea());
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.savedTexts.length).toBeGreaterThan(n);
+    expect(failedBlocks(editor)).toEqual([]);
+    editor.unmount();
+  }, 20_000);
+});
+
+// A-25 r3 (R1, Reviewer r3 delta; Main_Designer 2026-11-09): the refusal pause is per block and lives and dies with the
+// block's failures. Here X's failure goes away without a save of X going through (the open group it was asked again
+// with is gone: :314), so its refusal must go too, and its mark goes out (O4).
+describe('A-25 r3 (R1) a refusal ends with the block\'s failures', () => {
+  const wait = async (ms: number) => { await act(async () => { await new Promise((resolve) => setTimeout(resolve, ms)); }); };
+  // Red before R1: the 409's refusal outlived the failure, so X's later 500 was never asked again by itself.
+  it('X 409 (refused); its failure goes with its open group; X 500 later: asked again by itself', async () => {
+    let status: number | null = 409;
+    const editor = renderHistoryEditor('original', { saveFails: () => status !== null, failStatus: () => status ?? undefined });
+    editor.input('original a', 8);
+    await wait(IDLE_SAVE_MS + 150);
+    await editor.idle();
+    expect(editor.current().textHistory.failedTypingBlockIds).toEqual(['synthetic-block']);
+    // Typed back to what it was: the group changes nothing and is dropped at the blur (the blur's own save is refused).
+    editor.input('original', 10, 10, 'insertText');
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    // Retry asks X: no open group on X any more, so its idle failure is gone without a save of X (:314).
+    await act(async () => { editor.current().textHistory.retryFailedSavesNow(); });
+    await wait(50);
+    await editor.idle();
+    // Nothing was sent, and the mark is out (O4: red before, the mark stayed lit until some other redraw).
+    expect(editor.savedTexts).toEqual(['original a', 'original']);
+    expect(editor.current().textHistory.failedTypingBlockIds).toEqual([]);
+    // X fails again, with a 500 this time: the backoff must take it.
+    status = 500;
+    editor.input('original b', 8);
+    await wait(IDLE_SAVE_MS + 150);
+    await editor.idle();
+    expect(editor.current().textHistory.failedTypingBlockIds).toEqual(['synthetic-block']);
+    const n = editor.savedTexts.length;
+    status = null;
+    await wait(SAVE_RETRY_START_MS + 300);
+    await editor.idle();
+    expect(editor.savedTexts.length).toBeGreaterThan(n);
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original b');
+    expect(editor.current().textHistory.failedTypingBlockIds).toEqual([]);
+    editor.unmount();
+  }, 20_000);
 });

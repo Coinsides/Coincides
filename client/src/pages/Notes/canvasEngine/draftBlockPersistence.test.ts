@@ -809,6 +809,25 @@ describe('A-20 block edit receipts outlive the tab, per account', () => {
     expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) ?? '').not.toContain('older edit');
   });
 
+  // A-25 ②a (iv) A: one entry per block per visit. A save replaces its own visit's entry (above: same mount and
+  // generation), never another visit's: that one holds words its page could not see saved.
+  it("another visit's entry for the block is kept beside this visit's, and each visit replaces only its own", () => {
+    signIn('user-1');
+    const otherVisit = blockEditRecoveryReceipt({ text: 'other visit edit', mountNonce: 'mount-old' });
+    const thisVisit = blockEditRecoveryReceipt({ text: 'this visit edit', mountNonce: 'mount-new' });
+    expect(rememberBlockEditRecoveryReceipt(otherVisit)).toBe(true);
+    expect(rememberBlockEditRecoveryReceipt(thisVisit)).toBe(true);
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual(expect.arrayContaining([otherVisit, thisVisit]));
+    expect(listBlockEditRecoveryReceipts('note-a')).toHaveLength(2);
+    const later = blockEditRecoveryReceipt({ text: 'this visit later', mountNonce: 'mount-new', operationSequence: 2 });
+    expect(rememberBlockEditRecoveryReceipt(later)).toBe(true);
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual(expect.arrayContaining([otherVisit, later]));
+    expect(listBlockEditRecoveryReceipts('note-a')).toHaveLength(2);
+    const otherGeneration = blockEditRecoveryReceipt({ text: 'same mount, next route generation', mountNonce: 'mount-new', generation: 2 });
+    expect(rememberBlockEditRecoveryReceipt(otherGeneration)).toBe(true);
+    expect(listBlockEditRecoveryReceipts('note-a')).toHaveLength(3);
+  });
+
   it('forgetting removes it wherever it is', () => {
     signIn('user-1');
     const legacy = blockEditRecoveryReceipt({ text: 'legacy edit' });

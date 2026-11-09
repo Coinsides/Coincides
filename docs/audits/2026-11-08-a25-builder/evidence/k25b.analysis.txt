@@ -1,0 +1,34 @@
+IME-new                pass 24/24
+   pinyin in note 0/24; examples 
+IME-mid                pass 24/24
+   pinyin in note 0/24; examples 
+SAVEFAIL-500-direct    pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) <=1 failed toast 2; controls seen ["Retry","Copy"]; catch-up ms [4538,4549]
+SAVEFAIL-500-blur      pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) <=1 failed toast 2; controls seen ["Retry","Copy"]; catch-up ms [2274,2265]
+SAVEFAIL-net-direct    pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) <=1 failed toast 2; controls seen ["Retry","Copy"]; catch-up ms [4541,4508]
+SAVEFAIL-net-blur      pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) <=1 failed toast 2; controls seen ["Retry","Copy"]; catch-up ms [2259,2265]
+LANDFAIL-auto-500      pass 0/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; passed of 2: {"a":0,"c":2,"d":2,"e":0,"bInfo":2}; clicked [null,null]; caught ms [14722,13637]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-auto-net      pass 0/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; passed of 2: {"a":0,"c":2,"d":2,"e":0,"bInfo":2}; clicked [null,null]; caught ms [13616,13608]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-500     pass 0/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); passed of 2: {"a":0,"b":2,"d":2,"e":0}; clicked ["Retry","Retry"]; caught ms [4153,4163]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-net     pass 0/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); passed of 2: {"a":0,"b":2,"d":2,"e":0}; clicked ["Retry","Retry"]; caught ms [4153,4153]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+CHAIN-enter            pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-blur             pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-inline           pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-mixed            pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-seed             pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":0},{"kzero":1,"kone":1,"ktwo":0}]
+H1                     pass 2/2
+   injected throw fired 2/2 (a run where it did not fire proves nothing); beta landed 2/2
+H2                     pass 2/2
+   SMOKE only (not a gate): landed after coming back 2/2

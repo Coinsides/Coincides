@@ -1,0 +1,6 @@
+tsc exit 0
+layers tests exit 0
+vite build exit 0
+index-4nEsyJNA.js
+ Test Files  32 passed (32)
+      Tests  344 passed (344)

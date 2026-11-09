@@ -1,0 +1,64 @@
+slot heavy-job.lock.2 taken 2026-11-09 18:55:34: regression step 1 mx: A-20b r2 + A-25, 2 browsers
+base  mx exit 0
+A-25 mx exit 0
+slot heavy-job.lock.2 released 19:37:50 exit 0
+  a20bp: SUMMARY {"label":"a20bp-mx","origin":"http://127.0.0.1:5612","by":{"K":{"n":30,"bad":0},"W":{"n":19,"bad":16},"H":{"n":13,"bad":0},"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":1},"G":{"n":51,"bad":3}},"errors":0,"firstErrors":[]}
+  a25p: SUMMARY {"label":"a25p-mx","origin":"http://127.0.0.1:5614","by":{"K":{"n":30,"bad":0},"W":{"n":19,"bad":0},"H":{"n":13,"bad":0},"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":1},"L":{"n":32,"bad":0},"G":{"n":51,"bad":0}},"errors":0,"firstErrors":[]}
+  subset: {"pre":18,"new":1,"newNotInPre":["D:lines30#0"],"preOnly":["W:ime200a#0","W:ime200b#0","W:ime250a#0","W:ime250b#0","W:ime280a#0","W:ime280b#0","W:ime300a#0","W:ime300b#0","W:ime320a#0","W:ime320b#0","W:ime350a#0","W:ime350b#0","W:ime400a#0","W:ime400b#0","W:ime500a#0","W:ime500b#0","L:insert-1#0","G:imeLines#0"]}
+slot heavy-job.lock.2 taken 2026-11-09 19:37:51: regression step 2 acc1: A-20b r2 + A-25, 2 browsers
+base  acc1 exit 0
+A-25 acc1 exit 0
+slot heavy-job.lock.2 released 19:45:10 exit 0
+  a20bp: DONE a20bp-acc1: 16 rows, bad 0
+  a25p: DONE a25p-acc1: 16 rows, bad 0
+  subset: {"pre":0,"new":0,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 19:45:11: regression step 3 acc10: A-20b r2 + A-25, 2 browsers
+base  acc10 exit 0
+A-25 acc10 exit 0
+slot heavy-job.lock.2 released 19:49:23 exit 0
+  a20bp: DONE a20bp-acc10: 6 rows, bad 3
+  a25p: DONE a25p-acc10: 6 rows, bad 3
+  subset: {"pre":1,"new":1,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 19:49:24: regression step 4 y: A-20b r2 + A-25, 2 browsers
+base  y exit 0
+A-25 y exit 0
+slot heavy-job.lock.2 released 19:54:29 exit 0
+  a20bp: DONE a20bp-y: 9 rows, bad 0
+  a25p: DONE a25p-y: 9 rows, bad 0
+  subset: {"pre":0,"new":0,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 19:54:29: regression step 5 two2: A-20b r2 + A-25, 2 browsers
+base  two2 exit 0
+A-25 two2 exit 0
+slot heavy-job.lock.2 released 19:57:01 exit 0
+  a20bp: DONE a20bp-two2: 3 rows, bad 0
+  a25p: DONE a25p-two2: 3 rows, bad 0
+  subset: {"pre":0,"new":0,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 19:57:01: regression step 6 acc18: A-20b r2 + A-25, 2 browsers
+base  acc18 exit 0
+A-25 acc18 exit 0
+slot heavy-job.lock.2 released 20:00:50 exit 0
+  a20bp: DONE a20bp-acc18: 6 rows, bad 0
+  a25p: DONE a25p-acc18: 6 rows, bad 0
+  subset: {"pre":0,"new":0,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 20:00:50: regression step 7 acc13: A-20b r2 + A-25, 2 browsers
+base  acc13 exit 0
+A-25 acc13 exit 0
+slot heavy-job.lock.2 released 20:07:04 exit 0
+  a20bp: DONE a20bp-acc13: 10 rows, bad 2
+  a25p: DONE a25p-acc13: 10 rows, bad 2
+  subset: {"pre":1,"new":1,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 20:07:04: regression step 8 J: A-20b r2 + A-25, 2 browsers
+base  J exit 0
+A-25 J exit 0
+slot heavy-job.lock.2 released 20:08:20 exit 0
+  a20bp: DONE a20bp-J: 4 rows, bad 0
+  a25p: DONE a25p-J: 4 rows, bad 0
+  subset: {"pre":0,"new":0,"newNotInPre":[],"preOnly":[]}
+slot heavy-job.lock.2 taken 2026-11-09 20:08:20: regression step 9 retry: A-20b r2 + A-25, 2 browsers
+base  retry exit 0
+A-25 retry exit 0
+slot heavy-job.lock.2 released 20:10:52 exit 0
+  a20bp: DONE a20bp-retry: 1 rows, bad 0
+  a25p: DONE a25p-retry: 1 rows, bad 0
+  subset: {"pre":0,"new":0,"newNotInPre":[],"preOnly":[]}
+regression done 20:10:52

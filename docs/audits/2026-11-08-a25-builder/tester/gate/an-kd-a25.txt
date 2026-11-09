@@ -1,0 +1,16 @@
+D-anchor-0         ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-anchor-1         ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-unanch-0         ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-unanch-1         ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-struct-0         ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-struct-1         ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-same-0           ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-same-1           ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-twice-0          ok  {"answers":true,"units":true,"receipt":true,"conflict":true,"receiptText":true,"secondHeld":true}
+D-twice-1          ok  {"answers":true,"units":true,"receipt":true,"conflict":true,"receiptText":true,"secondHeld":true}
+D-delonly-0        ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-delonly-1        ok  {"answers":true,"units":true,"receipt":true,"conflict":true}
+D-link-before-0    ok  {"answers":true,"units":true,"receipt":true,"conflict":true,"link":true}
+D-link-before-1    ok  {"answers":true,"units":true,"receipt":true,"conflict":true,"link":true}
+D-link-after-0     ok  {"answers":true,"units":true,"receipt":true,"conflict":true,"link":true}
+D-link-after-1     ok  {"answers":true,"units":true,"receipt":true,"conflict":true,"link":true}

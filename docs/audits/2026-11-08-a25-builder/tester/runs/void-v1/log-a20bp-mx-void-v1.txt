@@ -1,0 +1,16 @@
+BAD {"arm":"W","name":"ime200a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime200b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime250a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime250b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime280a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime280b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime300a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime300b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime320a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime320b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime350a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime350b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime400a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime400b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime500a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime500b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}

@@ -1,0 +1,56 @@
+slot heavy-job.lock taken 2026-11-09 23:02:26: H2 frozen-red unit test: one test, package tree and a frozen copy (vitest, one worker)
+===== tree-a25
+
+ RUN  v3.2.7 <a20acc>/tree-a25/client
+
+ ✓ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx (84 tests | 83 skipped) 129ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 83 skipped (84)
+   Start at  23:02:31
+   Duration  3.05s (transform 744ms, setup 361ms, collect 1.11s, tests 129ms, environment 1.01s, prepare 129ms)
+
+exit 0
+===== tree-a25-h2frozen
+   ↓ heading structure commits always release the note and keep both draft halves equal > condition a: words that landed before the page went away are not written twice
+   ↓ heading structure commits always release the note and keep both draft halves equal > condition b: leaving is released within the watchdog when writes never settle, and the words are kept
+   ↓ heading structure commits always release the note and keep both draft halves equal > past the limit the notice asks for attention, and no kept words are dropped
+   ↓ heading structure commits always release the note and keep both draft halves equal > leaving waits for typed words to be placed
+   ↓ heading structure commits always release the note and keep both draft halves equal > a structure whose writes never settle is abandoned by the watchdog: busy released, failure shown, keys kept
+   ↓ A-25 ③ the landing queue keeps going > H1: a landing that throws (closing its box) does not stop the next kept record from landing
+   × A-25 ③ the landing queue keeps going > H2: the note changes between queueing a kept record and its landing; back on the note, it lands 289ms
+     → expected 'Intro' to contain 'gamma'
+   ↓ A-25 r2 (②b 乙) a key refused by its own block's failed save adds no toast > its own block holds the failed save: refused as before, no toast
+   ↓ A-25 r2 (②b 乙) a key refused by its own block's failed save adds no toast > another block holds the failed save: refused with the toast, as before
+   ↓ A-25 r3 (F1) a structure whose own save fails is still told > the structure's own text save fails: onFailure exactly once
+   ↓ A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > its own block holds the failed save, the writes wait rejects with its network error: refused, no toast
+   ↓ A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > another block holds the failed save, the writes wait rejects: refused with the toast
+   ↓ A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > its own block holds a failed template conversion (no mark): refused with the toast
+   ↓ A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > no block holds a failed save and the writes wait rejects: refused with the toast
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx > A-25 ③ the landing queue keeps going > H2: the note changes between queueing a kept record and its landing; back on the note, it lands
+AssertionError: expected 'Intro' to contain 'gamma'
+
+Expected: "gamma"
+Received: "Intro"
+
+ ❯ src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx:1790:20
+    1788|       await tick(60_000);
+    1789|       const text = textOf(editor.data.flowDrafts.source ?? getTextFlow…
+    1790|       expect(text).toContain('gamma');
+       |                    ^
+    1791|       editor.unmount();
+    1792|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 83 skipped (84)
+   Start at  23:02:37
+   Duration  2.76s (transform 713ms, setup 258ms, collect 1.06s, tests 291ms, environment 735ms, prepare 107ms)
+
+exit 0
+slot heavy-job.lock released 23:02:40 exit 0

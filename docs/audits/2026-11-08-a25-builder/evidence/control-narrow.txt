@@ -1,0 +1,4 @@
+   × A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > its own block holds a failed template conversion (no mark): refused with the toast 104ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+      Tests  1 failed | 83 skipped (84)

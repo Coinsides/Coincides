@@ -1,0 +1,34 @@
+item 1 (history gate) on pre-r2 useTextFlowHistory.ts:
+  exit 1 (want 1: three red, the guard green)
+  restored useTextFlowHistory.ts
+item 2 (②b 乙) on pre-r2 useHeadingStructureController.ts:
+  exit 1 (want 1: own-block red, other-block guard green)
+  restored useHeadingStructureController.ts
+item 3 (IME) on pre-r2 useDraftBlockController.ts + useRuntimeNaturalWritingController.ts:
+  exit 1 (want 1: both red)
+  restored useDraftBlockController.ts
+  restored useRuntimeNaturalWritingController.ts
+item 4 guard on pre-r2 useTextFlowHistory.ts:
+  exit 0 (want 0: green before r2 too)
+  restored useTextFlowHistory.ts
+--- 1
+   × A-25 r2 (i) the idle save waits per block > A's sealed save failed: B typed after it is written at a pause 2340ms
+   × A-25 r2 (i) the idle save waits per block > A's idle save failed: B typed after it is written at a pause 4342ms
+   ✓ A-25 r2 (i) the idle save waits per block > A's own pauses stay quiet while A has a failed save  6478ms
+   × A-25 r2 (i) the idle save waits per block > a failed idle save is marked and asked again by the backoff with what the block shows 2172ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 1 passed | 52 skipped (56)
+--- 2
+   × A-25 r2 (②b 乙) a key refused by its own block's failed save adds no toast > its own block holds the failed save: refused as before, no toast 202ms
+   ✓ A-25 r2 (②b 乙) a key refused by its own block's failed save adds no toast > another block holds the failed save: refused with the toast, as before 196ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 1 passed | 77 skipped (79)
+--- 3
+   × A-25 r2 (①) the create's catch-up and hand-over wait for the composition to end > three composing changes while the create is on its way: nothing saved, not handed over, until the word 48ms
+   × A-25 r2 (①) the create's catch-up and hand-over wait for the composition to end > caught up while composing: not handed over; at the end, saved once and handed over once 16ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 17 skipped (19)
+--- 4
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx (56 tests | 55 skipped) 6834ms
+   ✓ A-25 r2 at most one save of a block on its way > a held retry: blur, the backoff timer, online and Retry add none beside it  6832ms
+      Tests  1 passed | 55 skipped (56)

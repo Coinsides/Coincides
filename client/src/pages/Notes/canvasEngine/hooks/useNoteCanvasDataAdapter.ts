@@ -22,6 +22,7 @@ import {
   contentForTemplate,
   plainTextForBlockContent,
   presentationKindForBlock,
+  readFieldValues,
   textFromContent,
   type BlockPresentationKind,
   type FieldValueRecord,
@@ -57,6 +58,7 @@ import type {
 import {
   getTextFlowContent,
   projectTextFlowContent,
+  replaceTextUnitText,
   TEXT_FLOW_CONTENT_KEY,
 } from '../textFlowService';
 import {
@@ -65,6 +67,7 @@ import {
 import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
 import { createBoardTextRangeEditSession, rebaseBoardTextRanges, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
+import { mergeTypedText } from './useHeadingStructureController';
 import { loadBoardTextRangesForNote, saveBoardTextRangesForNote } from '../boardTextRangeRepository';
 import {
   NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
@@ -412,6 +415,67 @@ function presentationKindForTemplate(template: TemplateOption, _sourceQuote = fa
   return 'paragraph';
 }
 
+// A-25 ②a (ii): the block's units, id and text in order, deleted ones left out. Exact (the measure of A-20 r3d N6a):
+// no substring, no normalising. A side without a text flow never matches.
+function liveUnitTexts(flow: TextBlockContentV1 | null | undefined): string[] | null {
+  return flow ? flow.units.filter((unit) => unit.status !== 'deleted').map((unit) => `${unit.id}\u0000${unit.text}`) : null;
+}
+function receiptIsOnServer(receipt: BlockEditRecoveryReceipt, block: NoteBlock | undefined): boolean {
+  if (!block) return false;
+  const mine = liveUnitTexts(receipt.textFlow ?? getTextFlowContent(receipt.contentJson));
+  const server = liveUnitTexts(getTextFlowContent(block.content_json));
+  return !!mine && !!server && mine.length === server.length && mine.every((text, index) => text === server[index]);
+}
+
+// A-25 ②a (iv) D: the server refused a block save because the block moved on since its base revision.
+function isStaleRevisionError(err: unknown): boolean {
+  const response = (err as { response?: { status?: number; data?: { error?: string; details?: { code?: string } } } })?.response;
+  return response?.status === 409 && (response.data?.error === 'stale_revision'
+    || response.data?.details?.code === 'stale_revision');
+}
+
+// A-25 ②a (iv) D: a receipt's words merged onto the block as the server holds it now, or null. All or nothing, and only
+// words, never structure: the receipt must have exactly the units the block had when this page opened it (same ids, same
+// order), and the server must still have each of them. A unit the receipt left as it was opened keeps the server's text;
+// every other unit's words go where they were typed, anchored on the opened text (mergeTypedText, as kept words land,
+// an empty unit being no anchor). One unit that cannot be anchored and nothing is merged.
+export function mergeRecoveryOntoCurrent(
+  receiptFlow: TextBlockContentV1 | null | undefined,
+  openedTexts: ReadonlyMap<string, string> | undefined,
+  currentFlow: TextBlockContentV1 | null | undefined,
+): TextBlockContentV1 | null {
+  if (!receiptFlow || !openedTexts || !currentFlow) return null;
+  const receiptUnits = receiptFlow.units.filter((unit) => unit.status !== 'deleted');
+  const openedIds = [...openedTexts.keys()];
+  if (receiptUnits.length !== openedIds.length || receiptUnits.some((unit, index) => unit.id !== openedIds[index])) return null;
+  const merged = new Map<string, { text: string; at: number; inserted: string }>();
+  for (const unit of receiptUnits) {
+    const live = currentFlow.units.find((candidate) => candidate.id === unit.id && candidate.status !== 'deleted');
+    if (!live) return null;
+    const opened = openedTexts.get(unit.id) as string;
+    if (unit.text === opened) continue;
+    // Already the receipt's words on the server (its save went through after all): the same, nothing to place.
+    if (live.text === unit.text) continue;
+    const placed = mergeTypedText(live.text, opened, unit.text, unit.text.length, { emptyMatches: false });
+    if (!placed) return null;
+    // D1: nothing to place (the receipt only took words out, and deletions are not replayed onto changed text): this
+    // is not a merge, so the item stays a conflict item rather than being forgotten as if it had applied.
+    if (placed.text === live.text) return null;
+    // D2: the words went in at one point (mergeTypedText inserts, never replaces): placed.caret is their end.
+    const length = placed.text.length - live.text.length;
+    const at = placed.caret - length;
+    merged.set(unit.id, { text: placed.text, at, inserted: placed.text.slice(at, placed.caret) });
+  }
+  // D2: through replaceTextUnitText with the insertion as the edit, so inline structures (links, marks) anchored on the
+  // server's text keep covering the same words.
+  let next = currentFlow;
+  for (const [unitId, words] of merged) {
+    next = replaceTextUnitText({ textFlow: next, textUnitId: unitId, nextText: words.text,
+      edit: { editedStartOffset: words.at, editedEndOffset: words.at, replacementText: words.inserted } });
+  }
+  return next;
+}
+
 export function useNoteCanvasDataAdapter({
   noteId,
   hostMode = 'page',
@@ -463,6 +527,9 @@ export function useNoteCanvasDataAdapter({
   // Presentation only: recovery receipts and their frozen retry payloads stay unchanged.
   const [blockEditRecoveryConflicts, setBlockEditRecoveryConflicts] = useState<Record<string, boolean>>({});
   const replayingBlockEditRecoveryKeysRef = useRef(new Set<string>());
+  // A-25 ②a (iv) D (d1): each block's live units (id → text, in order) as the server held them when this page opened the
+  // note: the anchor an Apply that meets a 409 merges from. First hydration of a block in this opening wins.
+  const openedUnitTextsRef = useRef<{ key: string | null; blocks: Map<string, Map<string, string> | null> }>({ key: null, blocks: new Map() });
   const [anchorsBySourceRef, setAnchorsBySourceRef] = useState<Record<string, SourceAnchor>>({});
   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
@@ -730,6 +797,15 @@ export function useNoteCanvasDataAdapter({
       setAnnotationProposals(annotationProposalsFromMetadata(hydratedNote.metadata));
       setBlocks(hydratedBlocks);
       const activeRouteGeneration = routeRequestGenerationRef.current;
+      const openingKey = `${requestedNoteId}@${activeRouteGeneration}`;
+      if (openedUnitTextsRef.current.key !== openingKey) openedUnitTextsRef.current = { key: openingKey, blocks: new Map() };
+      hydratedBlocks.forEach((block) => {
+        if (openedUnitTextsRef.current.blocks.has(block.id)) return;
+        const flow = getTextFlowContent(block.content_json);
+        openedUnitTextsRef.current.blocks.set(block.id, flow
+          ? new Map(flow.units.filter((unit) => unit.status !== 'deleted').map((unit) => [unit.id, unit.text]))
+          : null);
+      });
       const draftSnapshot = readBlockDraftSnapshot();
       const recoveredTextDrafts: Record<string, string> = {};
       const recoveredTextFlowDrafts: Record<string, TextBlockContentV1> = {};
@@ -739,6 +815,15 @@ export function useNoteCanvasDataAdapter({
           receipt.mountNonce !== blockEditRecoveryMountNonce
           || receipt.creationGeneration !== activeRouteGeneration
         ) {
+          // A-25 ②a (ii): the server already has this receipt's block, unit for unit (its save went through, the answer
+          // did not reach the page that sent it). Offering it would only meet a 409: it is forgotten.
+          if (receiptIsOnServer(receipt, hydratedBlocks.find((block) => block.id === receipt.blockId))) {
+            forgetBlockEditRecoveryReceipt(receipt.recoveryKey);
+            console.info('[A-25 2a] recovery receipt already on the server, forgotten', {
+              recoveryKey: receipt.recoveryKey, blockId: receipt.blockId,
+            });
+            return;
+          }
           const notificationKey = `block-edit-recovery:${receipt.recoveryKey}`;
           if (!recoveryFailureNotifiedKeysRef.current.has(notificationKey)) {
             recoveryFailureNotifiedKeysRef.current.add(notificationKey);
@@ -1900,6 +1985,8 @@ export function useNoteCanvasDataAdapter({
     text: string,
     options: {
       silent?: boolean;
+      /** A-25 ②a: the caller shows a failure itself (the history's mark on the block); no toast here. */
+      quietFailure?: boolean;
       fieldValues?: FieldValueRecord;
       textFlow?: TextBlockContentV1;
       recoveryKey?: string;
@@ -2001,21 +2088,32 @@ export function useNoteCanvasDataAdapter({
     }
     const operationSequence = blockSaveOperationSequenceRef.current + 1;
     blockSaveOperationSequenceRef.current = operationSequence;
+    // A-25 ②a (iv) B: Apply and Replay write their entry into the slot of the entry they apply, replacing it, so the
+    // block still has one item for it (a 409 turns that item into a conflict item, not a second one beside it).
+    const appliedReceipt = options.recoveryKey
+      ? listBlockEditRecoveryReceipts(requestedNoteId).find((receipt) => receipt.recoveryKey === options.recoveryKey
+        && receipt.blockId === block.id)
+      : undefined;
+    const receiptMountNonce = appliedReceipt?.mountNonce ?? blockEditRecoveryMountNonce;
+    const receiptGeneration = appliedReceipt?.creationGeneration ?? requestGeneration;
+    // In the applied entry's slot this page's sequence can equal the one that entry was written with: the key would be
+    // the applied entry's own. A later sequence keeps them apart (settling forgets both keys, a 409 marks the new one).
+    const receiptSequence = appliedReceipt ? Math.max(operationSequence, appliedReceipt.operationSequence + 1) : operationSequence;
     const recoveryReceipt: BlockEditRecoveryReceipt = Object.freeze({
       version: 2,
       kind: 'block_edit_recovery',
       recoveryKey: createBlockEditRecoveryKey(
         requestedNoteId,
         block.id,
-        requestGeneration,
-        operationSequence,
-        blockEditRecoveryMountNonce,
+        receiptGeneration,
+        receiptSequence,
+        receiptMountNonce,
       ),
       noteId: requestedNoteId,
       requestedNoteId,
-      mountNonce: blockEditRecoveryMountNonce,
-      creationGeneration: requestGeneration,
-      operationSequence,
+      mountNonce: receiptMountNonce,
+      creationGeneration: receiptGeneration,
+      operationSequence: receiptSequence,
       blockId: block.id,
       text: nextText,
       plainText: requestedPlainText,
@@ -2155,9 +2253,13 @@ export function useNoteCanvasDataAdapter({
       if (!requestIsCurrent() || !operationIsLatest()) {
         // A-20: the reply came after the route moved on (the read-back below then reports read_failed). A 2xx whose
         // block is what was sent proves this edit saved; only its receipt goes, so no stale banner waits on the note.
-        if (blockMatchesIssuedSave(result.block, requestedPlainText, nextContent)) forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
+        const sentMatches = blockMatchesIssuedSave(result.block, requestedPlainText, nextContent);
+        if (sentMatches) forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
         const reconciliation = await reconcileIssuedSave('read_after_outcome');
-        if (reconciliation.durableState === 'matches_requested') {
+        // A-25 decision 3 (TD-62): after the route moved on, the read-back cannot answer (read_failed), but a 2xx whose
+        // block is what was sent is the durable answer: the write registry counts it as saved, not as a failure.
+        const durableState = !requestRouteIsCurrent() && sentMatches ? 'matches_requested' : reconciliation.durableState;
+        if (durableState === 'matches_requested') {
           forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
           if (options.recoveryKey && options.recoveryKey !== recoveryReceipt.recoveryKey) {
             forgetBlockEditRecoveryReceipt(options.recoveryKey);
@@ -2178,7 +2280,7 @@ export function useNoteCanvasDataAdapter({
         if (requestRouteIsCurrent()) {
           addToast(
             'info',
-            reconciliation.durableState === 'matches_requested'
+            durableState === 'matches_requested'
               ? 'Block save crossed a newer state; durable result reconciled'
               : 'Block save crossed a newer state; pending edit retained',
           );
@@ -2190,7 +2292,7 @@ export function useNoteCanvasDataAdapter({
           reconciliation: reconciliation.reconciliation === 'read_after_outcome'
             ? 'read_after_outcome'
             : 'read_failed',
-          durableState: reconciliation.durableState,
+          durableState,
           reason,
         };
       }
@@ -2222,9 +2324,7 @@ export function useNoteCanvasDataAdapter({
       };
     } catch (err) {
       blockSaveOutcomeVersionRef.current += 1;
-      const response = (err as { response?: { status?: number; data?: { error?: string; details?: { code?: string } } } })?.response;
-      if (response?.status === 409 && (response.data?.error === 'stale_revision'
-        || response.data?.details?.code === 'stale_revision') && adapterMountActiveRef.current) {
+      if (isStaleRevisionError(err) && adapterMountActiveRef.current) {
         setBlockEditRecoveryConflicts((current) => ({ ...current, [recoveryReceipt.recoveryKey]: true }));
       }
       // Surface a failed write immediately, including while its read-back is pending.
@@ -2235,7 +2335,7 @@ export function useNoteCanvasDataAdapter({
       });
       if (adapterMountActiveRef.current) setBlockEditRecoveryVersion((version) => version + 1);
       console.error('Failed to save block:', err);
-      if (requestIsCurrent()) addToast('error', 'Failed to save block');
+      if (requestIsCurrent() && !options.quietFailure) addToast('error', 'Failed to save block');
       const reconciliation = await reconcileIssuedSave('read_after_error');
       return {
         status: 'rejected',
@@ -2307,7 +2407,71 @@ export function useNoteCanvasDataAdapter({
     if (applied && routeNoteIdRef.current === activeNoteId) {
       addToast('success', 'Recovered block edit applied');
     }
-    return applied;
+    if (applied) return true;
+    // A-25 ②a (iv) D: only a 409 goes on; every other failure is today's outcome.
+    if (outcome.status !== 'rejected' || !outcome.recoveryReceipt || !isStaleRevisionError(outcome.error)) return false;
+    const conflictKey = outcome.recoveryReceipt.recoveryKey;
+    const openingKey = openedUnitTextsRef.current.key;
+    const openedTexts = openedUnitTextsRef.current.blocks.get(receipt.blockId) ?? undefined;
+    const stillHere = () => adapterMountActiveRef.current && noteRef.current?.id === activeNoteId
+      && routeNoteIdRef.current === activeNoteId && openedUnitTextsRef.current.key === openingKey
+      && listBlockEditRecoveryReceipts(activeNoteId).some((candidate) => candidate.recoveryKey === conflictKey);
+    let current: NoteBlock;
+    try {
+      // The block as the server holds it now (the failure read-back keeps the old base revision: not used here).
+      const response = await api.get(`/notes/${activeNoteId}/blocks`);
+      const raw = Array.isArray(response.data)
+        ? response.data.find((candidate: NoteBlock) => candidate.id === receipt.blockId) : null;
+      if (!raw || !Number.isSafeInteger(raw.text_save_revision) || raw.text_save_revision < 0) return false;
+      current = hydrateClientBlock(raw);
+    } catch {
+      return false;
+    }
+    if (!stillHere()) return false;
+    const currentFlow = getTextFlowContent(current.content_json);
+    // D3: words only, never fields. A receipt whose field values differ from the block's now (a formula's fields
+    // changed on either side) stays a conflict item. A text block's receipt carries none (undefined), and the block
+    // reads as {}: both empty, equal.
+    const currentFields = readFieldValues(current.content_json, current.metadata);
+    if (JSON.stringify(canonicalJsonValue(receipt.fieldValues ?? {})) !== JSON.stringify(canonicalJsonValue(currentFields))) {
+      return false;
+    }
+    // Decided in full before any write: every unit anchors, or nothing is written and the item stays a conflict item.
+    const merged = mergeRecoveryOntoCurrent(receipt.textFlow ?? getTextFlowContent(receipt.contentJson), openedTexts, currentFlow);
+    if (!merged || !currentFlow) return false;
+    // Every word already where it was typed: nothing to write, the receipt is done.
+    if (merged.units.every((unit, index) => unit.text === currentFlow.units[index]?.text)) {
+      forgetBlockEditRecoveryReceipt(conflictKey);
+      setBlockEditRecoveryVersion((version) => version + 1);
+      return true;
+    }
+    const [ranges, annotations] = await Promise.all([
+      loadBoardTextRangesForNote(activeNoteId),
+      loadAnnotationTruthsForNote({ note: noteRef.current! }),
+    ]);
+    if (!stillHere()) return false;
+    // One more save, at the revision just read, in the slot of the item it applies (B). A second 409 stops here: the
+    // item stays a conflict item. No third.
+    const mergedOutcome = await saveBlock(current, receipt.text, {
+      silent: true,
+      textFlow: merged,
+      recoveryKey: conflictKey,
+      baseRevision: current.text_save_revision,
+      // D3: equal by now; the block's own values are written. None stays none (a text block's receipt).
+      fieldValues: receipt.fieldValues === undefined ? undefined : currentFields,
+      annotationRanges: recoveryReplayAnnotationRanges({
+        annotations, blockId: current.id, previousTextFlow: currentFlow, nextTextFlow: merged,
+      }),
+      boardRangeSnapshot: { ranges: rebaseBoardTextRanges({
+        ranges: ranges.filter((range) => range.block_id === current.id),
+        blockId: current.id, previousTextFlow: currentFlow, nextTextFlow: merged,
+      }) },
+    });
+    const mergedApplied = mergedOutcome.status === 'saved'
+      || ('durableState' in mergedOutcome && mergedOutcome.durableState === 'matches_requested'
+        && mergedOutcome.reason !== 'board_range_sync_failed');
+    if (mergedApplied && routeNoteIdRef.current === activeNoteId) addToast('success', 'Recovered block edit applied');
+    return mergedApplied;
   }, [addToast, blocks, saveBlock]);
 
   const readBlockEditRecoveryCurrent = useCallback(async (recoveryKey: string) => {
@@ -2463,8 +2627,11 @@ export function useNoteCanvasDataAdapter({
       && successfulHydrationEpochRef.current === requestHydrationEpoch
     );
     const nextText = options.historySnapshot ? text : text.trimEnd();
+    // A-25 ②a (iv) C: only this visit's entries for the block; another visit's stays on offer (its body is of the old
+    // type, so Apply meets a conflict and shows as a conflict item: TD appendix).
     const recoveryKeysAtCreation = listBlockEditRecoveryReceipts(requestedNoteId)
-      .filter((receipt) => receipt.blockId === block.id)
+      .filter((receipt) => receipt.blockId === block.id && receipt.mountNonce === blockEditRecoveryMountNonce
+        && receipt.creationGeneration === requestGeneration)
       .map((receipt) => receipt.recoveryKey);
     const operationSequence = blockSaveOperationSequenceRef.current + 1;
     blockSaveOperationSequenceRef.current = operationSequence;

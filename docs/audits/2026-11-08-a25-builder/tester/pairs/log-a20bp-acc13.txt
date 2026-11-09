@@ -1,0 +1,13 @@
+--- S-b1-nextLineSharesPrefix
+--- S-b2-prevLineSharesSuffix
+--- S-a1-moreTypedAtCaret
+--- S-ctrl-shouldLand
+--- N-a1-failedSaveThenMore-0
+--- N-a1-failedSaveThenMore-1
+--- N-a1-failedSaveThenMore-2
+--- N-a1c-failedSaveNoMore-0
+--- N-b2-headingAboveLineSameWord-0
+BAD {"arm":"RV","name":"N-b2-headingAboveLineSameWord-0","id":"d0cbeac3-c103-496a-b258-efb9e7463b9f","held":true,"atLeave":{"buf":"intro","boxes":2,"focusBuf":true,"active":"TEXTAREA=intro@0","notice":null,"eds":["warmup","see the note","noteintro"],"alerts":[],"s
+--- N-b2-headingAboveLineSameWord-1
+BAD {"arm":"RV","name":"N-b2-headingAboveLineSameWord-1","id":"3333851b-0e91-4d40-b707-1f838ada1164","held":true,"atLeave":{"buf":"intro","boxes":2,"focusBuf":true,"active":"TEXTAREA=intro@0","notice":null,"eds":["warmup","see the note","noteintro"],"alerts":[],"s
+DONE a20bp-acc13: 10 rows, bad 2

@@ -1,0 +1,12 @@
+{
+ "label": "a25p-dtfail",
+ "origin": "http://127.0.0.1:5614",
+ "by": {
+  "D": {
+   "n": 2,
+   "bad": 0
+  }
+ },
+ "errors": 0,
+ "firstErrors": []
+}

@@ -671,6 +671,8 @@ export function useNoteCanvasRuntimeController() {
     sourceLocked: sourceProjectionPolicy.contentReadOnly,
     contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying || walls.saving || headingStructure.busy || chapters.isMoving,
     recoveryBlockIds: sourceProjectionPolicy.contentReadOnly || historyReplaying ? [] : textHistory.recoveryBlockIds,
+    failedSaveBlockIds: sourceProjectionPolicy.contentReadOnly ? [] : textHistory.failedTypingBlockIds,
+    onRetryFailedSaves: textHistory.retryFailedSavesNow,
     surfaceMode,
     surfacePolicy,
     surfacePolicyMode: surfacePolicy.mode,

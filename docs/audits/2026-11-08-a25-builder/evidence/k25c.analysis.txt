@@ -1,0 +1,77 @@
+IME-new                    pass 24/24
+   pinyin in note 0/24; examples 
+   timeline (imeLog, page clock): {"green handoff-cuts-composition-2":24}
+     IME-new-0  ok  handoff-cuts-composition-2                           POST 596->742 (201); comp [[1,592,"第一"],[861,1541,"测试"]]; hand-off [911,"editor-in"]; draft-left 1700 '第一测试'; first editor input null
+     IME-new-1  ok  handoff-cuts-composition-2                           POST 591->741 (201); comp [[1,588,"第一"],[847,1528,"测试"]]; hand-off [886,"editor-in"]; draft-left 1674 '第一测试'; first editor input null
+     IME-new-2  ok  handoff-cuts-composition-2                           POST 592->739 (201); comp [[1,589,"第一"],[845,1542,"测试"]]; hand-off [885,"editor-in"]; draft-left 1689 '第一测试'; first editor input null
+     IME-new-3  ok  handoff-cuts-composition-2                           POST 599->734 (201); comp [[1,596,"第一"],[857,1567,"测试"]]; hand-off [871,"editor-in"]; draft-left 1716 '第一测试'; first editor input null
+     IME-new-4  ok  handoff-cuts-composition-2                           POST 598->749 (201); comp [[1,596,"第一"],[856,1548,"测试"]]; hand-off [895,"editor-in"]; draft-left 1697 '第一测试'; first editor input null
+     IME-new-5  ok  handoff-cuts-composition-2                           POST 586->721 (201); comp [[1,583,"第一"],[844,1551,"测试"]]; hand-off [858,"editor-in"]; draft-left 1700 '第一测试'; first editor input null
+     IME-new-6  ok  handoff-cuts-composition-2                           POST 600->750 (201); comp [[1,598,"第一"],[858,1566,"测试"]]; hand-off [881,"editor-in"]; draft-left 1715 '第一测试'; first editor input null
+     IME-new-7  ok  handoff-cuts-composition-2                           POST 598->748 (201); comp [[1,595,"第一"],[855,1560,"测试"]]; hand-off [879,"editor-in"]; draft-left 1710 '第一测试'; first editor input null
+     IME-new-8  ok  handoff-cuts-composition-2                           POST 598->747 (201); comp [[1,595,"第一"],[854,1542,"测试"]]; hand-off [878,"editor-in"]; draft-left 1693 '第一测试'; first editor input null
+     IME-new-9  ok  handoff-cuts-composition-2                           POST 596->730 (201); comp [[1,593,"第一"],[851,1553,"测试"]]; hand-off [864,"editor-in"]; draft-left 1702 '第一测试'; first editor input null
+     IME-new-10 ok  handoff-cuts-composition-2                           POST 596->734 (201); comp [[1,594,"第一"],[854,1561,"测试"]]; hand-off [878,"editor-in"]; draft-left 1711 '第一测试'; first editor input null
+     IME-new-11 ok  handoff-cuts-composition-2                           POST 597->732 (201); comp [[1,595,"第一"],[856,1566,"测试"]]; hand-off [869,"editor-in"]; draft-left 1714 '第一测试'; first editor input null
+     IME-new-12 ok  handoff-cuts-composition-2                           POST 598->733 (201); comp [[1,595,"第一"],[856,1562,"测试"]]; hand-off [869,"editor-in"]; draft-left 1713 '第一测试'; first editor input null
+     IME-new-13 ok  handoff-cuts-composition-2                           POST 601->736 (201); comp [[1,598,"第一"],[860,1567,"测试"]]; hand-off [874,"editor-in"]; draft-left 1715 '第一测试'; first editor input null
+     IME-new-14 ok  handoff-cuts-composition-2                           POST 598->734 (201); comp [[1,595,"第一"],[859,1554,"测试"]]; hand-off [872,"editor-in"]; draft-left 1702 '第一测试'; first editor input null
+     IME-new-15 ok  handoff-cuts-composition-2                           POST 603->739 (201); comp [[1,601,"第一"],[862,1568,"测试"]]; hand-off [875,"editor-in"]; draft-left 1717 '第一测试'; first editor input null
+     IME-new-16 ok  handoff-cuts-composition-2                           POST 603->738 (201); comp [[1,600,"第一"],[860,1566,"测试"]]; hand-off [873,"editor-in"]; draft-left 1717 '第一测试'; first editor input null
+     IME-new-17 ok  handoff-cuts-composition-2                           POST 600->736 (201); comp [[1,597,"第一"],[859,1566,"测试"]]; hand-off [872,"editor-in"]; draft-left 1712 '第一测试'; first editor input null
+     IME-new-18 ok  handoff-cuts-composition-2                           POST 597->747 (201); comp [[1,594,"第一"],[854,1560,"测试"]]; hand-off [878,"editor-in"]; draft-left 1706 '第一测试'; first editor input null
+     IME-new-19 ok  handoff-cuts-composition-2                           POST 596->731 (201); comp [[1,594,"第一"],[852,1553,"测试"]]; hand-off [876,"editor-in"]; draft-left 1703 '第一测试'; first editor input null
+     IME-new-20 ok  handoff-cuts-composition-2                           POST 596->729 (201); comp [[1,593,"第一"],[853,1557,"测试"]]; hand-off [866,"editor-in"]; draft-left 1705 '第一测试'; first editor input null
+     IME-new-21 ok  handoff-cuts-composition-2                           POST 599->735 (201); comp [[1,596,"第一"],[857,1565,"测试"]]; hand-off [870,"editor-in"]; draft-left 1714 '第一测试'; first editor input null
+     IME-new-22 ok  handoff-cuts-composition-2                           POST 596->733 (201); comp [[1,593,"第一"],[855,1562,"测试"]]; hand-off [868,"editor-in"]; draft-left 1712 '第一测试'; first editor input null
+     IME-new-23 ok  handoff-cuts-composition-2                           POST 600->735 (201); comp [[1,597,"第一"],[857,1565,"测试"]]; hand-off [870,"editor-in"]; draft-left 1713 '第一测试'; first editor input null
+IME-mid                    pass 24/24
+   pinyin in note 0/24; examples 
+SAVEFAIL-500-direct        pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [4547,4552]; failure toasts [0,0]
+SAVEFAIL-500-blur          pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [2273,2275]; failure toasts [0,0]
+SAVEFAIL-net-direct        pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [4548,4556]; failure toasts [0,0]
+SAVEFAIL-net-blur          pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [2271,2259]; failure toasts [0,0]
+ONEFAIL-500                pass 2/2
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 2: {"i":2,"ii":2,"iii":2,"iv":2,"markInfo":2}; B saved ms [2536,2520]; A caught ms [6807,6816]; failure toasts [0,0]; server [[["alpha start one two"],["beta start bee"]],[["alpha start one two"],["beta start bee"]]]
+ONEFAIL-net                pass 2/2
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 2: {"i":2,"ii":2,"iii":2,"iv":2,"markInfo":2}; B saved ms [2531,2540]; A caught ms [6805,6836]; failure toasts [0,0]; server [[["alpha start one two"],["beta start bee"]],[["alpha start one two"],["beta start bee"]]]
+LANDFAIL-auto-500          pass 2/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"c":2,"d":2,"e":2,"bInfo":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked [null,null]; caught ms [13641,13636]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-auto-net          pass 2/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"c":2,"d":2,"e":2,"bInfo":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked [null,null]; caught ms [13643,13641]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-500         pass 2/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"b":2,"d":2,"e":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked ["Retry","Retry"]; caught ms [4159,4149]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-net         pass 2/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"b":2,"d":2,"e":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked ["Retry","Retry"]; caught ms [4149,4163]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-other-plain       pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15912]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+LANDFAIL-other-heading     pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15874]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+LANDFAIL-other-headline    pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15914]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+CHAIN-enter                pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-blur                 pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-inline               pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-mixed                pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-seed                 pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":0},{"kzero":1,"kone":1,"ktwo":0}]
+H1                         pass 2/2
+   injected throw fired 2/2 (a run where it did not fire proves nothing); beta landed 2/2
+H2                         pass 2/2
+   SMOKE only (not a gate): landed after coming back 2/2

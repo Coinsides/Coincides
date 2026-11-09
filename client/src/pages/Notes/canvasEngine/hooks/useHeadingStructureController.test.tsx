@@ -42,7 +42,10 @@ function block(id: string, flow: TextBlockContentV1, order: number): NoteBlock {
 type ControllerInput = Parameters<typeof useHeadingStructureController>[0];
 
 function renderStructure(original: TextBlockContentV1, ending = textFlow([['end', 'End']]),
-  extra: Partial<Pick<ControllerInput, 'whenWritesIdle' | 'watchdogMs' | 'editorWaitMs' | 'placeRetryMs'>> = {}) {
+  extraInput: Partial<Pick<ControllerInput, 'whenWritesIdle' | 'watchdogMs' | 'editorWaitMs' | 'placeRetryMs'>>
+    & { headingNoteId?: () => string } = {}) {
+  // A-25 ③ H2: the note the heading controller is on can be switched by itself (the history stays on 'note').
+  const { headingNoteId, ...extra } = extraInput;
   const originalBlocks = [block('source', structuredClone(original), 0), block('ending', structuredClone(ending), 1)];
   const board = createBoardTextRangeEditSession('note', async (_note, updates) => updates);
   board.hydrate([]);
@@ -107,11 +110,13 @@ function renderStructure(original: TextBlockContentV1, ending = textFlow([['end'
       saveBlock: save, saveAnnotationTruthsOutcome: async () => true, history: host,
       createDraftBlock: create, saveDraftBlockPlacement: savePlacement, discardDraftBlock: discard,
       trashBlock: trash, restoreBlock: restore, transferTextUnit: transfer,
+      // A-25 r3: a template conversion that the server refuses (only the ②b 乙 template guard converts a block).
+      applyTemplateToBlock: async () => null,
     });
     const history = usePlacementHistory({ noteId: 'note', generation: 1, beforeHistoryBoundary: () => editing.boundary(),
       applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null });
     host.current = history;
-    const heading = useHeadingStructureController({ noteId: 'note', blocks: data.blocks,
+    const heading = useHeadingStructureController({ noteId: headingNoteId?.() ?? 'note', blocks: data.blocks,
       layouts: Object.fromEntries(data.blocks.map((entry) => [entry.id, layout])), readOnly: false,
       template, textHistory: editing, reorderBlocks: reorder, onFocusBlock: focus, onFailure: failure, editorWaitMs: 0,
       setBlockTextDrafts: (value) => { data.textDrafts = typeof value === 'function' ? value(data.textDrafts) : value; update(); },
@@ -1539,6 +1544,28 @@ describe('heading structure commits always release the note and keep both draft 
 
     // Green on r1 and r2: a split record with no line break (empty start, no role) has no anchor and stays in the box,
     // the note untouched, as before.
+    // Reviewer S2. Red without the source on the landed record (HSC :631–632): the next opening read none and split it.
+    it('an edit record that landed but whose save never answered, page left: reopened, still one line', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'edit-4', blockId: 'source', unitId: 'a', initialText: 'abc', text: 'abc\nd',
+        writingRole: 'paragraph', source: 'edit' } as Parameters<typeof rememberUnplacedWords>[1]);
+      const left = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      left.save.mockImplementation(() => new Promise(() => {}));
+      // It lands (one line), and its save goes out and never answers: the landed record stays stored.
+      await waitFor(() => expect(landedTexts(left)).toEqual(['abc\nd', 'q']), { timeout: 3000 });
+      await settle();
+      expect(left.save).toHaveBeenCalled();
+      expect(readUnplacedWords('note')).toEqual([expect.objectContaining({ id: 'edit-4', initialText: 'abc', text: 'abc\nd', source: 'edit' })]);
+      left.unmount();
+      startCleanScreenOnly();
+      // The server never had them: the next opening finds the line as it was.
+      const editor = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      await waitFor(() => expect(readUnplacedWords('note')).toEqual([]), { timeout: 3000 });
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc\nd', 'q']);
+      editor.unmount();
+    });
+
     it('a split record without a line break behaves as on r1: kept, nothing written', async () => {
       startClean();
       rememberUnplacedWords('note', { id: 'split-1', blockId: 'source', unitId: 'n', initialText: '', text: 'xyz',
@@ -1697,5 +1724,247 @@ describe('heading structure commits always release the note and keep both draft 
     expect(typeText('later')).toBe(true);
     typingNotice()!.querySelector('button')!.click();
     area.remove();
+  });
+});
+
+// A-25 ③ (Reviewer r2.3c H1 / H2): background landing of kept words must not stop for the rest of the mount.
+describe('A-25 ③ the landing queue keeps going', () => {
+  beforeEach(startClean);
+  afterEach(() => { vi.restoreAllMocks(); startClean(); });
+
+  it('H1: a landing that throws (closing its box) does not stop the next kept record from landing', async () => {
+    rememberUnplacedWords('note', { id: 'h1-a', blockId: 'source', unitId: 'body', initialText: 'Intro', text: 'Intro alpha' });
+    rememberUnplacedWords('note', { id: 'h1-b', blockId: 'source', unitId: 'title', initialText: 'Sec', text: 'Sec beta' });
+    // Injected where Tester's probe throws: closing the first landed record's box. (A throw from localStorage would
+    // not do: writeUnplacedWords catches its own storage errors.)
+    const remove = Element.prototype.remove;
+    let thrown = 0;
+    vi.spyOn(Element.prototype, 'remove').mockImplementation(function (this: Element) {
+      if (!thrown && this instanceof HTMLTextAreaElement && this.dataset.structureTypingBuffer) {
+        thrown += 1;
+        throw new Error('synthetic failure closing a landed box');
+      }
+      return remove.call(this);
+    });
+    // The fix lets the error go on out of its timer (as a browser logs it); here each timer's error is collected so
+    // the test can see it was really thrown.
+    const errors: unknown[] = [];
+    const realSetTimeout = globalThis.setTimeout;
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation(((callback: (...args: unknown[]) => void, ms?: number, ...args: unknown[]) =>
+      realSetTimeout(() => { try { callback(...args); } catch (error) { errors.push(error); } }, ms)) as typeof setTimeout);
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', 'Sec']]), undefined, { placeRetryMs: 40 });
+    await waitFor(() => expect(thrown).toBe(1));
+    await waitFor(() => {
+      const text = textOf(editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!);
+      expect(text).toContain('alpha');
+      expect(text).toContain('beta');
+    }, { timeout: 3000 });
+    expect(errors).toEqual([expect.objectContaining({ message: 'synthetic failure closing a landed box' })]);
+    editor.unmount();
+  });
+
+  it('H2: the note changes between queueing a kept record and its landing; back on the note, it lands', async () => {
+    // Fake timers: the window is "a retry handed the record to the landing queue, and the note changed before the
+    // queue ran it". Before the fix the queue run returned for a kept record on another note without asking again,
+    // and that was the last retry chain: back on the note, the record never landed (its box still on screen, so the
+    // reopen skips it too).
+    vi.useFakeTimers();
+    try {
+      rememberUnplacedWords('note', { id: 'h2-a', blockId: 'source', unitId: 'body', initialText: 'Intro', text: 'Intro gamma' });
+      let current = 'note';
+      const editor = renderStructure(textFlow([['body', 'Intro']]), undefined, { placeRetryMs: 40, headingNoteId: () => current });
+      const go = (noteId: string) => act(() => { current = noteId; editor.rerender(); });
+      const tick = (ms: number) => act(async () => { vi.advanceTimersByTime(ms); await Promise.resolve(); });
+      // The reopen queued the record; the person is on another note when the queue runs it.
+      go('other-note');
+      await tick(1);
+      // Back before its own retry (40 ms) asks: that retry hands it to the queue again...
+      go('note');
+      await tick(39);
+      // ...and the note changes again before the queue runs it.
+      go('other-note');
+      await tick(1);
+      go('note');
+      await tick(60_000);
+      const text = textOf(editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!);
+      expect(text).toContain('gamma');
+      editor.unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+// A-25 r2 (②b 乙, Main_Designer 2026-11-09): a structure refused because its own block holds a failed save is refused as
+// before (nothing written, nothing new on screen) but adds no toast: the block's mark says it. A refusal for any other
+// reason, or for another block's failed save, still says so.
+describe('A-25 r2 (②b 乙) a key refused by its own block\'s failed save adds no toast', () => {
+  const failedSave = async (editor: ReturnType<typeof renderStructure>, blockId: string) => {
+    const target = editor.data.blocks.find((entry) => entry.id === blockId)!;
+    const before = getTextFlowContent(target.content_json)!;
+    const typed = { ...before, units: before.units.map((unit, index) => index ? unit : { ...unit, text: `${unit.text} more` }) };
+    const unitId = before.units[0].id;
+    editor.save.mockImplementationOnce(async () => ({ status: 'rejected', block: null, recoveryReceipt: null,
+      reconciliation: 'not_attempted', durableState: 'not_checked', reason: 'request_failed', staleEpoch: false,
+      error: { response: { status: 409 } } }) as never);
+    await act(async () => { await editor.result.current.editing.applyEdit(target, typed, { previousTextFlow: before, metadata: {
+      unitId, inputType: 'insertText', kind: 'typing', isComposing: false,
+      beforeSelection: { unitId, start: 0, end: 0 }, afterSelection: { unitId, start: 5, end: 5 } } }); });
+    act(() => { editor.result.current.editing.boundary(); });
+    await waitFor(() => expect(editor.result.current.editing.failedTypingBlockIds).toEqual([blockId]));
+  };
+  const heading = (editor: ReturnType<typeof renderStructure>) => {
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], {
+        previousTextFlow: editor.data.flowDrafts.source ?? editor.flows()[0],
+        nextTextFlow: textFlow([['body', 'Intro more'], ['title', 'Sec', 'heading_1']]),
+        headingUnitId: 'title', focus: { unitId: 'title', caret: 3 }, inputType: 'insertHeading' });
+    });
+    return pending;
+  };
+
+  // Red before r2: every refused key raised "Heading changes could not be completed" (Tester LANDFAIL: 7 keys, 7 toasts).
+  it('its own block holds the failed save: refused as before, no toast', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    await failedSave(editor, 'source');
+    const blocks = editor.data.blocks.map((entry) => entry.id);
+    const saves = editor.save.mock.calls.length;
+    expect(await heading(editor)).toBe(false);
+    expect(editor.failure).not.toHaveBeenCalled();
+    expect(editor.create).not.toHaveBeenCalled();
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(blocks);
+    expect(editor.save.mock.calls.length).toBe(saves);
+    expect(editor.result.current.editing.failedTypingBlockIds).toEqual(['source']);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
+  });
+
+  // Guard (the same on r1): another block's failed save still refuses with a toast (cross-block isolation is not done).
+  it('another block holds the failed save: refused with the toast, as before', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    await failedSave(editor, 'ending');
+    expect(await heading(editor)).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    expect(editor.create).not.toHaveBeenCalled();
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
+  });
+});
+
+// A-25 r3 (F1, Reviewer r2 pre-seal read; Main_Designer 2026-11-09): only a refusal before the structure's body began is
+// quiet. Once the body has begun, its edit is on screen and in undo; a failure of its own save is told, once.
+describe('A-25 r3 (F1) a structure whose own save fails is still told', () => {
+  // Red on r2: the inner flush (after applyEdit) threw FailedSaveHoldError for the block itself and the toast was skipped.
+  it('the structure\'s own text save fails: onFailure exactly once', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]));
+    editor.save.mockImplementationOnce(async () => ({ status: 'rejected', block: null, recoveryReceipt: null,
+      reconciliation: 'not_attempted', durableState: 'not_checked', reason: 'request_failed', staleEpoch: false,
+      error: { response: { status: 500 } } }) as never);
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], {
+        previousTextFlow: editor.flows()[0], nextTextFlow: textFlow([['body', 'Intro'], ['title', 'Sec', 'heading_1']]),
+        headingUnitId: 'title', focus: { unitId: 'title', caret: 3 }, inputType: 'insertHeading' });
+    });
+    expect(await pending).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
+  });
+});
+
+// A-25 r3 (②b 乙, browser shape; LANDFAIL diagnostic 2026-11-09): in the browser the refusal reaches the catch from
+// whenWritesIdle, which rethrows the failed save's own network error before the structure's body begins (all 7 refused
+// keys: site catch, bodyStarted false, AxiosError 500). The r2 test above went through flush's FailedSaveHoldError, so it
+// was green while the browser still toasted at every key.
+describe('A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry', () => {
+  const networkError = () => Object.assign(new Error('Request failed with status code 500'), { name: 'AxiosError' });
+  const failedSave = async (editor: ReturnType<typeof renderStructure>, blockId: string) => {
+    const target = editor.data.blocks.find((entry) => entry.id === blockId)!;
+    const before = getTextFlowContent(target.content_json)!;
+    const typed = { ...before, units: before.units.map((unit, index) => index ? unit : { ...unit, text: `${unit.text} more` }) };
+    const unitId = before.units[0].id;
+    editor.save.mockImplementationOnce(async () => ({ status: 'rejected', block: null, recoveryReceipt: null,
+      reconciliation: 'not_attempted', durableState: 'not_checked', reason: 'request_failed', staleEpoch: false,
+      error: { response: { status: 409 } } }) as never);
+    await act(async () => { await editor.result.current.editing.applyEdit(target, typed, { previousTextFlow: before, metadata: {
+      unitId, inputType: 'insertText', kind: 'typing', isComposing: false,
+      beforeSelection: { unitId, start: 0, end: 0 }, afterSelection: { unitId, start: 5, end: 5 } } }); });
+    act(() => { editor.result.current.editing.boundary(); });
+    await waitFor(() => expect(editor.result.current.editing.failedTypingBlockIds).toEqual([blockId]));
+  };
+  const heading = (editor: ReturnType<typeof renderStructure>) => {
+    let pending!: Promise<boolean>;
+    act(() => {
+      pending = editor.result.current.heading.onHeadingStructure(editor.data.blocks[0], {
+        previousTextFlow: editor.data.flowDrafts.source ?? editor.flows()[0],
+        nextTextFlow: textFlow([['body', 'Intro more'], ['title', 'Sec', 'heading_1']]),
+        headingUnitId: 'title', focus: { unitId: 'title', caret: 3 }, inputType: 'insertHeading' });
+    });
+    return pending;
+  };
+
+  // Red on r3 before this change: the catch looked for FailedSaveHoldError; the registry's AxiosError toasted.
+  it('its own block holds the failed save, the writes wait rejects with its network error: refused, no toast', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined,
+      { whenWritesIdle: () => Promise.reject(networkError()) });
+    await failedSave(editor, 'source');
+    const blocks = editor.data.blocks.map((entry) => entry.id);
+    expect(await heading(editor)).toBe(false);
+    expect(editor.failure).not.toHaveBeenCalled();
+    expect(editor.create).not.toHaveBeenCalled();
+    expect(editor.data.blocks.map((entry) => entry.id)).toEqual(blocks);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
+  });
+
+  // Guard (green on both): the same rejection while only another block holds the failed save still says so.
+  it('another block holds the failed save, the writes wait rejects: refused with the toast', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined,
+      { whenWritesIdle: () => Promise.reject(networkError()) });
+    await failedSave(editor, 'ending');
+    expect(await heading(editor)).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
+  });
+
+  // Guard for the narrowing (Main_Designer 2026-11-09): a template failure lights no mark on its block, so a key refused
+  // while it holds is still told. Red before the narrowing (template failures were counted and the refusal was quiet).
+  it('its own block holds a failed template conversion (no mark): refused with the toast', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined,
+      { whenWritesIdle: () => Promise.reject(networkError()) });
+    const source = editor.data.blocks.find((entry) => entry.id === 'source')!;
+    await act(async () => { await editor.result.current.editing.applyTemplateToBlock(source, template, 'Intro\n# Sec'); });
+    expect(editor.result.current.editing.failedTypingBlockIds).toEqual([]);
+    expect(await heading(editor)).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
+  });
+
+  // Guard (green on both): no failed save anywhere, the writes wait rejects for some other reason: it is told.
+  it('no block holds a failed save and the writes wait rejects: refused with the toast', async () => {
+    startClean();
+    const editor = renderStructure(textFlow([['body', 'Intro'], ['title', '# Sec']]), undefined,
+      { whenWritesIdle: () => Promise.reject(networkError()) });
+    expect(await heading(editor)).toBe(false);
+    expect(editor.failure).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.result.current.heading.busy).toBe(false));
+    editor.unmount();
+    startClean();
   });
 });

@@ -1,0 +1,34 @@
+== package main JS (from its index.html): index-4nEsyJNA.js
+== files.list: 19 files; server/ or shared/ paths: 0
+== package self-check: src 19 / 19 OK; dist 63 / 63 OK
+== tree: src.sha256 -c OK lines 19 of 19
+== client/node_modules junction present
+== the listed files vs the baseline dfbcce8e:
+   changed: client/src/pages/Notes/canvasEngine/draftBlockPersistence.test.ts
+   changed: client/src/pages/Notes/canvasEngine/draftBlockPersistence.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useDraftBlockController.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.test.tsx
+   changed: client/src/pages/Notes/canvasEngine/hooks/useHeadingStructureController.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx
+   changed: client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx
+   changed: client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts
+   changed: client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx
+   changed: client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.ts
+   changed: client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx
+   new: client/src/pages/Notes/canvasEngine/layers/BlockSaveFailedMark.tsx
+   changed: client/src/pages/Notes/canvasEngine/layers/DraftBlockEditorLayer.test.tsx
+   changed: client/src/pages/Notes/canvasEngine/layers/DraftBlockEditorLayer.tsx
+   changed: client/src/pages/Notes/canvasEngine/layers/DraftWritingEntryLayer.tsx
+   changed: client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+   same as baseline: 0
+slot heavy-job.lock.2 taken 2026-11-09 21:53:08: same-source vite build of A-25
+build exit 0
+slot heavy-job.lock.2 released 21:53:24 exit 0
+== rebuild == package dist (63 files)
+== main JS byte-identical
+f32a046c60b61e71f53844f93724af6bee0a6f152714b16c0a1e4bb4ae72c5ab
+dist index-4nEsyJNA.js: LEFT_UNSAVED ABSENT, SAVE_FAILURE ABSENT
+VOID: 4 mismatch(es) - update a20m_judge.mjs before judging a20m rows

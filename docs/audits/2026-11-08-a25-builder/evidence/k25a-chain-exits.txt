@@ -1,0 +1,7 @@
+tsc exit 0
+client exit 0
+vite build exit 0
+index-69VomqRz.js
+a20 kit exit 0
+a25 kit exit 0
+a25 all done 16:50:22

@@ -1,0 +1,32 @@
+step 1 k25 A-25 start 18:55:12
+slot heavy-job.lock taken 2026-11-09 18:55:12: k25 canonical (k25-a25), one browser
+k25-a25 exit 0
+slot heavy-job.lock released 19:24:18 exit 0
+step 1 done 19:24:19
+step 2 D A-25 start 19:24:19
+slot heavy-job.lock taken 2026-11-09 19:24:19: D exits (kd-a25), one browser
+kd-a25 exit 0
+slot heavy-job.lock released 19:28:46 exit 0
+step 2 done 19:28:46
+step 3 chain start 19:28:46
+step 3 chain exit 0 20:51:17
+step 4 a20m LANDOTHER start 20:51:24
+slot heavy-job.lock taken 2026-11-09 20:51:24: a20m LANDOTHER on A-25 (5614 -> 3614); one browser
+a25 landother exit 0
+slot heavy-job.lock released 20:56:41 exit 0
+step 4 done 20:56:41
+step 5 a20n A-25 start 20:56:41
+slot heavy-job.lock taken 2026-11-09 20:56:41: a20n on A-25 (5614 -> 3614), TRACE=1, all arms; one browser
+a25-n exit 0
+a25-n-third exit 0
+slot heavy-job.lock released 21:48:49 exit 0
+step 5 done 21:48:49
+step 6 base column start 21:48:49
+slot heavy-job.lock taken 2026-11-09 21:48:49: k25 canonical (k25-base), one browser
+k25-base exit 0
+slot heavy-job.lock released 22:25:55 exit 0
+slot heavy-job.lock taken 2026-11-09 22:25:55: D exits (kd-base2), one browser
+kd-base2 exit 0
+slot heavy-job.lock released 22:30:32 exit 0
+step 6 done 22:30:32
+A-25 seq done 22:30:32

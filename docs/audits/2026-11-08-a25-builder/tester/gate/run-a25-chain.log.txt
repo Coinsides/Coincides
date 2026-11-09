@@ -1,0 +1,35 @@
+slot heavy-job.lock taken 2026-11-09 19:28:47: A-25 acceptance chain (r3 chain arms + a20m BACKIN,LIST; 5614 -> 3614)
+step 1 a25-k start 19:28:47
+step 1 a25-k exit 0 19:38:59 1 BAD; DONE a25-k: 22 rows, red 1
+step 2 a25-late start 19:38:59
+step 2 a25-late exit 0 19:43:11 0 BAD; DONE a25-late: 8 rows, red 0
+step 2 a25-j start 19:43:11
+step 2 a25-j exit 0 19:55:03 0 BAD; DONE a25-j: 28 rows, red 0
+step 2 a25-k-toast start 19:55:04
+step 2 a25-k-toast exit 0 19:56:51 0 BAD; DONE a25-k-toast: 4 rows, red 0
+step 2 a25-flyk start 19:56:52
+step 2 a25-flyk exit 0 19:59:52 0 BAD; DONE a25-flyk: 8 rows, red 0
+step 3 a25-inapp start 19:59:52
+step 3 a25-inapp exit 0 20:04:14 0 BAD; DONE a25-inapp: 8 rows, red 0
+step 4 a25-d start 20:04:14
+step 4 a25-d exit 0 20:13:29 0 BAD; DONE a25-d: 20 rows
+step 5 a25-b start 20:13:29
+step 5 a25-b exit 0 20:20:31 0 BAD; DONE a25-b: 24 rows
+step 6 a25-a start 20:20:31
+step 6 a25-a exit 0 20:23:42 0 BAD; DONE a25-a: 8 rows
+step 7 a25-c start 20:23:42
+step 7 a25-c exit 0 20:29:09 0 BAD; DONE a25-c: 18 rows
+step 8 a25-c-closetab start 20:29:10
+step 8 a25-c-closetab exit 0 20:29:34 0 BAD; PAUSEEXIT-closetab-0 {"exit":"closetab","words":"paused closetab words a","onServer":true,"units":["warmup","paused closetab words a"],"puts":["4424 PUT /note-b
+step 9 a25-c-kill start 20:29:34
+step 9 a25-c-kill exit 0 20:29:58 0 BAD; PAUSEEXIT-kill-0 {"exit":"kill","words":"paused kill words a","onServer":true,"units":["warmup","paused kill words a"],"puts":["3943 PUT /note-blocks/:id/text-s
+step 10 a25-kill-close-0 start 20:29:58
+step 10 a25-kill-close-0 exit 0 20:30:23 0 BAD; HARDKILL-close {"hasFirst":true,"hasTail":false,"units":["warmup","kill words one"]}
+step 11 a25-kill-proc-0 start 20:30:23
+step 11 a25-kill-proc-0 exit 0 20:30:50 0 BAD; HARDKILL-proc {"hasFirst":true,"hasTail":false,"units":["warmup","kill words one"]}
+step 12 a25-offkill-0 start 20:30:50
+step 12 a25-offkill-0 exit 0 20:31:18 0 BAD; OFFKILL {"before":["warmup","one burst back online"],"units":["warmup","one burst back online"],"puts":["2874 PUT /note-blocks/:id/text-save [neterr] warmup|one
+step 13 a25-m start 20:31:18
+step 13 a25-m exit 0 20:51:17 11 BAD; DONE a25-m: 37 rows, red 11
+A-25 chain done 20:51:17
+slot heavy-job.lock released 20:51:17 exit 0

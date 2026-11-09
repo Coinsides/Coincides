@@ -1,0 +1,96 @@
+== a20bp-dtd150: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2704->3202(201) hand-off 3307 draft keys aa⏎bb⏎cc | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\ncc@8"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2656->2864(201) hand-off 2966 draft keys aa⏎b | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:","D:aa\nb@4"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2649->2813(201) hand-off 2839 draft keys aa⏎ | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\n@3"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2640->2803(201) hand-off 2831 draft keys aa⏎ | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\n@3"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2632->2795(201) hand-off 2875 draft keys aa⏎b | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nb@4"]
+  tally {"green draftEnters=2":1,"green draftEnters=1":4}
+== a25p-dtd150: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2761->3124(201) hand-off 3419 draft keys aa⏎bb⏎cc | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:bb","E:c","D:aa\nbb\ncc@8"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2642->2805(201) hand-off 2946 draft keys aa⏎b | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:","D:aa\nb@4"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2632->2795(201) hand-off 2819 draft keys aa⏎ | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\n@3"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2650->2814(201) hand-off 2838 draft keys aa⏎ | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\n@3"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2656->2818(201) hand-off 2844 draft keys aa⏎ | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\n@3"]
+  tally {"green draftEnters=2":1,"green draftEnters=1":4}
+== a20bp-dtd400: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2698->3139(201) hand-off 3193 draft keys aa⏎bb⏎ | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\n@6"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2652->3067(201) hand-off 3094 draft keys aa⏎bb⏎c | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\nc@7"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2653->3068(201) hand-off 3129 draft keys aa⏎bb⏎cc | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:bb","E:c","D:aa\nbb\ncc@8"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2678->3092(201) hand-off 3143 draft keys aa⏎bb⏎cc | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:bb","E:c","D:aa\nbb\ncc@8"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2689->3115(201) hand-off 3146 draft keys aa⏎bb⏎cc | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc@8"]
+  tally {"green draftEnters=2":5}
+== a25p-dtd400: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2713->3135(201) hand-off 3184 draft keys aa⏎bb⏎c | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\nc@7"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2683->3096(201) hand-off 3122 draft keys aa⏎bb⏎c | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\nc@7"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2643->3057(201) hand-off 3085 draft keys aa⏎bb⏎c | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\nc@7"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2643->3070(201) hand-off 3094 draft keys aa⏎bb⏎c | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\nc@7"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2645->3084(201) hand-off 3107 draft keys aa⏎bb⏎c | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\nc@7"]
+  tally {"green draftEnters=2":5}
+== a20bp-dtd800: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2683->3515(201) hand-off 3568 draft keys aa⏎bb⏎cc⏎d | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\nd@10"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2653->3478(201) hand-off 3535 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:bb","E:cc","E:dd","E:e","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2658->3474(201) hand-off 3552 draft keys aa⏎bb⏎cc⏎dd⏎e | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:bb","E:cc","E:dd","E:","D:aa\nbb\ncc\ndd\ne@13"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2643->3455(201) hand-off 3481 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2665->3490(201) hand-off 3516 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  tally {"green draftEnters=3":1,"green draftEnters=4":4}
+== a25p-dtd800: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2711->3536(201) hand-off 3594 draft keys aa⏎bb⏎cc⏎d | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\nd@10"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2654->3472(201) hand-off 3508 draft keys aa⏎bb⏎cc⏎dd⏎e | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\ncc\ndd\ne@13"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2651->3470(201) hand-off 3503 draft keys aa⏎bb⏎cc⏎dd⏎e | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\ne@13"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2653->3463(201) hand-off 3518 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:aa","E:bb","E:cc","E:dd","E:e","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2639->3452(201) hand-off 3477 draft keys aa⏎bb⏎cc⏎dd⏎e | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\ne@13"]
+  tally {"green draftEnters=3":1,"green draftEnters=4":4}
+== a20bp-dtd1500: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2671->4200(201) hand-off 4247 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2653->4420(201) hand-off 4474 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2639->4159(201) hand-off 4190 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2658->4175(201) hand-off 4200 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2657->4171(201) hand-off 4202 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  tally {"green draftEnters=4":5}
+== a25p-dtd1500: 5 rows, red 0
+  lines30-0    ok  server ["aa","bb","cc","dd","ee"] POST 2676->4199(201) hand-off 4301 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-1    ok  server ["aa","bb","cc","dd","ee"] POST 2637->4206(201) hand-off 4454 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","E:a","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-2    ok  server ["aa","bb","cc","dd","ee"] POST 2680->4198(201) hand-off 4225 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-3    ok  server ["aa","bb","cc","dd","ee"] POST 2658->4173(201) hand-off 4199 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  lines30-4    ok  server ["aa","bb","cc","dd","ee"] POST 2648->4164(201) hand-off 4217 draft keys aa⏎bb⏎cc⏎dd⏎ee | first odd editor snap -
+     failed writes 0; failure mark seen false, at row end {"beforeBlur":0,"atEnd":0}; 'Failed to save block' page/CDP 0/0; console err/warn 0; draft input after hand-off 0; last snap before hand-off ["D:D 30","D:","D:aa\nbb\ncc\ndd\nee@14"]
+  tally {"green draftEnters=4":5}

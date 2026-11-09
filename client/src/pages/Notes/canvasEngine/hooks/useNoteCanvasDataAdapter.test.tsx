@@ -940,7 +940,9 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(failedPayload.text_ranges).toEqual([expect.objectContaining({ id: range.id, history_restore: true })]);
     const receipts = subject.result.current.adapter.blockEditRecoveryReceipts;
     expect(receipts[receipts.length - 1]?.boardRangeSnapshot).toMatchObject({ historyRestore: true });
-    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save block');
+    // A-25 ②a: a failed history save says so on the block (the mark), not in a toast.
+    expect(mocks.addToast).not.toHaveBeenCalledWith('error', 'Failed to save block');
+    expect(subject.result.current.editing.failedTypingBlockIds).toContain(original.id);
     await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
     const laterRange = { ...range, id: 'f17-later-independent', start_offset: 0, end_offset: 1, excerpt: 'a' };
     durableRanges.push(laterRange);
@@ -1154,6 +1156,214 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 3]);
     expect(durableBlocks[0].text_save_revision).toBe(9);
     expect(subject.result.current.blockEditRecoveryReceipts).not.toEqual([]);
+  });
+
+  // A-25 ②a (iv) D: Apply of another visit's item meets a 409 (this visit moved the block on). Its words are merged onto
+  // the block as the server holds it now, anchored on the text this page opened, all units or none, before any write.
+  describe('A-25 2a (iv) D: Apply merges on a 409', () => {
+    const stale = { response: { status: 409, data: { error: 'stale_revision', details: { code: 'stale_revision', current_revision: 9 } } } };
+    const flowBlock = (flow: ReturnType<typeof createTextBlockContentV1>, revision: number) => ({
+      ...serverBlock(flow.units.map((unit) => unit.text).join('\n'), false),
+      content_json: { body: flow.units.map((unit) => unit.text).join('\n'), [TEXT_FLOW_CONTENT_KEY]: flow },
+      text_save_revision: revision,
+    });
+    const withTexts = (flow: ReturnType<typeof createTextBlockContentV1>, texts: string[]) => {
+      const next = structuredClone(flow);
+      next.units.forEach((unit, index) => { unit.text = texts[index]; });
+      return next;
+    };
+    const otherVisitReceipt = (flow: ReturnType<typeof createTextBlockContentV1>): BlockEditRecoveryReceipt => {
+      const text = flow.units.map((unit) => unit.text).join('\n');
+      const receipt: BlockEditRecoveryReceipt = {
+        version: 2, kind: 'block_edit_recovery',
+        recoveryKey: createBlockEditRecoveryKey(note.id, 'block-1', 0, 1, 'previous-visit'),
+        noteId: note.id, requestedNoteId: note.id, blockId: 'block-1', mountNonce: 'previous-visit',
+        creationGeneration: 0, operationSequence: 1, hydrationEpoch: 1, queuedAt: '2026-11-09T00:00:00Z',
+        text, plainText: text, textFlow: flow, contentJson: { body: text, [TEXT_FLOW_CONTENT_KEY]: flow },
+        baseRevision: 3, annotationRanges: [], boardRangeSnapshot: { ranges: [] },
+      };
+      expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+      return receipt;
+    };
+    // Opens the note on 'opened' (revision 3), then the server moves to 'now' (revision 9) before Apply.
+    const openThenMove = async (opened: ReturnType<typeof createTextBlockContentV1>, receiptFlow: ReturnType<typeof createTextBlockContentV1>,
+      now: ReturnType<typeof createTextBlockContentV1>) => {
+      durableBlocks = [flowBlock(opened, 3)];
+      const receipt = otherVisitReceipt(receiptFlow);
+      const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+      await waitFor(() => expect(subject.result.current.loading).toBe(false));
+      expect(subject.result.current.blockEditRecoveryReceipts).toEqual([expect.objectContaining({ recoveryKey: receipt.recoveryKey })]);
+      durableBlocks = [flowBlock(now, 9)];
+      return { subject, receipt };
+    };
+    const serverUnits = () => getTextFlowContent(durableBlocks[0].content_json)?.units.map((unit) => unit.text);
+    const lines = (...texts: string[]) => {
+      const flow = createTextBlockContentV1(texts[0]);
+      texts.slice(1).forEach((text, index) => flow.units.push({ ...flow.units[0], id: `tu-${index + 2}`, text, order_index: index + 1 }));
+      return flow;
+    };
+
+    it('every unit anchors: one more save at the current revision, the words where they were typed', async () => {
+      const opened = lines('alpha beta', 'one two');
+      const { subject, receipt } = await openThenMove(opened, withTexts(opened, ['alpha beta gamma', 'one two']),
+        withTexts(opened, ['zero alpha beta', 'one two three']));
+      mocks.atomicPut.mockRejectedValueOnce(stale);
+      await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(true); });
+      expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 9]);
+      expect(serverUnits()).toEqual(['zero alpha beta gamma', 'one two three']);
+      expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+      expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    });
+
+    it('one unit cannot be anchored: nothing is written, the item stays a conflict item', async () => {
+      const opened = lines('alpha beta', 'one two');
+      const { subject, receipt } = await openThenMove(opened, withTexts(opened, ['alpha beta gamma', 'one two four']),
+        withTexts(opened, ['zero alpha beta', 'something else']));
+      mocks.atomicPut.mockRejectedValueOnce(stale);
+      await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(false); });
+      expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3]);
+      expect(serverUnits()).toEqual(['zero alpha beta', 'something else']);
+      expect(subject.result.current.blockEditRecoveryReceipts).toEqual([expect.objectContaining({ text: 'alpha beta gamma\none two four' })]);
+      expect(Object.values(subject.result.current.blockEditRecoveryConflicts)).toContain(true);
+    });
+
+    it('the receipt changes which units there are: nothing is written (words, never structure)', async () => {
+      const opened = lines('alpha beta');
+      const split = lines('alpha beta', 'gamma');
+      const { subject, receipt } = await openThenMove(opened, split, withTexts(opened, ['zero alpha beta']));
+      mocks.atomicPut.mockRejectedValueOnce(stale);
+      await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(false); });
+      expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+      expect(serverUnits()).toEqual(['zero alpha beta']);
+      expect(subject.result.current.blockEditRecoveryReceipts).toHaveLength(1);
+    });
+
+    it('the words are already there: the item is forgotten, nothing is written', async () => {
+      const opened = lines('alpha beta', 'one two');
+      const words = withTexts(opened, ['alpha beta gamma', 'one two']);
+      const { subject, receipt } = await openThenMove(opened, words, withTexts(opened, ['alpha beta gamma', 'one two three']));
+      mocks.atomicPut.mockRejectedValueOnce(stale);
+      await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(true); });
+      expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+      expect(serverUnits()).toEqual(['alpha beta gamma', 'one two three']);
+      expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+    });
+
+    it('the merged save meets a 409 again: it stops there, no third save, the item stays', async () => {
+      const opened = createTextBlockContentV1('alpha beta');
+      const { subject, receipt } = await openThenMove(opened, withTexts(opened, ['alpha beta gamma']), withTexts(opened, ['zero alpha beta']));
+      mocks.atomicPut.mockRejectedValueOnce(stale).mockRejectedValueOnce(stale);
+      await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(false); });
+      expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 9]);
+      expect(serverUnits()).toEqual(['zero alpha beta']);
+      expect(subject.result.current.blockEditRecoveryReceipts).toHaveLength(1);
+      expect(Object.values(subject.result.current.blockEditRecoveryConflicts)).toContain(true);
+    });
+  });
+
+  // A-25 ②a (iv) D1–D3 (Main_Designer 2026-11-09), same setting as the D cases above.
+  describe('A-25 2a (iv) D1-D3', () => {
+    const stale = { response: { status: 409, data: { error: 'stale_revision', details: { code: 'stale_revision', current_revision: 9 } } } };
+    const flowOf = (texts: string[], links: Array<{ id: string; start: number; end: number }> = []) => {
+      const flow = createTextBlockContentV1(texts[0]);
+      texts.slice(1).forEach((text, index) => flow.units.push({ ...flow.units[0], id: `tu-${index + 2}`, text, order_index: index + 1 }));
+      flow.inline_structures = links.map((link) => ({ id: link.id, semantic_kind: 'inline_code', parent_text_unit_id: flow.units[0].id,
+        anchor_text: texts[0].slice(link.start, link.end), anchor_range: { start: link.start, end: link.end },
+        field_values: {}, metadata: {}, status: 'active' }));
+      return flow;
+    };
+    const block = (flow: TextBlockContentV1, revision: number, formula?: Record<string, unknown>) => ({
+      ...serverBlock(flow.units.map((unit) => unit.text).join('\n'), false),
+      ...(formula ? { block_type: 'formula' } : {}),
+      content_json: { body: flow.units.map((unit) => unit.text).join('\n'), [TEXT_FLOW_CONTENT_KEY]: flow,
+        ...(formula ? { field_values: formula } : {}) },
+      text_save_revision: revision,
+    });
+    const receiptOf = (flow: TextBlockContentV1, fieldValues?: Record<string, unknown>): BlockEditRecoveryReceipt => {
+      const text = flow.units.map((unit) => unit.text).join('\n');
+      const receipt: BlockEditRecoveryReceipt = {
+        version: 2, kind: 'block_edit_recovery',
+        recoveryKey: createBlockEditRecoveryKey(note.id, 'block-1', 0, 1, 'previous-visit'),
+        noteId: note.id, requestedNoteId: note.id, blockId: 'block-1', mountNonce: 'previous-visit',
+        creationGeneration: 0, operationSequence: 1, hydrationEpoch: 1, queuedAt: '2026-11-09T00:00:00Z',
+        text, plainText: text, textFlow: flow, contentJson: { body: text, [TEXT_FLOW_CONTENT_KEY]: flow },
+        baseRevision: 3, annotationRanges: [], boardRangeSnapshot: { ranges: [] }, ...(fieldValues ? { fieldValues } : {}),
+      };
+      expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+      return receipt;
+    };
+    const run = async (opened: ReturnType<typeof block>, receipt: () => BlockEditRecoveryReceipt, now: ReturnType<typeof block>) => {
+      durableBlocks = [opened];
+      const made = receipt();
+      const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+      await waitFor(() => expect(subject.result.current.loading).toBe(false));
+      durableBlocks = [now];
+      mocks.atomicPut.mockRejectedValueOnce(stale);
+      let result!: boolean;
+      await act(async () => { result = await subject.result.current.applyBlockEditRecovery(made.recoveryKey); });
+      return { subject, result };
+    };
+    const serverFlow = () => getTextFlowContent(durableBlocks[0].content_json)!;
+
+    // D1. Red before D1: the merge took 'nothing to place' for 'already there', forgot the item and returned true.
+    it('D1: a receipt that only took words out, onto a line that has gained some: nothing written, still a conflict item', async () => {
+      const opened = flowOf(['alpha beta gamma']);
+      const { subject, result } = await run(block(opened, 3), () => receiptOf(flowOf(['alpha beta'])), block(flowOf(['zero alpha beta gamma']), 9));
+      expect(result).toBe(false);
+      expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+      expect(serverFlow().units.map((unit) => unit.text)).toEqual(['zero alpha beta gamma']);
+      expect(subject.result.current.blockEditRecoveryReceipts).toHaveLength(1);
+      expect(Object.values(subject.result.current.blockEditRecoveryConflicts)).toContain(true);
+    });
+
+    // D2. Red before D2: the unit's text was replaced and the inline range stayed at its old offsets ('lpha').
+    it('D2: words placed before an inline range move it with them', async () => {
+      const opened = flowOf(['alpha beta']);
+      const { result } = await run(block(opened, 3), () => receiptOf(flowOf(['zero alpha beta'])),
+        block(flowOf(['X alpha beta'], [{ id: 'link-beta', start: 8, end: 12 }]), 9));
+      expect(result).toBe(true);
+      expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 9]);
+      const flow = serverFlow();
+      expect(flow.units.map((unit) => unit.text)).toEqual(['X zero alpha beta']);
+      const link = flow.inline_structures.find((item) => item.id === 'link-beta')!;
+      expect(link.anchor_range).toEqual({ start: 13, end: 17 });
+      expect(flow.units[0].text.slice(link.anchor_range!.start, link.anchor_range!.end)).toBe('beta');
+    });
+
+    it('D2: words placed after an inline range leave it where it was', async () => {
+      const opened = flowOf(['alpha beta']);
+      const { result } = await run(block(opened, 3), () => receiptOf(flowOf(['alpha beta gamma'])),
+        block(flowOf(['alpha beta!'], [{ id: 'link-alpha', start: 0, end: 5 }]), 9));
+      expect(result).toBe(true);
+      const flow = serverFlow();
+      expect(flow.units.map((unit) => unit.text)).toEqual(['alpha beta gamma!']);
+      expect(flow.inline_structures.find((item) => item.id === 'link-alpha')!.anchor_range).toEqual({ start: 0, end: 5 });
+    });
+
+    // D3. A formula block: the receipt's fields against the block's now.
+    const fields = { latex_input: 'x^2', formula_name: 'Square', explanation: '' };
+    it('D3: a formula block whose fields are the same now: merged, its fields written as they are', async () => {
+      const opened = flowOf(['alpha beta']);
+      const { result } = await run(block(opened, 3, fields), () => receiptOf(flowOf(['alpha beta gamma']), fields),
+        block(flowOf(['zero alpha beta']), 9, fields));
+      expect(result).toBe(true);
+      expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 9]);
+      expect(serverFlow().units.map((unit) => unit.text)).toEqual(['zero alpha beta gamma']);
+      expect(durableBlocks[0].content_json.field_values).toEqual(fields);
+    });
+
+    // Red before D3: the merged save wrote the receipt's old fields over the ones the block has now.
+    it('D3: a formula block whose fields changed since: nothing written, still a conflict item', async () => {
+      const opened = flowOf(['alpha beta']);
+      const changed = { ...fields, formula_name: 'Area' };
+      const { subject, result } = await run(block(opened, 3, fields), () => receiptOf(flowOf(['alpha beta gamma']), fields),
+        block(flowOf(['zero alpha beta']), 9, changed));
+      expect(result).toBe(false);
+      expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+      expect(durableBlocks[0].content_json.field_values).toEqual(changed);
+      expect(subject.result.current.blockEditRecoveryReceipts).toHaveLength(1);
+      expect(Object.values(subject.result.current.blockEditRecoveryConflicts)).toContain(true);
+    });
   });
 
   it('B7 accepts a committed response omitting an independently deleted board range', async () => {
@@ -3037,6 +3247,50 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
   });
 
+  // A-25 decision 3 (TD-62): the same late 2xx is a saved write, not a failure: the write registry, and so the
+  // leave barrier and the history, see it as durable.
+  it('reports a save that succeeds after the route moved on as matching what was sent', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const durableA = serverBlock('server old', false, 'late-success-key');
+    const heldSave = deferred<{ data: NoteBlock }>();
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${noteB.id}`) return { data: noteB };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableA] };
+      if (url === `/notes/${noteB.id}/blocks`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${note.id}` || url === `/canvas-objects/by-note/${noteB.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}` || url === `/annotation-truths/by-note/${noteB.id}`) return { data: [] };
+      if (url === '/content-groups' || url === '/group-folders' || url === '/purposes' || url === '/templates') return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string) => {
+      if (url !== `/note-blocks/${durableA.id}`) throw new Error(`Unexpected PUT ${url}`);
+      return heldSave.promise;
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => { saveReceipt = subject.result.current.saveBlock(durableA, 'late body'); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+
+    subject.rerender({ noteId: noteB.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(noteB.id));
+    await act(async () => {
+      // The server stores exactly what was sent (the fixture echoes the request body).
+      heldSave.resolve({ data: {} as NoteBlock });
+      await saveReceipt;
+    });
+    await expect(saveReceipt).resolves.toMatchObject({
+      status: 'stale_epoch', reason: 'route_receipt_stale', durableState: 'matches_requested' });
+
+    subject.rerender({ noteId: note.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+  });
+
   it('keeps a rejected old A edit recoverable after A to B to A', async () => {
     const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
     const durableA = serverBlock('server old', false, 'route-reject-key');
@@ -3240,12 +3494,15 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       newSave = newMount.result.current.saveBlock(newBlock, 'new mount edit');
     });
     await waitFor(() => expect(blockPutCount).toBe(2));
-    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([]);
-    const newRecoveryKey = listBlockEditRecoveryReceipts(note.id)[0]?.recoveryKey;
-    const newReceiptBytes = blockEditReceiptBytes();
+    // A-25 ②a (iv) A: the new visit's save does not replace the old visit's entry: it stays on offer beside it.
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ recoveryKey: oldRecoveryKey, text: 'old mount edit' }),
+    ]);
+    const newRecoveryKey = listBlockEditRecoveryReceipts(note.id).find((receipt) => receipt.text === 'new mount edit')?.recoveryKey;
+    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(2);
     expect(newRecoveryKey).toBeTruthy();
     expect(newRecoveryKey).not.toBe(oldRecoveryKey);
-    expect(newReceiptBytes).toContain('new mount edit');
+    expect(blockEditReceiptBytes()).toContain('new mount edit');
     const toastCountBeforeOldSettle = mocks.addToast.mock.calls.length;
 
     let oldOutcome!: BlockSaveOutcome;
@@ -3264,11 +3521,18 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.addToast).toHaveBeenCalledTimes(toastCountBeforeOldSettle);
     expect(newMount.result.current.blocks[0]?.plain_text).toBe('server old');
     expect(newMount.result.current.savingBlockId).toBe(newBlock.id);
-    expect(blockEditReceiptBytes()).toBe(newReceiptBytes);
-    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([
+    // A-25 ②a (iv) A: the old mount is gone, so nothing confirms its 2xx (read_failed): its entry stays on offer beside
+    // the new one. Reopening (ii) forgets it once the server is seen to hold its words.
+    expect(blockEditReceiptBytes()).toContain('old mount edit');
+    expect(blockEditReceiptBytes()).toContain('new mount edit');
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ recoveryKey: oldRecoveryKey, text: 'old mount edit' }),
       expect.objectContaining({ recoveryKey: newRecoveryKey, text: 'new mount edit' }),
+    ]));
+    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(2);
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ recoveryKey: oldRecoveryKey, text: 'old mount edit' }),
     ]);
-    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([]);
 
     let newOutcome!: BlockSaveOutcome;
     await act(async () => {
@@ -3285,9 +3549,13 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     newMount.rerender({ onNoteLoaded: recoveryHydrated });
     await waitFor(() => expect(recoveryHydrated).toHaveBeenCalled());
     expect(newMount.result.current.blockTextDrafts[newBlock.id]).toBe('new mount edit');
-    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+    // A-25 ②a (iv) A: both visits' entries stay on offer. This fixture's server block has no text flow (content_json is
+    // a body only), so (ii) cannot see the old words on the server and does not forget that entry (its own tests do).
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual(expect.arrayContaining([
+      expect.objectContaining({ recoveryKey: oldRecoveryKey, text: 'old mount edit' }),
       expect.objectContaining({ recoveryKey: newRecoveryKey, text: 'new mount edit' }),
-    ]);
+    ]));
+    expect(newMount.result.current.blockEditRecoveryReceipts).toHaveLength(2);
     expect(blockEditReceiptBytes()).toContain('new mount edit');
   });
 
@@ -4659,4 +4927,54 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       expect(sessionStorage.getItem(storageKey)).toBe(rawBytes);
     },
   );
+
+// A-25 ②a (ii): a receipt from another visit is forgotten at opening when the server already has its block unit for unit
+// (the K1IME-held shape: the 2xx never reached the page that sent it); one that differs in any unit is still offered.
+describe('A-25 ②a a receipt the server already has is forgotten at opening', () => {
+  function queueReceipt(text: string) {
+    const flow = createTextBlockContentV1(text);
+    const receipt: BlockEditRecoveryReceipt = {
+      version: 2, kind: 'block_edit_recovery',
+      recoveryKey: createBlockEditRecoveryKey(note.id, 'block-1', 0, 1, 'previous-visit'),
+      noteId: note.id, requestedNoteId: note.id, blockId: 'block-1', mountNonce: 'previous-visit',
+      creationGeneration: 0, operationSequence: 1, hydrationEpoch: 1, queuedAt: '2026-11-09T00:00:00Z',
+      text, plainText: text, textFlow: flow, contentJson: { body: text, [TEXT_FLOW_CONTENT_KEY]: flow },
+      baseRevision: 3, annotationRanges: [], boardRangeSnapshot: { ranges: [] },
+    };
+    expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+    return receipt;
+  }
+  const serverWith = (text: string) => ({ ...serverBlock(text, false), text_save_revision: 4,
+    content_json: { body: text, [TEXT_FLOW_CONTENT_KEY]: createTextBlockContentV1(text) } });
+
+  it('same units on the server: forgotten, not offered, no notice', async () => {
+    queueReceipt('note 现值公式');
+    durableBlocks = [serverWith('note 现值公式')];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    expect(blockEditReceiptBytes() ?? '').not.toContain('previous-visit');
+    expect(mocks.addToast).not.toHaveBeenCalledWith('info', 'A previous block edit is queued for recovery');
+  });
+
+  it.each([
+    ['one word more on the server', 'note 现值', 'note 现值公式'],
+    ['the server is behind', 'note 现值公式', 'note 现值'],
+    ['same words, other spacing', 'note  现值', 'note 现值'],
+  ])('%s: still offered', async (_case, receiptText, serverText) => {
+    const queued = queueReceipt(receiptText);
+    durableBlocks = [serverWith(serverText)];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    expect(subject.result.current.blockEditRecoveryReceipts.map((receipt) => receipt.recoveryKey)).toEqual([queued.recoveryKey]);
+  });
+
+  it('a server block without a text flow never matches: still offered', async () => {
+    const queued = queueReceipt('recovered draft');
+    durableBlocks = [{ ...serverBlock('recovered draft', false), text_save_revision: 4 }];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    expect(subject.result.current.blockEditRecoveryReceipts.map((receipt) => receipt.recoveryKey)).toEqual([queued.recoveryKey]);
+  });
+});
 });

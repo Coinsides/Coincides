@@ -1,0 +1,77 @@
+IME-new                    pass 24/24
+   pinyin in note 0/24; examples 
+   timeline (imeLog, page clock): {"green handoff-outside-composition":24}
+     IME-new-0  ok  handoff-outside-composition                          POST 604->615 (201); comp [[1,599,"第一"],[857,1565,"测试"]]; hand-off [649,"focus"]; editor-in 656; draft-left 656 '第一'; first editor input [859,"第一c"]
+     IME-new-1  ok  handoff-outside-composition                          POST 652->685 (201); comp [[9,648,"第一"],[917,1612,"测试"]]; hand-off [800,"focus"]; editor-in 807; draft-left 807 '第一'; first editor input [918,"第一c"]
+     IME-new-2  ok  handoff-outside-composition                          POST 598->609 (201); comp [[1,595,"第一"],[854,1558,"测试"]]; hand-off [630,"focus"]; editor-in 637; draft-left 637 '第一'; first editor input [855,"第一c"]
+     IME-new-3  ok  handoff-outside-composition                          POST 591->602 (201); comp [[1,589,"第一"],[845,1544,"测试"]]; hand-off [621,"focus"]; editor-in 625; draft-left 625 '第一'; first editor input [846,"第一c"]
+     IME-new-4  ok  handoff-outside-composition                          POST 593->603 (201); comp [[1,590,"第一"],[852,1582,"测试"]]; hand-off [621,"focus"]; editor-in 626; draft-left 626 '第一'; first editor input [853,"第一c"]
+     IME-new-5  ok  handoff-outside-composition                          POST 598->609 (201); comp [[1,595,"第一"],[851,1557,"测试"]]; hand-off [627,"focus"]; editor-in 631; draft-left 631 '第一'; first editor input [852,"第一c"]
+     IME-new-6  ok  handoff-outside-composition                          POST 597->608 (201); comp [[1,595,"第一"],[851,1556,"测试"]]; hand-off [625,"focus"]; editor-in 630; draft-left 630 '第一'; first editor input [852,"第一c"]
+     IME-new-7  ok  handoff-outside-composition                          POST 595->605 (201); comp [[1,592,"第一"],[850,1548,"测试"]]; hand-off [623,"focus"]; editor-in 627; draft-left 627 '第一'; first editor input [852,"第一c"]
+     IME-new-8  ok  handoff-outside-composition                          POST 598->611 (201); comp [[1,595,"第一"],[850,1553,"测试"]]; hand-off [632,"focus"]; editor-in 637; draft-left 637 '第一'; first editor input [851,"第一c"]
+     IME-new-9  ok  handoff-outside-composition                          POST 599->609 (201); comp [[1,596,"第一"],[856,1559,"测试"]]; hand-off [628,"focus"]; editor-in 632; draft-left 632 '第一'; first editor input [858,"第一c"]
+     IME-new-10 ok  handoff-outside-composition                          POST 598->609 (201); comp [[1,595,"第一"],[856,1561,"测试"]]; hand-off [641,"focus"]; editor-in 646; draft-left 646 '第一'; first editor input [858,"第一c"]
+     IME-new-11 ok  handoff-outside-composition                          POST 592->602 (201); comp [[1,590,"第一"],[847,1553,"测试"]]; hand-off [621,"focus"]; editor-in 625; draft-left 625 '第一'; first editor input [848,"第一c"]
+     IME-new-12 ok  handoff-outside-composition                          POST 583->594 (201); comp [[1,581,"第一"],[838,1545,"测试"]]; hand-off [611,"focus"]; editor-in 616; draft-left 616 '第一'; first editor input [839,"第一c"]
+     IME-new-13 ok  handoff-outside-composition                          POST 599->609 (201); comp [[1,596,"第一"],[894,1620,"测试"]]; hand-off [629,"focus"]; editor-in 635; draft-left 635 '第一'; first editor input [895,"第一c"]
+     IME-new-14 ok  handoff-outside-composition                          POST 599->610 (201); comp [[1,597,"第一"],[853,1563,"测试"]]; hand-off [628,"focus"]; editor-in 632; draft-left 632 '第一'; first editor input [854,"第一c"]
+     IME-new-15 ok  handoff-outside-composition                          POST 596->607 (201); comp [[1,594,"第一"],[853,1544,"测试"]]; hand-off [625,"focus"]; editor-in 630; draft-left 629 '第一'; first editor input [854,"第一c"]
+     IME-new-16 ok  handoff-outside-composition                          POST 600->610 (201); comp [[1,598,"第一"],[857,1641,"测试"]]; hand-off [628,"focus"]; editor-in 633; draft-left 633 '第一'; first editor input [858,"第一c"]
+     IME-new-17 ok  handoff-outside-composition                          POST 596->606 (201); comp [[1,593,"第一"],[852,1561,"测试"]]; hand-off [623,"focus"]; editor-in 628; draft-left 628 '第一'; first editor input [853,"第一c"]
+     IME-new-18 ok  handoff-outside-composition                          POST 582->594 (201); comp [[1,579,"第一"],[840,1549,"测试"]]; hand-off [613,"focus"]; editor-in 617; draft-left 617 '第一'; first editor input [841,"第一c"]
+     IME-new-19 ok  handoff-outside-composition                          POST 600->610 (201); comp [[1,597,"第一"],[857,1567,"测试"]]; hand-off [627,"focus"]; editor-in 631; draft-left 631 '第一'; first editor input [858,"第一c"]
+     IME-new-20 ok  handoff-outside-composition                          POST 599->610 (201); comp [[1,596,"第一"],[857,1565,"测试"]]; hand-off [628,"focus"]; editor-in 632; draft-left 632 '第一'; first editor input [858,"第一c"]
+     IME-new-21 ok  handoff-outside-composition                          POST 593->603 (201); comp [[1,591,"第一"],[851,1559,"测试"]]; hand-off [621,"focus"]; editor-in 625; draft-left 625 '第一'; first editor input [852,"第一c"]
+     IME-new-22 ok  handoff-outside-composition                          POST 599->609 (201); comp [[1,597,"第一"],[858,1565,"测试"]]; hand-off [626,"focus"]; editor-in 631; draft-left 631 '第一'; first editor input [859,"第一c"]
+     IME-new-23 ok  handoff-outside-composition                          POST 599->609 (201); comp [[1,596,"第一"],[855,1564,"测试"]]; hand-off [627,"focus"]; editor-in 632; draft-left 632 '第一'; first editor input [856,"第一c"]
+IME-mid                    pass 24/24
+   pinyin in note 0/24; examples 
+SAVEFAIL-500-direct        pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [3030,3029]; failure toasts [0,0]
+SAVEFAIL-500-blur          pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [2022,2021]; failure toasts [0,0]
+SAVEFAIL-net-direct        pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [3035,3034]; failure toasts [0,0]
+SAVEFAIL-net-blur          pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [2027,2023]; failure toasts [0,0]
+ONEFAIL-500                pass 2/2
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 2: {"i":2,"ii":2,"iii":2,"iv":2,"markInfo":2}; B saved ms [2056,2055]; A caught ms [7078,7067]; failure toasts [0,0]; server [[["alpha start one two"],["beta start bee"]],[["alpha start one two"],["beta start bee"]]]
+ONEFAIL-net                pass 2/2
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 2: {"i":2,"ii":2,"iii":2,"iv":2,"markInfo":2}; B saved ms [2058,2053]; A caught ms [7087,7088]; failure toasts [0,0]; server [[["alpha start one two"],["beta start bee"]],[["alpha start one two"],["beta start bee"]]]
+LANDFAIL-auto-500          pass 2/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"c":2,"d":2,"e":2,"bInfo":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked [null,null]; caught ms [13177,13161]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-auto-net          pass 2/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"c":2,"d":2,"e":2,"bInfo":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked [null,null]; caught ms [13152,13155]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-500         pass 2/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"b":2,"d":2,"e":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked ["Retry","Retry"]; caught ms [4044,4037]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-net         pass 2/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"b":2,"d":2,"e":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked ["Retry","Retry"]; caught ms [4040,4038]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-other-plain       pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15243]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+LANDFAIL-other-heading     pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15158]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+LANDFAIL-other-headline    pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15176]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+CHAIN-enter                pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-blur                 pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-inline               pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-mixed                pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-seed                 pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":0},{"kzero":1,"kone":1,"ktwo":0}]
+H1                         pass 2/2
+   injected throw fired 2/2 (a run where it did not fire proves nothing); beta landed 2/2
+H2                         pass 2/2
+   SMOKE only (not a gate): landed after coming back 2/2

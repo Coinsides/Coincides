@@ -8,7 +8,7 @@ import { shouldShowEmptyPagePrompt } from '../draftBlockLifecycleReducer';
 import type { DraftBlockLifecyclePhase } from '../draftBlockLifecycleReducer';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { TextFocusReceipt } from '../textFocusReceipt';
-import { DraftBlockEditorLayer } from './DraftBlockEditorLayer';
+import { DraftBlockEditorLayer, type DraftInput } from './DraftBlockEditorLayer';
 import styles from '../../NoteDetail.module.css';
 
 export interface DraftWritingEntryLayerProps {
@@ -28,7 +28,7 @@ export interface DraftWritingEntryLayerProps {
   textareaRef: RefObject<HTMLTextAreaElement>;
   text: string;
   onActivate: (layout: BlockBoxLayout) => void;
-  onChange: (value: string, caret: number, textarea: HTMLTextAreaElement) => void;
+  onChange: (value: string, caret: number, textarea: HTMLTextAreaElement, input?: DraftInput) => void;
   onClearSlashTarget: () => void;
   onDiscard: () => void;
   onFocused: (receipt: TextFocusReceipt) => void;

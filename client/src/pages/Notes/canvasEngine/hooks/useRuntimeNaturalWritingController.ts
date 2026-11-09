@@ -28,6 +28,7 @@ import {
 } from '../placementService';
 import { getPageFrameContentRect } from '../pageFrameService';
 import type { BlockBoxLayout } from '../runtimeLayout';
+import type { DraftInput } from '../layers/DraftBlockEditorLayer';
 import {
   shouldCreateDurableDraftFromInput,
 } from '../draftBlockLifecycleReducer';
@@ -331,6 +332,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
     persistDraft,
     resizeDraftFromTextarea,
     resetDraft,
+    setDraftComposing,
     setDraftText,
   } = useDraftBlockController({
     ...options,
@@ -440,10 +442,14 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
     value: string,
     caret: number,
     anchorElement?: HTMLElement | null,
+    input?: DraftInput,
   ) => {
     handleDraftChangeBase(value, caret, anchorElement);
-    if (shouldCreateDurableDraftFromInput(value)) void persistDraft(value);
-  }, [handleDraftChangeBase, persistDraft]);
+    // A-25 r2 (①): the draft box's composing state, for the create's catch-up and hand-over (they wait for its end).
+    setDraftComposing(Boolean(input?.composing));
+    // A-25 ①: not while an input method composes; the draft box calls again with the word at compositionend.
+    if (!input?.composing && shouldCreateDurableDraftFromInput(value)) void persistDraft(value);
+  }, [handleDraftChangeBase, persistDraft, setDraftComposing]);
 
   const handleDraftKeyDown = useCallback((event: KeyboardEvent<HTMLTextAreaElement>) => {
     handleDraftKeyDownBase(event);

@@ -824,3 +824,122 @@ describe('useRuntimeNaturalWritingController Page draft authority', () => {
     expect(loadDraftRecoveryQueue()).toEqual({ replayable: [], blocked: [] });
   });
 });
+
+// A-25 ①: a new note's first line typed with an input method. The draft must not become a block on the letters the
+// input method is still composing (creating it hands the writing over and moves the focus; Chrome then commits the
+// letters themselves into the note).
+describe('A-25 ① a draft is not created while an input method composes', () => {
+  it('composing "d" creates nothing; the committed word creates the block once, with the word', async () => {
+    const createBlock = vi.fn(async () => null);
+    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({ createBlock })));
+    act(() => subject.result.current.activateDraft());
+    await act(async () => {
+      subject.result.current.handleDraftChange('d', 1, undefined, { composing: true });
+      subject.result.current.handleDraftChange('di', 2, undefined, { composing: true });
+      await Promise.resolve();
+    });
+    expect(createBlock).not.toHaveBeenCalled();
+    expect(subject.result.current.draftText).toBe('di');
+    await act(async () => {
+      subject.result.current.handleDraftChange('第一', 2);
+      await Promise.resolve();
+    });
+    expect(createBlock).toHaveBeenCalledTimes(1);
+    expect(createBlock).toHaveBeenCalledWith(defaultTextTemplate, '第一', expect.anything());
+  });
+});
+
+describe('A-25 ① composition: the committed word twice, and a slash while composing', () => {
+  it('the committed word reported twice (compositionend, then the input after it) creates one block', async () => {
+    const attempt = deferred<DraftBlockCreateResult | null>();
+    const createBlock = vi.fn(() => attempt.promise);
+    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({ createBlock })));
+    act(() => subject.result.current.activateDraft());
+    await act(async () => {
+      subject.result.current.handleDraftChange('d', 1, undefined, { composing: true });
+      subject.result.current.handleDraftChange('第一', 2);
+      subject.result.current.handleDraftChange('第一', 2);
+      await Promise.resolve();
+    });
+    expect(createBlock).toHaveBeenCalledTimes(1);
+    expect(createBlock).toHaveBeenCalledWith(defaultTextTemplate, '第一', expect.anything());
+    await act(async () => { attempt.resolve(null); await attempt.promise; await Promise.resolve(); });
+  });
+
+  it('a slash typed while composing opens the same slash target as one typed without', () => {
+    const targets = [true, false].map((composing) => {
+      const subject = renderHook(({ owner }: { owner: TextFocusReceipt | null }) => useRuntimeNaturalWritingController(
+        makeRuntimeOptions({ focusedTextOwner: owner })), { initialProps: { owner: null as TextFocusReceipt | null } });
+      act(() => subject.result.current.activateDraft());
+      const owner = subject.result.current.draftFocusReceipt;
+      subject.rerender({ owner });
+      const box = document.createElement('textarea');
+      Object.assign(box.dataset, { blockId: owner.blockId, textFlowId: owner.textFlowId, textUnitId: owner.textUnitId });
+      box.value = '/';
+      act(() => subject.result.current.handleDraftChange('/', 1, box, composing ? { composing } : undefined));
+      const target = subject.result.current.slashTarget;
+      subject.unmount();
+      return target;
+    });
+    expect(targets[0]).toMatchObject({ target: 'draft' });
+    expect(targets[0]).toEqual(targets[1]);
+  });
+});
+
+// A-25 r2 (①, Main_Designer 2026-11-09): the server never receives a composing text. While the draft box composes, the
+// create's catch-up saves nothing and the writing is not handed over; after compositionend the committed word is saved
+// once, then handed over. Tester k25a IME-new before: 20/24 lines kept the pinyin ('第一ceshi测试').
+describe('A-25 r2 (①) the create\'s catch-up and hand-over wait for the composition to end', () => {
+  const start = (saveBlock: ReturnType<typeof vi.fn>) => {
+    const attempt = deferred<DraftBlockCreateResult | null>();
+    const createBlock = vi.fn(() => attempt.promise);
+    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({ createBlock, saveBlock })));
+    act(() => subject.result.current.activateDraft());
+    return { subject, createBlock, attempt };
+  };
+  const created = (text: string): DraftBlockCreateResult => ({ block: createdBlock(text), clientCreateKey: 'key-1',
+    placementPersisted: true, reused: false }) as DraftBlockCreateResult;
+
+  // Red before r2: the catch-up saved '第一c', '第一ce', '第一ces' (the pinyin went to the server) and handed over.
+  it('three composing changes while the create is on its way: nothing saved, not handed over, until the word', async () => {
+    const saveBlock = vi.fn(async (block: NoteBlock, text: string) => savedBlockOutcome({ ...block, plain_text: text }));
+    const { subject, createBlock, attempt } = start(saveBlock);
+    await act(async () => { subject.result.current.handleDraftChange('第一', 2); await Promise.resolve(); });
+    expect(createBlock).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      subject.result.current.handleDraftChange('第一c', 3, undefined, { composing: true });
+      subject.result.current.handleDraftChange('第一ce', 4, undefined, { composing: true });
+      subject.result.current.handleDraftChange('第一ces', 5, undefined, { composing: true });
+      attempt.resolve(created('第一'));
+      await attempt.promise;
+      for (let i = 0; i < 5; i += 1) await Promise.resolve();
+    });
+    expect(saveBlock).not.toHaveBeenCalled();
+    expect(subject.result.current.draftOwnerReconciliation).toBeNull();
+    await act(async () => { subject.result.current.handleDraftChange('第一测试', 4); });
+    await waitFor(() => expect(subject.result.current.draftOwnerReconciliation).not.toBeNull());
+    expect(saveBlock.mock.calls.map(([, text]) => text)).toEqual(['第一测试']);
+  });
+
+  // Red before r2: with nothing left to catch up, the hand-over went ahead while the box was composing.
+  it('caught up while composing: not handed over; at the end, saved once and handed over once', async () => {
+    const saveBlock = vi.fn(async (block: NoteBlock, text: string) => savedBlockOutcome({ ...block, plain_text: text }));
+    const { subject, attempt } = start(saveBlock);
+    await act(async () => { subject.result.current.handleDraftChange('第一', 2); await Promise.resolve(); });
+    await act(async () => {
+      // A composition has begun and shows nothing yet: the text is what was created.
+      subject.result.current.handleDraftChange('第一', 2, undefined, { composing: true });
+      attempt.resolve(created('第一'));
+      await attempt.promise;
+      for (let i = 0; i < 5; i += 1) await Promise.resolve();
+    });
+    expect(saveBlock).not.toHaveBeenCalled();
+    expect(subject.result.current.draftOwnerReconciliation).toBeNull();
+    await act(async () => { subject.result.current.handleDraftChange('第一测试', 4); });
+    await waitFor(() => expect(subject.result.current.draftOwnerReconciliation).not.toBeNull());
+    expect(saveBlock.mock.calls.map(([, text]) => text)).toEqual(['第一测试']);
+    const handedOver = subject.result.current.draftOwnerReconciliation;
+    await act(async () => { for (let i = 0; i < 5; i += 1) await Promise.resolve(); });
+    expect(subject.result.current.draftOwnerReconciliation).toBe(handedOver);
+  });
+});

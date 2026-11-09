@@ -143,8 +143,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }
 
-function blockEditRecoveryScopeKey(noteId: string, blockId: string): string {
-  return `${noteId}\u0000${blockId}`;
+// A-25 ②a (iv) A: the slot one entry fills is a block in one visit (mount and route generation). A save replaces the
+// entry its own visit left for the block, never another visit's: that one still holds words the page that wrote it
+// could not see saved, and stays on offer until it is applied or dismissed.
+function blockEditRecoveryScopeKey(receipt: Pick<BlockEditRecoveryReceipt, 'noteId' | 'blockId' | 'mountNonce' | 'creationGeneration'>): string {
+  return `${receipt.noteId}\u0000${receipt.blockId}\u0000${receipt.mountNonce}\u0000${receipt.creationGeneration}`;
 }
 
 export function createBlockEditRecoveryKey(
@@ -474,7 +477,7 @@ export function listBlockEditRecoveryReceipts(noteId?: string): BlockEditRecover
     stored.entries.forEach((raw) => {
       const receipt = validateBlockEditRecoveryReceipt(raw);
       if (!receipt) return;
-      byScope.set(blockEditRecoveryScopeKey(receipt.noteId, receipt.blockId), receipt);
+      byScope.set(blockEditRecoveryScopeKey(receipt), receipt);
     });
   }
   return [...byScope.values()].filter((receipt) => !noteId || receipt.noteId === noteId);
@@ -514,11 +517,11 @@ export function rememberDraftRecoveryReceipt(receipt: DraftRecoveryReceipt): voi
 export function rememberBlockEditRecoveryReceipt(receipt: BlockEditRecoveryReceipt): boolean {
   const validated = validateBlockEditRecoveryReceipt(receipt);
   if (!validated) return false;
-  const scopeKey = blockEditRecoveryScopeKey(validated.noteId, validated.blockId);
+  const scopeKey = blockEditRecoveryScopeKey(validated);
   const keepUnlessSameBlockEdit = (item: unknown) => {
     const storedReceipt = validateBlockEditRecoveryReceipt(item);
     return !storedReceipt
-      || blockEditRecoveryScopeKey(storedReceipt.noteId, storedReceipt.blockId) !== scopeKey;
+      || blockEditRecoveryScopeKey(storedReceipt) !== scopeKey;
   };
   const local = blockEditRecoveryLocalStorage();
   if (local) {

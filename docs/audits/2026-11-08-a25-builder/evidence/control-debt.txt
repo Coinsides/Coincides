@@ -1,0 +1,7 @@
+S2 mutation (landed without source) applied exit 0
+S2 control exit 1 (want 1)
+HSC restored ok
+O4 mutation (step back up to 0xdfff) applied exit 0
+O4 control exit 1 (want 1)
+R3 under the O4 mutation exit 0 (want 0: R3 still holds)
+H restored ok

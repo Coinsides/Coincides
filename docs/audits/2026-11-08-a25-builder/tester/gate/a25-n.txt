@@ -1,0 +1,84 @@
+MERGE-close                2/2
+    ok  close: BOX; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes ["abcdZ"]; Z at box; kept at leave []; at reopen ["\"\"->\"abcdZ\"(split)"]; where closed; head efg after reopen+20 s+reopen banner+Apply; head efg 
+MERGE-addr                 2/2
+    ok  addr: BOX; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes ["abcdZ"]; Z at box; kept at leave []; at reopen ["\"\"->\"abcdZ\"(split)"]; where A; head efg after reopen+20 s+reopen banner+Apply; head efg at ban
+MERGE-back                 2/2
+    ok  back: BOX; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes ["abcdZ"]; Z at box; kept at leave ["\"\"->\"abcdZ\"(split)"]; at reopen ["\"\"->\"abcdZ\"(split)"]; where other; head efg after reopen+20 s+reopen b
+SELDEL-close               2/2
+    ok  close: BOX; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes ["adZ"]; Z at box; kept at leave []; at reopen ["\"\"->\"adZ\"(split)"]; where closed; head efg after reopen+20 s+reopen banner+Apply; head efg at b
+SELDEL-addr                2/2
+    ok  addr: BOX; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes ["adZ"]; Z at box; kept at leave []; at reopen ["\"\"->\"adZ\"(split)"]; where A; head efg after reopen+20 s+reopen banner+Apply; head efg at banner,
+SELDEL-back                2/2
+    ok  back: BOX; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes ["adZ"]; Z at box; kept at leave ["\"\"->\"adZ\"(split)"]; at reopen ["\"\"->\"adZ\"(split)"]; where other; head efg after reopen+20 s+reopen banner+
+CLICKBACK-end              2/2
+    ok  recorded (N4, TD-66): server ["alpha beta"]; screen ["alpha beta"]; boxes ["alphaZ"]; kept at reopen ["\"alpha\"->\"alphaZ\"(edit)"]
+ADDR-noncanon-slash        2/2
+    ok  slash (#/notes/:A/): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED; reopen ["warmup","backin words"]
+ADDR-noncanon-anchor       2/2
+    ok  anchor (#/notes/:A#x): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED; reopen ["warmup","backin words"]
+ADDR-noncanon-hash         2/2
+    ok  hash (hash to #/notes/A/, released 0, now #/notes/:A/, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words mor
+ADDR-noncanon-addr         2/2
+    ok  addr (addr to #/notes/A/, released 0, now #/notes/:A/, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words mor
+ADDR-noncanon-case         2/2
+    ok  case (case to #/Notes/A, released 0, now #/Notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words more"
+ADDR-noncanon-caseaddr     2/2
+    ok  caseaddr (caseaddr to #/Notes/A, released 0, now #/Notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin wor
+ADDR-noncanon-caseslash    2/2
+    ok  caseslash (caseslash to #/NOTES/A/, released 0, now #/NOTES/:A/, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin
+ADDR-noncanon-bare         2/2
+    ok  bare (bare to #notes/A, released 0, now #notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words more"]
+ADDR-noncanon-bareslash    2/2
+    ok  bareslash (bareslash to #notes/A/, released 0, now #notes/:A/, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin w
+ADDR-noncanon-bareaddr     2/2
+    ok  bareaddr (bareaddr to #notes/A, released 0, now #notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words
+BACKIN-heldback            2/2
+    ok  RAW retry x1 at +1610 ms (window end 9028; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1610 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+    ok  RAW retry x1 at +1629 ms (window end 9028; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1629 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+BACKIN-fail-heldhead       2/2
+    ok  kept series after Back: max 0, first +null ms, last +null ms, longest 0 ms; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+BACKIN-heldhead-undo       0/2
+    RED kept after Back: max 0, +null..+null ms; undo at +680 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+    RED kept after Back: max 0, +null..+null ms; undo at +667 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+BACKIN-heldhead-del        2/2
+    ok  NOT CONSTRUCTIBLE (delete had no effect during the hold); kept after Back: max 0, +null..+null ms; at delete (A, +947 ms) kept [] -> screen ["warmup bbb","aaa"], kept []; close at +975 ms (A, held 1); reopen server [
+    ok  NOT CONSTRUCTIBLE (delete had no effect during the hold); kept after Back: max 0, +null..+null ms; at delete (A, +963 ms) kept [] -> screen ["warmup bbb","aaa"], kept []; close at +992 ms (A, held 1); reopen server [
+CLOSEHEAD-plain            2/2
+    ok  recorded: plain: aaa at reopen banner+Apply, 20 s later banner+Apply; server ["warmup",""]; boxes []; kept []; receipts [{"store":"local","count":1,"has":true}]; banners ["A block edit is waiting for recovery warmup 
+CLOSEHEAD-sealed           2/2
+    ok  recorded: sealed: aaa at reopen banner+Apply, 20 s later banner+Apply; server ["warmup",""]; boxes []; kept []; receipts [{"store":"local","count":1,"has":true}]; banners ["A block edit is waiting for recovery warmup
+HEADCLOSE-plain            2/2
+    ok  plain (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\"(edit)"]); +20 s reopen aaa banner+Apply, bbb box; READINGS editor at reopen r1 ["warm
+HEADCLOSE-apply            1/1
+    ok  apply (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\"(edit)"]); +20 s reopen aaa banner+Apply, bbb box; apply clicked true: server ["warmup
+HEADCLOSE-dismiss          1/1
+    ok  dismiss (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\"(edit)"]); +20 s reopen aaa banner+Apply, bbb box; dismiss clicked true: server ["wa
+HEADCLOSE-putback          1/1
+    ok  READING (ruled A-25 ②a (iv), manual known; arm rule green): reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup
+HEADCLOSE-applyslow        2/2
+    ok  form req; end ok true, no 409 true, no "Failed to save block" true; first save after the click 5958 PUT /note-blocks/:id/text-save [hold] warmup|aaa; head idle; Apply clicked +651 ms after the reopen began; box words
+    ok  form req; end ok true, no 409 true, no "Failed to save block" true; first save after the click 5883 PUT /note-blocks/:id/text-save [hold] warmup|aaa; head idle; Apply clicked +604 ms after the reopen began; box words
+HEADCLOSE-applyslowresp    2/2
+    ok  form resp; end ok true, no 409 true, no "Failed to save block" true; first save after the click 5871 PUT /note-blocks/:id/text-save warmup|aaa; head idle; Apply clicked +602 ms after the reopen began; box words in li
+    ok  form resp; end ok true, no 409 true, no "Failed to save block" true; first save after the click 5856 PUT /note-blocks/:id/text-save warmup|aaa; head idle; Apply clicked +589 ms after the reopen began; box words in li
+MENTER-close               2/2
+    ok  KEPT (server kept true, boxes abxcd + Z true): screen at close ["abxcd","Z"] (merged ["abxcd"], enter ["abxcd",""]); reopen server ["abx","cd"], editor ["abx","cd"], boxes ["abxcd","Z"] / ["abxcd","Z"], kept ["\"\"->
+N6B-switch                 1/1
+    ok  head idle; to B +6825 ms (10973 B); back on A +276 ms; A at +1.5 s {"aaa":"server","bbb":"server"}, +9.5 s {"aaa":"server","bbb":"server"}, end {"aaa":"server","bbb":"server"}; A server end ["warmup bbb","aaa"] (aaa 
+MULTIPASTE-close           2/2
+    ok  XQ server/server, YQ box/box, def server/server (in a box true); on the server twice []; qr kept true; paste {"tag":"TEXTAREA","editor":true,"prevented":true,"hasData":true}; screen at close ["abcXQ","YQ","def","qr"]
+LISTPASTE-close            2/2
+    ok  item server/server; on the server twice false; warmup kept true; same line count true (["warmupr",""] -> ["warmupr","item"]); paste {"tag":"TEXTAREA","editor":true,"prevented":true,"hasData":true}; kept before close 
+SHIFTENTER-close           2/2
+    ok  landed shape ONE/ONE; newline server/server; qr kept true; abc twice false; screen at close ["abc\n","qr"]; kept before close []; reopen server ["abc\n","qr"], boxes [] / [], kept [], items [] (Apply false); +12 s se
+SURROGATE-paste-close      2/2
+    ok  broken units 0 []; 😁 server/server, YQ box/box, 😀 kept true, qr kept true; line 1 r1 "abc😁😀def" [61 62 63 1f601 1f600 64 65 66], +12 s "abc😁😀def" [61 62 63 1f601 1f600 64 65 66]; screen at close ["abc😁","YQ","
+SHIFTENTER-idle            2/2
+    ok  READING (control, nothing in flight): screen after Shift+Enter ["abc\n","q"]; sealed by a click false; server before the close "abc\n" , "q"; editor "abc\n" , "q"; after a reopen server "abc\n" , "q"; editor "abc\n" 
+SHIFTENTER-typed-close     2/2
+    ok  landed shape ONE/ONE (ONE = one unit, SPLIT = two units); qr kept true; abc twice false; screen at close ["abc\nd","qr"]; kept before close []; reopen server ["abc\nd","qr"], boxes [], kept [], items []; +12 s server
+SHIFTENTER-idletyped       2/2
+    ok  READING (control, nothing in flight) shape ONE: screen after Shift+Enter ["abc\nd","q"]; sealed by a click false; server before the close "abc\nd" , "q"; editor "abc\nd" , "q"; after a reopen server "abc\nd" , "q"; e
+WINDOWENTER-land           2/2
+    ok  landed shape SPLIT (SPLIT expected: a window record); kept x1, body x1; box at return [], kept records []; box gone after 0 ms; server blocks [["warmup"],["[heading_1]kept","body"]]; editor ["warmup","kept","body"]; 
+total red 2

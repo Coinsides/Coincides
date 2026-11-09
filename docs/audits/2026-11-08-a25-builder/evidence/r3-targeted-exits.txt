@@ -1,0 +1,2 @@
+tsc exit 0
+targeted exit 0

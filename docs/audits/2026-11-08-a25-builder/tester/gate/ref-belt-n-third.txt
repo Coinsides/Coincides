@@ -1,0 +1,7 @@
+BACKIN-heldback            1/1
+    ok  RAW retry x1 at +1635 ms (window end 9010; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1635 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+BACKIN-fail-heldhead       1/1
+    ok  kept series after Back: max 0, first +null ms, last +null ms, longest 0 ms; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+BACKIN-heldhead-undo       0/1
+    RED kept after Back: max 0, +null..+null ms; undo at +678 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+total red 1

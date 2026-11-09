@@ -1,0 +1,10 @@
+tsc exit 0
+targeted exit 0
+k25b ended 18:02:40
+vite build exit 0
+index-BngbSlvd.js
+a25 kit exit 0
+done 18:33:43
+tsc exit 0
+client exit 1
+chain done 18:39:40

@@ -1,0 +1,17 @@
+--- A1-natural-300-0
+--- A1-natural-300-1
+--- A1-natural-300-2
+--- A1-natural-300-3
+--- A1-natural-1000-0
+--- A1-natural-1000-1
+--- A1-natural-1000-2
+--- A1-natural-1000-3
+--- G-draftUndo-0
+--- G-draftUndo-1
+--- H-unloadU-0
+--- H-unloadU-1
+--- H-unloadU-2
+--- H-unloadW-0
+--- H-unloadW-1
+--- H-unloadW-2
+DONE a20bp-acc1: 16 rows, bad 0

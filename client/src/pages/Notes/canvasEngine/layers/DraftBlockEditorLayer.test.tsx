@@ -292,3 +292,86 @@ describe('client-first draft component lifecycle', () => {
     expect(view.getByRole('button', { name: 'Double-click to start writing' })).not.toBeNull();
   });
 });
+
+// A-25 ①: the draft box tells its owner when a change is an input method still composing, and hands over the
+// committed word at compositionend.
+describe('A-25 ① draft box and input method composition', () => {
+  it('marks changes during composition and hands over the committed value at compositionend', async () => {
+    const { DraftBlockEditorLayer } = await import('./DraftBlockEditorLayer');
+    const onChange = vi.fn();
+    const ref = { current: null as HTMLTextAreaElement | null };
+    function Box() {
+      const [text, setText] = useState('');
+      return (
+        <DraftBlockEditorLayer
+          creating={false}
+          focusReceipt={{ blockId: 'draft', textFlowId: 'flow', textUnitId: 'tu-1' }}
+          layout={defaultDraftLayout}
+          pageOffsetX={0}
+          phase="focused"
+          slashTargetActive={false}
+          textareaRef={ref as never}
+          text={text}
+          onChange={(value, caret, textarea, input) => { setText(value); onChange(value, input); }}
+          onClearSlashTarget={vi.fn()}
+          onDiscard={vi.fn()}
+          onFocused={vi.fn()}
+          onFocusReleased={vi.fn()}
+          onKeyDown={vi.fn()}
+          onPersist={vi.fn(async () => {})}
+          onResize={vi.fn()}
+        />
+      );
+    }
+    const view = render(<Box />);
+    const box = view.container.querySelector('textarea')!;
+    fireEvent.compositionStart(box);
+    fireEvent.change(box, { target: { value: 'd' } });
+    fireEvent.change(box, { target: { value: 'di' } });
+    expect(onChange.mock.calls).toEqual([['d', { composing: true }], ['di', { composing: true }]]);
+    fireEvent.change(box, { target: { value: '第一' } });
+    fireEvent.compositionEnd(box);
+    expect(onChange.mock.calls[onChange.mock.calls.length - 1]).toEqual(['第一', undefined]);
+    onChange.mockClear();
+    fireEvent.change(box, { target: { value: '第一 a' } });
+    expect(onChange.mock.calls).toEqual([['第一 a', undefined]]);
+  });
+});
+
+describe('A-25 ① keys while an input method composes behave as before', () => {
+  it('Enter and Escape reach the owner, and Escape discards, the same while composing as not', async () => {
+    const { DraftBlockEditorLayer } = await import('./DraftBlockEditorLayer');
+    const run = (composing: boolean, text: string) => {
+      const keys: string[] = [];
+      const onDiscard = vi.fn();
+      const view = render(
+        <DraftBlockEditorLayer
+          creating={false}
+          focusReceipt={{ blockId: 'draft', textFlowId: 'flow', textUnitId: 'tu-1' }}
+          layout={defaultDraftLayout}
+          pageOffsetX={0}
+          phase="focused"
+          slashTargetActive={false}
+          textareaRef={{ current: null } as never}
+          text={text}
+          onChange={vi.fn()}
+          onClearSlashTarget={vi.fn()}
+          onDiscard={onDiscard}
+          onFocused={vi.fn()}
+          onFocusReleased={vi.fn()}
+          onKeyDown={(event) => { keys.push(event.key); }}
+          onPersist={vi.fn(async () => {})}
+          onResize={vi.fn()}
+        />,
+      );
+      const box = view.container.querySelector('textarea')!;
+      if (composing) fireEvent.compositionStart(box);
+      fireEvent.keyDown(box, { key: 'Enter' });
+      fireEvent.keyDown(box, { key: 'Escape' });
+      view.unmount();
+      return { keys, discarded: onDiscard.mock.calls.length };
+    };
+    for (const text of ['', 'd']) expect(run(true, text)).toEqual(run(false, text));
+    expect(run(false, '')).toEqual({ keys: ['Enter', 'Escape'], discarded: 1 });
+  });
+});

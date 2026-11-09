@@ -1,0 +1,13 @@
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+ReferenceError: document is not defined
+ ❯ Timeout.place [as _onTimeout] src/pages/Notes/canvasEngine/structureTypingBuffer.ts:316:5
+This error originated in "src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+ReferenceError: document is not defined
+ ❯ Timeout.place [as _onTimeout] src/pages/Notes/canvasEngine/structureTypingBuffer.ts:316:5
+This error originated in "src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+ReferenceError: document is not defined
+ ❯ Timeout.place [as _onTimeout] src/pages/Notes/canvasEngine/structureTypingBuffer.ts:316:5
+This error originated in "src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+ Test Files  259 passed (259)
+      Tests  2853 passed (2853)
+     Errors  3 errors

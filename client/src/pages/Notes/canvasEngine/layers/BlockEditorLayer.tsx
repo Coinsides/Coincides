@@ -94,6 +94,7 @@ import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
 import { PAGINATED_SOURCE_REFERENCE_HEIGHT_PX } from '../pageFlowSourceReferenceService';
 import { BlockStatusBadgeLayer } from './BlockStatusBadgeLayer';
+import { BlockSaveFailedMark } from './BlockSaveFailedMark';
 import styles from '../../NoteDetail.module.css';
 
 interface BlockEditorLayerProps {
@@ -113,6 +114,9 @@ interface BlockEditorLayerProps {
   onSaveComponent?: (payload: ComponentBlockPayload) => Promise<boolean>;
   onSaveParagraphFurniture?: (value: ParagraphFurniture | null) => Promise<boolean>;
   allowSaveRecovery?: boolean;
+  /** A-25 ②a: this block's typing save failed and is being asked again. */
+  saveFailed?: boolean;
+  onRetryFailedSave?: () => void;
   text: string;
   textFlowDraft?: TextBlockContentV1;
   annotations: AnnotationTruthV1[];
@@ -199,6 +203,8 @@ export function BlockEditorLayer({
   onSaveComponent,
   onSaveParagraphFurniture,
   allowSaveRecovery = false,
+  saveFailed = false,
+  onRetryFailedSave,
   text,
   textFlowDraft,
   annotations,
@@ -529,6 +535,7 @@ export function BlockEditorLayer({
           sourceReferencesHeight: fragment.isFirst && block.source_references?.length ? PAGINATED_SOURCE_REFERENCE_HEIGHT_PX : 0 }))
         : [{ id: block.id, left: 0, top: 0, width: layout.width, height: layout.height, first: true, last: true }]} />}
       {chapter && <ChapterHeadingFurniture {...chapter} />}
+      {saveFailed && <BlockSaveFailedMark text={text} onRetry={onRetryFailedSave} />}
       <BlockStatusBadgeLayer
         blockTypeLabel={blockTypeLabel}
         boundary={boundary}

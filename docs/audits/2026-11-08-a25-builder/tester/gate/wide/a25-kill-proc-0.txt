@@ -1,0 +1,3 @@
+HARDKILL-proc              1/1
+    ok  first true, tail (300 ms) false
+total red 0

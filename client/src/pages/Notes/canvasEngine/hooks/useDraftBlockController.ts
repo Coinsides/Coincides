@@ -200,6 +200,26 @@ export function useDraftBlockController({
   // their content is adopted into the authority before the save is issued.
   const replayingHandoffRef = useRef(false);
   const persistDraftRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  // A-25 r2 (①): the draft box is composing (an input method's letters are on screen, not yet the word). The create's
+  // catch-up never saves a composing text and the hand-over never happens while it composes: it waits for the end.
+  const draftComposingRef = useRef(false);
+  const compositionWaitersRef = useRef<(() => void)[]>([]);
+  const releaseCompositionWaiters = useCallback(() => {
+    draftComposingRef.current = false;
+    for (const resume of compositionWaitersRef.current.splice(0)) resume();
+  }, []);
+  const setDraftComposing = useCallback((composing: boolean) => {
+    if (composing) draftComposingRef.current = true;
+    else if (draftComposingRef.current) releaseCompositionWaiters();
+  }, [releaseCompositionWaiters]);
+  const compositionEnded = () => new Promise<void>((resolve) => {
+    if (!draftComposingRef.current) resolve();
+    else compositionWaitersRef.current.push(resolve);
+  });
+  // Unmounted while composing: nothing will end it, so the waiting run is let go. It goes on, but its save goes through
+  // the text history, whose boundary refuses once the note's scope has ended: the composing letters never reach the
+  // server (A-25 r3, Reviewer O1: the request itself is still current here).
+  useLayoutEffect(() => () => releaseCompositionWaiters(), [releaseCompositionWaiters]);
   const draftFlowMemoRef = useRef<{ text: string; flow: TextBlockContentV1 } | null>(null);
 
   // Unit ids are minted per split, so every reader of one text must get one flow:
@@ -278,6 +298,8 @@ export function useDraftBlockController({
     draftRevisionRef.current = 0;
     setDraftActive((current) => transitionDraftActive(current, transition));
     draftActiveRef.current = false;
+    // A-25 r2 (①): a run waiting for a composition to end finds its draft gone instead of waiting for ever.
+    releaseCompositionWaiters();
     setDraftLayoutState((current) => transitionDraftLayout(current, transition));
     draftLayoutRef.current = null;
     if (!options.preserveReconciliation) setDraftOwnerReconciliation(null);
@@ -560,7 +582,15 @@ export function useDraftBlockController({
       }
 
       let savedRevision = durableSavedRevisionRef.current;
-      while (requestIsCurrent() && savedRevision !== draftRevisionRef.current) {
+      for (;;) {
+        // A-25 r2 (①): never a composing text to the server, never a hand-over mid-composition. At its end the
+        // committed word is what differs from the server: saved below, then handed over.
+        if (draftComposingRef.current) {
+          await compositionEnded();
+          if (!requestIsCurrent()) return;
+          continue;
+        }
+        if (!requestIsCurrent() || savedRevision === draftRevisionRef.current) break;
         const revisionToSave = draftRevisionRef.current;
         const latestText = draftTextRef.current.trimEnd();
         if (!hasMeaningfulDraftContent(latestText)) break;
@@ -686,6 +716,7 @@ export function useDraftBlockController({
     persistDraft,
     resetDraft,
     resizeDraftFromTextarea,
+    setDraftComposing,
     setDraftLayout,
     setDraftText,
   };

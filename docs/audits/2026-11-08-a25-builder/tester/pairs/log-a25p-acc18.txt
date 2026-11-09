@@ -1,0 +1,7 @@
+--- LEGACY-Y1-0
+--- LEGACY-Y1-1
+--- STEAL2-reopenThenTypeElsewhere-0
+--- STEAL2-reopenThenTypeElsewhere-1
+--- STEAL2-reopenThenTypeElsewhere-2
+--- COPYPASTE-0
+DONE a25p-acc18: 6 rows, bad 0

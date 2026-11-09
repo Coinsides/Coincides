@@ -1,0 +1,27 @@
+--- D-anchor-0
+BAD {"arm":"RV","name":"D-anchor-0","id":"f2fa2117-c567-4af9-8703-c35038c22e37","exit":"D-anchor","headKind":"idle","edited":["3189 PUT /note-blocks/:id/text-save [hold] alpha beta gamma|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery alpha
+--- D-anchor-1
+BAD {"arm":"RV","name":"D-anchor-1","id":"b90e3526-cb08-4bb6-b3d4-d831cca42d28","exit":"D-anchor","headKind":"idle","edited":["3168 PUT /note-blocks/:id/text-save [hold] alpha beta gamma|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery alpha
+--- D-unanch-0
+--- D-unanch-1
+--- D-struct-0
+--- D-struct-1
+--- D-same-0
+BAD {"arm":"RV","name":"D-same-0","id":"3a90843b-c19c-4139-be01-80ac7cebf2c2","exit":"D-same","headKind":"idle","edited":["3186 PUT /note-blocks/:id/text-save [hold] alpha beta gamma|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery alpha bet
+--- D-same-1
+BAD {"arm":"RV","name":"D-same-1","id":"aa9ef6e8-c8df-4c4e-be38-6afcdff1825e","exit":"D-same","headKind":"idle","edited":["3174 PUT /note-blocks/:id/text-save [hold] alpha beta gamma|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery alpha bet
+--- D-twice-0
+BAD {"arm":"RV","name":"D-twice-0","id":"4b6d9027-1c6e-4911-a95c-35036e70b964","exit":"D-twice","headKind":"idle","edited":["3187 PUT /note-blocks/:id/text-save [hold] alpha beta gamma|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery alpha b
+--- D-twice-1
+BAD {"arm":"RV","name":"D-twice-1","id":"a6024c69-bb11-4813-84c6-fabfd9c6d15a","exit":"D-twice","headKind":"idle","edited":["3206 PUT /note-blocks/:id/text-save [hold] alpha beta gamma|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery alpha b
+--- D-delonly-0
+--- D-delonly-1
+--- D-link-before-0
+BAD {"arm":"RV","name":"D-link-before-0","id":"e94d30c1-6061-4bdc-9c56-48d7ed85732e","exit":"D-link-before","headKind":"idle","edited":["2761 PUT /note-blocks/:id/text-save [hold] X alpha beta|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery
+--- D-link-before-1
+BAD {"arm":"RV","name":"D-link-before-1","id":"354fe025-2075-4f74-a692-85e2907f1ada","exit":"D-link-before","headKind":"idle","edited":["2750 PUT /note-blocks/:id/text-save [hold] X alpha beta|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery
+--- D-link-after-0
+BAD {"arm":"RV","name":"D-link-after-0","id":"b1f01858-5b61-479a-ad67-0489b1cfc08f","exit":"D-link-after","headKind":"idle","edited":["2767 PUT /note-blocks/:id/text-save [hold] alpha beta X|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery a
+--- D-link-after-1
+BAD {"arm":"RV","name":"D-link-after-1","id":"386d41f4-e4cd-4d33-b47a-1cae7b179ea2","exit":"D-link-after","headKind":"idle","edited":["2755 PUT /note-blocks/:id/text-save [hold] alpha beta X|one two"],"reopen":{"items":[{"t":"A block edit is waiting for recovery a
+DONE kd-base2: 16 rows, red 10

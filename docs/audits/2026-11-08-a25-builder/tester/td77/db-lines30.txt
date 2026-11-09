@@ -1,0 +1,19 @@
+D 30 notes created before 11:00Z (pair 1 mx, round 0): 3
+
+== lines30-0  note 69d0a4d6-e7d8-440e-95b8-4ea8e4e682fc  created 2026-11-09T10:16:49.801Z
+   block 3f543c96-50bc-4290-9517-1a04ff523b17 (paragraph, active) order 0
+   units tu-1:"aa" tu-2:"bb" tu-3:"cc" tu-4:"dd" tu-5:"ee"
+   text_save_revision 9; created 2026-11-09T10:16:52.748Z (+2.95 s after the note); updated 2026-11-09T10:16:55.213Z (+2.46 s after the block)
+   recovery events 0; events naming the block 0
+
+== lines30-1  note 096fb2dc-eb0e-4fe0-aeb5-17a58fbe0c82  created 2026-11-09T10:16:57.076Z
+   block 09345083-deb7-4139-8435-2014f816053d (paragraph, active) order 0
+   units tu-1:"" tu-2:"bb" tu-3:"cc" tu-4:"dd" tu-5:"eeaa"
+   text_save_revision 9; created 2026-11-09T10:16:59.996Z (+2.92 s after the note); updated 2026-11-09T10:17:02.440Z (+2.44 s after the block)
+   recovery events 0; events naming the block 0
+
+== lines30-2  note 2968b5e3-1234-48ec-be16-73358bfa864d  created 2026-11-09T10:17:04.295Z
+   block ae1292fb-d037-436e-89cd-9c98ad69c8f4 (paragraph, active) order 0
+   units tu-1:"aa" tu-2:"bb" tu-3:"cc" tu-4:"dd" tu-5:"ee"
+   text_save_revision 9; created 2026-11-09T10:17:07.200Z (+2.90 s after the note); updated 2026-11-09T10:17:09.635Z (+2.44 s after the block)
+   recovery events 0; events naming the block 0

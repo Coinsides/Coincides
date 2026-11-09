@@ -238,10 +238,15 @@ export function useHeadingStructureController(input: {
     if (landingScheduled.current) return;
     landingScheduled.current = true;
     const next = () => setTimeout(() => {
-      const due = landingQueue.current.shift();
-      if (due && kept.current.has(due) && mounted.current) placeTypedRef.current(due);
-      if (landingQueue.current.length) next();
-      else landingScheduled.current = false;
+      // A-25 ③ H1: a landing that throws must not stop the queue for the rest of this mount; the entry that threw
+      // stays kept (it was not removed) and its own retry asks again.
+      try {
+        const due = landingQueue.current.shift();
+        if (due && kept.current.has(due) && mounted.current) placeTypedRef.current(due);
+      } finally {
+        if (landingQueue.current.length) next();
+        else landingScheduled.current = false;
+      }
     }, 0);
     next();
   };
@@ -401,6 +406,8 @@ export function useHeadingStructureController(input: {
         }
       }
     };
+    // A-25 r3 (F1): the structure's own body has begun (its edit may be on screen and in undo from here on).
+    let bodyStarted = false;
     try {
       // Pause A1 writes before the existing unit transfers begin and drain any
       // earlier placement save, while its pure full plan remains available.
@@ -410,6 +417,7 @@ export function useHeadingStructureController(input: {
       await rendered();
       if (!current()) return false;
       const batch = api.textHistory.runStructureBatch(async (record) => {
+        bodyStarted = true;
         const change = changes[0];
         const edited = documentEdit ? await api.textHistory.applyDocumentEdit(changes)
           : await api.textHistory.applyEdit(change.block, change.nextTextFlow, {
@@ -485,7 +493,12 @@ export function useHeadingStructureController(input: {
     } catch {
       if (current()) {
         succeededFocus = null;
-        latest.current.onFailure();
+        // A-25 r2 (②b 乙): refused, before anything of it was applied, while a block of this structure holds a failed
+        // save. The key is refused as before; the block's own mark (Retry / Copy) already says why, so no toast at
+        // every key. r3 (F1): once the body has begun, its edit may be on screen and in undo: that failure is told.
+        // r3: read from the history's ledgers, not from the error: in the browser the refusal arrives from the write
+        // registry (whenWritesIdle above rethrows the failed save's own error), not as FailedSaveHoldError.
+        if (!(!bodyStarted && latest.current.textHistory.holdsFailedSave(touchedBlockIds()))) latest.current.onFailure();
         publishTextHalves(touchedBlockIds());
         exitQueue();
       }
@@ -520,7 +533,13 @@ export function useHeadingStructureController(input: {
       if (kept.current.has(entry)) retryTimer(entry, true);
       return;
     }
-    if (latest.current.noteId !== entry.session) { if (live) leaveBuffer(); return; }
+    // A-25 ③ H2: the note changed between queueing and running: a kept entry waits for its note again (retryTimer
+    // lands it once that note is current) instead of dropping out of the retry chain until a reload.
+    if (latest.current.noteId !== entry.session) {
+      if (live) leaveBuffer();
+      else if (kept.current.has(entry)) retryTimer(entry);
+      return;
+    }
     if (busyRef.current) { setTimeout(() => placeTypedRef.current(entry, waitingSince), EDITOR_POLL_MS); return; }
     const history = latest.current.textHistory;
     // The block that holds the unit now; the structure moves the entry along with it. A unit id

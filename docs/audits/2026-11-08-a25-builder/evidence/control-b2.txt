@@ -1,0 +1,6 @@
+   × A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > its own block holds the failed save, the writes wait rejects with its network error: refused, no toast 158ms
+   ✓ A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > another block holds the failed save, the writes wait rejects: refused with the toast 170ms
+   ✓ A-25 r3 (②b 乙, browser shape) the refusal arrives from the write registry > no block holds a failed save and the writes wait rejects: refused with the toast 77ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+      Tests  1 failed | 2 passed | 80 skipped (83)

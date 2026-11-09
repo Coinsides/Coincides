@@ -1,0 +1,8 @@
+--- LANDOTHER-plain-0
+BAD {"arm":"RV","name":"LANDOTHER-plain-0","ok":false,"error":"Error: setup: no empty line [\"wmup\",\"a\",\"plainb\",\"hb\",\"hbody\"]","net":["2994 POST /notes/:id/blocks","3014 PUT /canvas-objects/by-note/:id/block-placements/:id","3066 PUT /note-blocks/:id/tex
+--- LANDOTHER-plain-1
+--- LANDOTHER-heading-0
+--- LANDOTHER-heading-1
+--- LANDOTHER-headline-0
+--- LANDOTHER-headline-1
+DONE a25-m-landother: 6 rows, red 1

@@ -66,6 +66,17 @@ function commonPrefix(left: string, right: string): string {
 
 /** A-20: after this long without a recorded keystroke, the open group is written without being sealed. */
 export const IDLE_SAVE_MS = 2000;
+// A-25 ②a: a failed typing save is asked again by itself: 2 s, doubling, at most 30 s; at once when the browser is
+// back online. Only after a server error (5xx) or no answer: never after a 4xx. A 401 / 403 is the route guard's (sign
+// in again); a 409 means the block moved on under this save, and asking again with the same base can only be refused.
+export const SAVE_RETRY_START_MS = 2000;
+export const SAVE_RETRY_MAX_MS = 30_000;
+// A-25 r2 (②b 乙): flush refuses while a save failed. The refusal names the blocks whose failed saves hold the note, so
+// a caller can tell "this block's own failure, already marked on it" from any other refusal.
+export class FailedSaveHoldError extends Error {
+  constructor(message: string, readonly blockIds: readonly string[]) { super(message); this.name = 'FailedSaveHoldError'; }
+  holds(blockIds: readonly string[]): boolean { return blockIds.some((blockId) => this.blockIds.includes(blockId)); }
+}
 
 const sameSnapshot = (left: TextFlowEditSnapshot, right: TextFlowEditSnapshot) => JSON.stringify(
   [left.textFlow, left.annotationRanges, left.boardRanges],
@@ -132,6 +143,8 @@ export function useTextFlowHistory(options: Options) {
   const active = useRef<object | null>(null);
   const mounted = useRef(true);
   const [replayScope, setReplayScope] = useState<object | null>(null);
+  // A-25 ②a: failures live in the scope; this renders the mark on the block when they change.
+  const [, setFailureTick] = useState(0);
   const [selectionRequest, setSelectionRequest] = useState<{ token: object; blockId: string; selection: TextFlowEditSelection } | null>(null);
   const appliedSelection = useRef(selectionRequest);
   useLayoutEffect(() => {
@@ -154,10 +167,15 @@ export function useTextFlowHistory(options: Options) {
     let documentPending = false;
     let proposalPending = false;
     // Idle save (A-20, road B): the open group is written while it stays open, so undo groups exactly as before.
-    // It never enters `failures` (a stale snapshot must not be replayed ahead of the sealed group); one failure
-    // stops further idle saves until a sealed save succeeds, so a lost connection reports once, not every pause.
+    // It never enters `failures` (a stale snapshot must not be replayed ahead of the sealed group). A-25 r2: a failed
+    // idle save marks its own block only: that block's pauses stop sending and the backoff asks again with what the
+    // block shows; other blocks still save at a pause.
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
-    let idleSaveFailed = false;
+    const idleFailedBlocks = new Set<string>();
+    // A-25 r2: block X holds its own idle saves while X has a failed save (sealed or idle); other blocks do not wait.
+    const failedSaveOf = (blockId: string) => [...failures.keys()].some((transaction) => transaction.blockId === blockId);
+    const savePausedFor = (blockId: string) => failedSaveOf(blockId) || idleFailedBlocks.has(blockId);
+    const anyFailedSave = () => failures.size > 0 || idleFailedBlocks.size > 0;
     let lastIdleSave: { blockId: string; after: TextFlowEditSnapshot; block: NoteBlock } | null = null;
     // What each block holds on the server, as far as this note knows: the last body a save confirmed (A-20 r2). A
     // departure keeps, per unit, from that to what is on screen; equal (saved, or undone back to it) keeps nothing. A
@@ -230,6 +248,91 @@ export function useTextFlowHistory(options: Options) {
     };
     // Recovery attempts are keyed by the same immutable history entry, never a second undo stack.
     const failures = new Map<TextFlowEditTransaction, 'before' | 'after'>();
+    // A-25 ②a: automatic retry of failed typing saves, in the one write lane (never a second writer).
+    let saveRetryTimer: ReturnType<typeof setTimeout> | null = null;
+    let saveRetryDelay = SAVE_RETRY_START_MS;
+    // A-25 r3 (F3): a 4xx stops the automatic asking for its own block only; another block's backoff goes on.
+    const refusedBlocks = new Set<string>();
+    // R1: a block with no failure left has no refusal left either (it ends with its failures, by whatever way they go).
+    const settleRefusal = (blockId: string) => { if (!savePausedFor(blockId)) refusedBlocks.delete(blockId); };
+    // O4: a failure gone without a save of its block (gone block, no open group, rejected proposal): its refusal ends
+    // and its mark is redrawn, so the block no longer says "not saved" once nothing is failing there.
+    const failureGone = (blockId: string) => { settleRefusal(blockId); if (current()) setFailureTick((tick) => tick + 1); };
+    const failedBlockIds = () => new Set([...failures.keys()].map((transaction) => transaction.blockId).concat([...idleFailedBlocks]));
+    const anyRetryable = () => [...failedBlockIds()].some((blockId) => !refusedBlocks.has(blockId));
+    // A-25 r3 (F4): what makes an idle save wait (something else holds the note, or the input method composes) makes
+    // an automatic retry wait too: it is asked again shortly instead of being sent into it, or skipped.
+    const noteBusyForSave = () => {
+      const api = latest.current;
+      return replaying || templatePending || documentPending || proposalPending || !!api.history.current?.isReplaying?.()
+        || api.canSaveWhileTyping?.() === false || (!session.peek() && !!session.peek({ duringComposition: true }));
+    };
+    const cancelSaveRetry = () => {
+      if (saveRetryTimer) clearTimeout(saveRetryTimer);
+      saveRetryTimer = null;
+    };
+    // now: the browser is back online, or the person pressed Retry: ask at once, a refusal (401 / 403) included.
+    const scheduleSaveRetry = (now = false) => {
+      if (!current() || !(now ? anyFailedSave() : anyRetryable())) return;
+      if (saveRetryTimer && !now) return;
+      cancelSaveRetry();
+      const delay = now ? 0 : saveRetryDelay;
+      if (!now) saveRetryDelay = Math.min(saveRetryDelay * 2, SAVE_RETRY_MAX_MS);
+      saveRetryTimer = setTimeout(() => { saveRetryTimer = null; void retryFailedSaves(now); }, delay);
+    };
+    // A-25 r3 (F4): the note is busy when a retry is due: look again after a short pause, the pace unchanged.
+    const deferSaveRetry = (now: boolean) => {
+      cancelSaveRetry();
+      saveRetryTimer = setTimeout(() => { saveRetryTimer = null; void retryFailedSaves(now); }, SAVE_RETRY_START_MS);
+    };
+    // includeRefused: asked by the person (Retry) or by the browser coming back online: refused blocks are asked too.
+    async function retryFailedSaves(includeRefused = false) {
+      const host = latest.current.history.current;
+      if (!current() || !host) return;
+      if (noteBusyForSave()) { deferSaveRetry(includeRefused); return; }
+      // A block that is gone has no idle save left to ask again.
+      for (const blockId of [...idleFailedBlocks]) {
+        if (!latest.current.blocks.some((block) => block.id === blockId)) { idleFailedBlocks.delete(blockId); failureGone(blockId); }
+      }
+      const blockIds = new Set([...failures.keys()].map((transaction) => transaction.blockId).concat([...idleFailedBlocks])
+        .filter((blockId) => latest.current.blocks.some((block) => block.id === blockId)));
+      for (const blockId of blockIds) {
+        if (!includeRefused && refusedBlocks.has(blockId)) continue;
+        await host.enqueueRuntimeHistoryOperation(() => retryFailedBlock(blockId));
+        if (!current()) return;
+      }
+      scheduleSaveRetry();
+    }
+    // The earliest failed group of the block, sent with what the block shows now (it includes everything typed since).
+    async function retryFailedBlock(blockId: string, textFlow?: TextBlockContentV1): Promise<boolean> {
+      const failed = [...failures.keys()].find((transaction) => transaction.blockId === blockId);
+      if (!failed) {
+        // A-25 r2: only an idle save failed here: ask it again with the open group as it stands now. Sealed meanwhile
+        // (or gone): the sealed save carries it, through the lane like any other.
+        if (!idleFailedBlocks.has(blockId) || !current()) return true;
+        const open = session.peek();
+        if (!open || open.blockId !== blockId || open.metadata.proposalPatch) { idleFailedBlocks.delete(blockId); failureGone(blockId); return true; }
+        return persist(open, 'after', false, undefined, true);
+      }
+      if (!current()) return false;
+      const api = latest.current;
+      const flow = api.blockTextFlowDrafts[blockId] ?? textFlow ?? failed.after.textFlow;
+      const snapshot: TextFlowEditSnapshot = {
+        textFlow: flow, selection: failed.after.selection,
+        annotationRanges: api.readAnnotationTruths().flatMap((annotation) => annotation.ranges
+          .filter((range) => range.block_id === blockId).map((range) => ({ annotationId: annotation.id, range }))),
+        boardRanges: api.captureBoardTextRanges(blockId).ranges,
+      };
+      return persist(failed, failures.get(failed) ?? 'after', false, snapshot);
+    }
+    // A typing save failed: the block shows it (no toast), and it is asked again by itself.
+    const typingSaveFailed = (blockId: string, outcome?: BlockSaveOutcome) => {
+      const status = outcome && 'error' in outcome
+        ? (outcome.error as { response?: { status?: number } } | undefined)?.response?.status : undefined;
+      if (status !== undefined && status >= 400 && status < 500) refusedBlocks.add(blockId);
+      if (current()) setFailureTick((tick) => tick + 1);
+      scheduleSaveRetry();
+    };
     const lastSave = new Map<string, { transaction: TextFlowEditTransaction; side: 'before' | 'after'; outcome: BlockSaveOutcome }>();
     // Failed conversion intents are recovery metadata for existing reversibleEdit entries.
     const templateFailures = new Map<TemplateTransaction, 'before' | 'after'>();
@@ -275,7 +378,7 @@ export function useTextFlowHistory(options: Options) {
     };
     const persist = async (transaction: TextFlowEditTransaction, side: 'before' | 'after', replay: boolean, recovery?: TextFlowEditSnapshot,
       idle = false): Promise<boolean> => {
-      if (!current() || (idle && failures.size)) return false;
+      if (!current() || (idle && failedSaveOf(transaction.blockId))) return false;
       if (!idle) lastIdleSave = null;
       const historyRestore = restoringHistory(transaction, side, replay);
       if (!transactionOrder.has(transaction)) transactionOrder.set(transaction, ++nextTransactionOrder);
@@ -287,7 +390,7 @@ export function useTextFlowHistory(options: Options) {
           || transactionOrder.get(earlier)! >= transactionOrder.get(transaction)!) continue;
         if (!await persist(earlier, earlierSide, false) || !current()) {
           failures.set(transaction, side);
-          latest.current.onSaveFailure?.();
+          typingSaveFailed(transaction.blockId);
           return false;
         }
       }
@@ -323,7 +426,7 @@ export function useTextFlowHistory(options: Options) {
         // that runs past them starts from what was sent.
         settleKept(block.id, sent);
         outcome = await api.saveBlock(block, plainTextFromTextFlow(snapshot.textFlow), {
-          silent: true, textFlow: snapshot.textFlow, boardRangeSnapshot: boardSnapshot(snapshot.boardRanges, historyRestore), preserveDrafts: true,
+          silent: true, quietFailure: true, textFlow: snapshot.textFlow, boardRangeSnapshot: boardSnapshot(snapshot.boardRanges, historyRestore), preserveDrafts: true,
           annotationRanges: snapshot.annotationRanges,
           baseRevision: baseFor(transaction, side, block),
           ...(!historyRestore && side === 'after' && transaction.metadata.proposalPatch
@@ -351,16 +454,29 @@ export function useTextFlowHistory(options: Options) {
           replaying = false;
           if (historyRestore) setReplayScope(null);
           if (success) {
+            const hadFailures = anyFailedSave();
+            const blockWasFailing = failedSaveOf(block.id) || idleFailedBlocks.has(block.id);
             failures.delete(transaction);
             historyRestoreSides.delete(transaction);
             if (recovery && !historyRestore) for (const failed of failures.keys()) {
               if (failed.blockId === block.id) { failures.delete(failed); issuedBases.delete(failed); leaveUnsent(failed); }
             }
+            // A-25 ②a: a save that goes through ends the refusal pause (r3: of its own block); with nothing failed,
+            // the pace starts over.
+            refusedBlocks.delete(block.id);
+            idleFailedBlocks.delete(block.id);
+            if (!anyFailedSave()) { cancelSaveRetry(); saveRetryDelay = SAVE_RETRY_START_MS; }
+            if (hadFailures) setFailureTick((tick) => tick + 1);
+            // A-25 r3 (F2): words typed in this block while its failed save was being asked again were held back from
+            // the idle save (its pauses stop while it fails). The block is clear now: they go at the next pause.
+            if (blockWasFailing && !savePausedFor(block.id)) {
+              const open = session.peek();
+              if (open && open.blockId === block.id && JSON.stringify(open.after.textFlow) !== JSON.stringify(sent)) scheduleIdleSave();
+            }
             if (idle && outcome.block) lastIdleSave = { blockId: block.id, after: structuredClone(snapshot), block: outcome.block };
-            else if (!idle) idleSaveFailed = false;
           }
-          else if (idle) idleSaveFailed = true;
-          else { failures.set(transaction, side); api.onSaveFailure?.(); }
+          else if (idle) { idleFailedBlocks.add(block.id); typingSaveFailed(block.id, outcome); }
+          else { failures.set(transaction, side); typingSaveFailed(block.id, outcome); }
           lastSave.set(block.id, { transaction, side, outcome });
           if (historyRestore) restoreSelection(block.id, snapshot.selection);
         }
@@ -690,6 +806,7 @@ export function useTextFlowHistory(options: Options) {
                 api.restoreBoardTextRanges(transaction.blockId, before.textFlow, { ranges: before.boardRanges });
               }
               failures.delete(transaction);
+              failureGone(transaction.blockId);
               issuedBases.delete(transaction);
               transactionOrder.delete(transaction);
               lastSave.delete(transaction.blockId);
@@ -717,7 +834,7 @@ export function useTextFlowHistory(options: Options) {
         void host.enqueueRuntimeHistoryOperation(async () => {
           // The idle save already wrote exactly this group: take its receipt instead of writing the same body again.
           const idle = lastIdleSave;
-          if (idle && idle.blockId === transaction.blockId && !failures.size && sameSnapshot(idle.after, transaction.after)) {
+          if (idle && idle.blockId === transaction.blockId && !failedSaveOf(transaction.blockId) && sameSnapshot(idle.after, transaction.after)) {
             const queued = unsent.indexOf(transaction);
             if (queued >= 0) unsent.splice(queued, 1);
             const queuedSplit = unsentSplits.indexOf(transaction);
@@ -745,10 +862,10 @@ export function useTextFlowHistory(options: Options) {
       idleTimer = null;
       const api = latest.current;
       const open = session.peek();
-      if (!current() || idleSaveFailed || !open || open.metadata.proposalPatch) return;
+      if (!current() || !open || open.metadata.proposalPatch) return;
       // A draft block, or a failed save that holds the note for Retry or Undo: nothing to do here.
       if (!api.blocks.some((block) => block.id === open.blockId)
-        || failures.size || templateFailures.size || documentFailures.size) return;
+        || savePausedFor(open.blockId) || templateFailures.size || documentFailures.size) return;
       // Something else holds the note: ask again after another pause, while there is still something open.
       if (replaying || templatePending || documentPending || proposalPending || api.history.current?.isReplaying?.()
         || api.canSaveWhileTyping?.() === false) { scheduleIdleSave(); return; }
@@ -757,7 +874,7 @@ export function useTextFlowHistory(options: Options) {
       void host.enqueueRuntimeHistoryOperation(async () => {
         // Read again in the lane: an Enter or a blur may have sealed it meanwhile, or more was typed.
         const latestOpen = session.peek();
-        if (!current() || !latestOpen || latestOpen.metadata.proposalPatch || idleSaveFailed || failures.size) return true;
+        if (!current() || !latestOpen || latestOpen.metadata.proposalPatch || savePausedFor(latestOpen.blockId)) return true;
         if (lastIdleSave && lastIdleSave.blockId === latestOpen.blockId && sameSnapshot(lastIdleSave.after, latestOpen.after)) return true;
         return persist(latestOpen, 'after', false, undefined, true);
       });
@@ -887,7 +1004,7 @@ export function useTextFlowHistory(options: Options) {
     const observe = (drafts: Record<string, TextBlockContentV1>, blocks: NoteBlock[]) => {
       if (current()) observed = { drafts, blocks };
     };
-    return { token, current, session, scheduleIdleSave, cancelIdleSave, keepOpenEdit, withdrawKept, hasUnsavedEdit, observe, visitReceipts, unsent, unsentSplits, failures, lastSave, persist, proposalWrites, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
+    return { token, current, session, idleFailedBlocks, scheduleIdleSave, cancelIdleSave, scheduleSaveRetry, cancelSaveRetry, retryFailedBlock, keepOpenEdit, withdrawKept, hasUnsavedEdit, observe, visitReceipts, unsent, unsentSplits, failures, lastSave, persist, proposalWrites, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
       async runBatch(operation: (record: (entry: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>) => void) => Promise<boolean>) {
         if (batchEntries || !current()) return false;
         const entries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] = [];
@@ -918,7 +1035,13 @@ export function useTextFlowHistory(options: Options) {
   active.current = scope.token;
   scope.observe(options.blockTextFlowDrafts, options.blocks);
   // The scope ends when its note stops being current: no idle save after that, and what was still open is kept.
-  useLayoutEffect(() => () => { scope.cancelIdleSave(); scope.keepOpenEdit(); }, [scope]);
+  useLayoutEffect(() => () => { scope.cancelIdleSave(); scope.cancelSaveRetry(); scope.keepOpenEdit(); }, [scope]);
+  // A-25 ②a: back online, failed saves are asked again at once.
+  useEffect(() => {
+    const online = () => scope.scheduleSaveRetry(true);
+    window.addEventListener('online', online);
+    return () => window.removeEventListener('online', online);
+  }, [scope]);
   useEffect(() => {
     const onPageHide = () => scope.keepOpenEdit();
     // A-20 r3 (M4): back from the back-forward cache, the session goes on: what pagehide kept is taken back.
@@ -1234,15 +1357,8 @@ export function useTextFlowHistory(options: Options) {
       const previous = scope.lastSave.get(block.id);
       const failed = [...scope.failures.keys()].find((transaction) => transaction.blockId === block.id);
       if (failed) {
-        const api = latest.current;
-        const flow = api.blockTextFlowDrafts[block.id] ?? saveOptions?.textFlow ?? failed.after.textFlow;
-        const snapshot: TextFlowEditSnapshot = {
-          textFlow: flow, selection: failed.after.selection,
-          annotationRanges: api.readAnnotationTruths().flatMap((annotation) => annotation.ranges
-            .filter((range) => range.block_id === block.id).map((range) => ({ annotationId: annotation.id, range }))),
-          boardRanges: api.captureBoardTextRanges(block.id).ranges,
-        };
-        await scope.persist(failed, scope.failures.get(failed) ?? 'after', false, snapshot);
+        // The same retry the automatic one runs (A-25 ②a), here at a blur or the Retry control.
+        await scope.retryFailedBlock(block.id, saveOptions?.textFlow);
         outcome = scope.lastSave.get(block.id)?.outcome ?? rejected();
       } else if (previous && !saveOptions?.fieldValues && !saveOptions?.proposalPatch
         && text === plainTextFromTextFlow(previous.transaction[previous.side].textFlow)
@@ -1261,8 +1377,15 @@ export function useTextFlowHistory(options: Options) {
   }, [boundary, options.history, scope]);
   const flush = useCallback(async () => {
     if (!boundary()) throw new Error('Text composition is still active');
-    if (!await options.history.current?.whenHistoryIdle() || !scope.current() || scope.failures.size || scope.templateFailures.size || scope.documentFailures.size) {
+    if (!await options.history.current?.whenHistoryIdle() || !scope.current()) {
       throw new Error('Text changes could not be saved. Retry saving or undo before leaving the note.');
+    }
+    if (scope.failures.size || scope.templateFailures.size || scope.documentFailures.size) {
+      throw new FailedSaveHoldError('Text changes could not be saved. Retry saving or undo before leaving the note.', [...new Set([
+        ...[...scope.failures.keys()].map((transaction) => transaction.blockId),
+        ...[...scope.templateFailures.keys()].map((transaction) => transaction.blockId),
+        ...[...scope.documentFailures.keys()].flatMap((transaction) => transaction.blocks.map(({ edit }) => edit.blockId)),
+      ])]);
     }
   }, [boundary, options.history, scope]);
   return { applyEdit, canApplyEdit, isEditHeld, applyDocumentEdit, extractUnit, moveUnit, applyTemplateToBlock, boundary, saveBlock, flush,
@@ -1283,7 +1406,16 @@ export function useTextFlowHistory(options: Options) {
     readLiveFlow: (id: string) => latest.current.blockTextFlowDrafts[id]
       ?? getTextFlowContent(latest.current.blocks.find((block) => block.id === id)?.content_json ?? {}),
     isReplaying: () => scope.isReplaying() || Boolean(latest.current.history.current?.isReplaying?.()),
+    /** A-25 ②a: blocks whose typing save failed and is being asked again: each shows a mark with Retry and Copy. */
+    failedTypingBlockIds: [...new Set([...scope.failures.keys()].map((transaction) => transaction.blockId).concat([...scope.idleFailedBlocks]))],
+    /** A-25 ②a: ask the failed saves again now. */
+    retryFailedSavesNow: () => scope.scheduleSaveRetry(true),
+    /** A-25 r3 (②b 乙): one of these blocks holds a failed save that lights its mark (typing or idle: the ledgers of
+     * failedTypingBlockIds), read now rather than from the last render. Template and document failures light no mark. */
+    holdsFailedSave: (blockIds: readonly string[]) => blockIds.some((blockId) => scope.idleFailedBlocks.has(blockId)
+      || [...scope.failures.keys()].some((transaction) => transaction.blockId === blockId)),
     recoveryBlockIds: scope.isReplaying() ? [] : [...new Set([
+      ...[...scope.failures.keys()].map((transaction) => transaction.blockId),
       ...[...scope.templateFailures.keys()].map((transaction) => transaction.blockId),
       ...[...scope.documentFailures.keys()].flatMap((transaction) => transaction.blocks.map(({ edit }) => edit.blockId)),
     ])],

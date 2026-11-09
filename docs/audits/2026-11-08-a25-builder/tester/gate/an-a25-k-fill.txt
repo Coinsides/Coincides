@@ -1,0 +1,3 @@
+K1-paste500                2/2
+    ok  ["warmup","note alpha"]
+total red 0

@@ -172,6 +172,8 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     activeBlockId: input.activeBlockId,
     contentReadOnly: input.contentReadOnly,
     recoveryBlockIds: input.recoveryBlockIds,
+    failedSaveBlockIds: input.failedSaveBlockIds,
+    onRetryFailedSaves: input.onRetryFailedSaves,
     activeSlashCommandId: input.activeSlashCommandId,
     allBlocks: input.allBlocks,
     anchorsBySourceRef: input.anchorsBySourceRef,

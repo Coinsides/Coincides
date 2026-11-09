@@ -14,6 +14,7 @@ import { Boxes, MousePointer2, Pencil, Eraser, PanelLeft } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
 import { ViewOptionsMenu } from './ViewOptionsMenu';
+import type { DraftInput } from './DraftBlockEditorLayer';
 import { NoteToolbarGroup } from './NoteToolbarGroup';
 import { NoteInsertMenu } from './NoteInsertMenu';
 import { FloatingOverlayLayer } from './FloatingOverlayLayer';
@@ -187,6 +188,9 @@ export interface NoteWritingSurfaceLayerProps {
   activeBlockId: string | null;
   contentReadOnly: boolean;
   recoveryBlockIds?: string[];
+  /** A-25 ②a: blocks whose typing save failed (each shows a mark), and asking them again now. */
+  failedSaveBlockIds?: string[];
+  onRetryFailedSaves?: () => void;
   activeSlashCommandId: string | null;
   allBlocks: NoteBlock[];
   anchorsBySourceRef: Record<string, SourceAnchor>;
@@ -302,7 +306,7 @@ export interface NoteWritingSurfaceLayerProps {
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
   onDiscardDraft: () => void;
-  onDraftChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
+  onDraftChange: (value: string, caret: number, anchorElement?: HTMLElement | null, input?: DraftInput) => void;
   onDraftKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   onFieldDraftChange: (block: NoteBlock, text: string, fieldValues: FieldValueRecord) => void;
   onDraftFocusReceipt: (receipt: TextFocusReceipt) => void;
@@ -357,6 +361,8 @@ export function NoteWritingSurfaceLayer({
   activeBlockId,
   contentReadOnly,
   recoveryBlockIds = [],
+  failedSaveBlockIds = [],
+  onRetryFailedSaves,
   activeSlashCommandId,
   allBlocks,
   anchorsBySourceRef,
@@ -1981,6 +1987,8 @@ export function NoteWritingSurfaceLayer({
               textUnitGutterLaneX={surfaceMode === 'page' && layout.surface === 'formal_page' ? pageOffsetX : undefined}
               contentReadOnly={contentReadOnly}
               allowSaveRecovery={recoveryBlockIds.includes(block.id)}
+              saveFailed={failedSaveBlockIds.includes(block.id)}
+              onRetryFailedSave={onRetryFailedSaves}
               text={text}
               layout={layout}
               blockFragments={blockFragmentsByBlockId.get(block.id)}

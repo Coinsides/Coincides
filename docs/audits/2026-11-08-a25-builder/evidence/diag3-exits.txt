@@ -1,0 +1,5 @@
+diag applied
+diag build exit 0
+HSC restored (cmp ok)
+probe exit 0
+done 17:52:20

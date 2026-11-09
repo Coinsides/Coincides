@@ -1,0 +1,22 @@
+F2 F3 F4 on r2 useTextFlowHistory.ts:
+  exit 1 (want 1: four red)
+  restored useTextFlowHistory.ts
+F1 on r2 useHeadingStructureController.ts:
+  exit 1 (want 1: red)
+  restored useHeadingStructureController.ts
+--- h
+   × A-25 r2 (i) the idle save waits per block > X answered 409, Y answered 500: Y is still asked again by itself 4673ms
+   × A-25 r3 (F2, F4) a failing block's retry and the words typed around it > words typed while the retry is on its way are written after it goes through 7030ms
+   × A-25 r3 (F2, F4) a failing block's retry and the words typed around it > a retry due while something else holds the note waits, then goes 2390ms
+   × A-25 r3 (F2, F4) a failing block's retry and the words typed around it > a retry due while the input method composes waits for its end 2414ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected { blockId: 'block-b', …(2) } to deeply equal { blockId: 'block-b', …(2) }
+AssertionError: expected 'original a' to be 'original ab' // Object.is equality
+AssertionError: expected [ 'original a', 'original a', …(1) ] to have a length of 2 but got 3
+AssertionError: expected [ 'original a', 'original a', …(1) ] to have a length of 2 but got 3
+      Tests  4 failed | 56 skipped (60)
+--- hsc
+   × A-25 r3 (F1) a structure whose own save fails is still told > the structure's own text save fails: onFailure exactly once 127ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+      Tests  1 failed | 79 skipped (80)

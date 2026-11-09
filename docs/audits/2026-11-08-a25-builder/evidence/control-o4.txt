@@ -1,0 +1,4 @@
+   × A-25 r3 (R1) a refusal ends with the block's failures > X 409 (refused); its failure goes with its open group; X 500 later: asked again by itself 2325ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ 'synthetic-block' ] to deeply equal []
+      Tests  1 failed | 60 skipped (61)

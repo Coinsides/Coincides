@@ -11,14 +11,23 @@
 
 ## 正在做
 
-- **刚下的判语**：**A-20b r2 放行**（2026-11-09，第 24 轮）。报告 `docs/audits/2026-11-09-a20b-builder/tester/review-tester.md`，台账已登。**第 24 轮已上岛（`dfbcce8e`），部署后已核**：岛上 dist 63/63 与包一致，代表臂 10/10（报告「十一」）。
-  - 同源：src 19/19，自建 63/63 与包一致，主 JS `index-Db4qSSYo.js`。
-  - 没有一条臂比修前差，也没有比线上 r3e 差。新臂 11 个全合预期：修前红 18 行，r3e 红 16 行。
-  - 光标跳按 Main_Designer 看数前的预登记判：主判 0/30 对 r3e 1/30，复现与合并都不显著。探针分辨力有限，所以只写「没有证据显示 r2 高于 r3e」。这一条进 TD-77（阶段一）。
-  - 候 Main_Designer：SURROGATE 与 MULTIPASTE 同形，是否同归 TD-66。MULTIPASTE 裁定的前提要更正（修前并无重叠）；手册「别 Apply」改成「别把框里的 def 粘回」。
-  - 过程：停掉的探针排队子进程活着，多跑了一遍，单列为复现样本；METHOD 补了 `stopq.sh`。
-- **上一个判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`。第 23 轮已上岛（`29b1d456`），部署后已核：岛上 63/63 与包一致，代表臂 7/7。
-- **再上一个判语**：**A-20 r3d 挡放行，原因 P1、P2**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3d/review-tester.md`（从简）。P1：Apply 在途时 bbb 立即落地、Apply 得 409、aaa 丢；P2：重开时服务器 `cd` 行被 Z 改写。
+- **刚下的判语**：**A-25 放行**（2026-11-09，重封后的 v2，主 JS `index-4nEsyJNA.js`；放行即收割，第 25 轮）。报告 `docs/audits/2026-11-08-a25-builder/tester/review-tester.md`，台账已登。
+  - 同源：src 19/19，自建 63/63 与包一致。
+  - 比线上 A-20b r2 差的只有一条：真离线时对账提示随自动重试重复弹，已裁 🅱，记 TD。新红 D:lines30-1 已裁为既有（TD-77 家族，挪阶段二）。
+  - k25 正本全组 A-25 门全绿，底红作阳性对照；输入法是模拟的，真输入法候 Henry。H2 冻结版红单测我独立核过。
+  - 未覆盖：订单 (iv) 的模板转换臂、「1 条」改注（记 TD，不挡）。
+  - 报告交出前经 Opus 四路复核加二次核对，31 条全部确认、已改；其中有几句已进订单的，Main_Designer 在原句旁加了【更正】。
+- **在做**：等第 25 轮部署；部署后照例做岛上核对（dist 对包、代表臂）。之后是阶段末回归（跨单回归 + 全量 + 手册逐条），我一人跑。
+- **阶段末要改的 kit（已登记）**：
+  - 准备失败单独计数，写进判语；
+  - 链与 a20n 的 diff 改用宽注记；
+  - a20m 预言核对器在包里缺文件时回落到基线文件；
+  - UNDOPAUSE 的闸按不变量写：三次 Ctrl+Z 后 warmup 块是 `warmup` 的前缀；
+  - 「1 条」改注；
+  - 清理临时环境、树与隧道。
+- **上一个判语**：**A-20b r2 放行**（2026-11-09，第 24 轮）。报告 `docs/audits/2026-11-09-a20b-builder/tester/review-tester.md`。第 24 轮已上岛（`dfbcce8e`），部署后已核：岛上 dist 63/63 与包一致，代表臂 10/10。
+- **再上一个判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`。第 23 轮已上岛（`29b1d456`），部署后已核：岛上 63/63 与包一致，代表臂 7/7。
+- **更早**：**A-20 r3d 挡放行，原因 P1、P2**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3d/review-tester.md`（从简）。P1：Apply 在途时 bbb 立即落地、Apply 得 409、aaa 丢；P2：重开时服务器 `cd` 行被 Z 改写。
 - **更早**：**A-20 r3 挡放行，原因 N1**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3/review-tester.md`。N1：MERGE、SELDEL r3 12/12 DUP，修前 12/12 LOST。
 - **更早**：**A-20 r2 挡放行，原因 M2**（2026-11-08）。报告 `docs/audits/2026-11-08-a20-builder/tester-r2/review-tester.md`，台账已登。
   - 同源：src 15/15 OK，自建 63/63 与包一致，主 JS `index-DGn86c1V.js`。

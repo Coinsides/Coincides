@@ -1,0 +1,7 @@
+# package-only check (VOID = the package holds only changed files; useNoteRouteSaveBoundary.tsx is unchanged and not in it)
+MISSING <ops>\packages\a25-ime-save-failure\src\client\src\pages\Notes\canvasEngine\hooks\useNoteRouteSaveBoundary.tsx
+LEFT_UNSAVED  src: null  judge /did not reach the server/i  NO MATCH
+SAVE_FAILURE  src: null  judge "Changes could not be saved. Please retry before leaving the note."  NO MATCH
+dist index-4nEsyJNA.js: LEFT_UNSAVED ABSENT, SAVE_FAILURE ABSENT
+VOID: 4 mismatch(es) - update a20m_judge.mjs before judging a20m rows
+oracle exit 1

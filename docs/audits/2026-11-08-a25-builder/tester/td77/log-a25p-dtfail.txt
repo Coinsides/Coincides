@@ -1,0 +1,2 @@
+POST /notes/:id/blocks held 0 ms; first text-save per row answered 500: true
+SUMMARY {"label":"a25p-dtfail","origin":"http://127.0.0.1:5614","by":{"D":{"n":2,"bad":0}},"errors":0,"firstErrors":[]}

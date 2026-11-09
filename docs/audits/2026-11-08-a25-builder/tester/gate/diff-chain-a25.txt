@@ -1,0 +1,62 @@
+== k: rows A-20b 22 / A-25 22; total red 0; normalised diff lines 1
+8a9
+>     SETUP ERROR Error: setup: no 'note' line: ["rmup","notewa"]
+== late: rows A-20b 8 / A-25 8; total red 0; normalised diff lines 0
+== j: rows A-20b 28 / A-25 28; total red 0; normalised diff lines 0
+== k-toast: rows A-20b 4 / A-25 4; total red 0; normalised diff lines 2
+4c4
+<     ok  failed toasts N; all ["Failed to save block","Block save result could not be"]
+---
+>     ok  failed toasts N; all ["Block save result could not be","Block save result could not be","Block save result could not be"]
+== flyk: rows A-20b 8 / A-25 8; total red 0; normalised diff lines 0
+== inapp: rows A-20b 8 / A-25 8; total red 0; normalised diff lines 0
+== d: rows A-20b 20 / A-25 20; total red 0; normalised diff lines 8
+9c9
+<     ok  count N; alerts ["Failed to save block","Text changes could not be saved. Retry saving or undo before leaving the note."]
+---
+>     ok  count N; alerts []
+11c11
+<     ok  count N; alerts ["Failed to save block","Text changes could not be saved. Retry saving or undo before leaving the note."]
+---
+>     ok  count N; alerts []
+17c17
+<     ok  count N; banner on reopen true (stale banner = known, A-N Na)
+---
+>     ok  count N; banner on reopen false (stale banner = known, A-N Na)
+19c19
+<     ok  count N; banner on reopen true (stale banner = known, A-N Na)
+---
+>     ok  count N; banner on reopen false (stale banner = known, A-N Na)
+== b: rows A-20b 24 / A-25 24; total red 0; normalised diff lines 0
+== a: rows A-20b 8 / A-25 8; total red 0; normalised diff lines 0
+== c: rows A-20b 18 / A-25 18; total red 0; normalised diff lines 0
+== c-closetab: rows A-20b 1 / A-25 1; total red 0; normalised diff lines 0
+== c-kill: rows A-20b 1 / A-25 1; total red 0; normalised diff lines 0
+== kill-close-0: rows A-20b 1 / A-25 1; total red 0; normalised diff lines 0
+== kill-proc-0: rows A-20b 1 / A-25 1; total red 0; normalised diff lines 0
+== offkill-0: rows A-20b 1 / A-25 1; total red 0; normalised diff lines 2
+2c2
+<     ok  reference (manual: lost until A-N Na): kept false
+---
+>     ok  reference (manual: lost until A-N Na): kept true
+== m: rows A-20b 37 / A-25 37; total red 0; normalised diff lines 11
+8c8
+<     ok  sealed: stayed true (places A, host true); LEFT_UNSAVED N; kept N {"tN":N,"tN":N,"tN":N,"hold":N,"end":N}; Nnd leave REFUSED (prevented true, on A N/N, sent N, new toasts ["Changes could not be saved. "]); reopen ["w
+---
+>     SETUP ERROR Error: setup: the sealed failure was not reported
+10c10
+<     ok  refail: stayed true (places A, host true); LEFT_UNSAVED N; kept N {"tN":N,"tN":N,"tN":N,"hold":N,"end":N}; Nnd leave REFUSED (prevented true, on A N/N, sent N, new toasts ["Changes could not be saved. "]); reopen ["w
+---
+>     SETUP ERROR Error: setup: the first failure (aaa) was not reported
+12c12
+<     ok  idlefirst: stayed true (places A, host true); LEFT_UNSAVED N; kept N {"tN":N,"tN":N,"tN":N,"hold":N,"end":N}; Nnd leave REFUSED (prevented true, on A N/N, sent N, new toasts ["Changes could not be saved. "]); reopen 
+---
+>     SETUP ERROR Error: setup: the idle failure was not reported
+20c20
+<     ok  ctlfail: REFUSED (want REFUSED; prevented true, on A N/N, arrived false, sent N, new toasts ["Changes could not be saved. "]); count N
+---
+>     SETUP ERROR Error: setup: the failure was not reported
+24c24
+<     ok  close: x box, y box; server ["warmup","kN"]; boxes ["x","y"]; banner "A block edit is waiting for recovery warmup kN Apply Dismiss"
+---
+>     ok  close: x box, y box; server ["warmup","kN"]; boxes ["x","y"]; banner "Not in the note yet Discard"
