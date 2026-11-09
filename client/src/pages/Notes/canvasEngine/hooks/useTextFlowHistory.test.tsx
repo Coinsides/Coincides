@@ -10,13 +10,18 @@ import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowServ
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
 import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 import { usePlacementHistory } from './usePlacementHistory';
-import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
+import { IDLE_SAVE_MS, useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
+import { readUnplacedWords } from '../structureTypingBuffer';
+import { splitTextUnitForEnter } from '../textUnitEditorService';
+import { mergeTypedText } from './useHeadingStructureController';
 
 const plainTextFromTextFlow = (flow: TextBlockContentV1) => flow.units.map((unit) => unit.text).join('\n');
 
 function renderHistoryEditor(initialText = 'original', options: {
   legacy?: boolean; flow?: TextBlockContentV1;
   annotations?: AnnotationTruthV1[]; boardRanges?: BoardTextRangeV1[];
+  saveFails?: () => boolean; canSaveWhileTyping?: () => boolean; receiptKey?: string; holdSave?: () => boolean;
+  saveRefused?: () => boolean;
 } = {}) {
   const initialFlow = options.flow ?? createTextBlockContentV1(initialText);
   const initialPlainText = options.flow ? plainTextFromTextFlow(options.flow) : initialText;
@@ -28,12 +33,22 @@ function renderHistoryEditor(initialText = 'original', options: {
   const boardRanges = createBoardTextRangeEditSession('synthetic-note', async (_note, ranges) => ranges);
   boardRanges.hydrate(options.boardRanges ?? []);
   const savedTexts: string[] = [];
+  const heldSaves: (() => void)[] = [];
   const savedFlows: TextBlockContentV1[] = [];
   const saveBlock = vi.fn(async (_block: NoteBlock, text: string, saveOptions?: { textFlow?: TextBlockContentV1 }): Promise<BlockSaveOutcome> => {
     savedTexts.push(text);
     if (saveOptions?.textFlow) savedFlows.push(structuredClone(saveOptions.textFlow));
+    if (options.holdSave?.()) await new Promise<void>((resolve) => { heldSaves.push(resolve); });
+    // Refused before the adapter writes a receipt (A-20 r3 M5: the save is never sent).
+    if (options.saveRefused?.()) return { status: 'rejected', block: null, recoveryReceipt: null, reconciliation: 'not_attempted',
+      durableState: 'not_checked', reason: 'request_failed', staleEpoch: false };
+    // A save that was sent and failed: the adapter wrote its recovery receipt before sending.
+    if (options.saveFails?.()) return { status: 'rejected', block: null,
+      recoveryReceipt: { recoveryKey: options.receiptKey ?? 'harness-receipt' } as never, reconciliation: 'not_attempted',
+      durableState: 'not_checked', reason: 'request_failed', staleEpoch: false };
     return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
   });
+  const onSaveFailure = vi.fn();
   const saveLayout = vi.fn(async () => true);
   let current!: {
     history: ReturnType<typeof usePlacementHistory>;
@@ -64,6 +79,8 @@ function renderHistoryEditor(initialText = 'original', options: {
       saveBlock,
       saveAnnotationTruthsOutcome: async () => true,
       history: hostRef,
+      onSaveFailure,
+      canSaveWhileTyping: options.canSaveWhileTyping,
     });
     const history = usePlacementHistory({
       noteId: 'synthetic-note', generation: 1,
@@ -116,7 +133,7 @@ function renderHistoryEditor(initialText = 'original', options: {
     });
     return allowed;
   };
-  return { ...view, current: () => current, savedTexts, savedFlows, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key, boardRanges };
+  return { ...view, current: () => current, savedTexts, savedFlows, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key, boardRanges, onSaveFailure, heldSaves };
 }
 
 describe('B10 pointer reorder through the existing runtime history', () => {
@@ -642,5 +659,430 @@ describe('B6 smokes 2 and 3: cross-unit edits retain B4 history (synthetic memor
     expect(setData).toHaveBeenCalledTimes(1);
     expect(setData).toHaveBeenCalledWith('text/plain', 'pha\nbeta\nga');
     await editor.assertReplayWithFollowingTyping('');
+  });
+});
+
+// A-20, road B: a pause writes the open group without sealing it. Undo groups exactly as it did before.
+describe('A-20 idle save: written at a pause, undo unchanged', () => {
+  const pause = async (editor: ReturnType<typeof renderHistoryEditor>) => {
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, IDLE_SAVE_MS + 150)); });
+    await editor.idle();
+  };
+
+  it('writes the open text after a pause, and one Ctrl+Z still takes back everything typed since the last seal', async () => {
+    const editor = renderHistoryEditor('original');
+    editor.input('original a', 8);
+    await pause(editor);
+    expect(editor.savedTexts).toEqual(['original a']);
+    editor.input('original ab', 10);
+    await pause(editor);
+    expect(editor.savedTexts).toEqual(['original a', 'original ab']);
+    // The pause did not cut the group: one undo goes all the way back, and the server follows.
+    await editor.key('z');
+    expect(editor.textarea().value).toBe('original');
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original');
+    await editor.key('z');
+    expect(editor.textarea().value).toBe('original');
+  }, 15_000);
+
+  it('does not write the same body again when the group is sealed after the idle save wrote it', async () => {
+    const editor = renderHistoryEditor('original');
+    editor.input('original a', 8);
+    await pause(editor);
+    expect(editor.saveBlock).toHaveBeenCalledTimes(1);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    expect(editor.saveBlock).toHaveBeenCalledTimes(1);
+  }, 15_000);
+
+  it('a failed idle save is not retried at every pause and does not hold the note; the sealed save tries again', async () => {
+    let failing = true;
+    const editor = renderHistoryEditor('original', { saveFails: () => failing });
+    editor.input('original a', 8);
+    await pause(editor);
+    expect(editor.saveBlock).toHaveBeenCalledTimes(1);
+    expect(editor.onSaveFailure).not.toHaveBeenCalled();
+    editor.input('original ab', 10);
+    await pause(editor);
+    expect(editor.saveBlock).toHaveBeenCalledTimes(1);
+    failing = false;
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original ab');
+  }, 15_000);
+
+  it('waits while something else holds the note, and asks again after another pause while text is still open', async () => {
+    let free = false;
+    const editor = renderHistoryEditor('original', { canSaveWhileTyping: () => free });
+    editor.input('original a', 8);
+    await pause(editor);
+    expect(editor.saveBlock).not.toHaveBeenCalled();
+    free = true;
+    await pause(editor);
+    expect(editor.savedTexts).toEqual(['original a']);
+  }, 15_000);
+
+  it('keeps open, unsaved text in the kept-words archive when its note stops being current', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('original');
+    editor.input('original a', 8);
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([expect.objectContaining({
+      blockId: 'synthetic-block', initialText: 'original', text: 'original a',
+    })]);
+    localStorage.clear();
+  });
+});
+
+// A-20 r2: a departure keeps, per unit, from what the server holds (the last confirmed save) to what is on screen.
+// Only the open, unsealed group is kept; sealed typing is recovered from its save's receipt (Main_Designer r2).
+describe('A-20 r2 departure records start from what the server holds', () => {
+  const pause = async (editor: ReturnType<typeof renderHistoryEditor>) => {
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, IDLE_SAVE_MS + 150)); });
+    await editor.idle();
+  };
+
+  it('K1: after an idle save, the record of the still-open typing starts from the saved text, so landing it does not write the saved part twice', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('Note:');
+    editor.input('Note: alpha', 5);
+    await pause(editor);
+    expect(editor.savedTexts).toEqual(['Note: alpha']);
+    // Typed on, not sealed and not saved yet when the note stops being current.
+    editor.input('Note: alpha beta', 11);
+    editor.unmount();
+    const [record] = readUnplacedWords('synthetic-note');
+    expect(record).toMatchObject({ initialText: 'Note: alpha', text: 'Note: alpha beta' });
+    // What the server holds when the note is opened again: the idle save's text. Landing gives the text once.
+    expect(mergeTypedText('Note: alpha', record.initialText, record.text, record.text.length, { emptyMatches: false })?.text)
+      .toBe('Note: alpha beta');
+    localStorage.clear();
+  }, 15_000);
+
+  it('K2: a failed save that was undone keeps nothing; the undone words do not come back', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('original', { saveFails: () => true });
+    editor.input('original a', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    await editor.key('z');
+    expect(editor.textarea().value).toBe('original');
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    localStorage.clear();
+  });
+
+  it('K5: a recovery receipt left by this visit\'s own typing save is known as one, so the banner does not offer it', async () => {
+    const editor = renderHistoryEditor('original', { saveFails: () => true, receiptKey: 'visit-receipt' });
+    editor.input('original a', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    expect(editor.current().textHistory.isVisitReceipt('visit-receipt')).toBe(true);
+    expect(editor.current().textHistory.isVisitReceipt('another-visit')).toBe(false);
+  });
+});
+
+describe('A-20 r2 sealed typing is not kept in the kept-words archive', () => {
+  it('a sealed group whose save failed is left to its recovery receipt, not recorded at departure (SPLIT, RETRY)', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('alpha beta', { saveFails: () => true });
+    editor.input('alpha beta gamma', 10);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    localStorage.clear();
+  });
+});
+
+// A-20 r2: three ledgers, a group in exactly one: the open session, sealed-but-not-handed (unsent), the receipt (handed).
+describe('A-20 r2 a group is in exactly one ledger', () => {
+  it('a group queued behind a save on its way is unsent until handed over, then only the receipt has it', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('original', { holdSave: () => hold });
+    editor.input('original a', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    // The first group is handed to the adapter (its save is on its way): not in the session, not unsent.
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    expect(editor.current().textHistory.unsentGroups()).toEqual([]);
+    editor.input('original ab', 10);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    // The second is sealed and waits behind the first: unsent, and no longer open.
+    expect(editor.current().textHistory.unsentGroups().map((group) => group.after.textFlow.units[0].text)).toEqual(['original ab']);
+    // The page goes now: kept from what was handed ('original a') to the newest text, nothing of the first group.
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([expect.objectContaining({ initialText: 'original a', text: 'original ab' })]);
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
+  it('once the queued group is handed to the adapter it leaves the unsent ledger', async () => {
+    let hold = true;
+    const editor = renderHistoryEditor('original', { holdSave: () => hold });
+    editor.input('original a', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.input('original ab', 10);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    expect(editor.current().textHistory.unsentGroups()).toHaveLength(1);
+    hold = false;
+    await act(async () => { editor.heldSaves.splice(0).forEach((release) => release()); });
+    await editor.idle();
+    expect(editor.current().textHistory.unsentGroups()).toEqual([]);
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original ab');
+  });
+});
+
+// A-20 r2 (RETRY-del): a group that waited behind a failed save never reached hand-over 2. When Retry saves the whole
+// screen it is on the server, so it leaves the unsent ledger; a later departure must not keep its words again.
+describe('A-20 r2 a retried group leaves the unsent ledger', () => {
+  it('after Retry saved it and the words were then removed and saved, leaving keeps nothing and the words do not come back', async () => {
+    localStorage.clear();
+    let failing = true;
+    const editor = renderHistoryEditor('original', { saveFails: () => failing });
+    editor.input('original a', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    editor.input('original ab', 10);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    // The second group waited behind the first's failure: never handed to the adapter.
+    expect(editor.current().textHistory.unsentGroups()).toHaveLength(1);
+    failing = false;
+    editor.focus();
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original ab');
+    expect(editor.current().textHistory.unsentGroups()).toEqual([]);
+    // The person removes the typing; that save succeeds too. Then the note is left.
+    editor.input('original', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    expect(editor.savedTexts[editor.savedTexts.length - 1]).toBe('original');
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    localStorage.clear();
+  });
+});
+
+// A-20 r2 (B): a split (Enter) not handed to the adapter when the note is left keeps only the line it created, never the
+// line it cut; the record has no anchor of its own, so it is never placed by itself (SPLIT stays as before the fix).
+describe('A-20 r2 a split still queued when the note is left', () => {
+  it('keeps only the words of the new line, as a split record; the cut line is not recorded and stays as the server has it', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('alpha beta', { holdSave: () => hold });
+    // A save on its way, so the split waits behind it.
+    editor.input('alpha beta!', 10);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus();
+    editor.textarea().setSelectionRange(5, 5);
+    fireEvent.keyDown(editor.textarea(), { key: 'Enter' });
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['alpha', ' beta!']);
+    expect(editor.current().textHistory.unsentSplitGroups()).toHaveLength(1);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records).toEqual([expect.objectContaining({ source: 'split', initialText: '', text: ' beta!' })]);
+    expect(records[0].unitId).not.toBe('tu-1');
+    expect((records[0] as { writingRole?: string }).writingRole).toBeUndefined();
+    // No anchor: placed nowhere by itself, whether the unit is missing, empty, or holds other text.
+    expect(mergeTypedText('', records[0].initialText, records[0].text, records[0].text.length, { emptyMatches: false })).toBeNull();
+    expect(mergeTypedText('other', records[0].initialText, records[0].text, records[0].text.length, { emptyMatches: false })).toBeNull();
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+});
+
+// A-20 r3: a kept record belongs only to a session that has ended (Main_Designer r3 on Reviewer M1-M5).
+describe('A-20 r3 queued Enters: every line typed is kept (M1)', () => {
+  const enterAt = (editor: ReturnType<typeof renderHistoryEditor>, unitIndex: number, caret: number) => {
+    editor.focus(unitIndex);
+    editor.textarea(unitIndex).setSelectionRange(caret, caret);
+    fireEvent.keyDown(editor.textarea(unitIndex), { key: 'Enter' });
+  };
+  const values = (editor: ReturnType<typeof renderHistoryEditor>) => [...editor.container.querySelectorAll('textarea')].map((node) => node.value);
+
+  it('LIST: k0, Enter, x, Enter, y while a save is on its way, then the page goes: x and y are both kept, never placed by themselves', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('k0', { holdSave: () => hold });
+    editor.input('k0!', 2);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    enterAt(editor, 0, 3);
+    editor.inputAt(1, 'x', 0);
+    enterAt(editor, 1, 1);
+    editor.inputAt(2, 'y', 0);
+    expect(values(editor)).toEqual(['k0!', 'x', 'y']);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records.map((record) => record.text).sort()).toEqual(['x', 'y']);
+    for (const record of records) {
+      expect(record).toMatchObject({ source: 'split', initialText: '' });
+      expect(mergeTypedText('', record.initialText, record.text, record.text.length, { emptyMatches: false })).toBeNull();
+    }
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
+  it('CLICKBACK: with the Enter still queued, typing back on the line it cut is kept from that line as the Enter left it', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('alpha beta', { holdSave: () => hold });
+    editor.input('alpha beta!', 10);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    enterAt(editor, 0, 5);
+    expect(values(editor)).toEqual(['alpha', ' beta!']);
+    editor.inputAt(0, 'alphaZ', 5);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'split', initialText: '', text: ' beta!' }),
+      expect.objectContaining({ source: 'edit', unitId: 'tu-1', initialText: 'alpha', text: 'alphaZ' }),
+    ]));
+    expect(records).toHaveLength(2);
+    // Once the queued Enter has reached the server, the line it left is 'alpha' and the record lands there.
+    expect(mergeTypedText('alpha', 'alpha', 'alphaZ', 6, { emptyMatches: false })?.text).toBe('alphaZ');
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+});
+
+describe('A-20 r3 one home per group (M3, M5)', () => {
+  it('HANDOVER-one-home: a kept record of the open group goes the moment that group is handed to the adapter', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('original', { holdSave: () => hold });
+    editor.input('original a', 8);
+    // A departure kept it first (keepAndLeave), then the blur seals it and hands it over.
+    act(() => editor.current().textHistory.keepOpenEdit());
+    expect(readUnplacedWords('synthetic-note')).toEqual([expect.objectContaining({ initialText: 'original', text: 'original a' })]);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    // Its save is still on the way: the receipt is its only home now.
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
+  it('a save refused before any receipt was written leaves the group unsent, so a departure keeps it', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('original', { saveRefused: () => true });
+    editor.input('original a', 8);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    expect(editor.current().textHistory.unsentGroups().map((group) => group.after.textFlow.units[0].text)).toEqual(['original a']);
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([expect.objectContaining({ initialText: 'original', text: 'original a' })]);
+    localStorage.clear();
+  });
+});
+
+describe('A-20 r3 no frozen record while the session goes on (M2, M4)', () => {
+  it('BFCACHE: back from the back-forward cache, what pagehide kept is taken back', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('original');
+    editor.input('original a', 8);
+    act(() => { window.dispatchEvent(Object.assign(new Event('pagehide'), { persisted: true })); });
+    expect(readUnplacedWords('synthetic-note')).toHaveLength(1);
+    act(() => { window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true })); });
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    localStorage.clear();
+  });
+
+  it('BACKIN-undo: a departure taken back keeps nothing, so words undone afterwards do not come back', async () => {
+    localStorage.clear();
+    const editor = renderHistoryEditor('original', { saveFails: () => true });
+    editor.input('original a', 8);
+    act(() => editor.current().textHistory.keepOpenEdit());
+    expect(readUnplacedWords('synthetic-note')).toHaveLength(1);
+    // The router held the person on the note: the departure did not happen.
+    act(() => editor.current().textHistory.withdrawKeptEdit());
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    await act(async () => { fireEvent.blur(editor.textarea()); });
+    await editor.idle();
+    await editor.key('z');
+    expect(editor.textarea().value).toBe('original');
+    editor.unmount();
+    expect(readUnplacedWords('synthetic-note')).toEqual([]);
+    localStorage.clear();
+  });
+});
+
+// A-20 r3d (N1): a group that removes units (Backspace joining two lines, a selection deleted across lines) changes which
+// units there are, like a split. Its records are kept like a split's: empty start, never placed by themselves.
+describe('A-20 r3d a group that removes units is kept, never placed by itself (N1)', () => {
+  const twoLines = () => splitTextUnitForEnter(createTextBlockContentV1('abcd'), 'tu-1', 2, 2);
+
+  it('MERGE-leave: Backspace joins "cd" onto "ab" while a save is on its way, Z typed, the page goes', async () => {
+    localStorage.clear();
+    let hold = true;
+    const flow = twoLines();
+    const editor = renderHistoryEditor('ab\ncd', { flow, holdSave: () => hold });
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['ab', 'cd']);
+    editor.inputAt(0, 'ab!', 2);
+    await act(async () => { fireEvent.blur(editor.textarea(0)); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus(1);
+    editor.textarea(1).setSelectionRange(0, 0);
+    fireEvent.keyDown(editor.textarea(1), { key: 'Backspace' });
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['ab!cd']);
+    editor.inputAt(0, 'ab!cdZ', 5);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records.map((record) => record.text)).toEqual(['ab!cdZ']);
+    for (const record of records) {
+      expect(record).toMatchObject({ source: 'split', initialText: '' });
+      // Never placed by itself, whatever the server holds for that unit when the note opens again.
+      expect(mergeTypedText('ab!', record.initialText, record.text, record.text.length, { emptyMatches: false })).toBeNull();
+      expect(mergeTypedText('ab', record.initialText, record.text, record.text.length, { emptyMatches: false })).toBeNull();
+    }
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
+});
+
+// A-20 r3e (Reviewer P2): a unit made by Enter after a join can get the id of the line the join removed (the next id is
+// the highest one present + 1). It is a new line all the same: its words are kept like a split's, never placed over the
+// server's text of the removed line.
+describe('A-20 r3e a unit created after a join never inherits a removed unit\'s identity (P2)', () => {
+  it('Backspace joins "cd" onto "ab", Enter, Z typed, the page goes: Z is never placed over the server\'s "cd"', async () => {
+    localStorage.clear();
+    let hold = true;
+    const flow = splitTextUnitForEnter(createTextBlockContentV1('abcd'), 'tu-1', 2, 2);
+    const editor = renderHistoryEditor('ab\ncd', { flow, holdSave: () => hold });
+    editor.inputAt(0, 'ab!', 2);
+    await act(async () => { fireEvent.blur(editor.textarea(0)); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus(1);
+    editor.textarea(1).setSelectionRange(0, 0);
+    fireEvent.keyDown(editor.textarea(1), { key: 'Backspace' });
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['ab!cd']);
+    editor.textarea(0).setSelectionRange(5, 5);
+    fireEvent.keyDown(editor.textarea(0), { key: 'Enter' });
+    const lines = [...editor.container.querySelectorAll('textarea')];
+    expect(lines.map((node) => node.value)).toEqual(['ab!cd', '']);
+    editor.inputAt(1, 'Z', 1);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    const withZ = records.filter((record) => record.text.includes('Z'));
+    expect(withZ.length).toBeGreaterThan(0);
+    for (const record of withZ) {
+      // The server still has ['ab', 'cd'] (tu-1, tu-2). Whatever id the new line got, its words never replace "cd".
+      expect(mergeTypedText('cd', record.initialText, record.text, record.text.length, { emptyMatches: false })).toBeNull();
+    }
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
   });
 });

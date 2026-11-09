@@ -1,0 +1,5 @@
+BACKIN-heldhead-undo       0/3
+    RED kept after Back: max 1, +27..+1742 ms; undo at +680 ms -> screen ["warmup bbb","aaa"], kept before/after ["\"warmup\"->\"warmup bbb\"(edit)"] / ["\"warmup\"->\"warmup bbb\"(edit)"]; released 1; server before leave ["
+    RED kept after Back: max 1, +24..+1753 ms; undo at +677 ms -> screen ["warmup bbb","aaa"], kept before/after ["\"warmup\"->\"warmup bbb\"(edit)"] / ["\"warmup\"->\"warmup bbb\"(edit)"]; released 1; server before leave ["
+    RED kept after Back: max 1, +25..+1732 ms; undo at +678 ms -> screen ["warmup bbb","aaa"], kept before/after ["\"warmup\"->\"warmup bbb\"(edit)"] / ["\"warmup\"->\"warmup bbb\"(edit)"]; released 1; server before leave ["
+total red 3

@@ -1,0 +1,1 @@
+{"arm":"RV","name":"HARDKILL-proc","id":"ad338f95-8468-44e4-bac7-e75140792bad","mode":"proc","firstEnd":1505,"lastKey":4644,"killedAt":4951,"hasFirst":true,"hasTail":false,"units":["warmup","kill words one"],"net":["3416 PUT /note-blocks/:id/text-save warmup|kill words one","3422 RESP /note-blocks/:id/text-save 200"],"ok":true}

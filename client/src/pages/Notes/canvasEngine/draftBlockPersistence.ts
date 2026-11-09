@@ -1,4 +1,5 @@
 import type { TemplateOption } from '@/services/templateOptions';
+import { useAuthStore } from '@/stores/authStore';
 import {
   classifyCanvasSurfaceAuthority,
   type CanvasSurfaceAuthority,
@@ -77,6 +78,65 @@ function recoveryStorage(): Storage | null {
   } catch {
     return null;
   }
+}
+
+// A-20: a block edit that could not be saved outlives the tab: its receipt is kept in localStorage, per account
+// (someone else signing in on this browser neither sees nor applies it), under the same entry schema as before.
+// Receipts written by the earlier build to sessionStorage are still read, and are removed as they are replaced.
+const ANONYMOUS_BLOCK_EDIT_KEY = `${DRAFT_RECOVERY_STORAGE_KEY_V2}:anonymous`;
+
+function signedInAccount(): string | undefined {
+  try {
+    return useAuthStore.getState?.().user?.id;
+  } catch {
+    return undefined;
+  }
+}
+
+function blockEditRecoveryLocalKey(): string {
+  const account = signedInAccount();
+  return account ? `${DRAFT_RECOVERY_STORAGE_KEY_V2}:${account}` : ANONYMOUS_BLOCK_EDIT_KEY;
+}
+
+// A-20 r2 (K3): a receipt written before the account had loaded went under 'anonymous'. Once the account is known it
+// is claimed into that account's key, so it can be listed and forgotten; otherwise it would wait where nothing reads.
+function claimAnonymousBlockEditReceipts(local: Storage, accountKey: string): void {
+  if (accountKey === ANONYMOUS_BLOCK_EDIT_KEY) return;
+  const anonymous = readStorageEntries(local, ANONYMOUS_BLOCK_EDIT_KEY);
+  if (anonymous.invalidJson !== null || !anonymous.entries.length) return;
+  const claimed = anonymous.entries.filter((item) => validateBlockEditRecoveryReceipt(item));
+  const own = readStorageEntries(local, accountKey);
+  if (own.invalidJson !== null) return;
+  const keys = new Set(claimed.map((item) => validateBlockEditRecoveryReceipt(item)!.recoveryKey));
+  if (writeStorageEntries(local, accountKey, [
+    ...own.entries.filter((item) => !keys.has(validateBlockEditRecoveryReceipt(item)?.recoveryKey ?? '')),
+    ...claimed,
+  ])) writeStorageEntries(local, ANONYMOUS_BLOCK_EDIT_KEY, []);
+}
+
+function blockEditRecoveryLocalStorage(): Storage | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** Every place a block edit receipt can be, oldest first: the session keys of the earlier build, then this account's. */
+function blockEditRecoveryLocations(): { storage: Storage; storageKey: string }[] {
+  const locations: { storage: Storage; storageKey: string }[] = [];
+  const session = recoveryStorage();
+  if (session) {
+    locations.push({ storage: session, storageKey: DRAFT_RECOVERY_STORAGE_KEY_V1 });
+    locations.push({ storage: session, storageKey: DRAFT_RECOVERY_STORAGE_KEY_V2 });
+  }
+  const local = blockEditRecoveryLocalStorage();
+  if (local) {
+    const accountKey = blockEditRecoveryLocalKey();
+    claimAnonymousBlockEditReceipts(local, accountKey);
+    locations.push({ storage: local, storageKey: accountKey });
+  }
+  return locations;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -407,10 +467,8 @@ export function listDraftRecoveryReceipts(): DraftRecoveryReceipt[] {
 }
 
 export function listBlockEditRecoveryReceipts(noteId?: string): BlockEditRecoveryReceipt[] {
-  const storage = recoveryStorage();
-  if (!storage) return [];
   const byScope = new Map<string, BlockEditRecoveryReceipt>();
-  for (const storageKey of [DRAFT_RECOVERY_STORAGE_KEY_V1, DRAFT_RECOVERY_STORAGE_KEY_V2]) {
+  for (const { storage, storageKey } of blockEditRecoveryLocations()) {
     const stored = readStorageEntries(storage, storageKey);
     if (stored.invalidJson !== null) continue;
     stored.entries.forEach((raw) => {
@@ -455,14 +513,36 @@ export function rememberDraftRecoveryReceipt(receipt: DraftRecoveryReceipt): voi
 
 export function rememberBlockEditRecoveryReceipt(receipt: BlockEditRecoveryReceipt): boolean {
   const validated = validateBlockEditRecoveryReceipt(receipt);
-  const storage = recoveryStorage();
-  if (!validated || !storage) return false;
+  if (!validated) return false;
   const scopeKey = blockEditRecoveryScopeKey(validated.noteId, validated.blockId);
   const keepUnlessSameBlockEdit = (item: unknown) => {
     const storedReceipt = validateBlockEditRecoveryReceipt(item);
     return !storedReceipt
       || blockEditRecoveryScopeKey(storedReceipt.noteId, storedReceipt.blockId) !== scopeKey;
   };
+  const local = blockEditRecoveryLocalStorage();
+  if (local) {
+    const localKey = blockEditRecoveryLocalKey();
+    claimAnonymousBlockEditReceipts(local, localKey);
+    const stored = readStorageEntries(local, localKey);
+    // Corrupt bytes stay as they are; the receipt then goes where the earlier build kept it.
+    if (stored.invalidJson === null && writeStorageEntries(local, localKey, [
+      ...stored.entries.filter(keepUnlessSameBlockEdit),
+      validated,
+    ])) {
+      // One receipt per block edit: the earlier build's copy of the same block is replaced, not left beside it.
+      const session = recoveryStorage();
+      if (session) for (const storageKey of [DRAFT_RECOVERY_STORAGE_KEY_V2, DRAFT_RECOVERY_STORAGE_KEY_V1]) {
+        const legacy = readStorageEntries(session, storageKey);
+        if (legacy.invalidJson === null && legacy.entries.some((item) => !keepUnlessSameBlockEdit(item))) {
+          writeStorageEntries(session, storageKey, legacy.entries.filter(keepUnlessSameBlockEdit));
+        }
+      }
+      return true;
+    }
+  }
+  const storage = recoveryStorage();
+  if (!storage) return false;
   const storedV2 = readStorageEntries(storage, DRAFT_RECOVERY_STORAGE_KEY_V2);
   const legacy = readStorageEntries(storage, DRAFT_RECOVERY_STORAGE_KEY_V1);
   if (storedV2.invalidJson === null) {
@@ -504,11 +584,12 @@ export function forgetDraftRecoveryReceipt(clientCreateKey: string): void {
 }
 
 export function forgetBlockEditRecoveryReceipt(recoveryKey: string): boolean {
-  const storage = recoveryStorage();
-  if (!storage) return false;
-  for (const storageKey of [DRAFT_RECOVERY_STORAGE_KEY_V2, DRAFT_RECOVERY_STORAGE_KEY_V1]) {
+  const locations = blockEditRecoveryLocations();
+  if (!locations.length) return false;
+  for (const { storage, storageKey } of locations) {
     const stored = readStorageEntries(storage, storageKey);
     if (stored.invalidJson !== null) continue;
+    if (!stored.entries.some((item) => validateBlockEditRecoveryReceipt(item)?.recoveryKey === recoveryKey)) continue;
     writeStorageEntries(
       storage,
       storageKey,

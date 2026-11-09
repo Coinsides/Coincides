@@ -1,0 +1,61 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "undoEnter",
+   "i": 0,
+   "result": {
+    "undo": [
+     "warmup|aaa|bbb|ccc",
+     "warmup|aaa|bbb|",
+     "warmup|aaa|bbb",
+     "warmup|aaa|",
+     "warmup|aaa"
+    ]
+   },
+   "server": "warmup|aaa",
+   "err": null
+  },
+  {
+   "arm": "undoPause",
+   "i": 0,
+   "result": {
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|",
+     "warmup"
+    ]
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "idleSaved",
+   "i": 0,
+   "result": {
+    "serverAfterPause": "warmup|kept",
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|kept",
+   "err": null
+  },
+  {
+   "arm": "idleThenMore",
+   "i": 0,
+   "result": {
+    "s1": "warmup|aaa",
+    "s2": "warmup|aaabbb",
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|",
+     "warmup"
+    ],
+    "serverAfterUndo": "warmup"
+   },
+   "server": "warmup",
+   "err": null
+  }
+ ]
+}

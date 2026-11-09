@@ -1,0 +1,96 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "idleSaved",
+   "i": 0,
+   "result": {
+    "serverAfterPause": "warmup|kept",
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|kept",
+   "err": null
+  },
+  {
+   "arm": "idleSaved",
+   "i": 1,
+   "result": {
+    "serverAfterPause": "warmup|kept",
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|kept",
+   "err": null
+  },
+  {
+   "arm": "idleThenMore",
+   "i": 0,
+   "result": {
+    "s1": "warmup|aaa",
+    "s2": "warmup|aaabbb",
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|",
+     "warmup"
+    ],
+    "serverAfterUndo": "warmup"
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "idleThenMore",
+   "i": 1,
+   "result": {
+    "s1": "warmup|aaa",
+    "s2": "warmup|aaabbb",
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|",
+     "warmup"
+    ],
+    "serverAfterUndo": "warmup"
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "idleThenEnter",
+   "i": 0,
+   "result": {
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ],
+    "server": "warmup|aaa|"
+   },
+   "server": "warmup|aaa|",
+   "err": null
+  },
+  {
+   "arm": "idleThenEnter",
+   "i": 1,
+   "result": {
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ],
+    "server": "warmup|aaa|"
+   },
+   "server": "warmup|aaa|",
+   "err": null
+  },
+  {
+   "arm": "idleHardKill",
+   "i": 0,
+   "result": {
+    "serverAfterKill": "warmup|kept"
+   },
+   "server": "warmup|kept",
+   "err": null
+  }
+ ]
+}

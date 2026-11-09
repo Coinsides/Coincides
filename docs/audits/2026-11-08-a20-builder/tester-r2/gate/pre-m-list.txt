@@ -1,0 +1,13 @@
+LIST-close                 0/2
+    RED x lost, y lost; server ["warmup","k0"]; boxes []; banner "A block edit is waiting for recovery warmup k0 Apply Dismiss"
+LIST-back                  0/2
+    RED x lost, y lost; server ["warmup","k0"]; boxes []; banner "A block edit is waiting for recovery warmup k0 Apply Dismiss"
+LIST-addr                  0/2
+    RED x lost, y lost; server ["warmup","k0"]; boxes []; banner "A block edit is waiting for recovery warmup k0 Apply Dismiss"
+LANDOTHER-plain            2/2
+    ok  plain: keys show true; 'Heading changes could not' toasts 0; failure toasts 5; landed later true
+    ok  plain: keys show true; 'Heading changes could not' toasts 0; failure toasts 2; landed later true
+LANDOTHER-heading          1/2
+    ok  heading: keys show true; 'Heading changes could not' toasts 0; failure toasts 2; landed later true
+    SETUP ERROR Error: setup: no empty line ["rmup","wa","plainb","hb","hbody"]
+total red 6

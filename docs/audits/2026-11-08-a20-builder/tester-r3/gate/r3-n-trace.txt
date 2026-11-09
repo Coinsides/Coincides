@@ -1,0 +1,3 @@
+BACKIN-fail-heldhead       0/1
+    RED kept series after Back: max 1, first +25 ms, last +1635 ms, longest 1610 ms; kept 1 {"t1":1,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+total red 1

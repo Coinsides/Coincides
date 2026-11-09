@@ -1,0 +1,7 @@
+tsc exit 0
+client exit 1
+vite build exit 0
+index-Dkbj0u5K.js
+r3e build done 05:46:03
+kit exit 0
+r3e all done 07:18:46

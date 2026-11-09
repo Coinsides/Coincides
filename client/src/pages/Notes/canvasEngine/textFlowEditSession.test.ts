@@ -90,3 +90,48 @@ describe('one pending TextFlow edit group feeding runtime history', () => {
     expect(onSeal.mock.calls[0][0].generation).toBe(2);
   });
 });
+
+// A-20: the idle save reads the open group with peek. Reading must never change how groups form, so undo
+// splits exactly as before: not at a pause, at an Enter.
+describe('peek reads the open group without sealing it', () => {
+  it('returns a copy of the open group, and a pause with a peek in it does not split the group', () => {
+    const onSeal = vi.fn();
+    const session = createTextFlowEditSession({ noteId: 'note', generation: 1, onSeal });
+    expect(session.peek()).toBeNull();
+    session.record(change('a', 'ab'));
+    const open = session.peek()!;
+    expect(open.after.textFlow).toEqual(flow('ab'));
+    open.after.textFlow.units[0].text = 'changed by the reader';
+    session.record(change('ab', 'abc'));
+    expect(session.peek()!.after.textFlow).toEqual(flow('abc'));
+    expect(onSeal).not.toHaveBeenCalled();
+    session.seal();
+    expect(onSeal).toHaveBeenCalledTimes(1);
+    expect(onSeal.mock.calls[0][0]).toMatchObject({ before: { textFlow: flow('a') }, after: { textFlow: flow('abc') } });
+    expect(session.peek()).toBeNull();
+  });
+
+  it('an Enter still seals the typing before it, peek or no peek', () => {
+    const onSeal = vi.fn();
+    const session = createTextFlowEditSession({ noteId: 'note', generation: 1, onSeal });
+    session.record(change('a', 'aaa'));
+    session.peek();
+    const enter = change('aaa', 'aaa\n');
+    enter.metadata.inputType = 'insertParagraph';
+    session.record(enter);
+    expect(onSeal).toHaveBeenCalledTimes(2);
+    expect(onSeal.mock.calls[0][0].after.textFlow).toEqual(flow('aaa'));
+    expect(session.peek()).toBeNull();
+  });
+
+  it('gives nothing while a composition is open, unless asked for what a departure must keep', () => {
+    const session = createTextFlowEditSession({ noteId: 'note', generation: 1, onSeal: vi.fn() });
+    session.beginComposition();
+    const composing = change('a', 'a现');
+    composing.metadata.isComposing = true;
+    composing.metadata.inputType = 'insertCompositionText';
+    session.record(composing);
+    expect(session.peek()).toBeNull();
+    expect(session.peek({ duringComposition: true })!.after.textFlow).toEqual(flow('a现'));
+  });
+});

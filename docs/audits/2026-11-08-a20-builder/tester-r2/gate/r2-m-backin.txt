@@ -1,0 +1,6 @@
+BACKIN-fail                1/2
+    SETUP ERROR Error: setup: no empty line ["rmup","wa"]
+    ok  stayed true; false 'did not reach' on A 1; kept records while staying 1 (r3 allows one only if it follows the live text); second leave held false; reopen ["warmup","backin words"] banner "A previous block edit is que
+BACKIN-undo                0/2
+    RED stayed true; undo [["warmup",""]]; server after undo ["warmup",""]; reopen ["warmup","backin words"] count 1 = M2 REPRODUCED; banner on reopen false; false 'did not reach' while on A 1
+total red 2

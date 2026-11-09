@@ -1,0 +1,3 @@
+MERGE-close                0/1
+    RED close: DUP; server ["abcdZ","cd","ef"]; screen ["abcdZ","cd","ef"]; boxes []; Z at server; kept at leave []; at reopen []; where closed; head efg after reopen+20 s+reopen nowhere; head efg at nowhere, 20 s later nowh
+total red 1

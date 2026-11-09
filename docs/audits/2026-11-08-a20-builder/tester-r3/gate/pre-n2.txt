@@ -1,0 +1,28 @@
+MERGE-close                0/2
+    SETUP ERROR Error: setup: the idle save of 'efg' was not held as the head (held 0)
+MERGE-addr                 0/2
+    SETUP ERROR Error: setup: the idle save of 'efg' was not held as the head (held 0)
+MERGE-back                 0/2
+    SETUP ERROR Error: setup: the idle save of 'efg' was not held as the head (held 0)
+SELDEL-close               0/2
+    SETUP ERROR Error: setup: the idle save of 'efg' was not held as the head (held 0)
+SELDEL-addr                0/2
+    SETUP ERROR Error: setup: the idle save of 'efg' was not held as the head (held 0)
+SELDEL-back                0/2
+    SETUP ERROR Error: setup: the idle save of 'efg' was not held as the head (held 0)
+CLICKBACK-end              2/2
+    ok  recorded (N4, TD-66): server ["alpha beta"]; screen ["alpha beta"]; boxes []; kept at reopen []
+ADDR-noncanon-slash        0/2
+    RED slash (#/notes/:A/): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-anchor       0/2
+    RED anchor (#/notes/:A#x): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+    SETUP ERROR Error: setup: no empty line ["rmup","wa"]
+ADDR-noncanon-hash         0/2
+    RED hash (hash to #/notes/A/, released 0, now #/notes/:A/, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-addr         0/2
+    RED addr (addr to #/notes/A/, released 0, now #/notes/:A/, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+BACKIN-heldback            0/2
+    SETUP ERROR Error: setup: the injected failure did not happen (no save was held after the Back)
+BACKIN-fail-heldhead       0/2
+    SETUP ERROR Error: setup: the idle save of ' aaa' was not held as the head (held 0)
+total red 7

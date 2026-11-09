@@ -1,0 +1,5 @@
+CLOSEHEAD-plain            1/1
+    ok  recorded: plain: aaa at reopen banner+Apply, 20 s later banner+Apply; server ["warmup",""]; boxes []; kept []; receipts [{"store":"local","count":1,"has":true}]; banners ["A block edit is waiting for recovery warmup 
+CLOSEHEAD-sealed           1/1
+    ok  recorded: sealed: aaa at reopen banner+Apply, 20 s later banner+Apply; server ["warmup",""]; boxes []; kept []; receipts [{"store":"local","count":1,"has":true}]; banners ["A block edit is waiting for recovery warmup
+total red 0

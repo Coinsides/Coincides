@@ -1,0 +1,15 @@
+client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx
+client/src/pages/Notes/canvasEngine/draftBlockPersistence.test.ts
+client/src/pages/Notes/canvasEngine/draftBlockPersistence.ts
+client/src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx
+client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.tsx
+client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx
+client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.ts
+client/src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx
+client/src/pages/Notes/canvasEngine/structureTypingBuffer.ts
+client/src/pages/Notes/canvasEngine/textFlowEditSession.test.ts
+client/src/pages/Notes/canvasEngine/textFlowEditSession.ts

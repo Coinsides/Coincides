@@ -9,7 +9,8 @@ import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
 
 const mocks = vi.hoisted(() => ({ save: vi.fn(), post: vi.fn(), put: vi.fn() }));
 vi.mock('../canvasObjectRepository', () => ({ saveBlockCanvasPlacementForNote: mocks.save }));
-vi.mock('@/services/api', () => ({ default: { post: mocks.post, put: mocks.put } }));
+// The auth store (reached through the kept-words archive, A-20) reads the token when it is created.
+vi.mock('@/services/api', () => ({ default: { post: mocks.post, put: mocks.put }, getToken: () => null, setToken: () => {} }));
 const block: NoteBlock = { id:'block', placement_id:'placement', display_overrides_json:{},
   block_type:'paragraph', title:null, content_json:{body:'Draft'}, plain_text:'Draft',
   metadata:{}, order_index:0, source_references:[] };

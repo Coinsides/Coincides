@@ -1,0 +1,26 @@
+BAD {"arm":"W","name":"ime200a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime200b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime250a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime250b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime280a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime280b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime300a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime300b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime320a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime320b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime350a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime350b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime400a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime400b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime500a","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"W","name":"ime500b","round":0,"dom":["di第一段甲乙丙","第二行"],"server":["di第一段甲乙丙","第二行"],"ok":false}
+BAD {"arm":"V","name":"pause600","round":0,"boxes":[{"v":"c","y":437,"h":27,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-1","focused":false},{"v":"ab","y":467,"h":27,"vis":"visible","op":"1","color":"rgb(245, 245, 245)","unit":"tu-2","focused":
+BAD {"arm":"L","name":"insert-1-4000","round":0,"focus":{"unit":"tu-2","ro":false,"v":"aa"},"dom":["a","标题aa"],"server":["a","[heading_1]标题aa"],"expected":["aaa","[heading_1]标题"],"ok":false}
+BAD {"arm":"L","name":"insert-2-1000","round":0,"focus":{"unit":"tu-3","ro":false,"v":"aa"},"dom":["a","bbb","标题aa"],"server":["a","bbb","[heading_1]标题aa"],"expected":["aaa","bbb","[heading_1]标题"],"ok":false}
+BAD {"arm":"G","name":"rhythm23","round":0,"dom":["equick","brownfox","jumpsover","thelazyth"],"server":["equick","brownfox","jumpsover","thelazyth"],"expected":["thequick","brownfox","jumpsover","thelazy"],"ok":false}
+BAD {"arm":"G","name":"imeLines-0","round":0,"dom":["di第一行","第二行","第三行"],"server":["di第一行","第二行","第三行"],"expected":["第一行","第二行","第三行"],"ok":false}
+BAD {"arm":"G","name":"durableSentence-1","round":0,"dom":["a","hello world againaa"],"server":["a","hello world againaa"],"expected":["aaa","hello world again"],"ok":false}
+BAD {"arm":"G","name":"imeLines-1","round":0,"dom":["di第一行","第二行","第三行"],"server":["di第一行","第二行","第三行"],"expected":["第一行","第二行","第三行"],"ok":false}
+BAD {"arm":"G","name":"durableSentence-2","round":0,"dom":["a","hello world againaa"],"server":["a","hello world againaa"],"expected":["aaa","hello world again"],"ok":false}
+BAD {"arm":"G","name":"imeLines-2","round":0,"dom":["di第一行","第二行","第三行"],"server":["di第一行","第二行","第三行"],"expected":["第一行","第二行","第三行"],"ok":false}
+SUMMARY {"label":"a20pre3e-mx2","origin":"http://127.0.0.1:5601","by":{"K":{"n":30,"bad":0},"W":{"n":19,"bad":16},"H":{"n":13,"bad":0},"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":1},"D":{"n":12,"bad":0},"L":{"n":32,"bad":2},"G":{"n":51,"bad":6}},"errors":0,"firstErrors":[]}

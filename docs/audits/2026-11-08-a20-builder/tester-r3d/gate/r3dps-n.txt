@@ -1,0 +1,11 @@
+BACKIN-heldback            3/3
+    ok  RAW retry x1 at +1628 ms (window end 8995; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1628 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+    ok  RAW retry x1 at +1612 ms (window end 9034; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1612 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+    ok  RAW retry x1 at +1612 ms (window end 9045; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1612 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+BACKIN-fail-heldhead       3/3
+    ok  kept series after Back: max 0, first +null ms, last +null ms, longest 0 ms; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+BACKIN-heldhead-undo       0/3
+    RED kept after Back: max 0, +null..+null ms; undo at +675 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+    RED kept after Back: max 0, +null..+null ms; undo at +673 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+    RED kept after Back: max 0, +null..+null ms; undo at +667 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+total red 3

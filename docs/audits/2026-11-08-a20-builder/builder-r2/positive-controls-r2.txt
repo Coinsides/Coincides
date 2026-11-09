@@ -1,0 +1,60 @@
+=== K1 K2 K5, ledgers, split (text history)
+   × A-20 r2 departure records start from what the server holds > K1: after an idle save, the record of the still-open typing starts from the saved text, so landing it does not write the saved part twice 2294ms
+     → expected { …(6) } to match object { initialText: 'Note: alpha', …(1) }
+   × A-20 r2 departure records start from what the server holds > K2: a failed save that was undone keeps nothing; the undone words do not come back 29ms
+     → expected [ { …(6) } ] to deeply equal []
+   × A-20 r2 departure records start from what the server holds > K5: a recovery receipt left by this visit's own typing save is known as one, so the banner does not offer it 13ms
+     → editor.current(...).textHistory.isVisitReceipt is not a function
+   × A-20 r2 sealed typing is not kept in the kept-words archive > a sealed group whose save failed is left to its recovery receipt, not recorded at departure (SPLIT, RETRY) 12ms
+     → expected [ { …(6) } ] to deeply equal []
+   × A-20 r2 a group is in exactly one ledger > a group queued behind a save on its way is unsent until handed over, then only the receipt has it 11ms
+     → editor.current(...).textHistory.unsentGroups is not a function
+   × A-20 r2 a group is in exactly one ledger > once the queued group is handed to the adapter it leaves the unsent ledger 19ms
+     → editor.current(...).textHistory.unsentGroups is not a function
+   × A-20 r2 a split still queued when the note is left > keeps only the words of the new line, as a split record; the cut line is not recorded and stays as the server has it 20ms
+     → editor.current(...).textHistory.unsentSplitGroups is not a function
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  7 failed | 25 skipped (32)
+=== K6, LATEBACK (route boundary)
+   × A-20 r2 a held navigation keeps its kind > a replace is opened again as a replace, so Back does not come to the same note twice 137ms
+     → expected 2 to be 1 // Object.is equality
+   × A-20 r2 nothing leaves with the note unsaved > a held hash change shows "Saving before leaving" while it waits, and saves again what reached the editor meanwhile 28ms
+     → expected [ 'flush:note-a' ] to have a length of 2 but got 1
+   × A-20 r2 nothing leaves with the note unsaved > what still is not saved after two more rounds is kept before the note is left 30ms
+     → expected [ 'flush:note-a' ] to have a length of 3 but got 1
+   × A-20 r2 nothing leaves with the note unsaved > an in-app link takes the same path: saves again what is left, then goes 42ms
+     → Unable to find an accessible element with the role "status"
+   × A-20 r2 the browser Back button > keeps what is not on the server, sends it once, and shows no failure when the note changes 12ms
+     → expected [] to deeply equal [ 'keep:note-a', …(2) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  5 failed | 8 skipped (13)
+=== K3 (receipt storage)
+   × A-20 r2 a receipt written before the account loaded is not left where nothing reads it > is listed and can be forgotten once the account is known 18ms
+     → expected [] to deeply equal [ { version: 2, …(13) } ]
+   × A-20 r2 a receipt written before the account loaded is not left where nothing reads it > the kept words written then come back for that account too, and leave the anonymous key 2ms
+     → expected [] to deeply equal [ ObjectContaining{…} ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 41 skipped (43)
+=== gate: new arms, K4 control
+PATH idle save, more typing, its save held, the page goes (K1): type(<k0>) wait(2600) type(<k1>) holdSaves(0) unload wait(800) || note: prior[<P0> | <P1>] work[<W0> | <W1><k0><k1><k0>] || writes: save work [<W0>|<W1><k0>] ; save work HELD (never reaches the server) ; save work [<W0>|<W1><k0><k1><k0>]
+PATH idle save twice, then leaving through the app (K1): type(<k0>) wait(2600) type(<k1>) wait(2600) type(<k2>) leave(in app) wait(600) return wait(800) || note: prior[<P0> | <P1>] work[<W0> | <W1><k0><k1><k2>] || writes: save work [<W0>|<W1><k0>] ; save work [<W0>|<W1><k0><k1>] ; save work [<W0>|<W1><k0><k1><k2>]
+   × words typed around heading structures are conserved > path idle save, more typing, its save held, the page goes (K1) 4981ms
+     → <k0> DUPLICATED (note 2, kept false)
+   ✓ words typed around heading structures are conserved > path idle save twice, then leaving through the app (K1)  7784ms
+   ✓ words typed around heading structures are conserved > window-source boundary, positive control: with the window's own records gone and the departure records left, the gate turns red  2685ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 2 passed | 13 skipped (16)
+=== gate: seeds 31 and 36 (queued split, queued typing)
+ ✓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (16 tests | 15 skipped) 14879ms
+   ✓ words typed around heading structures are conserved > 6 seeded sequences of 16 events: every word in exactly one place, in its own unit  14877ms
+      Tests  1 passed | 15 skipped (16)
+
+== Added after the pre-seal kit (builder 2026-11-08), each run on the fixed work copy and on the same copy with only the touched file put back to its pre-fix state ==
+useTextFlowHistory.test.tsx  "A-20 r2 a retried group leaves the unsent ledger > after Retry saved it and the words were then removed and saved, leaving keeps nothing and the words do not come back"
+  fixed: 1 passed | pre-fix useTextFlowHistory.ts: 1 failed (AssertionError: expected [ { noteId: 'synthetic-note', …(5) } ] to deeply equal [])
+useNoteRouteSaveBoundary.leave.test.tsx  "A-20 r2 a second step while a departure waits" (2 tests)
+  fixed: 15/15 file passed | pre-fix useNoteRouteSaveBoundary.tsx: both failed
+    × a second hash change that can be held is held too, and the note leaves once, to the newest destination
+    × a second step that cannot be held lets the note go now, keeping what is open, with no retry notice for the held save
+useNoteCanvasRuntimeController.ts whenLeaveSettled (BACKOK / GONEFAIL-back): no unit test; its control is the browser kit:
+  BACKOK-plain/slow red on index-ClZUj0ex.js (kit/kit-r2j.analysis.txt), green on index-DGn86c1V.js (kit/kit-r3j.analysis.txt)

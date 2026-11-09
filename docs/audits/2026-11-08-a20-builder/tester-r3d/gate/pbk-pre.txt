@@ -1,0 +1,3 @@
+HEADCLOSE-putback          0/1
+    RED reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], editor ["warmup",""]); put back by click: null -> null; then server ["warmup",""], boxes [], kept []; Apply clicked true; +3 s server ["warmup","aaa"], +13 
+total red 1

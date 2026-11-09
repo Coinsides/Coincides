@@ -142,6 +142,14 @@ export function createTextFlowEditSession(options: {
       return true;
     },
     seal,
+    /**
+     * The open group as it stands, without sealing it: a copy, so reading never changes how
+     * the group grows or where undo splits. Null while a composition is open, unless asked for.
+     */
+    peek(options: { duringComposition?: boolean } = {}): TextFlowEditTransaction | null {
+      if (!pending || (composing && !options.duringComposition)) return null;
+      return structuredClone(pending);
+    },
     selectionChanged(selection: TextFlowEditSelection): boolean {
       return !pending || same(pending.after.selection, selection) ? true : seal();
     },

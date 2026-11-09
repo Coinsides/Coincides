@@ -1,0 +1,8 @@
+HEADCLOSE-putback          0/1
+    RED reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup bbb","pos":10,"len":10}): 18444 PUT /note-blocks/:id/text-s
+HEADCLOSE-applyslow        0/2
+    RED head idle; Apply clicked +619 ms after the reopen began; box words in line 1 during the hold: +737 ms after the click; Apply PUT held 1, released +2014 ms -> 7765 RESP /note-blocks/:id/text-save 409; aaa at reply now
+    RED head idle; Apply clicked +601 ms after the reopen began; box words in line 1 during the hold: +778 ms after the click; Apply PUT held 1, released +2027 ms -> 7795 RESP /note-blocks/:id/text-save 409; aaa at reply now
+MENTER-close               0/2
+    RED REWRITE: screen at close ["abxcd","Z"] (merged ["abxcd"], enter ["abxcd",""]); reopen server ["abx","Z"], editor ["abx","Z"], boxes ["abxcd"] / ["abxcd"], kept ["\"\"->\"abxcd\""], items ["A previous block edit is qu
+total red 5

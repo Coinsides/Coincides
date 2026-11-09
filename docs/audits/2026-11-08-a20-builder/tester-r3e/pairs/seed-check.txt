@@ -1,0 +1,14 @@
+# Pairs account for the r3e round (Tester 11-09). No password is written here.
+## file times (cred-3611r)
+2026-11-09 09:49:32 cred.json.bad-1109   <- written by matrix.mjs when pair 1's r3e side registered the shared default email: register 409
+2026-11-09 10:10:40 cred.json            <- written by scripts/seed-cred-3611r.mjs (own test email)
+## seed-cred-3611r.mjs output at 10:10 (copied from the session; 3611 = r3e, then 3612 = A-20b)
+register 201
+login 200 token true
+cred.json written for t1.a20reg@example.test
+register 201
+login 200 token true
+cred.json written for t1.a20reg@example.test
+## re-check after the round (127.0.0.1:3611)
+pairs account now: t1.a20reg@example.test login 200 | the file left by the failed register: t1.a18@example.test login 401
+## timeline (pairs/run-reg-r3e-par.log): pair 1 slot taken 09:49:31 (its r3e side died at 09:49:40); pair 2 slot taken 10:31:58, after the seed.

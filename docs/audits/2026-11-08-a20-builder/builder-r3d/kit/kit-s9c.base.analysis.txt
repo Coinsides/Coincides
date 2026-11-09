@@ -1,0 +1,19 @@
+PAUSEEXIT-unload           2/2
+    ok  unload: on server true
+PAUSEEXIT-hash             2/2
+    ok  hash: on server true
+PAUSEEXIT-401              2/2
+    ok  401: on server true
+UNDOSEQ                    0/2
+    RED [["warmup","aaa","bbb","ccc"],["warmup","aaa","bbb",""],["warmup","aaa","bbb"],["warmup","aaa",""],["warmup","aaa"]] (BASE has no UNDOSEQ row)
+UNDOPAUSE                  2/2
+    ok  [["warmup","aaabbb"],["warmup",""],["warmup"],[]] == base [["warmup","aaabbb"],["warmup",""],["warmup"],[]]
+DRAFT                      2/2
+    ok  full after 3.5 s true
+OFFLINE                    2/2
+    ok  reference only (old dedup watcher): use OFFLINE-N
+PUTDUP                     2/2
+    ok  PUT 4, duplicates 0
+IME                        0/2
+    RED PUT 3; [["warmup","现值公式推导"],["warmup","现值公式"],["warmup","现值"],["warmup",""]] (BASE has no IME row)
+total red 4

@@ -1,0 +1,29 @@
+SPLIT-mid                  1/1
+    ok  ["warmup","alpha beta"]
+SPLIT-home                 1/1
+    ok  ["warmup","alpha beta"]
+SPLIT-mid401               1/1
+    ok  ["warmup","alpha beta"]
+SPLIT-midback              1/1
+    ok  ["warmup","alpha beta"]
+RETRY-del                  0/1
+    RED ["warmup","alpha","beta"]
+RETRY-more                 1/1
+    ok  ["warmup","alpha","beta"]
+STALE-back                 1/1
+    ok  ["warmup",""]
+STALE-edit                 1/1
+    ok  ["warmup tail words edited elsewhere",""]
+TWICE-hash                 0/1
+    RED ["warmup","twice words"]
+TWICE-back                 1/1
+    ok  ["warmup","twice words"]
+TWICE-paste                0/1
+    RED ["warmup","twice words"]
+TWICE-hash500              0/1
+    RED ["warmup",""]
+BACKOK-plain               0/1
+    RED ["warmup","back ok words"]
+BACKOK-slow                0/1
+    RED ["warmup","back ok words"]
+total red 6

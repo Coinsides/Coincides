@@ -1,0 +1,360 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "hashSwitch",
+   "i": 0,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save",
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 1,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save",
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 2,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save",
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "pasteLink",
+   "i": 0,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save",
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "pasteLink",
+   "i": 1,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save",
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "pasteLink",
+   "i": 2,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save",
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "login401Enter",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at QE (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:1091)\n    at XMLHttpRequest.x (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:5",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at QE (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:1091)\n    at XMLHttpRequest.x (http://127.0.0.1:4201/assets/inde"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "login401Enter",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at QE (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:1091)\n    at XMLHttpRequest.x (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:5",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at QE (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:1091)\n    at XMLHttpRequest.x (http://127.0.0.1:4201/assets/inde"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "login401Enter",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at QE (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:1091)\n    at XMLHttpRequest.x (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:5",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at QE (http://127.0.0.1:4201/assets/index-BkYnVk7W.js:86:1091)\n    at XMLHttpRequest.x (http://127.0.0.1:4201/assets/inde"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "lateReply",
+   "i": 0,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 8,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": false
+  },
+  {
+   "arm": "lateReply",
+   "i": 1,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 8,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": false
+  },
+  {
+   "arm": "lateReply",
+   "i": 2,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": true,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 8,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": false
+  },
+  {
+   "arm": "emptyHash",
+   "i": 0,
+   "server": "",
+   "kept": false,
+   "reopenedOnScreen": null,
+   "bannerAfterReopen": null,
+   "receiptInSessionStorage": null,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 0,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "emptyHash",
+   "i": 1,
+   "server": "",
+   "kept": false,
+   "reopenedOnScreen": null,
+   "bannerAfterReopen": null,
+   "receiptInSessionStorage": null,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 0,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  },
+  {
+   "arm": "emptyHash",
+   "i": 2,
+   "server": "",
+   "kept": false,
+   "reopenedOnScreen": null,
+   "bannerAfterReopen": null,
+   "receiptInSessionStorage": null,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 0,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `w"
+   ],
+   "lateBanner": null
+  }
+ ],
+ "sum": {
+  "hashSwitch": {
+   "n": 3,
+   "kept": 3,
+   "toast": 0,
+   "routerWarning": 3,
+   "writesAfter": 6,
+   "reopened": 3
+  },
+  "pasteLink": {
+   "n": 3,
+   "kept": 3,
+   "toast": 0,
+   "routerWarning": 3,
+   "writesAfter": 6,
+   "reopened": 3
+  },
+  "login401Enter": {
+   "n": 3,
+   "kept": 0,
+   "toast": 0,
+   "routerWarning": 3,
+   "writesAfter": 2,
+   "reopened": 3
+  },
+  "lateReply": {
+   "n": 3,
+   "kept": 3,
+   "toast": 0,
+   "routerWarning": 3,
+   "writesAfter": 0,
+   "reopened": 3
+  },
+  "emptyHash": {
+   "n": 3,
+   "kept": 0,
+   "toast": 0,
+   "routerWarning": 3,
+   "writesAfter": 0,
+   "reopened": 0
+  }
+ }
+}

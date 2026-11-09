@@ -1,0 +1,5 @@
+BACKIN-fail-heldhead       0/3
+    RED kept series after Back: max 1, first +25 ms, last +1615 ms, longest 1590 ms; kept 1 {"t1":1,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+    RED kept series after Back: max 1, first +24 ms, last +1757 ms, longest 1733 ms; kept 1 {"t1":1,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+    RED kept series after Back: max 1, first +23 ms, last +1621 ms, longest 1598 ms; kept 1 {"t1":1,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+total red 3

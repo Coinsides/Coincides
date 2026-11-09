@@ -1,0 +1,29 @@
+SPLIT-mid                  0/1
+    RED ["warmup","alpha"]
+SPLIT-home                 0/1
+    RED ["warmup",""]
+SPLIT-mid401               0/1
+    RED ["warmup","alpha"]
+SPLIT-midback              0/1
+    RED ["warmup","alpha"]
+RETRY-del                  0/1
+    RED ["warmup","alpha","beta"]
+RETRY-more                 0/1
+    RED ["warmup","alpha","beta more"]
+STALE-back                 0/1
+    SETUP ERROR TypeError: Cannot read properties of undefined (reading 'browserContextId')
+STALE-edit                 0/1
+    SETUP ERROR TypeError: Cannot read properties of undefined (reading 'browserContextId')
+TWICE-hash                 0/1
+    RED ["warmup","twice words"]
+TWICE-back                 1/1
+    ok  ["warmup","twice words"]
+TWICE-paste                0/1
+    RED ["warmup","twice words"]
+TWICE-hash500              0/1
+    RED count undefined (not exact), ends C, jumps ["C"], Apply false; messages (A-25 e, not gated) undefined, still on screen at C 0
+BACKOK-plain               0/1
+    RED ["warmup","back ok words"]
+BACKOK-slow                0/1
+    RED ["warmup","back ok words"]
+total red 11

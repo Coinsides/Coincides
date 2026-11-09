@@ -1,0 +1,16 @@
+--- S-b1-nextLineSharesPrefix
+--- S-b2-prevLineSharesSuffix
+--- S-a1-moreTypedAtCaret
+--- S-ctrl-shouldLand
+--- N-a1-failedSaveThenMore-0
+--- N-a1-failedSaveThenMore-1
+BAD {"arm":"RV","name":"N-a1-failedSaveThenMore-1","id":"a6f65428-1514-4937-9c50-f05b41bbdd82","failed":true,"s1":{"buf":null,"boxes":1,"focusBuf":false,"active":"TEXTAREA:editor=big intro@4","notice":null,"eds":["warmup","big intro"],"alerts":[],"stored":["[{\"id
+--- N-a1-failedSaveThenMore-2
+BAD {"arm":"RV","name":"N-a1-failedSaveThenMore-2","id":"9478b504-46fd-4498-a5f0-afd878503a75","failed":true,"s1":{"buf":null,"boxes":1,"focusBuf":false,"active":"TEXTAREA:editor=big intro@4","notice":null,"eds":["warmup","big intro"],"alerts":[],"stored":["[{\"id
+--- N-a1c-failedSaveNoMore-0
+BAD {"arm":"RV","name":"N-a1c-failedSaveNoMore-0","id":"c66268e2-abac-4014-b714-fdd42d2676bf","failed":true,"s1":{"buf":null,"boxes":1,"focusBuf":false,"active":"TEXTAREA:editor=big intro@4","notice":null,"eds":["warmup","big intro"],"alerts":[],"stored":["[{\"id\
+--- N-b2-headingAboveLineSameWord-0
+BAD {"arm":"RV","name":"N-b2-headingAboveLineSameWord-0","id":"d1451831-fe28-4eda-8bdb-bb56e03fc1b6","held":true,"atLeave":{"buf":"intro","boxes":2,"focusBuf":true,"active":"TEXTAREA=intro@0","notice":null,"eds":["warmup","see the note","noteintro"],"alerts":[],"s
+--- N-b2-headingAboveLineSameWord-1
+BAD {"arm":"RV","name":"N-b2-headingAboveLineSameWord-1","id":"95c4d1c4-b927-4026-8333-68499573134f","held":true,"atLeave":{"buf":"intro","boxes":2,"focusBuf":true,"active":"TEXTAREA=intro@0","notice":null,"eds":["warmup","see the note","noteintro"],"alerts":[],"s
+DONE a20pre3e-acc13: 10 rows, bad 5

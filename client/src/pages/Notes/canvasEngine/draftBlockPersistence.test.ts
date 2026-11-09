@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TemplateOption } from '@/services/templateOptions';
 import type { NoteBlock } from './runtimeDataTypes';
+import { useAuthStore } from '@/stores/authStore';
+import { readUnplacedWords, rememberUnplacedWords } from './structureTypingBuffer';
 import {
   DRAFT_RECOVERY_STORAGE_KEY_V1,
   DRAFT_RECOVERY_STORAGE_KEY_V2,
@@ -246,7 +248,7 @@ const durableBlock = {
 } satisfies NoteBlock;
 
 describe('draft recovery persistence', () => {
-  beforeEach(() => sessionStorage.clear());
+  beforeEach(() => { sessionStorage.clear(); localStorage.clear(); });
   afterEach(() => vi.restoreAllMocks());
 
   it('fails closed for an ownerless v1 receipt and leaves the raw entry queued', async () => {
@@ -618,8 +620,10 @@ describe('draft recovery persistence', () => {
 
     expect(listBlockEditRecoveryReceipts('note-a')).toEqual([receipt]);
     expect(loadDraftRecoveryQueue()).toEqual({ replayable: [], blocked: [] });
-    expect(JSON.parse(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '[]'))
+    // A-20: kept per account in localStorage, outliving the tab; no signed-in user here.
+    expect(JSON.parse(localStorage.getItem(`${DRAFT_RECOVERY_STORAGE_KEY_V2}:anonymous`) || '[]'))
       .toEqual([receipt]);
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBeNull();
   });
 
   it('routes an explicit block edit hybrid only to edit recovery and never auto-replays it', async () => {
@@ -766,4 +770,77 @@ describe('draft recovery persistence', () => {
       expect(listDraftRecoveryReceipts()).toEqual([receipt]);
     },
   );
+});
+
+// A-20: a block edit that could not be saved (the 401 path among them) must outlive the tab. Its receipt is kept in
+// localStorage per account, same schema; receipts the earlier build left in sessionStorage are still read.
+describe('A-20 block edit receipts outlive the tab, per account', () => {
+  const signIn = (id: string | null) => useAuthStore.setState({ user: id ? { id } as never : null });
+  beforeEach(() => { sessionStorage.clear(); localStorage.clear(); });
+  afterEach(() => { signIn(null); sessionStorage.clear(); localStorage.clear(); });
+
+  it('a receipt is still there after the tab is gone (a new tab has a fresh sessionStorage)', () => {
+    signIn('user-1');
+    const receipt = blockEditRecoveryReceipt();
+    expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+    sessionStorage.clear();
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([receipt]);
+  });
+
+  it('someone else signed in on this browser neither sees nor forgets it', () => {
+    signIn('user-1');
+    const receipt = blockEditRecoveryReceipt();
+    rememberBlockEditRecoveryReceipt(receipt);
+    signIn('user-2');
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([]);
+    forgetBlockEditRecoveryReceipt(receipt.recoveryKey);
+    signIn('user-1');
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([receipt]);
+  });
+
+  it('a receipt the earlier build left in sessionStorage is read, and replaced rather than kept beside the new one', () => {
+    signIn('user-1');
+    const older = blockEditRecoveryReceipt({ text: 'older edit' });
+    sessionStorage.setItem(DRAFT_RECOVERY_STORAGE_KEY_V2, JSON.stringify([older]));
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([older]);
+    const newer = blockEditRecoveryReceipt({ text: 'newer edit', operationSequence: 2 });
+    expect(rememberBlockEditRecoveryReceipt(newer)).toBe(true);
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([newer]);
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) ?? '').not.toContain('older edit');
+  });
+
+  it('forgetting removes it wherever it is', () => {
+    signIn('user-1');
+    const legacy = blockEditRecoveryReceipt({ text: 'legacy edit' });
+    sessionStorage.setItem(DRAFT_RECOVERY_STORAGE_KEY_V2, JSON.stringify([legacy]));
+    expect(forgetBlockEditRecoveryReceipt(legacy.recoveryKey)).toBe(true);
+    const current = blockEditRecoveryReceipt({ text: 'current edit', operationSequence: 3 });
+    rememberBlockEditRecoveryReceipt(current);
+    expect(forgetBlockEditRecoveryReceipt(current.recoveryKey)).toBe(true);
+    expect(listBlockEditRecoveryReceipts()).toEqual([]);
+  });
+});
+
+// A-20 r2 (K3): a receipt written before the account had loaded is claimed by the account once it is known.
+describe('A-20 r2 a receipt written before the account loaded is not left where nothing reads it', () => {
+  const signIn = (id: string | null) => useAuthStore.setState({ user: id ? { id } as never : null });
+  beforeEach(() => { sessionStorage.clear(); localStorage.clear(); signIn(null); });
+  afterEach(() => { signIn(null); sessionStorage.clear(); localStorage.clear(); });
+
+  it('is listed and can be forgotten once the account is known', () => {
+    const receipt = blockEditRecoveryReceipt({ text: 'before the account loaded' });
+    expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+    signIn('user-1');
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([receipt]);
+    expect(localStorage.getItem(`${DRAFT_RECOVERY_STORAGE_KEY_V2}:anonymous`) ?? '').not.toContain('before the account loaded');
+    expect(forgetBlockEditRecoveryReceipt(receipt.recoveryKey)).toBe(true);
+    expect(listBlockEditRecoveryReceipts()).toEqual([]);
+  });
+
+  it('the kept words written then come back for that account too, and leave the anonymous key', () => {
+    rememberUnplacedWords('note-a', { id: 'kept-1', blockId: 'block-a', unitId: 'unit-a', initialText: 'Note:', text: 'Note: kept' });
+    signIn('user-1');
+    expect(readUnplacedWords('note-a')).toEqual([expect.objectContaining({ id: 'kept-1', text: 'Note: kept' })]);
+    expect(localStorage.getItem('coincides:unplaced-words:anonymous:note-a')).toBeNull();
+  });
 });

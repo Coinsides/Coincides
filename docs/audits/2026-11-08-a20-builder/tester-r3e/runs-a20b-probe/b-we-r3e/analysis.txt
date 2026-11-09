@@ -1,0 +1,3 @@
+WINDOWENTER-land           1/1
+    ok  landed shape SPLIT (SPLIT expected: a window record); kept x1, body x1; box at return [], kept records []; box gone after 0 ms; server blocks [["warmup"],["[heading_1]kept","body"]]; editor ["warmup","kept","body"]; box at end []; screen while typing ["warmup",""]
+total red 0

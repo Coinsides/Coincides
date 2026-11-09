@@ -1,0 +1,13 @@
+MERGE-close                0/2
+    RED close: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where closed
+MERGE-addr                 0/2
+    RED addr: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other
+MERGE-back                 0/2
+    RED back: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other
+SELDEL-close               0/2
+    RED close: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where closed
+SELDEL-addr                0/2
+    RED addr: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other
+SELDEL-back                0/2
+    RED back: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other
+total red 12

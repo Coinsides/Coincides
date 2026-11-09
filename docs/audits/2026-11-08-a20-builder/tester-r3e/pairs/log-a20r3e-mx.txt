@@ -1,0 +1,11 @@
+register 409
+file:///<scratch>/a20reg/matrix.mjs:36
+  if (PRESET) { const r = await fetch(`${API}/canvas-objects/by-note/${id}/page-frame-collection`, { method: 'PUT', headers: auth, body: JSON.stringify({ collection: SEEDS[PRESET] }) }); if (!r.ok) throw new Error(`frames ${r.status}`); }
+                                                                                                                                                                                                            ^
+
+Error: frames 401
+    at newNote (file:///<scratch>/a20reg/matrix.mjs:36:205)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///<scratch>/a20reg/matrix.mjs:68:14
+
+Node.js v22.22.1

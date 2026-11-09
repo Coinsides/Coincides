@@ -1,0 +1,8 @@
+A-20 r3e positive controls. Tests: useTextFlowHistory.test.tsx, useNoteCanvasDataAdapter.test.tsx, useNoteRouteSaveBoundary.leave.test.tsx, -t "A-20 r3e".
+r3e code: 7/7 green.
+r3d code (adapter, controller, history, boundary swapped back in the scratch copy; restored and cmp-checked after): 7/7 RED
+  P1 Apply in flight: expected [] to include 'block-1'
+  P2 join then Enter: expected { text: 'Z', caret: 1 } to be null
+  P3 #/Notes/note-a, #/NOTES/note-a/: held as a departure (defaultPrevented true, expected false)
+  P4 #/notes%2Fnote-a, #/notes/note-a%2F: not held (expected a held departure)
+  P3/P4 predicate: hashRoutePath('#/notes%2Fnote-a') = '/notes/note-a' (expected '/notes%2Fnote-a')

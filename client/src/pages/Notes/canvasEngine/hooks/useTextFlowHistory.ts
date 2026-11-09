@@ -14,6 +14,7 @@ import type { BlockBoxLayout } from '../runtimeLayout';
 import { extractTextUnit } from '../textUnitExtractionService';
 import { moveTextUnitBetweenFlows, type TextUnitIdMapping } from '../textUnitMoveService';
 import { TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { forgetUnplacedWords, readUnplacedWords, rememberUnplacedWords, type UnplacedWords } from '../structureTypingBuffer';
 
 export interface TextFlowHistoryHost {
   pushHistoryEntry: (entry: RuntimeHistoryEntry, options?: { skipBoundary?: boolean }) => boolean;
@@ -46,7 +47,18 @@ interface Options {
   saveAnnotationTruthsOutcome: (annotations: AnnotationTruthV1[], options?: { preserveDrafts?: boolean }) => Promise<boolean>;
   history: MutableRefObject<TextFlowHistoryHost | null>;
   onSaveFailure?: () => void;
+  /** False while something other than typing holds the note (a structure, a chapter move, the paper). */
+  canSaveWhileTyping?: () => boolean;
+  /** A typing save of this visit came back with a recovery receipt (A-20 r2, K5): render again to leave it out. */
+  onVisitReceipt?: () => void;
 }
+
+/** A-20: after this long without a recorded keystroke, the open group is written without being sealed. */
+export const IDLE_SAVE_MS = 2000;
+
+const sameSnapshot = (left: TextFlowEditSnapshot, right: TextFlowEditSnapshot) => JSON.stringify(
+  [left.textFlow, left.annotationRanges, left.boardRanges],
+) === JSON.stringify([right.textFlow, right.annotationRanges, right.boardRanges]);
 
 interface TemplateSnapshot extends Omit<TextFlowEditSnapshot, 'textFlow'> {
   textFlow: TextBlockContentV1 | null;
@@ -130,6 +142,61 @@ export function useTextFlowHistory(options: Options) {
     let templatePending = false;
     let documentPending = false;
     let proposalPending = false;
+    // Idle save (A-20, road B): the open group is written while it stays open, so undo groups exactly as before.
+    // It never enters `failures` (a stale snapshot must not be replayed ahead of the sealed group); one failure
+    // stops further idle saves until a sealed save succeeds, so a lost connection reports once, not every pause.
+    let idleTimer: ReturnType<typeof setTimeout> | null = null;
+    let idleSaveFailed = false;
+    let lastIdleSave: { blockId: string; after: TextFlowEditSnapshot; block: NoteBlock } | null = null;
+    // What each block holds on the server, as far as this note knows: the last body a save confirmed (A-20 r2). A
+    // departure keeps, per unit, from that to what is on screen; equal (saved, or undone back to it) keeps nothing. A
+    // save still on its way when the note is left is confirmed later: the record it outdated then starts from it.
+    const confirmedFlows = new Map<string, TextBlockContentV1>();
+    // The last body handed to the adapter for each block, whatever its answer: the adapter wrote a receipt for it
+    // before sending, so from here back it is the server's or the receipt's. A departure record starts after it.
+    const handedFlows = new Map<string, TextBlockContentV1>();
+    // Sealed typing not handed to the adapter yet (queued behind a save still on its way): no receipt exists for it,
+    // so a departure keeps it like the open group. Plain typing in one unit only; a group that splits or joins units,
+    // or a structural one, is not taken (it leaves only through its receipt). A group is in exactly one of three
+    // ledgers at any time: the open session, this list, or the receipt (handed). Two hand-overs: sealing moves it from
+    // the session to this list (onSeal), handing it to the adapter moves it from this list to the receipt (persist).
+    const unsent: TextFlowEditTransaction[] = [];
+    // A split (Enter) sealed but not handed to the adapter yet: it has no receipt either. Only the unit it created is
+    // kept, never the unit it cut (Main_Designer r2 (B)): the cut unit stays as the server has it, the new unit's words
+    // wait in the kept-words box, never placed by themselves (a later unit may reuse the id).
+    const unsentSplits: TextFlowEditTransaction[] = [];
+    // A-20 r3 (M1): the order the two lists were sealed in, so a departure replays them as they happened.
+    const sealedOrder = new WeakMap<TextFlowEditTransaction, number>();
+    let sealCount = 0;
+    // A sealed group that waited behind a failed save sits in failures without ever reaching hand-over 2. When a save
+    // of its block then succeeds with it (its own, or a Retry carrying the whole screen), it is on the server: it
+    // leaves the unsent ledgers with failures, or a later departure would keep words the server already has.
+    const leaveUnsent = (transaction: TextFlowEditTransaction) => {
+      const queued = unsent.indexOf(transaction);
+      if (queued >= 0) unsent.splice(queued, 1);
+      const queuedSplit = unsentSplits.indexOf(transaction);
+      if (queuedSplit >= 0) unsentSplits.splice(queuedSplit, 1);
+    };
+    const isSplit = (transaction: TextFlowEditTransaction) => {
+      const before = new Set(transaction.before.textFlow.units.map((unit) => unit.id));
+      return transaction.after.textFlow.units.some((unit) => !before.has(unit.id));
+    };
+    // A-20 r3d (N1): a unit the group's before has and its after has not (Backspace joining two lines, a selection
+    // deleted across lines, a whole line deleted). Like a split, the group changes which units there are.
+    const removesUnits = (transaction: TextFlowEditTransaction) => {
+      const after = new Set(transaction.after.textFlow.units.filter((unit) => unit.status !== 'deleted').map((unit) => unit.id));
+      return transaction.before.textFlow.units.some((unit) => unit.status !== 'deleted' && !after.has(unit.id));
+    };
+    const plainTyping = (transaction: TextFlowEditTransaction) => transaction.metadata.kind === 'typing'
+      && !['insertParagraph', 'insertLineBreak'].includes(transaction.metadata.inputType)
+      && JSON.stringify(transaction.before.textFlow.units.map((unit) => unit.id))
+        === JSON.stringify(transaction.after.textFlow.units.map((unit) => unit.id));
+    let observed: { drafts: Record<string, TextBlockContentV1>; blocks: NoteBlock[] } = { drafts: {}, blocks: [] };
+    const keptUnits = new Map<string, { id: string; blockId: string; unitId: string; text: string; writingRole?: string }>();
+    // A-20 r2 (K5): recovery receipts left by this visit's own typing saves. The editor still holds those words, so the
+    // recovery banner must not offer Apply for them (an older body over the live text).
+    const visitReceipts = new Set<string>();
+    const unitKey = (blockId: string, unitId: string) => `${blockId}\u0000${unitId}`;
     const proposalWrites = new Map<string, Promise<boolean>>();
     let batchEntries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] | null = null;
     let reserveBatch: (() => boolean) | null = null;
@@ -185,8 +252,10 @@ export function useTextFlowHistory(options: Options) {
     const restoreSelection = (blockId: string, selection: TextFlowEditSelection) => {
       if (current()) setSelectionRequest({ token, blockId, selection });
     };
-    const persist = async (transaction: TextFlowEditTransaction, side: 'before' | 'after', replay: boolean, recovery?: TextFlowEditSnapshot): Promise<boolean> => {
-      if (!current()) return false;
+    const persist = async (transaction: TextFlowEditTransaction, side: 'before' | 'after', replay: boolean, recovery?: TextFlowEditSnapshot,
+      idle = false): Promise<boolean> => {
+      if (!current() || (idle && failures.size)) return false;
+      if (!idle) lastIdleSave = null;
       const historyRestore = restoringHistory(transaction, side, replay);
       if (!transactionOrder.has(transaction)) transactionOrder.set(transaction, ++nextTransactionOrder);
       // A later body includes earlier typing. Confirm its failed dependencies
@@ -203,11 +272,15 @@ export function useTextFlowHistory(options: Options) {
       }
       const api = latest.current;
       const block = api.blocks.find((candidate) => candidate.id === transaction.blockId);
-      if (!block) { failures.set(transaction, side); api.onSaveFailure?.(); return false; }
+      if (!block) {
+        if (!idle) { failures.set(transaction, side); api.onSaveFailure?.(); }
+        return false;
+      }
       // Historical retries cannot promote new live ranges into the exemption.
       const snapshot = historyRestore ? transaction[side] : recovery ?? transaction[side];
       let outcome: BlockSaveOutcome = rejected();
       let success = false;
+      let sent: TextBlockContentV1 | null = null;
       try {
         if (historyRestore) {
           replaying = true;
@@ -217,6 +290,17 @@ export function useTextFlowHistory(options: Options) {
           api.setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(api.readAnnotationTruths(), snapshot.annotationRanges));
           api.restoreBoardTextRanges(block.id, snapshot.textFlow, { ranges: snapshot.boardRanges });
         }
+        sent = structuredClone(snapshot.textFlow);
+        // Hand-over 2: from here the adapter's receipt holds it.
+        const queued = unsent.indexOf(transaction);
+        if (queued >= 0) unsent.splice(queued, 1);
+        const queuedSplit = unsentSplits.indexOf(transaction);
+        if (queuedSplit >= 0) unsentSplits.splice(queuedSplit, 1);
+        const handedBefore = handedFlows.get(block.id);
+        handedFlows.set(block.id, sent);
+        // A-20 r3 (M3): the receipt is now the one home of what was sent. A kept record of the same words goes; one
+        // that runs past them starts from what was sent.
+        settleKept(block.id, sent);
         outcome = await api.saveBlock(block, plainTextFromTextFlow(snapshot.textFlow), {
           silent: true, textFlow: snapshot.textFlow, boardRangeSnapshot: boardSnapshot(snapshot.boardRanges, historyRestore), preserveDrafts: true,
           annotationRanges: snapshot.annotationRanges,
@@ -224,6 +308,12 @@ export function useTextFlowHistory(options: Options) {
           ...(!historyRestore && side === 'after' && transaction.metadata.proposalPatch
             ? { proposalPatch: transaction.metadata.proposalPatch } : {}),
         });
+        // A-20 r3 (M5): refused before the adapter wrote a receipt (the save was never sent): the group was not handed
+        // over after all. It goes back to its unsent list and the handed body back to what it was.
+        if (outcome.status !== 'saved' && !outcome.recoveryReceipt && (queued >= 0 || queuedSplit >= 0)) {
+          if (handedBefore) handedFlows.set(block.id, handedBefore); else handedFlows.delete(block.id);
+          (queued >= 0 ? unsent : unsentSplits).push(transaction);
+        }
         if (!current()) return false;
         success = outcome.status === 'saved';
         if (success && outcome.block) committed(transaction, outcome.block);
@@ -231,6 +321,11 @@ export function useTextFlowHistory(options: Options) {
         success = false;
         outcome = rejected();
       } finally {
+        if (sent && success) { confirmedFlows.set(block.id, sent); settleKept(block.id); }
+        if (!success && outcome.recoveryReceipt && !visitReceipts.has(outcome.recoveryReceipt.recoveryKey)) {
+          visitReceipts.add(outcome.recoveryReceipt.recoveryKey);
+          if (current()) latest.current.onVisitReceipt?.();
+        }
         if (current()) {
           replaying = false;
           if (historyRestore) setReplayScope(null);
@@ -238,9 +333,12 @@ export function useTextFlowHistory(options: Options) {
             failures.delete(transaction);
             historyRestoreSides.delete(transaction);
             if (recovery && !historyRestore) for (const failed of failures.keys()) {
-              if (failed.blockId === block.id) { failures.delete(failed); issuedBases.delete(failed); }
+              if (failed.blockId === block.id) { failures.delete(failed); issuedBases.delete(failed); leaveUnsent(failed); }
             }
+            if (idle && outcome.block) lastIdleSave = { blockId: block.id, after: structuredClone(snapshot), block: outcome.block };
+            else if (!idle) idleSaveFailed = false;
           }
+          else if (idle) idleSaveFailed = true;
           else { failures.set(transaction, side); api.onSaveFailure?.(); }
           lastSave.set(block.id, { transaction, side, outcome });
           if (historyRestore) restoreSelection(block.id, snapshot.selection);
@@ -250,6 +348,9 @@ export function useTextFlowHistory(options: Options) {
     };
     const persistTemplate = async (transaction: TemplateTransaction, side: 'before' | 'after', replay = false): Promise<boolean> => {
       if (!current()) return false;
+      lastIdleSave = null;
+      confirmedFlows.clear();
+      handedFlows.clear();
       const historyRestore = restoringHistory(transaction, side, replay);
       const api = latest.current;
       // Keep current provenance; only the five adjudicated fields belong to history.
@@ -308,6 +409,9 @@ export function useTextFlowHistory(options: Options) {
         sourcePayload: TransferPayloads; targetPayload: TransferPayloads },
     ): Promise<{ sourceBlock: NoteBlock; targetBlock: NoteBlock } | null> => {
       if (!current() || !latest.current.transferTextUnit) return null;
+      lastIdleSave = null;
+      confirmedFlows.clear();
+      handedFlows.clear();
       const [source, target] = transaction.blocks;
       const original = latest.current.blocks.find((block) => block.id === source.edit.blockId) ?? state.sourceBlock;
       const destination = latest.current.blocks.find((block) => block.id === target.edit.blockId) ?? state.targetBlock;
@@ -472,6 +576,9 @@ export function useTextFlowHistory(options: Options) {
     // One entry owns the ordered block snapshots. The server still receives the
     // existing individual saves; a same-side retry only finishes missing blocks.
     const persistDocument = async (transaction: DocumentTransaction, side: 'before' | 'after', replay = false): Promise<boolean> => {
+      lastIdleSave = null;
+      confirmedFlows.clear();
+      handedFlows.clear();
       if (transaction.extraction) return persistExtraction(transaction, side, replay);
       if (transaction.move) return persistMove(transaction, side, replay);
       if (!current()) return false;
@@ -534,6 +641,8 @@ export function useTextFlowHistory(options: Options) {
         }
       }
     };
+    const scopeNoteId = options.noteId;
+    const keptStamp = Date.now();
     const session = createTextFlowEditSession({
       noteId: options.noteId, generation: options.generation,
       onSeal(transaction) {
@@ -577,10 +686,182 @@ export function useTextFlowHistory(options: Options) {
           undo: () => persist(transaction, 'before', true),
           redo: () => persist(transaction, 'after', true),
         }, { skipBoundary: true })) return;
-        void host.enqueueRuntimeHistoryOperation(() => persist(transaction, 'after', false));
+        // Hand-over 1: sealed, waiting in the lane for its turn.
+        sealedOrder.set(transaction, ++sealCount);
+        if (plainTyping(transaction)) unsent.push(transaction);
+        // A-20 r3d (N1): a group that removes units waits in the same ledger as a split (it was in none).
+        else if (isSplit(transaction) || removesUnits(transaction)) unsentSplits.push(transaction);
+        void host.enqueueRuntimeHistoryOperation(async () => {
+          // The idle save already wrote exactly this group: take its receipt instead of writing the same body again.
+          const idle = lastIdleSave;
+          if (idle && idle.blockId === transaction.blockId && !failures.size && sameSnapshot(idle.after, transaction.after)) {
+            const queued = unsent.indexOf(transaction);
+            if (queued >= 0) unsent.splice(queued, 1);
+            const queuedSplit = unsentSplits.indexOf(transaction);
+            if (queuedSplit >= 0) unsentSplits.splice(queuedSplit, 1);
+            lastIdleSave = null;
+            committed(transaction, idle.block);
+            lastSave.set(transaction.blockId, { transaction, side: 'after',
+              outcome: { status: 'saved', block: idle.block, recoveryReceipt: null, reconciliation: 'response' } });
+            return true;
+          }
+          return persist(transaction, 'after', false);
+        });
       },
     });
-    return { token, current, session, failures, lastSave, persist, proposalWrites, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
+    const cancelIdleSave = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = null;
+    };
+    const scheduleIdleSave = () => {
+      cancelIdleSave();
+      if (current()) idleTimer = setTimeout(idleSave, IDLE_SAVE_MS);
+    };
+    // Write the open group as it stands, through the one write lane, without sealing it. Undo is untouched.
+    function idleSave() {
+      idleTimer = null;
+      const api = latest.current;
+      const open = session.peek();
+      if (!current() || idleSaveFailed || !open || open.metadata.proposalPatch) return;
+      // A draft block, or a failed save that holds the note for Retry or Undo: nothing to do here.
+      if (!api.blocks.some((block) => block.id === open.blockId)
+        || failures.size || templateFailures.size || documentFailures.size) return;
+      // Something else holds the note: ask again after another pause, while there is still something open.
+      if (replaying || templatePending || documentPending || proposalPending || api.history.current?.isReplaying?.()
+        || api.canSaveWhileTyping?.() === false) { scheduleIdleSave(); return; }
+      const host = api.history.current;
+      if (!host) return;
+      void host.enqueueRuntimeHistoryOperation(async () => {
+        // Read again in the lane: an Enter or a blur may have sealed it meanwhile, or more was typed.
+        const latestOpen = session.peek();
+        if (!current() || !latestOpen || latestOpen.metadata.proposalPatch || idleSaveFailed || failures.size) return true;
+        if (lastIdleSave && lastIdleSave.blockId === latestOpen.blockId && sameSnapshot(lastIdleSave.after, latestOpen.after)) return true;
+        return persist(latestOpen, 'after', false, undefined, true);
+      });
+    }
+    // What has not reached the server when its note stops being current (left, or the page goes away) is kept in the
+    // kept-words archive, the same record and the same way back as words that could not land. Per unit: from what the
+    // server holds (confirmed, or on its way) to what is on screen. Equal (saved, or undone back to it) keeps nothing.
+    const serverFlow = (blockId: string): TextBlockContentV1 | null => handedFlows.get(blockId) ?? confirmedFlows.get(blockId)
+      ?? getTextFlowContent(observed.blocks.find((block) => block.id === blockId)?.content_json ?? {}) ?? null;
+    // Every unit on screen whose text the server does not hold, with what the server holds for it.
+    const unsavedUnits = () => {
+      const units: { blockId: string; unit: TextBlockContentV1['units'][number]; initialText: string }[] = [];
+      const same: { blockId: string; unitId: string }[] = [];
+      for (const [blockId, live] of Object.entries(observed.drafts)) {
+        const server = serverFlow(blockId);
+        // Nothing known of what the server holds (no text flow yet): not compared, rather than every unit kept.
+        if (!server) continue;
+        for (const unit of live.units) {
+          if (unit.status === 'deleted') continue;
+          const initialText = server.units.find((candidate) => candidate.id === unit.id && candidate.status !== 'deleted')?.text ?? '';
+          if (initialText === unit.text) same.push({ blockId, unitId: unit.id });
+          else units.push({ blockId, unit, initialText });
+        }
+      }
+      return { units, same };
+    };
+    const hasUnsavedEdit = () => Boolean(session.peek({ duringComposition: true })) || unsavedUnits().units.length > 0;
+    // What is kept at a departure (Main_Designer r2, r3 M1): the open, unsealed group and the sealed groups not yet handed
+    // to the adapter (sealed typing already handed has its own recovery form, the save's receipt). Replayed in the
+    // order they were sealed, per unit, to the newest text on screen:
+    // - a unit the server does not have (a queued Enter made it, words typed into it, and that unit cut again) is kept
+    //   as a 'split' record: empty start, no role, so it never lands by itself and waits to be put back by hand;
+    // - a unit the server has starts from what the server holds, or, if a queued Enter cut it, from its text just after
+    //   that cut: the record lands only once that split has reached the server, and waits in the box otherwise.
+    // Equal start and end keeps nothing.
+    const keepOpenEdit = () => {
+      if (!scopeNoteId) return;
+      const open = session.peek({ duringComposition: true });
+      const queued = [...unsent, ...unsentSplits].sort((left, right) => (sealedOrder.get(left) ?? 0) - (sealedOrder.get(right) ?? 0));
+      const ends = new Map<string, { blockId: string; unitId: string; text: string; writingRole?: string; before: TextBlockContentV1 }>();
+      const cutText = new Map<string, string>();
+      // A-20 r3d (N1): units a group that removed units changed. The server's text of such a unit is not a start its
+      // record can land from (it still has the removed line's text beside it): the record is kept like a split's, with
+      // an empty start, and waits to be put back by hand.
+      const joined = new Set<string>();
+      for (const transaction of [...queued, ...(open ? [open] : [])]) {
+        const split = isSplit(transaction);
+        const removes = removesUnits(transaction);
+        const before = new Map(transaction.before.textFlow.units.filter((unit) => unit.status !== 'deleted').map((unit) => [unit.id, unit.text]));
+        for (const unit of transaction.after.textFlow.units) {
+          if (unit.status === 'deleted') continue;
+          const was = before.get(unit.id);
+          if (was === unit.text) continue;
+          const key = unitKey(transaction.blockId, unit.id);
+          // The unit a split cut: the text it was left with.
+          if (split && was !== undefined && !cutText.has(key)) cutText.set(key, unit.text);
+          if (removes) joined.add(key);
+          // A-20 r3e (P2): a unit this group created is a new line. The next unit id is the highest present + 1, so after
+          // the line with the highest id was removed (a join, a cross-line delete) the new line gets that id again: the
+          // server's unit under it is the removed line, not a start this record can land from.
+          if (split && was === undefined) joined.add(key);
+          ends.set(key, { blockId: transaction.blockId, unitId: unit.id, text: unit.text, writingRole: unit.writing_role,
+            before: ends.get(key)?.before ?? transaction.before.textFlow });
+        }
+      }
+      const stored = readUnplacedWords(scopeNoteId);
+      for (const [key, end] of ends) {
+        const own = keptUnits.get(key);
+        const server = serverFlow(end.blockId);
+        const onServer = server?.units.find((unit) => unit.id === end.unitId && unit.status !== 'deleted');
+        if ((server && !onServer) || joined.has(key)) {
+          if (own && !own.id.startsWith('split-')) { keptUnits.delete(key); forgetUnplacedWords(scopeNoteId, own.id); }
+          if (!end.text) continue;
+          const id = keptUnits.get(key)?.id ?? `split-${end.blockId}-${end.unitId}-${keptStamp}`;
+          keptUnits.set(key, { id, blockId: end.blockId, unitId: end.unitId, text: end.text });
+          const words: UnplacedWords = { id, blockId: end.blockId, unitId: end.unitId, initialText: '', text: end.text, source: 'split' };
+          rememberUnplacedWords(scopeNoteId, words);
+          continue;
+        }
+        const initialText = cutText.get(key) ?? onServer?.text ?? end.before.units
+          .find((unit) => unit.id === end.unitId && unit.status !== 'deleted')?.text ?? '';
+        if (initialText === end.text) {
+          if (own) { keptUnits.delete(key); forgetUnplacedWords(scopeNoteId, own.id); }
+          continue;
+        }
+        // Words a structure window already keeps for this unit, up to the same text, are not recorded twice.
+        if (stored.some((entry) => entry.id !== own?.id && entry.blockId === end.blockId && entry.unitId === end.unitId
+          && entry.text === end.text)) continue;
+        if (own && own.id.startsWith('split-')) { keptUnits.delete(key); forgetUnplacedWords(scopeNoteId, own.id); }
+        const id = keptUnits.get(key)?.id ?? `edit-${end.blockId}-${end.unitId}-${keptStamp}`;
+        keptUnits.set(key, { id, blockId: end.blockId, unitId: end.unitId, text: end.text, writingRole: end.writingRole });
+        const words: UnplacedWords & { writingRole?: string } = { id, blockId: end.blockId, unitId: end.unitId, initialText,
+          text: end.text, writingRole: end.writingRole, source: 'edit' };
+        rememberUnplacedWords(scopeNoteId, words);
+      }
+    };
+    // A-20 r3 (M2, M4): a kept record belongs only to a session that has ended. When the session turns out to go on
+    // (the router held the person on the note, or the page came back from the back-forward cache), every record this
+    // scope wrote is taken back.
+    const withdrawKept = () => {
+      if (!scopeNoteId) return;
+      for (const own of keptUnits.values()) forgetUnplacedWords(scopeNoteId, own.id);
+      keptUnits.clear();
+    };
+    // A save the server confirmed, possibly after the note was left. A record still waiting either has nothing left to
+    // keep (the server now holds its words) or starts from what the server now holds, so the part already there is
+    // not written again when it lands. A record already taken back (landed or closed) is left alone.
+    function settleKept(blockId: string, server = confirmedFlows.get(blockId)) {
+      if (!server || !scopeNoteId) return;
+      const waiting = new Set(readUnplacedWords(scopeNoteId).map((entry) => entry.id));
+      for (const [key, own] of keptUnits) {
+        if (own.blockId !== blockId) continue;
+        if (!waiting.has(own.id)) { keptUnits.delete(key); continue; }
+        const held = server.units.find((unit) => unit.id === own.unitId && unit.status !== 'deleted')?.text ?? '';
+        if (held === own.text) { keptUnits.delete(key); forgetUnplacedWords(scopeNoteId, own.id); continue; }
+        if (own.id.startsWith('split-')) continue;
+        const words: UnplacedWords & { writingRole?: string } = { id: own.id, blockId, unitId: own.unitId, initialText: held,
+          text: own.text, writingRole: own.writingRole, source: 'edit' };
+        rememberUnplacedWords(scopeNoteId, words);
+      }
+    }
+    // While its note is current, the scope sees each render's drafts and blocks: after the note changes, the hook's
+    // options already belong to the next note, so a departure reads what this one last showed.
+    const observe = (drafts: Record<string, TextBlockContentV1>, blocks: NoteBlock[]) => {
+      if (current()) observed = { drafts, blocks };
+    };
+    return { token, current, session, scheduleIdleSave, cancelIdleSave, keepOpenEdit, withdrawKept, hasUnsavedEdit, observe, visitReceipts, unsent, unsentSplits, failures, lastSave, persist, proposalWrites, templateFailures, lastTemplateSave, persistTemplate, confirmBlock, pushEntry,
       async runBatch(operation: (record: (entry: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>) => void) => Promise<boolean>) {
         if (batchEntries || !current()) return false;
         const entries: Extract<RuntimeHistoryEntry, { type: 'reversibleEdit' }>[] = [];
@@ -609,6 +890,20 @@ export function useTextFlowHistory(options: Options) {
       isReplaying: () => replaying || templatePending || documentPending || proposalPending };
   }, [options.noteId, options.generation]);
   active.current = scope.token;
+  scope.observe(options.blockTextFlowDrafts, options.blocks);
+  // The scope ends when its note stops being current: no idle save after that, and what was still open is kept.
+  useLayoutEffect(() => () => { scope.cancelIdleSave(); scope.keepOpenEdit(); }, [scope]);
+  useEffect(() => {
+    const onPageHide = () => scope.keepOpenEdit();
+    // A-20 r3 (M4): back from the back-forward cache, the session goes on: what pagehide kept is taken back.
+    const onPageShow = (event: PageTransitionEvent) => { if (event.persisted && scope.current()) scope.withdrawKept(); };
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
+    return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('pageshow', onPageShow);
+    };
+  }, [scope]);
 
   const apply = useBlockTextFlowEditController({
     annotationTruths: options.annotationTruths,
@@ -632,6 +927,8 @@ export function useTextFlowHistory(options: Options) {
         before: { textFlow: change.previousTextFlow, selection: metadata.beforeSelection, annotationRanges: change.beforeAnnotationRanges, boardRanges: change.beforeBoardRanges },
         after: { textFlow: change.nextTextFlow, selection: metadata.afterSelection, annotationRanges: change.afterAnnotationRanges, boardRanges: change.afterBoardRanges },
       });
+      // Every recorded keystroke restarts the pause; a group the record sealed leaves nothing open to write.
+      scope.scheduleIdleSave();
     },
   });
   const canApplyEdit = useCallback(() => scope.current() && !scope.isReplaying() && !scope.templateFailures.size
@@ -943,6 +1240,18 @@ export function useTextFlowHistory(options: Options) {
     }
   }, [boundary, options.history, scope]);
   return { applyEdit, canApplyEdit, isEditHeld, applyDocumentEdit, extractUnit, moveUnit, applyTemplateToBlock, boundary, saveBlock, flush,
+    /** Keep what is still open in the kept-words archive now, before a departure that may not wait for its save. */
+    keepOpenEdit: () => scope.keepOpenEdit(),
+    /** Take back what keepOpenEdit kept: the departure did not happen after all (A-20 r3). */
+    withdrawKeptEdit: () => scope.withdrawKept(),
+    /** Sealed typing not yet handed to the adapter, in order (copies): the second ledger, for tests and departures. */
+    unsentGroups: () => scope.unsent.map((transaction) => structuredClone(transaction)),
+    /** Sealed splits not yet handed to the adapter (copies). */
+    unsentSplitGroups: () => scope.unsentSplits.map((transaction) => structuredClone(transaction)),
+    /** Whether anything on screen is still not on the server (an open group, or a unit whose save is not confirmed). */
+    hasUnsavedEdit: () => scope.hasUnsavedEdit(),
+    /** A recovery receipt left by this visit's own typing: its words are still in the editor. */
+    isVisitReceipt: (recoveryKey: string) => scope.visitReceipts.has(recoveryKey),
     runStructureBatch: async (operation: Parameters<typeof scope.runBatch>[0]) => { await flush(); return scope.runBatch(operation); },
     readLiveBlock: (id: string) => latest.current.blocks.find((block) => block.id === id),
     readLiveFlow: (id: string) => latest.current.blockTextFlowDrafts[id]

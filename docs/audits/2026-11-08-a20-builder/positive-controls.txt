@@ -1,0 +1,84 @@
+# A-20 positive controls: the package's new tests copied onto the frozen 04f6f822 copy (scratch), run there, the copy restored and byte-compared afterwards.
+# Red = the behaviour is missing on 04f6f822. Tests that pass there are guards (kept behaviour), named as such in the receipt.
+
+=== peek (session)
+   × peek reads the open group without sealing it > returns a copy of the open group, and a pause with a peek in it does not split the group 7ms
+     → session.peek is not a function
+   × peek reads the open group without sealing it > an Enter still seals the typing before it, peek or no peek 1ms
+     → session.peek is not a function
+   × peek reads the open group without sealing it > gives nothing while a composition is open, unless asked for what a departure must keep 1ms
+     → session.peek is not a function
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 9 skipped (12)
+=== idle save (text history)
+   × A-20 idle save: written at a pause, undo unchanged > writes the open text after a pause, and one Ctrl+Z still takes back everything typed since the last seal 102ms
+     → expected [] to deeply equal [ 'original a' ]
+   × A-20 idle save: written at a pause, undo unchanged > does not write the same body again when the group is sealed after the idle save wrote it 18ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × A-20 idle save: written at a pause, undo unchanged > a failed idle save is not retried at every pause and does not hold the note; the sealed save tries again 13ms
+     → expected "spy" to be called 1 times, but got 0 times
+   × A-20 idle save: written at a pause, undo unchanged > waits while something else holds the note, and asks again after another pause while text is still open 17ms
+     → expected [] to deeply equal [ 'original a' ]
+   × A-20 idle save: written at a pause, undo unchanged > keeps open, unsaved text in the kept-words archive when its note stops being current 21ms
+     → expected [] to deeply equal [ ObjectContaining{…} ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  5 failed | 20 skipped (25)
+=== leave guard (route boundary)
+   × A-20 departures the router did not ask about > a hash change made by a script is held, leaves through the same flush as an in-app link, then opens that address 126ms
+     → expected false to be true // Object.is equality
+   × A-20 departures the router did not ask about > if that save fails the person stays on the note, told to retry, as with an in-app link 1027ms
+     → expected [] to include 'flush:note-a'
+   × A-20 departures the router did not ask about > an address-bar change that cannot be held keeps the open text first, then blurs, with no false failure after 14ms
+     → expected [] to deeply equal [ 'keep:note-a', …(2) ]
+   × A-20 departures the router did not ask about > the 401 redirect to sign-in is not held: the open text is kept, and the redirect goes on 9ms
+     → expected [] to deeply equal [ 'keep:note-a', …(2) ]
+   × A-20 departures the router did not ask about > a departure whose save then fails says so truthfully, without asking for a retry it can no longer give 1028ms
+     → expected "spy" to be called with arguments: [ 'error', undefined ]
+   × A-20 departures the router did not ask about > without the navigate event, popstate is the fallback: keep, blur, and no false "could not be saved" when the note changes 9ms
+     → expected [] to deeply equal [ 'keep:note-a', …(2) ]
+   × A-20 departures the router did not ask about > B-81: between two empty notes, a note change nobody announced no longer reports a failed save 7ms
+     → expected "spy" to not be called with arguments: [ 'error', …(1) ]
+   ✓ A-20 departures the router did not ask about > a step the router made itself (its history state has an index) is left to the router blocker 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  7 failed | 1 passed (8)
+=== receipt storage
+   × A-20 block edit receipts outlive the tab, per account > a receipt is still there after the tab is gone (a new tab has a fresh sessionStorage) 17ms
+     → expected [] to deeply equal [ { version: 2, …(13) } ]
+   × A-20 block edit receipts outlive the tab, per account > someone else signed in on this browser neither sees nor forgets it 3ms
+     → expected [ { version: 2, …(18) } ] to deeply equal []
+   ✓ A-20 block edit receipts outlive the tab, per account > a receipt the earlier build left in sessionStorage is read, and replaced rather than kept beside the new one 2ms
+   ✓ A-20 block edit receipts outlive the tab, per account > forgetting removes it wherever it is 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 2 passed | 37 skipped (41)
+=== late reply receipt (adapter)
+   × useNoteCanvasDataAdapter draft create receipt seam > forgets the receipt of a save that succeeds after the route moved on, so no banner waits on the note 289ms
+     → expected [ { version: 2, …(18) } ] to deeply equal []
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 122 skipped (123)
+=== conservation gate, relaxation removed
+UNSAVED AT UNLOAD (existing save path): seed 2: <k2> <k3> <k4> | seed 8: <k0> <k1> <k2> <k3> <k4> <k5> | seed 15: <k2> <k5> <k6> <k7> | seed 16: <k1> | seed 18: <k1> | seed 23: <k0> <k1> | seed 30: <k2> | seed 31: <k0> <k1> | seed 36: <k0> <k1> <k2> | seed 39: <k0>
+   ✓ words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit  1738ms
+   ✓ words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write  1693ms
+   ✓ words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window  1372ms
+   ✓ words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)  2435ms
+   ✓ words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again  2045ms
+   ✓ words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window  2642ms
+   ✓ words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for  1722ms
+   ✓ words typed around heading structures are conserved > path 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away  2678ms
+   ✓ words typed around heading structures are conserved > path 409: the first structure unit-transfer conflicts, then the page goes away  2665ms
+   ✓ words typed around heading structures are conserved > path GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again  3833ms
+   ✓ words typed around heading structures are conserved > path GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes  3242ms
+   ✓ words typed around heading structures are conserved > boundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red  2057ms
+   × words typed around heading structures are conserved > 40 seeded sequences of 16 events: every word in exactly one place, in its own unit 90980ms
+     → seed 18 (2 words): <k1> LOST
+seed 31 (2 words): <k1> LOST
+seed 36 (3 words): <k0> LOST; <k1> LOST; <k2> LOST
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: seed 18 (2 words): <k1> LOST
+seed 31 (2 words): <k1> LOST
+seed 36 (3 words): <k0> LOST; <k1> LOST; <k2> LOST
++   "seed 18 (2 words): <k1> LOST
++   "seed 31 (2 words): <k1> LOST
++   "seed 36 (3 words): <k0> LOST; <k1> LOST; <k2> LOST
+      Tests  1 failed | 12 passed (13)
+=== restored base copy

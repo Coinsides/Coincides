@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
@@ -11,6 +11,8 @@ import { useRuntimePresentationController } from './useRuntimePresentationContro
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
 import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
 import { useUIStore } from '@/stores/uiStore';
+import { useAuthStore } from '@/stores/authStore';
+import { listBlockEditRecoveryReceipts } from '../draftBlockPersistence';
 import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
@@ -40,6 +42,11 @@ export function useNoteCanvasRuntimeController() {
   const { noteId, hostMode = 'page' } = useNoteCanvasRuntime();
   const trayDropTargetRef = useRef<HTMLElement>(null);
   const textHistoryHostRef = useRef<TextFlowHistoryHost | null>(null);
+  // A-20: block edit receipts are kept per account. A note can open before the account has loaded; reading the
+  // account here renders the note again once it has, so its recovery receipts are listed for the right person.
+  useAuthStore((state) => state.user?.id);
+  // A-20 r2 (K5): renders the note again when this visit's own typing leaves a recovery receipt (see below).
+  const [, setVisitReceiptVersion] = useState(0);
   const wallBoundaryRef = useRef<() => boolean>(() => false);
   const paperBoundaryRef = useRef<() => boolean>(() => false);
   const paperBusyRef = useRef(false);
@@ -131,6 +138,7 @@ export function useNoteCanvasRuntimeController() {
     templateWarning,
     savingBlockId,
     blockEditRecoveryReceipts,
+    recoveryReceiptsKeptWordsWaitFor,
     blockEditRecoveryConflicts,
     anchorsBySourceRef,
     sourceJumpTarget,
@@ -389,15 +397,26 @@ export function useNoteCanvasRuntimeController() {
     saveBlock: saveBlockRaw,
     applyTemplateToBlock,
     onSaveFailure: () => addToast('error', 'Text changes could not be saved. Retry saving or undo before leaving the note.'),
+    canSaveWhileTyping: () => !paperBusyRef.current && !chapters.isMoving && !headingBusyRef.current(),
+    onVisitReceipt: () => setVisitReceiptVersion((version) => version + 1),
     createDraftBlock, saveDraftBlockPlacement, discardDraftBlock, trashBlock, restoreBlock, transferTextUnit,
   });
   const { applyEdit: applyBlockTextFlowEdit, saveBlock } = textHistory;
+  // A-20 r2 (K5): no Apply for a receipt this visit's own typing left; its words are still in the editor. The recovery
+  // queue shows exactly these, and kept words do not land on a block that has one (A-20 r3d, N6).
+  const offeredRecoveryReceipts = Array.isArray(blockEditRecoveryReceipts)
+    ? blockEditRecoveryReceipts.filter((receipt) => !textHistory.isVisitReceipt(receipt.recoveryKey)) : blockEditRecoveryReceipts;
   const headingStructure = useHeadingStructureController({ noteId, blocks: sortedBlocks, layouts: blockLayouts,
     coverFrameId, readOnly: sourceProjectionPolicy.contentReadOnly || chapters.isMoving, template: defaultTextTemplate, textHistory, reorderBlocks,
     onFocusBlock: setFocusBlockId,
     setBlockTextDrafts,
     whenWritesIdle: whenIdle,
     onFailure: () => addToast('error', 'Heading changes could not be completed. Undo to restore the previous text.'),
+    // A-20 r3d (N6a): the hook keeps back kept words only behind a receipt with words the server did not have.
+    // A-20 r3e (P1): the same, and a receipt Apply or Replay is still settling (the queue does not show it).
+    recoveryReceipts: Array.isArray(recoveryReceiptsKeptWordsWaitFor ?? blockEditRecoveryReceipts)
+      ? (recoveryReceiptsKeptWordsWaitFor ?? blockEditRecoveryReceipts)
+        .filter((receipt) => !textHistory.isVisitReceipt(receipt.recoveryKey)) : undefined,
   });
   headingBusyRef.current = headingStructure.isBusy;
   chapterBoundaryRef.current = () => !chapters.isMoving && !headingStructure.isBusy() && textHistory.boundary();
@@ -592,7 +611,7 @@ export function useNoteCanvasRuntimeController() {
     blockFieldDrafts,
     blockTrashLoadFailed,
     blockTrashLoading,
-    blockEditRecoveryReceipts,
+    blockEditRecoveryReceipts: offeredRecoveryReceipts,
     blockEditRecoveryConflicts,
     blockLayouts,
     blockListRef,
@@ -853,6 +872,21 @@ export function useNoteCanvasRuntimeController() {
     await whenDraftIdle();
     await whenIdle();
   }, [headingStructure.whenTypingSettled, saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
+  // A-20 r2 (BACKOK, GONEFAIL-back): the recovery receipts this note had when it opened. A save answered after the
+  // route has moved on is reported as failed although it saved; the adapter forgets its receipt on a 2xx that matches
+  // what was sent. So a departure lost words only when a receipt for this note is new or rewritten since it opened.
+  const receiptsAtOpen = useMemo(() => new Set(listBlockEditRecoveryReceipts(noteId)
+    .map((receipt) => `${receipt.recoveryKey}@${receipt.queuedAt}`)), [noteId]);
+  // Bound to this note's write lane and write registry: still answers after the route has moved on.
+  const whenLeaveSettled = useCallback(async () => {
+    try {
+      await whenHistoryIdle();
+      await whenIdle();
+    } catch (error) {
+      if (listBlockEditRecoveryReceipts(noteId)
+        .some((receipt) => !receiptsAtOpen.has(`${receipt.recoveryKey}@${receipt.queuedAt}`))) throw error;
+    }
+  }, [noteId, receiptsAtOpen, whenHistoryIdle, whenIdle]);
 
   return {
     paper,
@@ -862,6 +896,10 @@ export function useNoteCanvasRuntimeController() {
     toggleAppearancePanel,
     dismissTransientUI,
     flushPendingSaves,
+    whenLeaveSettled,
+    keepOpenEdit: textHistory.keepOpenEdit,
+    withdrawKeptEdit: textHistory.withdrawKeptEdit,
+    hasUnsavedEdit: textHistory.hasUnsavedEdit,
     refreshBoardTextRanges,
     layerProps,
     runtimePageFrameCollection,

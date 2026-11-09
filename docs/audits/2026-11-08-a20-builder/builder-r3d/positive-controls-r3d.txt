@@ -1,0 +1,252 @@
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a/ is not a departure 132ms
+   → expected true to be false // Object.is equality
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a#x is not a departure 20ms
+   → expected true to be false // Object.is equality
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a?q is not a departure 12ms
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a held hash step, then a Back the router holds, then the save fails: "Please retry" once 75ms
+   → expected [ Array(2) ] to have a length of 1 but got 2
+ × src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx > A-20 r3d a group that removes units is kept, never placed by itself (N1) > MERGE-leave: Backspace joins "cd" onto "ab" while a save is on its way, Z typed, the page goes 122ms
+   → expected { …(7) } to match object { source: 'split', initialText: '' }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 1 passed | 58 skipped (63)
+   × words typed around heading structures are conserved > path MERGE: k0, Enter k1, saves held, k2, Backspace joins the k1 line onto the k0 line, k3, the page goes (N1) 5069ms
+     → <k1> DUPLICATED (note 2, kept false)
+   × words typed around heading structures are conserved > path SELDEL: as MERGE, the line break selected and deleted (N1) 5003ms
+     → <k1> DUPLICATED (note 2, kept false)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 23 skipped (25)
+### C0 r3d (reference)
+===== C0
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a hash change made by a script is held, leaves through the same flush as an in-app link, then opens that address 177ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > if that save fails the person stays on the note, told to retry, as with an in-app link 32ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > an address-bar change that cannot be held keeps the open text first, then blurs, with no false failure after 35ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > the 401 redirect to sign-in is not held: the open text is kept, and the redirect goes on 12ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a departure whose save then fails says so truthfully, without asking for a retry it can no longer give 29ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > without the navigate event, popstate is the fallback: keep, blur, and no false "could not be saved" when the note changes 23ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > B-81: between two empty notes, a note change nobody announced no longer reports a failed save 6ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a step the router made itself (its history state has an index) is left to the router blocker 12ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a held navigation keeps its kind > a replace is opened again as a replace, so Back does not come to the same note twice 40ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > a held hash change shows "Saving before leaving" while it waits, and saves again what reached the editor meanwhile 41ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > what still is not saved after two more rounds is kept before the note is left 18ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > an in-app link takes the same path: saves again what is left, then goes 43ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 the browser Back button > keeps what is not on the server, sends it once, and shows no failure when the note changes 9ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second hash change that can be held is held too, and the note leaves once, to the newest destination 37ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second step that cannot be held lets the note go now, keeping what is open, with no retry notice for the held save 17ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN (A): the router taking the person back onto the note while the held departure saves is not a second departure 36ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN-fail (B): when the router holds the person after a keep, the keep is taken back and a failed save says retry, not "did not reach" 29ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > BACKIN-fail-sealed: rejected before the router holds the person: no "did not reach", the person stays, retry is asked 29ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > rejected before the note goes, and then it does go: "did not reach" is said once, when it goes 15ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a/ is not a departure 11ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a#x is not a departure 9ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a?q is not a departure 10ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a held hash step, then a Back the router holds, then the save fails: "Please retry" once 92ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a step the router holds, then a second step it holds again, then the save fails: "Please retry" once 95ms
+ ✓ src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime float card ownership > retains its exact portal node during route loading and binds the next hydrated paper 545ms
+ ✓ src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime handle for the route guard > passes every leave step on to the controller 4ms
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+### C1 r3 NoteCanvasRuntime.tsx + r3d tests (N5 must be red)
+===== C1
+ ✓ src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime float card ownership > retains its exact portal node during route loading and binds the next hydrated paper 887ms
+ × src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime handle for the route guard > passes every leave step on to the controller 11ms
+   → withdrawKeptEdit: expected "spy" to be called 1 times, but got 0 times
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: withdrawKeptEdit: expected "spy" to be called 1 times, but got 0 times
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+### C2 r3 boundary + r3d leave tests (N3b must be red)
+===== C2
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a hash change made by a script is held, leaves through the same flush as an in-app link, then opens that address 153ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > if that save fails the person stays on the note, told to retry, as with an in-app link 45ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > an address-bar change that cannot be held keeps the open text first, then blurs, with no false failure after 28ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > the 401 redirect to sign-in is not held: the open text is kept, and the redirect goes on 13ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a departure whose save then fails says so truthfully, without asking for a retry it can no longer give 20ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > without the navigate event, popstate is the fallback: keep, blur, and no false "could not be saved" when the note changes 14ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > B-81: between two empty notes, a note change nobody announced no longer reports a failed save 6ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a step the router made itself (its history state has an index) is left to the router blocker 7ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a held navigation keeps its kind > a replace is opened again as a replace, so Back does not come to the same note twice 19ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > a held hash change shows "Saving before leaving" while it waits, and saves again what reached the editor meanwhile 22ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > what still is not saved after two more rounds is kept before the note is left 19ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > an in-app link takes the same path: saves again what is left, then goes 37ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 the browser Back button > keeps what is not on the server, sends it once, and shows no failure when the note changes 9ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second hash change that can be held is held too, and the note leaves once, to the newest destination 52ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second step that cannot be held lets the note go now, keeping what is open, with no retry notice for the held save 14ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN (A): the router taking the person back onto the note while the held departure saves is not a second departure 33ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN-fail (B): when the router holds the person after a keep, the keep is taken back and a failed save says retry, not "did not reach" 28ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > BACKIN-fail-sealed: rejected before the router holds the person: no "did not reach", the person stays, retry is asked 30ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > rejected before the note goes, and then it does go: "did not reach" is said once, when it goes 14ms
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a/ is not a departure 20ms
+   → expected true to be false // Object.is equality
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a#x is not a departure 9ms
+   → expected true to be false // Object.is equality
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a?q is not a departure 8ms
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a held hash step, then a Back the router holds, then the save fails: "Please retry" once 74ms
+   → expected [ Array(2) ] to have a length of 1 but got 2
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a step the router holds, then a second step it holds again, then the save fails: "Please retry" once 92ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected true to be false // Object.is equality
+AssertionError: expected [ Array(2) ] to have a length of 1 but got 2
+ Test Files  1 failed (1)
+      Tests  3 failed | 21 passed (24)
+restored: r3d2 snapshot sha256 OK
+### C0 r3d (reference)
+===== C0
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a hash change made by a script is held, leaves through the same flush as an in-app link, then opens that address 146ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > if that save fails the person stays on the note, told to retry, as with an in-app link 25ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > an address-bar change that cannot be held keeps the open text first, then blurs, with no false failure after 13ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > the 401 redirect to sign-in is not held: the open text is kept, and the redirect goes on 10ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a departure whose save then fails says so truthfully, without asking for a retry it can no longer give 23ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > without the navigate event, popstate is the fallback: keep, blur, and no false "could not be saved" when the note changes 11ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > B-81: between two empty notes, a note change nobody announced no longer reports a failed save 8ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a step the router made itself (its history state has an index) is left to the router blocker 7ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a held navigation keeps its kind > a replace is opened again as a replace, so Back does not come to the same note twice 34ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > a held hash change shows "Saving before leaving" while it waits, and saves again what reached the editor meanwhile 18ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > what still is not saved after two more rounds is kept before the note is left 15ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > an in-app link takes the same path: saves again what is left, then goes 31ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 the browser Back button > keeps what is not on the server, sends it once, and shows no failure when the note changes 8ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second hash change that can be held is held too, and the note leaves once, to the newest destination 23ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second step that cannot be held lets the note go now, keeping what is open, with no retry notice for the held save 17ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN (A): the router taking the person back onto the note while the held departure saves is not a second departure 32ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN-fail (B): when the router holds the person after a keep, the keep is taken back and a failed save says retry, not "did not reach" 30ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > BACKIN-fail-sealed: rejected before the router holds the person: no "did not reach", the person stays, retry is asked 15ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > rejected before the note goes, and then it does go: "did not reach" is said once, when it goes 9ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a/ is not a departure 7ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a#x is not a departure 8ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a?q is not a departure 6ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a held hash step, then a Back the router holds, then the save fails: "Please retry" once 78ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a step the router holds, then a second step it holds again, then the save fails: "Please retry" once 93ms
+ ✓ src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime float card ownership > retains its exact portal node during route loading and binds the next hydrated paper 464ms
+ ✓ src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime handle for the route guard > passes every leave step on to the controller 3ms
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+===== C0g
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path LIST: k, Enter x, Enter y while a save is on its way, the page goes (M1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path CLICKBACK: with the Enter queued, typing back on the line it cut, the page goes (M1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path BACKIN-fail: kept and sent at a Back the router then holds, the save fails, the person stays and goes on (M2)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path BACKIN-undo: as BACKIN-fail, then the failed words are undone; they must not come back (M2)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path HANDOVER-one-home: kept, then handed over while its save is held, the page goes (M3)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path REFUSE: the save is turned down before its receipt is written, the page goes (M5)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path MERGE: k0, Enter k1, saves held, k2, Backspace joins the k1 line onto the k0 line, k3, the page goes (N1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path SELDEL: as MERGE, the line break selected and deleted (N1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path BFCACHE: pagehide into the back-forward cache and back, more typing saved, the page goes (M4)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path idle save, more typing, its save held, the page goes (K1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path idle save twice, then leaving through the app (K1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path 409: the first structure unit-transfer conflicts, then the page goes away
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > boundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > window-source boundary, positive control: with the window's own records gone and the departure records left, the gate turns red
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > 40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+ ✓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > A-20 r3d kept words wait while the block has a receipt to apply (N6) > reopen: the record stays in the box while the receipt waits, and lands once it is applied or dismissed 813ms
+ Test Files  1 passed (1)
+      Tests  1 passed | 25 skipped (26)
+### C1 r3 NoteCanvasRuntime.tsx + r3d tests (N5 must be red)
+===== C1
+ ✓ src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime float card ownership > retains its exact portal node during route loading and binds the next hydrated paper 432ms
+ × src/pages/Notes/canvasEngine/NoteCanvasRuntime.appearance.test.tsx > runtime handle for the route guard > passes every leave step on to the controller 9ms
+   → withdrawKeptEdit: expected "spy" to be called 1 times, but got 0 times
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: withdrawKeptEdit: expected "spy" to be called 1 times, but got 0 times
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+### C3 r3 HSC (= base 04f6f822, not in the r3 package) + r3d gate test (N6 must be red)
+===== C3
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1: words handed to a second structure that fails before its first edit
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 1b: the same, the second structure failing at once on a tracked write
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 2: leaving through the app right after Enter in the window
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss 3: a new heading elsewhere while kept words are on screen (buffer-3)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss H: the page goes away while the window holds words, and the note is opened again
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss the role-change save fails once, no Enter in the window
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > known loss commit-1: a sync-priority commit between a frame and the write it waits for
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path LIST: k, Enter x, Enter y while a save is on its way, the page goes (M1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path CLICKBACK: with the Enter queued, typing back on the line it cut, the page goes (M1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path BACKIN-fail: kept and sent at a Back the router then holds, the save fails, the person stays and goes on (M2)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path BACKIN-undo: as BACKIN-fail, then the failed words are undone; they must not come back (M2)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path HANDOVER-one-home: kept, then handed over while its save is held, the page goes (M3)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path REFUSE: the save is turned down before its receipt is written, the page goes (M5)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path MERGE: k0, Enter k1, saves held, k2, Backspace joins the k1 line onto the k0 line, k3, the page goes (N1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path SELDEL: as MERGE, the line break selected and deleted (N1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path BFCACHE: pagehide into the back-forward cache and back, more typing saved, the page goes (M4)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path idle save, more typing, its save held, the page goes (K1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path idle save twice, then leaving through the app (K1)
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path 409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path 409: the first structure unit-transfer conflicts, then the page goes away
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path GEO-long-0: words not on the server at unload, back from the record, the restored structure gets 409, unload again
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > path GEO-long-0 variant: the role save goes, everything after it is held, the window still open when the page goes
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > boundary of the unload exemption, positive control: a word typed in a window and excused at unload turns the gate red
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > window-source boundary, positive control: with the window's own records gone and the departure records left, the gate turns red
+ ↓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > words typed around heading structures are conserved > 40 seeded sequences of 16 events: every word in exactly one place, in its own unit
+ × src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > A-20 r3d kept words wait while the block has a receipt to apply (N6) > reopen: the record stays in the box while the receipt waits, and lands once it is applied or dismissed 525ms
+   → expected '<W0> <bbb>\n<W1>' not to contain '<bbb>'
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected '<W0> <bbb>\n<W1>' not to contain '<bbb>'
+ Test Files  1 failed (1)
+      Tests  1 failed | 25 skipped (26)
+### C2 r3 boundary + r3d leave tests (N2/N3 red; N3b coverage, green expected)
+===== C2
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a hash change made by a script is held, leaves through the same flush as an in-app link, then opens that address 141ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > if that save fails the person stays on the note, told to retry, as with an in-app link 44ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > an address-bar change that cannot be held keeps the open text first, then blurs, with no false failure after 13ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > the 401 redirect to sign-in is not held: the open text is kept, and the redirect goes on 7ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a departure whose save then fails says so truthfully, without asking for a retry it can no longer give 10ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > without the navigate event, popstate is the fallback: keep, blur, and no false "could not be saved" when the note changes 9ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > B-81: between two empty notes, a note change nobody announced no longer reports a failed save 4ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 departures the router did not ask about > a step the router made itself (its history state has an index) is left to the router blocker 6ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a held navigation keeps its kind > a replace is opened again as a replace, so Back does not come to the same note twice 27ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > a held hash change shows "Saving before leaving" while it waits, and saves again what reached the editor meanwhile 16ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > what still is not saved after two more rounds is kept before the note is left 17ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 nothing leaves with the note unsaved > an in-app link takes the same path: saves again what is left, then goes 35ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 the browser Back button > keeps what is not on the server, sends it once, and shows no failure when the note changes 9ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second hash change that can be held is held too, and the note leaves once, to the newest destination 32ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r2 a second step while a departure waits > a second step that cannot be held lets the note go now, keeping what is open, with no retry notice for the held save 16ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN (A): the router taking the person back onto the note while the held departure saves is not a second departure 33ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 Back to an entry the router knows > BACKIN-fail (B): when the router holds the person after a keep, the keep is taken back and a failed save says retry, not "did not reach" 10ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > BACKIN-fail-sealed: rejected before the router holds the person: no "did not reach", the person stays, retry is asked 35ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3 a save that failed before Back > rejected before the note goes, and then it does go: "did not reach" is said once, when it goes 15ms
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a/ is not a departure 16ms
+   → expected true to be false // Object.is equality
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a#x is not a departure 7ms
+   → expected true to be false // Object.is equality
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d this note under another spelling of its address (N2) > #/notes/note-a?q is not a departure 5ms
+ × src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a held hash step, then a Back the router holds, then the save fails: "Please retry" once 67ms
+   → expected [ Array(2) ] to have a length of 1 but got 2
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx > A-20 r3d one failed leave save, one notice (N3) > a step the router holds, then a second step it holds again, then the save fails: "Please retry" once 92ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected true to be false // Object.is equality
+AssertionError: expected [ Array(2) ] to have a length of 1 but got 2
+ Test Files  1 failed (1)
+      Tests  3 failed | 21 passed (24)
+restored: r3d3 snapshot sha256 OK
+== C-N6a: r3d HSC (pre-N6a) + test world that holds behind any receipt (= r3d controller)
+1
+   ✓ A-20 r3d kept words wait while the block has a receipt to apply (N6) > reopen: the record stays in the box while the receipt waits, and lands once it is applied or dismissed  856ms
+   × A-20 r3d kept words and a receipt the server already has (N6a) > kept words land when the block's receipt already matches the server (N6 narrowing) 4043ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > A-20 r3d kept words and a receipt the server already has (N6a) > kept words land when the block's receipt already matches the server (N6 narrowing)
+AssertionError: expected '<W0>\n<W1>' to contain '<bbb>'
+      Tests  1 failed | 1 passed | 25 skipped (27)
+== N6a: r3d + N6a
+ ✓ src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx (27 tests | 25 skipped) 911ms
+   ✓ A-20 r3d kept words wait while the block has a receipt to apply (N6) > reopen: the record stays in the box while the receipt waits, and lands once it is applied or dismissed  818ms
+      Tests  2 passed | 25 skipped (27)
+structureTypingConservation.test.tsx: OK
+useHeadingStructureController.ts: OK
+useNoteCanvasRuntimeController.ts: OK
+== C-N6b: HSC N6a without the per-note reset
+   × A-20 r3d the server text a receipt is read against is the note as opened this time (N6a) > note → other → note in the same runtime: kept words land behind a receipt the server got while the note was away 4157ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/pages/Notes/canvasEngine/hooks/structureTypingConservation.test.tsx > A-20 r3d the server text a receipt is read against is the note as opened this time (N6a) > note → other → note in the same runtime: kept words land behind a receipt the server got while the note was away
+AssertionError: expected '<W0> <aaa>\n<W1>' to contain '<bbb>'
+      Tests  1 failed | 27 passed (28)
+== N6b: with the reset (whole file)
+      Tests  28 passed (28)
+structureTypingConservation.test.tsx: OK
+useHeadingStructureController.ts: OK

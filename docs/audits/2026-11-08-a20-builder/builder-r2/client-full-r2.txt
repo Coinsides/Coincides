@@ -1,0 +1,6 @@
+== client full suite, final r2 work tree (index-DGn86c1V.js source), vitest --pool=forks maxForks=3 ==
+ Test Files  259 passed (259)
+      Tests  2727 passed (2727)
+vitest exit 0
+tsc --noEmit -p client: exit 0
+server: unchanged (no server files in the package)

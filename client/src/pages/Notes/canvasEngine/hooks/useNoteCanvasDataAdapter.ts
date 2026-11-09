@@ -527,6 +527,8 @@ export function useNoteCanvasDataAdapter({
     requestedNoteId: string;
     creationGeneration: number;
     pendingRecoveryKey?: string;
+    /** A-20 r3e (P1): this save applies or replays a recovery receipt (Apply, Replay draft on current version). */
+    applying?: boolean;
   }>>());
   const blockSaveOutcomeVersionRef = useRef(0);
   routeNoteIdRef.current = noteId;
@@ -637,6 +639,13 @@ export function useNoteCanvasDataAdapter({
   ).map((operation) => operation.pendingRecoveryKey));
   const blockEditRecoveryReceipts = listBlockEditRecoveryReceipts(noteId)
     .filter((receipt) => !pendingRecoveryKeys.has(receipt.recoveryKey));
+  // A-20 r3e (P1): kept words wait behind a block's receipt until it is settled. While Apply or Replay is on its way the
+  // receipt it wrote is pending (it replaced the one offered: one receipt per block), and the queue leaves it out; kept
+  // words must not, or they land on the old text and the next save of the block drops what Apply wrote.
+  const applyingRecoveryKeys = new Set(Array.from(outstandingBlockSaveOperationsRef.current.values())
+    .filter((operation) => operation.applying).map((operation) => operation.pendingRecoveryKey));
+  const recoveryReceiptsKeptWordsWaitFor = listBlockEditRecoveryReceipts(noteId)
+    .filter((receipt) => !pendingRecoveryKeys.has(receipt.recoveryKey) || applyingRecoveryKeys.has(receipt.recoveryKey));
 
   const insertTemplateGroups = useMemo(
     () => buildInsertTemplateGroups(templateOptions),
@@ -2104,6 +2113,7 @@ export function useNoteCanvasDataAdapter({
       requestedNoteId,
       creationGeneration: requestGeneration,
       pendingRecoveryKey: recoveryReceipt.recoveryKey,
+      applying: !!options.recoveryKey,
     });
     setBlockEditRecoveryVersion((version) => version + 1);
     setSavingBlockId(block.id);
@@ -2143,6 +2153,9 @@ export function useNoteCanvasDataAdapter({
       }
       blockSaveOutcomeVersionRef.current += 1;
       if (!requestIsCurrent() || !operationIsLatest()) {
+        // A-20: the reply came after the route moved on (the read-back below then reports read_failed). A 2xx whose
+        // block is what was sent proves this edit saved; only its receipt goes, so no stale banner waits on the note.
+        if (blockMatchesIssuedSave(result.block, requestedPlainText, nextContent)) forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
         const reconciliation = await reconcileIssuedSave('read_after_outcome');
         if (reconciliation.durableState === 'matches_requested') {
           forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
@@ -3119,6 +3132,7 @@ export function useNoteCanvasDataAdapter({
     templateWarning,
     savingBlockId,
     blockEditRecoveryReceipts,
+    recoveryReceiptsKeptWordsWaitFor,
     blockEditRecoveryConflicts,
     annotationTruths,
     readAnnotationTruths,

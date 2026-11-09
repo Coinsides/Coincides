@@ -1,0 +1,14 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "idleHardKill",
+   "i": 0,
+   "result": {
+    "serverAfterKill": "warmup|kept"
+   },
+   "server": "warmup|kept",
+   "err": null
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+LEFT_UNSAVED  src: "Your last edit did not reach the server. It is kept on this device: open the note again to recover it."  judge /did not reach the server/i  MATCH
+SAVE_FAILURE  src: "Changes could not be saved. Please retry before leaving the note."  judge "Changes could not be saved. Please retry before leaving the note."  MATCH
+dist index-Dkbj0u5K.js: LEFT_UNSAVED present, SAVE_FAILURE present
+oracle ok

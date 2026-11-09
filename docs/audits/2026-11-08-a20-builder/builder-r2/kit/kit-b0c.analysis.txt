@@ -1,0 +1,3 @@
+UNDOPAUSE                  0/2
+    RED [["warmup","aaabbb"],["warmup",""],["warmup"],[]]
+total red 2

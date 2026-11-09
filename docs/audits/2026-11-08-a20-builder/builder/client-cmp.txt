@@ -1,0 +1,18 @@
+=== work
+Error: Uncaught [TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function]
+    at performUnitOfWork (D:\Coinsides\v2.x\Coincides\client\node_modules\react-dom\cjs\react-dom.development.js:26599:12) TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function
+Error: Uncaught [TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function]
+    at performUnitOfWork (D:\Coinsides\v2.x\Coincides\client\node_modules\react-dom\cjs\react-dom.development.js:26599:12) TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function
+Error: Uncaught [TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function]
+    at performUnitOfWork (D:\Coinsides\v2.x\Coincides\client\node_modules\react-dom\cjs\react-dom.development.js:26599:12) TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function
+Error: Uncaught [TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function]
+    at performUnitOfWork (D:\Coinsides\v2.x\Coincides\client\node_modules\react-dom\cjs\react-dom.development.js:26599:12) TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function
+Error: Uncaught [TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function]
+    at performUnitOfWork (D:\Coinsides\v2.x\Coincides\client\node_modules\react-dom\cjs\react-dom.development.js:26599:12) TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function
+Error: Uncaught [TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function]
+    at performUnitOfWork (D:\Coinsides\v2.x\Coincides\client\node_modules\react-dom\cjs\react-dom.development.js:26599:12) TypeError: __vite_ssr_import_0__.useAuthStore.getState is not a function
+     → Unable to find an element by: [data-testid="paper-snapshot"]
+     → useAuthStore.getState is not a function
+=== base
+ Test Files  3 passed (3)
+      Tests  94 passed (94)

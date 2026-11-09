@@ -1,0 +1,7 @@
+tsc exit 0
+client exit 0
+vite build exit 0
+index-DY5t0krb.js
+r3d build done 03:15:21
+kit exit 0
+r3d all done 04:48:01

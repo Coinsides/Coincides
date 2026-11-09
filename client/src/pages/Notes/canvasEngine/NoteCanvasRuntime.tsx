@@ -16,13 +16,22 @@ import { SourceViewToggle } from './layers/SourceViewToggle';
 export interface NoteCanvasRuntimeHandle {
   dismissTransientUI: () => void;
   flushPendingSaves: () => Promise<void>;
+  /** After a departure the route guard could not hold: settles when this note's writes have, rejects if one failed. */
+  whenLeaveSettled?: () => Promise<void>;
+  /** Keeps the open, unsealed text in the kept-words archive (a departure that cannot wait for its save). */
+  keepOpenEdit?: () => void;
+  /** Take back what keepOpenEdit kept: the departure did not happen after all (A-20 r3). */
+  withdrawKeptEdit?: () => void;
+  /** Whether anything on screen is still not on the server: asked again before a departure goes on. */
+  hasUnsavedEdit?: () => boolean;
   refreshBoardTextRanges: () => Promise<void>;
 }
 
 const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntimeContent({ onRequestClose }, ref) {
   const { hostMode = 'page', noteId } = useNoteCanvasRuntime();
   const { layerProps, loading, loadError, note, skin, paper, layoutMode, runtimePageFrameCollection, showAppearancePanel, toggleAppearancePanel,
-    dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
+    dismissTransientUI: dismissControllerUI, flushPendingSaves, whenLeaveSettled, keepOpenEdit, withdrawKeptEdit, hasUnsavedEdit, refreshBoardTextRanges,
+  } = useNoteCanvasRuntimeController();
   // The note lags the route while the next one hydrates, so a projection's class must
   // not stand in for the note the route has already moved to.
   const sourcePageView = useSourcePageViewController({ noteId,
@@ -33,7 +42,11 @@ const NoteCanvasRuntimeContent = forwardRef<NoteCanvasRuntimeHandle, { onRequest
     documentRef.current?.resumeEditingForExit();
     dismissControllerUI();
   }, [dismissControllerUI]);
-  useImperativeHandle(ref, () => ({ dismissTransientUI, flushPendingSaves, refreshBoardTextRanges }), [dismissTransientUI, flushPendingSaves, refreshBoardTextRanges]);
+  // A-20 r3d (N5): withdrawKeptEdit was left out of this handle, so the route guard's take-back (a departure the router
+  // held after all) called nothing and the record stayed kept while the person was still on the note.
+  useImperativeHandle(ref, () => ({ dismissTransientUI, flushPendingSaves, whenLeaveSettled, keepOpenEdit, withdrawKeptEdit, hasUnsavedEdit,
+    refreshBoardTextRanges }),
+  [dismissTransientUI, flushPendingSaves, whenLeaveSettled, keepOpenEdit, withdrawKeptEdit, hasUnsavedEdit, refreshBoardTextRanges]);
 
   const content = hostMode === 'modal' && loadError ? <div className={styles.page}>
       <div className={styles.loading} role="alert">

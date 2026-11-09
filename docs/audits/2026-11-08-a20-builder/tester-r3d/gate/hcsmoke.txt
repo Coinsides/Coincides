@@ -1,0 +1,9 @@
+HEADCLOSE-plain            1/1
+    ok  plain (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\""]); +20 s reopen aaa banner+Apply, bbb box; READINGS editor at reopen r1 ["warmup",""
+HEADCLOSE-apply            1/1
+    ok  apply (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\""]); +20 s reopen aaa banner+Apply, bbb box; apply clicked true: server ["warmup bbb",
+HEADCLOSE-dismiss          1/1
+    ok  dismiss (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\""]); +20 s reopen aaa banner+Apply, bbb box; dismiss clicked true: server ["warmup b
+HEADCLOSE-putback          0/1
+    RED reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup bbb","pos":10,"len":10}): 18449 PUT /note-blocks/:id/text-s
+total red 1

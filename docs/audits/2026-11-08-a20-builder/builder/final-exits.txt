@@ -1,0 +1,3 @@
+client tsc exit 0
+client vitest exit 0
+vite build exit 0

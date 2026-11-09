@@ -1,0 +1,7 @@
+HEADCLOSE-plain            0/1
+    RED plain (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere
+HEADCLOSE-apply            0/1
+    RED apply (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere; apply clicked true: server ["warmup","aaa"], kept []
+HEADCLOSE-dismiss          0/1
+    RED dismiss (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere; dismiss clicked true: server ["warmup",""], kept []
+total red 3

@@ -1,0 +1,19 @@
+BACKIN-heldback            3/3
+    ok  RAW retry x1 at +1614 ms (window end 8964; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1614 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+    ok  RAW retry x1 at +1633 ms (window end 9053; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1633 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+    ok  RAW retry x1 at +1625 ms (window end 9043; recorded retryN 1) ; retry x1 (want 1, counted from the hash leave to the probe's second leave at +1625 ms) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true
+BACKIN-fail-heldhead       3/3
+    ok  kept series after Back: max 0, first +null ms, last +null ms, longest 0 ms; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; LEFT_UNSAVED 0; stayed true; 2nd leave REFUSED
+BACKIN-heldhead-undo       0/3
+    RED kept after Back: max 0, +null..+null ms; undo at +679 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+    RED kept after Back: max 0, +null..+null ms; undo at +663 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+    RED kept after Back: max 0, +null..+null ms; undo at +676 ms -> screen ["warmup bbb","aaa"], kept before/after [] / []; released 1; server before leave ["warmup bbb","aaa"]; kept at leave []; reopen server ["warmup bbb",
+HEADCLOSE-plain            3/3
+    ok  plain (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\""]); +20 s reopen aaa banner+Apply, bbb box; READINGS editor at reopen r1 undefined / 
+HEADCLOSE-apply            1/1
+    ok  apply (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\""]); +20 s reopen aaa banner+Apply, bbb box; apply clicked true: server ["warmup bbb",
+HEADCLOSE-dismiss          1/1
+    ok  dismiss (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\""]); +20 s reopen aaa banner+Apply, bbb box; dismiss clicked true: server ["warmup b
+N6B-switch                 1/1
+    ok  head idle; to B +6832 ms (10953 B); back on A +275 ms; A at +1.5 s {"aaa":"server","bbb":"server"}, +9.5 s {"aaa":"server","bbb":"server"}, end {"aaa":"server","bbb":"server"}; A server end ["warmup bbb","aaa"] (aaa 
+total red 3

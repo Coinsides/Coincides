@@ -1,0 +1,7 @@
+UNDOSEQ                    2/2
+    ok  [["warmup","aaa","bbb","ccc"],["warmup","aaa","bbb",""],["warmup","aaa","bbb"],["warmup","aaa",""],["warmup","aaa"]]
+UNDOPAUSE                  0/2
+    RED [["warmup","aaabbb"],["warmup",""],["warmup"],[]]
+IME                        2/2
+    ok  PUT 3; [["warmup","现值公式推导"],["warmup","现值公式"],["warmup","现值"],["warmup",""]]
+total red 2

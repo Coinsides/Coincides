@@ -1,0 +1,3 @@
+TWICE-hash500              0/1
+    RED where C, jumps ["A","C"], failure toasts 2, in editor false, Apply offered false clicked false, count 1; A-25 2a reference on server without Apply
+total red 1

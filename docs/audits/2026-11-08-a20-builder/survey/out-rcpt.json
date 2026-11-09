@@ -1,0 +1,141 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "hashSwitch",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "observer:[\"Changes could not be saved. Please retry before leaving the note.\"]",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "observer:[\"Changes could not be saved. Please retry before leaving the note.\"]",
+   "hash": "#/notes/:id",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "bannerAfterReopen": false,
+   "receiptInSessionStorage": false,
+   "toast": "observer:[\"Changes could not be saved. Please retry before leaving the note.\"]",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "bannerAfterReopen": true,
+   "receiptInSessionStorage": true,
+   "toast": "observer:[\"Changes could not be saved. Please retry before leaving the note.\"]",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "bannerAfterReopen": true,
+   "receiptInSessionStorage": true,
+   "toast": "observer:[\"Changes could not be saved. Please retry before leaving the note.\"]",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "bannerAfterReopen": true,
+   "receiptInSessionStorage": true,
+   "toast": "observer:[\"Changes could not be saved. Please retry before leaving the note.\"]",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  }
+ ],
+ "sum": {
+  "hashSwitch": {
+   "n": 3,
+   "kept": 0,
+   "toast": 3,
+   "routerWarning": 3,
+   "writesAfter": 2,
+   "reopened": 0
+  },
+  "login401Enter": {
+   "n": 3,
+   "kept": 0,
+   "toast": 3,
+   "routerWarning": 3,
+   "writesAfter": 0,
+   "reopened": 0
+  }
+ }
+}

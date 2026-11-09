@@ -1,0 +1,8 @@
+HEADCLOSE-putback          0/1
+    RED reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], editor ["warmup",""]); put back by click: 22953 PUT /note-blocks/:id/text-save warmup bbb| -> 22962 RESP /note-blocks/:id/text-save 200; then server ["warmu
+HEADCLOSE-applyslow        2/2
+    ok  head sealed; Apply clicked +848 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 1, released +8041 ms -> 16896 RESP /note-blocks/:id/text-save 200; aaa at reply serv
+    ok  head sealed; Apply clicked +615 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 1, released +8037 ms -> 16547 RESP /note-blocks/:id/text-save 200; aaa at reply serv
+MENTER-close               2/2
+    ok  LOST: screen at close ["abxcd","Z"] (merged ["abxcd"], enter ["abxcd",""]); reopen server ["abx","cd"], editor ["abx","cd"], boxes [] / [], kept [], items ["A block edit is waiting for recovery abx cd Apply Dismiss",
+total red 1

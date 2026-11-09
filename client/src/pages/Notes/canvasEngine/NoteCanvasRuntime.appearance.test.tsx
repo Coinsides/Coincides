@@ -1,14 +1,15 @@
-import { forwardRef, useState, type ReactNode } from 'react';
+import { createRef, forwardRef, useState, type ReactNode } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SkinSelection } from '@shared/types';
 import { usePaletteStore } from '@/hooks/usePaletteColors';
 import { useSkinSuiteStore } from '@/hooks/useSkinSuites';
-import NoteCanvasRuntime from './NoteCanvasRuntime';
+import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from './NoteCanvasRuntime';
 import { NoteCanvasRuntimeProvider } from './NoteCanvasRuntimeProvider';
 import type { NoteChromeLayerProps } from './layers/NoteChromeLayer';
 
-const mocks = vi.hoisted(() => ({ loading: false, noteId: 'paper-a', save: vi.fn(), preview: vi.fn(), controller: vi.fn() }));
+const mocks = vi.hoisted(() => ({ loading: false, noteId: 'paper-a', save: vi.fn(), preview: vi.fn(), controller: vi.fn(),
+  leave: { whenLeaveSettled: vi.fn(), keepOpenEdit: vi.fn(), withdrawKeptEdit: vi.fn(), hasUnsavedEdit: vi.fn() } }));
 vi.mock('@/services/api', () => ({ getToken: () => null, setToken: vi.fn(), default: { get: vi.fn(async () => ({ data: [] })) } }));
 vi.mock('./hooks/useNoteCanvasRuntimeController', () => ({ useNoteCanvasRuntimeController: () => mocks.controller() }));
 vi.mock('./layers/NoteChromeLayer', () => ({ NoteChromeLayer: ({ appearanceAnchorRef, onToggleAppearancePanel, mountAppearanceCard }: NoteChromeLayerProps) =>
@@ -33,7 +34,7 @@ beforeEach(() => {
       skin: { preset: 'default', style: {}, selection: { preset: 'default' }, error: null, retry: vi.fn(),
         preview: mocks.preview, save: (selection: SkinSelection | null) => mocks.save(noteId, selection) },
       layerProps: mocks.loading ? null : { chromeProps: { onToggleAppearancePanel: toggle }, documentLayerProps: { writingSurfaceProps: {} } },
-      dismissTransientUI: vi.fn(), flushPendingSaves: vi.fn(), refreshBoardTextRanges: vi.fn(),
+      dismissTransientUI: vi.fn(), flushPendingSaves: vi.fn(), refreshBoardTextRanges: vi.fn(), ...mocks.leave,
     };
   });
 });
@@ -60,5 +61,20 @@ describe('runtime float card ownership', () => {
     await waitFor(() => expect(mocks.save).toHaveBeenCalledExactlyOnceWith('paper-b', { preset: 'warm-paper' }));
     fireEvent.click(screen.getByRole('button', { name: '关闭外观' }));
     expect(screen.queryByRole('dialog', { name: '笔记外观浮卡' })).toBeNull();
+  });
+});
+
+// A-20 r3d (N5): the route guard reaches the note only through this handle. Every leave step it calls must be on it;
+// one left out is a silent no-op behind `?.()` (withdrawKeptEdit was: a held departure's record stayed kept).
+describe('runtime handle for the route guard', () => {
+  it('passes every leave step on to the controller', () => {
+    Object.values(mocks.leave).forEach((fn) => fn.mockReset());
+    const ref = createRef<NoteCanvasRuntimeHandle>();
+    render(<NoteCanvasRuntimeProvider noteId="paper-a"><NoteCanvasRuntime ref={ref} /></NoteCanvasRuntimeProvider>);
+    ref.current?.whenLeaveSettled?.();
+    ref.current?.keepOpenEdit?.();
+    ref.current?.withdrawKeptEdit?.();
+    ref.current?.hasUnsavedEdit?.();
+    for (const [name, fn] of Object.entries(mocks.leave)) expect(fn, name).toHaveBeenCalledTimes(1);
   });
 });

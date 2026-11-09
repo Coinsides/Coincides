@@ -1,0 +1,10 @@
+--- HL-saveNotSentThenClose-0
+BAD {"arm":"RV","name":"HL-saveNotSentThenClose-0","id":"e04a3a74-c457-4f89-bab1-20f722289e21","heldBody":true,"atLeave":{"buf":null,"boxes":2,"focusBuf":false,"active":"TEXTAREA:editor=body@4","notice":null,"eds":["warmup","head","body"],"alerts":[],"stored":[]},
+--- HL-saveNotSentThenClose-1
+BAD {"arm":"RV","name":"HL-saveNotSentThenClose-1","id":"4400f2ad-3dbd-419e-b1fb-1e19e1d388a8","heldBody":true,"atLeave":{"buf":null,"boxes":2,"focusBuf":false,"active":"TEXTAREA:editor=body@4","notice":null,"eds":["warmup","head","body"],"alerts":[],"stored":[]},
+--- HL-saveNotSentThenClose-2
+BAD {"arm":"RV","name":"HL-saveNotSentThenClose-2","id":"eac94e7d-6316-4758-a64b-a935c8f02f31","heldBody":true,"atLeave":{"buf":null,"boxes":2,"focusBuf":false,"active":"TEXTAREA:editor=body@4","notice":null,"eds":["warmup","head","body"],"alerts":[],"stored":[]},
+--- TWO-discardOne-0
+--- TWO-discardOne-1
+--- TWO-discardOne-2
+DONE a20r3e-acc10: 6 rows, bad 3

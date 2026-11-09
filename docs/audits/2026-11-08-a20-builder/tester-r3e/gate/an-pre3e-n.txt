@@ -1,0 +1,62 @@
+MERGE-close                0/2
+    RED close: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where closed; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+Apply
+MERGE-addr                 0/2
+    RED addr: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+Apply
+MERGE-back                 0/2
+    RED back: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+Apply
+SELDEL-close               0/2
+    RED close: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where closed; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+Apply
+SELDEL-addr                0/2
+    RED addr: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+Apply
+SELDEL-back                0/2
+    RED back: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where other; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+Apply
+CLICKBACK-end              2/2
+    ok  recorded (N4, TD-66): server ["alpha beta"]; screen ["alpha beta"]; boxes []; kept at reopen []
+ADDR-noncanon-slash        0/2
+    RED slash (#/notes/:A/): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-anchor       0/2
+    RED anchor (#/notes/:A#x): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-hash         0/2
+    RED hash (hash to #/notes/A/, released 0, now #/notes/:A/, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-addr         0/2
+    RED addr (addr to #/notes/A/, released 0, now #/notes/:A/, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-case         0/2
+    RED case (case to #/Notes/A, released 0, now #/Notes/:A, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-caseaddr     0/2
+    RED caseaddr (caseaddr to #/Notes/A, released 0, now #/Notes/:A, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+ADDR-noncanon-caseslash    0/2
+    RED caseslash (caseslash to #/NOTES/A/, released 0, now #/NOTES/:A/, backin words more x0): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave STUCK; reopen ["warmup",""]
+BACKIN-heldback            0/2
+    SETUP ERROR Error: setup: the injected failure did not happen (no save was held after the Back)
+BACKIN-fail-heldhead       0/2
+    SETUP ERROR Error: setup: the idle save of ' aaa' was not held as the head (held 0)
+BACKIN-heldhead-undo       0/2
+    SETUP ERROR Error: setup: the idle save of 'aaa' was not held as the head (held 0)
+    SETUP ERROR Error: setup: no empty line ["rmup","wa"]
+BACKIN-heldhead-del        0/2
+    SETUP ERROR Error: setup: the idle save of 'aaa' was not held as the head (held 0)
+CLOSEHEAD-plain            0/2
+    SETUP ERROR Error: setup: the save of 'aaa' was not held (held 0)
+CLOSEHEAD-sealed           2/2
+    ok  recorded: sealed: aaa at reopen banner+Apply, 20 s later banner+Apply; server ["warmup",""]; boxes []; kept []; receipts [{"store":"session","count":1,"has":true}]; banners ["A block edit is waiting for recovery warmup aaa Apply Dismiss","A block edit is waiting for recovery","warmup aaa Apply Dismiss","warmup aaa"] apply true
+HEADCLOSE-plain            0/2
+    RED plain (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere; READINGS editor at reopen r1 ["warmup",""] / ["warmup",""], r2 ["warmup",""] / ["warmup",""]; notices r1 ["231:A previous block edit is queued for recovery"], r2 ["97:A previous block edit is queued for recovery"]
+    RED plain (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere; READINGS editor at reopen r1 ["warmup",""] / ["warmup",""], r2 ["warmup",""] / ["warmup",""]; notices r1 ["203:A previous block edit is queued for recovery"], r2 ["89:A previous block edit is queued for recovery"]
+HEADCLOSE-apply            0/1
+    RED apply (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere; apply clicked true: server ["warmup","aaa"], kept []; READINGS editor at reopen r1 ["warmup",""] / ["warmup",""], r2 ["warmup",""] / ["warmup",""], after the click ["warmup","aaa"]; notices r1 ["216:A previous block edit is queued for recovery"], r2 ["87:A previous block edit is queued for recovery"], after the click ["9946:Recovered block edit applied"]
+HEADCLOSE-dismiss          0/1
+    RED dismiss (head sealed): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], boxes [], kept []); +20 s reopen aaa banner+Apply, bbb nowhere; dismiss clicked true: server ["warmup",""], kept []; READINGS editor at reopen r1 ["warmup",""] / ["warmup",""], r2 ["warmup",""] / ["warmup",""], after the click ["warmup",""]; notices r1 ["202:A previous block edit is queued for recovery"], r2 ["94:A previous block edit is queued for recovery"], after the click ["9952:Block edit recovery dismissed"]
+HEADCLOSE-putback          1/1
+    ok  READING (ruled A-25 ②a (iv), manual known; arm rule RED): reopen aaa banner+Apply, bbb nowhere (server ["warmup",""], editor ["warmup",""]); put back by click: 22894 PUT /note-blocks/:id/text-save warmup bbb| -> 22903 RESP /note-blocks/:id/text-save 200; then server ["warmup bbb",""], boxes [], kept []; Apply clicked false; +3 s server ["warmup bbb",""], +13 s server ["warmup bbb",""], editor ["warmup bbb",""], boxes [], kept []; requests after the click []; items +3 s []; items +13 s []; notices after the click []; put back 200 true, bbb stays true, Apply wrote false, conflict item false, Replay shown false (not clicked)
+HEADCLOSE-applyslow        0/2
+    RED form req; end ok false, no 409 true, no "Failed to save block" true; first save after the click 8634 PUT /note-blocks/:id/text-save [hold] warmup|aaa; head sealed; Apply clicked +626 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 1, released +2524 ms -> 11049 RESP /note-blocks/:id/text-save 200; aaa at reply server, +3.5 s server, +13 s server; bbb end nowhere; server reply ["warmup","aaa"], +3.5 s ["warmup","aaa"], +13 s ["warmup","aaa"] (aaa x1, bbb x0); screen +13 s ["warmup","aaa"]; boxes []; items +13 s []; receipt []; notices ["2915:Recovered block edit applied"]; requests after the click ["8634 PUT /note-blocks/:id/text-save [hold] warmup|aaa","11049 RESP /note-blocks/:id/text-save 200"]
+    RED form req; end ok false, no 409 true, no "Failed to save block" true; first save after the click 8601 PUT /note-blocks/:id/text-save [hold] warmup|aaa; head sealed; Apply clicked +616 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 1, released +2552 ms -> 11029 RESP /note-blocks/:id/text-save 200; aaa at reply server, +3.5 s server, +13 s server; bbb end nowhere; server reply ["warmup","aaa"], +3.5 s ["warmup","aaa"], +13 s ["warmup","aaa"] (aaa x1, bbb x0); screen +13 s ["warmup","aaa"]; boxes []; items +13 s []; receipt []; notices ["2938:Recovered block edit applied"]; requests after the click ["8601 PUT /note-blocks/:id/text-save [hold] warmup|aaa","11029 RESP /note-blocks/:id/text-save 200"]
+HEADCLOSE-applyslowresp    0/2
+    RED form resp; end ok false, no 409 true, no "Failed to save block" true; first save after the click 8565 PUT /note-blocks/:id/text-save warmup|aaa; head sealed; Apply clicked +634 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 0, reply delayed 2.5 s (released at +2808 ms) -> 8573 RESP /note-blocks/:id/text-save 200 [respDelay2500]; aaa at reply server, +3.5 s server, +13 s server; bbb end nowhere; server reply ["warmup","aaa"], +3.5 s ["warmup","aaa"], +13 s ["warmup","aaa"] (aaa x1, bbb x0); screen +13 s ["warmup","aaa"]; boxes []; items +13 s []; receipt []; notices ["3023:Recovered block edit applied"]; requests after the click ["8565 PUT /note-blocks/:id/text-save warmup|aaa","8573 RESP /note-blocks/:id/text-save 200 [respDelay2500]"]
+    RED form resp; end ok false, no 409 true, no "Failed to save block" true; first save after the click 8641 PUT /note-blocks/:id/text-save warmup|aaa; head sealed; Apply clicked +607 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 0, reply delayed 2.5 s (released at +2801 ms) -> 8648 RESP /note-blocks/:id/text-save 200 [respDelay2500]; aaa at reply server, +3.5 s server, +13 s server; bbb end nowhere; server reply ["warmup","aaa"], +3.5 s ["warmup","aaa"], +13 s ["warmup","aaa"] (aaa x1, bbb x0); screen +13 s ["warmup","aaa"]; boxes []; items +13 s []; receipt []; notices ["3007:Recovered block edit applied"]; requests after the click ["8641 PUT /note-blocks/:id/text-save warmup|aaa","8648 RESP /note-blocks/:id/text-save 200 [respDelay2500]"]
+MENTER-close               0/2
+    RED LOST (server kept true, boxes abxcd + Z false): screen at close ["abxcd","Z"] (merged ["abxcd"], enter ["abxcd",""]); reopen server ["abx","cd"], editor ["abx","cd"], boxes [] / [], kept [], items ["A block edit is waiting for recovery abx cd Apply Dismiss","A block edit is waiting for recovery","abx cd Apply Dismiss","abx cd"] (Apply true); +12 s server ["abx","cd"], boxes []; Z at nowhere; notices at reopen []; saves ["902 PUT /note-blocks/:id/text-save abx|cd","908 RESP /note-blocks/:id/text-save 200 [respDelay60000]"]
+    RED LOST (server kept true, boxes abxcd + Z false): screen at close ["abxcd","Z"] (merged ["abxcd"], enter ["abxcd",""]); reopen server ["abx","cd"], editor ["abx","cd"], boxes [] / [], kept [], items ["A block edit is waiting for recovery abx cd Apply Dismiss","A block edit is waiting for recovery","abx cd Apply Dismiss","abx cd"] (Apply true); +12 s server ["abx","cd"], boxes []; Z at nowhere; notices at reopen []; saves ["893 PUT /note-blocks/:id/text-save abx|cd","900 RESP /note-blocks/:id/text-save 200 [respDelay60000]"]
+N6B-switch                 0/1
+    RED head sealed; to B +277 ms (7167 B); back on A +278 ms; A at +1.5 s {"aaa":"server","bbb":"nowhere"}, +9.5 s {"aaa":"server","bbb":"nowhere"}, end {"aaa":"server","bbb":"nowhere"}; A server end ["warmup","aaa"] (aaa x1, bbb x0); A boxes end [], kept [], banner+Apply true; B server ["warmup","bnote"] (before ["warmup","bnote"]), B screen ["warmup","bnote"], B boxes []; RED lost ["bbb"], on B [], server+held []; recorded: server+banner ["r9:aaa","rF:aaa"]
+total red 37

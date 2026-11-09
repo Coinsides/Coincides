@@ -7,7 +7,7 @@ import type { TemplateOption } from '@/services/templateOptions';
 import type { HeadingTextFlowStructureRequest } from '../headingRoleService';
 import { headingLevelForRole } from '../headingRoleService';
 import { headingStructureRequestForEdit } from '../headingInputService';
-import { projectTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { getTextFlowContent, projectTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { forgetUnplacedWords, openStructureTypingBuffer, readUnplacedWords, rememberUnplacedWords, type UnplacedWords,
   UNPLACED_WORDS_LIMIT, type StructureTypingBuffer } from '../structureTypingBuffer';
 import { splitTextUnitForEnter } from '../textUnitEditorService';
@@ -122,6 +122,18 @@ type StoredWords = UnplacedWords & { writingRole?: TextUnitWritingRole };
 let entryCount = 0;
 const nextEntryId = () => `${Date.now().toString(36)}-${(entryCount += 1)}`;
 
+/** A-20 r3d (N6): what kept words need of a recovery receipt (a BlockEditRecoveryReceipt fits). */
+export interface RecoveryReceiptText {
+  readonly blockId: string;
+  readonly textFlow?: TextBlockContentV1;
+  readonly contentJson?: Record<string, unknown>;
+}
+
+// A-20 r3d (N6a): a block's live units, id and text, in order. Exact: no substring, no normalising.
+function unitTexts(flow: TextBlockContentV1 | null | undefined): string[] | null {
+  return flow ? flow.units.filter((unit) => unit.status !== 'deleted').map((unit) => `${unit.id}\u0000${unit.text}`) : null;
+}
+
 export function useHeadingStructureController(input: {
   noteId?: string; blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>;
   coverFrameId?: string | null; readOnly: boolean; template: TemplateOption;
@@ -137,8 +149,34 @@ export function useHeadingStructureController(input: {
   editorWaitMs?: number;
   /** Defaults to PLACE_RETRY_MS. */
   placeRetryMs?: number;
+  /**
+   * A-20 r3d (N6): receipts from another mount the recovery queue offers (Apply / Dismiss). Kept words do not land on a
+   * block one of them has words for that the server did not have, until it is applied or dismissed.
+   */
+  recoveryReceipts?: readonly RecoveryReceiptText[];
 }) {
   const latest = useRef(input); latest.current = input;
+  // A-20 r3d (N6a): each block's units as the server gave them when this note opened, taken once, the first time the
+  // block is seen. Never the live units: the first kept words to land change those, and a later record would then
+  // read the receipt as words the server lacks.
+  // Taken again for each note opened: the runtime is not remounted when the route goes from one note to another and
+  // back (NoteDetail is not keyed by note), and the server's text of a note opened again is what it is now, not what
+  // it was on the first visit. The old note's blocks seen until the new note's fetch lands have other ids.
+  const openedTexts = useRef(new Map<string, string[] | null>());
+  const openedFor = useRef(input.noteId);
+  if (openedFor.current !== input.noteId) { openedFor.current = input.noteId; openedTexts.current = new Map(); }
+  for (const block of input.blocks) {
+    if (!openedTexts.current.has(block.id)) openedTexts.current.set(block.id, unitTexts(getTextFlowContent(block.content_json)));
+  }
+  // A-20 r3d (N6a): a receipt holds kept words back only when its units differ from the server's text of the block at
+  // opening (exactly, unit by unit). One the server already has (its save went through after the page left) holds
+  // nothing back; with no flow on either side it holds.
+  const recoveryWaiting = useCallback((blockId: string) => (latest.current.recoveryReceipts ?? []).some((receipt) => {
+    if (receipt.blockId !== blockId) return false;
+    const mine = unitTexts(receipt.textFlow ?? getTextFlowContent(receipt.contentJson ?? {}));
+    const server = openedTexts.current.get(blockId);
+    return !mine || !server || mine.length !== server.length || mine.some((text, index) => text !== server[index]);
+  }), []);
   const busyRef = useRef(false);
   const activeRun = useRef<object | null>(null);
   const [busy, setBusy] = useState(false);
@@ -539,6 +577,10 @@ export function useHeadingStructureController(input: {
     }
     // Empty matching empty is taken for an open window, and for kept words only when the empty unit found by its block
     // and id still has the role it had when they were kept.
+    // A-20 r3d (N6): a receipt from an earlier page waits for this block in the recovery queue. Kept words landing now
+    // would save the block, and that save's receipt replaces the waiting one (one receipt per block), then goes when the
+    // save succeeds: words the server never had would be gone. They wait in the box until it is applied or dismissed.
+    if (!live && recoveryWaiting(blockId)) { keep(); return; }
     const merged = mergeTypedText(unit.text, typing.initialText, typing.text(), typing.caret(),
       { emptyMatches: live || (entry.roleFixed === true && entry.role !== undefined && unit.writing_role === entry.role) });
     // The words' place in the unit cannot be found: never moved somewhere else silently. Nothing is touched on the

@@ -1,0 +1,5 @@
+CLOSEHEAD-plain            0/1
+    SETUP ERROR Error: setup: the save of 'aaa' was not held (held 0)
+CLOSEHEAD-sealed           1/1
+    ok  recorded: sealed: aaa at reopen banner+Apply, 20 s later banner+Apply; server ["warmup",""]; boxes []; kept []; receipts [{"store":"session","count":1,"has":true}]; banners ["A block edit is waiting for recovery warm
+total red 0

@@ -1,0 +1,26 @@
+A-20 builder evidence (2026-11-08). Baseline 04f6f822; package ops packages/a20-idle-save (main JS index-BkYnVk7W.js).
+Scratch only: frozen copy = git archive 04f6f822; work copy = the same + the 14 package files. The scratch server is the frozen copy's server on a new database, loopback only; a counting proxy adds 57 ms each way. Headless Chrome with CDP key events. The temporary account password comes only from an environment variable.
+
+Suites (final, work = package src):
+  client tsc exit 0; vitest 259 files / 2707 tests passed, exit 0 (client-full-final.txt)
+  server unchanged; test:v2 failures = the 8 environment-only failures also seen on the A-19 base run (server-full-work.txt)
+  earlier client run 2: 2707/2707, but 3 unhandled TD-58 timer errors (structureTypingBuffer.ts:292); not seen in the final run
+
+Positive controls (positive-controls.txt, ../positive-controls.txt): the package's new tests on 04f6f822 = red
+  peek 3/3, idle save 5/5, leave guard 7/8 (the 8th is a guard: a router-made step is left to its blocker),
+  receipt storage 2/4 (2 guards: old session receipts are read; forget works anywhere), late-reply receipt 1/1,
+  conservation gate with its unload exemption removed: red on 04f6f822 (seeds 18 and 31: <k1> LOST), green on the package.
+
+Browser, final work build (out-f-*.json; dist-browser-runs.sha256; the dist did not change during the runs), 10 samples each:
+  with navigate event: hashSwitch 10/10 server, pasteLink 10/10, lateReply 10/10 (no stale banner), clickLeave 10/10,
+    loginHash and login401Enter: text back from the kept-words box 10/10, emptyHash: 0 false toasts
+  fallback (Chrome --disable-blink-features=NavigationApi): hashSwitch 10/10, pasteLink 10/10, lateReply 10/10,
+    loginHash kept 10/10, emptyHash 0 toasts
+  frozen 04f6f822: lateReply 0/3; fallback hashSwitch / pasteLink / lateReply 0/3; false toast 3/3 everywhere (out-b-*.json)
+  earlier frozen 10-sample loss table: ../survey/out-q2.json
+Undo shape, frozen vs package (out-b-extra / out-f-extra / out-pkgx): undoEnter, undoPause and undoIme are identical step for step.
+Idle save: idleSaved 1 PUT, server has it after 2.6 s; idleThenMore: one Ctrl+Z takes "aaabbb" back and the server follows;
+  idleThenEnter: no duplicate write; idleHardKill (CDP Browser.close after 2.6 s): server has it.
+Write counts (out-f-rate): 60 s of typing with no pause = 0 writes; 4 pauses = 4; IME 13 compositions = 13 (unchanged); draft = full text now.
+Package build smoke (out-pkg / out-pkgx): leave arms 3/3, no false toast, undo shapes unchanged, idle save works.
+:940 diagnostic build (../survey and diag rows): flushPendingSaves rejected at textHistory.flush "Text composition is still active", 6/6.

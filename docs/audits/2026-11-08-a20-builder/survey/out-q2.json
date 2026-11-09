@@ -1,0 +1,895 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "hashSwitch",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 3,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 4,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 5,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 6,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 7,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 8,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "hashSwitch",
+   "i": 9,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 3,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 4,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 5,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 6,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 7,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 8,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "pasteLink",
+   "i": 9,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/notes/:id",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "POST /api/source-anchors/generate"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 3,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 4,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 5,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 6,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 7,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 8,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "loginHash",
+   "i": 9,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 0,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 1,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 2,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 3,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 4,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 5,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 6,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 7,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 8,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "login401Enter",
+   "i": 9,
+   "server": "warmup|",
+   "kept": false,
+   "reopenedOnScreen": false,
+   "toast": "",
+   "hash": "#/login",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": true,
+   "err": null,
+   "console": [
+    "warning: You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. Thi",
+    "error: Failed to save block: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091)\n    at XMLHttpRe",
+    "error: Failed to reconcile block save outcome: AxiosError: Request failed with status code 401\n    at JE (http://127.0.0.1:4201/assets/index-Gswd3cHv.js:86:1091"
+   ]
+  },
+  {
+   "arm": "clickLeave",
+   "i": 0,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 1,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 2,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 3,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 4,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 5,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 6,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 7,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 8,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 7,
+   "writesAfterLeave": [],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  },
+  {
+   "arm": "clickLeave",
+   "i": 9,
+   "server": "warmup|kept",
+   "kept": true,
+   "reopenedOnScreen": null,
+   "toast": "",
+   "hash": "#/projects",
+   "typedWrites": 6,
+   "writesAfterLeave": [
+    "PUT /api/note-blocks/:id/text-save"
+   ],
+   "routerWarning": false,
+   "err": null,
+   "console": []
+  }
+ ],
+ "sum": {
+  "hashSwitch": {
+   "n": 10,
+   "kept": 0,
+   "toast": 0,
+   "routerWarning": 10,
+   "writesAfter": 9,
+   "reopened": 0
+  },
+  "pasteLink": {
+   "n": 10,
+   "kept": 0,
+   "toast": 0,
+   "routerWarning": 10,
+   "writesAfter": 10,
+   "reopened": 0
+  },
+  "loginHash": {
+   "n": 10,
+   "kept": 0,
+   "toast": 0,
+   "routerWarning": 10,
+   "writesAfter": 0,
+   "reopened": 0
+  },
+  "login401Enter": {
+   "n": 10,
+   "kept": 0,
+   "toast": 0,
+   "routerWarning": 10,
+   "writesAfter": 1,
+   "reopened": 0
+  },
+  "clickLeave": {
+   "n": 10,
+   "kept": 10,
+   "toast": 0,
+   "routerWarning": 0,
+   "writesAfter": 4,
+   "reopened": 0
+  }
+ }
+}

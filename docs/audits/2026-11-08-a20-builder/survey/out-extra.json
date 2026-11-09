@@ -1,0 +1,249 @@
+{
+ "client": "http://127.0.0.1:4201",
+ "rows": [
+  {
+   "arm": "undoEnter",
+   "i": 0,
+   "result": {
+    "undo": [
+     "warmup|aaa|bbb|ccc",
+     "warmup|aaa|bbb|",
+     "warmup|aaa|bbb",
+     "warmup|aaa|",
+     "warmup|aaa"
+    ]
+   },
+   "server": "warmup|aaa",
+   "err": null
+  },
+  {
+   "arm": "undoEnter",
+   "i": 1,
+   "result": {
+    "undo": [
+     "warmup|aaa|bbb|ccc",
+     "warmup|aaa|bbb|",
+     "warmup|aaa|bbb",
+     "warmup|aaa|",
+     "warmup|aaa"
+    ]
+   },
+   "server": "warmup|aaa",
+   "err": null
+  },
+  {
+   "arm": "undoPause",
+   "i": 0,
+   "result": {
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|",
+     "warmup"
+    ]
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "undoPause",
+   "i": 1,
+   "result": {
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|",
+     "warmup"
+    ]
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "undoSealA",
+   "i": 0,
+   "result": {
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|aaa",
+     "warmup|",
+     "warmup"
+    ]
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "undoSealA",
+   "i": 1,
+   "result": {
+    "undo": [
+     "warmup|aaabbb",
+     "warmup|aaa",
+     "warmup|",
+     "warmup"
+    ]
+   },
+   "server": "warmup",
+   "err": null
+  },
+  {
+   "arm": "undoIme",
+   "i": 0,
+   "result": {
+    "undo": [
+     "warmup|现值公式",
+     "warmup|现值",
+     "warmup|"
+    ]
+   },
+   "server": "warmup|",
+   "err": null
+  },
+  {
+   "arm": "undoIme",
+   "i": 1,
+   "result": {
+    "undo": [
+     "warmup|现值公式",
+     "warmup|现值",
+     "warmup|"
+    ]
+   },
+   "server": "warmup|",
+   "err": null
+  },
+  {
+   "arm": "rate60",
+   "i": 0,
+   "result": {
+    "keys": 411,
+    "writesWhileTyping": [],
+    "writesAfterEnter": [
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick br|",
+   "err": null
+  },
+  {
+   "arm": "rate60",
+   "i": 1,
+   "result": {
+    "keys": 408,
+    "writesWhileTyping": [],
+    "writesAfterEnter": [
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick brown fox jumps over a lazy dog and then rests the quick|",
+   "err": null
+  },
+  {
+   "arm": "rate4pauses",
+   "i": 0,
+   "result": {
+    "writes": []
+   },
+   "server": "warmup|",
+   "err": null
+  },
+  {
+   "arm": "rate4pauses",
+   "i": 1,
+   "result": {
+    "writes": []
+   },
+   "server": "warmup|",
+   "err": null
+  },
+  {
+   "arm": "rateDraft",
+   "i": 0,
+   "result": {
+    "keys": 144,
+    "writes": [
+     "POST /api/notes/:id/blocks",
+     "PUT /api/canvas-objects/by-note/:id/page-frame-collection",
+     "PUT /api/canvas-objects/by-note/:id/block-placements/:id",
+     "PUT /api/note-blocks/:id/text-save",
+     "POST /api/source-anchors/generate",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "the quick",
+   "err": null
+  },
+  {
+   "arm": "rateDraft",
+   "i": 1,
+   "result": {
+    "keys": 143,
+    "writes": [
+     "POST /api/notes/:id/blocks",
+     "PUT /api/canvas-objects/by-note/:id/page-frame-collection",
+     "PUT /api/canvas-objects/by-note/:id/block-placements/:id",
+     "PUT /api/note-blocks/:id/text-save",
+     "POST /api/source-anchors/generate",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "the quick",
+   "err": null
+  },
+  {
+   "arm": "rateIme",
+   "i": 0,
+   "result": {
+    "compositions": 13,
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|现值现值现值现值现值现值现值现值现值现值现值现值现值",
+   "err": null
+  },
+  {
+   "arm": "rateIme",
+   "i": 1,
+   "result": {
+    "compositions": 13,
+    "writes": [
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save",
+     "PUT /api/note-blocks/:id/text-save"
+    ]
+   },
+   "server": "warmup|现值现值现值现值现值现值现值现值现值现值现值现值现值",
+   "err": null
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+# server test:v2 on the work copy (server code = 04f6f822), --test-concurrency=3: failing lines and totals only (the full TAP is over 2 MB).
+not ok 400 - original live specimen replays byte-for-byte with prior successful save receipts and zero flags
+not ok 61 - src\\__tests__\\v2CanvasPersistenceCutover.test.ts
+not ok 64 - src\\__tests__\\v2DocumentParserPdf.test.ts
+not ok 884 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+not ok 885 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+not ok 886 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+not ok 897 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+not ok 916 - T-1 manifest copy recreates a missing dist target byte-for-byte
+# tests 978
+# suites 0
+# pass 970
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 232829.8504
+# tests 49
+# suites 0
+# pass 49
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 16622.301
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3995.7386

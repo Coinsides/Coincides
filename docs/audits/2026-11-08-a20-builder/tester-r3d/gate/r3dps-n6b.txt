@@ -1,0 +1,3 @@
+N6B-switch                 1/1
+    ok  head idle; to B +6802 ms (10882 B); back on A +273 ms; A at +1.5 s {"aaa":"server","bbb":"server"}, +9.5 s {"aaa":"server","bbb":"server"}, end {"aaa":"server","bbb":"server"}; A server end ["warmup bbb","aaa"] (aaa 
+total red 0

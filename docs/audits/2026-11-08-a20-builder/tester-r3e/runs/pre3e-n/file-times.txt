@@ -1,0 +1,3 @@
+2026-11-09 08:10:35 <scratch>/a20/runs-pre3e-n.log
+2026-11-09 08:10:35 <scratch>/a20/runs/pre3e-n/rows.jsonl
+2026-11-09 07:45:51 <scratch>/a20/runs/r3e-k/rows.jsonl

@@ -1,0 +1,3 @@
+BACKIN-heldback            0/1
+    RED RAW retry x2 at +1622,+1622 ms (window end 8983; recorded retryN 2) ; retry x2 (want 1, counted from the hash leave to the probe's second leave) [trace 9 entries]; LEFT_UNSAVED 0; hash leave held A; stayed true; kept
+total red 1

@@ -1,0 +1,3 @@
+SHIFTENTER-idle            1/1
+    ok  READING (control, nothing in flight): screen after Shift+Enter ["abc\n","q"]; sealed by a click false; server before the close "abc\n" , "q"; editor "abc\n" , "q"; after a reopen server "abc\n" , "q"; editor "abc\n" , "q"; saves "575 PUT /note-blocks/:id/text-save abc\n|q" ; "582 RESP /note-blocks/:id/text-save 200"
+total red 0

@@ -2,7 +2,7 @@
 // Every word typed is in exactly one place afterwards: the note, or kept (on screen and in
 // localStorage, two copies of one keeping). In the note it sits in the unit it was typed into.
 // Sequences are seeded; a failure prints the seed and the events so it can be replayed alone.
-import { render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -11,7 +11,8 @@ import { createBoardTextRangeEditSession } from '../boardTextRangeEditSession';
 import type { NoteBlock, TextBlockContentV1, TextUnitWritingRole } from '../runtimeDataTypes';
 import { createTextBlockContentV1, getTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { applyHeadingInputAtLine, headingStructureRequestForEdit } from '../headingInputService';
-import { splitTextUnitForEnter } from '../textUnitEditorService';
+import { mergeTextUnitWithPrevious, splitTextUnitForEnter } from '../textUnitEditorService';
+import { readUnplacedWords, rememberUnplacedWords } from '../structureTypingBuffer';
 import { useHeadingStructureController } from './useHeadingStructureController';
 import { usePlacementHistory } from './usePlacementHistory';
 import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
@@ -56,7 +57,9 @@ function random(seed: number) {
 }
 
 // conflict: the unit-transfer answered 409; the server applied nothing and the real adapter returns null (after its toast).
-type FaultKind = 'create' | 'transfer' | 'conflict' | 'reorder' | 'placement' | 'idleHang' | 'idleReject' | 'save';
+// refuse (A-20 r3 M5): the adapter turns the save down before writing its recovery receipt (mutation_not_allowed,
+// route_receipt_unavailable, board_range_sync_failed): nothing is sent, nothing is held for recovery.
+type FaultKind = 'create' | 'transfer' | 'conflict' | 'reorder' | 'placement' | 'idleHang' | 'idleReject' | 'save' | 'refuse';
 type Hooks = {
   editing: ReturnType<typeof useTextFlowHistory>;
   history: ReturnType<typeof usePlacementHistory>;
@@ -86,6 +89,8 @@ function makeWorld() {
     hooks: null as Hooks | null,
     // Saves sent while this is on never reach the server and never answer (a slow reply cut off by the page going).
     holdSaves: false,
+    // A-20 r3d (N6): receipts from another mount the recovery queue offers (the controller's recoveryReceipts).
+    recoveryReceipts: [] as { blockId: string; contentJson: Record<string, unknown> }[],
     // Saves to let through before holding starts: holdSaves@1 holds from the second save on.
     holdSkip: 0,
     // Bumped when the page goes away: the old page's code can no longer send anything.
@@ -94,6 +99,10 @@ function makeWorld() {
     click: () => {},
     created: 0,
     log: [] as string[],
+    // A-20 r2: the adapter's recovery receipts, as the app keeps them in localStorage: written before each block save
+    // (one per block, the newer replacing the older), dropped when a save of the block succeeds, kept when it is held
+    // or rejected. They outlive the page, and the banner offers them when the note is opened again.
+    receipts: new Map<string, TextBlockContentV1>(),
   };
   const take = (kind: FaultKind) => {
     if (world.fault !== kind) return false;
@@ -115,18 +124,27 @@ function makeWorld() {
   const noteOf = (blockId: string) => Object.keys(server).find((noteId) => server[noteId].some((entry) => entry.id === blockId)) ?? world.noteId;
   const adapter = {
     saveBlock: (async (target, text, options) => {
+      if (take('refuse')) {
+        world.log.push(`save ${target.id} REFUSED before its receipt`);
+        return { status: 'rejected', block: null, recoveryReceipt: null, reconciliation: 'not_attempted',
+          durableState: 'not_checked', reason: 'board_range_sync_failed', staleEpoch: false } as never;
+      }
+      const issued = options?.textFlow ?? getTextFlowContent(target.content_json);
+      if (issued) world.receipts.set(target.id, structuredClone(issued));
       if (world.holdSaves && world.holdSkip > 0) world.holdSkip -= 1;
       else if (world.holdSaves) { world.log.push(`save ${target.id} HELD (never reaches the server)`); return new Promise(() => {}); }
       await sleep(5);
       if (take('save')) {
         world.log.push(`save ${target.id} REJECTED`);
-        return { status: 'rejected', block: null, recoveryReceipt: null, reconciliation: 'read_failed',
+        // Sent and failed: the adapter wrote its receipt before sending (above), and returns it.
+        return { status: 'rejected', block: null, recoveryReceipt: { recoveryKey: `receipt:${target.id}` }, reconciliation: 'read_failed',
           durableState: 'missing', reason: 'request_failed', staleEpoch: false } as never;
       }
       const flow = options?.textFlow ?? getTextFlowContent(target.content_json)!;
       const saved = { ...target, content_json: options?.contentSnapshot?.contentJson ?? { ...target.content_json, [TEXT_FLOW_CONTENT_KEY]: flow },
         plain_text: options?.contentSnapshot?.plainText ?? text, text_save_revision: (options?.baseRevision ?? target.text_save_revision ?? 0) + 1 };
       world.log.push(`save ${target.id} [${units(flow)}]`);
+      world.receipts.delete(target.id);
       commit(noteOf(target.id), (current) => current.map((entry) => entry.id === target.id ? saved : entry));
       return { status: 'saved', block: saved, recoveryReceipt: null, reconciliation: 'response' };
     }) as HistoryOptions['saveBlock'],
@@ -227,7 +245,8 @@ function makeWorld() {
       layouts: Object.fromEntries(blocks.map((entry) => [entry.id, layout])), readOnly: false, template,
       textHistory: editing, reorderBlocks: alive(adapter.reorder), whenWritesIdle: adapter.whenWritesIdle,
       onFocusBlock: (id) => { world.log.push(`focusBlock ${id}`); }, onFailure: () => { world.log.push('onFailure'); }, setBlockTextDrafts: setTextDrafts,
-      watchdogMs: 250, editorWaitMs: 0, ...({ placeRetryMs: 60 } as object) });
+      watchdogMs: 250, editorWaitMs: 0, ...({ placeRetryMs: 60 } as object),
+      recoveryReceipts: world.recoveryReceipts });
     useLayoutEffect(() => { world.hooks = { editing, history, heading, blocks, flowDrafts }; });
     return null;
   }
@@ -235,7 +254,10 @@ function makeWorld() {
 }
 
 // The stored copy, whatever shape this build writes: every `text` field under the words keys.
-function storedTexts(): string[] {
+// A-20 r2 (K4): 'window' reads only what a structure window kept; the text history's departure records ('edit') are
+// left out, so a window that stopped keeping its own words cannot hide behind them.
+// skipBox: records to leave out of the duplicate count (A-20 r3d N1; see keptTokens).
+function storedTexts(only?: 'window', skipBox?: (record: Record<string, unknown>) => boolean): string[] {
   const texts: string[] = [];
   const tokens = (text: unknown) => (typeof text === 'string' ? text.match(TOKEN) ?? [] : []);
   const walk = (value: unknown) => {
@@ -243,6 +265,8 @@ function storedTexts(): string[] {
     else if (value && typeof value === 'object') {
       const record = value as Record<string, unknown>;
       if (typeof record.text === 'string') {
+        if (only === 'window' && (record.source === 'edit' || record.source === 'split')) return;
+        if (skipBox?.(record)) return;
         // Only what was typed into the window: its initial text is the unit's own, already in the note.
         const initial = new Set(tokens(record.initialText));
         texts.push(tokens(record.text).filter((token) => !initial.has(token)).join(''));
@@ -263,7 +287,10 @@ type Step = { kind: string; detail?: string };
 
 // exemptEverything: the boundary assertion's positive control. Every word is excused at unload, the ones typed in
 // a window included, exactly the misuse the assertion is there to catch.
-async function runSequence(seed: number, length: number, script?: readonly string[], control: { exemptEverything?: boolean } = {}) {
+// dropWindowRecords: the window-source boundary's positive control. The window's own records are treated as gone at
+// unload while the text history's departure records stay: a word typed in a window is then held only by those.
+async function runSequence(seed: number, length: number, script?: readonly string[],
+  control: { exemptEverything?: boolean; dropWindowRecords?: boolean } = {}) {
   localStorage.clear();
   document.body.innerHTML = '';
   const rand = random(seed);
@@ -366,6 +393,24 @@ async function runSequence(seed: number, length: number, script?: readonly strin
     steps.push({ kind: 'enter', detail: token });
   };
 
+  const joinLines = async (how: 'join' | 'seldel') => {
+    if (away) { steps.push({ kind: how, detail: 'away' }); return; }
+    const at = locate(anchor);
+    const index = at ? at.flow.units.findIndex((unit) => unit.id === at.unit.id) : -1;
+    const previous = at && index > 0 ? at.flow.units[index - 1] : null;
+    if (!at || !previous || !hooks().editing.canApplyEdit() || hooks().heading.isBusy()) { steps.push({ kind: how, detail: 'refused' }); return; }
+    const next = mergeTextUnitWithPrevious(at.flow, at.unit.id);
+    await (async () => {
+      await hooks().editing.applyEdit(at.block, next, { previousTextFlow: at.flow, metadata: {
+        unitId: previous.id, inputType: 'deleteContentBackward', kind: 'typing', isComposing: false,
+        beforeSelection: how === 'join'
+          ? { unitId: at.unit.id, start: 0, end: 0 }
+          : { unitId: previous.id, start: previous.text.length, end: previous.text.length },
+        afterSelection: { unitId: previous.id, start: previous.text.length, end: previous.text.length } } });
+    })();
+    steps.push({ kind: how, detail: at.unit.text.slice(0, 12) });
+  };
+
   const heading = async (tag?: string) => {
     const at = locate(tag ?? anchor);
     if (!at || hooks().heading.isBusy() || !hooks().editing.canApplyEdit() || at.unit.writing_role !== 'paragraph') {
@@ -422,7 +467,11 @@ async function runSequence(seed: number, length: number, script?: readonly strin
     const onServer = new Set(world.server.note.flatMap((entry) => (getTextFlowContent(entry.content_json)?.units ?? [])
       .filter((unit) => unit.status !== 'deleted').flatMap((unit) => unit.text.match(TOKEN) ?? [])));
     const held = new Set(keptTokens());
-    if (!away) for (const token of noteTokens()) if (!onServer.has(token) && !held.has(token)) unsavedAtUnload.add(token);
+    // A word typed in a window counts as held only if the window kept it (K4); any other word, if anything kept it.
+    const heldByWindow = control.dropWindowRecords ? new Set<string>() : new Set(keptTokens('window'));
+    if (!away) for (const token of noteTokens()) {
+      if (!onServer.has(token) && !(typedInWindow.has(token) ? heldByWindow : held).has(token)) unsavedAtUnload.add(token);
+    }
     if (control.exemptEverything) for (const token of typed) unsavedAtUnload.add(token);
     const stored: Array<[string, string]> = [];
     for (let index = 0; index < localStorage.length; index += 1) {
@@ -473,10 +522,23 @@ async function runSequence(seed: number, length: number, script?: readonly strin
     return flow ? flow.units.filter((unit) => unit.status !== 'deleted').flatMap((unit) => unit.text.match(TOKEN) ?? []) : [];
   });
   // An open window shows the unit's own text too; what it holds beyond the note is what was typed into it.
-  const keptTokens = () => {
+  // Held: shown in a window or kept-words box, stored in the kept-words archive, or (unless only the window's own
+  // records count) in a recovery receipt. A receipt carries its whole block: only its words not in the note count.
+  // A-20 r3d (N1), Main_Designer 2026-11-08: a box record with an empty start never lands by itself (no anchor; judged
+  // by initialText, since the source tag does not survive the heading controller rewriting the record at reopen). Its
+  // words that the note also has are not counted twice, UNLESS its whole text is already in that block's text on the
+  // server: then the box holds what the server has (the CLICKBACK-end shape, N4), which stays red. Blind spot, TD-66:
+  // a box copy that is only partly on the server is not seen as a duplicate.
+  const serverBlockText = (blockId: unknown) => (getTextFlowContent(world.server.note.find((entry) => entry.id === blockId)?.content_json ?? {})
+    ?.units ?? []).filter((unit) => unit.status !== 'deleted').map((unit) => unit.text).join(String.fromCharCode(10));
+  const boxOnly = (record: Record<string, unknown>) => record.initialText === '' && typeof record.text === 'string'
+    && !serverBlockText(record.blockId).includes(record.text);
+  const keptTokens = (only?: 'window', skipSplit = false) => {
     const inNote = new Set(noteTokens());
     const shown = shownBuffers().flatMap((element) => element.value.match(TOKEN) ?? []).filter((token) => !inNote.has(token));
-    return [...new Set([...shown, ...storedTexts().flatMap((text) => text.match(TOKEN) ?? [])])];
+    const receipts = only === 'window' ? [] : [...world.receipts.values()].flatMap((flow) => flow.units
+      .filter((unit) => unit.status !== 'deleted').flatMap((unit) => unit.text.match(TOKEN) ?? [])).filter((token) => !inNote.has(token));
+    return [...new Set([...shown, ...storedTexts(only, skipSplit ? boxOnly : undefined).flatMap((text) => text.match(TOKEN) ?? []), ...receipts])];
   };
 
   let clickFrames: { mockRestore(): void } | null = null;
@@ -504,6 +566,31 @@ async function runSequence(seed: number, length: number, script?: readonly strin
       steps.push({ kind: 'clicks' });
     }
     else if (name === 'wait') { await pause(Number(argument)); steps.push({ kind: 'wait', detail: argument }); }
+    // A-20 r3 seeds. at:N types on next into the line holding <kN> (clicking back onto an earlier line).
+    else if (name === 'at') { anchor = `<k${argument}>`; steps.push({ kind: 'at', detail: argument }); }
+    // A-20 r3d (N1). join: Backspace at the start of the anchor's line, joining it onto the line before (the unit is
+    // removed). seldel: a selection from the end of the line before to the start of the anchor's line deleted (the
+    // same change of units; tokens are whole words, so only the line break is selected).
+    else if (name === 'join' || name === 'seldel') await joinLines(name);
+    // keepleave: what the route boundary's keepAndLeave does (keep, then the blur seals and sends); the person may
+    // still be on the note after it. stay: the router held them after all, and the departure is taken back.
+    else if (name === 'keepleave') {
+      hooks().editing.keepOpenEdit();
+      hooks().editing.boundary();
+      void hooks().editing.flush().catch(() => {});
+      for (let turn = 0; turn < 5; turn += 1) await Promise.resolve();
+      steps.push({ kind: 'keepleave' });
+    }
+    else if (name === 'stay') {
+      (hooks().editing as { withdrawKeptEdit?: () => void }).withdrawKeptEdit?.();
+      steps.push({ kind: 'stay' });
+    }
+    // bfcache: the page goes into the back-forward cache and comes back; the session goes on.
+    else if (name === 'bfcache') {
+      window.dispatchEvent(Object.assign(new Event('pagehide'), { persisted: true }));
+      window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
+      steps.push({ kind: 'bfcache' });
+    }
     else throw new Error(`unknown scripted event ${event}`);
   };
 
@@ -539,11 +626,15 @@ async function runSequence(seed: number, length: number, script?: readonly strin
 
     const inNote = noteTokens();
     const kept = keptTokens();
+    // A-20 r3d (N1): a box record kept like a split's is never placed by itself. Words in it that the note also has
+    // are a copy the person is told not to paste back (manual, "Known for now"), not words written twice.
+    const keptBesidesBox = keptTokens(undefined, true);
     const problems: string[] = [];
     // The relaxation's boundary: a word typed in a window is never excused as unsaved at unload.
     for (const token of unsavedAtUnload) if (typedInWindow.has(token)) problems.push(`${token} typed in window, UNSAVED AT UNLOAD is not its excuse`);
     for (const token of typed) {
-      if (unsavedAtUnload.has(token) && !inNote.includes(token) && !kept.includes(token)) continue;
+      // A-20: no exemption for words still unsaved when the page went away. Typing still open is kept in the
+      // kept-words archive at pagehide, sealed typing in its save's recovery receipt: in the note or kept, like any other.
       if (undone.has(token)) {
         if (inNote.includes(token) || kept.includes(token)) problems.push(`${token} was undone but is still somewhere`);
         continue;
@@ -551,7 +642,7 @@ async function runSequence(seed: number, length: number, script?: readonly strin
       const noteCount = inNote.filter((value) => value === token).length;
       const keptHere = kept.includes(token);
       if (noteCount + (keptHere ? 1 : 0) === 0) problems.push(`${token} LOST`);
-      else if (noteCount > 1 || (noteCount === 1 && keptHere)) problems.push(`${token} DUPLICATED (note ${noteCount}, kept ${keptHere})`);
+      else if (noteCount > 1 || (noteCount === 1 && keptBesidesBox.includes(token))) problems.push(`${token} DUPLICATED (note ${noteCount}, kept ${keptHere})`);
       else if (noteCount === 1) {
         // In the note it must share a unit with its anchor, when the anchor is in the note too.
         const tag = anchorOf.get(token);
@@ -604,6 +695,34 @@ const KNOWN_LOSSES: Array<[string, string[]]> = [
 
 // Paths found in the browser that the gate has to cover. Not known losses: each is run on the current code.
 const PATH_ARMS: Array<[string, string[]]> = [
+  // A-20 r3 (Main_Designer on Reviewer M1-M4). Saves held from here on: the queue stays behind the first save, so every
+  // Enter and every line typed after it is sealed but not handed over when the page goes. Each Enter waits a beat after
+  // the word before it, as a person does (an Enter in the same tick reads the flow from before that word: A-25 CHAIN).
+  ['LIST: k, Enter x, Enter y while a save is on its way, the page goes (M1)',
+    ['type', 'wait:2600', 'holdSaves:0', 'type', 'wait:30', 'enter', 'wait:30', 'type', 'wait:30', 'enter', 'wait:30', 'type', 'unload', 'wait:800']],
+  ['CLICKBACK: with the Enter queued, typing back on the line it cut, the page goes (M1)',
+    ['type', 'wait:2600', 'holdSaves:0', 'type', 'wait:30', 'enter', 'wait:30', 'at:1', 'type', 'unload', 'wait:800']],
+  ['BACKIN-fail: kept and sent at a Back the router then holds, the save fails, the person stays and goes on (M2)',
+    ['type', 'wait:2600', 'fault:save', 'type', 'keepleave', 'wait:600', 'stay', 'type', 'wait:600', 'unload', 'wait:800']],
+  ['BACKIN-undo: as BACKIN-fail, then the failed words are undone; they must not come back (M2)',
+    ['type', 'wait:2600', 'fault:save', 'type', 'keepleave', 'wait:600', 'stay', 'undo', 'wait:600', 'unload', 'wait:800']],
+  ['HANDOVER-one-home: kept, then handed over while its save is held, the page goes (M3)',
+    ['type', 'wait:2600', 'holdSaves:0', 'type', 'keepleave', 'wait:600', 'unload', 'wait:800']],
+  ['REFUSE: the save is turned down before its receipt is written, the page goes (M5)',
+    ['type', 'wait:2600', 'fault:refuse', 'type', 'wait:30', 'unload', 'wait:800']],
+  // A-20 r3d (N1): a line joined (Backspace, or a selection across the line break deleted) while a save is on its way,
+  // more typed, the page goes. Before: the joined line's record started from the server's text and landed as a whole
+  // replacement beside the line the server still has (that line's words twice).
+  ['MERGE: k0, Enter k1, saves held, k2, Backspace joins the k1 line onto the k0 line, k3, the page goes (N1)',
+    ['type', 'wait:30', 'enter', 'wait:2600', 'holdSaves:0', 'type', 'wait:30', 'join', 'wait:30', 'type', 'unload', 'wait:800']],
+  ['SELDEL: as MERGE, the line break selected and deleted (N1)',
+    ['type', 'wait:30', 'enter', 'wait:2600', 'holdSaves:0', 'type', 'wait:30', 'seldel', 'wait:30', 'type', 'unload', 'wait:800']],
+  ['BFCACHE: pagehide into the back-forward cache and back, more typing saved, the page goes (M4)',
+    ['type', 'wait:2600', 'type', 'bfcache', 'wait:30', 'type', 'wait:2600', 'unload', 'wait:800']],
+  // A-20 r2: a pause longer than IDLE_SAVE_MS writes the open text without sealing it; more typing, its save held,
+  // and the page goes. Back on the note every word is there exactly once (K1: the saved part is not written twice).
+  ['idle save, more typing, its save held, the page goes (K1)', ['type', 'wait:2600', 'type', 'holdSaves:0', 'unload', 'wait:800']],
+  ['idle save twice, then leaving through the app (K1)', ['type', 'wait:2600', 'type', 'wait:2600', 'type', 'leave', 'wait:600', 'return', 'wait:800']],
   // acc15 / GEO-long-0: the words in the window land, the structure that follows gets 409 on its unit-transfer, the
   // page goes away and the note is opened again. Every word must be on the server or in this note's record.
   ['409: the second structure unit-transfer conflicts after the words in the window landed, then the page goes away',
@@ -642,6 +761,12 @@ describe('words typed around heading structures are conserved', () => {
     expect(result.problems.some((problem) => problem.includes('typed in window, UNSAVED AT UNLOAD is not its excuse'))).toBe(true);
   }, 60_000);
 
+  it('window-source boundary, positive control: with the window\'s own records gone and the departure records left, the gate turns red', async () => {
+    const result = await runSequence(0, 7, ['holdSaves:0', 'heading', 'type', 'enter', 'type', 'wait:600', 'unload', 'wait:600'], { dropWindowRecords: true });
+    expect(result.steps.some((step) => step.detail?.endsWith('in window'))).toBe(true);
+    expect(result.problems.some((problem) => problem.includes('typed in window, UNSAVED AT UNLOAD is not its excuse'))).toBe(true);
+  }, 60_000);
+
   it(`${SEEDS} seeded sequences of ${LENGTH} events: every word in exactly one place, in its own unit`, async () => {
     const failures: string[] = [];
     const unsavedSeeds: string[] = [];
@@ -657,4 +782,90 @@ describe('words typed around heading structures are conserved', () => {
     console.log(`UNSAVED AT UNLOAD (existing save path): ${unsavedSeeds.length ? unsavedSeeds.join(' | ') : 'none'}`);
     expect(failures, failures.join('\n')).toEqual([]);
   }, 600_000);
+});
+
+// A-20 r3d (N6): the page went with a save on its way (its receipt waits in the recovery queue with Apply) and with a
+// kept record on another line of the same block. On reopen the record waits in the box while the receipt waits: landing
+// it would save the block, and that save's receipt would replace the waiting one (one receipt per block) and then go.
+// The conservation gate cannot make that receipt (its saves are stand-ins, no receipt store); this test covers it.
+describe('A-20 r3d kept words wait while the block has a receipt to apply (N6)', () => {
+  it('reopen: the record stays in the box while the receipt waits, and lands once it is applied or dismissed', async () => {
+    localStorage.clear();
+    document.body.innerHTML = '';
+    const { world, Host } = makeWorld();
+    rememberUnplacedWords('note', { id: 'edit-work-tu-1-1', blockId: 'work', unitId: 'tu-1', initialText: '<W0>',
+      text: '<W0> <bbb>', source: 'edit' });
+    // An earlier page's save the server never had: '<W0> <aaa>'.
+    world.recoveryReceipts.push({ blockId: 'work', contentJson: { [TEXT_FLOW_CONTENT_KEY]: textFlow([['tu-1', '<W0> <aaa>'], ['tu-2', '<W1>']]) } });
+    const view = render(<Host noteId="note" />);
+    const workText = () => {
+      const hooks = world.hooks!;
+      const flow = hooks.flowDrafts.work ?? getTextFlowContent(hooks.blocks.find((entry) => entry.id === 'work')?.content_json ?? {});
+      return flow ? textOf(flow) : '';
+    };
+    await act(async () => { await sleep(400); });
+    expect(workText()).not.toContain('<bbb>');
+    expect(readUnplacedWords('note').map((words) => words.text)).toEqual(['<W0> <bbb>']);
+    expect(shownBuffers().map((element) => element.value)).toContain('<W0> <bbb>');
+    world.recoveryReceipts.splice(0);
+    await waitFor(() => expect(workText()).toContain('<bbb>'), { timeout: 4000 });
+    await waitFor(() => expect(readUnplacedWords('note')).toEqual([]));
+    view.unmount();
+  });
+});
+
+describe('A-20 r3d kept words and a receipt the server already has (N6a)', () => {
+  it("kept words land when the block's receipt already matches the server (N6 narrowing)", async () => {
+    localStorage.clear();
+    document.body.innerHTML = '';
+    const { world, Host } = makeWorld();
+    rememberUnplacedWords('note', { id: 'edit-work-tu-1-1', blockId: 'work', unitId: 'tu-1', initialText: '<W0>',
+      text: '<W0> <bbb>', source: 'edit' });
+    // An earlier page's save that went through after the page left: its receipt is still offered, and its words are
+    // exactly what the server has.
+    const served = world.server.note.find((entry) => entry.id === 'work')!;
+    world.recoveryReceipts.push({ blockId: 'work', contentJson: JSON.parse(JSON.stringify(served.content_json)) });
+    const view = render(<Host noteId="note" />);
+    const workText = () => {
+      const hooks = world.hooks!;
+      const flow = hooks.flowDrafts.work ?? getTextFlowContent(hooks.blocks.find((entry) => entry.id === 'work')?.content_json ?? {});
+      return flow ? textOf(flow) : '';
+    };
+    await waitFor(() => expect(workText()).toContain('<bbb>'), { timeout: 4000 });
+    await waitFor(() => expect(readUnplacedWords('note')).toEqual([]));
+    expect(shownBuffers()).toEqual([]);
+    view.unmount();
+  });
+});
+
+describe('A-20 r3d the server text a receipt is read against is the note as opened this time (N6a)', () => {
+  it('note → other → note in the same runtime: kept words land behind a receipt the server got while the note was away', async () => {
+    localStorage.clear();
+    document.body.innerHTML = '';
+    const { world, Host } = makeWorld();
+    const view = render(<Host noteId="note" />);
+    await act(async () => { await sleep(50); });
+    world.noteId = 'other';
+    view.rerender(<Host noteId="other" />);
+    await act(async () => { await sleep(50); });
+    // While the note was away, its last save went through: the server has '<W0> <aaa>'. The receipt of that save is
+    // still offered (its reply never reached the page), and words typed after it were kept.
+    const changed = textFlow([['tu-1', '<W0> <aaa>'], ['tu-2', '<W1>']]);
+    world.server.note = world.server.note.map((entry) => entry.id === 'work'
+      ? { ...entry, content_json: { [TEXT_FLOW_CONTENT_KEY]: changed }, plain_text: textOf(changed) } : entry);
+    world.recoveryReceipts.push({ blockId: 'work', contentJson: { [TEXT_FLOW_CONTENT_KEY]: structuredClone(changed) } });
+    rememberUnplacedWords('note', { id: 'edit-work-tu-1-2', blockId: 'work', unitId: 'tu-1', initialText: '<W0> <aaa>',
+      text: '<W0> <aaa> <bbb>', source: 'edit' });
+    world.noteId = 'note';
+    view.rerender(<Host noteId="note" />);
+    const workText = () => {
+      const hooks = world.hooks!;
+      const flow = hooks.flowDrafts.work ?? getTextFlowContent(hooks.blocks.find((entry) => entry.id === 'work')?.content_json ?? {});
+      return flow ? textOf(flow) : '';
+    };
+    await waitFor(() => expect(workText()).toContain('<bbb>'), { timeout: 4000 });
+    await waitFor(() => expect(readUnplacedWords('note')).toEqual([]));
+    expect(workText().match(/<aaa>/g)).toHaveLength(1);
+    view.unmount();
+  });
 });

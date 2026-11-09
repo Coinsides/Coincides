@@ -75,15 +75,39 @@ export interface UnplacedWords {
   unitId: string;
   initialText: string;
   text: string;
+  /**
+   * Who kept it: a structure window (the default, older records too), the text history on a departure ('edit'), or the
+   * new line of a split that had not been sent when the note was left ('split'): kept with no role and an empty start,
+   * so it has no anchor to land on by itself and waits in the box to be put back by hand.
+   */
+  source?: 'window' | 'edit' | 'split';
 }
 
 // Per account: someone else signing in on this browser neither sees these words nor writes them anywhere.
 const currentAccount = () => useAuthStore.getState().user?.id ?? 'anonymous';
 const unplacedKey = (noteId: string) => `coincides:unplaced-words:${currentAccount()}:${noteId}`;
 
+// A-20 r2 (K3): words kept before the account had loaded went under 'anonymous'. Once the account is known they are
+// claimed into its key, so they come back when the note is opened rather than waiting where nothing reads them.
+function claimAnonymousWords(noteId: string): void {
+  if (currentAccount() === 'anonymous') return;
+  const anonymousKey = `coincides:unplaced-words:anonymous:${noteId}`;
+  const waiting = localStorage.getItem(anonymousKey);
+  if (!waiting) return;
+  const parsed = JSON.parse(waiting) as unknown;
+  const claimed = (Array.isArray(parsed) ? parsed : [parsed]) as UnplacedWords[];
+  const own = localStorage.getItem(unplacedKey(noteId));
+  const ownEntries = own ? (JSON.parse(own) as unknown) : [];
+  const mine = (Array.isArray(ownEntries) ? ownEntries : [ownEntries]) as UnplacedWords[];
+  const ids = new Set(mine.map((entry) => entry?.id));
+  localStorage.setItem(unplacedKey(noteId), JSON.stringify([...mine, ...claimed.filter((entry) => !ids.has(entry?.id))]));
+  localStorage.removeItem(anonymousKey);
+}
+
 /** Every entry kept for the note. An entry written by the single-entry format is read as one entry. */
 export function readUnplacedWords(noteId: string): UnplacedWords[] {
   try {
+    claimAnonymousWords(noteId);
     const stored = localStorage.getItem(unplacedKey(noteId));
     if (!stored) return [];
     const parsed = JSON.parse(stored) as unknown;

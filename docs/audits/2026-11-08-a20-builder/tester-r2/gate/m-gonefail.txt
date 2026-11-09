@@ -1,0 +1,7 @@
+GONEFAIL-hash              1/1
+    ok  count 1; alerts ["Failed to save block","Text changes could not be saved. Retry saving or undo before leaving the note."]
+GONEFAIL-paste             1/1
+    ok  count 1; alerts ["Failed to save block","Text changes could not be saved. Retry saving or undo before leaving the note."]
+GONEFAIL-back              1/1
+    ok  count 1, false 'could not be saved' false (x0), true 'did not reach' true (x1)
+total red 0

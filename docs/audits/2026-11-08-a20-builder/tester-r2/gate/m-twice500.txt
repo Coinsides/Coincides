@@ -1,0 +1,3 @@
+TWICE-hash500              2/2
+    ok  count 1, ends C, jumps ["C"], Apply false; messages (A-25 e, not gated) 2, still on screen at C 2
+total red 0

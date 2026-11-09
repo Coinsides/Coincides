@@ -1,0 +1,5 @@
+BACKIN-fail                2/2
+    ok  stayed true; false 'did not reach' on A 0; kept records while staying 0; second leave held false; reopen ["warmup",""] banner "A block edit is waiting for recovery warmup backin words Apply Dismiss"; r3 rule (order, 
+BACKIN-undo                2/2
+    ok  stayed true; undo [["warmup",""]]; server after undo ["warmup",""]; reopen ["warmup",""] count 0; banner on reopen false; false 'did not reach' while on A 0
+total red 0

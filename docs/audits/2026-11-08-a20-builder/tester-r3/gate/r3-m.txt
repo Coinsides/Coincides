@@ -1,0 +1,29 @@
+BACKIN-fail                2/2
+    ok  held1500: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen [
+BACKIN-undo                2/2
+    ok  stayed true; undo [["warmup",""]]; server after undo ["warmup",""]; reopen ["warmup",""] count 0; banner on reopen false; false 'did not reach' while on A 0
+BACKIN-fail-recover        2/2
+    ok  recover: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); recover HELD-PROC
+BACKIN-fail-sealed         2/2
+    ok  sealed: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["w
+BACKIN-fail-refail         2/2
+    ok  refail: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["w
+BACKIN-fail-idlefirst      5/5
+    ok  idlefirst: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen 
+BACKIN-fail-fast           5/5
+    ok  fast: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["war
+BACKIN-fail-neterr         5/5
+    ok  neterr: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["w
+BACKIN-ctl                 2/2
+    ok  ctl: HELD-PROCEED (want HELD-PROCEED; prevented true, on A 6/6, arrived true, sent 2, new toasts []); count 1
+BACKIN-ctlfail             2/2
+    ok  ctlfail: REFUSED (want REFUSED; prevented true, on A 6/6, arrived false, sent 0, new toasts ["Changes could not be saved. "]); count 0
+BACKIN-ctlclean            2/2
+    ok  ctlclean: INSTANT-PROCEED (want INSTANT-PROCEED; prevented true, on A 0/6, arrived true, sent 0, new toasts []); count 1
+LIST-close                 2/2
+    ok  close: x box, y box; server ["warmup","k0"]; boxes ["x","y"]; banner "A block edit is waiting for recovery warmup k0 Apply Dismiss"
+LIST-back                  2/2
+    ok  back: x box, y box; server ["warmup","k0"]; boxes ["x","y"]; banner "Not in the note yet Discard"
+LIST-addr                  2/2
+    ok  addr: x server, y server; server ["warmup","k0","x","y"]; boxes []; banner undefined
+total red 0

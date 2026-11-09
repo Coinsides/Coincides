@@ -1,0 +1,11 @@
+ADDR-noncanon-bare         0/1
+    RED bare (bare to #notes/A, released 1, now #notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 1 {"t1":0,"t3":0,"t6":0,"hold":1}; 2nd leave STUCK; reopen ["warmup","backin words more"]
+ADDR-noncanon-bareslash    0/1
+    RED bareslash (bareslash to #notes/A/, released 1, now #notes/:A/, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 1 {"t1":0,"t3":0,"t6":0,"hold":1}; 2nd leave STUCK; reopen ["warmup","backin words more"]
+ADDR-noncanon-bareaddr     0/1
+    RED bareaddr (bareaddr to #notes/A, released 1, now #notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 1 {"t1":0,"t3":0,"t6":0,"hold":1}; 2nd leave STUCK; reopen ["warmup","backin words more"]
+MULTIPASTE-close           0/1
+    SETUP ERROR Error: setup: the paste did not leave 'abcXQ' {"pasted":{"tag":"TEXTAREA","editor":true,"prevented":
+LISTPASTE-close            0/1
+    SETUP ERROR TypeError: Cannot read properties of undefined (reading 'includes')
+total red 3

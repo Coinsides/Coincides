@@ -1,0 +1,7 @@
+HEADCLOSE-plain            0/1
+    RED plain (head idle): reopen aaa nowhere, bbb server (server ["warmup bbb",""], boxes [], kept []); +20 s reopen aaa nowhere, bbb server
+HEADCLOSE-apply            0/1
+    RED apply (head idle): reopen aaa nowhere, bbb server (server ["warmup bbb",""], boxes [], kept []); +20 s reopen aaa nowhere, bbb server; apply clicked false: server ["warmup bbb",""], kept []
+HEADCLOSE-dismiss          0/1
+    RED dismiss (head idle): reopen aaa nowhere, bbb server (server ["warmup bbb",""], boxes [], kept []); +20 s reopen aaa nowhere, bbb server; dismiss clicked false: server ["warmup bbb",""], kept []
+total red 3

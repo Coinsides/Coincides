@@ -1,0 +1,3 @@
+HEADCLOSE-putback          0/1
+    RED reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup bbb","pos":10,"len":10}): 18359 PUT /note-blocks/:id/text-s
+total red 1

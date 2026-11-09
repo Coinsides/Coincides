@@ -1,0 +1,3 @@
+BACKIN-heldhead-del        1/1
+    ok  NOT CONSTRUCTIBLE (delete had no effect during the hold); kept after Back: max 1, +34..+995 ms; at delete (A, +973 ms) kept ["\"warmup\"->\"warmup bbb\"(edit)"] -> screen ["warmup bbb","aaa"], kept ["\"warmup\"->\"wa
+total red 0

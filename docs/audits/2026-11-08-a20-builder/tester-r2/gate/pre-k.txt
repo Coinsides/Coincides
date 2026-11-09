@@ -1,0 +1,15 @@
+K1-401hash                 0/1
+    RED ["warmup","note"]
+K1-401blur                 1/1
+    ok  ["warmup","note"]
+K1-close                   1/1
+    ok  ["warmup","note"]
+K1-paste500                0/1
+    RED ["warmup","note"]
+K1IME-held                 0/1
+    RED ["warmup","note现值"]
+K2-hash                    1/1
+    ok  ["warmup","note"]
+K2-paste                   1/1
+    ok  ["warmup","note"]
+total red 3

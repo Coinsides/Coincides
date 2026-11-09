@@ -1,0 +1,3 @@
+PAUSEEXIT-kill             1/1
+    ok  kill: on server true
+total red 0

@@ -1,0 +1,9 @@
+INAPP-home-type            2/2
+    ok  
+INAPP-home-still           2/2
+    ok  
+INAPP-tab-type             2/2
+    ok  
+INAPP-tab-still            2/2
+    ok  
+total red 0

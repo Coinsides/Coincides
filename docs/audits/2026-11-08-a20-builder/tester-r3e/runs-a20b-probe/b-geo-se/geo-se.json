@@ -1,0 +1,113 @@
+[
+ {
+  "id": "3d616d99-3367-4647-98cf-05bba645d4e4",
+  "lines": [
+   {
+    "v": "abc",
+    "top": 437.1,
+    "bottom": 464.3,
+    "h": 27.2,
+    "left": 711,
+    "lh": "25.1px",
+    "fs": "15.2px",
+    "pt": "0px",
+    "pb": "0px",
+    "mt": "0px",
+    "mb": "0px",
+    "hostTop": 437.1,
+    "hostH": 27.2,
+    "hostMt": "0px",
+    "hostMb": "0px",
+    "hostPt": "0px",
+    "hostPb": "0px"
+   },
+   {
+    "v": "d",
+    "top": 467.4,
+    "bottom": 494.6,
+    "h": 27.2,
+    "left": 711,
+    "lh": "25.1px",
+    "fs": "15.2px",
+    "pt": "0px",
+    "pb": "0px",
+    "mt": "0px",
+    "mb": "0px",
+    "hostTop": 467.4,
+    "hostH": 27.2,
+    "hostMt": "0px",
+    "hostMb": "0px",
+    "hostPt": "0px",
+    "hostPb": "0px"
+   },
+   {
+    "v": "qr",
+    "top": 497.8,
+    "bottom": 525,
+    "h": 27.2,
+    "left": 711,
+    "lh": "25.1px",
+    "fs": "15.2px",
+    "pt": "0px",
+    "pb": "0px",
+    "mt": "0px",
+    "mb": "0px",
+    "hostTop": 497.8,
+    "hostH": 27.2,
+    "hostMt": "0px",
+    "hostMb": "0px",
+    "hostPt": "0px",
+    "hostPb": "0px"
+   }
+  ],
+  "abcY": 437.1,
+  "dY": 467.4,
+  "gap": 30.3
+ },
+ {
+  "id": "cd49bfa1-fb16-45b0-a847-d22a8f0c944c",
+  "lines": [
+   {
+    "v": "abc\nd",
+    "top": 437.1,
+    "bottom": 491.5,
+    "h": 54.4,
+    "left": 711,
+    "lh": "25.1px",
+    "fs": "15.2px",
+    "pt": "0px",
+    "pb": "0px",
+    "mt": "0px",
+    "mb": "0px",
+    "hostTop": 437.1,
+    "hostH": 54.4,
+    "hostMt": "0px",
+    "hostMb": "0px",
+    "hostPt": "0px",
+    "hostPb": "0px"
+   },
+   {
+    "v": "q",
+    "top": 491.5,
+    "bottom": 518.7,
+    "h": 27.2,
+    "left": 711,
+    "lh": "25.1px",
+    "fs": "15.2px",
+    "pt": "0px",
+    "pb": "0px",
+    "mt": "0px",
+    "mb": "0px",
+    "hostTop": 491.5,
+    "hostH": 27.2,
+    "hostMt": "0px",
+    "hostMb": "0px",
+    "hostPt": "0px",
+    "hostPb": "0px"
+   }
+  ],
+  "abcY": 437.1,
+  "dY": 462.20000000000005,
+  "gap": 25.1
+ }
+]

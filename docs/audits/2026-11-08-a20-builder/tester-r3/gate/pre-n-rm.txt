@@ -1,0 +1,3 @@
+MERGE-close                0/1
+    RED close: LOST; server ["ab","cd","ef"]; screen ["ab","cd","ef"]; boxes []; Z at lost; kept at leave []; at reopen []; where closed; head efg after reopen+20 s+reopen banner+Apply; head efg at banner, 20 s later banner+
+total red 1

@@ -2961,3 +2961,18 @@ r3d 进度:tsc 0、client 全量 0、构建 0,主 JS `index-5AKgn9Ew.js`;kit s6a
 ### Tester r3e 正式验收前三步读数(Tester;Main_Designer 收 2026-11-09)
 ① r3 链在 r3e 190/190、0 红;逐臂 notes 对 r3 判语链归一化 diff 0 行(16 组)。② a20m LANDOTHER r3e 6/6 绿(修前 5/5 + 1 setup N/A)。③ a20n r3e REPS=2 全臂 52 行 + 第三形 ×3:MERGE / SELDEL 三点 BOX(`abcdZ` / `adZ` 在框,头字 efg 横幅 + Apply);ADDR-noncanon 七形全绿含 `#/Notes` 三形(released 0,字 ×1);heldback 3/3;heldhead 3/3;HEADCLOSE-applyslow 两形 ×2 绿(扣留期 bbb 不落,Apply 200 先收,~1.4 s 后 bbb 落成 `['warmup bbb','aaa']`,无 409,中间点 +3.5 s 已终态);MENTER-close ×2 KEPT(服务器 `['abx','cd']` 不变,框 `abxcd` + `Z`,带 Apply 的项 = 读数,A-25 ②a (ii));N6B 绿;HEADCLOSE plain / apply / dismiss 绿;HEADCLOSE-putback = 读数(A-25 ②a (iv),修前同形);heldhead-undo 红 3/3(🅱 已裁,手册已知,修前无扣留 N/A);CLICKBACK-end 只记(框 `alphaZ`)。对修前 pre3e-n(MERGE / SELDEL / MENTER LOST、ADDR STUCK、HEADCLOSE / applyslow / N6B bbb 丢):**每臂都不比修前差**。下一步:9 对(槽 2)→ 第 10 对 → 判语;A-20b 包已收,判语后接,此前只写新臂不占槽。
 **主设计读**:三步没有一条超出预期形;applyslow 的 ~1.4 s 落地间隔是 P1 窄修的实证(bbb 等 Apply 结算,不等空闲)。无需补裁,等 9 对 + 第 10 对。
+
+### SHIFTENTER-typed-close 在 r3e 上 SPLIT,牵涉 r3e 判语 → 预裁(Main_Designer 2026-11-09)
+Tester 三臂 ×1:r3e close(`abc\n`)LOST、**typed-close(`abc\nd`)SPLIT**(应用 PUT `abc|d|qr`,服务器 `['abc','d','qr']`)、idletyped 对照 ONE;r1 close SPLIT、typed SPLIT、idletyped ONE。证实 builder 读码:落地写者切 `\n` 是 r3e 已有,A-20b r1 只是把尾部软换行也送进去。修前 typed-close 结果在跑(修前 Shift+Enter 当场存,Tester 给臂加了只在修前用的 `ALLOWEXTRA=1` 读同步骤结果)。Tester 问:若修前 ONE,这条臂上 r3e 比修前差(应用替人写了结构),进不进 r3e 判语。
+**预裁(修前为 ONE 时生效)**:**进判语列为「比修前差」,但不挡 r3e 放行**,记手册「已知」一句,A-20b r2 的乙修掉它(下一轮即删)。理由,逐条对齐我上午对 SHIFTENTER-close r1 的「不能放」:(1) 伤害形不同——r1 close 把看不见的尾换行变成**看得见的空段落**;typed-close 的 `'abc\nd'` 一单元与 `['abc','d']` 两单元**在屏上渲染一样**(都是两行),差在单元边界(选择、标题、锚在单元上的批注),字一个不少;(2) 修的代价不同——r1 的修在包封前就在手上、Tester 链没起、零延误;r3e 的修在 r2 里,r2 的验收链在 r3e 之后数小时,为它压 r3e 等于把 MERGE / SELDEL / MENTER / ADDR / HEADCLOSE / applyslow / N6B 七臂的丢字修复多压数小时,Henry 的令是「尽早上岛」;(3) 触发要「别处保存在途 + Shift+Enter 后打字 + 关页」三者同窗。原则写一次:**能在封前零延误修的就修;修要压别的单上岛的,如实列出、记已知、下一轮删。** 若修前不是 ONE 则无事。Tester 判语照她的标准列,裁定归我——这条由 Henry 复核。
+
+#### 更正:上节理由 (1)「屏上渲染一样」不成立(Tester 实测;Main_Designer 2026-11-09)
+Tester 只读测量(r3e 5610,无输入):两单元 `['abc','d']` 的 `d` 行在 `abc` 下 30.3 px、左栏**多一个块手柄**;一单元 `'abc\nd'` 的 `d` 在 25.1 px(一个行高)、无手柄。差约 5 px 行距 + 一个可见手柄,**看得出是两段**——更接近「看得见的空段落」那侧,只是轻得多(截图 `runs/b-geo-se/` 随她报告留档)。**我上节 (1) 是没量就写的视觉断言,撤回。** 预裁结论不变——不挡 r3e、进判语列差、记已知、r2 删——但只站在 (2)(3) 上:伤害 = 一个软换行变成一个轻微可见的分段、字不少、不可逆性低(重开后可手删那一段);修已在 r2(下一轮);为它压 r3e 的代价是七臂丢字修复多等数小时。这条差别**比我说的重**,所以手册「已知」那句要写实:「关页时若另一处保存未完成,刚按的 Shift+Enter 软换行重开后会变成两段(多一个块手柄)」。Henry 复核时请把 (1) 的撤回一起看:我在给他的理由里写了一个没有度量的事实,Tester 用 5 px 把它拦下了。
+mx2 收:r3e 19/226 红,全在修前 25/226 的红里,19 行两版 DOM 与服务器文字逐字同(IME 探针留下的拼音 `di`);修前多 6 行(durableSentence ×2、insert ×2、pause600、rhythm23)——第 1 对不比修前差。
+
+#### 修前 typed-close = LOST → 预裁「无事」生效;Tester 改准已知句;r3e 判语:放行(Main_Designer 收 2026-11-09)
+修前(ALLOWEXTRA 同步骤 ×1)`'abc\nd'` 关页重开服务器 `['abc','qr']`,`d` 与换行都丢——修前在途期间根本没发这次保存;close 形也 LOST。r3e SPLIT 保住了 `d`,只是成了单独一段:**此臂 r3e 不比修前差**,判语作读数单列(三版读数 + 「+5 px、多一个块手柄」),不进「比修前差」。手册「已知」按 Tester 改准(我上节那句把「只按 Shift+Enter」也写成变两段,不对——那形在 r3e 上是丢,修前同):**「关页时若另一处保存未完成:Shift+Enter 后接着打的字,重开后成为单独一段(多一个块手柄);只按了 Shift+Enter 没再打字,那个换行不保留。」**(A-20b r2 乙后两形都保留原样,到时删。)WINDOWENTER-land ×1:r3e / r1 SPLIT 绿(`[['warmup'],['[heading_1]kept','body']]`,各 1,回来时框已落地);修前 BOX(两行框 18 s 内未落地,字在框与记录里不丢)。**Tester 判语:r3e 放行,没有比修前差的臂**;她先起一轮 Opus 复核(≤4 路、占一位)对原始行反驳报告里的数,过了登台账、扫描、给包回拷。
+
+#### 再更正:「+5 px」实为约 +3 px(Tester,Opus 复核查出;Main_Designer 收 2026-11-09)
+25.1 px 是未乘画布缩放(108%)的 CSS 行高,与屏幕坐标里量到的 30.3 不在同一坐标系。同坐标系下:一单元 `'abc
+d'` 每行 27.2 px;两单元 `d` 在 `abc` 下 30.3 px,两格间空 3.1 px;截图逐像素 `d` 字顶差 4 px。**结论:行距多约 3–4 px,另加一个可见块手柄**(手柄不变)。上文两处「+5 px」以本条为准;手册已知句已改为「多一个块手柄,行距约多 3 px」。她的 Opus 复核其余 14 条都是证据留档或措辞,不改任何判定。

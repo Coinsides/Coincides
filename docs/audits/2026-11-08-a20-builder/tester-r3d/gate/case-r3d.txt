@@ -1,0 +1,5 @@
+ADDR-noncanon-case         0/1
+    RED case (case to #/Notes/A, released 1, now #/Notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 1 {"t1":0,"t3":0,"t6":0,"hold":1}; 2nd leave STUCK; reopen ["warmup","backin words more"]
+ADDR-noncanon-caseaddr     0/1
+    RED caseaddr (caseaddr to #/Notes/A, released 1, now #/Notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 1 {"t1":0,"t3":0,"t6":0,"hold":1}; 2nd leave STUCK; reopen ["warmup","backin words more
+total red 2
