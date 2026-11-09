@@ -1,0 +1,4 @@
+DEBUGENTER before {"link":{"tag":"DIV","role":null,"x":418,"y":383.109375,"n":1},"dbg":{"at":[418,383.109375],"vw":1422,"vh":904,"scrollY":0,"chain":["DIV._sectionHeader_1n138_166","DIV._section_1n138_162","DIV._page_1n138_1","DIV._content_12akn_7.","MAIN._main_12akn_203.","DIV._documentWorkspace_12akn_244"],"text":"Notes\n1\nNotes\nTrash\nNew Note"}}
+DEBUGENTER after {"hash":"#/courses/:id","eds":[]}
+DEBUGENTER before {"link":{"tag":"DIV","role":null,"x":418,"y":383.109375,"n":1},"dbg":{"at":[418,383.109375],"vw":1422,"vh":904,"scrollY":0,"chain":["DIV._sectionHeader_1n138_166","DIV._section_1n138_162","DIV._page_1n138_1","DIV._content_12akn_7.","MAIN._main_12akn_203.","DIV._documentWorkspace_12akn_244"],"text":"Notes\n1\nNotes\nTrash\nNew Note"}}
+DEBUGENTER after {"hash":"#/notes/:id","eds":["warmup",""]}

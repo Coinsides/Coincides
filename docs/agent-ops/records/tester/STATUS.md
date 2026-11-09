@@ -11,7 +11,7 @@
 
 ## 正在做
 
-- **刚下的判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`，台账已登，部署后待核。
+- **刚下的判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`，台账已登。**第 23 轮已上岛（`29b1d456`），部署后已核**：岛上 63/63 与包一致，代表臂 7/7（报告「十」）。
   - 同源：src 17/17 OK，自建 63/63 与包一致，主 JS `index-Dkbj0u5K.js`。
   - 没有一条臂比修前差：链 190/190 对 r3 0 行差异；a20m 全绿；P1 applyslow 两形 4/4、P2 MENTER 2/2 KEPT；9 对 r3e 红行都在修前红里；第 10 对 0/20 对 0/20。
   - 已裁、手册已知：heldhead-undo（🅱）、putback（A-25 ②a (iv)）、MENTER 多余回执（A-25 ②a (ii)）。单列：SHIFTENTER-typed-close r3e 成单独一段，修前丢字，A-20b r2 修。

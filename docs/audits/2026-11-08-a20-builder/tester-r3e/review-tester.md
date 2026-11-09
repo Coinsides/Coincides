@@ -131,3 +131,31 @@ applyslow 的中间点（只记不判）：两形的 Apply 回应时刻服务器
 - r3e：5611 → 3611（全新库 `data-r3e`），链 / a20m / a20n 用 `cred-3611`，配对用 `cred-3611r`（独立测试邮箱）。修前：5601 → 3601。封包前冻结件：5610 → 3605。
 - 锁：每一步都占一个槽位（`heavy-job.lock` / `.lock.2`），取放在同一条命令里；浏览器合计 ≤3；抽查过一次 CPU，6%。报告复核：3 个 Opus 读者对着原始行反驳本报告（只读，占一位）。查出一条错数（行距，已改），其余 14 条是证据没留档或措辞偏宽，均已补档或改写，没有一条改动判定。
 - 留档：`runs/`（链 16 个标签、a20m、a20n、修前 a20n、封包前 `r3eps-n`、第 10 对 40 行）、`runs-a20b-probe/`（第八节各臂的行，含两张测行距的截图）、`pairs/`（9 对与 mx2 的 rows.jsonl 与日志，不含截图）、`gate/`（链的逐臂注记、a20n / a20m / r3eps-n 的分析器输出、文案核对输出）、`hashes/`（自建清单、冻结件对包的比对）、`scripts/`（本轮正式跑用的 `a20n_arms.mjs`、`analyze-a20.mjs`、`a20m_judge.mjs`，以及 `check-a20m-oracle.mjs`、`undopause-tally.mjs`、运行脚本、`a20b-probe/`）。本地路径已换成占位符。
+
+## 十、第 23 轮部署后岛上复核（2026-11-09）
+
+**结论：岛上就是验过的那一版，代表臂 7/7 全过**（报给 Main_Designer 的六条，加 N6B）。 证据在 `postdeploy-23/`。
+
+- **部署前 ack**（`29b1d456`）：
+  - 包里 17 个文件与提交 17/17 逐字节相同。
+  - `04f6f822..29b1d456` 之间，代码区只多了根目录工具脚本 `scripts/pre-harvest-scan.mjs`，客户端构建不引用它。
+  - `docs/generated` 无改动。
+- **对账**：经隧道 GET 岛上 63 个客户端文件，63/63 与包的 `dist/client` 逐字节一致，主 JS `index-Dkbj0u5K.js`（`island-hash-post23.txt`）。部署前同一脚本对第二十二轮是 61/63，只差主 JS 和 `index.html`，作对照（`island-hash-pre23.txt`）。
+- **代表臂**：对岛上前端，只登录我的岛上测试账号，没注册新账号，没碰 Henry 的账号与数据。扣请求、拖回应都在测试浏览器里做，岛上只看到普通请求，或者根本没有请求。各 ×1，读数与 r3e 本地一致。
+
+| 臂 | 岛上结果 |
+|---|---|
+| IDLE（空闲保存） | 3.5 秒时字已在服务器 |
+| K1-close（字在途时关页） | 重开后 `['warmup','note alpha']` |
+| HEADCLOSE-plain | aaa 横幅带 Apply，bbb 在框（记录 `"warmup" → "warmup bbb"`），20 秒后再重开同 |
+| HEADCLOSE-applyslow（请求形，P1） | Apply 的 PUT 扣约 2.5 秒，得 200；之后 bbb 落成 `['warmup bbb','aaa']`，各 1 次；无 409、无「Failed to save block」 |
+| MENTER-close（P2） | KEPT：服务器 `['abx','cd']` 不变，框里 `abxcd` 和 `Z` |
+| ADDR-noncanon-case（`#/Notes/<id>`） | 人留在 A，放行 0 次，第二次离开被扣，`backin words more` 恰 1 份 |
+| N6B-switch | A → B → A，A 的字没到 B；A 上 `['warmup bbb','aaa']` 各 1 份 |
+
+- **ADDR-noncanon-case 前两次是探针的设置错，不是应用的错**（`post23-n`、`post23-n2`）。
+  - 探针在课程页先量好笔记卡片的位置，等 300 毫秒再点。岛上课程页的各节加载得晚，卡片在这期间被往下推了约 68 px，于是那一下点在「Notes」节标题上，笔记没打开。
+  - 第三次加了调试，留下截图和点中的元素（`post23-n3/`，`enter-debug.txt`）。
+  - 改成点击前再量一次之后（`post23-n4/`，点在 y 451.5，原先是 383），笔记正常打开，臂全绿。
+  - 本地环境的课程页加载快，没有碰到过这个问题。
+- 这几轮在我的测试账号里新建了几个「实测·A20m post23-*」项目和其中的测试笔记，留着没删。

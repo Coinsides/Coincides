@@ -1,0 +1,3 @@
+ADDR-noncanon-case         1/1
+    ok  case (case to #/Notes/A, released 0, now #/Notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words more"]
+total red 0

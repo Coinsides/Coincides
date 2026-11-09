@@ -1,0 +1,3 @@
+ADDR-noncanon-case         0/1
+    SETUP ERROR Error: setup: the click did not open A ({"idx":0,"len":5,"hash":"#/courses/69c9454a-7238-4524-b73c-9
+total red 0
