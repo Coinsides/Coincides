@@ -1,0 +1,12 @@
+#### post25-n
+HEADCLOSE-putback          1/1
+    ok  READING (ruled A-25 ②a (iv), manual known; arm rule green): reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup bbb","pos":10,"len":10}): 19366 PUT /note-blocks/:id/text-save warmup bbb| -> 19618 RESP /note-blocks/:id/text-save 200; then server ["warmup bbb",""], boxes [], kept []; Apply clicked true; +3 s server ["warmup bbb",""], +13 s server ["warmup bbb",""], editor ["warmup bbb",""], boxes [], kept []; requests after the click ["20846 PUT /note-blocks/:id/text-save warmup|aaa","20923 RESP /note-blocks/:id/text-save 409"]; items +3 s [{"text":"A block edit is waiting for recovery This draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point. Recovery draft: warmup aaa View differences Replay draft on current version Discard this draft","buttons":["View differences","Replay draft on current version","Discard this draft"]}]; items +13 s [{"text":"A block edit is waiting for recovery This draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point. Recovery draft: warmup aaa View differences Replay draft on current version Discard this draft","buttons":["View differences","Replay draft on current version","Discard this draft"]}]; notices after the click ["15233:Failed to save block"]; put back 200 true, bbb stays true, Apply wrote false, conflict item true, Replay shown true (not clicked)
+total red 0
+#### post25-k
+K1-close                   1/1
+    ok  ["warmup","note alpha"]
+total red 0
+#### post25-a
+IDLE                       1/1
+    ok  server at 3.5 s true
+total red 0

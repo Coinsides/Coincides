@@ -1,0 +1,72 @@
+health 200
+island main: assets/index-4nEsyJNA.js  css: assets/index-sq1LDYsi.css
+post25: 63 same, 0 different, 0 not served (of 63)
+slot heavy-job.lock taken 2026-11-09 23:26:08: post-deploy 25 representative arms on the island (my test account); one browser
+ime exit 1
+save exit 1
+d exit 1
+n exit 0
+k exit 0
+a exit 0
+slot heavy-job.lock released 23:28:20 exit 0
+#### post25-ime
+node:fs:440
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '<scratch>\a25k\runs\post25-ime\rows.jsonl'
+    at Object.readFileSync (node:fs:440:20)
+    at file:///<ops>/tester-kit/a25/analyze-a25.mjs:7:17
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  errno: -4058,
+  code: 'ENOENT',
+#### post25-save
+node:fs:440
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '<scratch>\a25k\runs\post25-save\rows.jsonl'
+    at Object.readFileSync (node:fs:440:20)
+    at file:///<ops>/tester-kit/a25/analyze-a25.mjs:7:17
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  errno: -4058,
+  code: 'ENOENT',
+#### post25-d
+node:fs:440
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '<scratch>\a25k\runs\post25-d\rows.jsonl'
+    at Object.readFileSync (node:fs:440:20)
+    at [eval]:2:42
+    at runScriptInThisContext (node:internal/vm:209:10)
+    at node:internal/process/execution:446:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:444:60)
+    at evalFunction (node:internal/process/execution:279:30)
+    at evalTypeScript (node:internal/process/execution:291:3)
+    at node:internal/main/eval_string:74:3 {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '<scratch>\\a25k\\runs\\post25-d\\rows.jsonl'
+}
+
+Node.js v22.22.1
+#### post25-n
+HEADCLOSE-putback          1/1
+    ok  READING (ruled A-25 ②a (iv), manual known; arm rule green): reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup bbb","pos":10,"len":10}): 19366 PUT /note-blocks/:id/text-save warmup bbb| -> 19618 RESP /note-blocks/:id/text-save 200; then server ["warmup bbb",""], boxes [], kept []; Apply clicked true; +3 s server ["warmup bbb",""], +13 s server ["warmup bbb",""], editor ["warmup bbb",""], boxes [], kept []; requests after the click ["20846 PUT /note-blocks/:id/text-save warmup|aaa","20923 RESP /note-blocks/:id/text-save 409"]; items +3 s [{"text":"A block edit is waiting for recovery This draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point. Recover
+total red 0
+#### post25-k
+K1-close                   1/1
+    ok  ["warmup","note alpha"]
+total red 0
+#### post25-a
+IDLE                       1/1
+    ok  server at 3.5 s true
+total red 0
+post-deploy 25 done 23:28:21

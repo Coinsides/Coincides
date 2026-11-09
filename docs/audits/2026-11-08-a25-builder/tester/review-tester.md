@@ -331,3 +331,33 @@ acc10、acc13 的红行数与 A-20b 那轮相同（那轮也是 3 与 2）。
     - 卫生：岛账号名；
     - 留档出处：同源重跑、预言输出截断、查库未归档、探针 sha 不全。
   - 由此报给 Main_Designer 的三问（第 10 对 `['wa']`、putback 对 :188、(iv) 两条臂），他已裁定，见〇节「已裁」5、6 与「未覆盖」。他也已在订单原句旁加了【更正】（:309、:359、:364、:371）。
+
+## 十二、第 25 轮部署后核对（2026-11-09）
+
+**岛上版本就是验收过的包，代表臂 7/7 绿。**
+
+- 部署（Main_Designer 报）：
+  - 岛上 app = `b734197e`（deploy 分支），只做了前端构建，服务没有重启（health 200，进程时间戳 14:24:42Z）；
+  - 锁文件差 0，server / shared 没有改动，没有 npm ci；
+  - 部署前库已备份；
+  - 他那边对岛上 dist 与包的 `dist.sha256` 按路径归一，63 同、0 差、0 缺。
+- 哈希（我经隧道取岛上实际服务的文件重算）：
+  - 主 JS `index-4nEsyJNA.js`，css `index-sq1LDYsi.css`；与 A-25 包 `dist/client` 的 63 个文件逐一比，**63 同、0 差、0 缺**（`postdeploy-25/island-hash-post25.txt`，对照清单 `a20-island-expected-a25.sha256`）。两次运行都核了。
+  - 部署前我对同一份清单空跑过一次作阳性对照：当时岛上还是 A-20b r2，得 61 同、2 不同（`index.html` 与新主 JS；岛上对不存在的路径回 index 页），守卫也正确停下了。
+- 代表臂（Main_Designer 给的单子，各 ×1；一个浏览器，只用我的岛上测试账号，走隧道；失败、扣住都在测试浏览器里用 CDP Fetch 做，岛上只看到普通请求）：
+
+| 臂 | 结果 | 读数 |
+|---|---|---|
+| IME-new | 绿 1/1 | 拼音 0，服务器 `第一测试`。岛上 POST /blocks 要约 1.07 s（598 → 1664 ms），两个词都在草稿里打完；交接在 3387 ms，晚于两次组字（结束于 593、1556 ms），分类「交接在组字外」。 |
+| SAVEFAIL-500-direct | 绿 1/1 | (a)–(e) 全过，常驻 Retry / Copy，失败 toast 0，补上 5532 ms（岛上往返慢） |
+| ONEFAIL-500 | 绿 1/1 | (i)–(iv) 全过：B 闲置保存 2361 ms，A 自己补上 7538 ms，服务器 `[["alpha start one two"],["beta start bee"]]`，toast 0 |
+| D-anchor | 绿 1/1 | 四项检查都对（第二个写入者是同一测试账号，走岛上 API） |
+| HEADCLOSE-putback | 绿 1/1 | 冲突项形：bbb 放回得 200；Apply → PUT `warmup|aaa` → 409，成冲突项，服务器 `["warmup bbb",""]`；没点 Replay |
+| K1-close | 绿 1/1 | `["warmup","note alpha"]` |
+| IDLE | 绿 1/1 | 3.5 s 时服务器已有 |
+
+- 过程里我这边的问题：
+  - 第一次运行（23:26:08–23:28:20）时，A-25 kit 的三条臂（IME-new、SAVEFAIL + ONEFAIL、D-anchor）没起来。kit 即使在 island 模式下也要 `CREDROOT`（放浏览器配置目录），我的脚本没设，进程一开头就退出，一行没跑。
+  - 另三条（putback、K1-close、IDLE）那次跑了，都绿。
+  - 设好 `CREDROOT` 后只补跑 kit 那三条（23:29:21–23:31:19），都绿。两次的输出都已归档（`run-post25-first.out.txt`、`run-post25-kit.out.txt`）。
+- 证据：`postdeploy-25/`，各臂的行与日志、分析器输出、哈希报告、运行脚本 `run-post25.sh`。

@@ -1,0 +1,10 @@
+#### post25-ime
+IME-new                    pass 1/1
+   pinyin in note 0/1; examples 
+   timeline (imeLog, page clock): {"green handoff-outside-composition":1}
+     IME-new-0  ok  handoff-outside-composition                          POST 598->1664 (201); comp [[1,593,"第一"],[859,1556,"测试"]]; hand-off [3387,"focus"]; editor-in 2541; draft-left 3393 '第一测试'; first editor input null
+#### post25-save
+SAVEFAIL-500-direct        pass 1/1
+   criteria passed (of 1): (a) other block types 1, (b) lasting control 1, (c) catch-up 1, (d) exact 1, (e) zero failure toasts 1; controls seen ["Retry","Copy"]; catch-up ms [5532]; failure toasts [0]
+ONEFAIL-500                pass 1/1
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 1: {"i":1,"ii":1,"iii":1,"iv":1,"markInfo":1}; B saved ms [2361]; A caught ms [7538]; failure toasts [0]; server [[["alpha start one two"],["beta start bee"]]]

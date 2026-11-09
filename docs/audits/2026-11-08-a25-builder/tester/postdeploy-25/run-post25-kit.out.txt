@@ -1,0 +1,33 @@
+health 200
+island main: assets/index-4nEsyJNA.js  css: assets/index-sq1LDYsi.css
+post25: 63 same, 0 different, 0 not served (of 63)
+slot heavy-job.lock taken 2026-11-09 23:29:21: post-deploy 25 representative arms on the island (my test account); one browser
+ime exit 0
+save exit 0
+d exit 0
+slot heavy-job.lock released 23:31:19 exit 0
+#### post25-ime
+IME-new                    pass 1/1
+   pinyin in note 0/1; examples 
+   timeline (imeLog, page clock): {"green handoff-outside-composition":1}
+     IME-new-0  ok  handoff-outside-composition                          POST 598->1664 (201); comp [[1,593,"第一"],[859,1556,"测试"]]; hand-off [3387,"focus"]; editor-in 2541; draft-left 3393 '第一测试'; first editor input null
+#### post25-save
+SAVEFAIL-500-direct        pass 1/1
+   criteria passed (of 1): (a) other block types 1, (b) lasting control 1, (c) catch-up 1, (d) exact 1, (e) zero failure toasts 1; controls seen ["Retry","Copy"]; catch-up ms [5532]; failure toasts [0]
+ONEFAIL-500                pass 1/1
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 1: {"i":1,"ii":1,"iii":1,"iv":1,"markInfo":1}; B saved ms [2361]; A caught ms [7538]; failure toasts [0]; server [[["alpha start one two"],["beta start bee"]]]
+#### post25-d
+D-anchor-0     ok  {"answers":true,"units":true,"receipt":true,"conflict":true} 
+#### post25-n
+HEADCLOSE-putback          1/1
+    ok  READING (ruled A-25 ②a (iv), manual known; arm rule green): reopen aaa banner+Apply, bbb box (server ["warmup",""], editor ["warmup",""]); put back by focus (the click left focus at {"ed":false,"box":true,"v":"warmup bbb","pos":10,"len":10}): 19366 PUT /note-blocks/:id/text-save warmup bbb| -> 19618 RESP /note-blocks/:id/text-save 200; then server ["warmup bbb",""], boxes [], kept []; Apply clicked true; +3 s server ["warmup bbb",""], +13 s server ["warmup bbb",""], editor ["warmup bbb",""], boxes [], kept []; requests after the click ["20846 PUT /note-blocks/:id/text-save warmup|aaa","20923 RESP /note-blocks/:id/text-save 409"]; items +3 s [{"text":"A block edit is waiting for recovery This draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point. Recover
+total red 0
+#### post25-k
+K1-close                   1/1
+    ok  ["warmup","note alpha"]
+total red 0
+#### post25-a
+IDLE                       1/1
+    ok  server at 3.5 s true
+total red 0
+post-deploy 25 done 23:31:20

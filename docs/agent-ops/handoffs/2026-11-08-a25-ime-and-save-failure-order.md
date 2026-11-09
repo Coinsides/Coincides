@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 交接 / Handoff(订单;本文件只放 A-25,别单⛔追加)
-> **日期 (Updated)**: 2026-11-08
+> **日期 (Updated)**: 2026-11-09(收割 `b734197e`、第 25 轮上岛、岛上核对 7/7;本单关闭)
 > **权威 (Authoritative)**: 是(规格与裁定);判语归 Tester,发现归 Reviewer,裁定、收割、部署归 Main_Designer
 
 # A-25 · 输入法拼音写进笔记 + 保存失败后的死路(阶段一「写字不丢」第二单)
@@ -379,3 +379,9 @@ Tester 判语方向:放行。她在出判语前把先前报给我、已进订单
 - **第四节(CHAIN 标冒烟不当门;IME 两组注明 CDP 模拟输入法、真输入法候 Henry;宽注记重比;探针归档里岛上测试账号登录名换占位符;remount 分析器窗口 bug 改了重出;查库读数、预言核对全量、18:54 同源原件、26 探针 + harness sha 归档;TD-74 措辞改回「按已知收、不重跑」;再扫 ⛔ 0)——全收。**
 
 等 Tester 补完 7 出判语。判语放行 → 收割 → 第 25 轮。
+
+### 收割 `b734197e` → 第 25 轮上岛 → Tester 岛上核对 7/7 绿;本单关闭(Main_Designer 2026-11-09)
+- **收割**:19 文件拷回 `sha256sum -c src.sha256` 19/19、client tsc 0(锁位内);入库 `b734197e`(代码 + Tester 整目录 360 文件 + Reviewer 三份 findings 与九行处置 + builder 两份代码回答 + td77-caret0 + 手册 + TD-78–81 / TD-63·69·77 附 + §365);扫描 ⛔ 0(staged 与 `--paths` 两新目录 391 文件)。
+- **第 25 轮**(Tester ack 后):push 裸仓 deploy → `reset --hard` `dfbcce8e`→`b734197e` → 锁 diff 0、server/shared 0 文件 → 不 `npm ci` → manifest 未过期 37 条 → `build:client` 12.7 s → dist 63、主 JS `index-4nEsyJNA.js` `f32a046c…c5ab` 与包同 → health ok → 岛上 dist 对包路径归一后 63 同 0 差;服务未重启;库备份 `pre-deploy-2026-11-09-1423.db`。看板入库 `0c51e5cf`。
+- **Tester 岛上核对(run-post25,第十二节 + `tester/postdeploy-25/` 25 文件)**:经隧道取实际服务文件重算,63 同 0 差 0 缺(两次运行;部署前空跑 61 同 2 不同、守卫停下 = 阳性对照);代表臂 7/7 绿——IME-new(拼音 0、服务器「第一测试」;岛上 POST /blocks 约 1.07 s,交接 3387 ms 在两次组字之外)、SAVEFAIL-500-direct(a)–(e) toast 0 补上 5.5 s、ONEFAIL-500(B 2.36 s、A 7.54 s、toast 0)、D-anchor、HEADCLOSE-putback 冲突项形(Apply → 409 → 冲突项,未点 Replay)、K1-close、IDLE。她的一处照实记:第一次运行 A-25 kit 三臂因 island 模式缺 CREDROOT 进程开头即退、一行没跑,设好后补跑三条绿,两次输出都归档——**kit 在缺凭据根时应当响亮失败而不是静退,归阶段末 kit 修**。
+- **本单关闭**。余项去处:TD-77(光标 0,阶段二,Henry 拍)、TD-78(封口不清标记)、TD-79(②b 甲 + M3 单测 + 模板转换臂 + 链注改注)、TD-80(真离线对账提示重复,Henry 可叫停)、TD-81(M2 / O1 / O2 / L4)、TD-69 ⑥(空行锚不到,修向紧规则)⑦、TD-63 附(UNDOPAUSE 前缀不变量)、TD-67(丢弃未做)、TD-73 S1、TD-74(全量 exit 1)、TD-75(d2 baseFlow)。阶段末:Tester 一人跑跨单回归 + 全量 + 手册逐条 → 封版;kit 修(setup error 单独计数、UNDOPAUSE 闸改前缀判据、缺 CREDROOT 响亮失败、oracle 基线回退、临时环境清理)先于回归。

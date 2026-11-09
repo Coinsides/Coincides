@@ -1,0 +1,2 @@
+--- D-anchor-0
+DONE post25-d: 1 rows, red 0
