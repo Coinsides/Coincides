@@ -1,0 +1,10 @@
+LATEBACK-req-type          2/2
+    ok  
+LATEBACK-req-still         2/2
+    ok  
+LATEBACK-resp-type         2/2
+    ok  
+LATEBACK-resp-still        2/2
+    ok  
+total red 0
+setup errors 0

@@ -1,0 +1,22 @@
+HASHFAIL-hash              1/1
+    ok  stayed true, toast true, in editor true
+HASHFAIL-paste             1/1
+    ok  stayed true, toast true, in editor true
+SWITCH                     1/1
+    ok  false toasts 0, each {"onea":1,"twoa":1,"threea":1,"foura":1}
+GONEFAIL-hash              1/1
+    ok  count 1; alerts []
+GONEFAIL-paste             1/1
+    ok  count 1; alerts []
+GONEFAIL-back              1/1
+    ok  count 1, false 'could not be saved' false (x0), true 'did not reach' true (x1)
+ACCT401                    1/1
+    ok  A count 1; B sees words false
+CLOSEFLY-req               1/1
+    ok  count 1; banner on reopen false (stale banner = known, A-25 2a)
+CLOSEFLY-resp              1/1
+    ok  count 1; banner on reopen false (stale banner = known, A-25 2a)
+OFFCLOSE                   1/1
+    ok  count 1; failed toasts (dedup watcher) 0
+total red 0
+setup errors 0

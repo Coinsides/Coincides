@@ -1,0 +1,30 @@
+SPLIT-mid                  1/1
+    ok  ["warmup","alpha beta"]
+SPLIT-home                 1/1
+    ok  ["warmup","alpha beta"]
+SPLIT-mid401               1/1
+    ok  ["warmup","alpha beta"]
+SPLIT-midback              1/1
+    ok  ["warmup","alpha beta"]
+RETRY-del                  1/1
+    ok  ["warmup","alpha",""]
+RETRY-more                 1/1
+    ok  ["warmup","alpha","beta more"]
+STALE-back                 1/1
+    ok  ["warmup",""]
+STALE-edit                 1/1
+    ok  ["warmup tail words edited elsewhere",""]
+TWICE-hash                 1/1
+    ok  ["warmup","twice words"]
+TWICE-back                 1/1
+    ok  ["warmup","twice words"]
+TWICE-paste                1/1
+    ok  ["warmup","twice words"]
+TWICE-hash500              1/1
+    ok  count 1, ends C, jumps ["C"], Apply false; messages (A-25 e, not gated) 0, still on screen at C 0
+BACKOK-plain               1/1
+    ok  ["warmup","back ok words"]
+BACKOK-slow                1/1
+    ok  ["warmup","back ok words"]
+total red 0
+setup errors 0

@@ -22,6 +22,7 @@
   - 1 行是准备步骤的光标跳（TD-77 家族），补跑 2/2 绿。
 - a20m LANDOTHER：heading 2/2、headline 2/2、plain 1/1，另有 1 行准备失败（光标跳），补跑 2/2 绿。
 - a20n：74 行 + 第三形 3 行。红行与 A-20b r2 同（BACKIN-heldhead-undo，已裁 🅱）。宽注记逐臂比，差异全在 A-25 好的一边。HEADCLOSE-putback 走冲突项而不是 :188 原写的合并形，已裁（下「已裁」6）。
+- **更正（2026-11-10）**：two2 两侧各 3 行都是 void（前提不成立），实为未测；acc10 / acc13 的红现挂 TD-82 / TD-83。见第七节表下更正段。
 - 9 对回归：A-25 的红行都在同对底侧红行之内，只有 mx 的 D:lines30-1 例外（已裁既有）。第 1 对里底的 20 行红（W 输入法 16、G imeLines 3、L insert-1 1），A-25 上全清。
 - 第 10 对：签名形状两侧 0/20。A-25 另有 2/20 末步 `['wa']`，归 TD-63（下「已裁」5）。
 - builder 全量 exit 1：已知 teardown 竞态 TD-74（第一节末），不是本包引入的。
@@ -214,6 +215,12 @@
 | retry | 0 | 0 | 无 | — |
 
 acc10、acc13 的红行数与 A-20b 那轮相同（那轮也是 3 与 2）。
+
+> **更正（2026-11-10，阶段末复核）：two2 两侧都没测。**
+> - 底（A-20b r2）与 A-25 两侧各 3 行都是 void：臂的前提「两个留字框同屏」没有满足（`void: "two kept records were not both on screen"`，`precondition: false`）。acc11 把 void 行记成 ok，`redsubset.mjs` 只读 BAD 行，所以表里 two2 那两格的「0」都应读作「3 行未测」。这一臂从 r3e 起在每一版上都是 void。
+> - 阶段末的 void 计数器（`count-void.mjs`）对两侧都报「NOT TESTED 3（TWO2-discardOne: two kept records were not both on screen）」。
+> - Main_Designer 2026-11-10 裁：two2 记为未覆盖，③ 类由 acc10 TWO 顶，不重建前提。
+> - acc10 HL-saveNotSentThenClose ×3 与 acc13 N-b2-headingAboveLineSameWord ×2 当时按「A-25 红 ⊆ 底红」放过，没有挂指针：现分别立 **TD-82**、**TD-83**。同日改类：两条都不是丢字。HL 的正文在恢复项里，点 Apply 落回；N-b2 丢的是交接窗口里的回车，归 TD-77 族。臂规则不数恢复项。详见阶段一封版回归报告第三节。
 
 ## 八、第 10 对（UNDOPAUSE 底 ×20 对 A-25 ×20，交替，单浏览器）
 

@@ -1,0 +1,4 @@
+PAUSEEXIT-closetab         1/1
+    ok  closetab: on server true
+total red 0
+setup errors 0

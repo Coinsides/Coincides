@@ -1,0 +1,15 @@
+{
+ "total": 9,
+ "failed": [
+  "SM-image",
+  "SM-tag",
+  "SM-binding"
+ ],
+ "notTested": [
+  "SM-image",
+  "SM-tag"
+ ],
+ "red": [
+  "SM-binding"
+ ]
+}

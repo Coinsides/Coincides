@@ -1,0 +1,26 @@
+LEAVE-hash-tab             2/2
+    ok  end true; alerts []
+LEAVE-hash-newtab          2/2
+    ok  end true; alerts []
+LEAVE-hash-inapp           2/2
+    ok  end true; alerts []
+LEAVE-paste-tab            2/2
+    ok  end true; alerts []
+LEAVE-paste-newtab         2/2
+    ok  end true; alerts []
+LEAVE-paste-inapp          2/2
+    ok  end true; alerts []
+LEAVE-401-tab              2/2
+    ok  end on server true; ["Your last edit did not reach the server. It is kept on this device: open the note again to"]
+LEAVE-401-newtab           2/2
+    ok  end on server true; ["Your last edit did not reach the server. It is kept on this device: open the note again to"]
+LEAVE-401-inapp            2/2
+    ok  end on server true; ["Your last edit did not reach the server. It is kept on this device: open the note again to"]
+EMPTYHASH                  2/2
+    ok  toast false
+LATE                       2/2
+    ok  on server true, Apply false
+LATEREQ                    2/2
+    ok  first words on server true, banner false (older-over-newer or silent loss = red)
+total red 0
+setup errors 0

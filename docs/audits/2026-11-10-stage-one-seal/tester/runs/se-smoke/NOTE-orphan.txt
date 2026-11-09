@@ -1,0 +1,1 @@
+rows-orphan-0303.jsonl: a duplicate round of the same probe on the same build, started 03:03:30 by a waiter of a stopped task (old port 9696) and killed during SM-binding; same results as rows 1-8 (6 green, SM-image and SM-tag setup errors). Screenshots of SM-heading..SM-timeline were overwritten by it (same content). Not counted.

@@ -1,0 +1,12 @@
+# server full run 2 (tree-se, test:v2, 90 files, --test-concurrency=3): wrapper output
+slot heavy-job.lock taken 2026-11-10 03:05:14: server full suite rerun with the environment prerequisites (manifest, untracked artifacts, npm_execpath)
+server full rerun exit 1
+slot heavy-job.lock released 03:11:25 exit 0
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2CanvasPersistenceCutover.test.ts: Unable to deserialize cloned data due to invalid or unsupported vers
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2ContentGroups.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. retry=
+[exited with code 0]
+
+# not ok lines in run 2
+34306:not ok 61 - src\\__tests__\\v2CanvasPersistenceCutover.test.ts
+34706:not ok 62 - src\\__tests__\\v2ContentGroups.test.ts
+53080:not ok 857 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text

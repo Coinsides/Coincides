@@ -1,0 +1,6 @@
+2d1
+<     SETUP ERROR Error: setup: no empty line ["wmup","a","plainb","hb","hbody"]
+9c8
+< setup errors N (NOT TESTED - re-run or explain): LANDOTHER-plain-N
+---
+> setup errors N

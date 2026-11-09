@@ -1,0 +1,8 @@
+LANDOTHER-plain            1/1
+    ok  plain: keys show true; 'Heading changes could not' toasts 0; failure toasts 0; landed later true
+LANDOTHER-heading          1/1
+    ok  heading: keys show true; 'Heading changes could not' toasts 0; failure toasts 0; landed later true
+LANDOTHER-headline         1/1
+    ok  headline: keys show true; 'Heading changes could not' toasts 0; failure toasts 0; landed later true
+total red 0
+setup errors 0

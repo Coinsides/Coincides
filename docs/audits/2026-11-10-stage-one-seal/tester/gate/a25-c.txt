@@ -1,0 +1,20 @@
+PAUSEEXIT-unload           2/2
+    ok  unload: on server true
+PAUSEEXIT-hash             2/2
+    ok  hash: on server true
+PAUSEEXIT-401              2/2
+    ok  401: on server true
+UNDOSEQ                    2/2
+    ok  [["warmup","aaa","bbb","ccc"],["warmup","aaa","bbb",""],["warmup","aaa","bbb"],["warmup","aaa",""],["warmup","aaa"]] == base [["warmup","aaa","bbb","ccc"],["warmup","aaa","bbb",""],["warmup","aaa","bbb"],["warmup","aaa",""],["warmup","aaa"]]
+UNDOPAUSE                  2/2
+    ok  [["warmup","aaabbb"],["warmup",""],["warmup"],["w"]] == base [["warmup","aaabbb"],["warmup",""],["warmup"],["w"]]
+DRAFT                      2/2
+    ok  full after 3.5 s true
+OFFLINE                    2/2
+    ok  reference only (old dedup watcher): use OFFLINE-N
+PUTDUP                     2/2
+    ok  PUT 4, duplicates 0
+IME                        2/2
+    ok  PUT 3; [["warmup","现值公式推导"],["warmup","现值公式"],["warmup","现值"],["warmup",""]] == base [["warmup","现值公式推导"],["warmup","现值公式"],["warmup","现值"],["warmup",""]]
+total red 0
+setup errors 0

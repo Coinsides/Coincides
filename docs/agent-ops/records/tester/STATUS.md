@@ -1,6 +1,6 @@
 > **状态 (Status)**: active（2026-11-07 Henry 拍板后生效）
 > **层 (Layer)**: 记录 / Role Records（Tester 状态卡·公开半）
-> **日期 (Updated)**: 2026-11-09
+> **日期 (Updated)**: 2026-11-10
 > **权威 (Authoritative)**: 否（Tester(1) 首次填写；规矩修改稿过目后改为 active）
 
 # Tester 状态卡（公开半，覆盖写）
@@ -11,23 +11,20 @@
 
 ## 正在做
 
-- **刚下的判语**：**A-25 放行**（2026-11-09，重封后的 v2，主 JS `index-4nEsyJNA.js`）。报告 `docs/audits/2026-11-08-a25-builder/tester/review-tester.md`，台账已登。**第 25 轮已上岛（`b734197e`），部署后已核**：岛上 dist 63/63 与包一致（经隧道取实际服务的文件重算），代表臂 7/7 绿（报告「十二」，证据 `postdeploy-25/`）。
-  - 同源：src 19/19，自建 63/63 与包一致。
-  - 比线上 A-20b r2 差的只有一条：真离线时对账提示随自动重试重复弹，已裁 🅱，记 TD。新红 D:lines30-1 已裁为既有（TD-77 家族，挪阶段二）。
-  - k25 正本全组 A-25 门全绿，底红作阳性对照；输入法是模拟的，真输入法候 Henry。H2 冻结版红单测我独立核过。
-  - 未覆盖：订单 (iv) 的模板转换臂、「1 条」改注（记 TD，不挡）。
-  - 报告交出前经 Opus 四路复核加二次核对，31 条全部确认、已改；其中有几句已进订单的，Main_Designer 在原句旁加了【更正】。
-- **在做**：阶段末回归（跨单回归 + 全量 + 手册逐条），我一人跑；开跑前先做下面「阶段末要改的 kit」。
+- **刚下的判语**：**阶段一封版回归，可以封版（快照）**（2026-11-10，岛上 `b734197e`，基线 = 自己）。报告 `docs/audits/2026-11-10-stage-one-seal/tester/review-tester.md`，台账已登，P2 清单 `p2-list.md` 交 Henry。
+  - 封版态：同源 63/63，岛上服务文件 63/63，岛上健康四项绿。
+  - 新发现 2 条单列，都不挡：
+    - TD-85（Apply 在途同块打字，Apply 的字被静默盖掉；既有，底同形）；
+    - 旧矩阵里 A-18 签名的低率残留（fine、hash@300；无 TD，候指针）。
+  - TD-82 / 83 改类：不是丢字，臂规则不数恢复项；83 丢的是交接窗口里的回车（TD-77 族）。
+  - 未覆盖：STEAL / BOXTYPE2 / BOXTYPE3、two2、SM-image、Source 原页写路径、Agent 补丁接受。
+  - 交出前 Opus 四路反驳复核，全部已改。
+- **在做**：等 Main_Designer 收判语、给旧矩阵那条的指针；之后做收尾（下面第 3 条）。
 - **岛上版本**：`b734197e`（第 25 轮，2026-11-09，A-25）。之前是 `dfbcce8e`（第 24 轮，A-20b r2）。
-- **阶段末要改的 kit（已登记）**：
-  - 准备失败单独计数，写进判语；
-  - 链与 a20n 的 diff 改用宽注记；
-  - a20m 预言核对器在包里缺文件时回落到基线文件；
-  - UNDOPAUSE 的闸按不变量写：三次 Ctrl+Z 后 warmup 块是 `warmup` 的前缀；
-  - 「1 条」改注；
-  - 清理临时环境、树与隧道。
-- **上一个判语**：**A-20b r2 放行**（2026-11-09，第 24 轮）。报告 `docs/audits/2026-11-09-a20b-builder/tester/review-tester.md`。第 24 轮已上岛（`dfbcce8e`），部署后已核：岛上 dist 63/63 与包一致，代表臂 10/10。
-- **再上一个判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`。第 23 轮已上岛（`29b1d456`），部署后已核：岛上 63/63 与包一致，代表臂 7/7。
+- **阶段末的 kit 改动已做完**：准备失败单独计数、宽注记 diff、预言核对回落、UNDOPAUSE 前缀闸、「1 条」改注（HEADCLOSE-putback 改判闸）、缺 CREDROOT 一律 exit 2；新臂 C-convert / APPLYTYPE / IME 守卫 / 冒烟 / 人速 / 恢复项重读器。明细见报告第八节。
+- **上一个判语**：**A-25 放行**（2026-11-09，重封后的 v2，主 JS `index-4nEsyJNA.js`）。报告 `docs/audits/2026-11-08-a25-builder/tester/review-tester.md`。第 25 轮已上岛（`b734197e`），部署后已核：岛上 dist 63/63 与包一致，代表臂 7/7。
+- **再上一个判语**：**A-20b r2 放行**（2026-11-09，第 24 轮）。报告 `docs/audits/2026-11-09-a20b-builder/tester/review-tester.md`。第 24 轮已上岛（`dfbcce8e`），部署后已核：岛上 dist 63/63 与包一致，代表臂 10/10。
+- **更早**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`。第 23 轮已上岛（`29b1d456`），部署后已核：岛上 63/63 与包一致，代表臂 7/7。
 - **更早**：**A-20 r3d 挡放行，原因 P1、P2**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3d/review-tester.md`（从简）。P1：Apply 在途时 bbb 立即落地、Apply 得 409、aaa 丢；P2：重开时服务器 `cd` 行被 Z 改写。
 - **更早**：**A-20 r3 挡放行，原因 N1**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3/review-tester.md`。N1：MERGE、SELDEL r3 12/12 DUP，修前 12/12 LOST。
 - **更早**：**A-20 r2 挡放行，原因 M2**（2026-11-08）。报告 `docs/audits/2026-11-08-a20-builder/tester-r2/review-tester.md`，台账已登。

@@ -12,6 +12,7 @@
 - r3 链 190 行：15 个标签与 r3e 判语链 0 行差异。唯一 1 行差是 `m` 标签的 LIST-addr-0 红（服务器 `["rmup","k0","x","ywa"]`）。它出自准备步骤里新起块的光标跳（见第八节），不是臂本身。
 - a20m LANDOTHER 全绿：plain 2/2、headline 2/2；heading 以补跑 2/2 为准，原跑 1/2，另 1 行设置错。
 - a20n：旧臂 28 个、52 行与 r3e 逐臂同数。新臂 11 个、22 行在 r2 上全合预期，修前红 18 行、r3e 红 16 行。
+- **更正（2026-11-10）**：two2 在 r2 一侧 3 行都是 void（前提不成立），实为未测；acc10 / acc13 的红现挂 TD-82 / TD-83。见第六节表下更正段。
 - 9 对回归：r2 的红行都是修前同一对红行的子集。第 10 对修前 0/20、r2 0/20。
 
 ### 比修前差的臂
@@ -35,7 +36,7 @@
 ### 已裁、手册已知（照记，不挡）
 
 1. **BACKIN-heldhead-undo 红 3/3**（REPS=2 两行，第三形一行）：扣留期间按 Ctrl+Z 无效，屏上和服务器最后都是 `['warmup bbb','aaa']`。与 r3e 同形，已裁 🅱。
-2. **HEADCLOSE-putback（×1，读数）**：重开后把 bbb 手动放回第一行，它的保存得 200，aaa 的恢复项被挤掉，Apply 点不到，aaa 丢，bbb 留在服务器。与 r3e 同形，已裁 A-25 ②a (iv)。探针按臂规则记红，分析器只记读数。
+2. **HEADCLOSE-putback（×1，读数）**：重开后把 bbb 手动放回第一行，它的保存得 200，aaa 的恢复项被挤掉，Apply 点不到，aaa 丢，bbb 留在服务器。与 r3e 同形，已裁 A-25 ②a (iv)。探针按臂规则记红，分析器只记读数。（2026-11-10 指针：这是「一块一条」旧存法下的历史形。从 b734197e 起改为「一块一访一条」，putback 是判的闸：放回的保存得 200 后 aaa 项仍带 Apply，Apply 得 409 后只剩一条冲突项，见 A-25 报告已裁 6；b734197e 上探针自报红只剩 heldhead-undo 2 行。）
 3. **MENTER-close 带 Apply 的那一项**：重开时出现「A block edit is waiting for recovery abx cd」，带 Apply。这是在途那次保存多余的回执，服务器上已有 `abx`。与 r3e 同形，已裁 A-25 ②a (ii)。
 4. **CLICKBACK-end（只记）**：框里 `alphaZ`，记录 `"alpha"→"alphaZ"`，服务器 `["alpha beta"]`。与 r3e 同形，修前没有框；TD-66 本条。
 
@@ -138,6 +139,12 @@ r2 的红行都是修前同一对红行的子集，按 `arm:name` 逐行核（`r
 | retry | 0 | 0 | 无 | — |
 
 与 r3e 那轮一致（r3e 的 acc13 也是 2）。配对账号用自己的测试邮箱预先注册（第 23 轮前的教训）。
+
+> **更正（2026-11-10，阶段末复核）：two2 在 r2 一侧其实没测。**
+> - r2 一侧 3 行都是 void：臂的前提「两个留字框同屏」没有满足（`void: "two kept records were not both on screen"`，`precondition: false`）。acc11 把 void 行记成 ok，`redsubset.mjs` 只读 BAD 行，所以 two2 那行 r2 的「0」应读作「3 行未测」。修前一侧 3 行前提成立，是真绿。
+> - 阶段末的 void 计数器（`count-void.mjs`）对 r2 这一行报「NOT TESTED 3」。
+> - Main_Designer 2026-11-10 裁：two2 记为未覆盖，③ 类由 acc10 TWO 顶，不重建前提。
+> - acc10 那 3 行与 acc13 那 2 行红，当时按 ⊆ 放过，没有挂指针：现分别立 **TD-82**（HL-saveNotSentThenClose）与 **TD-83**（N-b2-headingAboveLineSameWord）。同日改类：两条都不是丢字。HL 的正文在恢复项里，点 Apply 落回；N-b2 丢的是交接窗口里的回车，归 TD-77 族。臂规则不数恢复项。详见阶段一封版回归报告第三节。
 
 ## 七、第 10 对（UNDOPAUSE 修前 ×20 对 r2 ×20，交替，单浏览器）
 

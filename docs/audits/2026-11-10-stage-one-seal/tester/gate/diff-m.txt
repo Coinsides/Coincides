@@ -1,0 +1,22 @@
+8c8
+<     SETUP ERROR Error: setup: the sealed failure was not reported
+---
+>     ok  sealed: stayed true (places A, host true); LEFT_UNSAVED N; kept N {"tN":N,"tN":N,"tN":N,"hold":N,"end":N}; Nnd leave REFUSED (prevented true, on A N/N, sent N, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count N, banner none
+10c10
+<     SETUP ERROR Error: setup: the first failure (aaa) was not reported
+---
+>     ok  refail: stayed true (places A, host true); LEFT_UNSAVED N; kept N {"tN":N,"tN":N,"tN":N,"hold":N,"end":N}; Nnd leave REFUSED (prevented true, on A N/N, sent N, new toasts ["Changes could not be saved. "]); reopen ["warmup aaa","bbb"] count N, banner none
+12c12
+<     SETUP ERROR Error: setup: the idle failure was not reported
+---
+>     ok  idlefirst: stayed true (places A, host true); LEFT_UNSAVED N; kept N {"tN":N,"tN":N,"tN":N,"hold":N,"end":N}; Nnd leave REFUSED (prevented true, on A N/N, sent N, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count N, banner none
+14a15
+>     SETUP ERROR Error: setup: no empty line ["rmup","wa"]
+20c21
+<     SETUP ERROR Error: setup: the failure was not reported
+---
+>     ok  ctlfail: REFUSED (want REFUSED; prevented true, on A N/N, arrived false, sent N, new toasts ["Changes could not be saved. "]); count N
+30c31
+< setup errors N (NOT TESTED - re-run or explain): BACKIN-fail-sealed-N, BACKIN-fail-sealed-N, BACKIN-fail-refail-N, BACKIN-fail-refail-N, BACKIN-fail-idlefirst-N, BACKIN-fail-idlefirst-N, BACKIN-fail-idlefirst-N, BACKIN-fail-idlefirst-N, BACKIN-fail-idlefirst-N, BACKIN-ctlfail-N, BACKIN-ctlfail-N
+---
+> setup errors N (NOT TESTED - re-run or explain): BACKIN-fail-fast-N

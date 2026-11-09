@@ -1,0 +1,31 @@
+BACKIN-fail                1/1
+    ok  held1500: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 2, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count 1, banner none
+BACKIN-undo                1/1
+    ok  stayed true; undo [["warmup",""]]; server after undo ["warmup",""]; reopen ["warmup",""] count 0; banner on reopen false; false 'did not reach' while on A 0
+BACKIN-fail-recover        1/1
+    ok  recover: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 2, new toasts ["Changes could not be saved. "]); recover HELD-PROCEED, 'backin wordsz' x1; reopen ["warmup","backin wordsz"] count 1, banner none
+BACKIN-fail-sealed         1/1
+    ok  sealed: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count 1, banner none
+BACKIN-fail-refail         1/1
+    ok  refail: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["warmup aaa","bbb"] count 1, banner none
+BACKIN-fail-idlefirst      2/2
+    ok  idlefirst: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count 1, banner none
+BACKIN-fail-fast           1/2
+    ok  fast: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count 1, banner none
+    SETUP ERROR Error: setup: no empty line ["rmup","wa"]
+BACKIN-fail-neterr         2/2
+    ok  neterr: stayed true (places A, host true); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0,"end":0}; 2nd leave REFUSED (prevented true, on A 6/6, sent 0, new toasts ["Changes could not be saved. "]); reopen ["warmup","backin words"] count 1, banner none
+BACKIN-ctl                 1/1
+    ok  ctl: HELD-PROCEED (want HELD-PROCEED; prevented true, on A 6/6, arrived true, sent 2, new toasts []); count 1
+BACKIN-ctlfail             1/1
+    ok  ctlfail: REFUSED (want REFUSED; prevented true, on A 6/6, arrived false, sent 2, new toasts ["Changes could not be saved. "]); count 1
+BACKIN-ctlclean            1/1
+    ok  ctlclean: INSTANT-PROCEED (want INSTANT-PROCEED; prevented true, on A 0/6, arrived true, sent 0, new toasts []); count 1
+LIST-close                 1/1
+    ok  close: x box, y box; server ["warmup","k0"]; boxes ["x","y"]; banner "Not in the note yet Discard"
+LIST-back                  1/1
+    ok  back: x box, y box; server ["warmup","k0"]; boxes ["x","y"]; banner "Not in the note yet Discard"
+LIST-addr                  1/1
+    ok  addr: x server, y server; server ["warmup","k0","x","y"]; boxes []; banner undefined
+total red 0
+setup errors 1 (NOT TESTED - re-run or explain): BACKIN-fail-fast-1

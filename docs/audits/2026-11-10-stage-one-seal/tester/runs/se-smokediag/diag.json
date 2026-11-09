@@ -1,0 +1,269 @@
+{
+ "tagBefore": [
+  {
+   "x": 430.0531005859375,
+   "y": 211.92359924316406,
+   "w": 79.67919921875,
+   "h": 30.353988647460938,
+   "op": "0",
+   "vis": "visible",
+   "checkVis": false,
+   "anc": [
+    {
+     "tag": "BUTTON",
+     "op": "0",
+     "vis": "visible",
+     "disp": "flex",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "flex",
+     "pe": "auto",
+     "clip": null,
+     "empty": "true"
+    },
+    {
+     "tag": "HEADER",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "SECTION",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    }
+   ]
+  }
+ ],
+ "tagAfterHover": [
+  {
+   "x": 430.0531005859375,
+   "y": 211.92359924316406,
+   "w": 79.67919921875,
+   "h": 30.353988647460938,
+   "op": "1",
+   "vis": "visible",
+   "checkVis": true,
+   "anc": [
+    {
+     "tag": "BUTTON",
+     "op": "1",
+     "vis": "visible",
+     "disp": "flex",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "flex",
+     "pe": "auto",
+     "clip": null,
+     "empty": "true"
+    },
+    {
+     "tag": "HEADER",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "SECTION",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    }
+   ]
+  }
+ ],
+ "imageSeed": {
+  "up": 201,
+  "assetId": "60e88e13-2355-4e1c-b187-0bd85990d2dc",
+  "mk": 201
+ },
+ "imageShown": {
+  "state": "loaded",
+  "x": 431.1371765136719,
+  "y": 477.186279296875,
+  "w": 821.7255859375,
+  "h": 409.77874755859375
+ },
+ "article": [
+  {
+   "x": 430.0531005859375,
+   "y": 476.1021728515625,
+   "w": 823.893798828125,
+   "h": 411.9468994140625,
+   "op": "1",
+   "vis": "visible",
+   "checkVis": true,
+   "anc": [
+    {
+     "tag": "ARTICLE",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "SECTION",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    },
+    {
+     "tag": "DIV",
+     "op": "1",
+     "vis": "visible",
+     "disp": "block",
+     "pe": "auto",
+     "clip": null,
+     "empty": null
+    }
+   ]
+  }
+ ],
+ "afterClick": {
+  "editBtn": [],
+  "toolbarButtons": [
+   "Collapse navigator",
+   "diag image",
+   "关闭 diag image",
+   "Add tags",
+   "Text unit handle",
+   "Preview export boundary",
+   "Toggle layout mode",
+   "笔记外观",
+   "More note actions",
+   "Selection",
+   "Pen",
+   "Eraser",
+   "插入",
+   "View options",
+   "Navigation pane",
+   "Page overview",
+   "Decrease page reading step",
+   "Increase page reading step",
+   "Open content groups",
+   "Move block",
+   "Exclude from export",
+   "Hide from AI context",
+   "Save block",
+   "Label block",
+   "Move to trash"
+  ],
+  "active": "ARTICLE"
+ },
+ "formOpen": true,
+ "validity": {
+  "valid": true,
+  "bad": [],
+  "submit": [
+   {
+    "text": "保存装订",
+    "x": 987,
+    "y": 827.875,
+    "w": 66,
+    "h": 29,
+    "disabled": false,
+    "inView": true
+   }
+  ]
+ },
+ "afterRequestSubmit": {
+  "net": [
+   "1409 PUT /notes/:id/binding-settings"
+  ],
+  "formStillOpen": false,
+  "alert": []
+ }
+}

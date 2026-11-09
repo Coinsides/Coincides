@@ -1,0 +1,6 @@
+9d8
+<     SETUP ERROR Error: setup: no 'note' line: ["rmup","notewa"]
+25c24
+< setup errors N (NOT TESTED - re-run or explain): KN-pasteN-N
+---
+> setup errors N

@@ -1,0 +1,9 @@
+# counted smoke run (rows.jsonl rows 1-9): task output
+smoke exit 0
+slot heavy-job.lock.2 taken 2026-11-10 02:51:40: UI-save smokes (se-smoke), one browser
+se-smoke exit 0
+slot heavy-job.lock.2 released 02:53:28 exit 0
+DONE se-smoke: 9 rows, red 1, not tested 2
+[exited with code 0]
+
+# logs/se-smoke.log is the ORPHAN run's log (same file name, overwritten): 03:03:30 window, node killed by me during SM-binding

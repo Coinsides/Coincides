@@ -1,0 +1,15 @@
+{
+ "total": 8,
+ "bad": [
+  "NB2H-gap400-0",
+  "NB2H-gap450-1"
+ ],
+ "void": [
+  "HLH-gap250-0",
+  "HLH-gap320-1",
+  "HLH-gap400-2",
+  "HLH-gap500-3",
+  "HLH-gap250-4",
+  "HLH-gap320-5"
+ ]
+}

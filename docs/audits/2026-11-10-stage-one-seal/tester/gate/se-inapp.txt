@@ -1,0 +1,10 @@
+INAPP-home-type            1/1
+    ok  
+INAPP-home-still           1/1
+    ok  
+INAPP-tab-type             1/1
+    ok  
+INAPP-tab-still            1/1
+    ok  
+total red 0
+setup errors 0

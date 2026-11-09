@@ -1,0 +1,4 @@
+not ok 3 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+# tests 5
+# pass 4
+# fail 1

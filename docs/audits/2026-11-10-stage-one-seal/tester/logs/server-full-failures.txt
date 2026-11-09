@@ -1,0 +1,589 @@
+12148-# Node.js v22.22.1
+12149-# Subtest: src\\__tests__\\v14AgentKnowledgeProjection.test.ts
+12150:not ok 33 - src\\__tests__\\v14AgentKnowledgeProjection.test.ts
+12151-  ---
+12152-  duration_ms: 1034.5197
+12153-  type: 'test'
+12154-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14AgentKnowledgeProjection.test.ts:1:1'
+12155-  failureType: 'testCodeFailure'
+12156-  exitCode: 1
+12157-  signal: ~
+12158-  error: 'test failed'
+12159-  code: 'ERR_TEST_FAILURE'
+12160-  ...
+12161-# node:fs:440
+12162-#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+12163-#                    ^
+12164-# Error: ENOENT: no such file or directory, open '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+12165-#     at readFileSync (node:fs:440:20)
+12166-#     at loadToolFaceManifest (<acc>\\tree-se\\server\\src\\mcp\\manifest.ts:26:29)
+12167-#     at <anonymous> (<acc>\\tree-se\\server\\src\\agent\\tools\\definitions.ts:10:18)
+12168-#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+12169-#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+12170-#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+12171-#   errno: -4058,
+12172-#   code: 'ENOENT',
+--
+12176-# Node.js v22.22.1
+12177-# Subtest: src\\__tests__\\v14AgentRouteLifecycle.test.ts
+12178:not ok 34 - src\\__tests__\\v14AgentRouteLifecycle.test.ts
+12179-  ---
+12180-  duration_ms: 2197.5813
+12181-  type: 'test'
+12182-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14AgentRouteLifecycle.test.ts:1:1'
+12183-  failureType: 'testCodeFailure'
+12184-  exitCode: 1
+12185-  signal: ~
+12186-  error: 'test failed'
+12187-  code: 'ERR_TEST_FAILURE'
+12188-  ...
+12189-# node:fs:440
+12190-#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+12191-#                    ^
+12192-# Error: ENOENT: no such file or directory, open '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+12193-#     at readFileSync (node:fs:440:20)
+12194-#     at loadToolFaceManifest (<acc>\\tree-se\\server\\src\\mcp\\manifest.ts:26:29)
+12195-#     at <anonymous> (<acc>\\tree-se\\server\\src\\agent\\tools\\definitions.ts:10:18)
+12196-#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+12197-#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+12198-#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+12199-#   errno: -4058,
+12200-#   code: 'ENOENT',
+--
+12204-# Node.js v22.22.1
+12205-# Subtest: src\\__tests__\\v14AgentVerbTransfer.test.ts
+12206:not ok 35 - src\\__tests__\\v14AgentVerbTransfer.test.ts
+12207-  ---
+12208-  duration_ms: 2150.9713
+12209-  type: 'test'
+12210-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14AgentVerbTransfer.test.ts:1:1'
+12211-  failureType: 'testCodeFailure'
+12212-  exitCode: 1
+12213-  signal: ~
+12214-  error: 'test failed'
+12215-  code: 'ERR_TEST_FAILURE'
+12216-  ...
+12217-# node:fs:440
+12218-#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+12219-#                    ^
+12220-# Error: ENOENT: no such file or directory, open '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+12221-#     at readFileSync (node:fs:440:20)
+12222-#     at loadToolFaceManifest (<acc>\\tree-se\\server\\src\\mcp\\manifest.ts:26:29)
+12223-#     at <anonymous> (<acc>\\tree-se\\server\\src\\agent\\tools\\definitions.ts:10:18)
+12224-#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+12225-#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+12226-#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+12227-#   errno: -4058,
+12228-#   code: 'ENOENT',
+--
+12232-# Node.js v22.22.1
+12233-# Subtest: src\\__tests__\\v14AgentWriteDoor.test.ts
+12234:not ok 36 - src\\__tests__\\v14AgentWriteDoor.test.ts
+12235-  ---
+12236-  duration_ms: 1875.5134
+12237-  type: 'test'
+12238-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14AgentWriteDoor.test.ts:1:1'
+12239-  failureType: 'testCodeFailure'
+12240-  exitCode: 1
+12241-  signal: ~
+12242-  error: 'test failed'
+12243-  code: 'ERR_TEST_FAILURE'
+12244-  ...
+12245-# Subtest: layout inspector detects label/card overlap with coordinates and severity
+12246-ok 278 - layout inspector detects label/card overlap with coordinates and severity
+12247-  ---
+12248-  duration_ms: 3.8276
+12249-  type: 'test'
+12250-  ...
+12251-# Subtest: layout inspector detects overlapping label rectangles once per edge pair
+12252-ok 279 - layout inspector detects overlapping label rectangles once per edge pair
+12253-  ---
+12254-  duration_ms: 0.3526
+12255-  type: 'test'
+12256-  ...
+--
+12819-  ...
+12820-# Subtest: original live specimen replays byte-for-byte with prior successful save receipts and zero flags
+12821:not ok 329 - original live specimen replays byte-for-byte with prior successful save receipts and zero flags
+12822-  ---
+12823-  duration_ms: 4.7208
+12824-  type: 'test'
+12825-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14ClaimObservation.test.ts:1:6816'
+12826-  failureType: 'testCodeFailure'
+12827-  error: "ENOENT: no such file or directory, open '<acc>\\tree-se\\.eval-runs\\2026-09-14T10-54-13-381Z-167e5264\\05-memory-journey.json'"
+12828-  code: 'ENOENT'
+12829-  stack: |-
+12830-    Object.openSync (node:fs:560:18)
+12831-    readFileSync (node:fs:444:35)
+12832-    TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v14ClaimObservation.test.ts:154:17)
+12833-    Test.runInAsyncScope (node:async_hooks:214:14)
+12834-    Test.run (node:internal/test_runner/test:1047:25)
+12835-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+12836-    Test.postRun (node:internal/test_runner/test:1173:19)
+12837-    Test.run (node:internal/test_runner/test:1101:12)
+12838-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+12839-  ...
+12840-# Subtest: current successful memory-search hits support literal quoted references in Chinese and English
+12841-ok 330 - current successful memory-search hits support literal quoted references in Chinese and English
+12842-  ---
+12843-  duration_ms: 8.5877
+--
+12891-# Node.js v22.22.1
+12892-# Subtest: src\\__tests__\\v14ClaimReceipt.test.ts
+12893:not ok 42 - src\\__tests__\\v14ClaimReceipt.test.ts
+12894-  ---
+12895-  duration_ms: 1477.6278
+12896-  type: 'test'
+12897-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14ClaimReceipt.test.ts:1:1'
+12898-  failureType: 'testCodeFailure'
+12899-  exitCode: 1
+12900-  signal: ~
+12901-  error: 'test failed'
+12902-  code: 'ERR_TEST_FAILURE'
+12903-  ...
+12904-# sqlite-vec loaded: vv0.1.7
+12905-# Subtest: component is the fourth family with precisely three manual built-in templates and aligned shared definitions
+12906-ok 337 - component is the fourth family with precisely three manual built-in templates and aligned shared definitions
+12907-  ---
+12908-  duration_ms: 53.4711
+12909-  type: 'test'
+12910-  ...
+12911-# Subtest: timeline params preserve order and optional fields while enforcing one to 64 entries
+12912-ok 338 - timeline params preserve order and optional fields while enforcing one to 64 entries
+12913-  ---
+12914-  duration_ms: 6.128
+12915-  type: 'test'
+--
+13341-# Node.js v22.22.1
+13342-# Subtest: src\\__tests__\\v14ContextHint.test.ts
+13343:not ok 44 - src\\__tests__\\v14ContextHint.test.ts
+13344-  ---
+13345-  duration_ms: 2157.8923
+13346-  type: 'test'
+13347-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14ContextHint.test.ts:1:1'
+13348-  failureType: 'testCodeFailure'
+13349-  exitCode: 1
+13350-  signal: ~
+13351-  error: 'test failed'
+13352-  code: 'ERR_TEST_FAILURE'
+13353-  ...
+13354-# sqlite-vec loaded: vv0.1.7
+13355-# Subtest: A3 v2 upgrades A2 settings without changing sections and uses the card viewport vocabulary
+13356-ok 349 - A3 v2 upgrades A2 settings without changing sections and uses the card viewport vocabulary
+13357-  ---
+13358-  duration_ms: 36.1372
+13359-  type: 'test'
+13360-  ...
+13361-# 📦 Running 86 pending migration(s)...
+--
+13953-# Node.js v22.22.1
+13954-# Subtest: src\\__tests__\\v14DeleteCeremony.test.ts
+13955:not ok 46 - src\\__tests__\\v14DeleteCeremony.test.ts
+13956-  ---
+13957-  duration_ms: 1617.7258
+13958-  type: 'test'
+13959-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14DeleteCeremony.test.ts:1:1'
+13960-  failureType: 'testCodeFailure'
+13961-  exitCode: 1
+13962-  signal: ~
+13963-  error: 'test failed'
+13964-  code: 'ERR_TEST_FAILURE'
+13965-  ...
+13966-# node:fs:440
+13967-#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+13968-#                    ^
+13969-# Error: ENOENT: no such file or directory, open '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+13970-#     at readFileSync (node:fs:440:20)
+13971-#     at loadToolFaceManifest (<acc>\\tree-se\\server\\src\\mcp\\manifest.ts:26:29)
+13972-#     at <anonymous> (<acc>\\tree-se\\server\\src\\agent\\tools\\definitions.ts:10:18)
+13973-#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+13974-#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+13975-#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+13976-#   errno: -4058,
+13977-#   code: 'ENOENT',
+--
+13981-# Node.js v22.22.1
+13982-# Subtest: src\\__tests__\\v14LoopRobustness.test.ts
+13983:not ok 47 - src\\__tests__\\v14LoopRobustness.test.ts
+13984-  ---
+13985-  duration_ms: 1460.7291
+13986-  type: 'test'
+13987-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14LoopRobustness.test.ts:1:1'
+13988-  failureType: 'testCodeFailure'
+13989-  exitCode: 1
+13990-  signal: ~
+13991-  error: 'test failed'
+13992-  code: 'ERR_TEST_FAILURE'
+13993-  ...
+13994-# node:fs:440
+13995-#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+13996-#                    ^
+13997-# Error: ENOENT: no such file or directory, open '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+13998-#     at readFileSync (node:fs:440:20)
+13999-#     at loadToolFaceManifest (<acc>\\tree-se\\server\\src\\mcp\\manifest.ts:26:29)
+14000-#     at <anonymous> (<acc>\\tree-se\\server\\src\\agent\\tools\\definitions.ts:10:18)
+14001-#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+14002-#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+14003-#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+14004-#   errno: -4058,
+14005-#   code: 'ENOENT',
+--
+14009-# Node.js v22.22.1
+14010-# Subtest: src\\__tests__\\v14MemoryQuickwins.test.ts
+14011:not ok 48 - src\\__tests__\\v14MemoryQuickwins.test.ts
+14012-  ---
+14013-  duration_ms: 1388.875
+14014-  type: 'test'
+14015-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14MemoryQuickwins.test.ts:1:1'
+14016-  failureType: 'testCodeFailure'
+14017-  exitCode: 1
+14018-  signal: ~
+14019-  error: 'test failed'
+14020-  code: 'ERR_TEST_FAILURE'
+14021-  ...
+14022-# sqlite-vec loaded: vv0.1.7
+14023-# Subtest: 079 adds nullable note storage without rewriting old rows and is idempotent
+14024-ok 360 - 079 adds nullable note storage without rewriting old rows and is idempotent
+14025-  ---
+14026-  duration_ms: 12.1036
+14027-  type: 'test'
+14028-  ...
+14029-# Subtest: shared defaults are valid, cover the six slots, and produce independent settings objects
+14030-ok 361 - shared defaults are valid, cover the six slots, and produce independent settings objects
+14031-  ---
+14032-  duration_ms: 5.5015
+14033-  type: 'test'
+--
+15546-# Node.js v22.22.1
+15547-# Subtest: src\\__tests__\\v14ProposalUnification.test.ts
+15548:not ok 54 - src\\__tests__\\v14ProposalUnification.test.ts
+15549-  ---
+15550-  duration_ms: 1883.5444
+15551-  type: 'test'
+15552-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14ProposalUnification.test.ts:1:1'
+15553-  failureType: 'testCodeFailure'
+15554-  exitCode: 1
+15555-  signal: ~
+15556-  error: 'test failed'
+15557-  code: 'ERR_TEST_FAILURE'
+15558-  ...
+15559-# node:fs:440
+15560-#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+15561-#                    ^
+15562-# Error: ENOENT: no such file or directory, open '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+15563-#     at readFileSync (node:fs:440:20)
+15564-#     at loadToolFaceManifest (<acc>\\tree-se\\server\\src\\mcp\\manifest.ts:26:29)
+15565-#     at <anonymous> (<acc>\\tree-se\\server\\src\\agent\\tools\\definitions.ts:10:18)
+15566-#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+15567-#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+15568-#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+15569-#   errno: -4058,
+15570-#   code: 'ENOENT',
+--
+15574-# Node.js v22.22.1
+15575-# Subtest: src\\__tests__\\v14ReadTools.test.ts
+15576:not ok 55 - src\\__tests__\\v14ReadTools.test.ts
+15577-  ---
+15578-  duration_ms: 1462.528
+15579-  type: 'test'
+15580-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14ReadTools.test.ts:1:1'
+15581-  failureType: 'testCodeFailure'
+15582-  exitCode: 1
+15583-  signal: ~
+15584-  error: 'test failed'
+15585-  code: 'ERR_TEST_FAILURE'
+15586-  ...
+15587-# Subtest: V14 migrations preserve existing 071 suites and add optional material lineage idempotently
+15588-ok 389 - V14 migrations preserve existing 071 suites and add optional material lineage idempotently
+15589-  ---
+15590-  duration_ms: 17.1115
+15591-  type: 'test'
+15592-  ...
+15593-# Subtest: V14 suite routes create, list, rename and replace the complete appearance without changing identity
+15594-ok 390 - V14 suite routes create, list, rename and replace the complete appearance without changing identity
+15595-  ---
+15596-  duration_ms: 333.6454
+15597-  type: 'test'
+15598-  ...
+--
+16547-# Node.js v22.22.1
+16548-# Subtest: src\\__tests__\\v14TurnIdentity.test.ts
+16549:not ok 59 - src\\__tests__\\v14TurnIdentity.test.ts
+16550-  ---
+16551-  duration_ms: 1843.2285
+16552-  type: 'test'
+16553-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v14TurnIdentity.test.ts:1:1'
+16554-  failureType: 'testCodeFailure'
+16555-  exitCode: 1
+16556-  signal: ~
+16557-  error: 'test failed'
+16558-  code: 'ERR_TEST_FAILURE'
+16559-  ...
+16560-# sqlite-vec loaded: vv0.1.7
+16561-# 📦 Running 86 pending migration(s)...
+--
+22410-  ...
+22411-# Subtest: T-1 both dev gates enabled returns a normal-login-shaped JWT response
+22412:not ok 479 - T-1 both dev gates enabled returns a normal-login-shaped JWT response
+22413-  ---
+22414-  duration_ms: 3694.3792
+22415-  type: 'test'
+22416-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2DevQuickLogin.test.ts:7:442'
+22417-  failureType: 'testCodeFailure'
+22418-  error: |-
+22419-    Server exited before becoming ready (1)
+22420-    node:fs:440
+22421-        return binding.readFileUtf8(path, stringToFlags(options.flag));
+22422-                       ^
+22423-    
+22424-    Error: ENOENT: no such file or directory, open '<acc>\tree-se\server\dist\tool-face-manifest.json'
+22425-        at readFileSync (node:fs:440:20)
+22426-        at loadToolFaceManifest (<acc>\tree-se\server\src\mcp\manifest.ts:26:29)
+22427-        at <anonymous> (<acc>\tree-se\server\src\agent\tools\definitions.ts:10:18)
+22428-        at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+22429-        at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+22430-        at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+22431-      errno: -4058,
+22432-      code: 'ENOENT',
+22433-      syscall: 'open',
+22434-      path: '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+--
+22452-  ...
+22453-# Subtest: T-2 production startup does not mount the dev quick-login path
+22454:not ok 480 - T-2 production startup does not mount the dev quick-login path
+22455-  ---
+22456-  duration_ms: 3446.7447
+22457-  type: 'test'
+22458-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2DevQuickLogin.test.ts:7:1930'
+22459-  failureType: 'testCodeFailure'
+22460-  error: |-
+22461-    Server exited before becoming ready (1)
+22462-    node:fs:440
+22463-        return binding.readFileUtf8(path, stringToFlags(options.flag));
+22464-                       ^
+22465-    
+22466-    Error: ENOENT: no such file or directory, open '<acc>\tree-se\server\dist\tool-face-manifest.json'
+22467-        at readFileSync (node:fs:440:20)
+22468-        at loadToolFaceManifest (<acc>\tree-se\server\src\mcp\manifest.ts:26:29)
+22469-        at <anonymous> (<acc>\tree-se\server\src\agent\tools\definitions.ts:10:18)
+22470-        at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+22471-        at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+22472-        at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+22473-      errno: -4058,
+22474-      code: 'ENOENT',
+22475-      syscall: 'open',
+22476-      path: '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+--
+22494-  ...
+22495-# Subtest: T-3 the explicit opt-in defaults off and leaves the path unmounted
+22496:not ok 481 - T-3 the explicit opt-in defaults off and leaves the path unmounted
+22497-  ---
+22498-  duration_ms: 3641.8596
+22499-  type: 'test'
+22500-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2DevQuickLogin.test.ts:7:2284'
+22501-  failureType: 'testCodeFailure'
+22502-  error: |-
+22503-    Server exited before becoming ready (1)
+22504-    node:fs:440
+22505-        return binding.readFileUtf8(path, stringToFlags(options.flag));
+22506-                       ^
+22507-    
+22508-    Error: ENOENT: no such file or directory, open '<acc>\tree-se\server\dist\tool-face-manifest.json'
+22509-        at readFileSync (node:fs:440:20)
+22510-        at loadToolFaceManifest (<acc>\tree-se\server\src\mcp\manifest.ts:26:29)
+22511-        at <anonymous> (<acc>\tree-se\server\src\agent\tools\definitions.ts:10:18)
+22512-        at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+22513-        at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+22514-        at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+22515-      errno: -4058,
+22516-      code: 'ENOENT',
+22517-      syscall: 'open',
+22518-      path: '<acc>\\tree-se\\server\\dist\\tool-face-manifest.json'
+--
+27922-  ...
+27923-# Subtest: src\\__tests__\\v2MaterialLibrary.test.ts
+27924:not ok 71 - src\\__tests__\\v2MaterialLibrary.test.ts
+27925-  ---
+27926-  duration_ms: 20340.5828
+27927-  type: 'test'
+27928-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2MaterialLibrary.test.ts:1:1'
+27929-  failureType: 'uncaughtException'
+27930-  error: 'Unable to deserialize cloned data due to invalid or unsupported version.'
+27931-  code: 'ERR_TEST_FAILURE'
+27932-  stack: |-
+27933-    #processRawBuffer (node:internal/test_runner/runner:354:20)
+27934-    FileTest.parseMessage (node:internal/test_runner/runner:290:27)
+27935-    Socket.<anonymous> (node:internal/test_runner/runner:400:15)
+27936-    Socket.emit (node:events:519:28)
+27937-    addChunk (node:internal/streams/readable:561:12)
+27938-    readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+27939-    Readable.push (node:internal/streams/readable:392:5)
+27940-    Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+27941-  ...
+27942-# sqlite-vec loaded: vv0.1.7
+27943-# 📦 Running 86 pending migration(s)...
+--
+30733-  ...
+30734-# Subtest: src\\__tests__\\v2RelationLifecycleClosure.test.ts
+30735:not ok 75 - src\\__tests__\\v2RelationLifecycleClosure.test.ts
+30736-  ---
+30737-  duration_ms: 2179.2047
+30738-  type: 'test'
+30739-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2RelationLifecycleClosure.test.ts:1:1'
+30740-  failureType: 'uncaughtException'
+30741-  error: 'Unable to deserialize cloned data due to invalid or unsupported version.'
+30742-  code: 'ERR_TEST_FAILURE'
+30743-  stack: |-
+30744-    #processRawBuffer (node:internal/test_runner/runner:354:20)
+30745-    FileTest.parseMessage (node:internal/test_runner/runner:290:27)
+30746-    Socket.<anonymous> (node:internal/test_runner/runner:400:15)
+30747-    Socket.emit (node:events:519:28)
+30748-    addChunk (node:internal/streams/readable:561:12)
+30749-    readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+30750-    Readable.push (node:internal/streams/readable:392:5)
+30751-    Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+30752-  ...
+30753-# sqlite-vec loaded: vv0.1.7
+30754-# Subtest: Relation seed registry and validators own directionality and query scope
+30755-ok 596 - Relation seed registry and validators own directionality and query scope
+30756-  ---
+30757-  duration_ms: 9.0865
+--
+30784-# Subtest: src\\__tests__\\v2Relations.test.ts
+30785:not ok 76 - src\\__tests__\\v2Relations.test.ts
+30786-  ---
+30787-  duration_ms: 2115.3735
+30788-  type: 'test'
+30789-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2Relations.test.ts:1:1'
+30790-  failureType: 'uncaughtException'
+30791-  error: 'Unable to deserialize cloned data due to invalid or unsupported version.'
+30792-  code: 'ERR_TEST_FAILURE'
+30793-  stack: |-
+30794-    #processRawBuffer (node:internal/test_runner/runner:354:20)
+30795-    FileTest.parseMessage (node:internal/test_runner/runner:290:27)
+30796-    Socket.<anonymous> (node:internal/test_runner/runner:400:15)
+30797-    Socket.emit (node:events:519:28)
+30798-    addChunk (node:internal/streams/readable:561:12)
+30799-    readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+30800-    Readable.push (node:internal/streams/readable:392:5)
+30801-    Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+30802-  ...
+30803-# sqlite-vec loaded: vv0.1.7
+30804-# 📦 Running 86 pending migration(s)...
+--
+37248-  ...
+37249-# Subtest: K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+37250:not ok 656 - K-1/K-3/K-9 calibrate 9 pages and kill a timed-out Python process tree before returning
+37251-  ---
+37252-  duration_ms: 22.0695
+37253-  type: 'test'
+37254-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:273'
+37255-  failureType: 'testCodeFailure'
+37256-  error: "ENOENT: no such file or directory, open '<acc>\\tree-se\\_external_tools\\mineru\\uv.lock'"
+37257-  code: 'ENOENT'
+37258-  stack: |-
+37259-    readFileSync (node:fs:440:20)
+37260-    expectedMineruVersion (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:132:20)
+37261-    makeFixtureCommand (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:161:7)
+37262-    TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:380:26)
+37263-    async Test.run (node:internal/test_runner/test:1054:7)
+37264-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+37265-  ...
+37266-# 📦 Running 86 pending migration(s)...
+--
+37354-# sqlite-vec loaded: vv0.1.7
+37355-# Subtest: K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+37356:not ok 657 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+37357-  ---
+37358-  duration_ms: 3725.1388
+37359-  type: 'test'
+37360-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:2914'
+37361-  failureType: 'testCodeFailure'
+37362-  error: "ENOENT: no such file or directory, open '<acc>\\tree-se\\_external_tools\\mineru\\uv.lock'"
+37363-  code: 'ENOENT'
+37364-  stack: |-
+37365-    readFileSync (node:fs:440:20)
+37366-    expectedMineruVersion (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:132:20)
+37367-    makeFixtureCommand (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:161:7)
+37368-    <anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:445:21)
+37369-    withDbAndStorage (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:291:11)
+37370-    async TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:443:3)
+37371-    async Test.run (node:internal/test_runner/test:1054:7)
+37372-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+37373-  ...
+37374-# 📦 Running 86 pending migration(s)...
+--
+37462-# sqlite-vec loaded: vv0.1.7
+37463-# Subtest: K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+37464:not ok 658 - K-5/K-7-on/K-2 contain crash, timeout and nonzero exit, then publish with the raw uv.lock identity
+37465-  ---
+37466-  duration_ms: 3213.8732
+37467-  type: 'test'
+37468-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:4916'
+37469-  failureType: 'testCodeFailure'
+37470-  error: "ENOENT: no such file or directory, open '<acc>\\tree-se\\_external_tools\\mineru\\uv.lock'"
+37471-  code: 'ENOENT'
+37472-  stack: |-
+37473-    readFileSync (node:fs:440:20)
+37474-    expectedMineruVersion (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:132:20)
+37475-    makeFixtureCommand (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:161:7)
+37476-    <anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:525:25)
+37477-    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+37478-    async withDbAndStorage (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:291:5)
+37479-    async TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:509:3)
+37480-    async Test.run (node:internal/test_runner/test:1054:7)
+37481-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+37482-  ...
+37483-# 📦 Running 86 pending migration(s)...
+--
+38431-  ...
+38432-# Subtest: V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+38433:not ok 669 - V12.9c c-1b-2 keeps MinerU table regions honest and declares cell geometry unavailable
+38434-  ---
+38435-  duration_ms: 548.698
+38436-  type: 'test'
+38437-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2SourceRegionCells.test.ts:28:2231'
+38438-  failureType: 'testCodeFailure'
+38439-  error: 'MinerU lockfile could not be read: _external_tools/mineru/uv.lock'
+38440-  code: 'internal_interrupted'
+38441-  name: 'SourceMineruParserError'
+38442-  stack: |-
+38443-    mineruParserVersion (<acc>\tree-se\server\src\services\sourceMineruParser.ts:218:11)
+38444-    TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceRegionCells.test.ts:205:23)
+38445-    async Test.run (node:internal/test_runner/test:1054:7)
+38446-    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+38447-  ...
+38448-# sqlite-vec loaded: vv0.1.7
+38449-# 📦 Running 86 pending migration(s)...
+--
+39534-  ...
+39535-# Subtest: T-1 manifest copy recreates a missing dist target byte-for-byte
+39536:not ok 688 - T-1 manifest copy recreates a missing dist target byte-for-byte
+39537-  ---
+39538-  duration_ms: 2.8494
+39539-  type: 'test'
+39540-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2TestV2ManifestHook.test.ts:1:784'
+39541-  failureType: 'testCodeFailure'
+39542-  error: 'npm_execpath is required to exercise the npm lifecycle hook'
+39543-  code: 'ERR_ASSERTION'
+39544-  name: 'AssertionError'
+39545-  expected: true
+39546-  operator: '=='
+39547-  stack: |-
+39548-    TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v2TestV2ManifestHook.test.ts:32:10)
+39549-    Test.runInAsyncScope (node:async_hooks:214:14)
+39550-    Test.run (node:internal/test_runner/test:1047:25)
+39551-    Test.start (node:internal/test_runner/test:944:17)
+39552-    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+39553-  ...
+39554-# Subtest: T-2 pretest:v2 keeps manifest freshness checking and copying wired
+39555-ok 689 - T-2 pretest:v2 keeps manifest freshness checking and copying wired
+39556-  ---
+39557-  duration_ms: 1.3208
+39558-  type: 'test'
+[server-test-suite] FLAKY retry <acc>\tree-se\server\src\__tests__\v2MaterialLibrary.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. (isolated attempt 1/1)
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2MaterialLibrary.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. retry=PASS
+[server-test-suite] FLAKY retry <acc>\tree-se\server\src\__tests__\v2RelationLifecycleClosure.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. (isolated attempt 1/1)
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2RelationLifecycleClosure.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. retry=PASS
+[server-test-suite] FLAKY retry <acc>\tree-se\server\src\__tests__\v2Relations.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. (isolated attempt 1/1)
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2Relations.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. retry=PASS

@@ -12,6 +12,7 @@
 - a20m 全部：r3 链里的 BACKIN 与 LIST 37 行全绿；LANDOTHER 6/6 绿。
 - a20n 全臂 52 行 + 第三形 3 行：只有 heldhead-undo 红 3/3（已裁 🅱，手册已知），其余全合 r3e 预期。
 - P1（HEADCLOSE-applyslow，两形）与 P2（MENTER-close）在 r3e 上全绿，r3d 上的阳性对照是红的。
+- **更正（2026-11-10）**：第 5 对 two2 在 r3e 一侧 3 行都是 void（前提不成立），实为未测；acc10 / acc13 的红现挂 TD-82 / TD-83。见第五节表下更正段。
 - 9 对回归：r3e 的红行都是修前同一对红行的子集，没有一条比修前差。mx2 与 acc13 的同名行两版逐行同形；acc10 两版终态同形，过程不同（见第五节）。第 1 对以 mx2 重跑（见第七节）。
 - 第 10 对（UNDOPAUSE 修前 ×20 对 r3e ×20）：特征形状修前 0/20、r3e 0/20，没到停线（修前 0 且 r3e ≥3），只记数。
 
@@ -22,7 +23,7 @@
 ### 已裁、手册已知（照记，不挡）
 
 1. **BACKIN-heldhead-undo 红 3/3**（REPS=2 两行 + 第三形一行）：扣留期间按 Ctrl+Z 无效，屏上和服务器最后都是 `['warmup bbb','aaa']`。Main_Designer 11-09 裁 🅱（撤销在扣留期间无效），与 r3d 同因。修前两行都作废：一行因修前没有扣留造不出来，另一行在那之前就打字错位（`rmup/wa`），记 N/A。
-2. **HEADCLOSE-putback（×1，读数）**：重开后把 bbb 手动放回第一行，它的保存得 200，aaa 的恢复项被挤掉，Apply 点不到，**aaa 丢**；bbb 留在服务器。修前同形（修前也是 aaa 没了、bbb 留）。已裁 A-25 ②a (iv)，手册已知。r3e 上点 `warmup` 行末会点进覆盖那一行的框，探针改为直接给这一行设焦点（行里 `putHow: focus`），同 r3d。
+2. **HEADCLOSE-putback（×1，读数）**：重开后把 bbb 手动放回第一行，它的保存得 200，aaa 的恢复项被挤掉，Apply 点不到，**aaa 丢**；bbb 留在服务器。修前同形（修前也是 aaa 没了、bbb 留）。已裁 A-25 ②a (iv)，手册已知。（2026-11-10 指针：这是「一块一条」旧存法下的历史形；从 b734197e 起 putback 是判的闸，见 A-25 报告已裁 6。）r3e 上点 `warmup` 行末会点进覆盖那一行的框，探针改为直接给这一行设焦点（行里 `putHow: focus`），同 r3d。
 3. **MENTER-close 带 Apply 的那一项**：重开时有「A block edit is waiting for recovery abx cd」带 Apply。这是在途那次保存多余的回执（服务器已有 `abx`）。修前同样有。已裁 A-25 ②a (ii)。
 4. **CLICKBACK-end（只记）**：r3e 框里是 `alphaZ`，记录 `"alpha" → "alphaZ"`，服务器 `['alpha beta']`；修前没有框、没有记录。TD-66 族。
 
@@ -93,6 +94,12 @@ applyslow 的中间点（只记不判）：两形的 Apply 回应时刻服务器
 | 7 acc13 | 5/10 | 2/10 | 修前：N-a1-failedSaveThenMore ×2、N-a1c-failedSaveNoMore ×1、N-b2-headingAboveLineSameWord ×2；r3e 只有 N-b2 ×2，两版同形（重开后服务器 `['warmup','see the note']`、`['[heading_1]nointro']`） |
 | 8 J（REPS=2） | 0/4 | 0/4 | |
 | 9 retry（HOLD=70000） | 0/1 | 0/1 | |
+
+> **更正（2026-11-10，阶段末复核）：第 5 对 two2 在 r3e 一侧其实没测。**
+> - r3e 一侧 3 行都是 void：臂的前提「两个留字框同屏」没有满足（行里 `void: "two kept records were not both on screen"`，`precondition: false`）。acc11 把 void 行记成 ok，`redsubset.mjs` 只读 BAD 行，所以表里 r3e 那格的「0/3」应读作「3 行未测」。修前一侧 3 行前提成立，是真绿。
+> - 从 r3e 起每一版都是 void（A-20b r2、A-25 两轮也一样）。阶段末的 void 计数器（`count-void.mjs`）对 r3e 这一行报「NOT TESTED 3（TWO2-discardOne: two kept records were not both on screen）」。
+> - Main_Designer 2026-11-10 裁：two2 记为未覆盖，③ 类由 acc10 TWO 顶，不重建前提。
+> - 同表另有两条红，当时按「r3e 红 ⊆ 修前红」放过，没有挂指针：acc10 HL-saveNotSentThenClose ×3 现已立 **TD-82**，acc13 N-b2-headingAboveLineSameWord ×2 现已立 **TD-83**。同日改类：两条都不是丢字。HL 的正文在重开后的恢复项里，点 Apply 落回；N-b2 的字也在恢复项，丢的是交接窗口里的回车，归 TD-77 族。臂规则写于回执库之前，不数恢复项。详见阶段一封版回归报告第三节。
 
 ## 六、第 10 对（UNDOPAUSE 修前 ×20 对 r3e ×20，交替，单浏览器）
 

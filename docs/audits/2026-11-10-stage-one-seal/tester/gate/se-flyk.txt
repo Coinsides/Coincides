@@ -1,0 +1,10 @@
+FLYK-close-req             1/1
+    ok  
+FLYK-close-resp            1/1
+    ok  
+FLYK-full-req              1/1
+    ok  
+FLYK-full-resp             1/1
+    ok  
+total red 0
+setup errors 0

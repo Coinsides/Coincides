@@ -1,0 +1,12 @@
+IDLE                       1/1
+    ok  server at 3.5 s true
+WAMP                       1/1
+    ok  during 0, after 1
+PAUSES                     1/1
+    ok  saves 4
+UNDO                       1/1
+    ok  aaabbb ->  -> warmup
+PAGEHIDE                   1/1
+    ok  after reopen true
+total red 0
+setup errors 0

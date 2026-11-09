@@ -1,0 +1,9 @@
+# MinerU wiring file run alone (v2SourceMineruWiring.test.ts, --test-concurrency=1): conditions as read in this session
+
+run 1 (logs/server-mineru-alone.txt): slot 2, 03:24:25 - 03:25:31. Slot 1 was held by the void-arm setup-fix run
+  (03:12:00 - 03:27:13, one browser probe), so the machine was not idle.
+run 2 (logs/server-mineru-idle.txt): slot 1, 03:47:16 - 03:48:25. Both lock slots were free when it started (no owner
+  files); Win32_Processor LoadPercentage average read just before = 10 (PowerShell, this session); one leftover loopback
+  proxy process (from the failed first try of the old-matrix step) was found and killed before the run.
+
+Both runs: 5 tests, 4 pass, 1 fail (K-4 'native text completed while MinerU still held its slot', 0 !== 1).

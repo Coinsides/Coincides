@@ -1,0 +1,62 @@
+IME-new                    pass 8/8
+   pinyin in note 0/8; examples 
+   timeline (imeLog, page clock): {"green handoff-outside-composition":8}
+     IME-new-0  ok  handoff-outside-composition                          POST 598->615 (201); comp [[2,594,"第一"],[860,1560,"测试"]]; hand-off [652,"focus"]; editor-in 657; draft-left 657 '第一'; first editor input [862,"第一c"]
+     IME-new-1  ok  handoff-outside-composition                          POST 593->606 (201); comp [[1,590,"第一"],[846,1541,"测试"]]; hand-off [629,"focus"]; editor-in 634; draft-left 634 '第一'; first editor input [847,"第一c"]
+     IME-new-2  ok  handoff-outside-composition                          POST 592->604 (201); comp [[1,590,"第一"],[848,1543,"测试"]]; hand-off [624,"focus"]; editor-in 629; draft-left 629 '第一'; first editor input [849,"第一c"]
+     IME-new-3  ok  handoff-outside-composition                          POST 588->600 (201); comp [[1,585,"第一"],[840,1534,"测试"]]; hand-off [619,"focus"]; editor-in 624; draft-left 624 '第一'; first editor input [841,"第一c"]
+     IME-new-4  ok  handoff-outside-composition                          POST 600->612 (201); comp [[1,596,"第一"],[854,1560,"测试"]]; hand-off [631,"focus"]; editor-in 636; draft-left 636 '第一'; first editor input [855,"第一c"]
+     IME-new-5  ok  handoff-outside-composition                          POST 594->607 (201); comp [[1,591,"第一"],[850,1553,"测试"]]; hand-off [630,"focus"]; editor-in 644; draft-left 644 '第一'; first editor input [851,"第一c"]
+     IME-new-6  ok  handoff-outside-composition                          POST 601->613 (201); comp [[1,598,"第一"],[859,1563,"测试"]]; hand-off [631,"focus"]; editor-in 635; draft-left 635 '第一'; first editor input [860,"第一c"]
+     IME-new-7  ok  handoff-outside-composition                          POST 594->606 (201); comp [[1,592,"第一"],[851,1554,"测试"]]; hand-off [626,"focus"]; editor-in 631; draft-left 631 '第一'; first editor input [852,"第一c"]
+IME-mid                    pass 8/8
+   pinyin in note 0/8; examples 
+SAVEFAIL-500-direct        pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [3044,3034]; failure toasts [0,0]
+SAVEFAIL-500-blur          pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [2041,2013]; failure toasts [0,0]
+SAVEFAIL-net-direct        pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [3041,3024]; failure toasts [0,0]
+SAVEFAIL-net-blur          pass 2/2
+   criteria passed (of 2): (a) other block types 2, (b) lasting control 2, (c) catch-up 2, (d) exact 2, (e) zero failure toasts 2; controls seen ["Retry","Copy"]; catch-up ms [2019,2026]; failure toasts [0,0]
+ONEFAIL-500                pass 2/2
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 2: {"i":2,"ii":2,"iii":2,"iv":2,"markInfo":2}; B saved ms [2045,2049]; A caught ms [7047,7073]; failure toasts [0,0]; server [[["alpha start one two"],["beta start bee"]],[["alpha start one two"],["beta start bee"]]]
+ONEFAIL-net                pass 2/2
+   manual item 5: (i) the other block's idle save goes (6 s, no Enter / click away) (ii) the failing block retries by itself, words typed meanwhile included (iii) each once in its block (iv) zero failure toasts; passed of 2: {"i":2,"ii":2,"iii":2,"iv":2,"markInfo":2}; B saved ms [2044,2046]; A caught ms [7069,7061]; failure toasts [0,0]; server [[["alpha start one two"],["beta start bee"]],[["alpha start one two"],["beta start bee"]]]
+LANDFAIL-auto-500          pass 2/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"c":2,"d":2,"e":2,"bInfo":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked [null,null]; caught ms [13154,13143]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-auto-net          pass 2/2
+   gate (a)(c)(d)(e); (b) recorded as bInfo; (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"c":2,"d":2,"e":2,"bInfo":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked [null,null]; caught ms [13205,13220]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-500         pass 2/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"b":2,"d":2,"e":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked ["Retry","Retry"]; caught ms [4046,4092]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-apply-net         pass 2/2
+   gate (a)(b weak: lasting control + click after network back lands)(d)(e); (a) r2 = own mark lit (read before the separate block is typed into) AND zero failure toasts AND the separate block takes keys; passed of 2: {"a":2,"b":2,"d":2,"e":2}
+   own mark [true,true]; own controls [["Retry","Copy"],["Retry","Copy"]]; failure toasts [0,0]; separate block took keys [true,true]; own keys shown [false,false]; refused keys in a ledger [{"server":0,"box":false,"stored":false},{"server":0,"box":false,"stored":false}]
+   clicked ["Retry","Retry"]; caught ms [4030,4039]; server [["warmup","[heading_1]head","body","other start plus o"],["warmup","[heading_1]head","body","other start plus o"]]
+LANDFAIL-other-plain       pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15136]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+LANDFAIL-other-heading     pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15193]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+LANDFAIL-other-headline    pass 1/1
+   gate (a) keys show (c) caught up hands off (d) each once (e) zero failure toasts; mark recorded as markInfo; passed of 1: {"a":1,"c":1,"d":1,"e":1,"markInfo":1}; typed [true]; failure toasts [0]; caught ms [15114]; counts [{"head":1,"body":1,"typed":1,"plainb":1,"hbody":1}]
+CHAIN-enter                pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-blur                 pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-inline               pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-mixed                pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":1},{"kzero":1,"kone":1,"ktwo":1}]
+CHAIN-seed                 pass 2/2
+   kzero/kone/ktwo each once on the server; counts [{"kzero":1,"kone":1,"ktwo":0},{"kzero":1,"kone":1,"ktwo":0}]
+H1                         pass 2/2
+   injected throw fired 2/2 (a run where it did not fire proves nothing); beta landed 2/2
+H2                         pass 2/2
+   SMOKE only (not a gate): landed after coming back 2/2
+TOTAL rows 53; setup errors 0

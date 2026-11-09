@@ -55,3 +55,12 @@
 - Main_Designer 判断点(台账):把 Tester「正文丢、无处留」登成 🅰 候选并两次预登「红 → 建议本周修」,没先问读数器看了哪几处——A-25 恢复项是我自己裁的路径。以后「丢」字判语先问:三处是哪三处,回执库在不在。
 - **(d)(e) 收(2026-11-10 晚,落在预登读法上)**:HL Apply 步本地服务器 `""` → `[heading_1]head` + `bodyline`、岛上 `bo` → `bodyline`(无重复无多行),条目 0,各 1/1 → **TD-82 结清**(产品行为 = 手册「关页」已知形;臂规则过时)。N-b2 Apply 带回 `[heading_1]noteintro` 一行,条目 0,记形不判(TD-77 族)。(e) 重读:HL ×3、HL2 ×3 旧红 → 新绿;N-b2 ×2 → 「字母以 `noteintro` 提供、打的换行丢」;旧结果留读数;重读器 `stage-end/reread-items.mjs`、行 se-hum-apply / isl-hum-apply / se-acc10i / se-acc11i / se-acc13i 随报告证据收割。封版态核对收:63/63 同、主 JS `index-4nEsyJNA.js`、health 200 / 登录 200 / 写 201 / 读 200 / 标题相符;探针笔记 `seal-health <time>` 留在 Tester 测试账号的测试课程里。
 
+## 判语收讫 · 三问裁 · 封版(Main_Designer 2026-11-10)
+- **判语**:Tester「可以封版(快照)」,`docs/audits/2026-11-10-stage-one-seal/tester/review-tester.md` 〇(交出前 4 Opus 读者反驳复核,§十一)。新发现单列 2 条,都既有、都不挡:TD-85;旧矩阵 A-18 签名残留(下 (f))。
+- **(f) 旧矩阵 A-18 修前签名低率残留 → 新 TD-86**(🅰 候选 · 既有 · 低率 · TD-77 族):fine@xxx 构建 3/126、底 2/63;hash@300 跳 1 位构建 2/18、底 1/15,跳 0 位构建 1/18、底 0/15;两形 = A-18 订单 :12–13 修前签名,修后只验 0/3;机制两版都有,A-25 抬没抬率分不出(p≈0.6)。裁:与 TD-77 / TD-83 合并为阶段二一次机理调查;不为分率补跑(要分就两侧同条件各 3 遍)。手册已知 13 加一句。
+- **(g) typefirst 合并成功后同页仍挂不含 gamma 的旧恢复项(+8 s,重开才消失,点它未测)→ 归 TD-85 ②**,修 85 时一并(Apply / 合并成功后忘掉该块本次访问的旧回执)。
+- **(h) TD-45 措辞改**:「单跑绿」对 K-4 不成立(云机 + `a19acc/post` 树单跑红 2/2,含全空闲);K-4 例外照名单放行;不在阶段一写字路径。
+- **其余收**:冒烟 8/9(SM-image 未测 → P2;Source 原页从界面写、Agent 补丁接受未写臂 → 未覆盖 / P2);void 臂 GEO 10/10、BAN 1/1、acc6-Z 3/3 测绿,STEAL / BOXTYPE2 / BOXTYPE3 未覆盖,two2 未覆盖;harness winShot 写死仓内路径覆盖两张已入库截图(已原样写回)→ **TD-87**。
+- **封版件**(写入看板「岛上」块):版本 `b734197e`;主 JS `index-4nEsyJNA.js` sha256 `f32a046c…72c5ab`;63 文件清单 `tester/se-build.sha256`(清单 sha256 `50fd51b1…004b`),同源重建 63/63 = 岛上服务文件 63/63;岛上健康四项;已知形 = 手册 §一 + TD-63/67/69/73–81、83、85、86;未覆盖 = P2 清单 + STEAL/BOXTYPE2/BOXTYPE3/two2 + SM-image + Source 原页写 + Agent 补丁接受;**备份核(SSH)**:pre-deploy 库 26 份(最新 `pre-deploy-2026-11-09-1423.db`,第 25 轮前)、每日备份 timer 活(最近 11-08 19:39Z 成功,本机保留 10 份,最新 gz 完整性 ok)、盘用 16%;⚠️ 备份仍只在岛上本机(SERVER.md 待办「送出服务器」未做)。
+- **收割**:`docs/audits/2026-11-10-stage-one-seal/tester/`(PLAN.md、plan-raw.json、review-tester.md、p2-list.md、runs / pairs / gate / logs / matrices / scripts / shots,290 件 ≈4 MB;8 张截图入库前裁掉边栏)、`records/tester/{verdicts,STATUS,METHOD}.md`、三份旧报告(r3e / A-20b r2 / A-25)的更正段;扫描 ⛔0。台账 §366。本单关闭;Tester 清理放行;Henry 日用期开。
+

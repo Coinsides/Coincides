@@ -1,0 +1,9 @@
+LANDOTHER-plain            1/2
+    SETUP ERROR Error: setup: no empty line ["wmup","a","plainb","hb","hbody"]
+    ok  plain: keys show true; 'Heading changes could not' toasts 0; failure toasts 0; landed later true
+LANDOTHER-heading          2/2
+    ok  heading: keys show true; 'Heading changes could not' toasts 0; failure toasts 0; landed later true
+LANDOTHER-headline         2/2
+    ok  headline: keys show true; 'Heading changes could not' toasts 0; failure toasts 0; landed later true
+total red 0
+setup errors 1 (NOT TESTED - re-run or explain): LANDOTHER-plain-0

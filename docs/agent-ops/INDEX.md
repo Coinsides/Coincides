@@ -483,7 +483,7 @@
 | [records/reviewer/findings.md](records/reviewer/findings.md) | Reviewer 发现台账 | `active` | 2026-11-09 | — |
 | [records/tester/METHOD.md](records/tester/METHOD.md) | Tester 方法与坑 | `active` | 2026-11-09 | — |
 | [records/tester/README.md](records/tester/README.md) | Tester 的记录（records/tester/） | `active` | 2026-11-07 | — |
-| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-09 | — |
+| [records/tester/STATUS.md](records/tester/STATUS.md) | Tester 状态卡（公开半，覆盖写） | `active` | 2026-11-10 | — |
 | [records/tester/verdicts.md](records/tester/verdicts.md) | 判语台账 | `active` | 2026-11-09 | — |
 | [roles/builder.md](roles/builder.md) | 角色卡：builder（工程实施） | `active` | 2026-11-07 | — |
 | [roles/main-designer.md](roles/main-designer.md) | 角色卡：Main_Designer（主设计） | `active` | 2026-11-07 | — |

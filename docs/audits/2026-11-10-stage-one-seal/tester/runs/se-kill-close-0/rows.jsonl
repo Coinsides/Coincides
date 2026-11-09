@@ -1,0 +1,1 @@
+{"arm":"RV","name":"HARDKILL-close","id":"a6a0521e-efea-4ff6-b041-94a26eb94e1a","mode":"close","firstEnd":1504,"lastKey":4645,"killedAt":4955,"hasFirst":true,"hasTail":false,"units":["warmup","kill words one"],"net":["3415 PUT /note-blocks/:id/text-save warmup|kill words one","3421 RESP /note-blocks/:id/text-save 200"],"ok":true}

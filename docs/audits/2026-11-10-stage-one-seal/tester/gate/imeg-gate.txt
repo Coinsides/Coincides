@@ -1,0 +1,13 @@
+IMEG-enter-0     GREEN  Enter gate (no loss / one break / no menu): build {"ok":true,"noLoss":true,"oneBreak":true,"noMenu":true,"stored":"unit split"}; base {"ok":true,"noLoss":true,"oneBreak":true,"noMenu":true,"stored":"raw '\\n' inside the unit"} - break stored as a unit split on the build, raw '\n' inside the unit on the base (READING)
+   base (raw)        {"server":["d第一\n"],"blockCount":1,"eds":["d第一\n"],"menuAtKey":false,"menuAfterCommit":false}
+   base (normalised) {"server":["第一\n"],"blockCount":1,"eds":["第一\n"],"menuAtKey":false,"menuAfterCommit":false}
+   build             {"server":["第一",""],"blockCount":1,"eds":["第一",""],"menuAtKey":false,"menuAfterCommit":false}
+IMEG-esc-0       GREEN  same as the base after the first-letter normalisation
+   base (raw)        {"server":["d第一"],"blockCount":1,"eds":["d第一"],"menuAtKey":false,"menuAfterCommit":false}
+   base (normalised) {"server":["第一"],"blockCount":1,"eds":["第一"],"menuAtKey":false,"menuAfterCommit":false}
+   build             {"server":["第一"],"blockCount":1,"eds":["第一"],"menuAtKey":false,"menuAfterCommit":false}
+IMEG-slash-0     GREEN  same as the base after the first-letter normalisation
+   base (raw)        {"server":["d第一/"],"blockCount":1,"eds":["d第一/"],"menuAtKey":false,"menuAfterCommit":false}
+   base (normalised) {"server":["第一/"],"blockCount":1,"eds":["第一/"],"menuAtKey":false,"menuAfterCommit":false}
+   build             {"server":["第一/"],"blockCount":1,"eds":["第一/"],"menuAtKey":false,"menuAfterCommit":false}
+GATE GREEN: Esc and / behave as the base (first-letter drift removed); Enter keeps the word, one line break, no menu

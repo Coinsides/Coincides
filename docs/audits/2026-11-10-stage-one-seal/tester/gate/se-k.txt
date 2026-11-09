@@ -1,0 +1,24 @@
+K1-401hash                 1/1
+    ok  ["warmup","note alpha"]
+K1-401blur                 1/1
+    ok  ["warmup","note alpha"]
+K1-close                   1/1
+    ok  ["warmup","note alpha"]
+K1-paste500                1/1
+    ok  ["warmup","note alpha"]
+K1IME-held                 1/1
+    ok  ["warmup","note现值公式"]
+K2-hash                    1/1
+    ok  ["warmup","note"]
+K2-paste                   1/1
+    ok  ["warmup","note"]
+K5                         1/1
+    ok  ["warmup","note delta more"]
+K3                         1/1
+    ok  ["warmup",""]
+K6-push                    1/1
+    ok  ["warmup"," ksix"]
+K6-replace                 1/1
+    ok  ["warmup"," ksix"]
+total red 0
+setup errors 0

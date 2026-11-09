@@ -1,0 +1,78 @@
+34304-  ...
+34305-# Subtest: src\\__tests__\\v2CanvasPersistenceCutover.test.ts
+34306:not ok 61 - src\\__tests__\\v2CanvasPersistenceCutover.test.ts
+34307-  ---
+34308-  duration_ms: 8596.8202
+34309-  type: 'test'
+34310-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2CanvasPersistenceCutover.test.ts:1:1'
+34311-  failureType: 'uncaughtException'
+34312-  error: 'Unable to deserialize cloned data due to invalid or unsupported version.'
+34313-  code: 'ERR_TEST_FAILURE'
+34314-  stack: |-
+34315-    #processRawBuffer (node:internal/test_runner/runner:354:20)
+34316-    FileTest.parseMessage (node:internal/test_runner/runner:290:27)
+34317-    Socket.<anonymous> (node:internal/test_runner/runner:400:15)
+34318-    Socket.emit (node:events:519:28)
+34319-    addChunk (node:internal/streams/readable:561:12)
+34320-    readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+34321-    Readable.push (node:internal/streams/readable:392:5)
+34322-    Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+34323-  ...
+34324-# sqlite-vec loaded: vv0.1.7
+34325-# 📦 Running 86 pending migration(s)...
+--
+34704-  ...
+34705-# Subtest: src\\__tests__\\v2ContentGroups.test.ts
+34706:not ok 62 - src\\__tests__\\v2ContentGroups.test.ts
+34707-  ---
+34708-  duration_ms: 4922.6041
+34709-  type: 'test'
+34710-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2ContentGroups.test.ts:1:1'
+34711-  failureType: 'uncaughtException'
+34712-  error: 'Unable to deserialize cloned data due to invalid or unsupported version.'
+34713-  code: 'ERR_TEST_FAILURE'
+34714-  stack: |-
+34715-    #processRawBuffer (node:internal/test_runner/runner:354:20)
+34716-    FileTest.parseMessage (node:internal/test_runner/runner:290:27)
+34717-    Socket.<anonymous> (node:internal/test_runner/runner:400:15)
+34718-    Socket.emit (node:events:519:28)
+34719-    addChunk (node:internal/streams/readable:561:12)
+34720-    readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+34721-    Readable.push (node:internal/streams/readable:392:5)
+34722-    Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+34723-  ...
+34724-# Subtest: T-1 both dev gates enabled returns a normal-login-shaped JWT response
+34725-ok 644 - T-1 both dev gates enabled returns a normal-login-shaped JWT response
+34726-  ---
+34727-  duration_ms: 10524.3739
+34728-  type: 'test'
+--
+53078-# sqlite-vec loaded: vv0.1.7
+53079-# Subtest: K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+53080:not ok 857 - K-4 keeps three production MinerU materializations at concurrency 1 without serializing native text
+53081-  ---
+53082-  duration_ms: 10222.9013
+53083-  type: 'test'
+53084-  location: '<acc>\\tree-se\\server\\src\\__tests__\\v2SourceMineruWiring.test.ts:66:2914'
+53085-  failureType: 'testCodeFailure'
+53086-  error: |-
+53087-    native text completed while MinerU still held its slot
+53088-    
+53089-    0 !== 1
+53090-    
+53091-  code: 'ERR_ASSERTION'
+53092-  name: 'AssertionError'
+53093-  expected: 1
+53094-  actual: 0
+53095-  operator: 'strictEqual'
+53096-  stack: |-
+53097-    <anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:489:12)
+53098-    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+53099-    async withDbAndStorage (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:291:5)
+53100-    async TestContext.<anonymous> (<acc>\tree-se\server\src\__tests__\v2SourceMineruWiring.test.ts:443:3)
+53101-    async Test.run (node:internal/test_runner/test:1054:7)
+53102-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+[server-test-suite] FLAKY retry <acc>\tree-se\server\src\__tests__\v2CanvasPersistenceCutover.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. (isolated attempt 1/1)
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2CanvasPersistenceCutover.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. retry=PASS
+[server-test-suite] FLAKY retry <acc>\tree-se\server\src\__tests__\v2ContentGroups.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. (isolated attempt 1/1)
+[server-test-suite] FLAKY <acc>\tree-se\server\src\__tests__\v2ContentGroups.test.ts: Unable to deserialize cloned data due to invalid or unsupported version. retry=PASS
