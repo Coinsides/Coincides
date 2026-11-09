@@ -21,8 +21,8 @@
 ## 岛上
 
 ```text
-版本: 29b1d456 · 部署于 2026-11-09 03:27Z（第二十三轮：A-20 r3e 空闲落库 + 离开不丢字，主 JS index-Dkbj0u5K.js；纯前端、服务未重启（仍 11-08 01:32Z 那次）；依赖未动；dist 63/63 对包逐字节同）
-Tester 部署后核对: 已核（63/63 与包一致；代表臂 7/7 绿：idle save 3.5 s 已在服务器、K1-close、HEADCLOSE aaa 横幅 + bbb 框、applyslow 无 409、MENTER KEPT、`#/Notes` 扣留字 ×1、N6B 字未到 B；只用测试账号；留档 tester-r3e/postdeploy-23/）
+版本: dfbcce8e · 部署于 2026-11-09 08:08Z（第二十四轮：A-20b r2 保险带覆盖缺口——多行粘贴首段不丢、同单元集文字变的组入账、`#notes/<id>` 无前导斜杠同篇、Shift+Enter 软换行原样落地，主 JS index-Db4qSSYo.js；纯前端、服务未重启（仍 11-08 01:32Z 那次）；依赖未动；dist 63/63 对包逐字节同；上一轮 29b1d456 = A-20 r3e）
+Tester 部署后核对: 候核（第 23 轮那 7 条 + 本轮 SHIFTENTER-typed-close / MULTIPASTE-close / ADDR-noncanon-bare 3 条；只用测试账号；岛上 dist 清单在 `<ops>/island-dist-24.txt`）
 锁: 见私有 ops 目录里的锁记录（不进仓库）
 服务器细节: 见私有 ops 目录里的服务器手册（不进仓库）
 ```
