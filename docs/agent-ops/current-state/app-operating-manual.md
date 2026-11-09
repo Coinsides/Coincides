@@ -20,21 +20,21 @@
 ## 一 · 笔记:怎么写正文(翻车条目 #1)
 
 - **底部工具条(C4a,2026-09-20)**:四群以发丝线分隔。「纸的状态」=Preview/Layout/外观/装订及既有 More;「手上的笔」=Selection/Pen/Eraser;「+ 插入」=表格/时间线/柱图/折线图/媒体图/引文框/提示框;「看的方式」=View options/导航窗格/Overview/阅读步进,选块时保留「问 Agent」。既有按钮行为、tooltip 和只读禁用条件保留。窄屏先折叠「看」(1100px),再折叠「纸」(760px);笔与插入常驻,折叠菜单可键盘打开,没有功能被删除。
-- **插入双入口(C4a)**:上述七项与同名斜杠命令共用执行器。表格、时间线、柱图、折线图沿既有浮层编辑并保存;媒体图沿既有图片上传插入链。媒体图/引文框/提示框需以已保存的纸上段落为目标,菜单用选中或正在编辑的段落,斜杠用输入段落;条件不满足时显示禁用原因。引文框/提示框打开 B3 段落样式编辑器,仍需保存,取消不写。既有15项斜杠的文案与行为不变;`Source Quote` 仍只转换 TextFlow writing role,与这两个 placement 样式命令不同。
+- **插入双入口(C4a)**:上述各项(Tester 2026-11-10 对构建核:插入菜单现为 9 项,非文中「七项」;以构建为准)与同名斜杠命令共用执行器。表格、时间线、柱图、折线图沿既有浮层编辑并保存;媒体图沿既有图片上传插入链。媒体图/引文框/提示框需以已保存的纸上段落为目标,菜单用选中或正在编辑的段落,斜杠用输入段落;条件不满足时显示禁用原因。引文框/提示框打开 B3 段落样式编辑器,仍需保存,取消不写。既有15项斜杠的文案与行为不变;`Source Quote` 仍只转换 TextFlow writing role,与这两个 placement 样式命令不同。
 - **文档标签条(C4a)**:打开笔记或板后,文档区顶部出现身份标签;点击切换,中键或×关闭,拖拽排序。标签可用左右键切换、Alt+左右键排序、Delete关闭。关闭只退出在场,原文档仍在 Project/Boards 列表;最后一张纸关闭回所属Project,最后一块板关闭回Boards。切换/关闭沿既有 blur 自动保存与离页等待,不另设「未保存」标签。每个标签记滚动位/阅读步进或板视口;仅内存会话态,无新表、无localStorage/sessionStorage持久化,刷新只重建当前URL页。当前工具的 note/board 目标由既有 tool_start/tool_end 活动投影为天青徽章,结束即灭;通知计数槽留空等C4b。不与 Staging/Recent/Favorites 合并。
 
 - **UI**:打开笔记→双击纸面开始写;
-- **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:1, units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
+- **API**:`POST /api/notes/:id/blocks`,body:`{ block_type:'paragraph', content_json:{ text_flow:{ textflow_version:'TextBlockContentV1', units:[{ id:'<blockId>:unit', text:'正文', writing_role:'paragraph', indent_level:0, order_index:0, metadata:{}, status:'active' }], inline_structures:[], metadata:{} } }, plain_text:'正文' }`——order 自动排尾;
 - **建笔记(A5,2026-09-19)**:Project 的「New Note」或 Board 的「New note」直接新建 A4 纵向纸;建纸流程没有纸型选择。API 仍为 `POST /api/notes {course_id, title, description?, page_format:'a4_portrait'}`,页帧使用既有 A4 默认种子;Board 建纸沿用 ceremony-note 原子入口。
 - **纸型调节(A5)**:打开笔记→「笔记外观」浮卡→「纸型」,可选 A5/A4/A3 各纵向或横向、Letter 纵向、Legal 纵向,共 8 项。直接看当前纸面调整,没有另一张预览纸。尺寸读数与输入使用厘米(cm)或毫米(mm),可切换单位。选纸型作用于整本笔记的全部页帧,A1 按新纸面与版心自动重排跨页正文,一次撤销/重做恢复整次换型。
 - **单页异形(A5)**:进入 Layout 态,选中要调整的页,输入物理宽高或拖纸角调尺寸,只覆写该页几何;平时纸角没有编辑命中。「恢复默认」清除该页覆写,回到笔记默认纸型;以后新建页也使用笔记默认,不沿袭邻页异形。单页调节与恢复进入撤销栈,装订段、页码与封面仍按当前页身份共处。
 - **纸型存储与 Web 边界(A5)**:调节经既有页帧集合保存,物理单位在界面换算,存储仍为像素;既有 `page_format` 数据保持原值,不迁移。Web 长页保持独立的单帧向下生长模式,不列入上述纸型族,不提供转为分页纸或单页异形的操作。
-- **标题与章节(A4,2026-09-19)**:正文行首输入 `# `、`## `、`### ` 建一/二/三级标题;在既有段落输入 `/h1`、`/h2`、`/h3` 可升降级,`/body` 还原正文。标题仍是普通 text 块里的 unit `writing_role:'heading_1'|'heading_2'|'heading_3'`,没有 heading 块型。标题占一条硬行、独立成块;Enter/Shift+Enter 在后面续正文块,长标题视觉换行不另造单位。改字号/行高时标题随 Typography 同步。
+- **标题与章节(A4,2026-09-19)**:正文行首输入 `# `、`## `、`### ` 建一/二/三级标题;在既有段落输入 `/h1`、`/h2`、`/h3` 可升降级,`/body` 还原正文。标题仍是普通 text 块里的 unit `writing_role:'heading_1'|'heading_2'|'heading_3'`,没有 heading 块型。标题占一条硬行、独立成块;Enter/Shift+Enter 在后面续正文块,长标题视觉换行不另造单位。改字号/行高时标题随 Typography 同步(Typography 入口在 More 里,不在「笔记外观」;Tester 2026-11-10 核)。
 - **章操作**:章由标题和后续块序派生,截止下一个同级或更高层标题。删标题块只解散章,不删后文;拖标题旁的章把手搬整章,一次撤销/重做覆盖整批。标题前的文字是前言,缺级不造虚拟章。折叠箭头只改变本次阅读呈现,不存章节归属或折叠字段;隐藏正文不参与阅读分页,展开恢复。已有空页保留;打印仍包含完整正文。
-- **标题导航**:左侧 Navigation→Headings（标题树）,点击标题跳到章锚,阅读位置变化时当前章高亮;隐藏目标先展开再跳。标题与层级随编辑刷新,无需重载。Chapter numbers 开关控制派生编号,不改正文。agenda 是同一标题投影的接口,目录页未实装。
+- **标题导航**:左侧 Navigation→Headings（标题树）,点击标题跳到章锚,阅读位置变化时当前章高亮;隐藏目标先展开再跳。标题与层级随编辑刷新,无需重载。Chapter numbers 开关控制派生编号,不改正文。agenda 是同一标题投影的接口;目录页已实装(Tester 2026-11-10 对构建核,原文「未实装」过时)。
 - **封面与边界**:封面题名/述名仍属笔记身份,封面正文不提供标题升格,也不进入正文章树或 agenda;既有服务端封面白名单仍按 text 家族读取,本单没有增加服务端角色禁令。块正文改写继续走 text-save 门(`PUT /note-blocks/:id/text-save`);**Agent 零笔记直写权**(宪法③,14.4 note_patch 仅提案,人门采纳),不接章级动词——Agent 侧生成笔记的唯一路仍为 organized_note 提案。
 - **纸型自动分页(A1)**:A4/Letter 等纸型中,在流且 auto 的块按正文顺序灌入所属页叠。文字到版心底部按完整渲染行续到下一页,需要时自动续页;同一个逻辑块可以显示在多页,正文仍只存一份。最小例:在 A4 笔记输入一段长正文,超过下墙后继续写,后文自动出现在下页。Web 长页保持单帧向下生长,不转为分页纸。
-- **改版与页籍**:通过「笔记外观」改字号/行高/纸型,或进入 Layout 态调四界墙,会重新分页;每页可用自己的纸型和边距,跨页文字按目标页现宽重新换行。自动宽度来自该页现版心,储存的 x/y/width 不因分页被重写;块的 `frame_id` 只随首片换籍,经既有 placement 门保存。分片范围、后续片位置与行盒是派生数据,没有独立正文或分片写入 API。
+- **改版与页籍**:通过「笔记外观」改纸型、More → Typography 改字号/行高(入口位置 Tester 2026-11-10 核),或进入 Layout 态调四界墙,会重新分页;每页可用自己的纸型和边距,跨页文字按目标页现宽重新换行。自动宽度来自该页现版心,储存的 x/y/width 不因分页被重写;块的 `frame_id` 只随首片换籍,经既有 placement 门保存。分片范围、后续片位置与行盒是派生数据,没有独立正文或分片写入 API。
 - **跨片编辑**:在任意一片上编辑仍修改原逻辑块;片尾/片头的方向键继续穿行,跨页选区可复制和删除,撤销/重做后重新分页。块把手、标注章等可点击附属件随首片显示,同一件不会在每片重复出现。编辑面、Overview 和打印共用本次分页结果。
 - **整块与溢出**:媒体、投影、组件本版不切片;当前页放不下时整块移到下一页。高于整页版心的块独占一页,保留完整高度并报告结构化溢出,不会静默裁短;应调整块尺寸或该页纸型后再检查成品。
 - **自由摆放与墨水**:manual 块和非流覆盖件保持现有摆放,不随正文重排。墨水属于原页,文字跨页或首片换籍都不迁移墨水。正文回缩后既有页帧保留,以免连带删除原页墨水或手摆内容;空页不表示正文被复制。
@@ -58,9 +58,9 @@
 - **恢复横幅与留字框同一块(A-20)**:重开笔记时某块有 Apply 横幅,框里该块的字**等**你按 Apply 或 Dismiss 之后下一拍再自己回去,两边不互相覆盖;横幅的字已经等于服务器内容时,框里的字照常立刻回去。
 - **A-20 · 已知(不算故障;A-25 / A-20b 逐条删)**:
   1. **刚按 Enter 建的新行**,上次保存在途时关页或换篇:新行的字在框里,**不**自己回去。回去法:起一新行、粘进去、**Discard** 框。
-  2. **行中按 Enter 后立刻关页**:原行在笔记里仍完整,框里是后半的一份副本,**Discard** 即可,别粘回(会重复)。
+  2. **行中按 Enter 后立刻关页**:原行在笔记里仍完整,框里是后半的一份副本,**Discard** 即可,别粘回(会重复)。(此形来自读码推断,kit 历次未产出过——Tester 2026-11-10;碰到再报。)
   3. **两行合并**(行首 Backspace 或跨行选区删除)后、上次保存在途时关页或换篇:合并后的字在框里不自己回去,笔记仍是合并前两行;要完成合并就把框里的字粘过两行、Discard。
-  4. ~~**行中 Enter、在前半末尾打字、然后离开**(保存在途):重开可能只见 **"A previous block edit is queued for recovery"**、无 Apply~~ → A-25 起别次的恢复项都列出并带 Apply(一块每次访问一条,本次访问的保存不再顶掉别次的);「A previous block edit is queued…」那条提示不再弹。
+  4. ~~**行中 Enter、在前半末尾打字、然后离开**(保存在途):重开可能只见 **"A previous block edit is queued for recovery"**、无 Apply~~ → A-25 起别次的恢复项都列出并带 Apply(一块每次访问一条,本次访问的保存不再顶掉别次的);「A previous block edit is queued for recovery」那条 info 提示**仍会弹一条**(每回执一次,与横幅重复;收声记 TD-81 ①——2026-11-10 更正,我 11-09 写的「不再弹」有误)。
   5. ~~一次保存失败后,停顿保存停止~~ → A-25 起只停失败那一块,它自己退避重试;别的块照常停笔即存(见上「停顿保存失败」)。
   6. 服务器持续拒绝保存时,应用内后退与改 `#` 都留在本篇并提示 **"Changes could not be saved…"**;关页仍能走,字进恢复;A-25 起留在本篇期间失败块自动重试,服务器回来字自己送上去、重开无恢复项(Tester a20m BACKIN 四臂)。
   7. **写着 "This draft is based on an older version." 的恢复项**:**Replay draft on current version** 会用该草稿替换整块,可能删掉之后存的字——先 **View differences**,手工只补缺的,再 **Discard this draft**。两种情况会见到它:横幅的字在关页前其实已到服务器(直接 **Dismiss**,什么都不缺);或笔记被别的设备改过。
@@ -72,7 +72,7 @@
   13. **双击新起一块就马上打字**:偶尔头一两个字会跑到后面(块是打第一个字时才建的,建好那一瞬光标回到行首),接着回车会把头一行推到后面;很少见,看见就改回来。所有版本都有,下阶段修(TD-77;Henry 2026-11-09 定)。
 
 - **图片编辑(B5,2026-09-20)**:选中纸面媒体图块→块控制条「编辑图片」→拖动原图定位,用 Zoom 滑杆/滚轮/捏合裁剪,「Rotate 90°」按 0/90/180/270° 顺时针旋转,「Reset」恢复原图。取景保持当前图像或已存窗口的比例,旋转时窗口一起转,暂不提供自由改比例。Esc/Cancel 取消草稿,Save 才保存;失败保留草稿供重试,原图不改写。一次保存进入既有笔记撤销/重做栈;浮层中快捷键不触发背后笔记撤销,关闭后沿原快捷键撤销/重做。只读投影没有编辑入口。
-- **图片参数与消费面**:复用 `PUT /api/note-blocks/:id {metadata:完整metadata}`;只更新 `metadata.media.edit_v1`,其他 metadata 与 `asset_id/naturalWidth/naturalHeight/alt` 保留。例 `{crop:{x:25,y:25,w:50,h:50},zoom:2,rotation:90}`:crop 是旋转后原图包围盒的百分比,窗口不超出 0–100%,w/h>0;zoom=null 或 1–3。crop 非 null 时窗口为准,zoom 仅记编辑姿态,不二次放大;crop=null 时 zoom 派生居中缩放,null zoom 为全图。edit_v1 缺省/null=零编辑,旧媒体零迁移;Reset 保存 null,撤销可恢复编辑前的缺省状态。纸面、Overview 与页面导航缩略共用 MediaBlockProjection,等比呈现裁剪图,不改块布局或资产。**打印与导出预览仍是媒体占位,不输出图像**;本单未新增图像导出、行内媒体或装饰贴纸,未接 image_object_extensions。
+- **图片参数与消费面**:复用 `PUT /api/note-blocks/:id {metadata:完整metadata}`;只更新 `metadata.media.edit_v1`,其他 metadata 与 `asset_id/naturalWidth/naturalHeight/alt` 保留。例 `{crop:{x:25,y:25,w:50,h:50},zoom:2,rotation:90}`:crop 是旋转后原图包围盒的百分比,窗口不超出 0–100%,w/h>0;zoom=null 或 1–3。crop 非 null 时窗口为准,zoom 仅记编辑姿态,不二次放大;crop=null 时 zoom 派生居中缩放,null zoom 为全图。edit_v1 缺省/null=零编辑,旧媒体零迁移;Reset 保存 null,撤销可恢复编辑前的缺省状态。纸面、Overview 与页面导航缩略共用 MediaBlockProjection,等比呈现裁剪图,不改块布局或资产。~~**打印与导出预览仍是媒体占位,不输出图像**~~(B5 当时;Tester 2026-11-10 对构建核:打印预览已出真图);本单未新增行内媒体或装饰贴纸,未接 image_object_extensions。
 
 - **引文与提示框(B3,2026-09-20)**:选中段落→块工具条「引」(段落样式)→选「引文」或「提示框」→保存。引文显示「引」字签、浅底与右对齐纯文本出处;提示框显示虚线、浅暖底与可改标签(默认「注」)。选「正文」清除本块样式。出处可换行、最多1000字符,标签最多32字符;Esc/取消不保存,Ctrl+Enter/Cmd+Enter 保存,失败保留草稿。一次保存进入既有撤销/重做栈,正文仍在原段落中编辑。
 - **样式存法与分页**:复用 `PUT /api/notes/:id/block-placements/:placementId {display_overrides_json:完整覆写对象}`;仅增删对象内 `paragraph_furniture_v1` 键,例 `{variant:'quote',source:'范仲淹《岳阳楼记》'}` 或 `{variant:'callout',label:'冷知识'}`。其余覆写保留,不新增块型、不改 TextFlow 正文。在流长段按 A1 继续分页,每片有底纹/边线,字签或标签只在首片、出处只在末片;版面为装饰留出空间,不改存储坐标。纸面、缩略投影及打印跟随当前皮。

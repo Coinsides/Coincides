@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 476 份文档。
+共 477 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -156,7 +156,7 @@
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-09(A-25 收割:新增 TD-78 至 TD-81,TD-63 / TD-69 / TD-77 附;A-25 验收 lines30-1 并入 TD-77、范围扩大;Henry 拍 TD-77 挪阶段二;A-20b r2 链光标跳 → 新增 TD-77;A-20 r3e 收割:TD-64/66/68/69 附,新增 TD-71 至 TD-76;r3d P2 单元 id 复用新增 TD-70;A-25 ②a 范围定、冲突项 Replay 整块替换新增 TD-69;A-20 r3d heldhead 根因新增 TD-68;TD-66 据真机对照降级;Reviewer r3 N4 新增 TD-66、A-25 ②a 丢弃裁 (C) 新增 TD-67、TD-64 附两边;A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60) | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-11-10(阶段末回归立案:TD-82 / 83 既有丢字形、TD-84 规则缺陷;2026-11-09 A-25 收割:新增 TD-78 至 TD-81,TD-63 / TD-69 / TD-77 附;A-25 验收 lines30-1 并入 TD-77、范围扩大;Henry 拍 TD-77 挪阶段二;A-20b r2 链光标跳 → 新增 TD-77;A-20 r3e 收割:TD-64/66/68/69 附,新增 TD-71 至 TD-76;r3d P2 单元 id 复用新增 TD-70;A-25 ②a 范围定、冲突项 Replay 整块替换新增 TD-69;A-20 r3d heldhead 根因新增 TD-68;TD-66 据真机对照降级;Reviewer r3 N4 新增 TD-66、A-25 ②a 丢弃裁 (C) 新增 TD-67、TD-64 附两边;A-25 决定 4 普查新增 TD-65;Reviewer r2 M6 新增 TD-64;A-20 r2 封包前新增 TD-62 / TD-63;A-19 放行,新增 TD-61;编辑器组 r2.3c 放行,新增 TD-56 至 TD-60) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
@@ -452,6 +452,7 @@
 | [handoffs/2026-11-07-role-records-gates-order.md](handoffs/2026-11-07-role-records-gates-order.md) | (无标题) | `active` | 2026-11-07 | — |
 | [handoffs/2026-11-08-a25-ime-and-save-failure-order.md](handoffs/2026-11-08-a25-ime-and-save-failure-order.md) | A-25 · 输入法拼音写进笔记 + 保存失败后的死路(阶段一「写字不丢」第二单) | `active` | 2026-11-09(收割 `b734197e`、第 25 轮上岛、岛上核对 7/7;本单关闭) | — |
 | [handoffs/2026-11-09-a20b-safety-belt-coverage-order.md](handoffs/2026-11-09-a20b-safety-belt-coverage-order.md) | A-20b · 保险带覆盖缺口(Reviewer r3e Q2 / Q3 / Q4 / Q5;阶段一「写字不丢」A-2… | `active` | 2026-11-09 | — |
+| [handoffs/2026-11-10-stage-one-seal-regression-order.md](handoffs/2026-11-10-stage-one-seal-regression-order.md) | 阶段一「写字不丢」阶段末回归 + 封版(to: Tester;Main_Designer 2026-11-10) | `active` | 2026-11-10 | — |
 | [handoffs/ORDER-TEMPLATE.md](handoffs/ORDER-TEMPLATE.md) | 订单模板（复制下面整段，另存为 `YYYY-MM-DD-<单号>-order.md`；本模板文件名故意不以 -orde… | `active` | 2026-11-07 | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— 订单区(Main_Designer × Tester × builder) | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
