@@ -1,0 +1,9 @@
+INAPP-home-type            4/4
+    ok  
+INAPP-home-still           4/4
+    ok  
+INAPP-tab-type             4/4
+    ok  
+INAPP-tab-still            4/4
+    ok  
+total red 0

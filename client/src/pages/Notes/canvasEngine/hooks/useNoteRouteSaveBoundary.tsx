@@ -21,6 +21,10 @@ export function hashRoutePath(hash: string): string {
   try {
     pathname = pathname.split('/').map((segment) => decodeURIComponent(segment).replace(/\//g, '%2F')).join('/');
   } catch { /* left as it is, as the router leaves it */ }
+  // A-20b (Q4): a path without its leading '/' ('#notes/A', '#login') leads where it would with one, as in the router.
+  // A-20b r2 (R4): except a path starting with '.' ('#./notes/A'), which the router resolves without adding '/': the two
+  // read different strings, but both read it as elsewhere.
+  if (!pathname.startsWith('/')) pathname = `/${pathname}`;
   return pathname.replace(/\/+$/, '') || '/';
 }
 // A-20 r3e (P3): the routes match without regard to case ('notes/:noteId', 'login', 'register' have no caseSensitive),
@@ -29,7 +33,7 @@ export function isNoteRoutePath(path: string, noteId: string | undefined): boole
   const match = /^\/notes\/([^/]+)$/i.exec(path);
   return !!noteId && !!match && match[1] === noteId;
 }
-function isSignInPath(path: string): boolean {
+export function isSignInPath(path: string): boolean {
   return /^\/(login|register)$/i.test(path);
 }
 // Said after the note is already gone, so it cannot ask for a retry first. The failed save left its recovery

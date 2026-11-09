@@ -1,0 +1,55 @@
+slot heavy-job.lock.2 taken 2026-11-09 13:15:32: regression step 1 mx: pre+post, 2 browsers
+pre  mx exit 0
+post mx exit 0
+slot heavy-job.lock.2 released 13:57:58 exit 0
+  preb: SUMMARY {"label":"a20preb-mx","origin":"http://127.0.0.1:5601","by":{"K":{"n":30,"bad":0},"W":{"n":19,"bad":16},"H":{"n":13,"bad":0},"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":2},"G":{"n":51,"bad":4}},"errors":0,"firstErrors":[]}
+  belt: SUMMARY {"label":"a20belt-mx","origin":"http://127.0.0.1:5612","by":{"K":{"n":30,"bad":0},"W":{"n":19,"bad":16},"H":{"n":13,"bad":0},"N":{"n":18,"bad":0},"R":{"n":48,"bad":0},"V":{"n":3,"bad":0},"D":{"n":12,"bad":0},"L":{"n":32,"bad":0},"G":{"n":51,"bad":3}},"errors":0,"firstErrors":[]}
+slot heavy-job.lock.2 taken 2026-11-09 13:57:58: regression step 2 acc1: pre+post, 2 browsers
+pre  acc1 exit 0
+post acc1 exit 0
+slot heavy-job.lock.2 released 14:05:17 exit 0
+  preb: DONE a20preb-acc1: 16 rows, bad 0
+  belt: DONE a20belt-acc1: 16 rows, bad 0
+slot heavy-job.lock.2 taken 2026-11-09 14:05:17: regression step 3 acc10: pre+post, 2 browsers
+pre  acc10 exit 0
+post acc10 exit 0
+slot heavy-job.lock.2 released 14:09:47 exit 0
+  preb: DONE a20preb-acc10: 6 rows, bad 3
+  belt: DONE a20belt-acc10: 6 rows, bad 3
+slot heavy-job.lock.2 taken 2026-11-09 14:09:47: regression step 4 y: pre+post, 2 browsers
+pre  y exit 0
+post y exit 0
+slot heavy-job.lock.2 released 14:14:53 exit 0
+  preb: DONE a20preb-y: 9 rows, bad 0
+  belt: DONE a20belt-y: 9 rows, bad 0
+slot heavy-job.lock.2 taken 2026-11-09 14:14:53: regression step 5 two2: pre+post, 2 browsers
+pre  two2 exit 0
+post two2 exit 0
+slot heavy-job.lock.2 released 14:17:30 exit 0
+  preb: DONE a20preb-two2: 3 rows, bad 0
+  belt: DONE a20belt-two2: 3 rows, bad 0
+slot heavy-job.lock.2 taken 2026-11-09 14:17:30: regression step 6 acc18: pre+post, 2 browsers
+pre  acc18 exit 0
+post acc18 exit 0
+slot heavy-job.lock.2 released 14:21:19 exit 0
+  preb: DONE a20preb-acc18: 6 rows, bad 0
+  belt: DONE a20belt-acc18: 6 rows, bad 0
+slot heavy-job.lock.2 taken 2026-11-09 14:21:19: regression step 7 acc13: pre+post, 2 browsers
+pre  acc13 exit 0
+post acc13 exit 0
+slot heavy-job.lock.2 released 14:28:02 exit 0
+  preb: DONE a20preb-acc13: 10 rows, bad 3
+  belt: DONE a20belt-acc13: 10 rows, bad 2
+slot heavy-job.lock.2 taken 2026-11-09 14:28:03: regression step 8 J: pre+post, 2 browsers
+pre  J exit 0
+post J exit 0
+slot heavy-job.lock.2 released 14:29:19 exit 0
+  preb: DONE a20preb-J: 4 rows, bad 0
+  belt: DONE a20belt-J: 4 rows, bad 0
+slot heavy-job.lock.2 taken 2026-11-09 14:29:19: regression step 9 retry: pre+post, 2 browsers
+pre  retry exit 0
+post retry exit 0
+slot heavy-job.lock.2 released 14:31:51 exit 0
+  preb: DONE a20preb-retry: 1 rows, bad 0
+  belt: DONE a20belt-retry: 1 rows, bad 0
+regression done 14:31:51

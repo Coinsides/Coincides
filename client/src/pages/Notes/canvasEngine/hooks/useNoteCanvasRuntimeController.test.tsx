@@ -1,11 +1,12 @@
 import { act, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { UseRuntimePresentationControllerOptions } from './useRuntimePresentationController';
 import { DEFAULT_PAGE_CONTENT_WIDTH, type BlockBoxLayout } from '../runtimeLayout';
 import { createPageFramePrintProfile } from '../pageFramePrintScaleService';
 import { createDefaultDocumentTypographyProfile, documentTypographyToCssVars } from '../typographyProfileService';
 import { estimateTypographyTextBlockHeight } from '../typographyMeasurementService';
+import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { buildExportPreviewModel } from '../exportPreviewService';
 import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from '../types';
 import { createDefaultNoteBindingSettings, type NoteBindingSettings } from '../../../../../../shared/types/noteBinding';
@@ -45,7 +46,37 @@ const rootBridgeContract = vi.hoisted(() => ({
   markBlockSelected: vi.fn(),
   setFocusBlockId: vi.fn(),
   noop: () => undefined,
+  // A-20b (Q5 a): what the data controller offers, and what the heading structure controller is handed.
+  blockEditRecoveryReceipts: undefined as unknown[] | undefined,
+  recoveryReceiptsKeptWordsWaitFor: undefined as unknown[] | undefined,
+  headingStructureInput: null as { recoveryReceipts?: readonly object[] } | null,
+  // A-20b r2 (R2): what the text history needs of the data controller in a test that saves, and the history itself.
+  historyApi: null as Record<string, unknown> | null,
+  textHistory: null as { applyEdit: (...args: never[]) => Promise<unknown>; boundary: () => boolean } | null,
 }));
+
+vi.mock('./useTextFlowHistory', async () => {
+  const actual = await vi.importActual<typeof import('./useTextFlowHistory')>('./useTextFlowHistory');
+  return {
+    ...actual,
+    useTextFlowHistory: (input: Parameters<typeof actual.useTextFlowHistory>[0]) => {
+      const textHistory = actual.useTextFlowHistory(input);
+      rootBridgeContract.textHistory = textHistory as never;
+      return textHistory;
+    },
+  };
+});
+
+vi.mock('./useHeadingStructureController', async () => {
+  const actual = await vi.importActual<typeof import('./useHeadingStructureController')>('./useHeadingStructureController');
+  return {
+    ...actual,
+    useHeadingStructureController: (input: Parameters<typeof actual.useHeadingStructureController>[0]) => {
+      rootBridgeContract.headingStructureInput = input;
+      return actual.useHeadingStructureController(input);
+    },
+  };
+});
 
 vi.mock('./useNoteCanvasRuntime', () => ({
   useNoteCanvasRuntime: () => ({ noteId: rootBridgeContract.noteId }),
@@ -98,6 +129,10 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
     persistedContentMounts: [],
     coordinateContract: rootBridgeContract.coordinateContract,
     createBlock: rootBridgeContract.createBlock,
+    // A test that offers receipts gets both lists as the adapter gives them (the second may be undefined).
+    ...(rootBridgeContract.blockEditRecoveryReceipts ? { blockEditRecoveryReceipts: rootBridgeContract.blockEditRecoveryReceipts,
+      recoveryReceiptsKeptWordsWaitFor: rootBridgeContract.recoveryReceiptsKeptWordsWaitFor } : {}),
+    ...(rootBridgeContract.historyApi ?? {}),
   }, {
     get(target, property, receiver) {
       return Reflect.has(target, property)
@@ -168,9 +203,16 @@ vi.mock('./useRuntimePresentationController', () => ({
   },
 }));
 
-vi.mock('./useBlockTextFlowEditController', () => ({
-  useBlockTextFlowEditController: () => rootBridgeContract.noop,
-}));
+vi.mock('./useBlockTextFlowEditController', async () => {
+  const actual = await vi.importActual<typeof import('./useBlockTextFlowEditController')>('./useBlockTextFlowEditController');
+  return {
+    ...actual,
+    // A-20b r2 (R2): a test that saves through the text history uses the real edit controller (set for the whole test,
+    // so the hooks called stay the same from render to render); the others keep the no-op.
+    useBlockTextFlowEditController: (options: Parameters<typeof actual.useBlockTextFlowEditController>[0]) => (
+      rootBridgeContract.historyApi ? actual.useBlockTextFlowEditController(options) : rootBridgeContract.noop),
+  };
+});
 
 vi.mock('./useSlashBlockRollbackController', () => ({
   useSlashBlockRollbackController: () => rootBridgeContract.noop,
@@ -524,5 +566,76 @@ describe('useNoteCanvasRuntimeController Page runtime assembly after bridge remo
     expect(a4Canvas.measurement).toEqual(a4Page.measurement);
     expect(letterCanvas.layout).toEqual(letterPage.layout);
     expect([a4, letter]).toEqual(framesBefore);
+  });
+});
+
+// A-20b (Q5 a): through the real controller, the heading structure controller gets the receipts kept words wait for
+// (another visit's included, and one Apply is still settling), and the offered list when that list is not there.
+describe('A-20b the controller hands kept words the receipts they wait for (Q5 a)', () => {
+  const receipt = (recoveryKey: string) => ({ recoveryKey, blockId: 'block-1', contentJson: {} });
+  beforeEach(() => {
+    rootBridgeContract.loading = false;
+    rootBridgeContract.note = { id: NOTE_ID };
+    rootBridgeContract.noteId = NOTE_ID;
+    rootBridgeContract.hydratedProfile = createDefaultDocumentTypographyProfile();
+    rootBridgeContract.headingStructureInput = null;
+  });
+  afterEach(() => {
+    rootBridgeContract.blockEditRecoveryReceipts = undefined;
+    rootBridgeContract.recoveryReceiptsKeptWordsWaitFor = undefined;
+    rootBridgeContract.historyApi = null;
+    rootBridgeContract.blocks = [];
+  });
+
+  // A-20b r2 (R2): the other half of C:417–419. A receipt this visit's own typing save left (it failed: the editor still
+  // holds those words) is not one kept words wait for. It comes from a real failed save through the real text history
+  // (H:341–344 visitReceipts.add), not from a stub.
+  it('a receipt this visit left itself is left out; another visit\'s stays', async () => {
+    const flow = createTextBlockContentV1('alpha');
+    const block = { id: 'block-1', placement_id: 'placement-1', display_overrides_json: {}, canvas_layout: null,
+      block_type: 'paragraph', title: null, content_json: { [TEXT_FLOW_CONTENT_KEY]: flow }, plain_text: 'alpha',
+      metadata: {}, order_index: 0, source_references: [] } as unknown as NoteBlock;
+    rootBridgeContract.blocks = [block];
+    const saveBlock = vi.fn(async () => ({ status: 'rejected', block: null, recoveryReceipt: receipt('visit-own'),
+      reconciliation: 'not_attempted', durableState: 'not_checked', reason: 'request_failed', staleEpoch: false }));
+    rootBridgeContract.historyApi = {
+      saveBlock, textHistoryGeneration: 1, blockTextFlowDrafts: {}, setBlockTextFlowDrafts: vi.fn(), setBlockTextDrafts: vi.fn(),
+      annotationTruths: [], readAnnotationTruths: () => [], setAnnotationTruthsSnapshot: vi.fn(),
+      saveAnnotationTruthsOutcome: async () => true,
+      captureBoardTextRanges: () => ({ ranges: [] }), restoreBoardTextRanges: vi.fn(), rebaseBoardTextRanges: vi.fn(),
+    };
+    rootBridgeContract.blockEditRecoveryReceipts = [receipt('other-visit'), receipt('visit-own')];
+    rootBridgeContract.recoveryReceiptsKeptWordsWaitFor = [receipt('other-visit'), receipt('visit-own')];
+    render(<RootBridgeHarness />);
+    expect(rootBridgeContract.headingStructureInput?.recoveryReceipts?.map((entry) => (entry as { recoveryKey?: string }).recoveryKey))
+      .toEqual(['other-visit', 'visit-own']);
+    const next = structuredClone(flow);
+    next.units[0].text = 'alpha!';
+    const unitId = flow.units[0].id;
+    await act(async () => {
+      await rootBridgeContract.textHistory!.applyEdit(block as never, next as never, { previousTextFlow: flow, metadata: {
+        unitId, inputType: 'insertText', kind: 'typing', isComposing: false,
+        beforeSelection: { unitId, start: 5, end: 5 }, afterSelection: { unitId, start: 6, end: 6 } } } as never);
+    });
+    await act(async () => { rootBridgeContract.textHistory!.boundary(); });
+    await act(async () => {});
+    expect(saveBlock).toHaveBeenCalled();
+    expect(rootBridgeContract.headingStructureInput?.recoveryReceipts?.map((entry) => (entry as { recoveryKey?: string }).recoveryKey))
+      .toEqual(['other-visit']);
+  });
+
+  it('the list kept words wait for, not the offered one', () => {
+    rootBridgeContract.blockEditRecoveryReceipts = [receipt('offered-other-visit')];
+    rootBridgeContract.recoveryReceiptsKeptWordsWaitFor = [receipt('offered-other-visit'), receipt('apply-settling')];
+    render(<RootBridgeHarness />);
+    expect(rootBridgeContract.headingStructureInput?.recoveryReceipts?.map((entry) => (entry as { recoveryKey?: string }).recoveryKey))
+      .toEqual(['offered-other-visit', 'apply-settling']);
+  });
+
+  it('without that list, the offered one', () => {
+    rootBridgeContract.blockEditRecoveryReceipts = [receipt('offered-other-visit')];
+    render(<RootBridgeHarness />);
+    expect(rootBridgeContract.headingStructureInput?.recoveryReceipts?.map((entry) => (entry as { recoveryKey?: string }).recoveryKey))
+      .toEqual(['offered-other-visit']);
   });
 });

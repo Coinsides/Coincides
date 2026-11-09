@@ -11,14 +11,15 @@
 
 ## 正在做
 
-- **刚下的判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`，台账已登。**第 23 轮已上岛（`29b1d456`），部署后已核**：岛上 63/63 与包一致，代表臂 7/7（报告「十」）。
-  - 同源：src 17/17 OK，自建 63/63 与包一致，主 JS `index-Dkbj0u5K.js`。
-  - 没有一条臂比修前差：链 190/190 对 r3 0 行差异；a20m 全绿；P1 applyslow 两形 4/4、P2 MENTER 2/2 KEPT；9 对 r3e 红行都在修前红里；第 10 对 0/20 对 0/20。
-  - 已裁、手册已知：heldhead-undo（🅱）、putback（A-25 ②a (iv)）、MENTER 多余回执（A-25 ②a (ii)）。单列：SHIFTENTER-typed-close r3e 成单独一段，修前丢字，A-20b r2 修。
-  - 过程：配对账号没预置，第 1 对以 mx2 重跑。报告经 3 个 Opus 读者复核，行距一条错数已改。
-  - **在做**：A-20b（`a20b-belt-coverage`）验收。r1 已验同源，新臂在 r1 与 r3e 上都跑过。等 builder 的 r2 主 JS：Main_Designer 裁了 SHIFTENTER 乙与 SURROGATE，r2 正在做。环境 5612 → 3612，脚本 `run-a20b-seq.sh` 已备。
-- **上一个判语**：**A-20 r3d 挡放行，原因 P1、P2**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3d/review-tester.md`（从简）。P1：Apply 在途时 bbb 立即落地、Apply 得 409、aaa 丢；P2：重开时服务器 `cd` 行被 Z 改写。
-- **再上一个判语**：**A-20 r3 挡放行，原因 N1**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3/review-tester.md`。N1：MERGE、SELDEL r3 12/12 DUP，修前 12/12 LOST。
+- **刚下的判语**：**A-20b r2 放行**（2026-11-09，第 24 轮）。报告 `docs/audits/2026-11-09-a20b-builder/tester/review-tester.md`，台账已登。等 Main_Designer 收割、部署，部署后我来核。
+  - 同源：src 19/19，自建 63/63 与包一致，主 JS `index-Db4qSSYo.js`。
+  - 没有一条臂比修前差，也没有比线上 r3e 差。新臂 11 个全合预期：修前红 18 行，r3e 红 16 行。
+  - 光标跳按 Main_Designer 看数前的预登记判：主判 0/30 对 r3e 1/30，复现与合并都不显著。探针分辨力有限，所以只写「没有证据显示 r2 高于 r3e」。这一条进 TD-77（阶段一）。
+  - 候 Main_Designer：SURROGATE 与 MULTIPASTE 同形，是否同归 TD-66。MULTIPASTE 裁定的前提要更正（修前并无重叠）；手册「别 Apply」改成「别把框里的 def 粘回」。
+  - 过程：停掉的探针排队子进程活着，多跑了一遍，单列为复现样本；METHOD 补了 `stopq.sh`。
+- **上一个判语**：**A-20 r3e 放行**（2026-11-09，第 23 轮）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3e/review-tester.md`。第 23 轮已上岛（`29b1d456`），部署后已核：岛上 63/63 与包一致，代表臂 7/7。
+- **再上一个判语**：**A-20 r3d 挡放行，原因 P1、P2**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3d/review-tester.md`（从简）。P1：Apply 在途时 bbb 立即落地、Apply 得 409、aaa 丢；P2：重开时服务器 `cd` 行被 Z 改写。
+- **更早**：**A-20 r3 挡放行，原因 N1**（2026-11-09）。报告 `docs/audits/2026-11-08-a20-builder/tester-r3/review-tester.md`。N1：MERGE、SELDEL r3 12/12 DUP，修前 12/12 LOST。
 - **更早**：**A-20 r2 挡放行，原因 M2**（2026-11-08）。报告 `docs/audits/2026-11-08-a20-builder/tester-r2/review-tester.md`，台账已登。
   - 同源：src 15/15 OK，自建 63/63 与包一致，主 JS `index-DGn86c1V.js`。
   - 决定判语的是 BACKIN-undo：从课程列表点进笔记（路由条目，idx 0 → 1），保存失败后后退，人被留在 A；撤销后离开再重开，撤销的字自己落回。r2 2/2，修前 0/2。另有人没走却弹「已离开」的提示，r2 3/3。

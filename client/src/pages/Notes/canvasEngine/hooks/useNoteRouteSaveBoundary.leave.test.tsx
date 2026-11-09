@@ -3,7 +3,8 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NoteCanvasRuntimeHandle } from '../NoteCanvasRuntime';
-import { hashRoutePath, isNoteRoutePath, LEFT_UNSAVED, NoteRouteSaveBoundary, SAVING_BEFORE_LEAVING } from './useNoteRouteSaveBoundary';
+import { hashRoutePath, isNoteRoutePath, isSignInPath, LEFT_UNSAVED, NoteRouteSaveBoundary, SAVING_BEFORE_LEAVING } from './useNoteRouteSaveBoundary';
+import { createHashRouter, createRoutesFromElements, Route } from 'react-router-dom';
 
 // A-20: a hash change the router did not make (a script, the address bar, the 401 redirect) is a POP with no
 // known step; useBlocker lets it through without asking. These pin what the boundary does instead.
@@ -473,5 +474,56 @@ describe('A-20 r3e the predicate reads the address as the router does (P3, P4)',
     expect(isNoteRoutePath('/Notes/note-a', 'note-a')).toBe(true);
     expect(isNoteRoutePath('/notes/NOTE-A', 'note-a')).toBe(false);
     expect(isNoteRoutePath('/notes%2Fnote-a', 'note-a')).toBe(false);
+  });
+});
+
+// A-20b (Q4): the router reads '#notes/<id>' as '/notes/<id>' (a missing leading '/' is added): this note, no departure.
+describe('A-20b a hash path without its leading slash is read as the router reads it (Q4)', () => {
+  it('#notes/note-a is this note: not a departure', async () => {
+    withNavigateEvents();
+    host();
+    focusEditor();
+    const event = navigate('#notes/note-a', true);
+    expect(event.defaultPrevented).toBe(false);
+    await act(async () => {});
+    expect(order.filter((step) => step.startsWith('flush') || step.startsWith('keep'))).toEqual([]);
+  });
+});
+
+// A-20b (Q5 b): one table of addresses, read by the router (the app's route shape, App.tsx) and by the predicate. They
+// must say the same thing for every address: this note, sign-in, or elsewhere.
+describe('A-20b the predicate and the router read every address alike (Q5 b)', () => {
+  const routerReads = (hash: string, noteId: string) => {
+    // A-20b r2 (R4): '' is an address with no hash ('…/#' and '…/' both read '' from location.hash).
+    window.history.replaceState(null, '', hash || window.location.pathname);
+    const router = createHashRouter(createRoutesFromElements(
+      <Route>
+        <Route path="/login" />
+        <Route path="/register" />
+        <Route path="/"><Route path="notes/:noteId" /></Route>
+        <Route path="*" />
+      </Route>,
+    ));
+    const leaf = router.state.matches[router.state.matches.length - 1];
+    const read = leaf?.route.path === 'notes/:noteId'
+      ? (leaf.params.noteId === noteId ? 'this note' : 'elsewhere')
+      : leaf?.route.path === '/login' || leaf?.route.path === '/register' ? 'sign-in' : 'elsewhere';
+    router.dispose();
+    return read;
+  };
+  const predicateReads = (hash: string, noteId: string) => {
+    const path = hashRoutePath(hash);
+    return isNoteRoutePath(path, noteId) ? 'this note' : isSignInPath(path) ? 'sign-in' : 'elsewhere';
+  };
+  const addresses = [
+    '#/notes/note-a', '#/notes/note-a/', '#/notes/note-a?view=1', '#/notes/note-a#part', '#/Notes/note-a', '#/NOTES/note-a/',
+    '#notes/note-a', '#notes/note-a/', '#/notes/note%2Da', '#/notes/NOTE-A', '#/notes/note-b', '#/notes/', '#/notes',
+    '#/notes%2Fnote-a', '#/notes/note-a%2F', '#/notes/note-a/more', '#/', '#', '#/login', '#login', '#/LOGIN', '#/register/',
+    '#register', '#/login/x', '#/boards/note-a', '',
+  ];
+  afterEach(() => { window.history.replaceState(null, '', '#/'); });
+
+  it.each(addresses)('%s', (hash) => {
+    expect(predicateReads(hash, 'note-a')).toBe(routerReads(hash, 'note-a'));
   });
 });

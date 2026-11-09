@@ -1,0 +1,4 @@
+--- TWO2-discardOne-0
+--- TWO2-discardOne-1
+--- TWO2-discardOne-2
+DONE a20belt-two2: 3 rows, bad 0

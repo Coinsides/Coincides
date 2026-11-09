@@ -1,0 +1,27 @@
+IDLE                       4/4
+    ok  server at 3.5 s true
+WAMP                       2/2
+    ok  during 0, after 1
+PAUSES                     2/2
+    ok  saves 4
+B81-hash                   4/4
+    ok  ["warmup","leave words hash a"]
+    ok  ["warmup","leave words hash b"]
+B81-paste                  4/4
+    ok  ["warmup","leave words paste a"]
+    ok  ["warmup","leave words paste b"]
+B81-401                    4/4
+    ok  ["warmup",""]
+B81-401idle                4/4
+    ok  ["warmup",""]
+BACK-hash                  3/3
+    ok  ["warmup","come back words a"]
+    ok  ["warmup","come back words b"]
+BACK-401                   2/2
+    ok  ["warmup","come back words a"]
+    ok  ["warmup","come back words b"]
+UNDO                       2/2
+    ok  aaabbb ->  -> warmup
+PAGEHIDE                   2/2
+    ok  after reopen true
+total red 0

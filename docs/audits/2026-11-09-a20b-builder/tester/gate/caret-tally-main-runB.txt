@@ -1,0 +1,19 @@
+build x W: scrambled / rows (setup errors)
+W=800: pre 0/10   r3e 1/10   belt 0/10   | Fisher two-sided r2 vs r3e p=1.000, r2 vs pre p=1.000
+W=300: pre 0/10   r3e 0/10   belt 0/10   | Fisher two-sided r2 vs r3e p=1.000, r2 vs pre p=1.000
+W=0: pre 0/10   r3e 0/10   belt 0/10   | Fisher two-sided r2 vs r3e p=1.000, r2 vs pre p=1.000
+W=all: pre 0/30   r3e 1/30   belt 0/30   | Fisher two-sided r2 vs r3e p=1.000, r2 vs pre p=1.000
+
+scrambled rows:
+{"build":"r3e","name":"CARET-w800-1","round":"r1","units":["rmup","wa"],"dom":["rmup","wa"],"jumpAfterKeys":2,"firstBadInput":{"t":951,"same":false,"v":"rwa","s":1},"keyAt":[2922,2990,3058,3118,3180,3241],"tOpen":250,"tClick":2109,"goneAt":[3042],"goneAfterKey":[2],"postBlocksSent":[2944],"focus":[{"t":914,"same":false,"tag":"TEXTAREA","v":"w"},{"t":1407,"same":false,"tag":"TEXTAREA","v":"wa"}]}
+
+textarea replaced (gone) in clean rows, per build x W: count, and gone relative to first key (ms)
+pre W=800: replaced 10/10 rel [70,51,49,106,49,96,57,57,58,49]
+pre W=300: replaced 10/10 rel [48,50,48,88,55,48,50,53,62,49]
+pre W=0: replaced 10/10 rel [50,60,80,54,58,51,49,49,111,48]
+r3e W=800: replaced 9/9 rel [92,49,104,50,67,48,48,54,95]
+r3e W=300: replaced 10/10 rel [48,49,54,47,46,51,50,73,49,51]
+r3e W=0: replaced 10/10 rel [48,47,47,111,49,50,52,47,47,47]
+belt W=800: replaced 10/10 rel [68,51,49,53,96,78,51,49,52,91]
+belt W=300: replaced 10/10 rel [72,56,51,50,53,49,49,49,49,48]
+belt W=0: replaced 10/10 rel [50,49,52,58,52,49,49,99,51,50]

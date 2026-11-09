@@ -53,6 +53,17 @@ interface Options {
   onVisitReceipt?: () => void;
 }
 
+// A-20b (Q2): the longest text both strings start with.
+// A-20b r2 (R3): compared by UTF-16 code unit, so two different characters outside the BMP ('😀', '😁') share their high
+// surrogate; the prefix never ends on a high surrogate, which would cut a character in half.
+function commonPrefix(left: string, right: string): string {
+  let end = 0;
+  while (end < left.length && end < right.length && left[end] === right[end]) end += 1;
+  const last = left.charCodeAt(end - 1);
+  if (end > 0 && last >= 0xd800 && last <= 0xdbff) end -= 1;
+  return left.slice(0, end);
+}
+
 /** A-20: after this long without a recorded keystroke, the open group is written without being sealed. */
 export const IDLE_SAVE_MS = 2000;
 
@@ -186,6 +197,16 @@ export function useTextFlowHistory(options: Options) {
     const removesUnits = (transaction: TextFlowEditTransaction) => {
       const after = new Set(transaction.after.textFlow.units.filter((unit) => unit.status !== 'deleted').map((unit) => unit.id));
       return transaction.before.textFlow.units.some((unit) => unit.status !== 'deleted' && !after.has(unit.id));
+    };
+    // A-20b (Q3): a group that keeps the same units and changes their text without being plain typing: a one-line paste
+    // in list form ('- item') or of '# ' where a heading is not allowed (structural), and Shift+Enter at the end of a
+    // unit that is not a heading (typing, but insertLineBreak, which plainTyping leaves out). It is not a split, removes
+    // nothing: it was in no ledger, so a departure while it waited in the lane kept none of its words. It waits with typing.
+    const sameUnitsTextChanged = (transaction: TextFlowEditTransaction) => {
+      const before = transaction.before.textFlow.units;
+      const after = transaction.after.textFlow.units;
+      return JSON.stringify(before.map((unit) => unit.id)) === JSON.stringify(after.map((unit) => unit.id))
+        && after.some((unit, index) => unit.text !== before[index].text);
     };
     const plainTyping = (transaction: TextFlowEditTransaction) => transaction.metadata.kind === 'typing'
       && !['insertParagraph', 'insertLineBreak'].includes(transaction.metadata.inputType)
@@ -691,6 +712,8 @@ export function useTextFlowHistory(options: Options) {
         if (plainTyping(transaction)) unsent.push(transaction);
         // A-20 r3d (N1): a group that removes units waits in the same ledger as a split (it was in none).
         else if (isSplit(transaction) || removesUnits(transaction)) unsentSplits.push(transaction);
+        // A-20b (Q3): after the two above, so a group that also changes which units there are stays a split's.
+        else if (sameUnitsTextChanged(transaction)) unsent.push(transaction);
         void host.enqueueRuntimeHistoryOperation(async () => {
           // The idle save already wrote exactly this group: take its receipt instead of writing the same body again.
           const idle = lastIdleSave;
@@ -790,7 +813,10 @@ export function useTextFlowHistory(options: Options) {
           if (was === unit.text) continue;
           const key = unitKey(transaction.blockId, unit.id);
           // The unit a split cut: the text it was left with.
-          if (split && was !== undefined && !cutText.has(key)) cutText.set(key, unit.text);
+          // A-20b (Q2): what the cut left of the old text, not the unit's whole text after the group. An Enter leaves a
+          // prefix ('abcdef' -> 'abc': the same); a multi-line paste also adds to it ('abc|def' + 'X⏎Y' -> 'abcX'), and
+          // those words start from 'abc' like typing after the cut, instead of counting as already there.
+          if (split && was !== undefined && !cutText.has(key)) cutText.set(key, commonPrefix(was, unit.text));
           if (removes) joined.add(key);
           // A-20 r3e (P2): a unit this group created is a new line. The next unit id is the highest present + 1, so after
           // the line with the highest id was removed (a join, a cross-line delete) the new line gets that id again: the

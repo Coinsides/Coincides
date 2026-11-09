@@ -116,7 +116,7 @@ type Focus = { blockId: string; unitId: string; caret: number };
 // only if it still has that role: a new empty paragraph that reused the id (Enter) is not where a heading's words went.
 // roleFixed: the role was settled, once, when the words were kept or reopened; undefined then is a settled answer.
 type Entry = { id: string; typing: StructureTypingBuffer; session?: string; focus: Focus; retryDelay?: number;
-  role?: TextUnitWritingRole; roleFixed?: boolean };
+  role?: TextUnitWritingRole; roleFixed?: boolean; source?: UnplacedWords['source'] };
 // The stored record with the role beside it. Older records have none, and their words from an empty unit stay kept.
 type StoredWords = UnplacedWords & { writingRole?: TextUnitWritingRole };
 let entryCount = 0;
@@ -269,7 +269,9 @@ export function useHeadingStructureController(input: {
   // An open window has not been kept yet: what it would be stored with is read now, and not settled.
   const roleOf = (entry: Entry): TextUnitWritingRole | undefined => entry.roleFixed ? entry.role : liveRole(entry);
   const storedWords = (entry: Entry): StoredWords => ({ id: entry.id, blockId: entry.focus.blockId, unitId: entry.focus.unitId,
-    initialText: entry.typing.initialText, text: entry.typing.text(), writingRole: roleOf(entry) });
+    initialText: entry.typing.initialText, text: entry.typing.text(), writingRole: roleOf(entry),
+    // A-20b r2 (乙): where the words came from decides whether their '\n' is a paragraph key; it outlives each rewrite.
+    ...(entry.source ? { source: entry.source } : {}) });
 
   // Words that cannot go in now: on screen, saying so, and stored for when the note is open again.
   const retainWords = useCallback((entry: Entry) => {
@@ -327,8 +329,9 @@ export function useHeadingStructureController(input: {
 
   // A kept entry reopened from storage keeps its record's id, on screen too: one record, one box, one stored copy.
   const openEntry = (session: string | undefined, focus: Focus, text: string,
-    options: { initialText?: string; focus?: boolean; id?: string } = {}) => {
-    const entry: Entry = { id: options.id ?? nextEntryId(), session, focus: { ...focus }, typing: null as unknown as StructureTypingBuffer };
+    options: { initialText?: string; focus?: boolean; id?: string; source?: UnplacedWords['source'] } = {}) => {
+    const entry: Entry = { id: options.id ?? nextEntryId(), session, focus: { ...focus }, typing: null as unknown as StructureTypingBuffer,
+      source: options.source };
     entry.typing = openStructureTypingBuffer({ text, caret: focus.caret, initialText: options.initialText, focus: options.focus,
       locate: () => editorFor(entry.focus.blockId, entry.focus.unitId, true) });
     entry.typing.element.dataset.structureTypingEntry = entry.id;
@@ -593,7 +596,10 @@ export function useHeadingStructureController(input: {
     let next: TextBlockContentV1 = { ...flow, units: flow.units.map((candidate) => candidate.id === unit.id
       ? { ...candidate, text: merged.text } : candidate) };
     // Enter in the window splits paragraphs exactly as the editor's Enter does.
-    for (let splitting = unit.id; ;) {
+    // A-20b r2 (乙): only a window's '\n' is that Enter. A record the text history kept ('edit', 'split') holds a unit's
+    // text, where '\n' is the editor's Shift+Enter (Enter and a multi-line paste make new units): it lands as it is. A
+    // record with no source (older format) is split as before.
+    for (let splitting = entry.source === 'edit' || entry.source === 'split' ? '' : unit.id; splitting;) {
       const carrier = next.units.find((candidate) => candidate.id === splitting);
       const breakAt = carrier ? carrier.text.indexOf('\n') : -1;
       if (!carrier || breakAt < 0) break;
@@ -623,7 +629,7 @@ export function useHeadingStructureController(input: {
     if (entry.session) {
       const session = entry.session;
       const landed: StoredWords = { id: entry.id, blockId, unitId: unit.id, initialText: unit.text, text: merged.text,
-        writingRole: unit.writing_role };
+        writingRole: unit.writing_role, ...(entry.source ? { source: entry.source } : {}) };
       rememberUnplacedWords(session, landed);
       const confirm = (attempt: number) => {
         history.flush().then(() => forgetUnplacedWords(session, landed.id), () => {
@@ -677,7 +683,7 @@ export function useHeadingStructureController(input: {
         continue;
       }
       const entry = openEntry(noteId, { blockId: words.blockId, unitId: words.unitId, caret: words.text.length }, words.text,
-        { initialText: words.initialText, focus: false, id: words.id });
+        { initialText: words.initialText, focus: false, id: words.id, source: words.source });
       // A record without a role (older format) gives none: its words from an empty unit stay kept.
       fixRole(entry, (words as StoredWords).writingRole);
       retainWords(entry);

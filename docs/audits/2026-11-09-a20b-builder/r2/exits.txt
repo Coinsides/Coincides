@@ -1,0 +1,15 @@
+tsc exit 0
+targeted 4 files exit 0
+control 乙 on r1 HSC exit 1 (want 1)
+control 乙 four lines only exit 1 (want 1)
+S restored ok
+control R3 on r1 helper exit 1 (want 1)
+H restored ok
+mutation applied exit 0
+control R2 without filter exit 1 (want 1)
+C restored ok
+client exit 0
+vite build exit 0
+index-Db4qSSYo.js
+kit exit 0
+r2yi all done 13:11:19

@@ -1,0 +1,35 @@
+slot heavy-job.lock.2 taken 2026-11-09 14:31:51: regression pair 10: UNDOPAUSE x20 pre vs x20 A-20b, one browser
+round 01 pre exit 0 14:32:33
+round 01 A-20b exit 0 14:33:14
+round 02 pre exit 0 14:33:56
+round 02 A-20b exit 0 14:34:37
+round 03 pre exit 0 14:35:19
+round 03 A-20b exit 0 14:36:01
+round 04 pre exit 0 14:36:42
+round 04 A-20b exit 0 14:37:23
+round 05 pre exit 0 14:38:05
+round 05 A-20b exit 0 14:38:47
+round 06 pre exit 0 14:39:28
+round 06 A-20b exit 0 14:40:10
+round 07 pre exit 0 14:40:51
+round 07 A-20b exit 0 14:41:33
+round 08 pre exit 0 14:42:15
+round 08 A-20b exit 0 14:42:56
+round 09 pre exit 0 14:43:38
+round 09 A-20b exit 0 14:44:20
+round 10 pre exit 0 14:45:01
+round 10 A-20b exit 0 14:45:43
+base shape (pre modal) [["warmup","aaabbb"],["warmup",""],["warmup"],["w"]]
+
+pre: 20 rows (+0 setup errors); signature 0/20; any shape != base 2/20
+  18 x [["warmup","aaabbb"],["warmup",""],["warmup"],["w"]]  (base)
+   2 x [["warmup","aaabbb"],["warmup",""],["warmup"],["wa"]]
+  puts: signature rows {}; other rows {"4":20}
+
+belt: 20 rows (+0 setup errors); signature 0/20; any shape != base 0/20
+  20 x [["warmup","aaabbb"],["warmup",""],["warmup"],["w"]]  (base)
+  puts: signature rows {}; other rows {"5":20}
+
+decision: pre 0/20, r3 0/20 (below the stop line of 3) -> record
+undopause pair done 14:45:43
+slot heavy-job.lock.2 released 14:45:43 exit 0

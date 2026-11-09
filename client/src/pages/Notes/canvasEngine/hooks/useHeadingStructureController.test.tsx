@@ -166,6 +166,10 @@ const startClean = () => {
   localStorage.clear();
 };
 
+const startCleanScreenOnly = () => {
+  document.querySelectorAll('textarea[data-structure-typing-buffer], [data-structure-typing-notice]').forEach((element) => element.remove());
+};
+
 const typingBuffer = () => document.querySelector<HTMLTextAreaElement>('textarea[data-structure-typing-buffer]');
 const typingNotice = () => document.querySelector<HTMLElement>('[data-structure-typing-notice]');
 // Returns false when the window took the text, as a browser would for a default-prevented key.
@@ -1457,6 +1461,97 @@ describe('heading structure commits always release the note and keep both draft 
     }
     expect(shown.units.find((unit) => unit.text === 'one')?.writing_role).toBe('heading_1');
     editor.unmount();
+  });
+
+  describe('A-20b r2 (乙): only a window\'s line break is Enter', () => {
+    const landedTexts = (editor: ReturnType<typeof renderStructure>) => {
+      const flow = editor.data.flowDrafts.source ?? getTextFlowContent(editor.data.blocks[0].content_json)!;
+      return flow.units.filter((unit) => unit.status !== 'deleted').map((unit) => unit.text);
+    };
+    const settle = async () => { await act(async () => { await new Promise((resolve) => setTimeout(resolve, 300)); }); };
+
+    // Red on r1 (Tester SHIFTENTER-close): Shift+Enter at the end of 'abc' kept by the text history came back as
+    // ['abc', '', 'q'], the soft line break landed as a new empty line.
+    it('an edit record "abc⏎" lands as one line, its line break kept inside it', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'edit-1', blockId: 'source', unitId: 'a', initialText: 'abc', text: 'abc\n',
+        writingRole: 'paragraph', source: 'edit' } as Parameters<typeof rememberUnplacedWords>[1]);
+      const editor = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      await waitFor(() => expect(readUnplacedWords('note')).toEqual([]), { timeout: 3000 });
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc\n', 'q']);
+      editor.unmount();
+    });
+
+    // Red on r1: the same record shape already existed in r3e and split into ['abc', 'd'].
+    it('an edit record "abc⏎d" lands as one line', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'edit-2', blockId: 'source', unitId: 'a', initialText: 'abc', text: 'abc\nd',
+        writingRole: 'paragraph', source: 'edit' } as Parameters<typeof rememberUnplacedWords>[1]);
+      const editor = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      await waitFor(() => expect(readUnplacedWords('note')).toEqual([]), { timeout: 3000 });
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc\nd', 'q']);
+      editor.unmount();
+    });
+
+    // Red on r1: reopening rewrote the record without its source (storedWords), so the next opening split it.
+    it('an edit record that cannot land on one opening keeps its source, and lands as one line on the next', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'edit-3', blockId: 'source', unitId: 'a', initialText: 'abc', text: 'abc\nd',
+        writingRole: 'paragraph', source: 'edit' } as Parameters<typeof rememberUnplacedWords>[1]);
+      // 'zzz' gives the words no anchor: they are kept (and stored again by the box).
+      const held = renderStructure(textFlow([['a', 'zzz'], ['q', 'q']]));
+      await waitFor(() => expect(typingNotice()).toBeTruthy());
+      await settle();
+      expect(readUnplacedWords('note')).toEqual([expect.objectContaining({ id: 'edit-3', text: 'abc\nd', source: 'edit' })]);
+      held.unmount();
+      startCleanScreenOnly();
+      const editor = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      await waitFor(() => expect(readUnplacedWords('note')).toEqual([]), { timeout: 3000 });
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc\nd', 'q']);
+      editor.unmount();
+    });
+
+    // Green on r1 and r2: a window's Enter, and a record with no source (older format, a window's too), still split.
+    it('a window record "abc⏎d" still splits into two lines', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'win-1', blockId: 'source', unitId: 'a', initialText: 'abc', text: 'abc\nd',
+        writingRole: 'paragraph', source: 'window' } as Parameters<typeof rememberUnplacedWords>[1]);
+      const editor = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      await waitFor(() => expect(readUnplacedWords('note')).toEqual([]), { timeout: 3000 });
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc', 'd', 'q']);
+      editor.unmount();
+    });
+
+    it('a record with no source "abc⏎d" still splits into two lines', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'old-1', blockId: 'source', unitId: 'a', initialText: 'abc', text: 'abc\nd',
+        writingRole: 'paragraph' } as Parameters<typeof rememberUnplacedWords>[1]);
+      const editor = renderStructure(textFlow([['a', 'abc'], ['q', 'q']]));
+      await waitFor(() => expect(readUnplacedWords('note')).toEqual([]), { timeout: 3000 });
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc', 'd', 'q']);
+      editor.unmount();
+    });
+
+    // Green on r1 and r2: a split record with no line break (empty start, no role) has no anchor and stays in the box,
+    // the note untouched, as before.
+    it('a split record without a line break behaves as on r1: kept, nothing written', async () => {
+      startClean();
+      rememberUnplacedWords('note', { id: 'split-1', blockId: 'source', unitId: 'n', initialText: '', text: 'xyz',
+        source: 'split' } as Parameters<typeof rememberUnplacedWords>[1]);
+      const editor = renderStructure(textFlow([['a', 'abc'], ['n', '']]));
+      await waitFor(() => expect(typingNotice()).toBeTruthy());
+      await settle();
+      expect(landedTexts(editor)).toEqual(['abc', '']);
+      expect(readUnplacedWords('note')).toEqual([expect.objectContaining({ id: 'split-1', text: 'xyz' })]);
+      expect(editor.save).not.toHaveBeenCalled();
+      typingNotice()!.querySelector('button')!.click();
+      editor.unmount();
+    });
   });
 
   it('r2.3c G1: kept words do not land while the person is typing in their box; they land once the focus leaves', async () => {

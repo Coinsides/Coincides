@@ -1086,3 +1086,71 @@ describe('A-20 r3e a unit created after a join never inherits a removed unit\'s 
     localStorage.clear();
   });
 });
+
+// A-20b (Q2, Q3): words a structural group adds wait in a ledger like typing. Reviewer r3e Q2 (a multi-line paste: the
+// first line's piece) and Q3 narrowed (a one-line paste in list form: same units, text changed).
+describe('A-20b words of a structural group are kept at a departure (Q2, Q3)', () => {
+  const paste = (node: HTMLTextAreaElement, text: string) => fireEvent.paste(node, { clipboardData: {
+    getData: (type: string) => (type === 'text/plain' ? text : ''), files: [], items: [], types: ['text/plain'],
+  } });
+
+  it('Q2: "abc|def" + paste "X⏎Y" while the save before is on its way, page goes: X is kept, from "abc"', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('abcdef', { holdSave: () => hold });
+    editor.inputAt(0, 'abcdef!', 6);
+    await act(async () => { fireEvent.blur(editor.textarea(0)); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus(0);
+    editor.textarea(0).setSelectionRange(3, 3);
+    paste(editor.textarea(0), 'X\nY');
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['abcX', 'Y', 'def!']);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records).toEqual(expect.arrayContaining([expect.objectContaining({ initialText: 'abc', text: 'abcX' })]));
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
+  // A-20b r2 (R3): '😀' and '😁' share their high surrogate; the start is 'abc', never 'abc' + half a character.
+  it('R3: "abc|😀def" + paste "😁⏎Y": the record starts at "abc", not inside the emoji', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('abc😀def', { holdSave: () => hold });
+    editor.inputAt(0, 'abc😀def!', 8);
+    await act(async () => { fireEvent.blur(editor.textarea(0)); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus(0);
+    editor.textarea(0).setSelectionRange(3, 3);
+    paste(editor.textarea(0), '😁\nY');
+    expect([...editor.container.querySelectorAll('textarea')].map((node) => node.value)).toEqual(['abc😁', 'Y', '😀def!']);
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records).toEqual(expect.arrayContaining([expect.objectContaining({ initialText: 'abc', text: 'abc😁' })]));
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+
+  it('Q3: "- item" pasted at the end of a line while the save before is on its way, page goes: the words are kept', async () => {
+    localStorage.clear();
+    let hold = true;
+    const editor = renderHistoryEditor('abc', { holdSave: () => hold });
+    editor.inputAt(0, 'abc!', 3);
+    await act(async () => { fireEvent.blur(editor.textarea(0)); });
+    await waitFor(() => expect(editor.heldSaves).toHaveLength(1));
+    editor.focus(0);
+    editor.textarea(0).setSelectionRange(4, 4);
+    paste(editor.textarea(0), '- item');
+    const lines = [...editor.container.querySelectorAll('textarea')].map((node) => node.value);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).not.toBe('abc!');
+    editor.unmount();
+    const records = readUnplacedWords('synthetic-note');
+    expect(records).toEqual([expect.objectContaining({ initialText: 'abc!', text: lines[0] })]);
+    hold = false;
+    editor.heldSaves.splice(0).forEach((release) => release());
+    localStorage.clear();
+  });
+});

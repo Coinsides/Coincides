@@ -1,0 +1,9 @@
+FLYK-close-req             4/4
+    ok  
+FLYK-close-resp            4/4
+    ok  
+FLYK-full-req              4/4
+    ok  
+FLYK-full-resp             4/4
+    ok  
+total red 0

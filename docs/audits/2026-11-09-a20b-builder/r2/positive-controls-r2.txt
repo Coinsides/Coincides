@@ -1,0 +1,30 @@
+===== control-r1
+   × heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > an edit record "abc⏎" lands as one line, its line break kept inside it 497ms
+   × heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > an edit record "abc⏎d" lands as one line 404ms
+   × heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > an edit record that cannot land on one opening keeps its source, and lands as one line on the next 327ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > a window record "abc⏎d" still splits into two lines  386ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > a record with no source "abc⏎d" still splits into two lines  389ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > a split record without a line break behaves as on r1: kept, nothing written  333ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed | 68 skipped (74)
+===== control-half
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > an edit record "abc⏎" lands as one line, its line break kept inside it  479ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > an edit record "abc⏎d" lands as one line  410ms
+   × heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > an edit record that cannot land on one opening keeps its source, and lands as one line on the next 355ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > a window record "abc⏎d" still splits into two lines  385ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > a record with no source "abc⏎d" still splits into two lines  392ms
+   ✓ heading structure commits always release the note and keep both draft halves equal > A-20b r2 (乙): only a window's line break is Enter > a split record without a line break behaves as on r1: kept, nothing written  327ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed | 68 skipped (74)
+===== control-R3
+   × A-20b words of a structural group are kept at a departure (Q2, Q3) > R3: "abc|😀def" + paste "😁⏎Y": the record starts at "abc", not inside the emoji 114ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  1 failed | 43 skipped (44)
+===== control-R2
+   × A-20b the controller hands kept words the receipts they wait for (Q5 a) > a receipt this visit left itself is left out; another visit's stays 76ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 skipped (20)

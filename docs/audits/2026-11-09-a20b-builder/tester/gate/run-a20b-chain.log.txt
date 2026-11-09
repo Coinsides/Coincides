@@ -1,0 +1,35 @@
+slot heavy-job.lock taken 2026-11-09 13:15:30: A-20b acceptance chain (r3 chain arms + a20m; 5612 -> 3612)
+step 1 belt-k start 13:15:30
+step 1 belt-k exit 0 13:26:08 0 BAD; DONE belt-k: 22 rows, red 0
+step 2 belt-late start 13:26:09
+step 2 belt-late exit 0 13:30:21 0 BAD; DONE belt-late: 8 rows, red 0
+step 2 belt-j start 13:30:21
+step 2 belt-j exit 0 13:42:11 0 BAD; DONE belt-j: 28 rows, red 0
+step 2 belt-k-toast start 13:42:11
+step 2 belt-k-toast exit 0 13:44:00 0 BAD; DONE belt-k-toast: 4 rows, red 0
+step 2 belt-flyk start 13:44:00
+step 2 belt-flyk exit 0 13:47:49 0 BAD; DONE belt-flyk: 8 rows, red 0
+step 3 belt-inapp start 13:47:49
+step 3 belt-inapp exit 0 13:52:11 0 BAD; DONE belt-inapp: 8 rows, red 0
+step 4 belt-d start 13:52:11
+step 4 belt-d exit 0 14:01:28 0 BAD; DONE belt-d: 20 rows
+step 5 belt-b start 14:01:28
+step 5 belt-b exit 0 14:08:30 0 BAD; DONE belt-b: 24 rows
+step 6 belt-a start 14:08:30
+step 6 belt-a exit 0 14:11:41 0 BAD; DONE belt-a: 8 rows
+step 7 belt-c start 14:11:41
+step 7 belt-c exit 0 14:17:07 0 BAD; DONE belt-c: 18 rows
+step 8 belt-c-closetab start 14:17:07
+step 8 belt-c-closetab exit 0 14:17:31 0 BAD; PAUSEEXIT-closetab-0 {"exit":"closetab","words":"paused closetab words a","onServer":true,"units":["warmup","paused closetab words a"],"puts":["4420 PUT /note-b
+step 9 belt-c-kill start 14:17:31
+step 9 belt-c-kill exit 0 14:17:55 0 BAD; PAUSEEXIT-kill-0 {"exit":"kill","words":"paused kill words a","onServer":true,"units":["warmup","paused kill words a"],"puts":["3945 PUT /note-blocks/:id/text-s
+step 10 belt-kill-close-0 start 14:17:55
+step 10 belt-kill-close-0 exit 0 14:18:20 0 BAD; HARDKILL-close {"hasFirst":true,"hasTail":false,"units":["warmup","kill words one"]}
+step 11 belt-kill-proc-0 start 14:18:20
+step 11 belt-kill-proc-0 exit 0 14:18:47 0 BAD; HARDKILL-proc {"hasFirst":true,"hasTail":false,"units":["warmup","kill words one"]}
+step 12 belt-offkill-0 start 14:18:47
+step 12 belt-offkill-0 exit 0 14:19:15 1 BAD; OFFKILL {"before":["rmup","wa"],"units":["rmup","wa"],"puts":["2875 PUT /note-blocks/:id/text-save [neterr] rmup|one burstwa"]}
+step 13 belt-m start 14:19:15
+step 13 belt-m exit 0 14:42:16 1 BAD; DONE belt-m: 37 rows, red 1
+A-20b chain done 14:42:16
+slot heavy-job.lock released 14:42:16 exit 0

@@ -1,0 +1,22 @@
+HASHFAIL-hash              4/4
+    ok  stayed true, toast true, in editor true
+HASHFAIL-paste             4/4
+    ok  stayed true, toast true, in editor true
+SWITCH                     4/4
+    ok  false toasts 0, each {"onea":1,"twoa":1,"threea":1,"foura":1}
+    ok  false toasts 0, each {"oneb":1,"twob":1,"threeb":1,"fourb":1}
+GONEFAIL-hash              4/4
+    ok  count 1; alerts ["Failed to save block","Text changes could not be saved. Retry saving or undo before leaving the note."]
+GONEFAIL-paste             4/4
+    ok  count 1; alerts ["Failed to save block","Text changes could not be saved. Retry saving or undo before leaving the note."]
+GONEFAIL-back              4/4
+    ok  count 1, false 'could not be saved' false (x0), true 'did not reach' true (x1)
+ACCT401                    4/4
+    ok  A count 1; B sees words false
+CLOSEFLY-req               4/4
+    ok  count 1; banner on reopen true (stale banner = known, A-25 2a)
+CLOSEFLY-resp              4/4
+    ok  count 1; banner on reopen true (stale banner = known, A-25 2a)
+OFFCLOSE                   4/4
+    ok  count 1; failed toasts (dedup watcher) 1
+total red 0

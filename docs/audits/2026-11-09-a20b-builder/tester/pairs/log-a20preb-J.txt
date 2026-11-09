@@ -1,0 +1,5 @@
+--- J-slashText-line2-0
+--- J-slashText-line2-1
+--- J-slashText-line3-0
+--- J-slashText-line3-1
+DONE a20preb-J: 4 rows, bad 0

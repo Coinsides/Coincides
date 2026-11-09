@@ -1,0 +1,21 @@
+b        rows   30  setup-rows   12  scrambles 0
+belt     rows  275  setup-rows  243  scrambles 4  belt-d:CLOSEFLY-resp-1:warmup->rmup ok ; belt-m:LIST-addr-0:warmup->rmup ; belt-m-landother:LANDOTHER-heading-0:plainb->ainbpl (setup error) ; belt-offkill-0:OFFKILL:warmup->rmup
+caret    rows  180  setup-rows  180  scrambles 1  caret-r3e-r1:CARET-w800-1:warmup->rmupwa
+case     rows    4  setup-rows    4  scrambles 0
+hcsmoke  rows    4  setup-rows    4  scrambles 0
+m        rows    5  setup-rows    5  scrambles 0
+p12      rows   10  setup-rows    6  scrambles 0
+pbk      rows    2  setup-rows    2  scrambles 0
+post     rows   76  setup-rows   72  scrambles 0
+post23   rows   10  setup-rows    9  scrambles 0
+pre      rows  335  setup-rows  239  scrambles 3  pre-m-list:LANDOTHER-heading-1:warmup->rmupwa (setup error) ; pre-n2:ADDR-noncanon-anchor-1:warmup->rmup (setup error) ; pre3e-n:BACKIN-heldhead-undo-1:warmup->rmup (setup error)
+r1       rows   74  setup-rows   74  scrambles 0
+r2       rows  204  setup-rows  200  scrambles 2  r2-m-backin:BACKIN-fail-0:warmup->rmupwa (setup error) ; r2-m-list:LANDOTHER-heading-1:warmup->rmupwa (setup error)
+r3       rows  237  setup-rows  218  scrambles 0
+r3d      rows  190  setup-rows  186  scrambles 0
+r3dps    rows   10  setup-rows   10  scrambles 0
+r3dps2   rows   15  setup-rows   15  scrambles 0
+r3e      rows  273  setup-rows  241  scrambles 0
+r3eps    rows   13  setup-rows   11  scrambles 0
+s2mut    rows   34  setup-rows   34  scrambles 0
+up       rows   80  setup-rows   80  scrambles 0

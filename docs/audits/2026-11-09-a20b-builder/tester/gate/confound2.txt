@@ -1,0 +1,46 @@
+rows 1702, timed 1697 (of which interpolated 55), untimed 5
+
+== every scramble: time, live accounts on all backends / on its own backend (+-90 s), machine CPU peak (+-1 min)
+  belt    belt-d               CLOSEFLY-resp-1             warmup->rmup    11-09 13:59:50  live all 3, same backend (data-a20b) 2, cpu 62
+  belt    belt-m               LIST-addr-0                 warmup->rmup    11-09 14:41:27  live all 3, same backend (data-a20b) 2, cpu 30
+  belt    belt-m-landother     LANDOTHER-heading-0         plainb->ainbpl  11-09 14:44:02~ live all 3, same backend (data-a20b) 2, cpu 45
+  belt    belt-offkill-0       OFFKILL                     warmup->rmup    11-09 14:18:58  live all 3, same backend (data-a20b) 2, cpu 62
+  pre     pre-m-list           LANDOTHER-heading-1         warmup->rmupwa  11-08 17:36:55~ live all 3, same backend (data-a20pre) 1, cpu 86
+  pre     pre-n2               ADDR-noncanon-anchor-1      warmup->rmup    11-09 00:08:34~ live all 1, same backend (data-a20pre) 1, cpu 38
+  pre     pre3e-n              BACKIN-heldhead-undo-1      warmup->rmup    11-09 07:58:22~ live all 2, same backend (data-a20pre) 1, cpu 48
+  r2      r2-m-backin          BACKIN-fail-0               warmup->rmupwa  11-08 17:29:00~ live all 3, same backend (data-r2) 2, cpu 58
+  r2      r2-m-list            LANDOTHER-heading-1         warmup->rmupwa  11-08 17:36:56~ live all 3, same backend (data-r2) 2, cpu 86
+
+== setup rows per family x live accounts on all backends: rows/scrambles
+  r3fam    1: 476/0  2: 189/0  3+: 16/0
+  belt     1: 48/0  2: 5/0  3+: 190/4
+  pre      1: 118/1  2: 100/1  3+: 20/1
+  r2       1: 63/0  2: 42/0  3+: 95/2
+  r1+post  1: 87/0  2: 47/0  3+: 12/0
+  rate in the other families: 1: 0.0032  2: 0.0052  3+: 0.0221
+  r3 family expected at those rates with its own mix: 2.83; observed 0; P(0) = e^-2.83 = 0.059
+
+== setup rows per family x live accounts on the row's own backend: rows/scrambles
+  r3fam    1: 663/0  2+: 18/0
+  belt     1: 50/0  2+: 193/4
+  pre      1: 232/3  2+: 6/0
+  r2       1: 99/0  2+: 101/2
+  r1+post  1: 134/0  2+: 12/0
+  rate in the other families: 1: 0.0058  2+: 0.0192
+  r3 family expected at those rates with its own mix: 4.21; observed 0; P(0) = e^-4.21 = 0.015
+
+== setup rows per family x machine CPU peak: rows/scrambles
+  r3fam    <50: 470/0  50-69: 172/0  70+: 39/0  nogov: 0/0
+  belt     <50: 152/2  50-69: 88/2  70+: 3/0  nogov: 0/0
+  pre      <50: 109/2  50-69: 99/0  70+: 30/1  nogov: 0/0
+  r2       <50: 105/0  50-69: 47/1  70+: 48/1  nogov: 0/0
+  r1+post  <50: 52/0  50-69: 75/0  70+: 19/0  nogov: 0/0
+  rate in the other families: <50: 0.0096  50-69: 0.0097  70+: 0.0200  nogov: 0.0000
+  r3 family expected at those rates with its own mix: 6.95; observed 0; P(0) = e^-6.95 = 0.001
+
+== pooled setup rows/scrambles: r3fam 681/0  belt 243/4  pre 238/3  r2 200/2  r1+post 146/0
+  r3fam    live-accounts median 1, share with >=3 live: 0.02, share same-backend >=2: 0.03
+  belt     live-accounts median 3, share with >=3 live: 0.78, share same-backend >=2: 0.79
+  pre      live-accounts median 2, share with >=3 live: 0.08, share same-backend >=2: 0.03
+  r2       live-accounts median 2, share with >=3 live: 0.47, share same-backend >=2: 0.51
+  r1+post  live-accounts median 1, share with >=3 live: 0.08, share same-backend >=2: 0.08
