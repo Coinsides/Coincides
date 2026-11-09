@@ -1,0 +1,52 @@
+== A-20b code
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.leave.test.tsx (55 tests | 29 skipped) 158ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx (19 tests | 17 skipped) 63ms
+ ✓ src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx (43 tests | 41 skipped) 115ms
+      Tests  30 passed | 87 skipped (117)
+== r3e code (history + boundary from the sealed r3e package; isSignInPath exported for the table only)
+   × A-20b a hash path without its leading slash is read as the router reads it (Q4) > #notes/note-a is this note: not a departure 152ms
+     → expected true to be false // Object.is equality
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-a 5ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-a/ 2ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-a?view=1 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-a#part 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/Notes/note-a 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/NOTES/note-a/ 1ms
+   × A-20b the predicate and the router read every address alike (Q5 b) > #notes/note-a 3ms
+     → expected 'elsewhere' to be 'this note' // Object.is equality
+   × A-20b the predicate and the router read every address alike (Q5 b) > #notes/note-a/ 2ms
+     → expected 'elsewhere' to be 'this note' // Object.is equality
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note%2Da 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/NOTE-A 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-b 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/ 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes%2Fnote-a 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-a%2F 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/notes/note-a/more 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/ 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > # 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/login 1ms
+   × A-20b the predicate and the router read every address alike (Q5 b) > #login 2ms
+     → expected 'elsewhere' to be 'sign-in' // Object.is equality
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/LOGIN 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/register/ 1ms
+   × A-20b the predicate and the router read every address alike (Q5 b) > #register 1ms
+     → expected 'elsewhere' to be 'sign-in' // Object.is equality
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/login/x 1ms
+   ✓ A-20b the predicate and the router read every address alike (Q5 b) > #/boards/note-a 1ms
+   × A-20b words of a structural group are kept at a departure (Q2, Q3) > Q2: "abc|def" + paste "X⏎Y" while the save before is on its way, page goes: X is kept, from "abc" 114ms
+     → expected [ { …(6) }, { …(6) } ] to deeply equal ArrayContaining{…}
+   × A-20b words of a structural group are kept at a departure (Q2, Q3) > Q3: "- item" pasted at the end of a line while the save before is on its way, page goes: the words are kept 26ms
+     → expected [] to deeply equal [ ObjectContaining{…} ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  7 failed | 21 passed | 70 skipped (98)
+== Q5(a) mutation: the controller hands HSC the offered list
+   × A-20b the controller hands kept words the receipts they wait for (Q5 a) > the list kept words wait for, not the offered one 62ms
+     → expected [ 'offered-other-visit' ] to deeply equal [ 'offered-other-visit', …(1) ]
+   ✓ A-20b the controller hands kept words the receipts they wait for (Q5 a) > without that list, the offered one 6ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 1 passed | 17 skipped (19)
+restored useTextFlowHistory.ts
+restored useNoteRouteSaveBoundary.tsx
+restored useNoteCanvasRuntimeController.ts

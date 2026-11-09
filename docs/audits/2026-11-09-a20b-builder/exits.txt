@@ -1,0 +1,11 @@
+tsc exit 2
+client exit 0
+vite build exit 0
+index-DX5raR6f.js
+a20b build done 08:16:43
+kit exit 0
+a20b all done 09:49:28
+--- recheck
+tsc exit 0
+ctl exit 0
+      Tests  19 passed (19)

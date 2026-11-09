@@ -1,0 +1,8 @@
+src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx(59,7): error TS2322: Type '{ noteId?: string | undefined; blocks: NoteBlock[]; layouts: Record<string, BlockBoxLayout>; coverFrameId?: string | null | undefined; readOnly: boolean; ... 10 more ...; recoveryReceipts?: readonly RecoveryReceiptText[] | undefined; }' is not assignable to type '{ recoveryReceipts?: readonly { recoveryKey?: string | undefined; }[] | undefined; }'.
+  Types of property 'recoveryReceipts' are incompatible.
+    Type 'readonly RecoveryReceiptText[] | undefined' is not assignable to type 'readonly { recoveryKey?: string | undefined; }[] | undefined'.
+      Type 'readonly RecoveryReceiptText[]' is not assignable to type 'readonly { recoveryKey?: string | undefined; }[]'.
+        Type 'RecoveryReceiptText' has no properties in common with type '{ recoveryKey?: string | undefined; }'.
+--- after the test-only type fix (useNoteCanvasRuntimeController.test.tsx:51/:568/:575):
+tsc exit 0
+ctl exit 0
