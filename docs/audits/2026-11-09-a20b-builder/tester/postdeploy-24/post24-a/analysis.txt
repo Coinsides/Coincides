@@ -1,0 +1,3 @@
+IDLE                       1/1
+    ok  server at 3.5 s true
+total red 0

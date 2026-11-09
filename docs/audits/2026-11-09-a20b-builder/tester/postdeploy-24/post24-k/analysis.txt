@@ -1,0 +1,3 @@
+K1-close                   1/1
+    ok  ["warmup","note alpha"]
+total red 0

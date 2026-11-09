@@ -301,3 +301,30 @@ Reviewer 核过，Main_Designer 转：r3e→r2 改动的 7 个文件里，没有
   - 补 SURROGATE 同形、CLICKBACK-end 已裁项、预言核对输出、探针分辨力、活账号口径的限度、运行条件；
   - 日志改名进仓。
   另记：一个读者误建过一个 scratch 临时文件，随即删掉，别的没动。
+
+## 十一、第 24 轮部署前后核对（2026-11-09）
+
+**部署前 ack**（只读，没起浏览器，没占锁位）：
+- 收割提交 `dfbcce8e` 上，包里 19 个 src 文件逐个对包的 `src.sha256`：19/19 相符。
+- 岛上原版本 `29b1d456` → `dfbcce8e`：代码区改了 7 个文件，全在包清单里；server、package*.json 没改。
+- 与验收基线 `04f6f822` + 包相比，代码区包清单外 0 个文件不同；docs 以外只多根目录 `scripts/pre-harvest-scan.mjs`（不进 client 构建）。远端分支头是 `dfbcce8e`。
+
+**部署后**（Main_Designer 部署：岛上只跑 `build:client`，服务没重启，没 `npm ci`）：
+- 岛上 dist 清单（Main_Designer 给，`postdeploy-24/island-dist-24-from-md.txt`）对包 `dist.sha256`：63/63 逐行相同。
+- 我自己经隧道逐个取岛上实际服务的文件再算哈希：63 相同、0 不同、0 取不到；主 JS `index-Db4qSSYo.js`（`postdeploy-24/island-hash-post24.txt`）。
+- 代表臂在岛上，只用我的岛上测试账号，单浏览器，占一个锁位（17:10:40–17:17:52），每条 ×1。没点 Replay，没碰 Henry 的账号与数据。
+
+| 臂 | 岛上读数 |
+|---|---|
+| IDLE | 3.5 s 时已在服务器上 |
+| K1-close | `["warmup","note alpha"]` |
+| HEADCLOSE-plain | 重开时 aaa 带 Apply 横幅，bbb 在框里；20 s 后同 |
+| HEADCLOSE-applyslow（req 形） | 无 409，无「Failed to save block」，Apply 的 PUT 放行后 200，aaa 在服务器上（这一次扣留期间框里的字没落进第一行，窗口没撞上） |
+| MENTER-close | KEPT：服务器 `["abx","cd"]` 不改写，框里 `abxcd` 与 `Z` |
+| ADDR-noncanon-case（`#/Notes/<id>`） | 停在 A，HELD-PROCEED，重开 `["warmup","backin words more"]` |
+| N6B-switch | A 端 `["warmup bbb","aaa"]` 各一次，B 不变，丢 0 |
+| **SHIFTENTER-typed-close**（本轮新） | ONE：服务器 `["abc\nd","qr"]`，`abc` 无重复 |
+| **MULTIPASTE-close**（本轮新） | `XQ` 在服务器上（`abcXQdef`），`YQ`、`def` 在框里，`qr` 保留，服务器上无重复单元；与本地读数同形（见〇「归类」） |
+| **ADDR-noncanon-bare**（`#notes/<id>`，本轮新） | 停在 A，HELD-PROCEED，重开 `["warmup","backin words more"]` |
+
+10/10 与本地 r2 读数一致，0 行设置错，0 行新起块错位。证据在 `postdeploy-24/`（各臂 rows / summary / 分析器输出、岛上哈希报告、运行脚本与输出）。

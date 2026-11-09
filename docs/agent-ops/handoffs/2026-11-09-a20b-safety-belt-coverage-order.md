@@ -129,3 +129,6 @@ Tester 更正:15:02 停掉的排队只杀了外壳 bash,里面的 `withslot.sh` 
 6. 分辨力:每组 30 时 r2 要约 8/30 才与 r3e 的 1/30 显著;0/60 的 95% 上界约 6% → 结论只写「**没有证据显示 r2 高于 r3e**」,⛔「已证同级」;放行仍按预登记规则。
 7. 「单浏览器层」更名「**1 个活账号层**」(±90 s 活账号口径会把同一浏览器轮换账号、前后衔接作业算进去;单浏览器探针 180 行读数 2–3);r3 族该层 **476/0**。
 Tester 临时环境(5601/5611/5612/5613)留到第 24 轮部署后核对,阶段末统一清。**→ copy-back 开始。**
+
+### 收割 `dfbcce8e` → 第 24 轮上岛 → Tester 岛上核 10/10 绿;本单关闭(Main_Designer 2026-11-09)
+收割:copy-back 19/19 sha256 OK、client tsc 0,`dfbcce8e`(7 码文件 + Tester 217 件证据 + 三份记录 + Reviewer findings-r2 + 手册 / TD / 台账 §364)推送确认;Tester 部署前 ack(在 `dfbcce8e` 上逐文件 `git show | sha256sum` 对包 19/19;`04f6f822`→`dfbcce8e` 代码区包清单外 0 文件;远端头 = `dfbcce8e`)。**部署**(08:08Z):备份 `pre-deploy-2026-11-09-0807.db` → push 裸仓 deploy → reset → 锁 diff 0 → manifest 37 条未过期 → `build:client` exit 0(13 s)→ dist 63、主 JS `index-Db4qSSYo.js` sha256 `2f09b0be…68ca` → 岛上 dist 对包 63/63 逐字节同 → health ok;服务未重启。**Tester 岛上核**(17:10–17:17,锁位,测试账号,单浏览器):哈希 63 同 / 0 异 / 0 取不到(经隧道取岛上实际服务文件);代表臂 10/10——第 23 轮 7 条全同 + 本轮 SHIFTENTER-typed-close ONE(`["abc\nd","qr"]`)、MULTIPASTE-close(`abcXQdef` + 框 YQ/def,TD-66 形)、`#notes/<id>` HELD-PROCEED;0 设置错 0 错位。证据 `tester/postdeploy-24/`(17 文件)、报告第十一节、verdicts「已核」、STATUS——随下次收割带走。**本单关闭**;余项去处:TD-66 附(框内副本)、TD-71(链接 / 角色组)、TD-72(字素簇)、TD-73(S1 标题含 `\n`;S2/O4 测试债随 A-25)、TD-77(光标跳,岛上既有,阶段一开单候 Henry)。Tester 本地临时环境留到阶段末统一清。

@@ -1,0 +1,38 @@
+health 200
+island main: assets/index-Db4qSSYo.js  css: assets/index-sq1LDYsi.css
+post24: 63 same, 0 different, 0 not served (of 63)
+slot heavy-job.lock taken 2026-11-09 17:10:40: post-deploy 24 representative arms on the island (my test account); one browser
+a exit 0
+k exit 0
+n exit 0
+nn exit 0
+slot heavy-job.lock released 17:17:52 exit 0
+#### post24-a
+IDLE                       1/1
+    ok  server at 3.5 s true
+total red 0
+#### post24-k
+K1-close                   1/1
+    ok  ["warmup","note alpha"]
+total red 0
+#### post24-n
+ADDR-noncanon-case         1/1
+    ok  case (case to #/Notes/A, released 0, now #/Notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words more"]
+HEADCLOSE-plain            1/1
+    ok  plain (head idle): reopen aaa banner+Apply, bbb box (server ["warmup",""], boxes ["warmup bbb"], kept ["\"warmup\"->\"warmup bbb\"(edit)"]); +20 s reopen aaa banner+Apply, bbb box; READINGS editor at reopen r1 ["warmup",""] / ["warmup",""], r2 ["warmup",""] / ["warmup",""]; notices r1 ["1124:A previous block edit is queued for recovery","1292:Not in the note yet Discard"], r2 ["835:A previous block edit is queued for recovery","863:Not in the note yet Discard"]
+HEADCLOSE-applyslow        1/1
+    ok  form req; end ok true, no 409 true, no "Failed to save block" true; first save after the click 7410 PUT /note-blocks/:id/text-save [hold] warmup|aaa; head idle; Apply clicked +2129 ms after the reopen began; box words in line 1 during the hold: NO (window not hit); Apply PUT held 1, released +2524 ms -> 9910 RESP /note-blocks/:id/text-save 200; aaa at reply server, +3.5 s server, +13 s server; bbb end server; server reply ["warmup","aaa"], +3.5 s ["warmup bbb","aaa"], +13 s ["warmup bbb","aaa"] (aaa x1, bbb x1); screen +13 s ["warmup bbb","aaa"]; boxes []; items +13 s []; receipt []; notices ["4205:Recovered block edit applied"]; requests after the click ["7410 PUT /note-blocks/:id/text-save [hold] warmup|aaa","9910 RESP /note-blocks/:id/text-save 200","11066 PUT /note-blocks/:id/text-save warmup bbb|aaa","11148 RESP /note-blocks/:id/text-save 200"]
+MENTER-close               1/1
+    ok  KEPT (server kept true, boxes abxcd + Z true): screen at close ["abxcd","Z"] (merged ["abxcd"], enter ["abxcd",""]); reopen server ["abx","cd"], editor ["abx","cd"], boxes ["abxcd","Z"] / ["abxcd","Z"], kept ["\"\"->\"abxcd\"(split)","\"\"->\"Z\"(split)"], items ["A block edit is waiting for recovery abx cd Apply Dismiss","A block edit is waiting for recovery","abx cd Apply Dismiss","abx cd"] (Apply true); +12 s server ["abx","cd"], boxes ["abxcd","Z"]; Z at box; notices at reopen []; saves ["885 PUT /note-blocks/:id/text-save abx|cd","994 RESP /note-blocks/:id/text-save 200 [respDelay60000]"]
+N6B-switch                 1/1
+    ok  head idle; to B +7068 ms (11198 B); back on A +275 ms; A at +1.5 s {"aaa":"server","bbb":"server"}, +9.5 s {"aaa":"server","bbb":"server"}, end {"aaa":"server","bbb":"server"}; A server end ["warmup bbb","aaa"] (aaa x1, bbb x1); A boxes end [], kept [], banner+Apply false; B server ["warmup","bnote"] (before ["warmup","bnote"]), B screen ["warmup","bnote"], B boxes []; RED lost [], on B [], server+held []; recorded: server+banner []
+total red 0
+#### post24-nn
+ADDR-noncanon-bare         1/1
+    ok  bare (bare to #notes/A, released 0, now #notes/:A, backin words more x1): stayed true (places A); LEFT_UNSAVED 0; kept 0 {"t1":0,"t3":0,"t6":0,"hold":0}; 2nd leave HELD-PROCEED; reopen ["warmup","backin words more"]
+MULTIPASTE-close           1/1
+    ok  XQ server/server, YQ box/box, def server/server (in a box true); on the server twice []; qr kept true; paste {"tag":"TEXTAREA","editor":true,"prevented":true,"hasData":true}; screen at close ["abcXQ","YQ","def","qr"]; kept before close []; reopen server ["abcXQdef","qr"], editor ["abcXQdef","qr"], boxes ["YQ","def"] / ["YQ","def"], kept ["\"\"->\"YQ\"(split)","\"\"->\"def\"(split)"], items ["A previous block edit is queued for recovery","Not in the note yet Discard"] (Apply false); +12 s server ["abcXQdef","qr"], editor ["abcXQdef","qr"], boxes ["YQ","def"], kept ["\"\"->\"YQ\"(split)","\"\"->\"def\"(split)"], items [{"text":"Not in the note yet Discard","buttons":["Discard"]},{"text":"Not in the note yet Discard","buttons":["Discard"]}]; notices at reopen []; saves ["887 PUT /note-blocks/:id/text-save abcdef|qr","1059 RESP /note-blocks/:id/text-save 200 [respDelay60000]","6222 PUT /note-blocks/:id/text-save abcXQdef|qr","6390 RESP /note-blocks/:id/text-save 200"]
+SHIFTENTER-typed-close     1/1
+    ok  landed shape ONE/ONE (ONE = one unit, SPLIT = two units); qr kept true; abc twice false; screen at close ["abc\nd","qr"]; kept before close []; reopen server ["abc\nd","qr"], boxes [], kept [], items ["A previous block edit is queued for recovery"]; +12 s server ["abc\nd","qr"], editor ["abc\nd","qr"], boxes [], kept []; saves ["907 PUT /note-blocks/:id/text-save abc|qr","1052 RESP /note-blocks/:id/text-save 200 [respDelay60000]","6312 PUT /note-blocks/:id/text-save abc\nd|qr","6473 RESP /note-blocks/:id/text-save 200"]
+total red 0
+post-deploy 24 done 17:17:53
